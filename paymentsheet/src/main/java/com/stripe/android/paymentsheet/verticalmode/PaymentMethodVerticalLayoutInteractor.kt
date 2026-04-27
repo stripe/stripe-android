@@ -4,16 +4,17 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
-import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -23,6 +24,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
+import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMethods
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
@@ -51,7 +53,6 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     fun handleViewAction(viewAction: ViewAction)
 
     data class State(
-        val currencySelectorOptions: CurrencySelectorOptions?,
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
         val isProcessing: Boolean,
         val selection: Selection?,
@@ -79,7 +80,6 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
         data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
         data object CancelPaymentMethodVisibilityTracking : ViewAction
-        data class CurrencySelected(val currencyOption: CurrencyOption) : ViewAction
     }
 
     enum class SavedPaymentMethodAction {
@@ -113,8 +113,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
-    private val currencySelectorOptions: CurrencySelectorOptions? = null,
-    private val onCurrencySelected: (CurrencyOption) -> Unit,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
@@ -135,11 +133,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             )
             val isCurrentScreen = viewModel.navigationHandler.currentScreen.mapAsStateFlow {
                 it is PaymentSheetScreen.VerticalMode
-            }
-            val currencySelectorOptions = (viewModel as? PaymentSheetViewModel)?.let { psViewModel ->
-                psViewModel.latestCheckoutSessionResponse
-                    ?.adaptivePricingInfo
-                    ?.let { CurrencySelectorOptionsFactory.create(it) }
             }
             return DefaultPaymentMethodVerticalLayoutInteractor(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -202,10 +195,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         walletsState = viewModel.walletsState.value,
                         isVerticalLayout = true,
                     )
-                },
-                currencySelectorOptions = currencySelectorOptions,
-                onCurrencySelected = { currencyOption ->
-                    (viewModel as? PaymentSheetViewModel)?.updateCurrency(currencyOption.code)
                 },
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             ).also { interactor ->
@@ -314,7 +303,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
-            currencySelectorOptions = currencySelectorOptions,
         )
     }
 
@@ -372,7 +360,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     ): List<DisplayablePaymentMethod> {
         val lpms = supportedPaymentMethods.map { supportedPaymentMethod ->
             val paymentMethodIncentive = incentive?.takeIfMatches(supportedPaymentMethod.code)
-            supportedPaymentMethod.asDisplayablePaymentMethod(paymentMethods, paymentMethodIncentive) {
+            supportedPaymentMethod.asDisplayablePaymentMethod(
+                customerSavedPaymentMethods = paymentMethods,
+                incentive = paymentMethodIncentive,
+                promotionProvider = getPromotionProvider(supportedPaymentMethod.code)
+            ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
         }
@@ -580,9 +572,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             is ViewAction.CancelPaymentMethodVisibilityTracking -> {
                 cancelPaymentMethodVisibilityTracking()
             }
-            is ViewAction.CurrencySelected -> {
-                onCurrencySelected(viewAction.currencyOption)
-            }
         }
     }
 
@@ -651,5 +640,15 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         is PaymentSelection.New.USBankAccount -> label
         else -> null
+    }
+
+    private fun getPromotionProvider(code: PaymentMethodCode): (() -> PaymentMethodMessagePromotion?)? {
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled &&
+            PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)
+        ) {
+            { paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(code) }
+        } else {
+            null
+        }
     }
 }

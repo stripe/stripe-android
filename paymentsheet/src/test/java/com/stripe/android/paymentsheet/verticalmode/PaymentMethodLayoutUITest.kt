@@ -8,15 +8,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertAll
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.isNotDisplayed
 import androidx.compose.ui.test.isSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -26,7 +31,7 @@ import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.Selection
 import com.stripe.android.testing.createComposeCleanupRule
-import org.junit.Assume.assumeTrue
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -110,6 +115,110 @@ internal class PaymentMethodLayoutUITest(
             composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_card").performClick()
             assertThat(onClickCalled).isTrue()
             assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun clickingOnBnpL_with_promotion_shows_promotion() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm")
+            )
+        )
+        var onClickCalled = false
+        runScenario(
+            initialState = createState(
+                displayablePaymentMethods = listOf(
+                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                        metadata = metadata,
+                        definition = AffirmDefinition,
+                        sharedDataSpecs = emptyList()
+                    )!!
+                        .asDisplayablePaymentMethod(
+                            customerSavedPaymentMethods = emptyList(),
+                            incentive = null,
+                            onClick = { onClickCalled = true },
+                            promotionProvider = { FakePaymentMethodMessagePromotionsHelper.affirmPromotion }
+                        ),
+                ),
+                displayedSavedPaymentMethod = null,
+            )
+        ) {
+            assertThat(onClickCalled).isFalse()
+            composeRule.onNodeWithText("This is a message", substring = true).isNotDisplayed()
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").performClick()
+            assertThat(onClickCalled).isTrue()
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithText("This is a message", substring = true).isDisplayed()
+        }
+    }
+
+    @Test
+    fun clickingOnBnpL_falls_back_to_subtitle_if_promotion_not_available() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm")
+            )
+        )
+        var onClickCalled = false
+        runScenario(
+            initialState = createState(
+                displayablePaymentMethods = listOf(
+                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                        metadata = metadata,
+                        definition = AffirmDefinition,
+                        sharedDataSpecs = emptyList()
+                    )!!
+                        .asDisplayablePaymentMethod(
+                            customerSavedPaymentMethods = emptyList(),
+                            incentive = null,
+                            onClick = { onClickCalled = true },
+                            promotionProvider = { null }
+                        ),
+                ),
+                displayedSavedPaymentMethod = null,
+            )
+        ) {
+            assertThat(onClickCalled).isFalse()
+            composeRule.onNodeWithText("Pay over time with Affirm").isNotDisplayed()
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_affirm").performClick()
+            assertThat(onClickCalled).isTrue()
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithText("Pay over time with Affirm").isDisplayed()
+        }
+    }
+
+    @Test
+    fun displays_subtitle_if_promotion_provider_is_null() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm")
+            )
+        )
+        var onClickCalled = false
+        runScenario(
+            initialState = createState(
+                displayablePaymentMethods = listOf(
+                    AffirmDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                        metadata = metadata,
+                        definition = AffirmDefinition,
+                        sharedDataSpecs = emptyList()
+                    )!!
+                        .asDisplayablePaymentMethod(
+                            customerSavedPaymentMethods = emptyList(),
+                            incentive = null,
+                            onClick = { onClickCalled = true },
+                            promotionProvider = null
+                        ),
+                ),
+                displayedSavedPaymentMethod = null,
+            )
+        ) {
+            assertThat(onClickCalled).isFalse()
+            composeRule.onNodeWithText("Pay over time with Affirm").isDisplayed()
         }
     }
 
@@ -237,56 +346,6 @@ internal class PaymentMethodLayoutUITest(
         }
     }
 
-    @Test
-    fun currencySelector_visibleWhenOptionsProvided() {
-        // Currency selector is only rendered in PaymentMethodVerticalLayoutUI, not embedded layout.
-        assumeTrue(paymentMethodsTag == TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
-        runScenario(
-            initialState = createState(
-                currencySelectorOptions = CurrencySelectorOptions(
-                    first = CurrencyOption(code = "USD", displayableText = "$10.00"),
-                    second = CurrencyOption(code = "EUR", displayableText = "€9.50"),
-                    selectedCode = "USD",
-                ),
-            ),
-        ) {
-            composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR).assertExists()
-        }
-    }
-
-    @Test
-    fun currencySelector_notVisibleWhenOptionsNull() {
-        // Currency selector is only rendered in PaymentMethodVerticalLayoutUI, not embedded layout.
-        assumeTrue(paymentMethodsTag == TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
-        runScenario(
-            initialState = createState(currencySelectorOptions = null),
-        ) {
-            composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR).assertDoesNotExist()
-        }
-    }
-
-    @Test
-    fun currencySelector_clickingOption_dispatchesCurrencySelectedViewAction() {
-        // Currency selector is only rendered in PaymentMethodVerticalLayoutUI, not embedded layout.
-        assumeTrue(paymentMethodsTag == TEST_TAG_NEW_PAYMENT_METHOD_VERTICAL_LAYOUT_UI)
-        val eurOption = CurrencyOption(code = "EUR", displayableText = "€9.50")
-        runScenario(
-            initialState = createState(
-                currencySelectorOptions = CurrencySelectorOptions(
-                    first = CurrencyOption(code = "USD", displayableText = "$10.00"),
-                    second = eurOption,
-                    selectedCode = "USD",
-                ),
-            ),
-        ) {
-            composeRule.onNodeWithTag("$TEST_TAG_CURRENCY_OPTION_PREFIX${eurOption.code}").performClick()
-            viewActionRecorder.consume(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.CurrencySelected(eurOption)
-            )
-            assertThat(viewActionRecorder.viewActions).isEmpty()
-        }
-    }
-
     private fun runScenario(
         initialState: PaymentMethodVerticalLayoutInteractor.State,
         block: Scenario.() -> Unit
@@ -364,7 +423,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod: DisplayableSavedPaymentMethod? = PaymentMethodFixtures.displayableCard(),
             availableSavedPaymentMethodAction: SavedPaymentMethodAction = SavedPaymentMethodAction.MANAGE_ALL,
             mandate: ResolvableString? = null,
-            currencySelectorOptions: CurrencySelectorOptions? = null,
         ): PaymentMethodVerticalLayoutInteractor.State = PaymentMethodVerticalLayoutInteractor.State(
             displayablePaymentMethods = displayablePaymentMethods,
             isProcessing = isProcessing,
@@ -372,7 +430,6 @@ internal class PaymentMethodLayoutUITest(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = availableSavedPaymentMethodAction,
             mandate = mandate,
-            currencySelectorOptions = currencySelectorOptions,
         )
     }
 }

@@ -43,8 +43,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -64,6 +66,7 @@ import com.stripe.android.link.theme.LinkThemeConfig.contentOnPrimaryButton
 import com.stripe.android.link.theme.LinkThemeConfig.separatorOnPrimaryButton
 import com.stripe.android.link.ui.wallet.BankIcon
 import com.stripe.android.link.ui.wallet.DefaultPaymentUI
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButtonTheme
@@ -91,13 +94,18 @@ private val LinkButtonTheme.borderColor: Color?
         LinkButtonTheme.DEFAULT -> null
     }
 
-private val LinkButtonTheme.logoRes: Int
-    @Composable
-    @DrawableRes
-    get() = when (this) {
+@Composable
+@DrawableRes
+private fun LinkButtonTheme.logoRes(linkBrand: LinkBrand): Int = when (linkBrand) {
+    LinkBrand.Link -> when (this) {
         LinkButtonTheme.WHITE -> R.drawable.stripe_link_logo_light
         LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_link_logo_bw
     }
+    LinkBrand.Notlink -> when (this) {
+        LinkButtonTheme.WHITE -> R.drawable.stripe_notlink_logo_light
+        LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_notlink_logo_bw
+    }
+}
 
 @Composable
 private fun Modifier.themeBorder(theme: LinkButtonTheme): Modifier {
@@ -179,6 +187,7 @@ internal fun LinkButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
+    linkBrand: LinkBrand = LinkBrand.Link,
 ) {
     val alpha = if (enabled) {
         1f
@@ -210,14 +219,19 @@ internal fun LinkButton(
                 when (state) {
                     is LinkButtonState.DefaultPayment -> PaymentDetailsButtonContent(
                         paymentUI = state.paymentUI,
-                        theme = theme
+                        theme = theme,
+                        linkBrand = linkBrand,
                     )
 
                     is LinkButtonState.Email -> SignedInButtonContent(
                         email = state.email,
-                        theme = theme
+                        theme = theme,
+                        linkBrand = linkBrand,
                     )
-                    LinkButtonState.Default -> SignedOutButtonContent(theme = theme)
+                    LinkButtonState.Default -> SignedOutButtonContent(
+                        theme = theme,
+                        linkBrand = linkBrand,
+                    )
                 }
             }
         }
@@ -227,13 +241,14 @@ internal fun LinkButton(
 @Composable
 private fun PaymentDetailsButtonContent(
     paymentUI: DefaultPaymentUI,
-    theme: LinkButtonTheme
+    theme: LinkButtonTheme,
+    linkBrand: LinkBrand,
 ) {
     val color = theme.textColor.copy(alpha = LocalContentAlpha.current)
     Row(
         verticalAlignment = Alignment.CenterVertically
     ) {
-        LinkIconAndDivider(theme)
+        LinkIconAndDivider(theme, linkBrand)
 
         PaymentDetailsDisplay(paymentUI = paymentUI)
 
@@ -273,7 +288,8 @@ private fun PaymentDetailsDisplay(
 @Composable
 private fun SignedInButtonContent(
     email: String,
-    theme: LinkButtonTheme
+    theme: LinkButtonTheme,
+    linkBrand: LinkBrand,
 ) {
     val annotatedEmail = remember(email) {
         buildAnnotatedString {
@@ -282,16 +298,18 @@ private fun SignedInButtonContent(
     }
 
     val color = theme.textColor.copy(alpha = LocalContentAlpha.current)
-    val payWithLinkText = resolvableString(R.string.stripe_pay_with_link).resolve(LocalContext.current)
+    val payWithLinkText =
+        resolvableString(R.string.stripe_pay_with_link_format, linkBrand.brandName()).resolve(LocalContext.current)
 
     Row(
         modifier = Modifier.semantics(
             mergeDescendants = true
         ) {
             this.contentDescription = payWithLinkText
+            this.role = Role.Button
         }
     ) {
-        LinkIconAndDivider(theme)
+        LinkIconAndDivider(theme, linkBrand)
         Text(
             text = annotatedEmail,
             color = color,
@@ -306,8 +324,9 @@ private fun SignedInButtonContent(
 
 @Suppress("UnusedReceiverParameter")
 @Composable
-private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
-    val text = stringResource(id = R.string.stripe_pay_with_link)
+private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: LinkBrand) {
+    val text = stringResource(R.string.stripe_pay_with_link)
+    val contentDescription = stringResource(R.string.stripe_pay_with_link_format, linkBrand.brandName())
 
     val iconizedText = buildAnnotatedString {
         append(text.substringBefore(LINK_BRAND_NAME))
@@ -322,13 +341,13 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
         text = iconizedText,
         textAlign = TextAlign.Center,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon(theme.logoRes) }
+            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon(theme.logoRes(linkBrand)) }
         }.build(),
         modifier = Modifier
             .padding(start = 6.dp)
             .fillMaxWidth()
             .semantics {
-                this.contentDescription = text
+                this.contentDescription = contentDescription
             },
         color = theme.textColor.copy(alpha = LocalContentAlpha.current),
         style = LinkTheme.typography.bodyEmphasized,
@@ -341,7 +360,8 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme) {
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun LinkIconAndDivider(
-    theme: LinkButtonTheme
+    theme: LinkButtonTheme,
+    linkBrand: LinkBrand,
 ) {
     val annotatedLinkAndDivider = remember {
         buildAnnotatedString {
@@ -371,7 +391,7 @@ private fun LinkIconAndDivider(
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkButtonIcon(theme.logoRes) }
+            add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkButtonIcon(theme.logoRes(linkBrand)) }
             add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(theme.dividerColor) }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
         }.build(),

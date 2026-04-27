@@ -1,5 +1,7 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -8,6 +10,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
@@ -32,8 +35,6 @@ import javax.inject.Singleton
 internal interface FormActivityStateHelper {
     val state: StateFlow<State>
     val result: SharedFlow<FormResult>
-    fun updateEnabled(enabled: Boolean)
-    fun updateConfirmationState(confirmationState: ConfirmationHandler.State)
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
@@ -62,6 +63,9 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
     @param:ViewModelScope private val coroutineScope: CoroutineScope,
+    private val confirmationHandler: ConfirmationHandler,
+    private val tapToAddHelper: TapToAddHelper,
+    private val customerStateHolder: CustomerStateHolder,
 ) : FormActivityStateHelper {
     private val _state = MutableStateFlow(
         FormActivityStateHelper.State(
@@ -82,6 +86,52 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
 
     init {
         coroutineScope.launch {
+            tapToAddHelper.nextStep.collect { result ->
+                val formResult = when (result) {
+                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
+                        updateSavedPaymentSelectionToConfirm(
+                            result.paymentSelection,
+                        )
+                        null
+                    }
+                    is TapToAddNextStep.ShowSavedPaymentMethods -> {
+                        FormResult.Complete(
+                            selection = result.paymentSelection,
+                            hasBeenConfirmed = false,
+                            customerState = customerStateHolder.customer.value,
+                        )
+                    }
+                    TapToAddNextStep.Complete -> {
+                        FormResult.Complete(
+                            selection = null,
+                            hasBeenConfirmed = true,
+                            customerState = customerStateHolder.customer.value
+                        )
+                    }
+                    is TapToAddNextStep.Continue -> {
+                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
+                        FormResult.Complete(
+                            selection = result.paymentSelection,
+                            hasBeenConfirmed = false,
+                            customerState = customerStateHolder.customer.value
+                        )
+                    }
+                }
+                formResult?.let {
+                    setResult(it)
+                }
+            }
+        }
+
+        coroutineScope.launch {
+            confirmationHandler.state.collectLatest { confirmationState ->
+                _state.update {
+                    it.updateWithConfirmationState(confirmationState)
+                }
+            }
+        }
+
+        coroutineScope.launch {
             selectionHolder.selection.collectLatest { selection ->
                 _state.update { currentState ->
                     currentState.copy(
@@ -96,20 +146,6 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     override fun setResult(result: FormResult) {
         coroutineScope.launch {
             _result.emit(result)
-        }
-    }
-
-    override fun updateConfirmationState(confirmationState: ConfirmationHandler.State) {
-        _state.update {
-            it.updateWithConfirmationState(confirmationState)
-        }
-    }
-
-    override fun updateEnabled(enabled: Boolean) {
-        _state.update {
-            it.copy(
-                isEnabled = enabled,
-            )
         }
     }
 

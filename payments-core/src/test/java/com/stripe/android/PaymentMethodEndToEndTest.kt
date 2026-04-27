@@ -160,16 +160,6 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withUpi_shouldCreateObject() {
-        val params = PaymentMethodCreateParamsFixtures.UPI
-        val paymentMethod =
-            Stripe(context, ApiKeyFixtures.UPI_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod.type)
-            .isEqualTo(PaymentMethod.Type.Upi)
-    }
-
-    @Test
     fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {
         val params = PaymentMethodCreateParams.createOxxo(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
@@ -467,5 +457,14 @@ internal class PaymentMethodEndToEndTest {
 
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Multibanco)
+    }
+
+    @Test
+    fun createPaymentMethod_withPayByBank_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.PAY_BY_BANK
+        val stripe = Stripe(context, ApiKeyFixtures.PAY_BY_BANK_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.PayByBank)
     }
 }

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.paymentsheet.CreateIntentResult
 
 /**
@@ -8,7 +7,6 @@ import com.stripe.android.paymentsheet.CreateIntentResult
  * This should be implemented to allow customers to tap their card on their
  * device to save it.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @TapToAddPreview
 fun interface CreateCardPresentSetupIntentCallback {
     /**

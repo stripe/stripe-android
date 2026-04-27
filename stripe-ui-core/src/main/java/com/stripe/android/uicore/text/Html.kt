@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.Placeholder
@@ -327,7 +328,18 @@ fun HtmlWithCustomOnClick(
         ClickableText(
             annotatedText,
             modifier = modifier
-                .semantics(mergeDescendants = true) {}, // makes it a separate accessible item,
+                .semantics(mergeDescendants = true) {
+                    onClick {
+                        onClick(
+                            annotatedText.getStringAnnotations(
+                                LINK_TAG,
+                                0,
+                                annotatedText.length
+                            )
+                        )
+                        true
+                    }
+                },
             inlineContent = drawableImages + bitmapImages + remoteImages,
             color = color,
             style = style,

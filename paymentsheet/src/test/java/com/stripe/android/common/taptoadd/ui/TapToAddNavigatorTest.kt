@@ -2,7 +2,9 @@ package com.stripe.android.common.taptoadd.ui
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.TapToAddErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddResult
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
@@ -99,7 +101,13 @@ internal class TapToAddNavigatorTest {
 
     @Test
     fun `performAction with CloseWithUnsupportedDevice emits UnsupportedDevice`() = runTest {
-        val initialScreen = TapToAddNavigator.Screen.NotSupportedError
+        val initialScreen = TapToAddNavigator.Screen.Error(
+            message = TapToAddErrorMessage(
+                title = "t".resolvableString,
+                action = "a".resolvableString,
+            ),
+            dueToUnsupportedDevice = true,
+        )
         val navigator = TapToAddNavigator(
             coroutineScope = this,
             stateHolder = FakeStateHolder(state = null),
@@ -109,6 +117,48 @@ internal class TapToAddNavigatorTest {
         navigator.result.test {
             navigator.performAction(TapToAddNavigator.Action.CloseWithUnsupportedDevice)
             assertThat(awaitItem()).isEqualTo(TapToAddResult.UnsupportedDevice)
+        }
+    }
+
+    @Test
+    fun `Error screen cancel button uses CloseWithUnsupportedDevice when dueToUnsupportedDevice is true`() = runTest {
+        val screen = TapToAddNavigator.Screen.Error(
+            message = TapToAddErrorMessage(
+                title = "Error".resolvableString,
+                action = "Try again".resolvableString,
+            ),
+            dueToUnsupportedDevice = true,
+        )
+        val cancel = screen.cancelButton.value as TapToAddNavigator.CancelButton.Available
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = screen,
+        )
+        navigator.result.test {
+            navigator.performAction(cancel.action)
+            assertThat(awaitItem()).isEqualTo(TapToAddResult.UnsupportedDevice)
+        }
+    }
+
+    @Test
+    fun `Error screen cancel button uses Close when dueToUnsupportedDevice is false`() = runTest {
+        val screen = TapToAddNavigator.Screen.Error(
+            message = TapToAddErrorMessage(
+                title = "Error".resolvableString,
+                action = "Try again".resolvableString,
+            ),
+            dueToUnsupportedDevice = false,
+        )
+        val cancel = screen.cancelButton.value as TapToAddNavigator.CancelButton.Available
+        val navigator = TapToAddNavigator(
+            coroutineScope = this,
+            stateHolder = FakeStateHolder(state = null),
+            initialScreen = screen,
+        )
+        navigator.result.test {
+            navigator.performAction(cancel.action)
+            assertThat(awaitItem()).isEqualTo(TapToAddResult.Canceled(paymentSelection = null))
         }
     }
 

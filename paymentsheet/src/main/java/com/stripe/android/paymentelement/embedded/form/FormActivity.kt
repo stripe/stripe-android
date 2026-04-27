@@ -5,13 +5,25 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.common.ui.BottomSheetScaffold
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.CustomerState
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
+import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -28,7 +40,10 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     @Inject
-    lateinit var formScreen: FormScreen
+    lateinit var formScreen: EmbeddedNavigator.Screen.Form
+
+    @Inject
+    lateinit var formInteractor: DefaultVerticalModeFormInteractor
 
     @Inject
     lateinit var eventReporter: EventReporter
@@ -38,6 +53,9 @@ internal class FormActivity : AppCompatActivity() {
 
     @Inject
     lateinit var customerStateHolder: CustomerStateHolder
+
+    @Inject
+    lateinit var formActivityRegistrar: FormActivityRegistrar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -49,10 +67,12 @@ internal class FormActivity : AppCompatActivity() {
 
         renderEdgeToEdge()
 
-        viewModel.component.subcomponentFactory.build(
+        viewModel.component.inject(this)
+
+        formActivityRegistrar.registerAndBootstrap(
             activityResultCaller = this,
             lifecycleOwner = this,
-        ).inject(this)
+        )
 
         lifecycleScope.launch {
             formActivityStateHelper.result.collect {
@@ -63,23 +83,43 @@ internal class FormActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                formScreen.Content(
-                    onProcessingCompleted = ::setCompletedResultAndDismiss,
-                    onDismissed = ::setCancelAndFinish,
+                FormSheetContent(
+                    formScreen = formScreen,
                 )
             }
         }
     }
 
-    private fun setCompletedResultAndDismiss() {
-        setFormResult(
-            FormResult.Complete(
-                selection = null,
-                hasBeenConfirmed = true,
-                customerState = getCustomerState(),
-            )
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    private fun FormSheetContent(formScreen: EmbeddedNavigator.Screen.Form) {
+        val state by formActivityStateHelper.state.collectAsState()
+        val bottomSheetState = rememberStripeBottomSheetState(
+            confirmValueChange = { !state.isProcessing }
         )
-        finish()
+        ElementsBottomSheetLayout(
+            state = bottomSheetState,
+            onDismissed = ::setCancelAndFinish,
+        ) {
+            val scrollState = rememberScrollState()
+            BottomSheetScaffold(
+                topBar = {
+                    val topBarState by remember(formScreen) {
+                        formScreen.topBarState()
+                    }.collectAsState()
+                    PaymentSheetTopBar(
+                        state = topBarState,
+                        canNavigateBack = false,
+                        isEnabled = true,
+                        handleBackPressed = ::setCancelAndFinish,
+                    )
+                },
+                content = {
+                    formScreen.Content()
+                },
+                scrollState = scrollState,
+            )
+        }
     }
 
     private fun setCancelAndFinish() {

@@ -455,4 +455,12 @@ private class DefaultCardScanEventReporter(
             )
         )
     }
+
+    override fun onCardScanButtonShown() {
+        viewActionHandler.invoke(
+            CustomerSheetViewAction.OnCardScanEvent(
+                CustomerSheetEvent.CardScanButtonShown()
+            )
+        )
+    }
 }

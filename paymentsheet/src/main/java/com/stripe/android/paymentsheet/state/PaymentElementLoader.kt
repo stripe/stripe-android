@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.analytics.experiment.CardArtExperimentHandler
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
@@ -221,6 +222,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
+    private val cardArtExperimentHandler: CardArtExperimentHandler,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
@@ -265,7 +267,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
-        tapToAddConnectionStarter.start()
+        tapToAddConnectionStarter.start(configuration)
 
         val isGooglePaySupportedOnDevice = async {
             isGooglePaySupportedOnDevice()
@@ -378,6 +380,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
+        cardArtExperimentHandler.logExposure(
+            elementsSession = elementsSession,
+            paymentMethodMetadata = pmMetadata,
+            savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
+            integrationConfiguration = integrationConfiguration,
+            defaultPaymentSelection = state.paymentSelection,
+        )
+
         logLinkExperimentExposures(
             elementsSession = elementsSession,
             state = state
@@ -387,7 +397,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            paymentMethodMetadata = pmMetadata,
+            paymentMethodMetadata = state.paymentMethodMetadata,
         )
 
         return@runCatching state
@@ -481,7 +491,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
         )
 
-        return PaymentMethodMetadata.createForPaymentElement(
+        val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
@@ -495,6 +505,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
         )
+
+        return paymentMethodMetadata
     }
 
     private suspend fun isGooglePayReady(

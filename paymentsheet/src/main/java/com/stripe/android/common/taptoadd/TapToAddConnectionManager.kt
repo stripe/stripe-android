@@ -7,7 +7,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
 import com.stripe.android.core.networking.RetryDelaySupplier
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.stripeterminal.external.callable.Callback
@@ -41,9 +40,15 @@ internal interface TapToAddConnectionManager {
 
     /**
      * Connects to the NFC reader. Successful completion of this function indicates a successful connection while
-     * an interruption will result from a connection failure
+     * an interruption will result from a connection failure.
+     *
+     * @param config attributes required for connecting to the NFC reader.
      */
-    suspend fun connect()
+    suspend fun connect(config: ConnectionConfig)
+
+    data class ConnectionConfig(
+        val merchantDisplayName: String?
+    )
 
     companion object {
         fun create(
@@ -97,7 +102,7 @@ internal class DefaultTapToAddConnectionManager(
 
     override val isSupported: Boolean
         get() {
-            return FeatureFlags.enableTapToAdd.isEnabled && terminal().supportsReadersOfType(
+            return terminal().supportsReadersOfType(
                 deviceType = DeviceType.TAP_TO_PAY_DEVICE,
                 discoveryConfiguration = discoveryConfiguration,
             ).isSupported
@@ -117,7 +122,7 @@ internal class DefaultTapToAddConnectionManager(
         }
     }
 
-    override suspend fun connect() = withContext(workContext) {
+    override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) = withContext(workContext) {
         runCatching {
             if (!isSupported) {
                 throw IllegalStateException("Tap to Add is not supported by this device!")
@@ -141,7 +146,7 @@ internal class DefaultTapToAddConnectionManager(
             val discoverReadersResult = discoverReaders()
 
             if (discoverReadersResult is DiscoverCallResult.CollectedReaders) {
-                connectReader(discoverReadersResult.readers)
+                connectReader(discoverReadersResult.readers, config)
             }
         }.fold(
             onSuccess = {
@@ -225,7 +230,10 @@ internal class DefaultTapToAddConnectionManager(
         }
     }
 
-    private suspend fun connectReader(readers: List<Reader>) = suspendCancellableCoroutine { continuation ->
+    private suspend fun connectReader(
+        readers: List<Reader>,
+        config: TapToAddConnectionManager.ConnectionConfig,
+    ) = suspendCancellableCoroutine { continuation ->
         val reader = readers.firstOrNull() ?: run {
             val exception = IllegalStateException("No reader found!")
 
@@ -244,6 +252,7 @@ internal class DefaultTapToAddConnectionManager(
             config = ConnectionConfiguration.TapToPayConnectionConfiguration(
                 useCase = TapUseCase.Verify(),
                 autoReconnectOnUnexpectedDisconnect = true,
+                merchantDisplayName = config.merchantDisplayName,
                 tapToPayReaderListener = this@DefaultTapToAddConnectionManager,
             ),
             connectionCallback = object : ReaderCallback {
@@ -310,7 +319,7 @@ internal class DefaultTapToAddConnectionManager(
 internal class UnsupportedTapToAddConnectionManager : TapToAddConnectionManager {
     override val isSupported: Boolean = false
 
-    override suspend fun connect() {
+    override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
         // No-op
     }
 }
@@ -320,12 +329,12 @@ internal class TapToAddRetriableConnectionManager(
     private val fatalErrorChecker: TapToAddFatalErrorChecker,
     private val retryDelaySupplier: RetryDelaySupplier,
 ) : TapToAddConnectionManager by tapToAddConnectionManager {
-    override suspend fun connect() {
+    override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
         var retriesRemaining = MAX_RETRIES
 
         while (true) {
             runCatching {
-                tapToAddConnectionManager.connect()
+                tapToAddConnectionManager.connect(config)
             }.fold(
                 onSuccess = {
                     break

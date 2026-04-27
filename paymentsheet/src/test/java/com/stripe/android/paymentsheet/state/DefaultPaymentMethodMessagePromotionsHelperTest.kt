@@ -10,9 +10,11 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodMessagePromotionList
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.DefaultPaymentMethodMessagePromotionsHelper
 import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import java.util.Locale
@@ -32,6 +34,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true,
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        assertThat(eventReporter.pmmPromotionsFetched.awaitItem()).isNotNull()
         val request = fakeRepository.calls.awaitItem()
         assertThat(request.amount).isEqualTo(1099)
         assertThat(request.currency).isEqualTo("usd")
@@ -44,15 +47,28 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        dispatcher.scheduler.advanceUntilIdle()
+        assertThat(eventReporter.pmmPromotionsFetched.awaitItem()).isNotNull()
+        val result = helper.getPromotionIfAvailableForCode("afterpay_clearpay")
+        assertThat(result).isEqualTo(AFTERPAY_PROMOTION)
+    }
+
+    @Test
+    fun `onPaymentMethodMessagePromotionsIncomplete event sent when request still in progress `() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         val result = helper.getPromotionIfAvailableForCode("afterpay_clearpay")
         assertThat(result).isNull()
+        assertThat(eventReporter.pmmPromotionsFetched.awaitItem()).isNotNull()
+        assertThat(eventReporter.pmmPromotionsIncomplete.awaitItem()).isNotNull()
     }
 
     private fun runScenario(
         featureFlagEnabled: Boolean = false,
         repositoryResult: Result<PaymentMethodMessagePromotionList> = Result.success(
             PaymentMethodMessagePromotionList(
-            listOf(AFTERPAY_PROMOTION)
+                listOf(AFTERPAY_PROMOTION)
             )
         ),
         block: suspend Scenario.() -> Unit,
@@ -61,6 +77,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
         val fakeRepository = FakePromotionsStripeRepository(repositoryResult)
         val testDispatcher = StandardTestDispatcher(testScheduler)
+        val eventReporter = FakeEventReporter()
 
         val helper = DefaultPaymentMethodMessagePromotionsHelper(
             stripeRepository = fakeRepository,
@@ -69,17 +86,24 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             },
             viewModelScope = this,
             workContext = testDispatcher,
+            eventReporter = eventReporter
         )
 
         Scenario(
             helper = helper,
             fakeRepository = fakeRepository,
+            dispatcher = testDispatcher,
+            eventReporter = eventReporter
         ).block()
+
+        eventReporter.validate()
     }
 
     private data class Scenario(
         val helper: DefaultPaymentMethodMessagePromotionsHelper,
         val fakeRepository: FakePromotionsStripeRepository,
+        val dispatcher: TestDispatcher,
+        val eventReporter: FakeEventReporter
     )
 
     private class FakePromotionsStripeRepository(

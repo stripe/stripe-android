@@ -8,10 +8,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
@@ -44,6 +44,7 @@ internal fun NewPaymentMethodRowButton(
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
         appearance = appearance,
         trailingContent = trailingContent,
+        promotionProvider = displayablePaymentMethod.promotionProvider
     )
 }
 
@@ -61,7 +62,8 @@ internal fun NewPaymentMethodRowButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
-    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default)
+    appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -73,7 +75,9 @@ internal fun NewPaymentMethodRowButton(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 iconRequiresTinting = iconRequiresTinting,
-                modifier = Modifier.height(iconHeight).width(iconWidth),
+                modifier = Modifier
+                    .height(iconHeight)
+                    .width(UIConstants.iconWidth),
                 contentAlignment = Alignment.Center,
             )
         },
@@ -84,5 +88,6 @@ internal fun NewPaymentMethodRowButton(
         modifier = modifier,
         appearance = appearance,
         trailingContent = trailingContent,
+        promotionProvider = promotionProvider,
     )
 }

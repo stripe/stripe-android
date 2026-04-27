@@ -5,7 +5,8 @@
   "merchant_id": "acct_1HvTI7Lu5o3P18Zp",
   "ordered_payment_method_types_and_wallets": [PAYMENT_METHOD_TYPES],
   "flags": {
-    "elements_mobile_android_tap_to_add_enabled": true
+    "elements_mobile_android_tap_to_add_enabled": true,
+    "elements_mobile_link_inline_signup_with_saved_pm_enabled": LINK_ENABLED_STATE
   },
   "link_settings": {
     "link_funding_sources": ["CARD"],

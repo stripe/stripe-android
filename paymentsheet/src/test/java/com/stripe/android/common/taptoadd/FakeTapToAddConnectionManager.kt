@@ -9,16 +9,20 @@ internal class FakeTapToAddConnectionManager private constructor(
 ) : TapToAddConnectionManager {
     private val queuedConnectResults = connectResults.toMutableList()
 
-    val connectCalls = Turbine<Unit>()
+    val connectCalls = Turbine<ConnectCall>()
 
-    override suspend fun connect() {
-        connectCalls.add(Unit)
+    override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) {
+        connectCalls.add(ConnectCall(config))
 
         queuedConnectResults.removeFirst().getOrThrow()
     }
 
+    data class ConnectCall(
+        val config: TapToAddConnectionManager.ConnectionConfig,
+    )
+
     class Scenario(
-        val connectCalls: ReceiveTurbine<Unit>,
+        val connectCalls: ReceiveTurbine<ConnectCall>,
         val tapToAddConnectionManager: TapToAddConnectionManager
     )
 

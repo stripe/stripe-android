@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -46,6 +47,7 @@ fun VerificationPreview() {
                     defaultPayment = null,
                     isDialog = false,
                     allowLogout = true,
+                    linkBrand = LinkBrand.Link,
                 ),
                 otpElement = OTPSpec.transform(),
                 onBack = {},

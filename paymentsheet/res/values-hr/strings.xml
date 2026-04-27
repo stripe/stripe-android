@@ -273,8 +273,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">Otkaži i plati na drugi način</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Odobri plaćanje</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Otvorite svoju aplikaciju UPI da biste odobrili svoje plaćanje unutar %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Molimo vratite se i odaberite drugi način plaćanja</string>
   <!-- Text on a screen that indicates a payment has failed -->

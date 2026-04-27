@@ -523,6 +523,7 @@ internal class PlaygroundSettings private constructor(
             UserCountryOverrideSettingsDefinition,
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.forceNotlink),
             MerchantSettingsDefinition,
             CustomSecretKeyDefinition,
             CustomPublishableKeyDefinition,
@@ -591,9 +592,6 @@ internal class PlaygroundSettings private constructor(
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
             TermsDisplaySettingsDefinition,
-            AttestationOnIntentConfirmationDefinition,
-            EnableTapToAddSettingsDefinition,
-            CardArtSettingsDefinition,
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions)

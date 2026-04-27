@@ -4,6 +4,7 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.ui.IconHelper
 
 internal data class DisplayablePaymentMethod(
@@ -17,6 +18,7 @@ internal data class DisplayablePaymentMethod(
     val iconRequiresTinting: Boolean,
     val subtitle: ResolvableString? = null,
     val promoBadge: String? = null,
+    val promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
     val onClick: () -> Unit,
     @DrawableRes private val outlinedIconResource: Int? = null,
 ) {

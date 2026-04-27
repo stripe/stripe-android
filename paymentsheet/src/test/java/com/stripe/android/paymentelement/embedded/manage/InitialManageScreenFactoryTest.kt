@@ -6,6 +6,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -26,7 +27,7 @@ internal class InitialManageScreenFactoryTest {
                 paymentMethods = PaymentMethodFixtures.createCards(2)
             )
         )
-        assertThat(factory.createInitialScreen()).isInstanceOf<ManageNavigator.Screen.All>()
+        assertThat(factory.createInitialScreen()).isInstanceOf<EmbeddedNavigator.Screen.ManageAll>()
     }
 
     @Test
@@ -36,7 +37,7 @@ internal class InitialManageScreenFactoryTest {
                 paymentMethods = PaymentMethodFixtures.createCards(1)
             )
         )
-        assertThat(factory.createInitialScreen()).isInstanceOf<ManageNavigator.Screen.Update>()
+        assertThat(factory.createInitialScreen()).isInstanceOf<EmbeddedNavigator.Screen.ManageUpdate>()
     }
 
     private fun testScenario(

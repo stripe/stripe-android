@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityStateH
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.FormActivityRegistrar
 import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
-import com.stripe.android.paymentelement.embedded.form.FormActivitySubcomponent
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
@@ -35,8 +34,8 @@ import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateSc
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
-import com.stripe.android.paymentelement.embedded.manage.ManageNavigator
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -49,6 +48,7 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInter
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
 import dagger.Module
@@ -58,11 +58,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Singleton
 
-@Module(
-    subcomponents = [
-        FormActivitySubcomponent::class,
-    ]
-)
+@Module
 internal interface EmbeddedActivityModule {
     @Binds
     fun bindsEmbeddedManageScreenInteractorFactory(
@@ -101,6 +97,11 @@ internal interface EmbeddedActivityModule {
         impl: DefaultLinkInlineSignupAvailability,
     ): LinkInlineSignupAvailability
 
+    @Binds
+    fun providesFormActivityConfirmationHandlerRegistrar(
+        implementation: DefaultFormActivityRegistrar
+    ): FormActivityRegistrar
+
     @Suppress("TooManyFunctions")
     companion object {
         @Provides
@@ -117,12 +118,12 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
-        fun provideManageNavigator(
+        fun provideEmbeddedNavigator(
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
-        ): ManageNavigator {
-            return ManageNavigator(
+        ): EmbeddedNavigator {
+            return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
                 initialScreen = initialManageScreenFactory.createInitialScreen(),
@@ -186,15 +187,6 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         @Singleton
-        fun providesFormActivityConfirmationHandlerRegistrar(
-            confirmationHandler: ConfirmationHandler,
-            tapToAddHelper: TapToAddHelper,
-        ): FormActivityRegistrar {
-            return DefaultFormActivityRegistrar(confirmationHandler, tapToAddHelper)
-        }
-
-        @Provides
-        @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
             return DefaultStripeImageLoader(context)
         }
@@ -215,11 +207,15 @@ internal interface EmbeddedActivityModule {
         fun provideSavedPaymentMethodConfirmInteractorFactory(
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
+            formActivityStateHelper: FormActivityStateHelper,
             savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         ): SavedPaymentMethodConfirmInteractor.Factory {
             return DefaultSavedPaymentMethodConfirmInteractor.Factory(
                 paymentMethodMetadata = paymentMethodMetadata,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
+                processing = formActivityStateHelper.state.mapAsStateFlow {
+                    it.isProcessing
+                },
                 coroutineScope = coroutineScope,
             )
         }

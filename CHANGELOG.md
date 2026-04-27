@@ -1,12 +1,27 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
-
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+### PaymentSheet
+* [ADDED] Stripe card scanning is back in public preview. [Add `stripecardscan` to the `dependencies` block of your build.gradle](https://docs.stripe.com/payments/accept-a-payment?payment-ui=mobile&platform=android#android-card-scanning) to enable the Stripe card scanner.
+* [ADDED] Tap to add your card is in private preview. See documentation for [EmbeddedPaymentElement](https://docs.corp.stripe.com/payments/mobile/embedded-tap-to-add) and [PaymentSheet](https://docs.corp.stripe.com/payments/mobile/tap-to-add) for integration guide and to sign up for access.
+
+### PaymentSheet
+* [CHANGED] `PaymentOption.icon()` and `PaymentOption.iconPainter` may return card art instead of a network logo for card payment methods.
+* [FIXED][12950](https://github.com/stripe/stripe-android/pull/12950) Fixed an issue where raw API error messages (e.g. `invalid_request_error`) were displayed to end users instead of a generic fallback message. Only `card_error` messages are now shown directly.
+
+## 23.5.0 - 2026-04-20
+* [REMOVED][12871](https://github.com/stripe/stripe-android/pull/12871) Removed UPI support across the SDK.
+
+### PaymentSheet
+* [ADDED][12880](https://github.com/stripe/stripe-android/pull/12880) Added support for Pay by Bank (GA in GB, private preview in EU).
 
 ## 23.4.0 - 2026-04-14
 ### Crypto Onramp (Private Preview)
 * [ADDED][12740](https://github.com/stripe/stripe-android/pull/12740) Ability to Receive L0 KYC Info From Google Pay
+
+### Identity
+* [CHANGED][12811](https://github.com/stripe/stripe-android/pull/12811) Updated the Identity example app to use the new example API endpoint.
 
 ## 23.3.0 - 2026-04-06
 ### AddressElement

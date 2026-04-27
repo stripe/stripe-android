@@ -1,0 +1,191 @@
+package com.stripe.android.paymentelement.embedded.sheet
+
+import android.app.Activity
+import android.os.Bundle
+import androidx.activity.addCallback
+import androidx.activity.compose.setContent
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.common.ui.BottomSheetScaffold
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
+import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.getOuterFormInsets
+import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.fadeOut
+import javax.inject.Inject
+
+internal class EmbeddedSheetActivity : AppCompatActivity() {
+    private val args: EmbeddedSheetContract.Args? by lazy {
+        EmbeddedSheetContract.Args.fromIntent(intent)
+    }
+
+    private val viewModel: EmbeddedSheetViewModel by viewModels {
+        EmbeddedSheetViewModel.Factory {
+            requireNotNull(args)
+        }
+    }
+
+    @Inject
+    lateinit var eventReporter: EventReporter
+
+    @Inject
+    lateinit var customerStateHolder: CustomerStateHolder
+
+    @Inject
+    lateinit var embeddedNavigator: EmbeddedNavigator
+
+    @Inject
+    lateinit var selectionHolder: EmbeddedSelectionHolder
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        if (args == null) {
+            finish()
+            return
+        }
+
+        renderEdgeToEdge()
+        viewModel.component.inject(this)
+
+        onBackPressedDispatcher.addCallback {
+            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation()) {
+                embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
+            }
+        }
+
+        setContent {
+            StripeTheme {
+                SheetContent()
+            }
+        }
+    }
+
+    @OptIn(ExperimentalMaterialApi::class)
+    @Composable
+    private fun SheetContent() {
+        val screen by embeddedNavigator.screen.collectAsState()
+        val bottomSheetState = rememberStripeBottomSheetState(
+            confirmValueChange = { !screen.isPerformingNetworkOperation() }
+        )
+        ElementsBottomSheetLayout(
+            state = bottomSheetState,
+            onDismissed = {
+                setEmbeddedResult(shouldInvokeSelectionCallback = false)
+                finish()
+            }
+        ) {
+            var hasResult by remember { mutableStateOf(false) }
+            if (!hasResult) {
+                Box(modifier = Modifier.padding(bottom = 20.dp)) {
+                    ScreenContent(embeddedNavigator, screen)
+                }
+                LaunchedEffect(Unit) {
+                    embeddedNavigator.result.collect { result ->
+                        hasResult = true
+                        setEmbeddedResult(shouldInvokeSelectionCallback = result == true)
+                        finish()
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun ScreenContent(
+        navigator: EmbeddedNavigator,
+        screen: EmbeddedNavigator.Screen
+    ) {
+        val density = LocalDensity.current
+        var contentHeight by remember { mutableStateOf(0.dp) }
+        val scrollState = rememberScrollState()
+        BottomSheetScaffold(
+            topBar = {
+                val topBarState by remember(screen) {
+                    screen.topBarState()
+                }.collectAsState()
+                PaymentSheetTopBar(
+                    state = topBarState,
+                    canNavigateBack = navigator.canGoBack,
+                    isEnabled = true,
+                    handleBackPressed = { embeddedNavigator.performAction(EmbeddedNavigator.Action.Back) },
+                )
+            },
+            content = {
+                val horizontalPadding = StripeTheme.getOuterFormInsets()
+                val headerText by remember(screen) {
+                    screen.title()
+                }.collectAsState()
+                headerText?.let { text ->
+                    H4Text(
+                        text = text.resolve(),
+                        modifier = Modifier
+                            .padding(bottom = 16.dp)
+                            .padding(horizontalPadding),
+                    )
+                }
+
+                Box(modifier = Modifier.animateContentSize()) {
+                    screen.Content()
+                }
+            },
+            modifier = Modifier.onGloballyPositioned {
+                contentHeight = with(density) { it.size.height.toDp() }
+            },
+            scrollState = scrollState,
+        )
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        if (isFinishing) {
+            CheckoutInstances.markIntegrationDismissed(args?.paymentMethodMetadata)
+            if (::eventReporter.isInitialized) {
+                eventReporter.onDismiss()
+            }
+        }
+    }
+
+    private fun setEmbeddedResult(shouldInvokeSelectionCallback: Boolean) {
+        val result = EmbeddedSheetResult.Complete(
+            selection = selectionHolder.selection.value,
+            hasBeenConfirmed = false,
+            customerState = customerStateHolder.customer.value,
+            shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
+        )
+        setResult(
+            Activity.RESULT_OK,
+            EmbeddedSheetResult.toIntent(intent, result)
+        )
+    }
+}

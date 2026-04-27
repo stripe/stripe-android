@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -13,7 +14,7 @@ internal class InitialManageScreenFactory @Inject constructor(
     private val updateScreenInteractorFactory: EmbeddedUpdateScreenInteractorFactory,
     private val manageInteractorFactory: EmbeddedManageScreenInteractorFactory,
 ) {
-    fun createInitialScreen(): ManageNavigator.Screen {
+    fun createInitialScreen(): EmbeddedNavigator.Screen {
         val paymentMethods = customerStateHolder.customer.value?.paymentMethods
         return if (paymentMethods?.size == 1) {
             val paymentMethod = paymentMethods.first()
@@ -25,13 +26,13 @@ internal class InitialManageScreenFactory @Inject constructor(
                 paymentMethod = paymentMethod,
                 isCbcEligible = paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
-            ManageNavigator.Screen.Update(
+            EmbeddedNavigator.Screen.ManageUpdate(
                 interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
                     displayableSavedPaymentMethod = displayableSavedPaymentMethod
                 )
             )
         } else {
-            ManageNavigator.Screen.All(interactor = manageInteractorFactory.createManageScreenInteractor())
+            EmbeddedNavigator.Screen.ManageAll(interactor = manageInteractorFactory.createManageScreenInteractor())
         }
     }
 }

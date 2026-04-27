@@ -283,13 +283,6 @@ public final class com/stripe/android/link/ui/ComposableSingletons$SecondaryButt
 	public final fun getLambda$1093093247$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt;
-	public fun <init> ()V
-	public final fun getLambda$1314356750$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1639009544$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt;
 	public fun <init> ()V
@@ -336,10 +329,10 @@ public final class com/stripe/android/link/ui/verification/ComposableSingletons$
 	public static final field INSTANCE Lcom/stripe/android/link/ui/verification/ComposableSingletons$VerificationBodyKt;
 	public fun <init> ()V
 	public final fun getLambda$-391428647$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$-690017062$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1556541497$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1594811933$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda$1814127193$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$211050873$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/link/ui/verification/ComposableSingletons$VerificationDialogKt {
@@ -462,6 +455,10 @@ public abstract interface class com/stripe/android/paymentelement/ConfirmCustomP
 	public abstract fun onConfirmCustomPaymentMethod (Lcom/stripe/android/paymentsheet/PaymentSheet$CustomPaymentMethod;Lcom/stripe/android/model/PaymentMethod$BillingDetails;)V
 }
 
+public abstract interface class com/stripe/android/paymentelement/CreateCardPresentSetupIntentCallback {
+	public abstract fun createCardPresentSetupIntent (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
 public abstract interface class com/stripe/android/paymentelement/CreateIntentWithConfirmationTokenCallback {
 	public abstract fun onCreateIntent (Lcom/stripe/android/model/ConfirmationToken;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -508,6 +505,7 @@ public final class com/stripe/android/paymentelement/EmbeddedPaymentElement$Buil
 	public fun <init> (Lcom/stripe/android/paymentsheet/CreateIntentCallback;Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$ResultCallback;)V
 	public final fun analyticEventCallback (Lcom/stripe/android/paymentelement/AnalyticEventCallback;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
+	public final fun createCardPresentSetupIntentCallback (Lcom/stripe/android/paymentelement/CreateCardPresentSetupIntentCallback;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 	public final fun rowSelectionBehavior (Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$RowSelectionBehavior;)Lcom/stripe/android/paymentelement/EmbeddedPaymentElement$Builder;
 }
@@ -1088,6 +1086,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Builder {
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet;
 	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
+	public final fun createCardPresentSetupIntentCallback (Lcom/stripe/android/paymentelement/CreateCardPresentSetupIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentelement/CreateIntentWithConfirmationTokenCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$Builder;
@@ -1329,6 +1328,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$FlowController$B
 	public final fun build (Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun build (Landroidx/fragment/app/Fragment;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 	public final fun confirmCustomPaymentMethodCallback (Lcom/stripe/android/paymentelement/ConfirmCustomPaymentMethodCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
+	public final fun createCardPresentSetupIntentCallback (Lcom/stripe/android/paymentelement/CreateCardPresentSetupIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentelement/CreateIntentWithConfirmationTokenCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun createIntentCallback (Lcom/stripe/android/paymentsheet/CreateIntentCallback;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
 	public final fun externalPaymentMethodConfirmHandler (Lcom/stripe/android/paymentsheet/ExternalPaymentMethodConfirmHandler;)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController$Builder;
@@ -2267,6 +2267,7 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$CardA
 	public fun <init> ()V
 	public final fun getLambda$-267801545$paymentsheet_release ()Lkotlin/jvm/functions/Function4;
 	public final fun getLambda$-429181471$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1950496891$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$DefaultPaymentMethodLabelKt {
@@ -2314,10 +2315,10 @@ public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingle
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodRowButtonKt;
 	public fun <init> ()V
 	public final fun getLambda$-1179981339$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
-	public final fun getLambda$-1423392141$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$-228724754$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-775164684$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1616606426$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda$1795895082$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$1972223339$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingletons$SavedPaymentMethodConfirmUIKt {

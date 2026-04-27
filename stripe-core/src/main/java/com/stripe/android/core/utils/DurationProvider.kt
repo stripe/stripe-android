@@ -9,6 +9,7 @@ import kotlin.time.DurationUnit
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface DurationProvider {
     fun start(key: Key, reset: Boolean = true)
+    fun elapsed(key: Key): Duration?
     fun end(key: Key): Duration?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -25,7 +26,8 @@ interface DurationProvider {
         PrepareAttestation,
         Attest,
         IntentConfirmationChallenge,
-        IntentConfirmationChallengeWebViewLoaded
+        IntentConfirmationChallengeWebViewLoaded,
+        PaymentMethodMessaging
     }
 }
 
@@ -41,10 +43,14 @@ class DefaultDurationProvider private constructor() : DurationProvider {
         }
     }
 
+    override fun elapsed(key: DurationProvider.Key): Duration? {
+        val startTime = store[key] ?: return null
+        return (SystemClock.uptimeMillis() - startTime).milliseconds
+    }
+
     override fun end(key: DurationProvider.Key): Duration? {
         val startTime = store.remove(key) ?: return null
-        val duration = SystemClock.uptimeMillis() - startTime
-        return duration.milliseconds
+        return (SystemClock.uptimeMillis() - startTime).milliseconds
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

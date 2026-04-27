@@ -271,8 +271,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">Abbrechen und anders bezahlen</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Zahlung genehmigen</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Öffnen Sie Ihre UPI-App, um die Zahlung per %s zu genehmigen.</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Bitte gehen Sie zurück und wählen Sie eine andere Zahlungsmethode.</string>
   <!-- Text on a screen that indicates a payment has failed -->

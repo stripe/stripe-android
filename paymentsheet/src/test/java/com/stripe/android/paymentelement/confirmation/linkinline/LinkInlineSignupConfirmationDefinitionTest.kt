@@ -28,6 +28,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -806,6 +807,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+                linkBrand = LinkBrand.Link,
             ),
             userInput = userInput,
         )

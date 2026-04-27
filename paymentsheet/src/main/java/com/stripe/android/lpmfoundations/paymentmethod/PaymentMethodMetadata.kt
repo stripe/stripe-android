@@ -352,6 +352,7 @@ internal data class PaymentMethodMetadata(
             isTapToAddAvailable: Boolean,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
+            val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -407,7 +408,7 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArts = cardArts,
             )
         }
 
@@ -419,6 +420,7 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
+            val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -476,7 +478,7 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArts = cardArts,
             )
         }
     }

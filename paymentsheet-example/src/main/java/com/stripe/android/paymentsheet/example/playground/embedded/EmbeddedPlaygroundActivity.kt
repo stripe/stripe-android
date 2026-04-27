@@ -115,7 +115,11 @@ internal class EmbeddedPlaygroundActivity :
             .confirmCustomPaymentMethodCallback(this)
             .externalPaymentMethodConfirmHandler(this)
             .analyticEventCallback(this)
-            .createCardPresentSetupIntentCallback(this)
+            .also {
+                if (playgroundState.canUseTapToAdd) {
+                    it.createCardPresentSetupIntentCallback(this)
+                }
+            }
             .rowSelectionBehavior(
                 playgroundSettings[EmbeddedRowSelectionBehaviorSettingsDefinition].value.rowSelectionBehavior
             )

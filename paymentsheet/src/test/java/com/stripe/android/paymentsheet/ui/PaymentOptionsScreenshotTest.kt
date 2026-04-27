@@ -140,7 +140,7 @@ class PaymentOptionsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("8431"),
-                shouldShowDefaultBadge = true
+                shouldShowDefaultBadge = true,
             ),
         ),
         PaymentOptionsItem.SavedPaymentMethod(

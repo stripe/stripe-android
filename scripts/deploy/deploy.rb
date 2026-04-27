@@ -33,7 +33,7 @@ def execute_steps(steps, step_index)
       step_index += 1
     end
   rescue Exception => e
-    rputs "Restart with --continue-from #{step_index} to re-run from this step."
+    rputs "Restart with --continue-from #{step_index} --version #{@version} to re-run from this step."
     raise
   end
 end

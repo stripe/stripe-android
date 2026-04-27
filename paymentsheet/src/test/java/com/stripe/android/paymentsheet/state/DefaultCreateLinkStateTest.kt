@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
@@ -42,6 +43,46 @@ internal class DefaultCreateLinkStateTest {
             enableCardFundFiltering = false,
             expectedFundingTypes = PaymentSheet.CardFundingType.entries
         )
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled is false by default`() =
+        testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
+            flags = emptyMap(),
+            isLinkInlineSignupAvailableForSavedPaymentMethods = false,
+        )
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled matches elements session flag`() =
+        testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to true
+            ),
+            isLinkInlineSignupAvailableForSavedPaymentMethods = true,
+        )
+
+    private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
+        flags: Map<ElementsSession.Flag, Boolean>,
+        isLinkInlineSignupAvailableForSavedPaymentMethods: Boolean
+    ) = runTest {
+        val createLinkState = createLinkStateFactory()
+        val configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration()
+        val elementsSession = createElementsSession(flags)
+
+        val linkStateResult = createLinkState(
+            elementsSession = elementsSession,
+            configuration = configuration,
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        assertThat(linkStateResult).isInstanceOf<LinkState>()
+
+        val linkState = linkStateResult as LinkState
+
+        assertThat(linkState.signupModeResult.availableForSavedPaymentMethods)
+            .isEqualTo(isLinkInlineSignupAvailableForSavedPaymentMethods)
     }
 
     @OptIn(CardFundingFilteringPrivatePreview::class)

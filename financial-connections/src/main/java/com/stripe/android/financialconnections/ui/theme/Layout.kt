@@ -41,6 +41,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.model.LinkBrand
 
 /**
  * A layout that contains a body, and an optional, bottom fixed footer.
@@ -240,6 +241,7 @@ internal fun LayoutPreview() {
                 FinancialConnectionsTopAppBar(
                     state = TopAppBarState(
                         hideStripeLogo = false,
+                        linkBrand = LinkBrand.Link,
                         isContentScrolled = state.canScrollBackward,
                     ),
                     onCloseClick = {},

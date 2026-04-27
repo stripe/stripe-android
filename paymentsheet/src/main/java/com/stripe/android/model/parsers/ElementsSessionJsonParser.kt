@@ -8,6 +8,7 @@ import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -48,9 +49,21 @@ internal class ElementsSessionJsonParser(
 
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
         val elementsSessionConfigId = json.optString(FIELD_ELEMENTS_SESSION_CONFIG_ID)
+
+        val experimentsData: ElementsSession.ExperimentsData? =
+            json.optJSONObject(FIELD_EXPERIMENTS_DATA)?.let { experimentsDataJson ->
+                ElementsSession.ExperimentsData(
+                    arbId = experimentsDataJson.optString(ARB_ID),
+                    experimentAssignments = experimentsDataJson.optJSONObject(FIELD_EXPERIMENTS_ASSIGNMENTS)?.let {
+                        parseExperimentAssignments(it)
+                    } ?: emptyMap()
+                )
+            }
+
         val customer = parseCustomer(
             json = json.optJSONObject(FIELD_CUSTOMER),
-            enableLinkInSpm = flags[ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM] == true
+            enableLinkInSpm = flags[ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM] == true,
+            isCardArtEnabled = isCardArtEnabled(experimentsData),
         )
 
         val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
@@ -66,16 +79,6 @@ internal class ElementsSessionJsonParser(
                 countryCode = countryCode
             ),
         )
-
-        val experimentsData: ElementsSession.ExperimentsData? =
-            json.optJSONObject(FIELD_EXPERIMENTS_DATA)?.let { experimentsDataJson ->
-                ElementsSession.ExperimentsData(
-                    arbId = experimentsDataJson.optString(ARB_ID),
-                    experimentAssignments = experimentsDataJson.optJSONObject(FIELD_EXPERIMENTS_ASSIGNMENTS)?.let {
-                        parseExperimentAssignments(it)
-                    } ?: emptyMap()
-                )
-            }
 
         val customPaymentMethods = parseCustomPaymentMethods(json.optJSONArray(FIELD_CUSTOM_PAYMENT_METHODS_DATA))
 
@@ -205,6 +208,12 @@ internal class ElementsSessionJsonParser(
             LinkMode.entries.firstOrNull { it.value == mode }
         }
 
+        val linkBrand = json?.optString(FIELD_LINK_BRAND)
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { brand ->
+                LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Link
+            }
+
         val linkFlags = json?.let { linkSettingsJson ->
             parseLinkFlags(linkSettingsJson)
         } ?: emptyMap()
@@ -234,6 +243,7 @@ internal class ElementsSessionJsonParser(
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = linkSignUpOptInInitialValue,
             linkSupportedPaymentMethodsOnboardingEnabled = linkSupportedPaymentMethodsOnboardingEnabled,
+            linkBrand = linkBrand,
         )
     }
 
@@ -252,6 +262,7 @@ internal class ElementsSessionJsonParser(
     private fun parseCustomer(
         json: JSONObject?,
         enableLinkInSpm: Boolean,
+        isCardArtEnabled: Boolean,
     ): ElementsSession.Customer? {
         if (json == null) {
             return null
@@ -267,7 +278,7 @@ internal class ElementsSessionJsonParser(
         // separate top-level array (keyed by PM ID) to bypass those gates for Elements sessions.
         // We merge it into each PaymentMethod.Card here so the rest of the SDK sees card art
         // where it belongs — on the card object — rather than leaking this elements session backend workaround.
-        val mergedPaymentMethods = if (FeatureFlags.enableCardArt.isEnabled) {
+        val mergedPaymentMethods = if (isCardArtEnabled) {
             val cardArtMap = buildCardArtLookup(json)
             mergeCardArt(paymentMethods, cardArtMap)
         } else {
@@ -529,7 +540,13 @@ internal class ElementsSessionJsonParser(
         }
     }
 
+    private fun isCardArtEnabled(experimentsData: ElementsSession.ExperimentsData?): Boolean {
+        val variant = experimentsData?.experimentAssignments?.get(ExperimentAssignment.OCS_MOBILE_CARD_ART)
+        return variant == TREATMENT
+    }
+
     internal companion object {
+        private const val TREATMENT = "treatment"
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_ELEMENTS_SESSION_CONFIG_ID = "config_id"
@@ -541,6 +558,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_FLAGS = "flags"
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
+        private const val FIELD_LINK_BRAND = "link_brand"
         private const val FIELD_LINK_MODE = "link_mode"
         private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
         private const val FIELD_USE_LINK_ATTESTATION_ENDPOINTS = "link_mobile_use_attestation_endpoints"

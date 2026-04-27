@@ -7,7 +7,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Add a payment method</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_afterpay_subtitle">Buy now or pay later with Afterpay</string>
+  <string name="stripe_afterpay_subtitle">Buy Now, Pay Later with Afterpay</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_bank_account_ending_in">Bank account ending in %s</string>
   <!-- Concise description of a saved bank account. E.g. 'Bank account ···· 4242' -->
@@ -17,9 +17,9 @@
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_cashapp_afterpay_subtitle">Buy now or pay later with Cash App Afterpay</string>
+  <string name="stripe_cashapp_afterpay_subtitle">Buy Now, Pay Later with Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
-  <string name="stripe_clearpay_subtitle">Buy now or pay later with Clearpay</string>
+  <string name="stripe_clearpay_subtitle">Buy Now, Pay Later with Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Your payment information will not be saved.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -275,8 +275,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">Cancel and pay another way</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Approve payment</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Open your UPI app to approve your payment within %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Please go back and select another payment method</string>
   <!-- Text on a screen that indicates a payment has failed -->

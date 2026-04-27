@@ -7,6 +7,7 @@ import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.common.analytics.experiment.CardArtExperimentHandler
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
@@ -64,6 +65,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.analytics.FakeCardArtExperimentHandler
 import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -560,17 +562,21 @@ internal class DefaultPaymentElementLoaderTest {
                     tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = true),
                 )
 
+                val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+
                 val result = loader.load(
                     initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
                     ),
-                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    paymentSheetConfiguration = config,
                     metadata = PaymentElementLoader.Metadata(
                         initializedViaCompose = false,
                     ),
                 ).getOrThrow()
 
-                assertThat(startCalls.awaitItem()).isNotNull()
+                assertThat(startCalls.awaitItem()).isEqualTo(
+                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isTrue()
 
@@ -603,17 +609,21 @@ internal class DefaultPaymentElementLoaderTest {
                     elementsSessionRepository = elementsSessionRepository,
                 )
 
+                val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+
                 val result = loader.load(
                     initializationMode = PaymentElementLoader.InitializationMode.SetupIntent(
                         clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value
                     ),
-                    paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                    paymentSheetConfiguration = config,
                     metadata = PaymentElementLoader.Metadata(
                         initializedViaCompose = false,
                     ),
                 ).getOrThrow()
 
-                assertThat(startCalls.awaitItem()).isNotNull()
+                assertThat(startCalls.awaitItem()).isEqualTo(
+                    FakeTapToAddConnectionStarter.StartCall(config = config.asCommonConfiguration())
+                )
 
                 assertThat(result.paymentMethodMetadata.isTapToAddSupported).isFalse()
 
@@ -1167,6 +1177,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             )
         )
 
@@ -1211,6 +1222,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             )
         )
 
@@ -1309,6 +1321,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             ),
             linkStore = FakeLinkStore(hasUsedLink = true),
         )
@@ -1345,6 +1358,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             )
         )
 
@@ -2108,6 +2122,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
+                linkBrand = null,
             ),
             linkStore = FakeLinkStore(hasUsedLink = false),
         )
@@ -4112,6 +4127,36 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `Card art experiment exposure is logged when loading`() = runScenario {
+        val cardArtExperimentHandler = FakeCardArtExperimentHandler()
+        val paymentSheetConfiguration = PaymentSheet.Configuration("Some Name")
+
+        val loader = createPaymentElementLoader(
+            cardArtExperimentHandler = cardArtExperimentHandler,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = paymentSheetConfiguration,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val call = cardArtExperimentHandler.logExposureCalls.awaitItem()
+        assertThat(call.elementsSession.stripeIntent).isEqualTo(result.paymentMethodMetadata.stripeIntent)
+        assertThat(call.paymentMethodMetadata).isNotNull()
+        assertThat(call.integrationConfiguration).isEqualTo(
+            PaymentElementLoader.Configuration.PaymentSheet(paymentSheetConfiguration)
+        )
+        assertThat(call.defaultPaymentSelection).isEqualTo(result.paymentSelection)
+        cardArtExperimentHandler.logExposureCalls.ensureAllEventsConsumed()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `Loads successfully for cryptoOnramp`() = runScenario {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
@@ -4344,6 +4389,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
+            linkBrand = null,
         )
     }
 
@@ -4507,6 +4553,7 @@ internal class DefaultPaymentElementLoaderTest {
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
         logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
+        cardArtExperimentHandler: CardArtExperimentHandler = FakeCardArtExperimentHandler(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
@@ -4562,6 +4609,7 @@ internal class DefaultPaymentElementLoaderTest {
             workContext = testDispatcher,
             createLinkState = createLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
+            cardArtExperimentHandler = cardArtExperimentHandler,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             integrityRequestManager = integrityRequestManager,

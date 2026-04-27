@@ -9,7 +9,6 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.LocalStripeException
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -26,8 +25,8 @@ import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -50,13 +49,14 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
+import com.stripe.android.core.R as StripeCoreR
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @OptIn(TapToAddPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class TapToAddActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val composeTestRule = createEmptyComposeRule()
-    private val featureFlagTestRule = FeatureFlagTestRule(FeatureFlags.enableTapToAdd, true)
     private val composeCleanupRule = createComposeCleanupRule()
     private val terminalWrapperTestRule = TerminalWrapperTestRule()
     private val imageLoaderTestRule = TapToAddStripeImageLoaderTestRule()
@@ -70,7 +70,6 @@ class TapToAddActivityTest {
         .around(composeTestRule)
         .around(networkRule)
         .around(terminalWrapperTestRule)
-        .around(featureFlagTestRule)
         .around(paymentElementCallbackTestRule)
         .around(imageLoaderTestRule)
         .around(PaymentConfigurationTestRule(applicationContext))
@@ -129,7 +128,10 @@ class TapToAddActivityTest {
                     )
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                signupModeResult = LinkSignupModeResult.Enabled(
+                    mode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                    availableForSavedPaymentMethods = true,
+                ),
             )
         )
     ) {
@@ -259,7 +261,10 @@ class TapToAddActivityTest {
                     )
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                signupModeResult = LinkSignupModeResult.Enabled(
+                    mode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                    availableForSavedPaymentMethods = true,
+                ),
             )
         )
     ) {
@@ -390,7 +395,10 @@ class TapToAddActivityTest {
                     )
                 ),
                 loginState = LinkState.LoginState.LoggedOut,
-                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                signupModeResult = LinkSignupModeResult.Enabled(
+                    mode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                    availableForSavedPaymentMethods = true,
+                ),
             )
         )
     ) {
@@ -444,20 +452,31 @@ class TapToAddActivityTest {
     @Test
     fun userShownErrorFromCardCollection() = errorTest(
         errorCode = TerminalErrorCode.CARD_READ_TIMED_OUT,
-        errorMessage = "Transaction timed out!",
+        expectedTitle = applicationContext.getString(
+            StripeCoreR.string.stripe_timed_out
+        ),
+        expectedAction = applicationContext.getString(
+            PaymentSheetR.string.stripe_tap_to_add_timed_out_error_action
+        ),
         expectedResult = TapToAddResult.Canceled(paymentSelection = null)
     )
 
     @Test
     fun userShownUnsupportedErrorFromCardCollection() = errorTest(
         errorCode = TerminalErrorCode.TAP_TO_PAY_UNSUPPORTED_DEVICE,
-        errorMessage = "Unsupported device!",
+        expectedTitle = applicationContext.getString(
+            PaymentSheetR.string.stripe_tap_to_add_unsupported_device_error_title
+        ),
+        expectedAction = applicationContext.getString(
+            PaymentSheetR.string.stripe_tap_to_add_unsupported_device_error_action
+        ),
         expectedResult = TapToAddResult.UnsupportedDevice
     )
 
     private fun errorTest(
         errorCode: TerminalErrorCode,
-        errorMessage: String,
+        expectedTitle: String,
+        expectedAction: String,
         expectedResult: TapToAddResult,
     ) = runScenario(
         mode = TapToAddMode.Complete
@@ -467,7 +486,7 @@ class TapToAddActivityTest {
                 collectSetupIntentPaymentMethodResult = TerminalTestDelegate.SetupIntentResult.Failure(
                     exception = TerminalException(
                         errorCode = errorCode,
-                        errorMessage = errorMessage,
+                        errorMessage = "Error!",
                     )
                 )
             )
@@ -485,7 +504,10 @@ class TapToAddActivityTest {
 
             waitForIdle()
 
-            errorPage.assertShown(errorMessage)
+            errorPage.assertShown(
+                expectedTitle = expectedTitle,
+                expectedAction = expectedAction,
+            )
             errorPage.clickCloseButton()
 
             waitForIdle()

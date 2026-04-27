@@ -273,8 +273,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">Annuller, og betal på en anden måde</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Godkend betaling</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Åbn din UPI-app for at godkende din betaling i %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Gå tilbage, og vælg en anden betalingsmetode</string>
   <!-- Text on a screen that indicates a payment has failed -->

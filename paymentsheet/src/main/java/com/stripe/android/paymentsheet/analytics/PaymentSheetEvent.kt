@@ -127,6 +127,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_HAS_CARD_ART to paymentSelection.hasCardArt(),
+        )
     }
 
     class ShowPaymentOptionForm(
@@ -174,12 +177,14 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         selectedLpm: String?,
         linkContext: String?,
+        hasCardArt: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_confirm_button_tapped"
         override val params: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
             FIELD_SELECTED_LPM to selectedLpm,
             FIELD_LINK_CONTEXT to linkContext,
+            FIELD_HAS_CARD_ART to hasCardArt,
         ).filterNotNullValues()
     }
 
@@ -215,6 +220,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }
             put(FIELD_SELECTED_LPM, paymentSelection.code())
             put(FIELD_IS_SAVED_PAYMENT_METHOD, paymentSelection.isSaved)
+            put(FIELD_HAS_CARD_ART, paymentSelection.hasCardArt())
             paymentSelection.linkContext()?.let { linkContext ->
                 put(FIELD_LINK_CONTEXT, linkContext)
             }
@@ -522,6 +528,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardScanButtonShown : PaymentSheetEvent() {
+        override val eventName: String = "mc_cardscan_button_shown"
+    }
+
     class CardScanApiCheckFailed(
         implementation: String,
         error: Throwable?,
@@ -543,6 +553,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_VISIBLE_PAYMENT_METHODS, visiblePaymentMethods.joinToString(","))
             put(FIELD_HIDDEN_PAYMENT_METHODS, hiddenPaymentMethods.joinToString(","))
             put(FIELD_PAYMENT_METHOD_LAYOUT, if (isVerticalLayout) "vertical" else "horizontal")
+        }
+    }
+
+    sealed class PaymentMethodMessaging : PaymentSheetEvent() {
+
+        class Fetched : PaymentMethodMessaging() {
+            override val eventName: String = "payment_method_messaging_fetched"
+        }
+
+        class Incomplete(val duration: Duration?) : PaymentMethodMessaging() {
+            override val eventName: String = "payment_method_messaging_incomplete"
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
         }
     }
 
@@ -620,6 +642,13 @@ internal fun PaymentSelection.code(): String {
         is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
         is PaymentSelection.ExternalPaymentMethod -> type
         is PaymentSelection.CustomPaymentMethod -> id
+    }
+}
+
+internal fun PaymentSelection?.hasCardArt(): Boolean {
+    return when (this) {
+        is PaymentSelection.Saved -> paymentMethod.card?.cardArt?.artImage?.url != null
+        else -> false
     }
 }
 

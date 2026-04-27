@@ -70,11 +70,13 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
     override fun onConfirmPaymentMethodSucceeded(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) {
         fireEvent(
             CustomerSheetEvent.ConfirmPaymentMethodSucceeded(
                 type = type,
                 syncDefaultEnabled = syncDefaultEnabled,
+                hasCardArt = hasCardArt,
             )
         )
     }
@@ -82,11 +84,13 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
     override fun onConfirmPaymentMethodFailed(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) {
         fireEvent(
             CustomerSheetEvent.ConfirmPaymentMethodFailed(
                 type = type,
                 syncDefaultEnabled = syncDefaultEnabled,
+                hasCardArt = hasCardArt,
             )
         )
     }

@@ -275,8 +275,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">Zrušiť a zaplatiť iným spôsobom</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Schváliť platbu</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Otvorte si aplikáciu UPI za účelom schválenia platby v rámci %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Vráťte sa späť a vyberte iný spôsob platby</string>
   <!-- Text on a screen that indicates a payment has failed -->

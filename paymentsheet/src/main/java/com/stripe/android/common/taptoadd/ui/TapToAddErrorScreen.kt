@@ -11,18 +11,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.core.R as StripeCoreR
 
 @Composable
 internal fun ColumnScope.TapToAddErrorScreen(
-    message: ResolvableString,
+    title: ResolvableString,
+    action: ResolvableString,
 ) {
     Spacer(Modifier.weight(1f))
 
@@ -39,7 +38,7 @@ internal fun ColumnScope.TapToAddErrorScreen(
 
     Text(
         modifier = Modifier.align(Alignment.CenterHorizontally),
-        text = stringResource(StripeCoreR.string.stripe_error),
+        text = title.resolve(),
         color = MaterialTheme.colors.secondaryVariant,
         style = MaterialTheme.typography.h5,
         fontSize = StripeTheme.typographyMutable.xLargeFontSize,
@@ -50,7 +49,7 @@ internal fun ColumnScope.TapToAddErrorScreen(
 
     Text(
         modifier = Modifier.align(Alignment.CenterHorizontally),
-        text = message.resolve(),
+        text = action.resolve(),
         color = MaterialTheme.colors.secondaryVariant,
         style = MaterialTheme.typography.h5,
         fontSize = StripeTheme.typographyMutable.xLargeFontSize,

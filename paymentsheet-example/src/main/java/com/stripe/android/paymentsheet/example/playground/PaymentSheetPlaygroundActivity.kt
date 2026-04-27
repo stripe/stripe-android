@@ -179,8 +179,11 @@ internal class PaymentSheetPlaygroundActivity :
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
                     .analyticEventCallback(viewModel::analyticCallback)
-                    .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
                     .also {
+                        if (playgroundState?.asPaymentState()?.canUseTapToAdd == true) {
+                            it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+                        }
+
                         if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                             it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
                         } else {

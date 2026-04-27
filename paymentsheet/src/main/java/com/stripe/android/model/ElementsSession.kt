@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentMethod.Type.Link
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
@@ -79,16 +78,16 @@ internal data class ElementsSession(
         get() = linkSettings?.linkSignUpOptInInitialValue ?: false
 
     val enableAttestationOnIntentConfirmation: Boolean
-        get() {
-            return flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true &&
-                FeatureFlags.enableAttestationOnIntentConfirmation.isEnabled
-        }
+        get() = flags[Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION] == true
 
     val enableCardFundFiltering: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_CARD_FUND_FILTERING] == true
 
     val isTapToAddEnabled: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED] == true
+
+    val isLinkInlineSignupWithSavedPaymentMethodsEnabled: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED] == true
 
     val isStripeCardScanAllowed: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN] == true
@@ -117,6 +116,7 @@ internal data class ElementsSession(
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean,
         val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
+        val linkBrand: LinkBrand?,
     ) : StripeModel
 
     @Parcelize
@@ -234,6 +234,9 @@ internal data class ElementsSession(
         ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION("elements_mobile_attest_on_intent_confirmation"),
         ELEMENTS_MOBILE_CARD_FUND_FILTERING("elements_mobile_card_funding_filtering"),
         ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED("elements_mobile_android_tap_to_add_enabled"),
+        ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED(
+            "elements_mobile_link_inline_signup_with_saved_pm_enabled"
+        ),
         ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN("elements_mobile_allow_stripecardscan"),
         ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT("elements_mobile_cardscan_use_mlkit"),
         ELEMENTS_MOBILE_CARDSCAN_DISABLE_SSDOCR("elements_mobile_cardscan_disable_ssdocr"),
@@ -246,8 +249,7 @@ internal data class ElementsSession(
         LINK_GLOBAL_HOLD_BACK("link_global_holdback"),
         LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
         LINK_AB_TEST("link_ab_test"),
-        OCS_MOBILE_HORIZONTAL_MODE_AA("ocs_mobile_horizontal_mode_aa"),
-        OCS_MOBILE_HORIZONTAL_MODE("ocs_mobile_horizontal_mode"),
+        OCS_MOBILE_CARD_ART("ocs_mobile_card_art"),
     }
 
     companion object {

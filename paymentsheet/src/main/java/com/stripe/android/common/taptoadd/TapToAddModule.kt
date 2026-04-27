@@ -1,6 +1,7 @@
 package com.stripe.android.common.taptoadd
 
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
@@ -41,6 +42,7 @@ internal interface TapToAddModule {
             paymentConfiguration: PaymentConfiguration,
             terminalWrapper: TerminalWrapper,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
+            userFacingLogger: UserFacingLogger,
             errorReporter: ErrorReporter,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever
         ): TapToAddCollectionHandler {
@@ -52,6 +54,7 @@ internal interface TapToAddModule {
                 paymentConfiguration = paymentConfiguration,
                 tapToPayUxConfiguration = tapToPayUxConfiguration,
                 errorReporter = errorReporter,
+                userFacingLogger = userFacingLogger,
                 createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
             )
         }

@@ -275,8 +275,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_upi_polling_cancel">Anulați și folosiți altă metodă de plată</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Aprobare plată</string>
-  <!-- Countdown timer text on a screen asking the user to approve a payment -->
-  <string name="stripe_upi_polling_message">Deschideți aplicația UPI pentru a aproba plata în termen de %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Vă rugăm să reveniți și să selectați o altă metodă de plată</string>
   <!-- Text on a screen that indicates a payment has failed -->

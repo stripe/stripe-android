@@ -15,10 +15,23 @@ internal class SavedPaymentMethodConfirmUIScreenshotTest {
     )
 
     @Test
-    fun testSavedPaymentMethodConfirmUI() {
+    fun formEnabled() {
         paparazziRule.snapshot {
             SavedPaymentMethodConfirmUI(
-                savedPaymentMethodConfirmInteractor = FakeSavedPaymentMethodConfirmInteractor()
+                savedPaymentMethodConfirmInteractor = FakeSavedPaymentMethodConfirmInteractor(
+                    formEnabled = false,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun formDisabled() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodConfirmUI(
+                savedPaymentMethodConfirmInteractor = FakeSavedPaymentMethodConfirmInteractor(
+                    formEnabled = true,
+                )
             )
         }
     }

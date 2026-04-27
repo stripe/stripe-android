@@ -26,6 +26,15 @@ internal class DebugConfiguration @Inject constructor(
                 }
             }
         }.getOrNull()
+
+    internal val forceNotlink: Boolean
+        get() = runCatching {
+            sharedPreferences.getString("json", null)?.let {
+                val jsonObject = Json.decodeFromString(JsonObject.serializer(), it)
+                jsonObject[KEY_FORCE_NOTLINK]?.jsonPrimitive?.contentOrNull == "true"
+            } ?: false
+        }.getOrDefault(false)
 }
 
 private const val KEY_OVERRIDE_NATIVE = "financial_connections_override_native"
+private const val KEY_FORCE_NOTLINK = "force_notlink"

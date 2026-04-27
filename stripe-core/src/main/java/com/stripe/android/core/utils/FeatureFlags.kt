@@ -14,9 +14,7 @@ object FeatureFlags {
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
-    val enableAttestationOnIntentConfirmation = FeatureFlag("Enable Attestation on Intent Confirmation")
-    val enableTapToAdd = FeatureFlag("Enable Tap to Add")
-    val enableCardArt = FeatureFlag("Enable Card Art")
+    val forceNotlink = FeatureFlag("Link: Force Notlink brand")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
 }

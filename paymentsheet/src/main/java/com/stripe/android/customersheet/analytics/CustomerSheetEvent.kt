@@ -85,10 +85,12 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     class ConfirmPaymentMethodSucceeded(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) : CustomerSheetEvent() {
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_PAYMENT_METHOD_TYPE, type)
             syncDefaultEnabled?.let { put(FIELD_SYNC_DEFAULT_ENABLED, it) }
+            put(FIELD_HAS_CARD_ART, hasCardArt)
         }
         override val eventName: String = CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
     }
@@ -96,10 +98,12 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     class ConfirmPaymentMethodFailed(
         type: String,
         syncDefaultEnabled: Boolean?,
+        hasCardArt: Boolean,
     ) : CustomerSheetEvent() {
         override val additionalParams: Map<String, Any?> = buildMap {
             put(FIELD_PAYMENT_METHOD_TYPE, type)
             syncDefaultEnabled?.let { put(FIELD_SYNC_DEFAULT_ENABLED, it) }
+            put(FIELD_HAS_CARD_ART, hasCardArt)
         }
         override val eventName: String = CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
     }
@@ -341,6 +345,11 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardScanButtonShown : CustomerSheetEvent(), CardScanEvent {
+        override val eventName: String = CS_CARDSCAN_BUTTON_SHOWN
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
     internal companion object {
         const val CS_INIT_WITH_CUSTOMER_ADAPTER = "cs_init_with_customer_adapter"
         const val CS_INIT_WITH_CUSTOMER_SESSION = "cs_init_with_customer_session"
@@ -402,6 +411,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val CS_CARDSCAN_CANCEL = "cs_cardscan_cancel"
         const val CS_CARDSCAN_API_CHECK_SUCCEEDED = "cs_cardscan_api_check_succeeded"
         const val CS_CARDSCAN_API_CHECK_FAILED = "cs_cardscan_api_check_failed"
+        const val CS_CARDSCAN_BUTTON_SHOWN = "cs_cardscan_button_shown"
 
         const val FIELD_GOOGLE_PAY_ENABLED = "google_pay_enabled"
         const val FIELD_BILLING = "default_billing_details"
@@ -416,6 +426,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
         const val FIELD_SYNC_DEFAULT_ENABLED = "sync_default_enabled"
+        const val FIELD_HAS_CARD_ART = "has_card_art"
         const val FIELD_OPEN_CARD_SCAN_AUTOMATICALLY_ENABLED = "open_card_scan_automatically_enabled"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_CARD_BRAND_ACCEPTANCE = "card_brand_acceptance"

@@ -85,8 +85,6 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">Informació de targeta</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">Afegeix un compte bancari dels EUA</string>
-  <!-- Header text shown above a UPI ID text field -->
-  <string name="stripe_paymentsheet_buy_using_upi_id">Compra amb un ID d\'UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Domiciliació bancària AU BECS</string>
   <!-- Payment Method type brand name -->

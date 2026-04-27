@@ -66,6 +66,7 @@ import com.stripe.android.financialconnections.ui.toLocalTheme
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.get
 import com.stripe.android.financialconnections.utils.updateWithNewEntry
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -532,6 +533,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val completed: Boolean,
     val initialPane: Pane,
     val theme: Theme,
+    val linkBrand: LinkBrand,
     val isLinkWithStripe: Boolean,
     val manualEntryUsesMicrodeposits: Boolean,
     val elementsSessionContext: ElementsSessionContext?,
@@ -554,6 +556,7 @@ internal data class FinancialConnectionsSheetNativeState(
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
+        linkBrand = args.initialSyncResponse.manifest.linkBrand ?: LinkBrand.Link,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
         manualEntryUsesMicrodeposits = args.initialSyncResponse.manifest.manualEntryUsesMicrodeposits,
@@ -642,5 +645,6 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
         theme = theme,
+        linkBrand = linkBrand,
     )
 }

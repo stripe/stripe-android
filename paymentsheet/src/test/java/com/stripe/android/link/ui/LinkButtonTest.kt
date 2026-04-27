@@ -7,6 +7,7 @@ import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
@@ -24,12 +25,13 @@ class LinkButtonTest {
     val composeCleanupRule = createComposeCleanupRule()
 
     @Test
-    fun signedInButton_hasUsefulContentDescription() {
+    fun signedInButton_hasUsefulContentDescription_forLink() {
         composeRule.setContent {
             LinkButton(
                 state = LinkButtonState.Email("email@email.com"),
                 enabled = true,
-                onClick = {}
+                onClick = {},
+                linkBrand = LinkBrand.Link,
             )
         }
 
@@ -41,17 +43,52 @@ class LinkButtonTest {
     }
 
     @Test
-    fun signedOutButton_hasUsefulContentDescription() {
+    fun signedInButton_hasUsefulContentDescription_forNotlink() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Email("email@email.com"),
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Notlink,
+            )
+        }
+
+        composeRule.onNodeWithTag(
+            LinkButtonTestTag
+        ).onChildren().assertAny(
+            hasContentDescription("Pay with Notlink")
+        )
+    }
+
+    @Test
+    fun signedOutButton_hasUsefulContentDescription_forLink() {
         composeRule.setContent {
             LinkButton(
                 state = LinkButtonState.Default,
                 enabled = true,
-                onClick = {}
+                onClick = {},
+                linkBrand = LinkBrand.Link,
             )
         }
 
         composeRule.onNodeWithTag(
             LinkButtonTestTag
         ).assertContentDescriptionContains("Pay with Link")
+    }
+
+    @Test
+    fun signedOutButton_hasUsefulContentDescription_forNotlink() {
+        composeRule.setContent {
+            LinkButton(
+                state = LinkButtonState.Default,
+                enabled = true,
+                onClick = {},
+                linkBrand = LinkBrand.Notlink,
+            )
+        }
+
+        composeRule.onNodeWithTag(
+            LinkButtonTestTag
+        ).assertContentDescriptionContains("Pay with Notlink")
     }
 }

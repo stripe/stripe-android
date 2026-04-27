@@ -232,6 +232,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 selectedLpm = paymentSelection.code(),
                 linkContext = paymentSelection.linkContext(),
+                hasCardArt = paymentSelection.hasCardArt(),
             )
         )
     }
@@ -517,6 +518,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onCardScanButtonShown() {
+        fireEvent(PaymentSheetEvent.CardScanButtonShown())
+    }
+
     override fun onCardScanApiCheckSucceeded(implementation: String) {
         fireEvent(
             PaymentSheetEvent.CardScanApiCheckSucceeded(
@@ -535,6 +540,20 @@ internal class DefaultEventReporter @Inject internal constructor(
         error?.message?.let {
             logger.logWarningWithoutPii("Card scan check failed: $it")
         }
+    }
+
+    override fun onPaymentMethodMessagePromotionsFetched() {
+        durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
+        fireEvent(
+            PaymentSheetEvent.PaymentMethodMessaging.Fetched()
+        )
+    }
+
+    override fun onPaymentMethodMessagePromotionsIncomplete() {
+        val duration = durationProvider.end(DurationProvider.Key.PaymentMethodMessaging)
+        fireEvent(
+            PaymentSheetEvent.PaymentMethodMessaging.Incomplete(duration)
+        )
     }
 
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {

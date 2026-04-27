@@ -33,11 +33,15 @@ internal class SaveAccountToLinkTest {
     @Test
     fun `Polls account numbers if requested to do so`() = runTest(testDispatcher) {
         val polledAccountIds = mutableSetOf<String>()
+        var polledClientSecret: String? = null
 
         val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
 
         val accountsRepository = mockAccountsRepository(
-            onPollAccountNumbers = polledAccountIds::addAll,
+            onPollAccountNumbers = { clientSecret, linkedAccounts ->
+                polledClientSecret = clientSecret
+                polledAccountIds.addAll(linkedAccounts)
+            },
         )
 
         val saveAccountToLink = makeSaveAccountToLink(accountsRepository = accountsRepository)
@@ -50,6 +54,7 @@ internal class SaveAccountToLinkTest {
             shouldPollAccountNumbers = true,
         )
 
+        assertThat(polledClientSecret).isEqualTo(ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET)
         assertThat(polledAccountIds).containsExactly("linked_id_1", "linked_id_2")
     }
 
@@ -60,7 +65,9 @@ internal class SaveAccountToLinkTest {
         val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
 
         val accountsRepository = mockAccountsRepository(
-            onPollAccountNumbers = polledAccountIds::addAll,
+            onPollAccountNumbers = { _, linkedAccounts ->
+                polledAccountIds.addAll(linkedAccounts)
+            },
         )
 
         val saveAccountToLink = makeSaveAccountToLink(accountsRepository = accountsRepository)
@@ -87,7 +94,7 @@ internal class SaveAccountToLinkTest {
         )
 
         val accountsRepository = mockAccountsRepository(
-            onPollAccountNumbers = { error("This is failing") },
+            onPollAccountNumbers = { _, _ -> error("This is failing") },
         )
 
         val saveAccountToLink = makeSaveAccountToLink(
@@ -113,7 +120,7 @@ internal class SaveAccountToLinkTest {
         val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
 
         val accountsRepository = mockAccountsRepository(
-            onPollAccountNumbers = { error("This is failing") },
+            onPollAccountNumbers = { _, _ -> error("This is failing") },
         )
 
         val successRepository = SuccessContentRepository(SavedStateHandle())
@@ -262,12 +269,15 @@ internal class SaveAccountToLinkTest {
     }
 
     private fun mockAccountsRepository(
-        onPollAccountNumbers: (Set<String>) -> Unit = {},
+        onPollAccountNumbers: (String, Set<String>) -> Unit = { _, _ -> },
     ): FinancialConnectionsAccountsRepository {
         return object : AbsFinancialConnectionsAccountsRepository() {
 
-            override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
-                onPollAccountNumbers(linkedAccounts)
+            override suspend fun pollAccountNumbers(
+                clientSecret: String,
+                linkedAccounts: Set<String>,
+            ) {
+                onPollAccountNumbers(clientSecret, linkedAccounts)
             }
         }
     }

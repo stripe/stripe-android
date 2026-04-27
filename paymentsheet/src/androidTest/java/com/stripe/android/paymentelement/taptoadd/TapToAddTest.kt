@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.taptoadd
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -14,7 +13,6 @@ import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.utils.TerminalWrapperTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.tta.testing.TapToAddCardAddedPage
 import com.stripe.android.tta.testing.TapToAddCardCollectionTestHelper
 import com.stripe.android.tta.testing.TapToAddConfirmationPage
@@ -44,9 +42,7 @@ internal class TapToAddTest {
     val testRules: TestRules = TestRules.create(
         networkRule = networkRule,
         terminalTestRule = terminalWrapperTestRule,
-    ) {
-        around(FeatureFlagTestRule(FeatureFlags.enableTapToAdd, true))
-    }
+    )
 
     private val composeTestRule = testRules.compose
 
@@ -324,7 +320,11 @@ internal class TapToAddTest {
                 ResponseReplacement(
                     original = "PAYMENT_METHOD_TYPES",
                     new = "\"card\", \"cashapp\""
-                )
+                ),
+                ResponseReplacement(
+                    original = "LINK_ENABLED_STATE",
+                    new = "false"
+                ),
             )
         )
     }
@@ -336,7 +336,11 @@ internal class TapToAddTest {
                 ResponseReplacement(
                     original = "PAYMENT_METHOD_TYPES",
                     new = "\"card\", \"cashapp\", \"link\""
-                )
+                ),
+                ResponseReplacement(
+                    original = "LINK_ENABLED_STATE",
+                    new = "true"
+                ),
             )
         )
     }

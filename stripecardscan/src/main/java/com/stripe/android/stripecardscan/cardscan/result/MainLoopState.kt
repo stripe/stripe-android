@@ -10,6 +10,7 @@ internal sealed class MainLoopState(
     timeSource: TimeSource,
     protected val enableExpiryWait: Boolean = false,
 ) : MachineState(timeSource) {
+    open val hasModelDisagreement: Boolean = false
 
     companion object {
         /**
@@ -33,6 +34,11 @@ internal sealed class MainLoopState(
          * when expiry detection is enabled.
          */
         val EXPIRY_WAIT_DURATION = 1.seconds
+
+        /**
+         * Both OCR models need repeated evidence before we report that they disagree.
+         */
+        const val MODEL_DISAGREEMENT_THRESHOLD = 2
     }
 
     internal abstract suspend fun consumeTransition(
@@ -54,6 +60,7 @@ internal sealed class MainLoopState(
                 pan = transition.pan,
                 expiryMonth = transition.expiryMonth,
                 expiryYear = transition.expiryYear,
+                source = transition.source,
             )
         }
     }
@@ -64,9 +71,13 @@ internal sealed class MainLoopState(
         pan: String,
         expiryMonth: Int? = null,
         expiryYear: Int? = null,
+        source: CardOcr.Source = CardOcr.Source.Unknown,
     ) : MainLoopState(timeSource, enableExpiryWait) {
 
         private val panCounter = ItemCounter(pan)
+        private val panCountersBySource = mutableMapOf<CardOcr.Source, ItemCounter<String>>().apply {
+            source.takeIf { it != CardOcr.Source.Unknown }?.let { put(it, ItemCounter(pan)) }
+        }
         private val expiryCounter = ItemCounter(
             if (expiryMonth != null && expiryYear != null) {
                 CardOcr.Expiry(month = expiryMonth, year = expiryYear)
@@ -81,12 +92,23 @@ internal sealed class MainLoopState(
         private val mostLikelyExpiry: CardOcr.Expiry?
             get() = expiryCounter.getHighestCountItemOrNull()?.item
 
+        override val hasModelDisagreement: Boolean
+            get() = topPanFor(CardOcr.Source.MlKit)?.let { mlKitTopPan ->
+                topPanFor(CardOcr.Source.Darknite)?.let { darkniteTopPan ->
+                    mlKitTopPan != darkniteTopPan
+                }
+            } ?: false
+
         private var lastCardVisible = TimeSource.Monotonic.markNow()
 
         private fun highestOcrCount() = panCounter.getHighestCountItem().count
         private fun isOcrSatisfied() = highestOcrCount() >= DESIRED_OCR_AGREEMENT
         private fun isTimedOut() = reachedStateAt.elapsedNow() > OCR_SEARCH_DURATION
         private fun isNoCardVisible() = lastCardVisible.elapsedNow() > NO_CARD_VISIBLE_DURATION
+        private fun topPanFor(source: CardOcr.Source): String? {
+            val topItem = panCountersBySource[source]?.getHighestCountItemOrNull() ?: return null
+            return topItem.item.takeIf { topItem.count >= MODEL_DISAGREEMENT_THRESHOLD }
+        }
 
         override suspend fun consumeTransition(
             transition: CardOcr.Prediction
@@ -94,6 +116,9 @@ internal sealed class MainLoopState(
             val transitionPan = transition.pan
             if (!transitionPan.isNullOrEmpty()) {
                 panCounter.countItem(transitionPan)
+                transition.source.takeIf { it != CardOcr.Source.Unknown }?.let { source ->
+                    panCountersBySource.getOrPut(source) { ItemCounter() }.countItem(transitionPan)
+                }
                 lastCardVisible = TimeSource.Monotonic.markNow()
             }
 
@@ -110,6 +135,7 @@ internal sealed class MainLoopState(
                             timeSource = timeSource,
                             enableExpiryWait = enableExpiryWait,
                             pan = mostLikelyPan,
+                            hasModelDisagreement = hasModelDisagreement,
                         )
                     } else {
                         Finished(
@@ -117,6 +143,7 @@ internal sealed class MainLoopState(
                             pan = mostLikelyPan,
                             expiryMonth = mostLikelyExpiry?.month,
                             expiryYear = mostLikelyExpiry?.year,
+                            hasModelDisagreement = hasModelDisagreement,
                         )
                     }
                 isTimedOut() ->
@@ -125,6 +152,7 @@ internal sealed class MainLoopState(
                         pan = mostLikelyPan,
                         expiryMonth = mostLikelyExpiry?.month,
                         expiryYear = mostLikelyExpiry?.year,
+                        hasModelDisagreement = hasModelDisagreement,
                     )
                 isNoCardVisible() ->
                     Initial(timeSource, enableExpiryWait)
@@ -137,6 +165,7 @@ internal sealed class MainLoopState(
         timeSource: TimeSource,
         enableExpiryWait: Boolean = false,
         private val pan: String,
+        override val hasModelDisagreement: Boolean = false,
     ) : MainLoopState(timeSource, enableExpiryWait) {
 
         private val expiryCounter = ItemCounter<CardOcr.Expiry>(null)
@@ -161,6 +190,7 @@ internal sealed class MainLoopState(
                     pan = pan,
                     expiryMonth = mostLikelyExpiry?.month,
                     expiryYear = mostLikelyExpiry?.year,
+                    hasModelDisagreement = hasModelDisagreement,
                 )
             } else {
                 this
@@ -173,6 +203,7 @@ internal sealed class MainLoopState(
         val pan: String,
         val expiryMonth: Int? = null,
         val expiryYear: Int? = null,
+        override val hasModelDisagreement: Boolean = false,
     ) : MainLoopState(timeSource) {
         override suspend fun consumeTransition(
             transition: CardOcr.Prediction

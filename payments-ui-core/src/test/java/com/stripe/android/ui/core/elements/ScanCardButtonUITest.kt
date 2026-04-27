@@ -40,6 +40,7 @@ internal class ScanCardButtonUITest {
     fun `ScanCardButtonUI should launch Google launcher when GPCR is available`() = runScenario(
         isFetchClientSucceed = true,
     ) {
+        scanButtonShownCall.awaitItem()
         composeTestRule.onNodeWithText("Scan card").performClick()
         assertThat(cardScanCall.awaitItem()).isEqualTo("google_pay")
     }
@@ -49,6 +50,23 @@ internal class ScanCardButtonUITest {
         isFetchClientSucceed = false,
     ) {
         composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
+    }
+
+    @Test
+    fun `ScanCardButtonUI fires button shown event when visible`() = runScenario(
+        isFetchClientSucceed = true,
+    ) {
+        composeTestRule.onNodeWithText("Scan card").assertExists()
+        assertThat(scanButtonShownCall.awaitItem())
+            .isEqualTo(FakeCardScanEventsReporter.ScanButtonShownCall)
+    }
+
+    @Test
+    fun `ScanCardButtonUI does not fire button shown event when hidden`() = runScenario(
+        isFetchClientSucceed = false,
+    ) {
+        composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
+        // No event should have been fired - validate ensures no unconsumed events
     }
 
     private fun createMockPaymentCardRecognitionResultIntent(): Intent {
@@ -69,6 +87,7 @@ internal class ScanCardButtonUITest {
     }
     private class Scenario(
         val cardScanCall: ReceiveTurbine<String>,
+        val scanButtonShownCall: ReceiveTurbine<FakeCardScanEventsReporter.ScanButtonShownCall>,
     )
 
     private fun runScenario(
@@ -76,6 +95,7 @@ internal class ScanCardButtonUITest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val cardScanCall = Turbine<String>()
+        val fakeEventsReporter = FakeCardScanEventsReporter()
         val registryOwner = object : ActivityResultRegistryOwner {
             override val activityResultRegistry: ActivityResultRegistry =
                 object : ActivityResultRegistry() {
@@ -96,12 +116,13 @@ internal class ScanCardButtonUITest {
 
         val scenario = Scenario(
             cardScanCall = cardScanCall,
+            scanButtonShownCall = fakeEventsReporter.scanButtonShownCalls,
         )
 
         composeTestRule.setContent {
             CompositionLocalProvider(
                 LocalActivityResultRegistryOwner provides registryOwner,
-                LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
+                LocalCardScanEventsReporter provides fakeEventsReporter,
                 LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(isFetchClientSucceed)
             ) {
                 val context = LocalContext.current
