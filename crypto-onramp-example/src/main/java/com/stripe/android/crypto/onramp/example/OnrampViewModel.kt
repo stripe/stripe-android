@@ -30,6 +30,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -69,6 +70,7 @@ internal class OnrampViewModel(
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
+        .crsCarfDeclarationCallback(callback = ::onCrsCarfDeclarationResult)
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
@@ -334,6 +336,20 @@ internal class OnrampViewModel(
             is OnrampVerifyIdentityResult.Failed -> {
                 _message.value = "Identity Verification failed: ${result.error.message}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup) }
+            }
+        }
+    }
+
+    fun onCrsCarfDeclarationResult(result: OnrampCrsCarfDeclarationResult) {
+        when (result) {
+            is OnrampCrsCarfDeclarationResult.Confirmed -> {
+                _message.value = "CRS CARF Declaration Confirmed"
+            }
+            is OnrampCrsCarfDeclarationResult.Failed -> {
+                _message.value = "CRS CARF Declaration failed: ${result.error.message}"
+            }
+            is OnrampCrsCarfDeclarationResult.Cancelled -> {
+                _message.value = "CRS CARF Declaration cancelled, please try again"
             }
         }
     }

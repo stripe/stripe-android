@@ -65,8 +65,8 @@ fun CrsCarfDeclarationScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Tax declaration",
-                            style = LinkTheme.typography.bodyEmphasized,
+                            text = "Declarations",
+                            style = LinkTheme.typography.title,
                             color = LinkTheme.colors.textPrimary
                         )
                         TextButton(onClick = onClose) {

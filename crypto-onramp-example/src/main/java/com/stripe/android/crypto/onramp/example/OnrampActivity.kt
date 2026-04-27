@@ -217,6 +217,9 @@ internal class OnrampActivity : ComponentActivity() {
                             },
                             onVerifyKyc = {
                                 onrampPresenter.verifyKycInfo()
+                            },
+                            onShowCRSCARFDeclaration = {
+                                onrampPresenter.presentCrsCarfDeclaration()
                             }
                         )
                     }
@@ -428,6 +431,7 @@ internal fun OnrampScreen(
     onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onVerifyKyc: () -> Unit,
+    onShowCRSCARFDeclaration: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -505,6 +509,7 @@ internal fun OnrampScreen(
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
                     onVerifyKyc = onVerifyKyc,
                     onStartVerification = onStartVerification,
+                    onShowCRSCARFDeclaration = onShowCRSCARFDeclaration,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
                     onCreateSession = { viewModel.createSession() },
@@ -736,6 +741,7 @@ private fun AuthenticatedOperationsScreen(
     onCollectKYC: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
+    onShowCRSCARFDeclaration: () -> Unit,
     onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
@@ -974,9 +980,14 @@ private fun AuthenticatedOperationsScreen(
             }
         }
 
-        StartVerificationScreen {
-            onStartVerification()
-        }
+        StartVerificationScreen(
+            startVerification = {
+                onStartVerification()
+            },
+            showCRSCARFDeclaration = {
+                onShowCRSCARFDeclaration()
+            }
+        )
 
         Text(
             text = "Payment",
@@ -1183,7 +1194,8 @@ private fun KYCTextField(
 
 @Composable
 private fun StartVerificationScreen(
-    startVerification: () -> Unit
+    startVerification: () -> Unit,
+    showCRSCARFDeclaration: () -> Unit
 ) {
     Column {
         Text(
@@ -1201,6 +1213,17 @@ private fun StartVerificationScreen(
                 .padding(bottom = 24.dp)
         ) {
             Text("Start Identity Verification")
+        }
+
+        Button(
+            onClick = {
+                showCRSCARFDeclaration()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("CRS CARF Declaration")
         }
     }
 }
