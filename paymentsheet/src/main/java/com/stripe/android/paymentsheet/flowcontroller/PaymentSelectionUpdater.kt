@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.flowcontroller
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.model.containsVolatileDifferences
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -92,8 +94,34 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         return if (paymentMethodRequiresMandate) {
             !currentSelection.customerAcknowledgedMandate
         } else {
-            false
+            needsMandateDisplayForCard(currentSelection, metadata)
         }
+    }
+
+    /**
+     * Cards don't require an API-level mandate, but the form shows mandate text when
+     * setupFutureUsage is set. If SFU was dynamically added after the user entered their card
+     * details (via configureWithIntentConfiguration update), we need to invalidate the selection
+     * so the user is forced to re-open the payment sheet and see the mandate text.
+     *
+     * When termsDisplay is NEVER (mandateAllowed returns false), the merchant has declared they
+     * display mandate terms externally, so the selection should be preserved.
+     */
+    private fun needsMandateDisplayForCard(
+        selection: PaymentSelection.New,
+        metadata: PaymentMethodMetadata,
+    ): Boolean {
+        if (selection !is PaymentSelection.New.Card) return false
+
+        val code = selection.paymentMethodCreateParams.typeCode
+        val wouldShowMandate = metadata.hasIntentToSetup(code) &&
+            metadata.mandateAllowed(PaymentMethod.Type.Card)
+
+        if (!wouldShowMandate) return false
+
+        // If the card was entered without setupFutureUsage, the user hasn't seen mandate text
+        val cardOptions = selection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
+        return cardOptions?.setupFutureUsage == null
     }
 }
 
