@@ -103,9 +103,6 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
      * setupFutureUsage is set. If SFU was dynamically added after the user entered their card
      * details (via configureWithIntentConfiguration update), we need to invalidate the selection
      * so the user is forced to re-open the payment sheet and see the mandate text.
-     *
-     * When termsDisplay is NEVER (mandateAllowed returns false), the merchant has declared they
-     * display mandate terms externally, so the selection should be preserved.
      */
     private fun needsMandateDisplayForCard(
         selection: PaymentSelection.New,
@@ -113,13 +110,12 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
     ): Boolean {
         if (selection !is PaymentSelection.New.Card) return false
 
-        val code = selection.paymentMethodCreateParams.typeCode
-        val wouldShowMandate = metadata.hasIntentToSetup(code) &&
-            metadata.mandateAllowed(PaymentMethod.Type.Card)
+        val cardCode = PaymentMethod.Type.Card.code
+        val wouldShowMandate = metadata.forceSetupFutureUseBehaviorAndNewMandate ||
+            (metadata.hasIntentToSetup(cardCode) && metadata.mandateAllowed(PaymentMethod.Type.Card))
 
         if (!wouldShowMandate) return false
 
-        // If the card was entered without setupFutureUsage, the user hasn't seen mandate text
         val cardOptions = selection.paymentMethodOptionsParams as? PaymentMethodOptionsParams.Card
         return cardOptions?.setupFutureUsage == null
     }
