@@ -1216,7 +1216,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
-            paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1372,7 +1372,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
-            paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }

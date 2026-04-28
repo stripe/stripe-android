@@ -6,14 +6,14 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 
 internal fun PaymentSheetViewModel.shouldLaunchCvcRecollectionScreen(selection: PaymentSelection.Saved): Boolean {
     return requiresCvcRecollection(selection) {
-        paymentMethodMetadata.value?.paymentMethodOrientation == PaymentMethodOrientation.Vertical &&
+        paymentMethodMetadata.value?.paymentMethodOrientation() == PaymentMethodOrientation.Vertical &&
             navigationHandler.currentScreen.value !is PaymentSheetScreen.CvcRecollection
     }
 }
 
 internal fun PaymentSheetViewModel.shouldAttachCvc(selection: PaymentSelection.Saved): Boolean {
     return requiresCvcRecollection(selection) {
-        paymentMethodMetadata.value?.paymentMethodOrientation == PaymentMethodOrientation.Horizontal
+        paymentMethodMetadata.value?.paymentMethodOrientation() == PaymentMethodOrientation.Horizontal
     }
 }
 

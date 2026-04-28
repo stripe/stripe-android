@@ -54,7 +54,7 @@ internal class MandateHandler(
                 selection = viewModel.selection,
                 merchantDisplayName = viewModel.config.merchantDisplayName,
                 isVerticalModeProvider = {
-                    viewModel.paymentMethodMetadata.value?.paymentMethodOrientation == PaymentMethodOrientation.Vertical
+                    viewModel.paymentMethodMetadata.value?.paymentMethodOrientation() == PaymentMethodOrientation.Vertical
                 },
                 isSetupFlowProvider = { viewModel.paymentMethodMetadata.value?.stripeIntent is SetupIntent },
             )
