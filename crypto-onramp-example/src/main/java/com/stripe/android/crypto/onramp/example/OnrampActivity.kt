@@ -79,7 +79,6 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -1149,6 +1148,7 @@ private fun AuthenticatedOperationsScreen(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun IdentifierInfoScreen(
     micaIdentifierCountry: String,
     onMicaIdentifierCountryChange: (String) -> Unit,
