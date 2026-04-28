@@ -39,6 +39,9 @@ internal class CheckoutSessionResponseJsonParser(
             "Expected ui_mode to be \"$UI_MODE_CUSTOM\" but was \"$uiMode\""
         }
         val mode = parseMode(json.optString(FIELD_MODE))
+        val status = json.optString(FIELD_STATUS).takeIf { it.isNotEmpty() } ?: return null
+        val paymentStatus = json.optString(FIELD_PAYMENT_STATUS).takeIf { it.isNotEmpty() } ?: return null
+        val livemode = json.optBoolean(FIELD_LIVEMODE, false)
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
         val customerEmail = StripeJsonUtils.optString(json, FIELD_CUSTOMER_EMAIL)
@@ -79,6 +82,9 @@ internal class CheckoutSessionResponseJsonParser(
             amount = amount,
             currency = currency,
             mode = mode,
+            status = status,
+            paymentStatus = paymentStatus,
+            livemode = livemode,
             customerEmail = customerEmail,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
@@ -270,6 +276,11 @@ internal class CheckoutSessionResponseJsonParser(
             ?: return null
 
         val discountAmounts = parseDiscountAmounts(lineItemGroup)
+        val discountTotal = totalSummary?.let {
+            if (it.has(FIELD_DISCOUNT_TOTAL)) it.optLong(FIELD_DISCOUNT_TOTAL) else null
+        } ?: lineItemGroup?.let {
+            if (it.has(FIELD_DISCOUNT_TOTAL)) it.optLong(FIELD_DISCOUNT_TOTAL) else null
+        }
         val taxAmounts = parseTaxAmounts(lineItemGroup)
         val shippingRate = parseShippingRate(lineItemGroup, json)
         val appliedBalance = totalSummary?.let {
@@ -281,6 +292,7 @@ internal class CheckoutSessionResponseJsonParser(
             totalDueToday = totalDueToday,
             totalAmountDue = totalAmountDue,
             discountAmounts = discountAmounts,
+            discountTotal = discountTotal,
             taxAmounts = taxAmounts,
             shippingRate = shippingRate,
             appliedBalance = appliedBalance,
@@ -460,6 +472,9 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_UI_MODE = "ui_mode"
         private const val UI_MODE_CUSTOM = "custom"
         private const val FIELD_MODE = "mode"
+        private const val FIELD_STATUS = "status"
+        private const val FIELD_PAYMENT_STATUS = "payment_status"
+        private const val FIELD_LIVEMODE = "livemode"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_CUSTOMER_EMAIL = "customer_email"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"
@@ -481,6 +496,7 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_TOTAL = "total"
         private const val FIELD_AMOUNT = "amount"
         private const val FIELD_APPLIED_BALANCE = "applied_balance"
+        private const val FIELD_DISCOUNT_TOTAL = "discount_total"
         private const val FIELD_DISCOUNT_AMOUNTS = "discount_amounts"
         private const val FIELD_COUPON = "coupon"
         private const val FIELD_NAME = "name"

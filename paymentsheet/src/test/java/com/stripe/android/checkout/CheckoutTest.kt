@@ -717,6 +717,7 @@ class CheckoutTest {
                 totalDueToday = 2000L,
                 totalAmountDue = 2000L,
                 discountAmounts = emptyList(),
+                discountTotal = null,
                 taxAmounts = emptyList(),
                 shippingRate = null,
                 appliedBalance = null,

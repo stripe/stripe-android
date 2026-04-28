@@ -1,6 +1,9 @@
 {
     "session_id": "cs_test_after_promo",
     "ui_mode": "custom",
+    "status": "open",
+    "payment_status": "unpaid",
+    "livemode": false,
     "currency": "usd",
     "total_summary": {
         "due": 4099,

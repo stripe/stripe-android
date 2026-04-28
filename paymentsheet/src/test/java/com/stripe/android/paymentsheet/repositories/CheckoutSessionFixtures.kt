@@ -17,6 +17,7 @@ internal object CheckoutSessionFixtures {
           "currency": "usd",
           "mode": "payment",
           "status": "open",
+          "payment_status": "unpaid",
           "livemode": false,
           "line_item_group": {
             "currency": "usd",
@@ -210,6 +211,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "complete",
+            "payment_status": "paid",
+            "livemode": false,
             "total_summary": {
                 "due": 999
             },
@@ -238,6 +242,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_a1vLTpmgcJO40ZjQpd3GUNHwlwtkT1bejjhpfd0nN05iqoVuJziixjNYIh",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 999
             },
@@ -274,6 +281,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1000
             },
@@ -323,6 +333,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1000
             },
@@ -344,6 +357,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1000
             },
@@ -361,6 +377,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_guest123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1000
             },
@@ -379,6 +398,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1000
             },
@@ -400,6 +422,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1000
             },
@@ -421,6 +446,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1000
             },
@@ -442,6 +470,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 4044,
                 "subtotal": 5000,
@@ -521,6 +552,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "line_item_group": {
                 "currency": "usd",
                 "total": 2000,
@@ -541,6 +575,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 800,
                 "subtotal": 1000,
@@ -561,6 +598,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 4497,
                 "subtotal": 4497,
@@ -604,6 +644,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 1500,
                 "subtotal": 1000,
@@ -649,6 +692,7 @@ internal object CheckoutSessionFixtures {
           "currency": "usd",
           "mode": "setup",
           "status": "open",
+          "payment_status": "no_payment_required",
           "livemode": false,
           "total_summary": {
             "due": 0,
@@ -679,6 +723,9 @@ internal object CheckoutSessionFixtures {
             "ui_mode": "custom",
             "currency": "usd",
             "mode": "setup",
+            "status": "complete",
+            "payment_status": "no_payment_required",
+            "livemode": false,
             "total_summary": {
                 "due": 0,
                 "subtotal": 0,
@@ -709,6 +756,9 @@ internal object CheckoutSessionFixtures {
             "ui_mode": "custom",
             "currency": "usd",
             "mode": "setup",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 0,
                 "subtotal": 0,
@@ -748,6 +798,9 @@ internal object CheckoutSessionFixtures {
             "ui_mode": "custom",
             "currency": "usd",
             "mode": "payment",
+            "status": "complete",
+            "payment_status": "paid",
+            "livemode": false,
             "total_summary": {
                 "due": 999,
                 "subtotal": 999,
@@ -793,6 +846,9 @@ internal object CheckoutSessionFixtures {
             "ui_mode": "custom",
             "currency": "usd",
             "mode": "setup",
+            "status": "complete",
+            "payment_status": "no_payment_required",
+            "livemode": false,
             "total_summary": {
                 "due": 0,
                 "subtotal": 0,
@@ -832,6 +888,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "total_summary": {
                 "due": 6106,
                 "subtotal": 6106,
@@ -862,6 +921,9 @@ internal object CheckoutSessionFixtures {
             "session_id": "cs_test_abc123",
             "ui_mode": "custom",
             "currency": "usd",
+            "status": "open",
+            "payment_status": "unpaid",
+            "livemode": false,
             "shipping_rate": "shr_standard",
             "total_summary": {
                 "due": 1500,

@@ -106,6 +106,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
             }
             """.trimIndent()
@@ -176,6 +178,8 @@ class CheckoutSessionResponseJsonParserTest {
             {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": { "due": 1000 },
                 "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
             }
@@ -194,6 +198,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
             }
             """.trimIndent()
@@ -211,6 +217,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": { "due": 1000 }
             }
             """.trimIndent()
@@ -232,6 +240,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": { "due": 1000 },
                 "elements_session": {}
             }
@@ -392,6 +402,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_abc123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": {
                     "due": 1000
                 },
@@ -420,6 +432,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_abc123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": {
                     "due": 1000
                 },
@@ -547,6 +561,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_abc123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": {
                     "due": 1000,
                     "subtotal": 1000,
@@ -581,6 +597,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": { "due": 1000 }
             }
             """.trimIndent()
@@ -599,6 +617,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_abc123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": {
                     "due": 4099,
                     "subtotal": 5099,
@@ -681,6 +701,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
                 "customer_email": null
             }
@@ -787,6 +809,8 @@ class CheckoutSessionResponseJsonParserTest {
                 "session_id": "cs_test_abc123",
                 "ui_mode": "custom",
                 "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
                 "total_summary": { "due": 6106, "subtotal": 6106, "total": 6106 },
                 "adaptive_pricing_info": {
                     "active_presentment_currency": "usd",
@@ -823,6 +847,103 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(localCurrencyOptions?.get(1)?.conversionMarkupBps).isEqualTo(350)
         assertThat(localCurrencyOptions?.get(1)?.currency).isEqualTo("gbp")
         assertThat(localCurrencyOptions?.get(1)?.presentmentExchangeRate).isEqualTo("1.41200")
+    }
+
+    @Test
+    fun `parse status field`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo("open")
+    }
+
+    @Test
+    fun `parse payment_status field`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.paymentStatus).isEqualTo("unpaid")
+    }
+
+    @Test
+    fun `parse livemode field`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.livemode).isFalse()
+    }
+
+    @Test
+    fun `parse returns null when status is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "payment_status": "unpaid",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `parse returns null when payment_status is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "open",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `parse discount_total from total_summary`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_abc123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "open",
+                "payment_status": "unpaid",
+                "total_summary": {
+                    "due": 4500,
+                    "subtotal": 5000,
+                    "total": 4500,
+                    "discount_total": 500
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.totalSummary?.discountTotal).isEqualTo(500L)
+    }
+
+    @Test
+    fun `parse discount_total is null when not present`() {
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+            .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.totalSummary?.discountTotal).isNull()
     }
 
     @Test

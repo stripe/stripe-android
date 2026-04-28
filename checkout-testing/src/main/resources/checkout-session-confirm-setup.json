@@ -1,6 +1,9 @@
 {
   "session_id": "cs_test_abc123",
   "ui_mode": "custom",
+  "status": "complete",
+  "payment_status": "no_payment_required",
+  "livemode": false,
   "currency": "usd",
   "mode": "setup",
   "total_summary": {

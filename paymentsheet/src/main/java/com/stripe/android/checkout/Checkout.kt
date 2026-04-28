@@ -149,7 +149,12 @@ class Checkout private constructor(
 
     private val mutex = Mutex()
 
-    private val _checkoutSession = MutableStateFlow(internalState.checkoutSessionResponse.asCheckoutSession())
+    private val _checkoutSession = MutableStateFlow(
+        internalState.checkoutSessionResponse.asCheckoutSession(
+            billingAddress = internalState.billingAddress,
+            shippingAddress = internalState.shippingAddress,
+        )
+    )
 
     /**
      * The current [CheckoutSession], updated after each successful mutation.
@@ -298,7 +303,10 @@ class Checkout private constructor(
 
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
         internalState = internalState.copy(checkoutSessionResponse = response)
-        _checkoutSession.value = response.asCheckoutSession()
+        _checkoutSession.value = response.asCheckoutSession(
+            billingAddress = internalState.billingAddress,
+            shippingAddress = internalState.shippingAddress,
+        )
     }
 
     private suspend fun withInternalState(
@@ -317,7 +325,10 @@ class Checkout private constructor(
             _isLoading.value = true
             val result = internalState.block(internalState.checkoutSessionResponse.id).map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
-                _checkoutSession.value = response.asCheckoutSession()
+                _checkoutSession.value = response.asCheckoutSession(
+                    billingAddress = internalState.billingAddress,
+                    shippingAddress = internalState.shippingAddress,
+                )
             }
             _isLoading.value = false
             result

@@ -1,6 +1,9 @@
 {
   "session_id": "cs_test_abc123",
   "ui_mode": "custom",
+  "status": "open",
+  "payment_status": "unpaid",
+  "livemode": false,
   "currency": "usd",
   "shipping_rate": "shr_express",
   "total_summary": {

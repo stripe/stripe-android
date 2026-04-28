@@ -36,6 +36,18 @@ internal data class CheckoutSessionResponse(
      */
     val mode: Mode,
     /**
+     * The checkout session status (e.g., "open", "complete", "expired").
+     */
+    val status: String,
+    /**
+     * The payment status of the checkout session (e.g., "paid", "unpaid", "no_payment_required").
+     */
+    val paymentStatus: String,
+    /**
+     * Whether this is a live mode checkout session.
+     */
+    val livemode: Boolean,
+    /**
      * The customer's email address from the checkout session.
      * Always available at the top level as `customer_email`, regardless of whether
      * a customer object exists (guest checkout) or not.
@@ -138,6 +150,7 @@ internal data class CheckoutSessionResponse(
         val totalDueToday: Long,
         val totalAmountDue: Long,
         val discountAmounts: List<DiscountAmount>,
+        val discountTotal: Long?,
         val taxAmounts: List<TaxAmount>,
         val shippingRate: ShippingRate?,
         val appliedBalance: Long?,

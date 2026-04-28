@@ -12,12 +12,50 @@ import dev.drewhamilton.poko.Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CheckoutSession internal constructor(
     val id: String,
+    val status: Status,
+    val paymentStatus: PaymentStatus,
+    val liveMode: Boolean,
     val currency: String,
+    val customer: String?,
+    val customerEmail: String?,
     val totalSummary: TotalSummary?,
+    val discountAmounts: List<DiscountAmount>,
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
+    val billingAddress: Address?,
+    val shippingAddress: Address?,
     internal val currencySelectorOptions: CurrencySelectorOptions?,
 ) {
+
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Status {
+        OPEN,
+        COMPLETE,
+        EXPIRED,
+        UNKNOWN,
+    }
+
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class PaymentStatus {
+        PAID,
+        UNPAID,
+        NO_PAYMENT_REQUIRED,
+        UNKNOWN,
+    }
+
+    @Poko
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Address internal constructor(
+        val city: String?,
+        val country: String?,
+        val line1: String?,
+        val line2: String?,
+        val postalCode: String?,
+        val state: String?,
+    )
 
     @Poko
     @CheckoutSessionPreview
@@ -27,6 +65,7 @@ class CheckoutSession internal constructor(
         val totalDueToday: Long,
         val totalAmountDue: Long,
         val discountAmounts: List<DiscountAmount>,
+        val discountTotal: Long?,
         val taxAmounts: List<TaxAmount>,
         val shippingRate: ShippingRate?,
         val appliedBalance: Long?,
@@ -74,14 +113,57 @@ class CheckoutSession internal constructor(
 }
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun CheckoutSessionResponse.asCheckoutSession(): CheckoutSession {
+internal fun CheckoutSessionResponse.asCheckoutSession(
+    billingAddress: Address.State?,
+    shippingAddress: Address.State?,
+): CheckoutSession {
     return CheckoutSession(
         id = id,
+        status = status.asStatus(),
+        paymentStatus = paymentStatus.asPaymentStatus(),
+        liveMode = livemode,
         currency = currency,
+        customer = customer?.id,
+        customerEmail = customerEmail,
         totalSummary = totalSummary?.asTotalSummary(),
+        discountAmounts = totalSummary?.discountAmounts?.map { it.asDiscountAmount() } ?: emptyList(),
         lineItems = lineItems.map { it.asLineItem() },
         shippingOptions = shippingOptions.map { it.asShippingRate() },
+        billingAddress = billingAddress?.asAddress(),
+        shippingAddress = shippingAddress?.asAddress(),
         currencySelectorOptions = CurrencySelectorOptionsFactory.create(adaptivePricingInfo = adaptivePricingInfo)
+    )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun String.asStatus(): CheckoutSession.Status {
+    return when (this) {
+        "open" -> CheckoutSession.Status.OPEN
+        "complete" -> CheckoutSession.Status.COMPLETE
+        "expired" -> CheckoutSession.Status.EXPIRED
+        else -> CheckoutSession.Status.UNKNOWN
+    }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun String.asPaymentStatus(): CheckoutSession.PaymentStatus {
+    return when (this) {
+        "paid" -> CheckoutSession.PaymentStatus.PAID
+        "unpaid" -> CheckoutSession.PaymentStatus.UNPAID
+        "no_payment_required" -> CheckoutSession.PaymentStatus.NO_PAYMENT_REQUIRED
+        else -> CheckoutSession.PaymentStatus.UNKNOWN
+    }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun Address.State.asAddress(): CheckoutSession.Address {
+    return CheckoutSession.Address(
+        city = city,
+        country = country,
+        line1 = line1,
+        line2 = line2,
+        postalCode = postalCode,
+        state = state,
     )
 }
 
@@ -92,6 +174,7 @@ private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): Check
         totalDueToday = totalDueToday,
         totalAmountDue = totalAmountDue,
         discountAmounts = discountAmounts.map { it.asDiscountAmount() },
+        discountTotal = discountTotal,
         taxAmounts = taxAmounts.map { it.asTaxAmount() },
         shippingRate = shippingRate?.asShippingRate(),
         appliedBalance = appliedBalance,
