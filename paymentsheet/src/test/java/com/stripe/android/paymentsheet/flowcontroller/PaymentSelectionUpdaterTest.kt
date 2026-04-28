@@ -9,11 +9,15 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -543,6 +547,111 @@ class PaymentSelectionUpdaterTest {
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 displayableCustomPaymentMethods = displayableCustomPaymentMethods,
                 isGooglePayReady = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `New card selection is invalidated when setupFutureUsage is added and mandate not yet seen`() {
+        val cardSelectionWithoutSFU = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(setupFutureUsage = null),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            brand = CardBrand.Visa,
+        )
+
+        val newState = mockPaymentSheetStateWithSetupFutureUsage(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+        )
+
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = cardSelectionWithoutSFU,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `New card selection is preserved when setupFutureUsage was already set when card was entered`() {
+        val cardSelectionWithSFU = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            ),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+            brand = CardBrand.Visa,
+        )
+
+        val newState = mockPaymentSheetStateWithSetupFutureUsage(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+        )
+
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = cardSelectionWithSFU,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(cardSelectionWithSFU)
+    }
+
+    @Test
+    fun `New card selection is preserved when termsDisplay is NEVER`() {
+        val cardSelection = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(setupFutureUsage = null),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            brand = CardBrand.Visa,
+        )
+
+        val newState = mockPaymentSheetStateWithSetupFutureUsage(
+            setupFutureUsage = StripeIntent.Usage.OffSession,
+            termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER),
+        )
+
+        val updater = createUpdater()
+
+        val result = updater(
+            selection = cardSelection,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+            newConfig = defaultPaymentSheetConfiguration,
+            walletButtonsAlreadyShown = false,
+        )
+
+        assertThat(result).isEqualTo(cardSelection)
+    }
+
+    private fun mockPaymentSheetStateWithSetupFutureUsage(
+        setupFutureUsage: StripeIntent.Usage,
+        termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
+    ): PaymentSheetState.Full {
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        return PaymentSheetState.Full(
+            config = defaultPaymentSheetConfiguration.asCommonConfiguration(),
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            paymentSelection = null,
+            validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = intent.copy(
+                    setupFutureUsage = setupFutureUsage,
+                ),
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("card"),
+                ),
+                isGooglePayReady = true,
+                termsDisplay = termsDisplay,
             ),
         )
     }
