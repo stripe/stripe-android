@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -43,6 +44,24 @@ class PaymentOptionsStateFactoryTest {
         )
 
         assertThat(state.selectedItem).isNull()
+    }
+
+    @Test
+    fun `Link item round trips brand into selection`() {
+        val state = PaymentOptionsStateFactory.create(
+            paymentMethods = emptyList(),
+            showGooglePay = false,
+            showLink = true,
+            linkBrand = LinkBrand.Notlink,
+            currentSelection = PaymentSelection.Link(linkBrand = LinkBrand.Notlink),
+            nameProvider = { it!!.resolvableString },
+            isCbcEligible = false,
+            defaultPaymentMethodId = null,
+        )
+
+        assertThat(state.selectedItem).isEqualTo(PaymentOptionsItem.Link(LinkBrand.Notlink))
+        assertThat(state.selectedItem?.toPaymentSelection())
+            .isEqualTo(PaymentSelection.Link(linkBrand = LinkBrand.Notlink))
     }
 
     @Test

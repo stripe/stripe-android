@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -19,6 +20,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.R as StripeR
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentSelectionTest {
@@ -40,6 +42,14 @@ class PaymentSelectionTest {
         val link = PaymentSelection.Link(selectedPayment = null)
 
         assertThat(link.billingDetails).isNull()
+    }
+
+    @Test
+    fun `Link label uses branded name`() {
+        val result = PaymentSelection.Link(linkBrand = LinkBrand.Notlink).label.resolve(context)
+
+        assertThat(result).isEqualTo("Notlink")
+        assertThat(result).isNotEqualTo(context.getString(StripeR.string.stripe_link))
     }
 
     @Test

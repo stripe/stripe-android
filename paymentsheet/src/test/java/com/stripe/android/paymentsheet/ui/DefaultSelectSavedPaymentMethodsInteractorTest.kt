@@ -192,13 +192,13 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             paymentOptionsItems = MutableStateFlow(
                 createPaymentOptionsItems(
                     paymentMethods = PaymentMethodFixtures.createCards(2),
-                ).plus(PaymentOptionsItem.Link)
+                ).plus(PaymentOptionsItem.Link())
             ),
             currentSelection = currentSelectionFlow,
         ) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link())
                 }
             }
         }
@@ -213,13 +213,13 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             paymentOptionsItems = MutableStateFlow(
                 createPaymentOptionsItems(
                     paymentMethods = PaymentMethodFixtures.createCards(2),
-                ).plus(PaymentOptionsItem.Link).plus(PaymentOptionsItem.GooglePay)
+                ).plus(PaymentOptionsItem.Link()).plus(PaymentOptionsItem.GooglePay)
             ),
             currentSelection = currentSelectionFlow,
         ) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link())
                 }
             }
 
@@ -242,13 +242,13 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             paymentOptionsItems = MutableStateFlow(
                 createPaymentOptionsItems(
                     paymentMethods = PaymentMethodFixtures.createCards(2),
-                ).plus(PaymentOptionsItem.Link)
+                ).plus(PaymentOptionsItem.Link())
             ),
             currentSelection = currentSelectionFlow,
         ) {
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link())
                 }
             }
 
@@ -256,7 +256,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
             interactor.state.test {
                 awaitItem().run {
-                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link)
+                    assertThat(selectedPaymentOptionsItem).isEqualTo(PaymentOptionsItem.Link())
                 }
             }
         }
@@ -378,7 +378,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
         runScenario(
             paymentOptionsItems = MutableStateFlow(
                 createPaymentOptionsItems(paymentMethods = paymentMethods).plus(
-                    PaymentOptionsItem.Link
+                    PaymentOptionsItem.Link()
                 )
             ),
             currentSelection = currentSelectionFlow,
@@ -399,7 +399,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             interactor.state.test {
                 awaitItem().run {
                     assertThat(selectedPaymentOptionsItem).isEqualTo(
-                        PaymentOptionsItem.Link
+                        PaymentOptionsItem.Link()
                     )
                 }
             }
