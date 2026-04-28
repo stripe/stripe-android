@@ -49,11 +49,13 @@ class Identifiers {
  *
  * @property country ISO 3166-1 alpha-2 country code associated with the identifier.
  * @property identifier The identifier value.
+ * @property identifierType Optional subtype for classifying the identifier.
  */
 @ExperimentalCryptoOnramp
 class Identifier {
     private var country: CountryCode? = null
     private var identifier: String? = null
+    private var identifierType: String? = null
 
     /**
      * Sets the ISO 3166-1 alpha-2 country code associated with the identifier.
@@ -69,9 +71,17 @@ class Identifier {
         this.identifier = identifier
     }
 
+    /**
+     * Sets an optional subtype for the identifier.
+     */
+    fun identifierType(identifierType: String) = apply {
+        this.identifierType = identifierType
+    }
+
     internal class State(
         val country: CountryCode,
-        val identifier: String
+        val identifier: String,
+        val identifierType: String?
     )
 
     internal fun build(): State {
@@ -81,7 +91,8 @@ class Identifier {
             },
             identifier = requireNotNull(identifier) {
                 "identifier must not be null"
-            }
+            },
+            identifierType = identifierType
         )
     }
 }
@@ -117,7 +128,7 @@ class MissingIdentifiers internal constructor(
  *
  * @property valid Whether the submitted identifiers were accepted.
  * @property missingIdentifiers Missing identifiers, if more are required.
- * @property errors Invalid country codes for identifiers that were rejected.
+ * @property errors Validation errors returned by the API.
  */
 @ExperimentalCryptoOnramp
 @Poko
@@ -142,7 +153,9 @@ internal data class IdentifierRequest(
     @SerialName("country")
     val country: String,
     @SerialName("identifier")
-    val identifier: String
+    val identifier: String,
+    @SerialName("identifier_type")
+    val identifierType: String? = null
 )
 
 @Serializable
@@ -208,6 +221,7 @@ internal fun Identifiers.toRequest(
 private fun Identifier.State.toRequest(): IdentifierRequest {
     return IdentifierRequest(
         country = country.value,
-        identifier = identifier
+        identifier = identifier,
+        identifierType = identifierType
     )
 }

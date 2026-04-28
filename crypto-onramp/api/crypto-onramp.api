@@ -84,6 +84,7 @@ public final class com/stripe/android/crypto/onramp/model/Identifier {
 	public fun <init> ()V
 	public final fun country (Lcom/stripe/android/core/model/CountryCode;)Lcom/stripe/android/crypto/onramp/model/Identifier;
 	public final fun identifier (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/Identifier;
+	public final fun identifierType (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/Identifier;
 }
 
 public final class com/stripe/android/crypto/onramp/model/IdentifierRequirements {

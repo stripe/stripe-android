@@ -77,6 +77,10 @@ internal class CryptoApiRepository @Inject constructor(
         encodeDefaults = true
     }
 
+    private val nullOmittingJson = Json {
+        explicitNulls = false
+    }
+
     /**
      * Grants the provided session merchant permissions.
      *
@@ -149,7 +153,7 @@ internal class CryptoApiRepository @Inject constructor(
         return executePost(
             updateKycInfoUrl,
             JsonObject(
-                Json.encodeToJsonElement(
+                nullOmittingJson.encodeToJsonElement(
                     identifiers.toRequest(
                         credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
                     )

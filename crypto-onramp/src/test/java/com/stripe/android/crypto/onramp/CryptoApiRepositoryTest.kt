@@ -210,6 +210,7 @@ class CryptoApiRepositoryTest {
                             Identifier()
                                 .country(CountryCode.create("IE"))
                                 .identifier("mica_123")
+                                .identifierType("tax_id")
                         )
                     )
                     .identifiersCarf(
@@ -656,7 +657,8 @@ class CryptoApiRepositoryTest {
                     "identifiers_mica" to listOf(
                         mapOf(
                             "country" to "IE",
-                            "identifier" to "mica_123"
+                            "identifier" to "mica_123",
+                            "identifier_type" to "tax_id"
                         )
                     ),
                     "identifiers_carf" to listOf(

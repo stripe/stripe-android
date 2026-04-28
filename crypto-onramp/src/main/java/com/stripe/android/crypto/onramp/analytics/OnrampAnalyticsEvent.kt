@@ -178,7 +178,7 @@ internal sealed class OnrampAnalyticsEvent(
             PerformCheckout("perform_checkout"),
             LogOut("log_out"),
             VerifyKyc("verify_kyc_info"),
-            GetIdentifierRequirements("get_identifier_requirements"),
+            GetIdentifierRequirements("identifier_requirements"),
             CollectEuIdentifiers("collect_eu_identifiers"),
             ConfirmCrsCarfDeclaration("confirm_crs_carf_declaration")
         }
