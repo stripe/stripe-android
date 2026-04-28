@@ -36,6 +36,8 @@ internal const val TEST_TAG_CURRENCY_SELECTOR = "TEST_TAG_CURRENCY_SELECTOR"
 
 internal const val TEST_TAG_CURRENCY_OPTION_PREFIX = "TEST_TAG_CURRENCY_OPTION_"
 
+internal const val TEST_TAG_CURRENCY_SELECTOR_ERROR = "TEST_TAG_CURRENCY_SELECTOR_ERROR"
+
 private const val DISABLED_ALPHA = 0.6f
 
 internal data class CurrencyOption(
@@ -55,6 +57,7 @@ internal fun CurrencySelectorToggle(
     options: CurrencySelectorOptions,
     onCurrencySelected: (CurrencyOption) -> Unit,
     isEnabled: Boolean,
+    errorMessage: String? = null,
     modifier: Modifier = Modifier,
 ) {
     val shape = RoundedCornerShape(percent = 50)
@@ -91,6 +94,18 @@ internal fun CurrencySelectorToggle(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp),
+            )
+        }
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .testTag(TEST_TAG_CURRENCY_SELECTOR_ERROR),
             )
         }
     }
