@@ -591,7 +591,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
                     !isUsingWalletButtons && isGooglePayReady
                 }
-                is SavedSelection.Link -> PaymentSelection.Link().takeIf {
+                is SavedSelection.Link -> PaymentSelection.Link(
+                    linkBrand = metadata.linkBrandOrDefault
+                ).takeIf {
                     !isUsingWalletButtons
                 }
                 is SavedSelection.PaymentMethod -> {
@@ -601,7 +603,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     } else if (selection.isLinkOrigin) {
                         // The payment method wasn't attached to the customer, but is of Link origin. Offer
                         // Link as the initial payment selection.
-                        PaymentSelection.Link().takeIf {
+                        PaymentSelection.Link(
+                            linkBrand = metadata.linkBrandOrDefault
+                        ).takeIf {
                             !isUsingWalletButtons
                         }
                     } else {

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -74,6 +75,7 @@ internal class SavedPaymentMethodMutator(
             customerState = customerStateHolder.customer,
             isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
             isLinkEnabled = isLinkEnabled,
+            linkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkBrandOrDefault ?: LinkBrand.Link },
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = { paymentMethodMetadataFlow.value?.displayNameForCode(it).orEmpty() },
             isCbcEligible = { paymentMethodMetadataFlow.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible },

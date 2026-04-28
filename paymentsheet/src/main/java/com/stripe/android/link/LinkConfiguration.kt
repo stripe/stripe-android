@@ -75,3 +75,6 @@ internal data class LinkConfiguration(
         val preferredNetworks: List<String>,
     ) : Parcelable
 }
+
+internal val LinkConfiguration?.linkBrandOrDefault: LinkBrand
+    get() = this?.linkBrand ?: LinkBrand.Link

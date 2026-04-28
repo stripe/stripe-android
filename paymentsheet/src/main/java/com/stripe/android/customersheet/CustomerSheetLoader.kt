@@ -229,18 +229,25 @@ internal class DefaultCustomerSheetLoader(
         return if (metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
             getDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
         } else {
-            useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
+            useLocalSelectionAsPaymentSelection(
+                customerSheetSession = customerSheetSession,
+                metadata = metadata,
+                paymentMethods = paymentMethods,
+            )
         }
     }
 
     private fun useLocalSelectionAsPaymentSelection(
         customerSheetSession: CustomerSheetSession,
+        metadata: PaymentMethodMetadata,
         paymentMethods: List<PaymentMethod>
     ): PaymentSelection? {
         return customerSheetSession.savedSelection?.let { selection ->
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.Link -> PaymentSelection.Link(
+                    linkBrand = metadata.linkBrandOrDefault
+                )
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->
                         paymentMethod.id == selection.id
