@@ -476,19 +476,30 @@ internal class DefaultFlowControllerTest {
             paymentSelectionUpdater = DefaultPaymentSelectionUpdater(),
         )
 
+        val intentConfig = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000,
+                currency = "usd",
+            ),
+        )
+
         // First configure: no setupFutureUsage — card selection is preserved
-        flowController.configureExpectingSuccess()
+        flowController.configureWithIntentConfigurationExpectingSuccess(intentConfig)
         assertThat(flowController.getPaymentOption()).isNotNull()
 
         // Merchant reconfigures with setupFutureUsage = OffSession
-        val intentWithSFU = intentWithoutSFU.copy(
-            setupFutureUsage = StripeIntent.Usage.OffSession,
+        paymentSheetLoader.updateStripeIntent(
+            intentWithoutSFU.copy(setupFutureUsage = StripeIntent.Usage.OffSession)
         )
-        paymentSheetLoader.updateStripeIntent(intentWithSFU)
 
-        flowController.configureExpectingSuccess(
-            clientSecret = PaymentSheetFixtures.DIFFERENT_CLIENT_SECRET,
+        val intentConfigWithSFU = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000,
+                currency = "usd",
+                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+            ),
         )
+        flowController.configureWithIntentConfigurationExpectingSuccess(intentConfigWithSFU)
 
         // Card selection should be invalidated — user must re-open payment sheet to see mandate
         assertThat(flowController.getPaymentOption()).isNull()
@@ -2651,6 +2662,20 @@ private suspend fun PaymentSheet.FlowController.configureExpectingSuccess(
     val configureTurbine = Turbine<Throwable?>()
     configureWithPaymentIntent(
         paymentIntentClientSecret = clientSecret,
+        configuration = configuration,
+    ) { _, error ->
+        configureTurbine += error
+    }
+    assertThat(configureTurbine.awaitItem()).isNull()
+}
+
+private suspend fun PaymentSheet.FlowController.configureWithIntentConfigurationExpectingSuccess(
+    intentConfiguration: PaymentSheet.IntentConfiguration,
+    configuration: PaymentSheet.Configuration? = null,
+) {
+    val configureTurbine = Turbine<Throwable?>()
+    configureWithIntentConfiguration(
+        intentConfiguration = intentConfiguration,
         configuration = configuration,
     ) { _, error ->
         configureTurbine += error
