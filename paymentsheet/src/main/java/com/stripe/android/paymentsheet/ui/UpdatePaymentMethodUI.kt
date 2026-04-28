@@ -26,6 +26,7 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -335,6 +336,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(CardBrand.Visa)
         ),
+        linkBrand = LinkBrand.Link,
     )
     UpdatePaymentMethodUI(
         interactor = DefaultUpdatePaymentMethodInteractor(

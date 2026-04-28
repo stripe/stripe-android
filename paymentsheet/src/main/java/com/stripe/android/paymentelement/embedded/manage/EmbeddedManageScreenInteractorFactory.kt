@@ -33,7 +33,10 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             canEdit = savedPaymentMethodMutator.canEdit,
             toggleEdit = savedPaymentMethodMutator::toggleEditing,
             onSelectPaymentMethod = {
-                val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
+                val savedPmSelection = PaymentSelection.Saved(
+                    paymentMethod = it.paymentMethod,
+                    linkBrand = it.linkBrand,
+                )
                 selectionHolder.set(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
                 embeddedNavigatorProvider.get().performAction(

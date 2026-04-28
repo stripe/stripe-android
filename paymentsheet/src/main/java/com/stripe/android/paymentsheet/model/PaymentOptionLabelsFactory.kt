@@ -5,6 +5,7 @@ import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ui.createCardLabel
@@ -38,7 +39,7 @@ internal object PaymentOptionLabelsFactory {
             }
             is PaymentSelection.Saved -> {
                 selection.paymentMethod.run {
-                    linkPaymentDetails?.let { savedLink(context, it) }
+                    linkPaymentDetails?.let { savedLink(context, it, selection.linkBrand) }
                         ?: card?.let { savedCard(context, it) }
                         ?: usBankAccount?.let { savedUSBankAccount(it, label) }
                         ?: fallback
@@ -75,9 +76,10 @@ internal object PaymentOptionLabelsFactory {
     private fun savedLink(
         context: Context,
         linkDetails: LinkPaymentDetails,
+        linkBrand: LinkBrand,
     ): PaymentOption.Labels {
         return PaymentOption.Labels(
-            label = R.string.stripe_link.resolvableString.resolve(context),
+            label = linkBrand.resolvableString.resolve(context),
             sublabel = linkDetails.paymentOptionLabel.resolve(context),
         )
     }

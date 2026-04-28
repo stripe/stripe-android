@@ -56,7 +56,12 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                     onSuccess = { paymentMethod ->
                         val currentSelection = selectionHolder.selection.value
                         if (paymentMethod.id == (currentSelection as? PaymentSelection.Saved)?.paymentMethod?.id) {
-                            selectionHolder.set(PaymentSelection.Saved(paymentMethod))
+                            selectionHolder.set(
+                                PaymentSelection.Saved(
+                                    paymentMethod = paymentMethod,
+                                    linkBrand = currentSelection.linkBrand,
+                                )
+                            )
                         }
                     },
                 )

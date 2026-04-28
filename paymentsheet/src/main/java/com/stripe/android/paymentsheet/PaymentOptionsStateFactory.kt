@@ -31,6 +31,7 @@ internal object PaymentOptionsStateFactory {
                 DisplayableSavedPaymentMethod.create(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
+                    linkBrand = linkBrand,
                     isCbcEligible = isCbcEligible,
                     shouldShowDefaultBadge = it.id == defaultPaymentMethodId,
                 ),
@@ -105,6 +106,9 @@ internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
         is PaymentOptionsItem.Link -> PaymentSelection.Link(linkBrand = linkBrand)
-        is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
+        is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(
+            paymentMethod = paymentMethod,
+            linkBrand = displayableSavedPaymentMethod.linkBrand,
+        )
     }
 }

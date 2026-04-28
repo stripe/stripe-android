@@ -53,6 +53,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
     private val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
         displayName = displayName,
         paymentMethod = initialSelection.paymentMethod,
+        linkBrand = initialSelection.linkBrand,
     )
 
     override val state = processing.mapAsStateFlow { isProcessing ->

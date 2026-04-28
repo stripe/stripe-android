@@ -217,7 +217,12 @@ internal class SavedPaymentMethodMutator(
         }.onSuccess {
             withContext(uiContext) {
                 customerStateHolder.setDefaultPaymentMethod(paymentMethod = paymentMethod)
-                setSelection(PaymentSelection.Saved(paymentMethod = paymentMethod))
+                setSelection(
+                    PaymentSelection.Saved(
+                        paymentMethod = paymentMethod,
+                        linkBrand = paymentMethodMetadataFlow.value?.linkBrandOrDefault ?: LinkBrand.Link,
+                    )
+                )
             }
 
             eventReporter.onSetAsDefaultPaymentMethodSucceeded(
@@ -289,7 +294,12 @@ internal class SavedPaymentMethodMutator(
                     )
                 )
                 if (isSelectedPaymentMethod(updatedMethod)) {
-                    setSelection(PaymentSelection.Saved(updatedMethod))
+                    setSelection(
+                        PaymentSelection.Saved(
+                            paymentMethod = updatedMethod,
+                            linkBrand = paymentMethodMetadataFlow.value?.linkBrandOrDefault ?: LinkBrand.Link,
+                        )
+                    )
                 }
 
                 onSuccess(updatedMethod)

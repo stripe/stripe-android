@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -44,7 +45,10 @@ internal fun SavedPaymentMethodRowButton(
         .resolve()
         .readNumbersAsIndividualDigits()
     val paymentMethodTitle =
-        displayableSavedPaymentMethod.paymentMethod.getLabel(canShowSublabel = true)
+        displayableSavedPaymentMethod.paymentMethod.getLabel(
+            canShowSublabel = true,
+            linkBrand = displayableSavedPaymentMethod.linkBrand,
+        )
             ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
@@ -105,6 +109,7 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
                 last4 = "4242",
             )
         ),
+        linkBrand = LinkBrand.Link,
     )
 
     DefaultStripeTheme {
@@ -143,6 +148,7 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
                 last4 = "4444",
             )
         ),
+        linkBrand = LinkBrand.Link,
     )
 
     DefaultStripeTheme {

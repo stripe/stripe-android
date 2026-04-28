@@ -195,6 +195,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     last4 = "4242",
                 )
             ),
+            linkBrand = LinkBrand.Link,
             shouldShowDefaultBadge = true,
         ),
     ),
@@ -208,6 +209,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                 code = PaymentMethod.Type.SepaDebit.code,
                 type = PaymentMethod.Type.SepaDebit,
             ),
+            linkBrand = LinkBrand.Link,
         ),
     ),
     PaymentOptionsItem.SavedPaymentMethod(
@@ -224,6 +226,7 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                     last4 = "4242",
                 )
             ),
+            linkBrand = LinkBrand.Link,
         ),
     ),
 )
@@ -419,7 +422,10 @@ private fun SavedPaymentMethodTab(
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
-    val labelText = paymentMethod.paymentMethod.getLabel(canShowSublabel = false)?.resolve() ?: return
+    val labelText = paymentMethod.paymentMethod.getLabel(
+        canShowSublabel = false,
+        linkBrand = paymentMethod.displayableSavedPaymentMethod.linkBrand,
+    )?.resolve() ?: return
 
     Box(
         modifier = Modifier.semantics {

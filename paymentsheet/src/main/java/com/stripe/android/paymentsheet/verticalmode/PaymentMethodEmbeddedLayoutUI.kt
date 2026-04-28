@@ -73,7 +73,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
         },
         onSelectSavedPaymentMethod = {
             interactor.handleViewAction(
-                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it.paymentMethod)
+                PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(it)
             )
         },
         onManageOneSavedPaymentMethod = {

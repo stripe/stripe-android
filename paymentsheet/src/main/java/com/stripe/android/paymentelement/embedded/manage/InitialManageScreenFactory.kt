@@ -24,6 +24,7 @@ internal class InitialManageScreenFactory @Inject constructor(
             val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                 displayName = displayName,
                 paymentMethod = paymentMethod,
+                linkBrand = paymentMethodMetadata.linkBrandOrDefault,
                 isCbcEligible = paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
             EmbeddedNavigator.Screen.ManageUpdate(

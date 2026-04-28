@@ -78,7 +78,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         data object TransitionToManageSavedPaymentMethods : ViewAction
         data class OnManageOneSavedPaymentMethod(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
         data class PaymentMethodSelected(val selectedPaymentMethodCode: String) : ViewAction
-        data class SavedPaymentMethodSelected(val savedPaymentMethod: PaymentMethod) : ViewAction
+        data class SavedPaymentMethodSelected(val savedPaymentMethod: DisplayableSavedPaymentMethod) : ViewAction
         data class UpdatePaymentMethodVisibility(val itemCode: String, val coordinates: LayoutCoordinates) : ViewAction
         data object CancelPaymentMethodVisibilityTracking : ViewAction
     }
@@ -554,7 +554,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             }
             is ViewAction.SavedPaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected("saved")
-                val selection = PaymentSelection.Saved(viewAction.savedPaymentMethod)
+                val selection = PaymentSelection.Saved(
+                    paymentMethod = viewAction.savedPaymentMethod.paymentMethod,
+                    linkBrand = viewAction.savedPaymentMethod.linkBrand,
+                )
                 updateSelection(selection, true)
                 invokeRowSelectionCallback?.invoke()
             }

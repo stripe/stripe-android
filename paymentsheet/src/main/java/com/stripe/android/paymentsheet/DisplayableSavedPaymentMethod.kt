@@ -4,6 +4,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 
@@ -11,6 +12,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
     val savedPaymentMethod: SavedPaymentMethod,
+    val linkBrand: LinkBrand,
     val isCbcEligible: Boolean = false,
     val shouldShowDefaultBadge: Boolean = false,
 ) {
@@ -129,6 +131,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         fun create(
             displayName: ResolvableString,
             paymentMethod: PaymentMethod,
+            linkBrand: LinkBrand,
             isCbcEligible: Boolean = false,
             shouldShowDefaultBadge: Boolean = false,
         ): DisplayableSavedPaymentMethod {
@@ -158,6 +161,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 displayName = displayName,
                 paymentMethod = paymentMethod,
                 savedPaymentMethod = savedPaymentMethod ?: SavedPaymentMethod.Unexpected,
+                linkBrand = linkBrand,
                 isCbcEligible = isCbcEligible,
                 shouldShowDefaultBadge = shouldShowDefaultBadge,
             )

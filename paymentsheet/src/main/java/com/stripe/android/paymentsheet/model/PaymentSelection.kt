@@ -163,6 +163,7 @@ internal sealed class PaymentSelection : Parcelable {
         val paymentMethod: PaymentMethod,
         val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         val linkInput: UserInput? = null,
+        val linkBrand: LinkBrand = LinkBrand.Link,
     ) : PaymentSelection() {
         val showMandateAbovePrimaryButton: Boolean
             get() {
@@ -441,7 +442,10 @@ internal val LinkBrand.resolvableString: ResolvableString
     }
 
 private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
-    return selection.paymentMethod.getLabel(canShowSublabel = true)
+    return selection.paymentMethod.getLabel(
+        canShowSublabel = true,
+        linkBrand = selection.linkBrand,
+    )
 }
 
 internal val PaymentSelection.paymentMethodType: String

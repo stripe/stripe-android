@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -585,7 +586,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
             customer?.paymentMethods?.firstOrNull {
                 customer.defaultPaymentMethodId != null && it.id == customer.defaultPaymentMethodId
-            }?.toPaymentSelection()
+            }?.toPaymentSelection(linkBrand = metadata.linkBrandOrDefault)
         } else {
             when (val selection = savedSelection.await()) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
@@ -599,7 +600,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 is SavedSelection.PaymentMethod -> {
                     val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
                     if (customerPaymentMethod != null) {
-                        customerPaymentMethod.toPaymentSelection()
+                        customerPaymentMethod.toPaymentSelection(linkBrand = metadata.linkBrandOrDefault)
                     } else if (selection.isLinkOrigin) {
                         // The payment method wasn't attached to the customer, but is of Link origin. Offer
                         // Link as the initial payment selection.
@@ -617,7 +618,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         return primaryPaymentSelection
-            ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection()
+            ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection(linkBrand = metadata.linkBrandOrDefault)
             ?: PaymentSelection.GooglePay.takeIf {
                 !isUsingWalletButtons && isGooglePayReady
             }
@@ -764,8 +765,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 }
 
-private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
-    return PaymentSelection.Saved(this)
+private fun PaymentMethod.toPaymentSelection(linkBrand: LinkBrand = LinkBrand.Link): PaymentSelection.Saved {
+    return PaymentSelection.Saved(
+        paymentMethod = this,
+        linkBrand = linkBrand,
+    )
 }
 
 private suspend fun <T> Deferred<T>.completeResultOrNull(

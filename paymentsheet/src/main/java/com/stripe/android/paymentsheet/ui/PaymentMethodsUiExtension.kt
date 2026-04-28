@@ -8,13 +8,14 @@ import com.stripe.android.link.ui.wallet.label
 import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.resolvableString
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @DrawableRes
@@ -224,11 +225,14 @@ private fun getOverridableIcon(
     }
 }
 
-internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
+internal fun PaymentMethod.getLabel(
+    canShowSublabel: Boolean = false,
+    linkBrand: LinkBrand = LinkBrand.Link,
+): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> if (isLinkPassthroughMode) {
         if (canShowSublabel) {
-            // For Link passthrough mode, show "Link" as main label
-            StripeR.string.stripe_link.resolvableString
+            // For Link passthrough mode, show the active Link brand as the main label.
+            linkBrand.resolvableString
         } else {
             // Show original card label as sublabel
             createCardLabel(card?.last4)
@@ -247,8 +251,8 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
         sepaDebit?.last4
     )
     PaymentMethod.Type.USBankAccount -> if (isLinkPassthroughMode && canShowSublabel) {
-        // For Link passthrough mode, show "Link" as main label
-        StripeR.string.stripe_link.resolvableString
+        // For Link passthrough mode, show the active Link brand as the main label.
+        linkBrand.resolvableString
     } else {
         // Show original bank account label
         resolvableString(
