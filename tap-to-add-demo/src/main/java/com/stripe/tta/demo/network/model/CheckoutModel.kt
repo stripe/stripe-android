@@ -1,0 +1,388 @@
+package com.stripe.tta.demo.network.model
+
+import com.stripe.android.paymentsheet.PaymentSheet
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+@Suppress("TooManyFunctions")
+class CheckoutRequest private constructor(
+    @SerialName("initialization")
+    val initialization: String?,
+    @SerialName("customer")
+    val customer: String?,
+    @SerialName("customer_key_type")
+    val customerKeyType: CustomerKeyType?,
+    @SerialName("currency")
+    val currency: String?,
+    @SerialName("amount")
+    val amount: Long?,
+    @SerialName("mode")
+    val mode: String?,
+    @SerialName("on_behalf_of")
+    val onBehalfOf: String?,
+    @SerialName("set_shipping_address")
+    val setShippingAddress: Boolean?,
+    @SerialName("automatic_payment_methods")
+    val automaticPaymentMethods: Boolean?,
+    @SerialName("use_link")
+    val useLink: Boolean?,
+    @SerialName("merchant")
+    val merchant: String?,
+    @SerialName("supported_payment_methods")
+    val supportedPaymentMethods: List<String>?,
+    @SerialName("payment_method_configuration")
+    val paymentMethodConfigurationId: String?,
+    @SerialName("require_cvc_recollection")
+    val requireCvcRecollection: Boolean?,
+    @SerialName("customer_session_component_name")
+    val customerSessionComponentName: String,
+    @SerialName("customer_session_payment_method_save")
+    val paymentMethodSaveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove")
+    val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove_last")
+    val paymentMethodRemoveLastFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_redisplay")
+    val paymentMethodRedisplayFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_allow_redisplay_filters")
+    val paymentMethodRedisplayFilters: List<AllowRedisplayFilter>?,
+    @SerialName("customer_session_payment_method_save_allow_redisplay_override")
+    val paymentMethodOverrideRedisplay: AllowRedisplayFilter?,
+    @SerialName("customer_session_payment_method_set_as_default")
+    val paymentMethodSetAsDefaultFeature: FeatureState?,
+    @SerialName("payment_method_options_setup_future_usage")
+    val paymentMethodOptionsSetupFutureUsage: Map<String, String>?,
+    @SerialName("is_confirmation_token")
+    val isConfirmationToken: Boolean?,
+    @SerialName("allows_tap_to_add")
+    val allowsTapToAdd: Boolean?,
+    @SerialName("custom_stripe_api")
+    val customStripeApi: String?,
+    @SerialName("custom_secret_key")
+    val customSecretKey: String?,
+    @SerialName("custom_publishable_key")
+    val customPublishableKey: String?,
+    @SerialName("use_checkout_session")
+    val useCheckoutSession: Boolean?,
+    @SerialName("checkout_session_payment_method_save")
+    val checkoutSessionPaymentMethodSave: FeatureState?,
+    @SerialName("checkout_session_payment_method_remove")
+    val checkoutSessionPaymentMethodRemove: FeatureState?,
+    @SerialName("allow_promotion_codes")
+    val allowPromotionCodes: Boolean?,
+    @SerialName("adjustable_quantity")
+    val adjustableQuantity: Boolean?,
+    @SerialName("automatic_tax")
+    val automaticTax: Boolean?,
+    @SerialName("adaptive_pricing")
+    val adaptivePricing: Boolean?,
+    @SerialName("display_shipping_rates")
+    val displayShippingRates: Boolean?,
+    @SerialName("customer_email")
+    val customerEmail: String?,
+    @SerialName("use_manual_capture")
+    val useManualCapture: Boolean?,
+) {
+    @Serializable
+    enum class CustomerKeyType {
+        @SerialName("customer_session")
+        CustomerSession,
+
+        @SerialName("legacy")
+        Legacy
+    }
+
+    class Builder {
+        private var initialization: String? = null
+        private var customer: String? = null
+        private var customerKeyType: CustomerKeyType? = null
+        private var currency: String? = null
+        private var amount: Long? = null
+        private var mode: String? = null
+        private var onBehalfOf: String? = null
+        private var setShippingAddress: Boolean? = null
+        private var automaticPaymentMethods: Boolean? = null
+        private var useLink: Boolean? = null
+        private var merchant: String? = null
+        private var supportedPaymentMethods: List<String>? = null
+        private var paymentMethodConfigurationId: String? = null
+        private var requireCvcRecollection: Boolean? = null
+        private var paymentMethodSaveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRemoveFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRemoveLastFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodSetAsDefaultFeature: FeatureState = FeatureState.Disabled
+        private var paymentMethodRedisplayFeature: FeatureState = FeatureState.Enabled
+        private var paymentMethodRedisplayFilters: List<AllowRedisplayFilter> = listOf(
+            AllowRedisplayFilter.Unspecified,
+            AllowRedisplayFilter.Limited,
+            AllowRedisplayFilter.Always,
+        )
+        private var paymentMethodOverrideRedisplay: AllowRedisplayFilter? = null
+        private var paymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
+        private var overridePaymentMethodOptionsSetupFutureUsage: Map<String, String>? = null
+        private var isConfirmationToken: Boolean? = null
+        private var allowsTapToAdd: Boolean? = null
+        private var customStripeApi: String? = null
+        private var customSecretKey: String? = null
+        private var customPublishableKey: String? = null
+        private var useCheckoutSession: Boolean? = null
+        private var checkoutSessionPaymentMethodSave: FeatureState? = null
+        private var checkoutSessionPaymentMethodRemove: FeatureState? = null
+        private var allowPromotionCodes: Boolean? = null
+        private var adjustableQuantity: Boolean? = null
+        private var automaticTax: Boolean? = null
+        private var adaptivePricing: Boolean? = null
+        private var displayShippingRates: Boolean? = null
+        private var customerEmail: String? = null
+        private var useManualCapture: Boolean? = null
+
+        fun initialization(initialization: String?) = apply {
+            this.initialization = initialization
+        }
+
+        fun customer(customer: String?) = apply {
+            this.customer = customer
+        }
+
+        fun customerKeyType(customerKeyType: CustomerKeyType?) = apply {
+            this.customerKeyType = customerKeyType
+        }
+
+        fun currency(currency: String?) = apply {
+            this.currency = currency
+        }
+
+        fun amount(amount: Long?) = apply {
+            this.amount = amount
+        }
+
+        fun mode(mode: String?) = apply {
+            this.mode = mode
+        }
+
+        fun setShippingAddress(setShippingAddress: Boolean?) = apply {
+            this.setShippingAddress = setShippingAddress
+        }
+
+        fun automaticPaymentMethods(automaticPaymentMethods: Boolean?) = apply {
+            this.automaticPaymentMethods = automaticPaymentMethods
+        }
+
+        fun useLink(useLink: Boolean?) = apply {
+            this.useLink = useLink
+        }
+
+        fun merchant(merchant: String?) = apply {
+            this.merchant = merchant
+        }
+
+        fun supportedPaymentMethods(supportedPaymentMethods: List<String>?) = apply {
+            this.supportedPaymentMethods = supportedPaymentMethods
+        }
+
+        fun paymentMethodConfigurationId(paymentMethodConfigurationId: String?) = apply {
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+        }
+
+        fun paymentMethodSaveFeature(state: FeatureState) {
+            this.paymentMethodSaveFeature = state
+        }
+
+        fun paymentMethodRemoveFeature(state: FeatureState) {
+            this.paymentMethodRemoveFeature = state
+        }
+
+        fun paymentMethodRemoveLastFeature(state: FeatureState) {
+            this.paymentMethodRemoveLastFeature = state
+        }
+
+        fun paymentMethodSetAsDefaultFeature(state: FeatureState) {
+            this.paymentMethodSetAsDefaultFeature = state
+        }
+
+        fun paymentMethodRedisplayFeature(state: FeatureState) {
+            this.paymentMethodRedisplayFeature = state
+        }
+
+        fun paymentMethodRedisplayFilters(filters: List<AllowRedisplayFilter>) {
+            this.paymentMethodRedisplayFilters = filters
+        }
+
+        fun paymentMethodOverrideRedisplay(override: AllowRedisplayFilter?) {
+            this.paymentMethodOverrideRedisplay = override
+        }
+
+        fun requireCvcRecollection(requireCvcRecollection: Boolean?) = apply {
+            this.requireCvcRecollection = requireCvcRecollection
+        }
+
+        fun paymentMethodOptionsSetupFutureUsage(valuesMap: Map<String, String>) = apply {
+            this.paymentMethodOptionsSetupFutureUsage = valuesMap
+        }
+
+        fun overridePaymentMethodOptionsSetupFutureUsage(valuesMap: Map<String, String>) = apply {
+            this.overridePaymentMethodOptionsSetupFutureUsage = valuesMap
+        }
+
+        fun isConfirmationToken(isConfirmationToken: Boolean?) = apply {
+            this.isConfirmationToken = isConfirmationToken
+        }
+
+        fun allowsTapToAdd(allowsTapToAdd: Boolean?) = apply {
+            this.allowsTapToAdd = allowsTapToAdd
+        }
+
+        fun onBehalfOf(onBehalfOf: String?) = apply {
+            this.onBehalfOf = onBehalfOf
+        }
+
+        fun customStripeApi(customStripeApi: String?) = apply {
+            this.customStripeApi = customStripeApi
+        }
+
+        fun customSecretKey(customSecretKey: String?) = apply {
+            this.customSecretKey = customSecretKey
+        }
+
+        fun customPublishableKey(customPublishableKey: String?) = apply {
+            this.customPublishableKey = customPublishableKey
+        }
+
+        fun useCheckoutSession(useCheckoutSession: Boolean?) = apply {
+            this.useCheckoutSession = useCheckoutSession
+        }
+
+        fun checkoutSessionPaymentMethodSave(state: FeatureState?) = apply {
+            this.checkoutSessionPaymentMethodSave = state
+        }
+
+        fun checkoutSessionPaymentMethodRemove(state: FeatureState?) = apply {
+            this.checkoutSessionPaymentMethodRemove = state
+        }
+
+        fun allowPromotionCodes(allowPromotionCodes: Boolean?) = apply {
+            this.allowPromotionCodes = allowPromotionCodes
+        }
+
+        fun adjustableQuantity(adjustableQuantity: Boolean?) = apply {
+            this.adjustableQuantity = adjustableQuantity
+        }
+
+        fun automaticTax(automaticTax: Boolean?) = apply {
+            this.automaticTax = automaticTax
+        }
+
+        fun adaptivePricing(adaptivePricing: Boolean?) = apply {
+            this.adaptivePricing = adaptivePricing
+        }
+
+        fun displayShippingRates(displayShippingRates: Boolean?) = apply {
+            this.displayShippingRates = displayShippingRates
+        }
+
+        fun customerEmail(customerEmail: String?) = apply {
+            this.customerEmail = customerEmail
+        }
+
+        fun useManualCapture(useManualCapture: Boolean?) = apply {
+            this.useManualCapture = useManualCapture
+        }
+
+        fun build(): CheckoutRequest {
+            return CheckoutRequest(
+                initialization = initialization,
+                customer = customer,
+                customerKeyType = customerKeyType,
+                currency = currency,
+                amount = amount,
+                mode = mode,
+                onBehalfOf = onBehalfOf,
+                setShippingAddress = setShippingAddress,
+                automaticPaymentMethods = automaticPaymentMethods,
+                useLink = useLink,
+                merchant = merchant,
+                supportedPaymentMethods = supportedPaymentMethods,
+                paymentMethodConfigurationId = paymentMethodConfigurationId,
+                requireCvcRecollection = requireCvcRecollection,
+                customerSessionComponentName = "mobile_payment_element",
+                paymentMethodSaveFeature = paymentMethodSaveFeature,
+                paymentMethodRemoveFeature = paymentMethodRemoveFeature,
+                paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultFeature,
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature.takeIf {
+                    paymentMethodRemoveLastFeature == FeatureState.Enabled
+                },
+                paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
+                paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
+                paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
+                paymentMethodOptionsSetupFutureUsage = overridePaymentMethodOptionsSetupFutureUsage
+                    ?: paymentMethodOptionsSetupFutureUsage,
+                isConfirmationToken = isConfirmationToken,
+                allowsTapToAdd = allowsTapToAdd,
+                customStripeApi = customStripeApi,
+                customSecretKey = customSecretKey,
+                customPublishableKey = customPublishableKey,
+                useCheckoutSession = useCheckoutSession,
+                checkoutSessionPaymentMethodSave = checkoutSessionPaymentMethodSave,
+                checkoutSessionPaymentMethodRemove = checkoutSessionPaymentMethodRemove,
+                allowPromotionCodes = allowPromotionCodes,
+                adjustableQuantity = adjustableQuantity,
+                automaticTax = automaticTax,
+                adaptivePricing = adaptivePricing,
+                displayShippingRates = displayShippingRates,
+                customerEmail = customerEmail,
+                useManualCapture = useManualCapture,
+            )
+        }
+    }
+}
+
+@Serializable
+data class CheckoutResponse(
+    @SerialName("publishableKey")
+    val publishableKey: String,
+    @SerialName("intentClientSecret")
+    val intentClientSecret: String? = null,
+    @SerialName("checkoutSessionClientSecret")
+    val checkoutSessionClientSecret: String? = null,
+    @SerialName("customerId")
+    val customerId: String? = null,
+    @SerialName("customerEphemeralKeySecret")
+    val customerEphemeralKeySecret: String? = null,
+    @SerialName("customerSessionClientSecret")
+    val customerSessionClientSecret: String? = null,
+    @SerialName("terminalLocationId")
+    val terminalLocationId: String? = null,
+    @SerialName("amount")
+    val amount: Long? = null,
+    @SerialName("paymentMethodTypes")
+    val paymentMethodTypes: String? = null,
+) {
+
+    val clientSecret: String = intentClientSecret ?: checkoutSessionClientSecret
+    ?: error("Either intentClientSecret or checkoutSessionClientSecret must be non-null")
+
+    fun makeCustomerConfig(
+        customerKeyType: CheckoutRequest.CustomerKeyType?
+    ) = customerId?.let { id ->
+        when (customerKeyType) {
+            CheckoutRequest.CustomerKeyType.CustomerSession -> {
+                customerSessionClientSecret?.let { clientSecret ->
+                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = id,
+                        clientSecret = clientSecret,
+                    )
+                }
+            }
+            CheckoutRequest.CustomerKeyType.Legacy,
+            null -> {
+                customerEphemeralKeySecret?.let { ephemeralKeySecret ->
+                    PaymentSheet.CustomerConfiguration(
+                        id = id,
+                        ephemeralKeySecret = ephemeralKeySecret
+                    )
+                }
+            }
+        }
+    }
+}
