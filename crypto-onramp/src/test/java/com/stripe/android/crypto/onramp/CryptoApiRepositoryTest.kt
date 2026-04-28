@@ -14,8 +14,8 @@ import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.MissingIdentifier
-import com.stripe.android.crypto.onramp.model.RegulationType
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.RegulationType
 import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
@@ -34,6 +34,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class CryptoApiRepositoryTest {
     private val stripeNetworkClient: StripeNetworkClient = mock()
     private val stripeRepository = mock<StripeRepository>()
@@ -709,8 +710,7 @@ class CryptoApiRepositoryTest {
                     "identifiers_carf" to listOf(
                         mapOf(
                             "country" to "FR",
-                            "identifier" to "carf_456"
-                            ,
+                            "identifier" to "carf_456",
                             "identifier_type" to "fr_spi"
                         )
                     )
