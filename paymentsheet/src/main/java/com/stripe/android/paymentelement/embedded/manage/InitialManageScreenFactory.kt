@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -25,13 +26,13 @@ internal class InitialManageScreenFactory @Inject constructor(
                 paymentMethod = paymentMethod,
                 isCbcEligible = paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
-            EmbeddedNavigator.Screen.Update(
+            EmbeddedNavigator.Screen.ManageUpdate(
                 interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(
                     displayableSavedPaymentMethod = displayableSavedPaymentMethod
                 )
             )
         } else {
-            EmbeddedNavigator.Screen.All(interactor = manageInteractorFactory.createManageScreenInteractor())
+            EmbeddedNavigator.Screen.ManageAll(interactor = manageInteractorFactory.createManageScreenInteractor())
         }
     }
 }

@@ -92,6 +92,7 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
+    val paymentMethodOrientation: PaymentMethodOrientation,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -350,8 +351,10 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
+            paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
+            val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -407,7 +410,12 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArts = cardArts,
+                paymentMethodOrientation = when (paymentMethodLayout) {
+                    PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
+                    PaymentSheet.PaymentMethodLayout.Vertical,
+                    PaymentSheet.PaymentMethodLayout.Automatic -> PaymentMethodOrientation.Vertical
+                }
             )
         }
 
@@ -419,6 +427,7 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
+            val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -476,7 +485,8 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
+                cardArts = cardArts,
+                paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
             )
         }
     }

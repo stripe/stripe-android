@@ -28,7 +28,9 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -49,7 +51,6 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -60,7 +61,6 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.paymentsheet.utils.toConfirmationError
-import com.stripe.android.paymentsheet.verticalmode.CheckoutCurrencyUpdater
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
@@ -100,7 +100,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
-    private val checkoutCurrencyUpdater: CheckoutCurrencyUpdater,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : BaseSheetViewModel(
     config = args.config,
@@ -115,15 +114,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
 ) {
-
-    internal var latestCheckoutSessionResponse: CheckoutSessionResponse?
-        get() = savedStateHandle[LATEST_CHECKOUT_SESSION_RESPONSE]
-            ?: (args.initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
-                ?.checkoutSessionResponse
-        set(value) {
-            savedStateHandle[LATEST_CHECKOUT_SESSION_RESPONSE] = value
-        }
-
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
         currentScreenFlow = navigationHandler.currentScreen,
@@ -225,7 +215,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
-            cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter
+            cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter,
+            linkBrand = paymentMethodMetadata?.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
         )
     }
 
@@ -390,36 +381,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewState.value =
             PaymentSheetViewState.Reset(userErrorMessage?.let { PaymentSheetViewState.UserErrorMessage(it) })
         savedStateHandle[SAVE_PROCESSING] = false
-    }
-
-    internal fun updateCurrency(currencyCode: String) {
-        val checkoutSession = args.initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession
-            ?: return
-
-        savedStateHandle[SAVE_PROCESSING] = true
-
-        viewModelScope.launch {
-            checkoutCurrencyUpdater.updateCurrency(
-                instancesKey = checkoutSession.instancesKey,
-                sessionId = checkoutSession.checkoutSessionResponse.id,
-                currencyCode = currencyCode,
-                config = args.config,
-                initializedViaCompose = args.initializedViaCompose,
-            ).fold(
-                onSuccess = { currencyUpdateResult ->
-                    latestCheckoutSessionResponse = currencyUpdateResult.checkoutSessionResponse
-
-                    customerStateHolder.setCustomerState(currencyUpdateResult.loaderState.customer)
-                    updateSelection(currencyUpdateResult.loaderState.paymentSelection)
-                    setPaymentMethodMetadata(currencyUpdateResult.loaderState.paymentMethodMetadata)
-                    navigateToInitialScreens(currencyUpdateResult.loaderState.paymentMethodMetadata)
-                    resetViewState()
-                },
-                onFailure = { error ->
-                    resetViewState(error.stripeErrorMessage())
-                },
-            )
-        }
     }
 
     private fun initializeNavigationStateIfNeeded(
@@ -736,7 +697,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (getPaymentMethodLayout() != PaymentSheet.PaymentMethodLayout.Horizontal) {
+        if (paymentMethodMetadata.paymentMethodOrientation == PaymentMethodOrientation.Vertical) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -823,7 +784,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private companion object {
         const val IN_PROGRESS_SELECTION = "IN_PROGRESS_PAYMENT_SELECTION"
-        const val LATEST_CHECKOUT_SESSION_RESPONSE = "latest_checkout_session_response"
     }
 }
 

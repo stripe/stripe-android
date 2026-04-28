@@ -26,6 +26,12 @@
   <string name="stripe_address_label_zip_code">Postleitzahl</string>
   <!-- Text for error labels -->
   <string name="stripe_error">Fehler</string>
+  <!-- Text for error labels indicating a network error -->
+  <string name="stripe_network_error">Netzwerkfehler</string>
+  <!-- Error message shown when a transaction has timed out -->
+  <string name="stripe_timed_out">Zeit überschritten</string>
+  <!-- Text for error labels indicating to take an action at a late undetermined time -->
+  <string name="stripe_try_again_later">Versuchen Sie es später erneut</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Unerwarteter Fehler – versuchen Sie es in ein paar Sekunden noch einmal.</string>
 </resources>

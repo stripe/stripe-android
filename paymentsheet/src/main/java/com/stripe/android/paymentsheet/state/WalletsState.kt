@@ -9,6 +9,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher.Billi
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
@@ -80,6 +81,7 @@ internal data class WalletsState(
     data class Link(
         val state: LinkButtonState,
         val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
+        val linkBrand: LinkBrand = LinkBrand.Link,
     ) : Wallet
 
     data class GooglePay(
@@ -113,14 +115,16 @@ internal data class WalletsState(
                 link = LinkButtonTheme.DEFAULT
             ),
             cardFundingFilter: CardFundingFilter,
-            cardBrandFilter: CardBrandFilter
+            cardBrandFilter: CardBrandFilter,
+            linkBrand: LinkBrand = LinkBrand.Link,
         ): WalletsState? {
             val link = createLink(
                 isLinkAvailable = isLinkAvailable,
                 linkEmail = linkEmail,
                 paymentDetails = paymentDetails,
                 enableDefaultValues = enableDefaultValues,
-                buttonThemes = buttonThemes
+                buttonThemes = buttonThemes,
+                linkBrand = linkBrand,
             )
 
             val googlePay = createGooglePay(
@@ -155,7 +159,8 @@ internal data class WalletsState(
             linkEmail: String?,
             paymentDetails: DisplayablePaymentDetails?,
             enableDefaultValues: Boolean,
-            buttonThemes: PaymentSheet.ButtonThemes
+            buttonThemes: PaymentSheet.ButtonThemes,
+            linkBrand: LinkBrand,
         ): Link? {
             return if (isLinkAvailable == true) {
                 Link(
@@ -164,7 +169,8 @@ internal data class WalletsState(
                         paymentDetails = paymentDetails,
                         enableDefaultValues = enableDefaultValues
                     ),
-                    theme = buttonThemes.link
+                    theme = buttonThemes.link,
+                    linkBrand = linkBrand,
                 )
             } else {
                 null

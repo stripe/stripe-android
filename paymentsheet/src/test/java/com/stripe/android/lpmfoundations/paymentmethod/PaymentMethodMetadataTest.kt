@@ -6,7 +6,6 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
@@ -19,6 +18,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinit
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PassiveCaptchaParamsFactory
@@ -34,7 +34,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.R
@@ -51,7 +50,6 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
@@ -62,12 +60,6 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
-
-    @get:Rule
-    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
-        isEnabled = true
-    )
 
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
@@ -141,7 +133,7 @@ internal class PaymentMethodMetadataTest {
     fun `filterSupportedPaymentMethods filters payment methods without shared data specs`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "sepa_debit")
+                paymentMethodTypes = listOf("card", "bacs_debit")
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
@@ -210,11 +202,11 @@ internal class PaymentMethodMetadataTest {
     fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("sepa_debit")
+                paymentMethodTypes = listOf("bacs_debit")
             ),
             sharedDataSpecs = emptyList(),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("sepa_debit")).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("bacs_debit")).isNull()
     }
 
     @Test
@@ -306,7 +298,7 @@ internal class PaymentMethodMetadataTest {
     fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("affirm", "sepa_debit", "card"),
+                paymentMethodTypes = listOf("affirm", "bacs_debit", "card"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
             sharedDataSpecs = listOf(
@@ -1152,7 +1144,8 @@ internal class PaymentMethodMetadataTest {
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddAvailable = false
+            isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         val expectedMetadata = PaymentMethodMetadata(
@@ -1223,6 +1216,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
         )
 
         assertThat(metadata).isEqualTo(expectedMetadata)
@@ -1284,6 +1278,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         // When flag is false, should use default funding types, not the configured ones
@@ -1377,6 +1372,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)
     }
@@ -2112,6 +2108,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.availableWallets)
@@ -2181,6 +2178,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2205,6 +2203,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.isTapToAddSupported).isTrue()
@@ -2233,6 +2232,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.isTapToAddSupported).isFalse()
@@ -2270,6 +2270,7 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
     }
 
@@ -2341,6 +2342,7 @@ internal class PaymentMethodMetadataTest {
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+            linkBrand = LinkBrand.Link,
         )
     }
 

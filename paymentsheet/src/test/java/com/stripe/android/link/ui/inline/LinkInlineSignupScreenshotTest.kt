@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -57,6 +58,7 @@ class LinkInlineSignupScreenshotTest {
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
@@ -93,6 +95,7 @@ class LinkInlineSignupScreenshotTest {
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
@@ -129,6 +132,7 @@ class LinkInlineSignupScreenshotTest {
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},
@@ -164,6 +168,7 @@ class LinkInlineSignupScreenshotTest {
                 expanded = true,
                 requiresNameCollection = false,
                 allowsDefaultOptIn = true,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 linkSignUpOptInFeatureEnabled = false,
                 errorMessage = null,
@@ -200,6 +205,7 @@ class LinkInlineSignupScreenshotTest {
                 expanded = true,
                 requiresNameCollection = false,
                 allowsDefaultOptIn = true,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 linkSignUpOptInFeatureEnabled = false,
                 errorMessage = null,
@@ -237,6 +243,7 @@ class LinkInlineSignupScreenshotTest {
                 requiresNameCollection = false,
                 allowsDefaultOptIn = true,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = true,
                 errorMessage = null,
                 toggleExpanded = {},
@@ -273,6 +280,7 @@ class LinkInlineSignupScreenshotTest {
                 requiresNameCollection = true,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = true,
+                linkBrand = LinkBrand.Link,
                 didAskToChangeSignupDetails = false,
                 errorMessage = null,
                 toggleExpanded = {},

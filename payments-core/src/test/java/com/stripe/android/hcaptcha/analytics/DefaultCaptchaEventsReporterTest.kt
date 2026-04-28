@@ -166,6 +166,10 @@ internal class DefaultCaptchaEventsReporterTest {
                 startCalled = true
             }
 
+            override fun elapsed(key: DurationProvider.Key): Duration? {
+                throw NotImplementedError("this function should not be called")
+            }
+
             override fun end(key: DurationProvider.Key): Duration? {
                 throw NotImplementedError("this function should not be called")
             }

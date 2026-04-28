@@ -26,6 +26,12 @@
   <string name="stripe_address_label_zip_code">Mã ZIP</string>
   <!-- Text for error labels -->
   <string name="stripe_error">Lỗi</string>
+  <!-- Text for error labels indicating a network error -->
+  <string name="stripe_network_error">Lỗi mạng lưới</string>
+  <!-- Error message shown when a transaction has timed out -->
+  <string name="stripe_timed_out">Đã hết thời gian</string>
+  <!-- Text for error labels indicating to take an action at a late undetermined time -->
+  <string name="stripe_try_again_later">Thử lại sau</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Có lỗi bất ngờ -- hãy thử lại sau vài giây</string>
 </resources>

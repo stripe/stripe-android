@@ -26,6 +26,12 @@
   <string name="stripe_address_label_zip_code">ZIP Code</string>
   <!-- Text for error labels -->
   <string name="stripe_error">Error</string>
+  <!-- Text for error labels indicating a network error -->
+  <string name="stripe_network_error">Error sa network</string>
+  <!-- Error message shown when a transaction has timed out -->
+  <string name="stripe_timed_out">Nag-time out</string>
+  <!-- Text for error labels indicating to take an action at a late undetermined time -->
+  <string name="stripe_try_again_later">Subukan muli mamaya.</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Nagkaroon ng di-inaasahang kamalian -- subukin muli sa ilang segundo</string>
 </resources>

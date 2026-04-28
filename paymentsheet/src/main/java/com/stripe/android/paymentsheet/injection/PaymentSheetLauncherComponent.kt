@@ -33,6 +33,7 @@ import javax.inject.Singleton
         ApplicationIdModule::class,
         MobileSessionIdModule::class,
         LinkHoldbackExposureModule::class,
+        CardArtExperimentModule::class,
         PaymentSheetViewModelModule::class,
         TapToAddConnectionStarterModule::class,
         PaymentElementConfirmationModule::class,

@@ -1,18 +1,9 @@
 package com.stripe.android.model
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.testing.FeatureFlagTestRule
-import org.junit.Rule
 import org.junit.Test
 
 class ElementsSessionTest {
-
-    @get:Rule
-    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
-        isEnabled = true
-    )
 
     @Test
     fun `passiveCaptchaParams returns passiveCaptcha when flag is enabled`() {
@@ -115,17 +106,6 @@ class ElementsSessionTest {
     }
 
     @Test
-    fun `enableAttestationOnIntentConfirmation returns false when feature flag is disabled`() {
-        enableAttestationOnIntentConfirmationRule.setEnabled(false)
-        val session = createElementsSession(
-            passiveCaptcha = null,
-            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ATTEST_ON_INTENT_CONFIRMATION to true)
-        )
-
-        assertThat(session.enableAttestationOnIntentConfirmation).isFalse()
-    }
-
-    @Test
     fun `onBehalfOf is null when account and merchant are the same`() {
         val session = createElementsSession(
             accountId = "acct_1SGP1sPvdtoA7EjP",
@@ -213,6 +193,40 @@ class ElementsSessionTest {
         )
 
         assertThat(session.isTapToAddEnabled).isFalse()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to true
+            )
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isTrue()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(
+                ElementsSession.Flag.ELEMENTS_MOBILE_LINK_INLINE_SIGNUP_WITH_SAVED_PM_ENABLED to false
+            )
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isFalse()
+    }
+
+    @Test
+    fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.isLinkInlineSignupWithSavedPaymentMethodsEnabled).isFalse()
     }
 
     @Test

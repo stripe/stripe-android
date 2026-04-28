@@ -1,8 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Application
-import androidx.activity.result.ActivityResultCaller
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
@@ -22,12 +20,12 @@ import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
-import dagger.Subcomponent
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Component(
     modules = [
+        FormActivityModule::class,
         EmbeddedActivityModule::class,
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
@@ -41,7 +39,7 @@ internal interface FormActivityViewModelComponent {
     val viewModel: FormActivityViewModel
     val selectionHolder: EmbeddedSelectionHolder
     val customerStateHolder: CustomerStateHolder
-    val subcomponentFactory: FormActivitySubcomponent.Factory
+    fun inject(formActivity: FormActivity)
 
     @Component.Factory
     interface Factory {
@@ -60,24 +58,6 @@ internal interface FormActivityViewModelComponent {
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
         ): FormActivityViewModelComponent
-    }
-}
-
-@Subcomponent(
-    modules = [
-        FormActivityModule::class,
-    ]
-)
-@FormActivityScope
-internal interface FormActivitySubcomponent {
-    fun inject(activity: FormActivity)
-
-    @Subcomponent.Factory
-    interface Factory {
-        fun build(
-            @BindsInstance activityResultCaller: ActivityResultCaller,
-            @BindsInstance lifecycleOwner: LifecycleOwner,
-        ): FormActivitySubcomponent
     }
 }
 

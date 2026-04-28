@@ -108,7 +108,12 @@ internal class SaveAccountToLink @Inject constructor(
                 maxNumberOfRetries = 20,
             ),
             retryCondition = { it.shouldRetry },
-            block = { accountsRepository.pollAccountNumbers(linkedAccountIds) },
+            block = {
+                accountsRepository.pollAccountNumbers(
+                    clientSecret = configuration.financialConnectionsSessionClientSecret,
+                    linkedAccounts = linkedAccountIds,
+                )
+            },
         )
     }
 

@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.stripe.android.common.taptoadd.TapToAddErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
@@ -86,7 +87,11 @@ class TapToAddLayoutScreenshotTest {
             TapToAddTheme(imageRepository = null) {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Error(
-                        message = "Something went wrong".resolvableString
+                        message = TapToAddErrorMessage(
+                            title = "Something went wrong".resolvableString,
+                            action = "Try again".resolvableString,
+                        ),
+                        dueToUnsupportedDevice = false,
                     ),
                 ) {}
             }

@@ -18,7 +18,7 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
         isCbcEligible: Boolean,
-        defaultPaymentMethodId: String?
+        defaultPaymentMethodId: String?,
     ): List<PaymentOptionsItem> {
         return listOfNotNull(
             PaymentOptionsItem.AddCard,
@@ -30,7 +30,7 @@ internal object PaymentOptionsStateFactory {
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
                     isCbcEligible = isCbcEligible,
-                    shouldShowDefaultBadge = it.id == defaultPaymentMethodId
+                    shouldShowDefaultBadge = it.id == defaultPaymentMethodId,
                 ),
             )
         }

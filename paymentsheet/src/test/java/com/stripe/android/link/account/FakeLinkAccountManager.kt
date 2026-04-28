@@ -130,7 +130,12 @@ internal open class FakeLinkAccountManager(
 
     private val updateCardDetailsTurbine = Turbine<ConsumerPaymentDetailsUpdateParams>()
     private val startVerificationTurbine = Turbine<Boolean>()
-    private val createPaymentDetailsFromPaymentMethodTurbine = Turbine<PaymentMethod>()
+    private val createPaymentDetailsFromPaymentMethodTurbine = Turbine<CreatePaymentDetailsFromPaymentMethodCall>()
+
+    internal data class CreatePaymentDetailsFromPaymentMethodCall(
+        val customerEphemeralKey: String,
+        val paymentMethod: PaymentMethod,
+    )
 
     val confirmVerificationTurbine = Turbine<String>()
 
@@ -215,9 +220,12 @@ internal open class FakeLinkAccountManager(
     }
 
     override suspend fun createPaymentDetailsFromPaymentMethod(
+        customerEphemeralKey: String,
         paymentMethod: PaymentMethod,
     ): Result<LinkPaymentDetails.Saved> {
-        createPaymentDetailsFromPaymentMethodTurbine.add(paymentMethod)
+        createPaymentDetailsFromPaymentMethodTurbine.add(
+            CreatePaymentDetailsFromPaymentMethodCall(customerEphemeralKey, paymentMethod)
+        )
         return createPaymentDetailsFromPaymentMethodResult
     }
 
@@ -310,7 +318,7 @@ internal open class FakeLinkAccountManager(
         return confirmVerificationTurbine.awaitItem()
     }
 
-    suspend fun awaitCreatePaymentDetailsFromPaymentMethodTurbineCall(): PaymentMethod {
+    suspend fun awaitCreatePaymentDetailsFromPaymentMethodTurbineCall(): CreatePaymentDetailsFromPaymentMethodCall {
         return createPaymentDetailsFromPaymentMethodTurbine.awaitItem()
     }
 

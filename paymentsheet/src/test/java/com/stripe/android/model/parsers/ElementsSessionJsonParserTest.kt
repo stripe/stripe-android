@@ -13,6 +13,7 @@ import com.stripe.android.model.ElementsSessionFixtures.PAYMENT_METHODS_WITH_LIN
 import com.stripe.android.model.ElementsSessionFixtures.createPaymentIntentWithCustomerSession
 import com.stripe.android.model.ElementsSessionFixtures.createWithCustomPaymentMethods
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkConsumerIncentive
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
@@ -30,18 +31,6 @@ class ElementsSessionJsonParserTest {
     @get:Rule
     val incentivesFeatureFlagRule = FeatureFlagTestRule(
         featureFlag = FeatureFlags.instantDebitsIncentives,
-        isEnabled = false,
-    )
-
-    @get:Rule
-    val enableAttestationOnIntentConfirmationRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableAttestationOnIntentConfirmation,
-        isEnabled = true
-    )
-
-    @get:Rule
-    val enableCardArtRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.enableCardArt,
         isEnabled = false,
     )
 
@@ -183,6 +172,30 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `link_brand is parsed as Link`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("link"))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `link_brand is parsed as Notlink`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("notlink"))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `unknown link_brand defaults to Link`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("some_future_brand"))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `missing link_brand is parsed as null`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand(linkBrand = null))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isNull()
+    }
+
+    @Test
     fun parseSetupIntent_shouldCreateObjectLinkFundingSources() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.SetupIntentType(
@@ -217,7 +230,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession.experimentsData).isNotNull()
         assertThat(elementsSession.experimentsData?.experimentAssignments).containsEntry(
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_HORIZONTAL_MODE_AA,
+            ElementsSession.ExperimentAssignment.OCS_MOBILE_CARD_ART,
             "control"
         )
     }
@@ -1798,8 +1811,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Card art merges into matching payment method`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             cardArt = """
                 [
@@ -1823,8 +1834,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Card art with non-matching ID leaves cardArt null`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             cardArt = """
                 [
@@ -1844,8 +1853,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `No card_art key leaves cardArt null`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(cardArt = null)
         val session = parseElementsSession(json)
 
@@ -1854,8 +1861,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Empty card_art array leaves cardArt null`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(cardArt = "[]")
         val session = parseElementsSession(json)
 
@@ -1863,30 +1868,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `Card art not parsed when feature flag is disabled`() {
-        enableCardArtRule.setEnabled(false)
-
-        val json = createElementsSessionWithCardArt(
-            cardArt = """
-                [
-                    {
-                        "payment_method": "pm_123",
-                        "art_image": { "url": "https://example.com/art.png", "format": "image/png" },
-                        "program_name": "Test Program"
-                    }
-                ]
-            """
-        )
-
-        val session = parseElementsSession(json)
-
-        assertThat(session?.customer?.paymentMethods?.first()?.card?.cardArt).isNull()
-    }
-
-    @Test
     fun `Card art partial match only sets art on matching payment method`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             extraPaymentMethod = """
                 ,{
@@ -1926,8 +1908,6 @@ class ElementsSessionJsonParserTest {
 
     @Test
     fun `Multiple payment methods each get their card art`() {
-        enableCardArtRule.setEnabled(true)
-
         val json = createElementsSessionWithCardArt(
             extraPaymentMethod = """
                 ,{
@@ -1982,6 +1962,22 @@ class ElementsSessionJsonParserTest {
         ).parse(json)
     }
 
+    private fun createElementsSessionWithLinkBrand(linkBrand: String?): JSONObject {
+        val linkBrandField = if (linkBrand != null) """"link_brand": "$linkBrand",""" else ""
+        return JSONObject(
+            """
+            {
+              "link_settings": {
+                $linkBrandField
+                "link_bank_enabled": false,
+                "link_bank_onboarding_enabled": false
+              },
+              "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON
+            }
+            """.trimIndent()
+        )
+    }
+
     private fun createElementsSessionWithCardArt(
         cardArt: String? = null,
         extraPaymentMethod: String = "",
@@ -1991,6 +1987,12 @@ class ElementsSessionJsonParserTest {
             """
             {
               "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON,
+              "experiments_data": {
+                "arb_id": "arb_123",
+                "experiment_assignments": {
+                  "ocs_mobile_card_art": "treatment"
+                }
+              },
               "customer": {
                 $cardArtField
                 "customer_session": $CUSTOMER_SESSION_JSON,

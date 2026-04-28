@@ -25,6 +25,7 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.IncentiveEligibilitySession
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.model.PaymentIntentCreationFlow
@@ -286,6 +287,7 @@ internal object TestFactory {
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
         ),
         cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+        linkBrand = LinkBrand.Link,
     )
 
     val LINK_CONFIGURATION_WITH_INSTANT_DEBITS_ONBOARDING = LINK_CONFIGURATION.copy(

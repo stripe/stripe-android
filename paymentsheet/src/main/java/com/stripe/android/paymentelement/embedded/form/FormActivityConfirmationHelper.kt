@@ -1,11 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
-import androidx.activity.result.ActivityResultCaller
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.taptoadd.TapToAddHelper
-import com.stripe.android.common.taptoadd.TapToAddNextStep
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -15,7 +10,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -23,7 +17,6 @@ internal interface FormActivityConfirmationHelper {
     fun confirm()
 }
 
-@FormActivityScope
 internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
@@ -32,65 +25,9 @@ internal class DefaultFormActivityConfirmationHelper @Inject constructor(
     private val stateHelper: FormActivityStateHelper,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
-    private val tapToAddHelper: TapToAddHelper,
     private val customerStateHolder: CustomerStateHolder,
-    lifecycleOwner: LifecycleOwner,
-    activityResultCaller: ActivityResultCaller,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    formActivityRegistrar: FormActivityRegistrar
 ) : FormActivityConfirmationHelper {
-
-    init {
-        formActivityRegistrar.registerAndBootstrap(
-            activityResultCaller,
-            lifecycleOwner,
-            paymentMethodMetadata
-        )
-
-        lifecycleOwner.lifecycleScope.launch {
-            tapToAddHelper.nextStep.collect { result ->
-                val formResult = when (result) {
-                    is TapToAddNextStep.ConfirmSavedPaymentMethod -> {
-                        stateHelper.updateSavedPaymentSelectionToConfirm(
-                            result.paymentSelection,
-                        )
-                        null
-                    }
-                    is TapToAddNextStep.ShowSavedPaymentMethods -> {
-                        FormResult.Complete(
-                            selection = result.paymentSelection,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value,
-                        )
-                    }
-                    TapToAddNextStep.Complete -> {
-                        FormResult.Complete(
-                            selection = null,
-                            hasBeenConfirmed = true,
-                            customerState = customerStateHolder.customer.value
-                        )
-                    }
-                    is TapToAddNextStep.Continue -> {
-                        customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
-                        FormResult.Complete(
-                            selection = result.paymentSelection,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value
-                        )
-                    }
-                }
-                formResult?.let {
-                    stateHelper.setResult(it)
-                }
-            }
-        }
-
-        lifecycleOwner.lifecycleScope.launch {
-            confirmationHandler.state.collectLatest {
-                stateHelper.updateConfirmationState(it)
-            }
-        }
-    }
 
     override fun confirm() {
         if (onClickDelegate.onClickOverride != null) {

@@ -19,6 +19,7 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
@@ -28,7 +29,9 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PassiveCaptchaParamsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -37,6 +40,7 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationOption
+import com.stripe.android.paymentelement.confirmation.PAYMENT_INTENT
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.asLaunch
 import com.stripe.android.paymentelement.confirmation.asNew
@@ -378,7 +382,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
             val action = definition.action(
                 confirmationOption = savedOption,
-                confirmationArgs = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_ARGS_WITH_CUSTOMER_EK,
             )
 
             val getAccountStatusFlowCall = coordinatorScenario.getAccountStatusFlowCalls.awaitItem()
@@ -386,6 +390,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
             val attachExistingCardCall = coordinatorScenario.attachExistingCardToAccountCalls.awaitItem()
             assertThat(attachExistingCardCall.configuration).isEqualTo(savedOption.linkConfiguration)
+            assertThat(attachExistingCardCall.customerEphemeralKey).isEqualTo("ek_123")
             assertThat(attachExistingCardCall.paymentMethod).isEqualTo(savedOption.paymentMethod)
 
             assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -412,12 +417,13 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
             val action = definition.action(
                 confirmationOption = savedOption,
-                confirmationArgs = CONFIRMATION_PARAMETERS,
+                confirmationArgs = CONFIRMATION_ARGS_WITH_CUSTOMER_EK,
             )
 
             assertThat(coordinatorScenario.getAccountStatusFlowCalls.awaitItem()).isNotNull()
 
             val attachExistingCardCall = coordinatorScenario.attachExistingCardToAccountCalls.awaitItem()
+            assertThat(attachExistingCardCall.customerEphemeralKey).isEqualTo("ek_123")
             assertThat(attachExistingCardCall.paymentMethod).isEqualTo(savedOption.paymentMethod)
 
             assertThat(action).isInstanceOf<ConfirmationDefinition.Action.Launch<Unit>>()
@@ -806,6 +812,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
                 clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
+                linkBrand = LinkBrand.Link,
             ),
             userInput = userInput,
         )
@@ -957,9 +964,16 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         override suspend fun attachExistingCardToAccount(
             configuration: LinkConfiguration,
+            customerEphemeralKey: String,
             paymentMethod: PaymentMethod,
         ): Result<LinkPaymentDetails.Saved> {
-            attachExistingCardToAccountCalls.add(AttachExistingCardToAccountCall(configuration, paymentMethod))
+            attachExistingCardToAccountCalls.add(
+                AttachExistingCardToAccountCall(
+                    configuration = configuration,
+                    customerEphemeralKey = customerEphemeralKey,
+                    paymentMethod = paymentMethod,
+                )
+            )
 
             return attachExistingCardToAccountResult
         }
@@ -984,6 +998,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
 
         data class AttachExistingCardToAccountCall(
             val configuration: LinkConfiguration,
+            val customerEphemeralKey: String,
             val paymentMethod: PaymentMethod,
         )
 
@@ -1031,6 +1046,14 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
     }
 
     private companion object {
+        private val CONFIRMATION_ARGS_WITH_CUSTOMER_EK = CONFIRMATION_PARAMETERS.copy(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT,
+                passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
+                hasCustomerConfiguration = true,
+            )
+        )
+
         private val DEFAULT_CONSUMER_CARD = ConsumerPaymentDetails.Card(
             id = "pm_123",
             last4 = "4242",

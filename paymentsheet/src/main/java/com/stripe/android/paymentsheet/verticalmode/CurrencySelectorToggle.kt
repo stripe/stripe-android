@@ -7,13 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Divider
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -22,14 +24,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val TEST_TAG_CURRENCY_SELECTOR = "TEST_TAG_CURRENCY_SELECTOR"
 
 internal const val TEST_TAG_CURRENCY_OPTION_PREFIX = "TEST_TAG_CURRENCY_OPTION_"
+
+internal const val TEST_TAG_CURRENCY_SELECTOR_ERROR = "TEST_TAG_CURRENCY_SELECTOR_ERROR"
 
 private const val DISABLED_ALPHA = 0.6f
 
@@ -50,9 +57,10 @@ internal fun CurrencySelectorToggle(
     options: CurrencySelectorOptions,
     onCurrencySelected: (CurrencyOption) -> Unit,
     isEnabled: Boolean,
+    errorMessage: String? = null,
     modifier: Modifier = Modifier,
 ) {
-    val shape = MaterialTheme.stripeShapes.roundedCornerShape
+    val shape = RoundedCornerShape(percent = 50)
     val borderColor = MaterialTheme.stripeColors.componentBorder
 
     Column(modifier = modifier) {
@@ -74,12 +82,6 @@ internal fun CurrencySelectorToggle(
                     .height(IntrinsicSize.Min),
             ) {
                 CurrencyOptionItem(options.first, options, onCurrencySelected, isEnabled)
-                Divider(
-                    color = borderColor,
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .width(MaterialTheme.stripeShapes.borderStrokeWidth.dp),
-                )
                 CurrencyOptionItem(options.second, options, onCurrencySelected, isEnabled)
             }
         }
@@ -88,7 +90,22 @@ internal fun CurrencySelectorToggle(
                 text = options.exchangeRateText,
                 style = MaterialTheme.typography.caption,
                 color = MaterialTheme.stripeColors.subtitle,
-                modifier = Modifier.padding(top = 4.dp),
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+            )
+        }
+        if (errorMessage != null) {
+            Text(
+                text = errorMessage,
+                style = MaterialTheme.typography.caption,
+                color = MaterialTheme.colors.error,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+                    .testTag(TEST_TAG_CURRENCY_SELECTOR_ERROR),
             )
         }
     }
@@ -103,7 +120,7 @@ private fun RowScope.CurrencyOptionItem(
 ) {
     val isSelected = currency.code == options.selectedCode
     val backgroundColor = if (isSelected) {
-        MaterialTheme.colors.primary.copy(alpha = 0.12f)
+        MaterialTheme.colors.primary
     } else {
         MaterialTheme.stripeColors.component
     }
@@ -118,14 +135,32 @@ private fun RowScope.CurrencyOptionItem(
                 enabled = isEnabled && !isSelected,
                 onClick = { onCurrencySelected(currency) },
             )
-            .padding(vertical = 12.dp)
+            .padding(vertical = 4.dp)
             .testTag("$TEST_TAG_CURRENCY_OPTION_PREFIX${currency.code}"),
     ) {
-        Text(
-            text = currency.displayableText,
-            style = MaterialTheme.typography.subtitle1,
-            color = MaterialTheme.stripeColors.onComponent,
-            fontWeight = if (isSelected) FontWeight.Medium else null,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            if (isSelected) {
+                Icon(
+                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colors.onPrimary,
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = currency.displayableText,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = MaterialTheme.colors.onPrimary,
+                    fontWeight = if (isSelected) FontWeight.Medium else null,
+                )
+            } else {
+                Text(
+                    text = currency.displayableText,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = MaterialTheme.stripeColors.onComponent,
+                    fontWeight = if (isSelected) FontWeight.Medium else null,
+                )
+            }
+        }
     }
 }

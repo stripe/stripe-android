@@ -2,8 +2,8 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -53,7 +53,9 @@ internal class MandateHandler(
                 coroutineScope = viewModel.viewModelScope,
                 selection = viewModel.selection,
                 merchantDisplayName = viewModel.config.merchantDisplayName,
-                isVerticalModeProvider = { viewModel.getPaymentMethodLayout() != PaymentMethodLayout.Horizontal },
+                isVerticalModeProvider = {
+                    viewModel.paymentMethodMetadata.value?.paymentMethodOrientation == PaymentMethodOrientation.Vertical
+                },
                 isSetupFlowProvider = { viewModel.paymentMethodMetadata.value?.stripeIntent is SetupIntent },
             )
         }

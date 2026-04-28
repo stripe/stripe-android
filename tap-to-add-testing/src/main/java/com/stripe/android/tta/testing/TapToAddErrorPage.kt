@@ -9,19 +9,19 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
 class TapToAddErrorPage(
     private val composeTestRule: ComposeTestRule,
 ) {
-    fun assertShown(errorMessage: String) {
-        assertHasErrorTitle()
-        composeTestRule.onNode(hasText(errorMessage)).isDisplayed()
+    fun assertShown(
+        expectedTitle: String,
+        expectedAction: String
+    ) {
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
+            composeTestRule.onNode(hasText(expectedTitle)).isDisplayed()
+        }
+        composeTestRule.onNode(hasText(expectedTitle)).assertIsDisplayed()
+        composeTestRule.onNode(hasText(expectedAction)).assertIsDisplayed()
         composeTestRule.retrieveCloseButton().assertIsDisplayed().assertIsEnabled()
     }
 
     fun clickCloseButton() {
         composeTestRule.retrieveCloseButton().click()
-    }
-
-    private fun assertHasErrorTitle() {
-        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT) {
-            composeTestRule.onNode(hasText("Error")).isDisplayed()
-        }
     }
 }

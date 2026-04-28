@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -57,6 +58,7 @@ class LinkOptionalInlineSignupScreenshotTest {
                 signUpState = SignUpState.InputtingPrimaryField,
                 enabled = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
             )
         }
@@ -87,6 +89,7 @@ class LinkOptionalInlineSignupScreenshotTest {
                 signUpState = SignUpState.VerifyingEmail,
                 enabled = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
             )
         }
@@ -117,6 +120,7 @@ class LinkOptionalInlineSignupScreenshotTest {
                 signUpState = SignUpState.InputtingRemainingFields,
                 enabled = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
             )
         }
@@ -150,6 +154,7 @@ class LinkOptionalInlineSignupScreenshotTest {
                 signUpState = SignUpState.InputtingPrimaryField,
                 enabled = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
             )
         }
@@ -183,6 +188,7 @@ class LinkOptionalInlineSignupScreenshotTest {
                 signUpState = SignUpState.InputtingRemainingFields,
                 enabled = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
             )
         }

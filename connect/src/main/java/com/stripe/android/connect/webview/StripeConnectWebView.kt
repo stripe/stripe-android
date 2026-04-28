@@ -441,7 +441,10 @@ internal class StripeConnectWebView private constructor(
                 ?: view.context.getString(android.R.string.cancel).takeIf { isConfirm }
 
             // Prepare and show the dialog.
-            AlertDialog.Builder(view.context)
+            // Use the two-arg Builder to enforce an AppCompat theme. On some devices/OEM WebView
+            // implementations, view.context may not carry AppCompat theme attributes, which causes
+            // AppCompatDelegateImpl.createSubDecor to throw an IllegalStateException.
+            AlertDialog.Builder(view.context, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
                 .setCancelable(true)
                 .setOnCancelListener {
                     didConfirm = false

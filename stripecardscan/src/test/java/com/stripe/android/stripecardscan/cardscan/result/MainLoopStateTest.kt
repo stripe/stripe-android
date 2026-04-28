@@ -305,4 +305,134 @@ class MainLoopStateTest {
         // Should go directly to Finished, not ExpiryWait
         assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
     }
+
+    @Test
+    fun `Prediction source defaults to Unknown`() {
+        assertThat(CardOcr.Prediction(pan = "4242424242424242").source).isEqualTo(CardOcr.Source.Unknown)
+    }
+
+    @Test
+    fun `OcrFound does not report disagreement when only one model is active`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource)
+
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+
+        assertThat(state.hasModelDisagreement).isFalse()
+    }
+
+    @Test
+    fun `OcrFound does not report disagreement when model leaders agree`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource)
+
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.Darknite,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.Darknite,
+            )
+        )
+
+        assertThat(state.hasModelDisagreement).isFalse()
+    }
+
+    @Test
+    fun `OcrFound reports disagreement when models repeatedly favor different PANs`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource)
+
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "5555555555554444",
+                source = CardOcr.Source.Darknite,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "5555555555554444",
+                source = CardOcr.Source.Darknite,
+            )
+        )
+
+        assertThat(state).isInstanceOf(MainLoopState.OcrFound::class.java)
+        assertThat(state.hasModelDisagreement).isTrue()
+    }
+
+    @Test
+    fun `Finished preserves disagreement flag when reached after disagreement`() = runTest {
+        var state: MainLoopState = MainLoopState.Initial(timeSource)
+
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "5555555555554444",
+                source = CardOcr.Source.Darknite,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "5555555555554444",
+                source = CardOcr.Source.Darknite,
+            )
+        )
+        state = state.consumeTransition(
+            CardOcr.Prediction(
+                pan = "4242424242424242",
+                source = CardOcr.Source.MlKit,
+            )
+        )
+
+        assertThat(state).isInstanceOf(MainLoopState.Finished::class.java)
+        assertThat(state.hasModelDisagreement).isTrue()
+        assertThat((state as MainLoopState.Finished).pan).isEqualTo("4242424242424242")
+    }
 }

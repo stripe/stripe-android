@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.form
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -13,9 +14,11 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
@@ -115,6 +118,8 @@ internal class FormActivityScreenShotTest {
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val confirmationHandler = FakeConfirmationHandler()
+        confirmationHandler.state.value = confirmationState
         val stateHolder = DefaultFormActivityStateHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
@@ -122,6 +127,9 @@ internal class FormActivityScreenShotTest {
             coroutineScope = TestScope(UnconfinedTestDispatcher()),
             onClickDelegate = OnClickDelegateOverrideImpl(),
             eventReporter = FakeEventReporter(),
+            confirmationHandler = confirmationHandler,
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+            customerStateHolder = FakeCustomerStateHolder(),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -144,22 +152,22 @@ internal class FormActivityScreenShotTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
         ).create()
 
-        stateHolder.updateConfirmationState(confirmationState)
         stateHolder.updateMandate(usBankMandate)
         stateHolder.updateSavedPaymentSelectionToConfirm(savedPaymentMethodSelectionToConfirm)
         val state by stateHolder.state.collectAsState()
 
         ViewModelStoreOwnerContext {
-            FormActivityUI(
-                interactor = interactor,
-                eventReporter = eventReporter,
-                onClick = {},
-                onProcessingCompleted = {},
-                state = state.copy(isEnabled = enabled),
-                onDismissed = {},
-                updateSelection = {},
-                savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
-            )
+            Column {
+                FormScreenContent(
+                    interactor = interactor,
+                    eventReporter = eventReporter,
+                    onClick = {},
+                    onProcessingCompleted = {},
+                    state = state.copy(isEnabled = enabled),
+                    updateSelection = {},
+                    savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
+                )
+            }
         }
     }
 }

@@ -17,7 +17,7 @@ internal class CurrencySelectorToggleScreenshotTest {
         SystemAppearance.entries,
         PaymentSheetAppearance.entries,
         FontSize.entries,
-        boxModifier = Modifier.padding(horizontal = 16.dp),
+        boxModifier = Modifier.padding(all = 16.dp),
     )
 
     private val options = CurrencySelectorOptions(
@@ -56,6 +56,18 @@ internal class CurrencySelectorToggleScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = false,
+            )
+        }
+    }
+
+    @Test
+    fun testErrorMessage() {
+        paparazziRule.snapshot {
+            CurrencySelectorToggle(
+                options = options,
+                onCurrencySelected = {},
+                isEnabled = true,
+                errorMessage = "Something went wrong. Try again.",
             )
         }
     }

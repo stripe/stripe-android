@@ -10,4 +10,12 @@ internal interface CardScanEventsReporter {
     fun scanFailed(error: Throwable?)
 
     fun scanCancelled(reason: CancellationReason)
+
+    fun scanMlKitFoundPan()
+
+    fun scanMlKitFoundExp()
+
+    fun scanDarkniteFoundPan()
+
+    fun scanModelsDisagree()
 }

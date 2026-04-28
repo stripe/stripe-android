@@ -17,9 +17,9 @@
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Confirm the payment in your bank\'s app within %s to complete the purchase.</string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->
-  <string name="stripe_cashapp_afterpay_subtitle">Buy now or pay later with Cash App Afterpay</string>
+    <string name="stripe_cashapp_afterpay_subtitle">Buy Now, Pay Later with Cash App Afterpay</string>
   <!-- This shows the message on Buy Now Pay Later LPM, clearpay. -->
-  <string name="stripe_clearpay_subtitle">Buy now or pay later with Clearpay</string>
+    <string name="stripe_clearpay_subtitle">Buy Now, Pay Later with Clearpay</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
   <string name="stripe_confirm_close_form_body">Your payment information will not be saved.</string>
   <!-- Used as the title for prompting the user if they want to close the sheet -->
@@ -92,6 +92,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_or_enter_manually">or enter manually</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Pay with Link</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">Pay with %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[By continuing, you agree to authorize payments pursuant to <terms>these terms</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -269,10 +271,28 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">Card added</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Tap to add</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">Card declined</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Try tapping your card again</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">Card not supported</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">Turn developer options off and try again</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Try another network and tap again</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Paid %s</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Go back and tap your card again</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">Tap to add is not supported by your device</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Try another device</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Device not supported</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Try another card</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancel and pay another way</string>
   <!-- Text on a screen asking the user to approve a payment -->

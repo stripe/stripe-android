@@ -14,6 +14,6 @@ internal fun PaymentMethod.toDisplayableSavedPaymentMethod(
         displayName = paymentMethodMetadata?.displayNameForCode(type?.code).orEmpty(),
         paymentMethod = this,
         isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
-        shouldShowDefaultBadge = id == defaultPaymentMethodId
+        shouldShowDefaultBadge = id == defaultPaymentMethodId,
     )
 }

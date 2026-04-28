@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.ui.getSublabel
 import com.stripe.android.paymentsheet.ui.readNumbersAsIndividualDigits
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconHeight
-import com.stripe.android.paymentsheet.verticalmode.UIConstants.iconWidth
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.strings.resolve
 
@@ -57,7 +56,7 @@ internal fun SavedPaymentMethodRowButton(
             CardArtImage(
                 url = displayableSavedPaymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
                 modifier = Modifier
-                    .width(iconWidth)
+                    .width(UIConstants.iconWidth)
                     .height(iconHeight)
             ) {
                 PaymentMethodIconFromResource(
@@ -68,7 +67,7 @@ internal fun SavedPaymentMethodRowButton(
                     alignment = Alignment.Center,
                     modifier = Modifier
                         .height(iconHeight)
-                        .width(iconWidth)
+                        .width(UIConstants.iconWidth)
                         .testMetadata(displayBrand)
                 )
             }
@@ -105,7 +104,7 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
                 brand = CardBrand.Visa,
                 last4 = "4242",
             )
-        )
+        ),
     )
 
     DefaultStripeTheme {
@@ -143,7 +142,7 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
                 brand = CardBrand.AmericanExpress,
                 last4 = "4444",
             )
-        )
+        ),
     )
 
     DefaultStripeTheme {

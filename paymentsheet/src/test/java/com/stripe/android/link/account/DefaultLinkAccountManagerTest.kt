@@ -479,14 +479,17 @@ class DefaultLinkAccountManagerTest {
     fun `createPaymentDetailsFromPaymentMethod returns success when account exists`() = runSuspendTest {
         val linkRepository = object : FakeLinkRepository() {
             var createPaymentDetailsFromPaymentMethodCallCount = 0
+            var capturedCustomerEphemeralKey = "not_called"
             override suspend fun createPaymentDetailsFromPaymentMethod(
                 paymentMethod: PaymentMethod,
                 userEmail: String,
                 stripeIntent: StripeIntent,
                 consumerSessionClientSecret: String,
                 clientAttributionMetadata: ClientAttributionMetadata,
+                customerEphemeralKey: String,
             ): Result<LinkPaymentDetails.Saved> {
                 createPaymentDetailsFromPaymentMethodCallCount += 1
+                capturedCustomerEphemeralKey = customerEphemeralKey
                 return Result.success(
                     LinkPaymentDetails.Saved(
                         paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
@@ -503,11 +506,16 @@ class DefaultLinkAccountManagerTest {
         )
 
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        val result = accountManager.createPaymentDetailsFromPaymentMethod(paymentMethod)
+        val ephemeralKey = "ek_test_key"
+        val result = accountManager.createPaymentDetailsFromPaymentMethod(
+            customerEphemeralKey = ephemeralKey,
+            paymentMethod = paymentMethod,
+        )
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()?.paymentMethod).isEqualTo(paymentMethod)
         assertThat(linkRepository.createPaymentDetailsFromPaymentMethodCallCount).isEqualTo(1)
+        assertThat(linkRepository.capturedCustomerEphemeralKey).isEqualTo(ephemeralKey)
     }
 
     @Test
@@ -516,7 +524,8 @@ class DefaultLinkAccountManagerTest {
         accountManager.setTestAccount(null, null)
 
         val result = accountManager.createPaymentDetailsFromPaymentMethod(
-            PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            customerEphemeralKey = "ek_test_key",
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
 
         assertThat(result.isFailure).isTrue()
@@ -1084,7 +1093,7 @@ class DefaultLinkAccountManagerTest {
         linkRepository: LinkRepository = FakeLinkRepository(),
         linkEventsReporter: LinkEventsReporter = AccountManagerEventsReporter(),
         allowUserEmailEdits: Boolean = true,
-        linkAuth: LinkAuth = fakeLinkAuth()
+        linkAuth: LinkAuth = fakeLinkAuth(),
     ): DefaultLinkAccountManager {
         val customerInfo = TestFactory.LINK_CONFIGURATION.customerInfo.copy(
             email = customerEmail,
@@ -1095,7 +1104,7 @@ class DefaultLinkAccountManagerTest {
                 stripeIntent = stripeIntent,
                 passthroughModeEnabled = passthroughModeEnabled,
                 customerInfo = customerInfo,
-                allowUserEmailEdits = allowUserEmailEdits
+                allowUserEmailEdits = allowUserEmailEdits,
             ),
             linkRepository = linkRepository,
             linkEventsReporter = linkEventsReporter,

@@ -15,6 +15,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -578,6 +579,7 @@ internal class AddPaymentMethodTest {
                 isExpanded = true,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -609,6 +611,7 @@ internal class AddPaymentMethodTest {
                 isExpanded = true,
                 allowsDefaultOptIn = false,
                 linkSignUpOptInFeatureEnabled = false,
+                linkBrand = LinkBrand.Link,
             )
         )
 

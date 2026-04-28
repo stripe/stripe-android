@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.analytics.experiment.CardArtExperimentHandler
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
@@ -34,6 +35,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -221,6 +223,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
+    private val cardArtExperimentHandler: CardArtExperimentHandler,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
@@ -378,6 +381,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
+        cardArtExperimentHandler.logExposure(
+            elementsSession = elementsSession,
+            paymentMethodMetadata = pmMetadata,
+            savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
+            integrationConfiguration = integrationConfiguration,
+            defaultPaymentSelection = state.paymentSelection,
+        )
+
         logLinkExperimentExposures(
             elementsSession = elementsSession,
             state = state
@@ -387,7 +398,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state,
             isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            paymentMethodMetadata = pmMetadata,
+            paymentMethodMetadata = state.paymentMethodMetadata,
         )
 
         return@runCatching state
@@ -481,7 +492,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
         )
 
-        return PaymentMethodMetadata.createForPaymentElement(
+        val paymentMethodLayout = when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.PaymentSheet ->
+                integrationConfiguration.configuration.paymentMethodLayout
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
+        }
+
+        val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
@@ -494,7 +512,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
+            paymentMethodLayout = paymentMethodLayout,
         )
+
+        return paymentMethodMetadata
     }
 
     private suspend fun isGooglePayReady(

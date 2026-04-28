@@ -21,6 +21,7 @@ import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.delay
@@ -468,6 +469,7 @@ internal class VerificationViewModelTest {
             linkLaunchMode = linkLaunchMode,
             webLinkAuthChannel = webLinkAuthChannel,
             isDialog = false,
+            linkBrand = LinkBrand.Link,
             onVerificationSucceeded = onVerificationSucceeded,
             onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,

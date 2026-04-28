@@ -20,6 +20,7 @@ import com.stripe.android.link.verification.VerificationState.Render2FA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -80,6 +81,7 @@ internal interface WalletButtonsInteractor {
         data class Link(
             val state: LinkButtonState,
             val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
+            val linkBrand: LinkBrand = LinkBrand.Link,
         ) : WalletButton {
             override val walletType = WalletType.Link
 
@@ -194,7 +196,9 @@ internal class DefaultWalletButtonsInteractor constructor(
                                 linkEmail = arguments.linkEmail,
                                 paymentDetails = linkAccountInfo.account?.displayablePaymentDetails
                             ),
-                            theme = arguments.configuration.walletButtons?.buttonThemes?.link ?: LinkButtonTheme.DEFAULT
+                            theme = arguments.configuration.walletButtons?.buttonThemes?.link
+                                ?: LinkButtonTheme.DEFAULT,
+                            linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link,
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&

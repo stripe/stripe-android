@@ -29,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
@@ -37,10 +36,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
+import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.paymentsheet.R
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -87,6 +88,7 @@ internal fun LinkOptionalInlineSignup(
         isShowingPhoneFirst = viewState.isShowingPhoneFirst,
         enabled = enabled,
         requiresNameCollection = viewModel.requiresNameCollection,
+        linkBrand = viewState.linkBrand,
         errorMessage = errorMessage?.resolve(),
         modifier = modifier
     )
@@ -103,6 +105,7 @@ internal fun LinkOptionalInlineSignup(
     signUpState: SignUpState,
     enabled: Boolean,
     requiresNameCollection: Boolean,
+    linkBrand: LinkBrand,
     errorMessage: String?,
     modifier: Modifier = Modifier
 ) {
@@ -144,6 +147,7 @@ internal fun LinkOptionalInlineSignup(
             isShowingPhoneFirst = isShowingPhoneFirst,
             requiresNameCollection = requiresNameCollection,
             allowsDefaultOptIn = false,
+            linkBrand = linkBrand,
             errorMessage = errorMessage,
             emailFocusRequester = emailFocusRequester,
             phoneFocusRequester = phoneFocusRequester,
@@ -158,6 +162,7 @@ internal fun LinkOptionalInlineSignup(
             } else {
                 LinkTermsType.InlineOptional
             },
+            linkBrand = linkBrand,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(top = 8.dp)
@@ -217,16 +222,17 @@ internal fun EmailCollection(
 @Composable
 internal fun LinkLogo(
     modifier: Modifier = Modifier,
+    linkBrand: LinkBrand,
 ) {
     Icon(
         painter = painterResource(
             id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                R.drawable.stripe_link_logo_knockout_black
+                linkBrand.logoRes(LinkLogoStyle.TermsKnockoutBlack)
             } else {
-                R.drawable.stripe_link_logo_knockout_white
+                linkBrand.logoRes(LinkLogoStyle.TermsKnockoutWhite)
             }
         ),
-        contentDescription = stringResource(id = com.stripe.android.R.string.stripe_link),
+        contentDescription = linkBrand.brandName(),
         modifier = modifier.semantics {
             testTag = "LinkLogoIcon"
         },
@@ -248,6 +254,7 @@ private fun PreviewInitial() {
                 enabled = true,
                 isShowingPhoneFirst = false,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )
@@ -269,6 +276,7 @@ private fun PreviewInitialWithPhoneFirst() {
                 enabled = true,
                 isShowingPhoneFirst = true,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )
@@ -290,6 +298,7 @@ private fun PreviewFilledOut() {
                 enabled = true,
                 isShowingPhoneFirst = false,
                 requiresNameCollection = true,
+                linkBrand = LinkBrand.Link,
                 errorMessage = null,
                 modifier = Modifier.padding(16.dp),
             )

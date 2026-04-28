@@ -11,6 +11,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -133,6 +134,7 @@ internal class SignUpBodyTest {
                     signUpEnabled = isReadyToSignUp,
                     requiresNameCollection = requiresNameCollection,
                     canEditEmail = canEditEmail,
+                    linkBrand = LinkBrand.Link,
                     errorMessage = errorMessage,
                     signUpState = signUpState,
                 ),

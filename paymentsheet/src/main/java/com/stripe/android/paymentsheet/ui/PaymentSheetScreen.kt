@@ -489,6 +489,7 @@ private fun WalletHeader(
                     LinkButton(
                         state = wallet.state,
                         enabled = state.buttonsEnabled,
+                        linkBrand = wallet.linkBrand,
                         onClick = onLinkPressed,
                     )
                 }
