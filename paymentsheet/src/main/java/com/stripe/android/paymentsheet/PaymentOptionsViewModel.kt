@@ -24,7 +24,6 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
-import com.stripe.android.link.linkBrandOrDefault
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.gate.LinkGate
@@ -178,7 +177,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             },
             onLinkPressed = {
                 updateSelection(
-                    Link(linkBrand = linkConfiguration.linkBrandOrDefault)
+                    Link(linkBrand = linkConfiguration?.linkBrandOrDefault ?: LinkBrand.Link)
                 )
                 onUserSelection()
             },
@@ -193,7 +192,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 hasLinkWithSelectedPayment.not(),
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-            linkBrand = linkConfiguration.linkBrandOrDefault,
+            linkBrand = linkConfiguration?.linkBrandOrDefault ?: LinkBrand.Link,
         )
     }
 
