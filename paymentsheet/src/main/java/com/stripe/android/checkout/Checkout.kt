@@ -4,12 +4,18 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.checkout.Checkout.Companion.configure
 import com.stripe.android.checkout.Checkout.Companion.createWithState
 import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
@@ -320,16 +326,27 @@ class Checkout private constructor(
 
     @Composable
     fun CurrencySelectorContent() {
+        val context = LocalContext.current
         val scope = rememberCoroutineScope()
         val isLoading by isLoading.collectAsState()
         val checkoutSession by checkoutSession.collectAsState()
         val currencySelectorOptions = checkoutSession.currencySelectorOptions ?: return
+        var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
+        LaunchedEffect(checkoutSession) {
+            errorMessage = null
+        }
         CurrencySelectorToggle(
             options = currencySelectorOptions,
             onCurrencySelected = { currencyOption ->
-                scope.launch(Dispatchers.Main.immediate) { updateCurrency(currencyOption.code) }
+                scope.launch(Dispatchers.Main.immediate) {
+                    updateCurrency(currencyOption.code)
+                        .onFailure { throwable ->
+                            errorMessage = throwable.stripeErrorMessage(context)
+                        }
+                }
             },
             isEnabled = !isLoading,
+            errorMessage = errorMessage,
         )
     }
 }

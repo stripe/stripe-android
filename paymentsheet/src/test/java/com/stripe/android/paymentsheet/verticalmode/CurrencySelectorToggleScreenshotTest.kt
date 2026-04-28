@@ -59,4 +59,16 @@ internal class CurrencySelectorToggleScreenshotTest {
             )
         }
     }
+
+    @Test
+    fun testErrorMessage() {
+        paparazziRule.snapshot {
+            CurrencySelectorToggle(
+                options = options,
+                onCurrencySelected = {},
+                isEnabled = true,
+                errorMessage = "Something went wrong. Try again.",
+            )
+        }
+    }
 }

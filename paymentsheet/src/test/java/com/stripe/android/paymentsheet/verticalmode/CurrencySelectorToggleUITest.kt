@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -45,9 +47,22 @@ internal class CurrencySelectorToggleUITest {
         onCurrencySelectedCalls.expectNoEvents()
     }
 
+    @Test
+    fun errorMessage_isDisplayed() = runScenario(errorMessage = "Something went wrong.") {
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_ERROR)
+            .assertIsDisplayed()
+            .assertTextEquals("Something went wrong.")
+    }
+
+    @Test
+    fun errorMessage_isNotDisplayed_whenNull() = runScenario(errorMessage = null) {
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_ERROR).assertDoesNotExist()
+    }
+
     private fun runScenario(
         selectedCode: String = "USD",
         isEnabled: Boolean = true,
+        errorMessage: String? = null,
         block: suspend Scenario.() -> Unit,
     ) {
         val onCurrencySelectedCalls = Turbine<CurrencyOption>()
@@ -61,6 +76,7 @@ internal class CurrencySelectorToggleUITest {
                 ),
                 onCurrencySelected = { onCurrencySelectedCalls.add(it) },
                 isEnabled = isEnabled,
+                errorMessage = errorMessage,
             )
         }
 
