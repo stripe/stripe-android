@@ -30,6 +30,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
@@ -766,8 +767,9 @@ class CheckoutTest {
     fun `ensureNoMutationInFlight throws when mutex is locked`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
+        val latch = CountDownLatch(1)
         networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
+            latch.await()
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 
@@ -782,6 +784,7 @@ class CheckoutTest {
         assertThat(error).hasMessageThat()
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
+        latch.countDown()
         deferred.cancel()
     }
 
@@ -789,8 +792,9 @@ class CheckoutTest {
     fun `setting state throws when mutex is locked`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
+        val latch = CountDownLatch(1)
         networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
+            latch.await()
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
 
@@ -805,6 +809,7 @@ class CheckoutTest {
         assertThat(error).hasMessageThat()
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
+        latch.countDown()
         deferred.cancel()
     }
 
@@ -851,6 +856,40 @@ class CheckoutTest {
         assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         assertThat(result.exceptionOrNull()).hasMessageThat()
             .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+    }
+
+    @Test
+    fun `updateCurrency updates checkoutSession on success`() = runCreateWithStateScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("updated_currency", "eur"),
+            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(checkoutSessionTurbine.awaitItem().totalSummary).isNull()
+
+        val result = checkout.updateCurrency("eur")
+
+        val updated = checkoutSessionTurbine.awaitItem()
+        result.getOrThrow()
+        assertThat(updated.totalSummary).isNotNull()
+    }
+
+    @Test
+    fun `updateCurrency returns failure on error response`() = runCreateWithStateScenario {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid currency"}}""")
+        }
+
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.updateCurrency("invalid")
+        assertThat(result.isFailure).isTrue()
+
+        checkoutSessionTurbine.expectNoEvents()
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
     @Test

@@ -3,6 +3,8 @@ package com.stripe.android.checkout
 import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
 import dev.drewhamilton.poko.Poko
 
 @Poko
@@ -14,6 +16,7 @@ class CheckoutSession internal constructor(
     val totalSummary: TotalSummary?,
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
+    internal val currencySelectorOptions: CurrencySelectorOptions?,
 ) {
 
     @Poko
@@ -78,6 +81,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(): CheckoutSession {
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
         shippingOptions = shippingOptions.map { it.asShippingRate() },
+        currencySelectorOptions = CurrencySelectorOptionsFactory.create(adaptivePricingInfo = adaptivePricingInfo)
     )
 }
 

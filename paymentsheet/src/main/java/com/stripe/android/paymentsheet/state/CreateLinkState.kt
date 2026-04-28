@@ -42,21 +42,27 @@ internal interface CreateLinkState {
 
 internal sealed interface LinkSignupModeResult : Parcelable {
     val mode: LinkSignupMode?
+    val availableForSavedPaymentMethods: Boolean
     val disabledReasons: List<LinkSignupDisabledReason>?
 
     @Parcelize
     data object AlreadyRegistered : LinkSignupModeResult {
         override val mode: LinkSignupMode? get() = null
+        override val availableForSavedPaymentMethods: Boolean get() = false
         override val disabledReasons: List<LinkSignupDisabledReason>? get() = null
     }
 
     @Parcelize
-    data class Enabled(override val mode: LinkSignupMode) : LinkSignupModeResult {
+    data class Enabled(
+        override val mode: LinkSignupMode,
+        override val availableForSavedPaymentMethods: Boolean,
+    ) : LinkSignupModeResult {
         override val disabledReasons: List<LinkSignupDisabledReason>? get() = null
     }
 
     @Parcelize
     data class Disabled(override val disabledReasons: List<LinkSignupDisabledReason>) : LinkSignupModeResult {
+        override val availableForSavedPaymentMethods: Boolean get() = false
         override val mode: LinkSignupMode? get() = null
     }
 }
@@ -196,7 +202,10 @@ internal class DefaultCreateLinkState @Inject constructor(
             else ->
                 LinkSignupMode.InsteadOfSaveForFutureUse
         }
-        return LinkSignupModeResult.Enabled(signupMode)
+        return LinkSignupModeResult.Enabled(
+            mode = signupMode,
+            availableForSavedPaymentMethods = elementsSession.isLinkInlineSignupWithSavedPaymentMethodsEnabled
+        )
     }
 
     // Create LinkConfiguration without validating whether Link should be enabled at all.

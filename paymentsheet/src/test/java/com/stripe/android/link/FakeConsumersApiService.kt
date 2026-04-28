@@ -173,7 +173,8 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         consumerSessionClientSecret: String,
         paymentMethodId: String,
         requestSurface: String,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        customerEphemeralKey: String,
     ): Result<ConsumerPaymentDetails> {
         createPaymentDetailsFromPaymentMethodCalls.add(
             CreatePaymentDetailsFromPaymentMethodCall(
@@ -181,6 +182,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
                 paymentMethodId = paymentMethodId,
                 requestSurface = requestSurface,
                 requestOptions = requestOptions,
+                customerEphemeralKey = customerEphemeralKey,
             )
         )
         return createPaymentDetailsFromPaymentMethodResult
@@ -269,5 +271,6 @@ internal open class FakeConsumersApiService : ConsumersApiService {
         val paymentMethodId: String,
         val requestSurface: String,
         val requestOptions: ApiRequest.Options,
+        val customerEphemeralKey: String,
     )
 }

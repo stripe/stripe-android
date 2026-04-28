@@ -15,11 +15,11 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-class DefaultLogCardArtExperimentTest {
+class DefaultCardArtExperimentHandlerTest {
 
     @Test
     fun `does not log when experimentsData is null`() = runScenario {
-        invoke(
+        logExposure(
             elementsSession = createElementsSession(experimentsData = null),
         )
 
@@ -28,7 +28,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `does not log when experiment assignment is missing`() = runScenario {
-        invoke(
+        logExposure(
             elementsSession = createElementsSession(
                 experimentsData = ElementsSession.ExperimentsData(
                     arbId = "arb_123",
@@ -42,16 +42,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `logs exposure with correct group when experiment is assigned`() = runScenario {
-        invoke(
-            elementsSession = createElementsSession(
-                experimentsData = ElementsSession.ExperimentsData(
-                    arbId = "arb_123",
-                    experimentAssignments = mapOf(
-                        ExperimentAssignment.OCS_MOBILE_CARD_ART to "treatment",
-                    ),
-                ),
-            ),
-        )
+        logExposure()
 
         val call = eventReporter.experimentExposureCalls.awaitItem()
         val experiment = call.experiment as LoggableExperiment.OcsMobileCardArt
@@ -62,7 +53,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `layout is horizontal for PaymentSheet with Horizontal layout`() = runScenario {
-        invoke(
+        logExposure(
             integrationConfiguration = paymentSheetConfiguration(
                 layout = PaymentSheet.PaymentMethodLayout.Horizontal,
             ),
@@ -74,7 +65,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `layout is vertical for PaymentSheet with Vertical layout`() = runScenario {
-        invoke(
+        logExposure(
             integrationConfiguration = paymentSheetConfiguration(
                 layout = PaymentSheet.PaymentMethodLayout.Vertical,
             ),
@@ -86,7 +77,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `layout is horizontal for PaymentSheet with Automatic layout`() = runScenario {
-        invoke(
+        logExposure(
             integrationConfiguration = paymentSheetConfiguration(
                 layout = PaymentSheet.PaymentMethodLayout.Automatic,
             ),
@@ -98,7 +89,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `saved_payment_method_count reflects total saved PMs`() = runScenario {
-        invoke(
+        logExposure(
             savedPaymentMethods = listOf(
                 createCardPaymentMethod(id = "pm_1"),
                 createCardPaymentMethod(id = "pm_2"),
@@ -112,7 +103,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `saved_card_payment_method_count counts only card PMs`() = runScenario {
-        invoke(
+        logExposure(
             savedPaymentMethods = listOf(
                 createCardPaymentMethod(id = "pm_1"),
                 createCardPaymentMethod(id = "pm_2"),
@@ -126,7 +117,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `saved_card_payment_method_with_card_art_count counts cards with art`() = runScenario {
-        invoke(
+        logExposure(
             savedPaymentMethods = listOf(
                 createCardPaymentMethod(id = "pm_1", hasCardArt = true),
                 createCardPaymentMethod(id = "pm_2", hasCardArt = false),
@@ -142,7 +133,7 @@ class DefaultLogCardArtExperimentTest {
     fun `selected_payment_method_type is set from default selection`() = runScenario {
         val savedPm = createCardPaymentMethod(id = "pm_1")
 
-        invoke(
+        logExposure(
             savedPaymentMethods = listOf(savedPm),
             defaultPaymentSelection = PaymentSelection.Saved(savedPm),
         )
@@ -153,7 +144,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `selected_payment_method_type is google_pay for GooglePay selection`() = runScenario {
-        invoke(
+        logExposure(
             defaultPaymentSelection = PaymentSelection.GooglePay,
         )
 
@@ -163,7 +154,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `selected_payment_method_type is null when no selection`() = runScenario {
-        invoke(
+        logExposure(
             defaultPaymentSelection = null,
         )
 
@@ -175,7 +166,7 @@ class DefaultLogCardArtExperimentTest {
     fun `selected_payment_method_has_card_art is true when saved card has art`() = runScenario {
         val savedPm = createCardPaymentMethod(id = "pm_1", hasCardArt = true)
 
-        invoke(
+        logExposure(
             savedPaymentMethods = listOf(savedPm),
             defaultPaymentSelection = PaymentSelection.Saved(savedPm),
         )
@@ -188,7 +179,7 @@ class DefaultLogCardArtExperimentTest {
     fun `selected_payment_method_has_card_art is false when saved card has no art`() = runScenario {
         val savedPm = createCardPaymentMethod(id = "pm_1", hasCardArt = false)
 
-        invoke(
+        logExposure(
             savedPaymentMethods = listOf(savedPm),
             defaultPaymentSelection = PaymentSelection.Saved(savedPm),
         )
@@ -199,7 +190,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `selected_payment_method_has_card_art is false for non-saved selection`() = runScenario {
-        invoke(
+        logExposure(
             defaultPaymentSelection = PaymentSelection.GooglePay,
         )
 
@@ -209,7 +200,7 @@ class DefaultLogCardArtExperimentTest {
 
     @Test
     fun `all counts are zero when no saved PMs`() = runScenario {
-        invoke(
+        logExposure(
             savedPaymentMethods = emptyList(),
         )
 
@@ -224,13 +215,13 @@ class DefaultLogCardArtExperimentTest {
     ) = runTest {
         val eventReporter = FakeEventReporter()
 
-        val sut = DefaultLogCardArtExperiment(
+        val cardArtExperimentHandler = DefaultCardArtExperimentHandler(
             eventReporter = eventReporter,
             mode = EventReporter.Mode.Complete,
         )
 
         Scenario(
-            sut = sut,
+            cardArtExperimentHandler = cardArtExperimentHandler,
             eventReporter = eventReporter,
         ).apply { block() }
 
@@ -238,7 +229,7 @@ class DefaultLogCardArtExperimentTest {
     }
 
     private data class Scenario(
-        val sut: DefaultLogCardArtExperiment,
+        val cardArtExperimentHandler: DefaultCardArtExperimentHandler,
         val eventReporter: FakeEventReporter,
     ) {
         private val defaultElementsSession = createElementsSession(
@@ -250,7 +241,7 @@ class DefaultLogCardArtExperimentTest {
             ),
         )
 
-        fun invoke(
+        fun logExposure(
             elementsSession: ElementsSession = defaultElementsSession,
             paymentMethodMetadata: com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata =
                 PaymentMethodMetadataFactory.create(),
@@ -258,7 +249,7 @@ class DefaultLogCardArtExperimentTest {
             integrationConfiguration: PaymentElementLoader.Configuration = paymentSheetConfiguration(),
             defaultPaymentSelection: PaymentSelection? = null,
         ) {
-            sut(
+            cardArtExperimentHandler.logExposure(
                 elementsSession = elementsSession,
                 paymentMethodMetadata = paymentMethodMetadata,
                 savedPaymentMethods = savedPaymentMethods,

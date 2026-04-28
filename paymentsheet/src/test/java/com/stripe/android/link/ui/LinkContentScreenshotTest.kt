@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.stripe.android.link.LinkScreen
 import com.stripe.android.link.LinkScreenContentBody
 import com.stripe.android.link.ScreenState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -56,6 +57,7 @@ internal class LinkContentScreenshotTest {
                             showHeader = true,
                             title = null,
                             isElevated = false,
+                            linkBrand = LinkBrand.Link,
                         ),
                         bottomSheetContent = null,
                         initialDestination = LinkScreen.Loading,
@@ -94,6 +96,7 @@ internal class LinkContentScreenshotTest {
                         canNavigateBack = false,
                         title = null,
                         isElevated = false,
+                        linkBrand = LinkBrand.Link,
                     ),
                     eventReporter = eventReporter,
                     navigationChannel = MutableSharedFlow(),

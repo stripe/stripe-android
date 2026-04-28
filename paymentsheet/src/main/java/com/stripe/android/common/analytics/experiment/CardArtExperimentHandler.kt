@@ -11,8 +11,12 @@ import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
-internal interface LogCardArtExperiment {
-    operator fun invoke(
+internal interface CardArtExperimentHandler {
+    /**
+     * Logs the experiment exposure with full dimensions. Should be called after
+     * payment method metadata and default selection are resolved.
+     */
+    fun logExposure(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
         savedPaymentMethods: List<PaymentMethod>,
@@ -21,12 +25,12 @@ internal interface LogCardArtExperiment {
     )
 }
 
-internal class DefaultLogCardArtExperiment @Inject constructor(
+internal class DefaultCardArtExperimentHandler @Inject constructor(
     private val eventReporter: EventReporter,
     private val mode: EventReporter.Mode,
-) : LogCardArtExperiment {
+) : CardArtExperimentHandler {
 
-    override fun invoke(
+    override fun logExposure(
         elementsSession: ElementsSession,
         paymentMethodMetadata: PaymentMethodMetadata,
         savedPaymentMethods: List<PaymentMethod>,
@@ -34,6 +38,8 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
         defaultPaymentSelection: PaymentSelection?,
     ) {
         val experimentsData = elementsSession.experimentsData ?: return
+        val variant = experimentsData.experimentAssignments[ExperimentAssignment.OCS_MOBILE_CARD_ART]
+            ?: return
 
         val savedCardPaymentMethods = savedPaymentMethods.filter { it.type == PaymentMethod.Type.Card }
 
@@ -43,25 +49,21 @@ internal class DefaultLogCardArtExperiment @Inject constructor(
             ?.cardArt
             ?.artImage != null
 
-        experimentsData.experimentAssignments[
-            ExperimentAssignment.OCS_MOBILE_CARD_ART,
-        ]?.let { variant ->
-            eventReporter.onExperimentExposure(
-                LoggableExperiment.OcsMobileCardArt(
-                    experimentsData = experimentsData,
-                    experiment = ExperimentAssignment.OCS_MOBILE_CARD_ART,
-                    group = variant,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                    mode = mode,
-                    layout = integrationConfiguration.layoutDimensionValue(),
-                    savedPaymentMethodCount = savedPaymentMethods.size,
-                    savedCardPaymentMethodCount = savedCardPaymentMethods.size,
-                    savedCardPaymentMethodWithCardArtCount = savedCardPaymentMethods.count { it.card?.cardArt != null },
-                    selectedPaymentMethodType = defaultPaymentSelection?.paymentMethodType,
-                    selectedPaymentMethodHasCardArt = selectedPaymentMethodHasCardArt,
-                )
+        eventReporter.onExperimentExposure(
+            LoggableExperiment.OcsMobileCardArt(
+                experimentsData = experimentsData,
+                experiment = ExperimentAssignment.OCS_MOBILE_CARD_ART,
+                group = variant,
+                paymentMethodMetadata = paymentMethodMetadata,
+                mode = mode,
+                layout = integrationConfiguration.layoutDimensionValue(),
+                savedPaymentMethodCount = savedPaymentMethods.size,
+                savedCardPaymentMethodCount = savedCardPaymentMethods.size,
+                savedCardPaymentMethodWithCardArtCount = savedCardPaymentMethods.count { it.card?.cardArt != null },
+                selectedPaymentMethodType = defaultPaymentSelection?.paymentMethodType,
+                selectedPaymentMethodHasCardArt = selectedPaymentMethodHasCardArt,
             )
-        }
+        )
     }
 }
 

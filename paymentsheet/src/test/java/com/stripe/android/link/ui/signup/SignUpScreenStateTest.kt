@@ -26,6 +26,7 @@ class SignUpScreenStateTest {
 
         assertThat(result.signUpEnabled).isFalse()
         assertThat(result.signUpState).isEqualTo(SignUpState.InputtingPrimaryField)
+        assertThat(result.linkBrand).isEqualTo(LinkBrand.Link)
     }
 
     @Test

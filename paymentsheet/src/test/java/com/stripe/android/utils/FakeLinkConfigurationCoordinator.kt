@@ -110,7 +110,8 @@ internal class FakeLinkConfigurationCoordinator(
 
     override suspend fun attachExistingCardToAccount(
         configuration: LinkConfiguration,
-        paymentMethod: PaymentMethod
+        customerEphemeralKey: String,
+        paymentMethod: PaymentMethod,
     ): Result<LinkPaymentDetails.Saved> {
         return attachExistingCardToAccountResult
     }

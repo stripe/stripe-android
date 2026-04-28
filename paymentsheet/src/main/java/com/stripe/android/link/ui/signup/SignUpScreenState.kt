@@ -6,6 +6,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState.InputtingPrimaryField
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
+import com.stripe.android.model.LinkBrand
 
 @Immutable
 internal data class SignUpScreenState(
@@ -13,6 +14,7 @@ internal data class SignUpScreenState(
     val signUpEnabled: Boolean,
     val requiresNameCollection: Boolean,
     val canEditEmail: Boolean,
+    val linkBrand: LinkBrand,
     val signUpState: SignUpState = InputtingPrimaryField,
     val isSubmitting: Boolean = false,
     val errorMessage: ResolvableString? = null,
@@ -36,6 +38,7 @@ internal data class SignUpScreenState(
                 merchantName = configuration.merchantName,
                 requiresNameCollection = configuration.requiresNameCollection,
                 canEditEmail = configuration.allowUserEmailEdits,
+                linkBrand = configuration.linkBrand,
                 signUpState = signUpState,
             )
         }

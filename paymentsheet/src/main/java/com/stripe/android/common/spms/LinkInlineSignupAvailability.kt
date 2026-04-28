@@ -20,11 +20,10 @@ internal class DefaultLinkInlineSignupAvailability @Inject constructor(
     override fun availability(): LinkInlineSignupAvailability.Result {
         val linkState = paymentMethodMetadata.linkState
 
-        return when (linkState?.signupMode) {
+        return when (linkState?.signupModeResult?.availableForSavedPaymentMethods) {
+            true -> LinkInlineSignupAvailability.Result.Available(configuration = linkState.configuration)
+            false,
             null -> LinkInlineSignupAvailability.Result.Unavailable
-            else -> LinkInlineSignupAvailability.Result.Available(
-                configuration = linkState.configuration,
-            )
         }
     }
 }

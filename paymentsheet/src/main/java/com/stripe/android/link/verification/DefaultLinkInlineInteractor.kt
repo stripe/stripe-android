@@ -149,6 +149,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 linkConfiguration.enableDisplayableDefaultValuesInEce
             ),
             allowLogout = true,
+            linkBrand = linkConfiguration.linkBrand,
         )
     )
 

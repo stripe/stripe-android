@@ -41,6 +41,7 @@ internal interface LinkConfigurationCoordinator {
 
     suspend fun attachExistingCardToAccount(
         configuration: LinkConfiguration,
+        customerEphemeralKey: String,
         paymentMethod: PaymentMethod,
     ): Result<LinkPaymentDetails.Saved>
 
@@ -123,10 +124,11 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
 
     override suspend fun attachExistingCardToAccount(
         configuration: LinkConfiguration,
+        customerEphemeralKey: String,
         paymentMethod: PaymentMethod
     ): Result<LinkPaymentDetails.Saved> {
         val accountManager = getLinkPaymentLauncherComponent(configuration).linkAccountManager
-        return accountManager.createPaymentDetailsFromPaymentMethod(paymentMethod)
+        return accountManager.createPaymentDetailsFromPaymentMethod(customerEphemeralKey, paymentMethod)
     }
 
     override suspend fun logOut(

@@ -26,6 +26,12 @@
   <string name="stripe_address_label_zip_code">邮政编码</string>
   <!-- Text for error labels -->
   <string name="stripe_error">错误</string>
+  <!-- Text for error labels indicating a network error -->
+  <string name="stripe_network_error">网络错误</string>
+  <!-- Error message shown when a transaction has timed out -->
+  <string name="stripe_timed_out">超时</string>
+  <!-- Text for error labels indicating to take an action at a late undetermined time -->
+  <string name="stripe_try_again_later">请稍后重试</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">发生了意外错误 —— 请过几秒钟再试</string>
 </resources>

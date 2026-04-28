@@ -17,8 +17,10 @@ internal fun Throwable?.stripeErrorMessage(context: Context): String {
     (this as? LocalStripeException)?.displayMessage?.let {
         return it
     }
-    (this as? StripeException)?.stripeError?.message?.let {
-        return it
+    (this as? StripeException)?.stripeError?.let { error ->
+        if (error.type == "card_error") {
+            error.message?.let { return it }
+        }
     }
     return context.getString(R.string.stripe_something_went_wrong)
 }
@@ -31,8 +33,10 @@ internal fun Throwable.stripeErrorMessage(): ResolvableString {
     (this as? LocalStripeException)?.displayMessage?.let {
         return it.resolvableString
     }
-    (this as? StripeException)?.stripeError?.message?.let {
-        return it.resolvableString
+    (this as? StripeException)?.stripeError?.let { error ->
+        if (error.type == "card_error") {
+            error.message?.let { return it.resolvableString }
+        }
     }
     this.getTerminalErrorMessage()?.let {
         return it

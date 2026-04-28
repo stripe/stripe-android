@@ -28,12 +28,15 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
+import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkSpinner
+import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.verification.ResendCodeButton
 import com.stripe.android.link.ui.verification.VERIFICATION_HEADER_IMAGE_TAG
 import com.stripe.android.link.ui.verification.VERIFICATION_OTP_TAG
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -106,8 +109,8 @@ private fun LinkHeaderSection(
             modifier = Modifier
                 .width(48.dp)
                 .testTag(VERIFICATION_HEADER_IMAGE_TAG),
-            painter = painterResource(R.drawable.stripe_link_logo),
-            contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+            painter = painterResource(verificationState.linkBrand.logoRes(LinkLogoStyle.Primary)),
+            contentDescription = verificationState.linkBrand.brandName(),
         )
 
         verificationState.defaultPayment?.let { paymentUI ->
@@ -232,6 +235,7 @@ private fun LinkEmbeddedOtpSectionDefaultPreview() {
         defaultPayment = null,
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(
@@ -264,6 +268,7 @@ private fun LinkEmbeddedOtpSectionDefaultCardPreview() {
         ).toDefaultPaymentUI(true),
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(
@@ -296,6 +301,7 @@ private fun LinkEmbeddedOtpSectionDefaultBankPreview() {
         ).toDefaultPaymentUI(true),
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(
@@ -326,6 +332,7 @@ private fun LinkEmbeddedOtpSectionProcessingPreview() {
         defaultPayment = null,
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     Box(
@@ -360,6 +367,7 @@ private fun LinkEmbeddedOtpSectionErrorPreview() {
         defaultPayment = null,
         isDialog = false,
         allowLogout = true,
+        linkBrand = LinkBrand.Link,
     )
 
     LinkInline2FASection(

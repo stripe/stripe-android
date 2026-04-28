@@ -7,10 +7,10 @@ import java.util.Locale
 
 internal object CurrencySelectorOptionsFactory {
     fun create(
-        adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo,
+        adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo?,
         locale: Locale = Locale.getDefault(),
     ): CurrencySelectorOptions? {
-        val localOption = adaptivePricingInfo.localCurrencyOptions.firstOrNull() ?: return null
+        val localOption = adaptivePricingInfo?.localCurrencyOptions?.firstOrNull() ?: return null
 
         val integrationCode = adaptivePricingInfo.integrationCurrency.uppercase()
         val localCode = localOption.currency.uppercase()

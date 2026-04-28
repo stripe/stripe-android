@@ -82,7 +82,7 @@ internal class LinkActivityViewModel @Inject constructor(
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
 
-    private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial())
+    private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial(linkConfiguration.linkBrand))
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
 
     // Enable replay because the result can be emitted during `onCreate` while observation occurs
@@ -174,7 +174,8 @@ internal class LinkActivityViewModel @Inject constructor(
             LinkAppBarState.create(
                 currentEntry = currentEntry,
                 previousEntryRoute = previousEntry,
-                consumerIsSigningUp = linkAccount?.completedSignup == true
+                consumerIsSigningUp = linkAccount?.completedSignup == true,
+                linkBrand = linkConfiguration.linkBrand,
             )
         }
     }

@@ -592,8 +592,6 @@ internal class PlaygroundSettings private constructor(
                 listOf(PlaygroundConfigurationData.IntegrationType.LinkController)
             ),
             TermsDisplaySettingsDefinition,
-            EnableTapToAddSettingsDefinition,
-            CardArtSettingsDefinition,
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions)

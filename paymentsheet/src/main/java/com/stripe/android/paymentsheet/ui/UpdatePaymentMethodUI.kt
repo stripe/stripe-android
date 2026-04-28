@@ -334,7 +334,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             code = PaymentMethod.Type.Card.code,
             type = PaymentMethod.Type.Card,
             card = PaymentMethod.Card(CardBrand.Visa)
-        )
+        ),
     )
     UpdatePaymentMethodUI(
         interactor = DefaultUpdatePaymentMethodInteractor(

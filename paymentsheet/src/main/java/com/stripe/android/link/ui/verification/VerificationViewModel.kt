@@ -21,6 +21,7 @@ import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.utils.errorMessage
 import com.stripe.android.model.ConsumerSessionRefresh
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.ui.core.elements.OTPSpec
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -43,6 +44,7 @@ internal class VerificationViewModel @Inject constructor(
     private val linkLaunchMode: LinkLaunchMode,
     private val webLinkAuthChannel: WebLinkAuthChannel,
     private val isDialog: Boolean,
+    private val linkBrand: LinkBrand,
     private val onVerificationSucceeded: (refresh: ConsumerSessionRefresh?) -> Unit,
     private val onChangeEmailRequested: () -> Unit,
     private val onDismissClicked: () -> Unit,
@@ -62,7 +64,8 @@ internal class VerificationViewModel @Inject constructor(
             defaultPayment = null,
             isDialog = isDialog,
             allowLogout = !isDialog || linkLaunchMode is LinkLaunchMode.PaymentMethodSelection,
-            consentSection = (linkAccount.consentPresentation as? ConsentPresentation.Inline)?.consentSection
+            consentSection = (linkAccount.consentPresentation as? ConsentPresentation.Inline)?.consentSection,
+            linkBrand = linkBrand,
         )
     )
     val viewState: StateFlow<VerificationViewState> = _viewState
@@ -308,6 +311,7 @@ internal class VerificationViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkLaunchMode = parentComponent.linkLaunchMode,
                         webLinkAuthChannel = parentComponent.webLinkAuthChannel,
+                        linkBrand = parentComponent.configuration.linkBrand,
                         onVerificationSucceeded = parentComponent.viewModel::onVerificationSucceeded,
                         onChangeEmailRequested = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,

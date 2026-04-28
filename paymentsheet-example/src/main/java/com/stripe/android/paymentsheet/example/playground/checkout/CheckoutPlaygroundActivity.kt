@@ -167,6 +167,7 @@ private fun CheckoutScreen(
     Box {
         PlaygroundTheme(
             content = {
+                checkout.CurrencySelectorContent()
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
                 ShippingAddressSection(
                     lastAddressDetails = lastAddressDetails,
