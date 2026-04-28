@@ -493,27 +493,24 @@ internal fun OnrampScreen(
             }
             Screen.AuthenticatedOperations -> {
                 AuthenticatedOperationsScreen(
-                    email = uiState.email,
-                    consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
-                    onrampSessionResponse = uiState.onrampSession,
-                    selectedSettlementSpeed = uiState.settlementSpeed,
-                    selectedPaymentData = uiState.selectedPaymentData,
-                    googlePayIsReady = uiState.googlePayIsReady,
-                    kycFirstName = uiState.kycFirstName,
+                    state = uiState,
                     onKycFirstNameChange = viewModel::updateKycFirstName,
-                    kycLastName = uiState.kycLastName,
                     onKycLastNameChange = viewModel::updateKycLastName,
-                    kycBirthCountry = uiState.kycBirthCountry,
                     onKycBirthCountryChange = viewModel::updateKycBirthCountry,
-                    kycBirthCity = uiState.kycBirthCity,
                     onKycBirthCityChange = viewModel::updateKycBirthCity,
-                    kycNationalities = uiState.kycNationalities,
                     onKycNationalitiesChange = viewModel::updateKycNationalities,
-                    kycAddress = uiState.kycAddress,
                     onKycAddressChange = viewModel::updateKycAddress,
+                    onMicaIdentifierCountryChange = viewModel::updateMicaIdentifierCountry,
+                    onMicaIdentifierValueChange = viewModel::updateMicaIdentifierValue,
+                    onMicaIdentifierTypeChange = viewModel::updateMicaIdentifierType,
+                    onCarfIdentifierCountryChange = viewModel::updateCarfIdentifierCountry,
+                    onCarfIdentifierValueChange = viewModel::updateCarfIdentifierValue,
+                    onCarfIdentifierTypeChange = viewModel::updateCarfIdentifierType,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
+                    onGetIdentifierRequirements = viewModel::getIdentifierRequirements,
+                    onUpdateKycInfo = viewModel::updateIdentifierInfo,
                     onVerifyKyc = onVerifyKyc,
                     onStartVerification = onStartVerification,
                     onShowCRSCARFDeclaration = onShowCRSCARFDeclaration,
@@ -731,27 +728,24 @@ fun AuthenticateSection(
 @Composable
 @Suppress("LongMethod")
 private fun AuthenticatedOperationsScreen(
-    email: String,
-    consentedLinkAuthIntentIds: List<String>,
-    onrampSessionResponse: OnrampSessionResponse?,
-    selectedPaymentData: PaymentMethodDisplayData?,
-    selectedSettlementSpeed: SettlementSpeed?,
-    googlePayIsReady: Boolean,
-    kycFirstName: String,
+    state: OnrampUiState,
     onKycFirstNameChange: (String) -> Unit,
-    kycLastName: String,
     onKycLastNameChange: (String) -> Unit,
-    kycBirthCountry: String,
     onKycBirthCountryChange: (String) -> Unit,
-    kycBirthCity: String,
     onKycBirthCityChange: (String) -> Unit,
-    kycNationalities: String,
     onKycNationalitiesChange: (String) -> Unit,
-    kycAddress: PaymentSheet.Address,
     onKycAddressChange: (PaymentSheet.Address) -> Unit,
+    onMicaIdentifierCountryChange: (String) -> Unit,
+    onMicaIdentifierValueChange: (String) -> Unit,
+    onMicaIdentifierTypeChange: (String) -> Unit,
+    onCarfIdentifierCountryChange: (String) -> Unit,
+    onCarfIdentifierValueChange: (String) -> Unit,
+    onCarfIdentifierTypeChange: (String) -> Unit,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
+    onGetIdentifierRequirements: () -> Unit,
+    onUpdateKycInfo: () -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
     onShowCRSCARFDeclaration: () -> Unit,
@@ -783,16 +777,16 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Text(
-            text = "Email: $email",
+            text = "Email: ${state.email}",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Text(
-            text = "Consented LAIs:\n${consentedLinkAuthIntentIds.joinToString("\n")}",
+            text = "Consented LAIs:\n${state.consentedLinkAuthIntentIds.joinToString("\n")}",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        onrampSessionResponse?.let { response ->
+        state.onrampSession?.let { response ->
             Text(
                 text = "Onramp Session ID: ${response.id}",
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -832,7 +826,7 @@ private fun AuthenticatedOperationsScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        selectedPaymentData?.let {
+        state.selectedPaymentData?.let {
             when (it.type) {
                 PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay -> { }
                 PaymentMethodDisplayData.Type.BankAccount -> {
@@ -847,7 +841,7 @@ private fun AuthenticatedOperationsScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     ) {
                         SettlementSpeed.entries.forEach { speed ->
-                            val isSelected = selectedSettlementSpeed == speed
+                            val isSelected = state.settlementSpeed == speed
                             Box(
                                 modifier = Modifier
                                     .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
@@ -865,20 +859,20 @@ private fun AuthenticatedOperationsScreen(
             }
 
             Image(
-                painter = selectedPaymentData.iconPainter,
-                contentDescription = selectedPaymentData.label,
+                painter = it.iconPainter,
+                contentDescription = it.label,
                 modifier = Modifier
                     .height(24.dp)
                     .padding(end = 8.dp)
             )
 
             Text(
-                text = "Selected Payment Type: ${selectedPaymentData.label}",
+                text = "Selected Payment Type: ${it.label}",
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
             Text(
-                text = "Selected Payment Value: ${selectedPaymentData.sublabel}",
+                text = "Selected Payment Value: ${it.sublabel}",
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
@@ -973,17 +967,17 @@ private fun AuthenticatedOperationsScreen(
         AnimatedVisibility(visible = kycExpanded) {
             Column {
                 KYCScreen(
-                    firstName = kycFirstName,
+                    firstName = state.kycFirstName,
                     onFirstNameChange = onKycFirstNameChange,
-                    lastName = kycLastName,
+                    lastName = state.kycLastName,
                     onLastNameChange = onKycLastNameChange,
-                    birthCountry = kycBirthCountry,
+                    birthCountry = state.kycBirthCountry,
                     onBirthCountryChange = onKycBirthCountryChange,
-                    birthCity = kycBirthCity,
+                    birthCity = state.kycBirthCity,
                     onBirthCityChange = onKycBirthCityChange,
-                    nationalities = kycNationalities,
+                    nationalities = state.kycNationalities,
                     onNationalitiesChange = onKycNationalitiesChange,
-                    address = kycAddress,
+                    address = state.kycAddress,
                     onAddressChange = onKycAddressChange,
                     onCollectKYC = onCollectKYC,
                 )
@@ -997,6 +991,44 @@ private fun AuthenticatedOperationsScreen(
                     Text("Verify KYC Info")
                 }
             }
+        }
+
+        var identifiersExpanded by remember { mutableStateOf(false) }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { identifiersExpanded = !identifiersExpanded }
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Identifier Info",
+                fontWeight = FontWeight.Bold,
+            )
+            Text(text = if (identifiersExpanded) "▲" else "▼")
+        }
+
+        AnimatedVisibility(visible = identifiersExpanded) {
+            IdentifierInfoScreen(
+                micaIdentifierCountry = state.micaIdentifierCountry,
+                onMicaIdentifierCountryChange = onMicaIdentifierCountryChange,
+                micaIdentifierValue = state.micaIdentifierValue,
+                onMicaIdentifierValueChange = onMicaIdentifierValueChange,
+                micaIdentifierType = state.micaIdentifierType,
+                onMicaIdentifierTypeChange = onMicaIdentifierTypeChange,
+                carfIdentifierCountry = state.carfIdentifierCountry,
+                onCarfIdentifierCountryChange = onCarfIdentifierCountryChange,
+                carfIdentifierValue = state.carfIdentifierValue,
+                onCarfIdentifierValueChange = onCarfIdentifierValueChange,
+                carfIdentifierType = state.carfIdentifierType,
+                onCarfIdentifierTypeChange = onCarfIdentifierTypeChange,
+                identifierRequirementsSummary = state.identifierRequirementsSummary,
+                updateKycInfoSummary = state.updateKycInfoSummary,
+                onGetIdentifierRequirements = onGetIdentifierRequirements,
+                onUpdateKycInfo = onUpdateKycInfo,
+            )
         }
 
         StartVerificationScreen(
@@ -1043,7 +1075,7 @@ private fun AuthenticatedOperationsScreen(
         }
 
         GooglePayButton(
-            enabled = googlePayIsReady,
+            enabled = state.googlePayIsReady,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -1081,14 +1113,14 @@ private fun AuthenticatedOperationsScreen(
 
         Button(
             onClick = onPerformCheckout,
-            enabled = onrampSessionResponse != null,
+            enabled = state.onrampSession != null,
             modifier = Modifier
                 .testTag(CHECKOUT_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
             Text(
-                if (onrampSessionResponse != null) {
+                if (state.onrampSession != null) {
                     "🚀 Checkout"
                 } else {
                     "🚀 Checkout (Create session first)"
@@ -1113,6 +1145,108 @@ private fun AuthenticatedOperationsScreen(
         }
 
         Spacer(Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun IdentifierInfoScreen(
+    micaIdentifierCountry: String,
+    onMicaIdentifierCountryChange: (String) -> Unit,
+    micaIdentifierValue: String,
+    onMicaIdentifierValueChange: (String) -> Unit,
+    micaIdentifierType: String,
+    onMicaIdentifierTypeChange: (String) -> Unit,
+    carfIdentifierCountry: String,
+    onCarfIdentifierCountryChange: (String) -> Unit,
+    carfIdentifierValue: String,
+    onCarfIdentifierValueChange: (String) -> Unit,
+    carfIdentifierType: String,
+    onCarfIdentifierTypeChange: (String) -> Unit,
+    identifierRequirementsSummary: String?,
+    updateKycInfoSummary: String?,
+    onGetIdentifierRequirements: () -> Unit,
+    onUpdateKycInfo: () -> Unit,
+) {
+    Column {
+        Text(
+            text = "Identifier Requirements",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Fetch missing MiCA and CARF identifier fields for the current Link user.",
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Button(
+            onClick = onGetIdentifierRequirements,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Text("Get Identifier Requirements")
+        }
+
+        identifierRequirementsSummary?.let { summary ->
+            Text(
+                text = "Latest requirements:\n$summary",
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
+        }
+
+        Text(
+            text = "Update Identifier Info",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "This sample app submits one MiCA entry and one CARF entry.",
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Text(
+            text = "MiCA",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        KYCTextField(micaIdentifierCountry, "MiCA Country (ISO)", onChange = onMicaIdentifierCountryChange)
+        KYCTextField(micaIdentifierValue, "MiCA Identifier", onChange = onMicaIdentifierValueChange)
+        KYCTextField(
+            micaIdentifierType,
+            "MiCA Identifier Type (optional)",
+            onChange = onMicaIdentifierTypeChange
+        )
+
+        Text(
+            text = "CARF",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+        KYCTextField(carfIdentifierCountry, "CARF Country (ISO)", onChange = onCarfIdentifierCountryChange)
+        KYCTextField(carfIdentifierValue, "CARF Identifier", onChange = onCarfIdentifierValueChange)
+        KYCTextField(
+            carfIdentifierType,
+            "CARF Identifier Type (optional)",
+            onChange = onCarfIdentifierTypeChange
+        )
+
+        Button(
+            onClick = onUpdateKycInfo,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Text("Update Identifier Info")
+        }
+
+        updateKycInfoSummary?.let { summary ->
+            Text(
+                text = "Latest update result:\n$summary",
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+        }
     }
 }
 

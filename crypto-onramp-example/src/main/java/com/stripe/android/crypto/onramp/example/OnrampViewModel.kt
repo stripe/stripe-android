@@ -15,10 +15,14 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.result.Result
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
+import com.stripe.android.crypto.onramp.model.Identifier
+import com.stripe.android.crypto.onramp.model.IdentifierRequirements
+import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -31,15 +35,18 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
+import com.stripe.android.crypto.onramp.model.OnrampGetIdentifierRequirementsResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
+import com.stripe.android.crypto.onramp.model.OnrampUpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
@@ -555,6 +562,78 @@ internal class OnrampViewModel(
         }
     }
 
+    fun getIdentifierRequirements() {
+        _uiState.update {
+            it.copy(
+                screen = Screen.Loading,
+                loadingMessage = "Retrieving identifier requirements..."
+            )
+        }
+
+        viewModelScope.launch {
+            val result = onrampCoordinator.getIdentifierRequirements()
+
+            when (result) {
+                is OnrampGetIdentifierRequirementsResult.Completed -> {
+                    _message.value = "Identifier requirements retrieved"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null,
+                            identifierRequirementsSummary = formatIdentifierRequirements(result.requirements)
+                        )
+                    }
+                }
+                is OnrampGetIdentifierRequirementsResult.Failed -> handleError(result.error) {
+                    _message.value = "Failed to retrieve identifier requirements: ${result.error.message}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateIdentifierInfo() {
+        val identifiers = buildIdentifiersRequest(_uiState.value) ?: return
+
+        _uiState.update {
+            it.copy(
+                screen = Screen.Loading,
+                loadingMessage = "Updating identifier information..."
+            )
+        }
+
+        viewModelScope.launch {
+            val result = onrampCoordinator.updateKycInfo(identifiers)
+
+            when (result) {
+                is OnrampUpdateKycInfoResult.Completed -> {
+                    _message.value = "Identifier update completed"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null,
+                            updateKycInfoSummary = formatUpdateKycInfoResult(result.result)
+                        )
+                    }
+                }
+                is OnrampUpdateKycInfoResult.Failed -> handleError(result.error) {
+                    _message.value = "Identifier update failed: ${result.error.message}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     fun updatePhoneNumber(phoneNumber: String) {
         if (phoneNumber.isBlank()) {
             _message.value = "Please enter a phone number"
@@ -736,6 +815,30 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycAddress = address) }
     }
 
+    fun updateMicaIdentifierCountry(value: String) {
+        _uiState.update { it.copy(micaIdentifierCountry = value) }
+    }
+
+    fun updateMicaIdentifierValue(value: String) {
+        _uiState.update { it.copy(micaIdentifierValue = value) }
+    }
+
+    fun updateMicaIdentifierType(value: String) {
+        _uiState.update { it.copy(micaIdentifierType = value) }
+    }
+
+    fun updateCarfIdentifierCountry(value: String) {
+        _uiState.update { it.copy(carfIdentifierCountry = value) }
+    }
+
+    fun updateCarfIdentifierValue(value: String) {
+        _uiState.update { it.copy(carfIdentifierValue = value) }
+    }
+
+    fun updateCarfIdentifierType(value: String) {
+        _uiState.update { it.copy(carfIdentifierType = value) }
+    }
+
     fun clearCheckoutEvent() {
         _checkoutEvent.value = null
     }
@@ -824,6 +927,89 @@ internal class OnrampViewModel(
         getPrefs().edit { remove(userDataKey) }
     }
 
+    private fun buildIdentifiersRequest(state: OnrampUiState): Identifiers? {
+        val (micaIdentifier, micaError) = buildIdentifier(
+            label = "MiCA identifier",
+            country = state.micaIdentifierCountry,
+            value = state.micaIdentifierValue,
+            identifierType = state.micaIdentifierType
+        )
+        if (micaError != null) {
+            _message.value = micaError
+            return null
+        }
+
+        val (carfIdentifier, carfError) = buildIdentifier(
+            label = "CARF identifier",
+            country = state.carfIdentifierCountry,
+            value = state.carfIdentifierValue,
+            identifierType = state.carfIdentifierType
+        )
+        if (carfError != null) {
+            _message.value = carfError
+            return null
+        }
+
+        if (micaIdentifier == null && carfIdentifier == null) {
+            _message.value = "Enter at least one MiCA or CARF identifier"
+            return null
+        }
+
+        return Identifiers()
+            .identifiersMica(micaIdentifier?.let(::listOf))
+            .identifiersCarf(carfIdentifier?.let(::listOf))
+    }
+
+    private fun buildIdentifier(
+        label: String,
+        country: String,
+        value: String,
+        identifierType: String
+    ): Pair<Identifier?, String?> {
+        val trimmedCountry = country.trim()
+        val trimmedValue = value.trim()
+        val trimmedIdentifierType = identifierType.trim()
+
+        if (trimmedCountry.isEmpty() && trimmedValue.isEmpty() && trimmedIdentifierType.isEmpty()) {
+            return null to null
+        }
+
+        if (trimmedCountry.isEmpty() || trimmedValue.isEmpty()) {
+            return null to "$label requires both country and identifier"
+        }
+
+        val identifier = Identifier()
+            .country(CountryCode.create(trimmedCountry))
+            .identifier(trimmedValue)
+
+        if (trimmedIdentifierType.isNotEmpty()) {
+            identifier.identifierType(trimmedIdentifierType)
+        }
+
+        return identifier to null
+    }
+
+    private fun formatIdentifierRequirements(requirements: IdentifierRequirements): String {
+        return buildString {
+            append("MiCA missing: ")
+            append(requirements.missingIdentifiersMica.joinToStringOrNone())
+            append("\nCARF missing: ")
+            append(requirements.missingIdentifiersCarf.joinToStringOrNone())
+        }
+    }
+
+    private fun formatUpdateKycInfoResult(result: UpdateKycInfoResult): String {
+        return buildString {
+            append("Valid: ${result.valid}")
+            append("\nMiCA missing: ")
+            append(result.missingIdentifiers?.missingIdentifiersMica.orEmpty().joinToStringOrNone())
+            append("\nCARF missing: ")
+            append(result.missingIdentifiers?.missingIdentifiersCarf.orEmpty().joinToStringOrNone())
+            append("\nErrors: ")
+            append(result.errors.orEmpty().joinToStringOrNone())
+        }
+    }
+
     private fun getPrefs(): SharedPreferences {
         return application.applicationContext.getSharedPreferences(ONRAMP_PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -863,6 +1049,14 @@ data class OnrampUiState(
     val kycBirthCity: String = "",
     val kycNationalities: String = "",
     val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
+    val micaIdentifierCountry: String = "",
+    val micaIdentifierValue: String = "",
+    val micaIdentifierType: String = "",
+    val carfIdentifierCountry: String = "",
+    val carfIdentifierValue: String = "",
+    val carfIdentifierType: String = "",
+    val identifierRequirementsSummary: String? = null,
+    val updateKycInfoSummary: String? = null,
 ) : Parcelable
 
 enum class Screen {
@@ -900,4 +1094,8 @@ private object NullPaymentMethodDisplayDataParceler : Parceler<PaymentMethodDisp
 private object NullOnrampSessionResponseParceler : Parceler<OnrampSessionResponse?> {
     override fun create(parcel: Parcel): OnrampSessionResponse? = null
     override fun OnrampSessionResponse?.write(parcel: Parcel, flags: Int) { /* no-op */ }
+}
+
+private fun List<String>.joinToStringOrNone(): String {
+    return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"
 }
