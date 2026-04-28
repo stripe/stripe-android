@@ -6,6 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -52,6 +53,17 @@ internal class LinkAppBarScreenshotTest(
                         showHeader = true,
                         title = null,
                         isElevated = false,
+                        linkBrand = LinkBrand.Link,
+                    )
+                ),
+                TestCase(
+                    name = "NotlinkAppBarWithLogoAndCloseButton",
+                    state = LinkAppBarState(
+                        canNavigateBack = false,
+                        showHeader = true,
+                        title = null,
+                        isElevated = false,
+                        linkBrand = LinkBrand.Notlink,
                     )
                 ),
                 TestCase(
@@ -61,6 +73,7 @@ internal class LinkAppBarScreenshotTest(
                         showHeader = false,
                         title = R.string.stripe_add_payment_method.resolvableString,
                         isElevated = false,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
                 TestCase(
@@ -70,6 +83,7 @@ internal class LinkAppBarScreenshotTest(
                         showHeader = false,
                         title = "Ein richtig langer Titel auf Deutsch, einer sehr verbosen Sprache".resolvableString,
                         isElevated = false,
+                        linkBrand = LinkBrand.Link,
                     )
                 ),
             )

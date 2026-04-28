@@ -555,6 +555,7 @@ class LinkApiRepositoryTest {
     @Test
     fun `createPaymentDetailsFromPaymentMethod sends correct parameters and returns Saved`() = runTest {
         val secret = "consumer_secret"
+        val ephemeralKey = "ek_test_abc"
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val paymentDetails = PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS
 
@@ -569,6 +570,7 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = secret,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            customerEphemeralKey = ephemeralKey,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -593,6 +595,7 @@ class LinkApiRepositoryTest {
                 stripeAccount = STRIPE_ACCOUNT_ID
             )
         )
+        assertThat(createDetailsCall.customerEphemeralKey).isEqualTo(ephemeralKey)
     }
 
     @Test
@@ -611,6 +614,7 @@ class LinkApiRepositoryTest {
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = "secret",
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            customerEphemeralKey = "ek_test_abc",
         )
 
         assertThat(result.isFailure).isTrue()

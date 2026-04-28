@@ -58,8 +58,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
+import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
 import com.stripe.android.model.LinkBrand
@@ -408,7 +410,7 @@ private fun TextWithLinkLogo(
     linkBrand: LinkBrand,
 ) {
     val label = stringResource(R.string.stripe_inline_sign_up_toggle)
-    val painter = painterResource(R.drawable.stripe_link_logo_knockout)
+    val painter = painterResource(linkBrand.logoRes(LinkLogoStyle.InlineKnockout))
     // Slightly smaller Link logo for better visual balance
     val logoHeight = style.fontSize * LINK_LOGO_SCALE
     val logoWidth = logoHeight * (painter.intrinsicSize.width / painter.intrinsicSize.height)
@@ -561,6 +563,7 @@ internal fun LinkFields(
             AnimatedVisibility(visible = allowsDefaultOptIn || signUpState == InputtingRemainingFields) {
                 LinkTerms(
                     type = if (allowsDefaultOptIn) LinkTermsType.InlineWithDefaultOptIn else LinkTermsType.Inline,
+                    linkBrand = linkBrand,
                     modifier = Modifier.padding(top = 16.dp),
                     textAlign = TextAlign.Start,
                 )

@@ -120,6 +120,7 @@ internal interface LinkRepository {
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
         clientAttributionMetadata: ClientAttributionMetadata,
+        customerEphemeralKey: String,
     ): Result<LinkPaymentDetails.Saved>
 
     suspend fun createBankAccountPaymentDetails(

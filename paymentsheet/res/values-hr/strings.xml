@@ -90,6 +90,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_or_enter_manually">ili upišite ručno</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Platite koristeći Link</string>
+  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_format">Platite s %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Ako nastavite, pristajete na autorizaciju plaćanja u skladu s <terms>ovim uvjetima</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -265,10 +267,28 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">Kartica je dodana</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Dodirnite za dodavanje kartice</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">Kartica odbijena</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Pokušajte ponovno prisloniti karticu</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">Kartica nije podržana</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">Isključite mogućnost za razvijatelje i pokušajte ponovno</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Pokušajte s drugom mrežom i ponovno prislonite</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Plaćeno %s</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Vratite se i ponovno prislonite karticu</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">Vaš uređaj ne podržava dodavanje dodirom</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Isprobajte drugi uređaj</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Uređaj nije podržan</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Pokušaj s drugom karticom</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Otkaži i plati na drugi način</string>
   <!-- Text on a screen asking the user to approve a payment -->

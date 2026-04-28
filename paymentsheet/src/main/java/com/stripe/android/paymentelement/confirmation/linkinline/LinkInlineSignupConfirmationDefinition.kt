@@ -9,6 +9,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -38,7 +39,10 @@ internal class LinkInlineSignupConfirmationDefinition(
         confirmationOption: LinkInlineSignupConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args
     ): ConfirmationDefinition.Action<LauncherArguments> {
-        val nextConfirmationOption = createPaymentMethodConfirmationOption(confirmationOption)
+        val nextConfirmationOption = createPaymentMethodConfirmationOption(
+            customerMetadata = confirmationArgs.paymentMethodMetadata.customerMetadata,
+            linkInlineSignupConfirmationOption = confirmationOption,
+        )
 
         return ConfirmationDefinition.Action.Launch(
             launcherArguments = LauncherArguments(nextConfirmationOption),
@@ -75,13 +79,32 @@ internal class LinkInlineSignupConfirmationDefinition(
     }
 
     private suspend fun createPaymentMethodConfirmationOption(
+        customerMetadata: CustomerMetadata?,
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
     ): PaymentMethodConfirmationOption {
+        val ephemeralKeySecret = when (customerMetadata) {
+            is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.CustomerSession -> customerMetadata.ephemeralKeySecret
+            is CustomerMetadata.CheckoutSession,
+            null -> null
+        }
+
+        if (
+            linkInlineSignupConfirmationOption is LinkInlineSignupConfirmationOption.Saved &&
+            ephemeralKeySecret == null
+        ) {
+            return linkInlineSignupConfirmationOption.toOption()
+        }
+
         val configuration = linkInlineSignupConfirmationOption.linkConfiguration
         val userInput = linkInlineSignupConfirmationOption.sanitizedUserInput
 
         return when (linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()) {
-            is AccountStatus.Verified -> createOptionAfterAttachingToLink(linkInlineSignupConfirmationOption, userInput)
+            is AccountStatus.Verified -> createOptionAfterAttachingToLink(
+                linkInlineSignupConfirmationOption = linkInlineSignupConfirmationOption,
+                ephemeralKeySecret = ephemeralKeySecret,
+                userInput = userInput,
+            )
             AccountStatus.VerificationStarted,
             is AccountStatus.NeedsVerification -> {
                 linkAnalyticsHelper.onLinkPopupSkipped()
@@ -93,7 +116,10 @@ internal class LinkInlineSignupConfirmationDefinition(
                 linkConfigurationCoordinator.signInWithUserInput(configuration, userInput).fold(
                     onSuccess = {
                         // If successful, the account was fetched or created, so try again
-                        createPaymentMethodConfirmationOption(linkInlineSignupConfirmationOption)
+                        createPaymentMethodConfirmationOption(
+                            customerMetadata = customerMetadata,
+                            linkInlineSignupConfirmationOption = linkInlineSignupConfirmationOption
+                        )
                     },
                     onFailure = {
                         linkInlineSignupConfirmationOption.toOption()
@@ -105,6 +131,7 @@ internal class LinkInlineSignupConfirmationDefinition(
 
     private suspend fun createOptionAfterAttachingToLink(
         linkInlineSignupConfirmationOption: LinkInlineSignupConfirmationOption,
+        ephemeralKeySecret: String?,
         userInput: UserInput,
     ): PaymentMethodConfirmationOption {
         if (userInput is UserInput.SignIn) {
@@ -148,9 +175,13 @@ internal class LinkInlineSignupConfirmationDefinition(
                 }
             }
             is LinkInlineSignupConfirmationOption.Saved -> {
+                val ephemeralKeySecret = ephemeralKeySecret
+                    ?: return linkInlineSignupConfirmationOption.toOption()
+
                 val linkPaymentDetails = linkConfigurationCoordinator.attachExistingCardToAccount(
-                    configuration,
-                    linkInlineSignupConfirmationOption.paymentMethod,
+                    configuration = configuration,
+                    customerEphemeralKey = ephemeralKeySecret,
+                    paymentMethod = linkInlineSignupConfirmationOption.paymentMethod,
                 ).getOrNull()
 
                 when (linkPaymentDetails) {

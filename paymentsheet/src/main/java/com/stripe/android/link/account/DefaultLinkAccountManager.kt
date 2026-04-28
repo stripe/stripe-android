@@ -229,6 +229,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
     }
 
     override suspend fun createPaymentDetailsFromPaymentMethod(
+        customerEphemeralKey: String,
         paymentMethod: PaymentMethod
     ): Result<LinkPaymentDetails.Saved> {
         val linkAccountValue = linkAccountHolder.linkAccountInfo.value.account
@@ -239,6 +240,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 stripeIntent = config.stripeIntent,
                 consumerSessionClientSecret = account.clientSecret,
                 clientAttributionMetadata = config.clientAttributionMetadata,
+                customerEphemeralKey = customerEphemeralKey,
             ).onSuccess {
                 errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
             }

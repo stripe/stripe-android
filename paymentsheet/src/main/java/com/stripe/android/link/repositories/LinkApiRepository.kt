@@ -262,13 +262,15 @@ internal class LinkApiRepository @Inject constructor(
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        clientAttributionMetadata: ClientAttributionMetadata
+        clientAttributionMetadata: ClientAttributionMetadata,
+        customerEphemeralKey: String,
     ): Result<LinkPaymentDetails.Saved> {
         return consumersApiService.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentMethodId = paymentMethod.id,
             requestSurface = requestSurface.value,
             requestOptions = apiRequestOptions,
+            customerEphemeralKey = customerEphemeralKey,
         ).mapCatching {
             LinkPaymentDetails.Saved(
                 paymentDetails = it.paymentDetails.first(),

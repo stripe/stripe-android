@@ -13,6 +13,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.ui.LinkAppBar
 import com.stripe.android.link.ui.LinkAppBarState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
@@ -96,7 +97,8 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
                     showHeader = false,
                     canNavigateBack = !isRootScreen,
                     title = null,
-                    isElevated = false
+                    isElevated = false,
+                    linkBrand = LinkBrand.Link,
                 )
             ) {
                 onBack()

@@ -39,6 +39,7 @@ import com.stripe.android.link.ui.LinkAppBarState
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.DateOfBirth
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
@@ -93,7 +94,8 @@ fun OnrampKycRefreshScreen(
                         showHeader = true,
                         canNavigateBack = false,
                         title = null,
-                        isElevated = false
+                        isElevated = false,
+                        linkBrand = LinkBrand.Link,
                     ),
                     onBackPressed = { dismissThen(onClose) },
                     modifier = Modifier

@@ -36,11 +36,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
+import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
+import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.model.LinkBrand
-import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -161,6 +162,7 @@ internal fun LinkOptionalInlineSignup(
             } else {
                 LinkTermsType.InlineOptional
             },
+            linkBrand = linkBrand,
             textAlign = TextAlign.Start,
             modifier = Modifier
                 .padding(top = 8.dp)
@@ -225,9 +227,9 @@ internal fun LinkLogo(
     Icon(
         painter = painterResource(
             id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                R.drawable.stripe_link_logo_knockout_black
+                linkBrand.logoRes(LinkLogoStyle.TermsKnockoutBlack)
             } else {
-                R.drawable.stripe_link_logo_knockout_white
+                linkBrand.logoRes(LinkLogoStyle.TermsKnockoutWhite)
             }
         ),
         contentDescription = linkBrand.brandName(),

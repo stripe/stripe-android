@@ -2,14 +2,17 @@ package com.stripe.android.utils
 
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -47,26 +50,39 @@ internal class FakePaymentElementLoader(
     }
 
     private fun createPaymentMethodMetadata(
+        integrationConfiguration: PaymentElementLoader.Configuration,
         configuration: CommonConfiguration,
-    ) = PaymentMethodMetadataFactory.create(
-        hasCustomerConfiguration = customer != null,
-        stripeIntent = stripeIntent,
-        billingDetailsCollectionConfiguration = configuration
-            .billingDetailsCollectionConfiguration,
-        allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-        allowsPaymentMethodsRequiringShippingAddress = configuration
-            .allowsPaymentMethodsRequiringShippingAddress,
-        isGooglePayReady = isGooglePayAvailable,
-        cbcEligibility = cbcEligibility,
-        linkState = linkState,
-        passiveCaptchaParams = passiveCaptchaParams,
-        clientAttributionMetadata =
-        clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-        shippingDetails = shippingDetails,
-        experimentsData = experimentsData,
-        integrationMetadata = integrationMetadata
-            ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
-    )
+    ): PaymentMethodMetadata {
+        return PaymentMethodMetadataFactory.create(
+            hasCustomerConfiguration = customer != null,
+            stripeIntent = stripeIntent,
+            billingDetailsCollectionConfiguration = configuration
+                .billingDetailsCollectionConfiguration,
+            allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+            allowsPaymentMethodsRequiringShippingAddress = configuration
+                .allowsPaymentMethodsRequiringShippingAddress,
+            isGooglePayReady = isGooglePayAvailable,
+            cbcEligibility = cbcEligibility,
+            linkState = linkState,
+            passiveCaptchaParams = passiveCaptchaParams,
+            clientAttributionMetadata =
+                clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            shippingDetails = shippingDetails,
+            experimentsData = experimentsData,
+            integrationMetadata = integrationMetadata
+                ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
+            paymentMethodOrientation = when (integrationConfiguration) {
+                is PaymentElementLoader.Configuration.CryptoOnramp,
+                is PaymentElementLoader.Configuration.Embedded -> PaymentMethodOrientation.Vertical
+                is PaymentElementLoader.Configuration.PaymentSheet ->
+                    when (integrationConfiguration.configuration.paymentMethodLayout) {
+                        PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
+                        PaymentSheet.PaymentMethodLayout.Vertical,
+                        PaymentSheet.PaymentMethodLayout.Automatic -> PaymentMethodOrientation.Vertical
+                    }
+            }
+        )
+        }
 
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
@@ -84,7 +100,10 @@ internal class FakePaymentElementLoader(
                     customer = customer,
                     paymentSelection = paymentSelection,
                     validationError = validationError,
-                    paymentMethodMetadata = createPaymentMethodMetadata(configuration).let { metadata ->
+                    paymentMethodMetadata = createPaymentMethodMetadata(
+                        integrationConfiguration,
+                        configuration
+                    ).let { metadata ->
                         if (integrationMetadata != null) {
                             metadata.copy(integrationMetadata = integrationMetadata)
                         } else {

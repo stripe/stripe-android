@@ -117,6 +117,7 @@ internal interface LinkAccountManager {
     ): Result<LinkPaymentDetails.New>
 
     suspend fun createPaymentDetailsFromPaymentMethod(
+        customerEphemeralKey: String,
         paymentMethod: PaymentMethod,
     ): Result<LinkPaymentDetails.Saved>
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
-  <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Buy Now, Pay Later with <img/>]]></string>
+    <string name="stripe_afterpay_clearpay_marketing"><![CDATA[Buy Now, Pay Later with <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Pay in <num_installments/> interest-free payments of <installment_price/> with <img/>]]></string>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay. -->

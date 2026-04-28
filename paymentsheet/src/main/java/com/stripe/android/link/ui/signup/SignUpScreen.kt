@@ -52,6 +52,7 @@ import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.link.ui.ProgressIndicatorTestTag
 import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.utils.LINK_DEFAULT_ANIMATION_DELAY_MILLIS
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.elements.EmailConfig
@@ -254,6 +255,7 @@ private fun SecondaryFields(
                     .padding(top = 8.dp, bottom = 16.dp),
                 textAlign = TextAlign.Center,
                 type = LinkTermsType.Full,
+                linkBrand = signUpScreenState.linkBrand,
             )
         }
         AnimatedVisibility(visible = signUpScreenState.errorMessage != null) {
@@ -401,6 +403,7 @@ private fun SignUpScreenLoadingPreview() {
                 signUpState = SignUpState.VerifyingEmail,
                 requiresNameCollection = true,
                 canEditEmail = true,
+                linkBrand = LinkBrand.Link,
             ),
             onSignUpClick = {},
             onSuggestedEmailClick = {}
@@ -422,6 +425,7 @@ private fun SignUpScreenPreview() {
                 signUpState = SignUpState.InputtingRemainingFields,
                 requiresNameCollection = true,
                 canEditEmail = true,
+                linkBrand = LinkBrand.Link,
             ),
             onSignUpClick = {},
             onSuggestedEmailClick = {}

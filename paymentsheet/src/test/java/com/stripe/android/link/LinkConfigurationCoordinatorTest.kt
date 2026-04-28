@@ -84,8 +84,10 @@ class LinkConfigurationCoordinatorTest {
             )
         )
 
+        val ephemeralKey = "ek_123"
         val result = coordinator.attachExistingCardToAccount(
             configuration = TestFactory.LINK_CONFIGURATION,
+            customerEphemeralKey = ephemeralKey,
             paymentMethod = paymentMethod,
         )
 
@@ -97,8 +99,10 @@ class LinkConfigurationCoordinatorTest {
         assertThat(linkPaymentDetails.paymentMethod).isEqualTo(paymentMethod)
         assertThat(linkPaymentDetails.paymentDetails).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD)
 
-        assertThat(accountManager.awaitCreatePaymentDetailsFromPaymentMethodTurbineCall())
-            .isEqualTo(paymentMethod)
+        val createPaymentDetailsCall = accountManager.awaitCreatePaymentDetailsFromPaymentMethodTurbineCall()
+
+        assertThat(createPaymentDetailsCall.paymentMethod).isEqualTo(paymentMethod)
+        assertThat(createPaymentDetailsCall.customerEphemeralKey).isEqualTo(ephemeralKey)
 
         accountManager.ensureAllEventsConsumed()
     }
