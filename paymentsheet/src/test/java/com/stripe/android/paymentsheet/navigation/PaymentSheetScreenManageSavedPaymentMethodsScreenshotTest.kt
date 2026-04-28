@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.ManageSavedPaymentMethods
@@ -36,6 +37,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = it.second.resolvableString,
                 paymentMethod = it.first,
+                linkBrand = LinkBrand.Link,
                 isCbcEligible = true,
             )
         }
@@ -48,6 +50,7 @@ internal class PaymentSheetScreenManageSavedPaymentMethodsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = it.second.resolvableString,
                 paymentMethod = it.first,
+                linkBrand = LinkBrand.Link,
                 isCbcEligible = true,
             )
         }

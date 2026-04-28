@@ -237,7 +237,7 @@ internal class PaymentMethodLayoutUITest(
             ).performClick()
             viewActionRecorder.consume(
                 PaymentMethodVerticalLayoutInteractor.ViewAction.SavedPaymentMethodSelected(
-                    savedPaymentMethod.paymentMethod
+                    savedPaymentMethod
                 )
             )
             assertThat(viewActionRecorder.viewActions).isEmpty()

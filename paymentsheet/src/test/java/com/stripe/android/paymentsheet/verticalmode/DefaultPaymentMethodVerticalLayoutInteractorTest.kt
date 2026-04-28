@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -1015,9 +1016,29 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     fun handleViewAction_SelectSavedPaymentMethod_selectsSavedPm() {
         val savedPaymentMethod = PaymentMethodFixtures.displayableCard()
         runScenario {
-            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod))
             assertThat((selection.value as PaymentSelection.Saved).paymentMethod)
                 .isEqualTo(savedPaymentMethod.paymentMethod)
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
+            assertThat(updateSelectionTurbine.awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun handleViewAction_SelectSavedPaymentMethod_preservesLinkBrand() {
+        val linkPaymentMethod = PaymentMethodFixtures.displayableLinkPaymentMethod()
+        val savedPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = linkPaymentMethod.displayName,
+            paymentMethod = linkPaymentMethod.paymentMethod,
+            linkBrand = LinkBrand.Notlink,
+            isCbcEligible = linkPaymentMethod.isCbcEligible,
+            shouldShowDefaultBadge = linkPaymentMethod.shouldShowDefaultBadge,
+        )
+
+        runScenario {
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod))
+            assertThat((selection.value as PaymentSelection.Saved).linkBrand)
+                .isEqualTo(LinkBrand.Notlink)
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
             assertThat(updateSelectionTurbine.awaitItem()).isTrue()
         }
@@ -1032,7 +1053,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 rowSelectionCallbackInvoked = true
             }
         ) {
-            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod.paymentMethod))
+            interactor.handleViewAction(ViewAction.SavedPaymentMethodSelected(savedPaymentMethod))
             assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("saved")
             assertThat(rowSelectionCallbackInvoked).isTrue()
             assertThat(updateSelectionTurbine.awaitItem()).isTrue()

@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.runner.RunWith
@@ -24,6 +25,7 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = visaCardUsingCartesBancaires,
+            linkBrand = LinkBrand.Link,
         )
 
         val description = displayableSavedPaymentMethod.getDescription().resolve(context)
@@ -39,6 +41,7 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = cardWithoutDisplayBrand,
+            linkBrand = LinkBrand.Link,
         )
 
         val description = displayableSavedPaymentMethod.getDescription().resolve(context)
@@ -53,6 +56,7 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
+            linkBrand = LinkBrand.Link,
             isCbcEligible = false,
         )
 
@@ -66,6 +70,7 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
+            linkBrand = LinkBrand.Link,
             isCbcEligible = false,
         )
 
@@ -79,6 +84,7 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
+            linkBrand = LinkBrand.Link,
             isCbcEligible = false,
         )
 
@@ -94,6 +100,7 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
+            linkBrand = LinkBrand.Link,
             isCbcEligible = false,
         )
 
@@ -107,6 +114,7 @@ class DisplayableSavedPaymentMethodTest {
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
             paymentMethod = paymentMethod,
+            linkBrand = LinkBrand.Link,
             isCbcEligible = false,
         )
 

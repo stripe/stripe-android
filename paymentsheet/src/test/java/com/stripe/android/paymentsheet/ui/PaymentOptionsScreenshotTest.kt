@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -37,18 +38,21 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
         )
@@ -69,18 +73,21 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
         )
@@ -100,18 +107,21 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4242"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("4000"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234", addNetworks = true),
+                    linkBrand = LinkBrand.Link,
                     isCbcEligible = true,
                 ),
             ),
@@ -140,6 +150,7 @@ class PaymentOptionsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("8431"),
+                linkBrand = LinkBrand.Link,
                 shouldShowDefaultBadge = true,
             ),
         ),
@@ -147,12 +158,14 @@ class PaymentOptionsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("4000"),
+                linkBrand = LinkBrand.Link,
             ),
         ),
         PaymentOptionsItem.SavedPaymentMethod(
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("1234", addNetworks = true),
+                linkBrand = LinkBrand.Link,
                 isCbcEligible = true,
             ),
         ),

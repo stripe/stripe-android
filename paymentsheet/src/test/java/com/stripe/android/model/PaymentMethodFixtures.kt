@@ -698,6 +698,7 @@ internal object PaymentMethodFixtures {
         return DisplayableSavedPaymentMethod.create(
             displayName = displayName,
             paymentMethod = this,
+            linkBrand = LinkBrand.Link,
             isCbcEligible = true,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
         )

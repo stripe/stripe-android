@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -39,6 +40,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                 last4 = "4242",
             )
         ),
+        linkBrand = LinkBrand.Link,
     )
 
     @Test
@@ -159,6 +161,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                     )
                 )
             ),
-            )
+            linkBrand = LinkBrand.Link,
+        )
     }
 }
