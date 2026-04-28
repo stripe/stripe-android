@@ -92,6 +92,7 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
+    val paymentMethodOrientation: PaymentMethodOrientation,
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -350,6 +351,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
+            paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
@@ -409,6 +411,11 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
+                paymentMethodOrientation = when (paymentMethodLayout) {
+                    PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
+                    PaymentSheet.PaymentMethodLayout.Vertical,
+                    PaymentSheet.PaymentMethodLayout.Automatic -> PaymentMethodOrientation.Vertical
+                }
             )
         }
 
@@ -479,6 +486,7 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
+                paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
             )
         }
     }

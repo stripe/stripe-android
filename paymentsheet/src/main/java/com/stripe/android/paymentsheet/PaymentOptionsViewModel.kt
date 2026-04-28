@@ -29,6 +29,7 @@ import com.stripe.android.link.account.updateLinkAccount
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.SetupIntent
@@ -436,7 +437,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerStateHolder: CustomerStateHolder,
     ): List<PaymentSheetScreen> {
-        if (config.paymentMethodLayout != PaymentSheet.PaymentMethodLayout.Horizontal) {
+        if (paymentMethodMetadata.paymentMethodOrientation == PaymentMethodOrientation.Vertical) {
             return VerticalModeInitialScreenFactory.create(
                 viewModel = this,
                 paymentMethodMetadata = paymentMethodMetadata,

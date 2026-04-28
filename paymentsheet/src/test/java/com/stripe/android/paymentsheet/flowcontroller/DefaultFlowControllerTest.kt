@@ -39,6 +39,7 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -479,7 +480,8 @@ internal class DefaultFlowControllerTest {
                 validationError = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     hasCustomerConfiguration = true,
-                    allowsDelayedPaymentMethods = false
+                    allowsDelayedPaymentMethods = false,
+                    paymentMethodOrientation = PaymentMethodOrientation.Vertical,
                 ),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
