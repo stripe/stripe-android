@@ -1117,6 +1117,7 @@ private fun AuthenticatedOperationsScreen(
 }
 
 @Composable
+@Suppress("LongMethod")
 private fun KYCScreen(
     firstName: String,
     onFirstNameChange: (String) -> Unit,
