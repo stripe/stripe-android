@@ -88,44 +88,44 @@ internal fun buildAnnotatedStringResource(
     pressedLinkColor: Color,
 ): AnnotatedString {
     val spannedString = SpannedString(resource)
-    return AnnotatedString.Builder(spannedString.toString()).apply {
-        spannedString
-            .getSpans<Any>(0, spannedString.length)
-            .forEach { rawAnnotation ->
-                val spanStart = spannedString.getSpanStart(rawAnnotation)
-                val spanEnd = spannedString.getSpanEnd(rawAnnotation)
-                rawAnnotation.toAnnotation()?.let { annotation ->
-                    val matchingAnnotation = annotation.matchingStringAnnotation()
-                    val spanStyle = annotationStyles[matchingAnnotation]
-                    when (matchingAnnotation) {
-                        StringAnnotation.CLICKABLE -> {
-                            addLink(
-                                url = annotation.toLinkAnnotation(
-                                    onClickableTextClick = onClickableTextClick,
-                                    style = spanStyle,
-                                    pressedLinkColor = pressedLinkColor,
-                                ),
-                                start = spanStart,
-                                end = spanEnd
-                            )
-                        }
+    val resultBuilder = AnnotatedString.Builder(spannedString.toString())
+    spannedString
+        .getSpans<Any>(0, spannedString.length)
+        .forEach { annotation ->
+            val spanStart = spannedString.getSpanStart(annotation)
+            val spanEnd = spannedString.getSpanEnd(annotation)
+            annotation.toAnnotation()?.let {
+                val matchingAnnotation = it.matchingStringAnnotation()
+                val spanStyle = annotationStyles[matchingAnnotation]
+                when (matchingAnnotation) {
+                    StringAnnotation.CLICKABLE -> {
+                        resultBuilder.addLink(
+                            url = it.toLinkAnnotation(
+                                onClickableTextClick = onClickableTextClick,
+                                style = spanStyle,
+                                pressedLinkColor = pressedLinkColor,
+                            ),
+                            start = spanStart,
+                            end = spanEnd
+                        )
+                    }
 
-                        null,
-                        StringAnnotation.BOLD -> {
-                            addStringAnnotation(
-                                tag = annotation.key,
-                                annotation = annotation.value,
-                                start = spanStart,
-                                end = spanEnd
-                            )
-                            spanStyle?.let { style ->
-                                addStyle(style, spanStart, spanEnd)
-                            }
+                    null,
+                    StringAnnotation.BOLD -> {
+                        resultBuilder.addStringAnnotation(
+                            tag = it.key,
+                            annotation = it.value,
+                            start = spanStart,
+                            end = spanEnd
+                        )
+                        spanStyle?.let { style ->
+                            resultBuilder.addStyle(style, spanStart, spanEnd)
                         }
                     }
                 }
             }
-    }.toAnnotatedString()
+        }
+    return resultBuilder.toAnnotatedString()
 }
 
 private fun Annotation.matchingStringAnnotation(): StringAnnotation? =
