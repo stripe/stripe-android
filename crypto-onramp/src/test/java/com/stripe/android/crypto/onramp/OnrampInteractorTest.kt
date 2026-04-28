@@ -15,12 +15,14 @@ import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.Identifier
+import com.stripe.android.crypto.onramp.model.IdentifierHint
+import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.MissingIdentifiers
+import com.stripe.android.crypto.onramp.model.MissingIdentifier
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
@@ -40,6 +42,7 @@ import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
+import com.stripe.android.crypto.onramp.model.RegulationType
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
@@ -204,8 +207,23 @@ class OnrampInteractorTest {
     fun testGetIdentifierRequirementsIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val requirements = IdentifierRequirements(
-            missingIdentifiersMica = listOf("tax_id"),
-            missingIdentifiersCarf = listOf("nationalities")
+            missingIdentifiers = listOf(
+                MissingIdentifier(
+                    type = IdentifierType.MT_NIC,
+                    placeholder = "123456M",
+                    alternateIdentifier = IdentifierHint(
+                        type = IdentifierType.MT_PP,
+                        placeholder = "AA1234567"
+                    ),
+                    regulation = RegulationType.EuMica
+                ),
+                MissingIdentifier(
+                    type = IdentifierType.FR_SPI,
+                    placeholder = "12 34 567 890 123",
+                    alternateIdentifier = null,
+                    regulation = RegulationType.EuCarf
+                )
+            )
         )
         whenever(cryptoApiRepository.getIdentifierRequirements(any()))
             .thenReturn(Result.success(requirements))
@@ -225,11 +243,15 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val submissionResult = UpdateKycInfoResult(
             valid = false,
-            missingIdentifiers = MissingIdentifiers(
-                missingIdentifiersMica = emptyList(),
-                missingIdentifiersCarf = listOf("nationalities")
+            missingIdentifiers = listOf(
+                MissingIdentifier(
+                    type = IdentifierType.FR_SPI,
+                    placeholder = "12 34 567 890 123",
+                    alternateIdentifier = null,
+                    regulation = RegulationType.EuCarf
+                )
             ),
-            errors = listOf("FR")
+            invalidIdentifiers = listOf(IdentifierType.FR_SPI)
         )
         whenever(cryptoApiRepository.updateKycInfo(any(), any()))
             .thenReturn(Result.success(submissionResult))
@@ -241,8 +263,8 @@ class OnrampInteractorTest {
                 .identifiersMica(
                     listOf(
                         Identifier()
-                            .country(CountryCode.create("IE"))
-                            .identifier("mica_123")
+                            .type(IdentifierType.MT_NIC)
+                            .value("mica_123")
                     )
                 )
         )

@@ -499,10 +499,8 @@ internal fun OnrampScreen(
                     onKycBirthCityChange = viewModel::updateKycBirthCity,
                     onKycNationalitiesChange = viewModel::updateKycNationalities,
                     onKycAddressChange = viewModel::updateKycAddress,
-                    onMicaIdentifierCountryChange = viewModel::updateMicaIdentifierCountry,
                     onMicaIdentifierValueChange = viewModel::updateMicaIdentifierValue,
                     onMicaIdentifierTypeChange = viewModel::updateMicaIdentifierType,
-                    onCarfIdentifierCountryChange = viewModel::updateCarfIdentifierCountry,
                     onCarfIdentifierValueChange = viewModel::updateCarfIdentifierValue,
                     onCarfIdentifierTypeChange = viewModel::updateCarfIdentifierType,
                     onAuthenticate = onAuthenticateUser,
@@ -734,10 +732,8 @@ private fun AuthenticatedOperationsScreen(
     onKycBirthCityChange: (String) -> Unit,
     onKycNationalitiesChange: (String) -> Unit,
     onKycAddressChange: (PaymentSheet.Address) -> Unit,
-    onMicaIdentifierCountryChange: (String) -> Unit,
     onMicaIdentifierValueChange: (String) -> Unit,
     onMicaIdentifierTypeChange: (String) -> Unit,
-    onCarfIdentifierCountryChange: (String) -> Unit,
     onCarfIdentifierValueChange: (String) -> Unit,
     onCarfIdentifierTypeChange: (String) -> Unit,
     onAuthenticate: (oauthScopes: String) -> Unit,
@@ -1011,14 +1007,10 @@ private fun AuthenticatedOperationsScreen(
 
         AnimatedVisibility(visible = identifiersExpanded) {
             IdentifierInfoScreen(
-                micaIdentifierCountry = state.micaIdentifierCountry,
-                onMicaIdentifierCountryChange = onMicaIdentifierCountryChange,
                 micaIdentifierValue = state.micaIdentifierValue,
                 onMicaIdentifierValueChange = onMicaIdentifierValueChange,
                 micaIdentifierType = state.micaIdentifierType,
                 onMicaIdentifierTypeChange = onMicaIdentifierTypeChange,
-                carfIdentifierCountry = state.carfIdentifierCountry,
-                onCarfIdentifierCountryChange = onCarfIdentifierCountryChange,
                 carfIdentifierValue = state.carfIdentifierValue,
                 onCarfIdentifierValueChange = onCarfIdentifierValueChange,
                 carfIdentifierType = state.carfIdentifierType,
@@ -1150,14 +1142,10 @@ private fun AuthenticatedOperationsScreen(
 @Composable
 @Suppress("LongMethod")
 private fun IdentifierInfoScreen(
-    micaIdentifierCountry: String,
-    onMicaIdentifierCountryChange: (String) -> Unit,
     micaIdentifierValue: String,
     onMicaIdentifierValueChange: (String) -> Unit,
     micaIdentifierType: String,
     onMicaIdentifierTypeChange: (String) -> Unit,
-    carfIdentifierCountry: String,
-    onCarfIdentifierCountryChange: (String) -> Unit,
     carfIdentifierValue: String,
     onCarfIdentifierValueChange: (String) -> Unit,
     carfIdentifierType: String,
@@ -1175,7 +1163,7 @@ private fun IdentifierInfoScreen(
         )
 
         Text(
-            text = "Fetch missing MiCA and CARF identifier fields for the current Link user.",
+            text = "Fetch missing MiCA and CARF identifier requirements for the current Link user.",
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
@@ -1211,26 +1199,24 @@ private fun IdentifierInfoScreen(
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        KYCTextField(micaIdentifierCountry, "MiCA Country (ISO)", onChange = onMicaIdentifierCountryChange)
-        KYCTextField(micaIdentifierValue, "MiCA Identifier", onChange = onMicaIdentifierValueChange)
         KYCTextField(
             micaIdentifierType,
-            "MiCA Identifier Type (optional)",
+            "MiCA Identifier Type (e.g. mt_nic)",
             onChange = onMicaIdentifierTypeChange
         )
+        KYCTextField(micaIdentifierValue, "MiCA Identifier Value", onChange = onMicaIdentifierValueChange)
 
         Text(
             text = "CARF",
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        KYCTextField(carfIdentifierCountry, "CARF Country (ISO)", onChange = onCarfIdentifierCountryChange)
-        KYCTextField(carfIdentifierValue, "CARF Identifier", onChange = onCarfIdentifierValueChange)
         KYCTextField(
             carfIdentifierType,
-            "CARF Identifier Type (optional)",
+            "CARF Identifier Type (e.g. fr_spi)",
             onChange = onCarfIdentifierTypeChange
         )
+        KYCTextField(carfIdentifierValue, "CARF Identifier Value", onChange = onCarfIdentifierValueChange)
 
         Button(
             onClick = onUpdateKycInfo,

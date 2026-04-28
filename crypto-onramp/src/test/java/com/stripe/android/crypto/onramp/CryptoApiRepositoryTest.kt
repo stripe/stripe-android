@@ -9,8 +9,12 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.Identifier
+import com.stripe.android.crypto.onramp.model.IdentifierHint
+import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
+import com.stripe.android.crypto.onramp.model.MissingIdentifier
+import com.stripe.android.crypto.onramp.model.RegulationType
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
@@ -152,8 +156,22 @@ class CryptoApiRepositoryTest {
                 200,
                 """
                     {
-                        "missing_identifiers_mica": ["tax_id"],
-                        "missing_identifiers_carf": ["nationalities"]
+                        "missing_identifiers_mica": [
+                            {
+                                "type": "mt_nic",
+                                "placeholder": "123456M",
+                                "alternate_identifier": {
+                                    "type": "mt_pp",
+                                    "placeholder": "AA1234567"
+                                }
+                            }
+                        ],
+                        "missing_identifiers_carf": [
+                            {
+                                "type": "fr_spi",
+                                "placeholder": "12 34 567 890 123"
+                            }
+                        ]
                     }
                     """,
                 emptyMap()
@@ -175,10 +193,24 @@ class CryptoApiRepositoryTest {
                 .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
 
             assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrThrow().missingIdentifiersMica)
-                .isEqualTo(listOf("tax_id"))
-            assertThat(result.getOrThrow().missingIdentifiersCarf)
-                .isEqualTo(listOf("nationalities"))
+            assertThat(result.getOrThrow().missingIdentifiers)
+                .containsExactly(
+                    MissingIdentifier(
+                        type = IdentifierType.MT_NIC,
+                        placeholder = "123456M",
+                        alternateIdentifier = IdentifierHint(
+                            type = IdentifierType.MT_PP,
+                            placeholder = "AA1234567"
+                        ),
+                        regulation = RegulationType.EuMica
+                    ),
+                    MissingIdentifier(
+                        type = IdentifierType.FR_SPI,
+                        placeholder = "12 34 567 890 123",
+                        alternateIdentifier = null,
+                        regulation = RegulationType.EuCarf
+                    )
+                )
         }
     }
 
@@ -191,10 +223,24 @@ class CryptoApiRepositoryTest {
                     {
                         "valid": false,
                         "missing_identifiers": {
-                            "missing_identifiers_mica": ["tax_id"],
-                            "missing_identifiers_carf": ["nationalities"]
+                            "missing_identifiers_mica": [
+                                {
+                                    "type": "mt_nic",
+                                    "placeholder": "123456M",
+                                    "alternate_identifier": {
+                                        "type": "mt_pp",
+                                        "placeholder": "AA1234567"
+                                    }
+                                }
+                            ],
+                            "missing_identifiers_carf": [
+                                {
+                                    "type": "fr_spi",
+                                    "placeholder": "12 34 567 890 123"
+                                }
+                            ]
                         },
-                        "errors": ["FR"]
+                        "errors": ["fr_spi"]
                     }
                     """,
                 emptyMap()
@@ -208,16 +254,15 @@ class CryptoApiRepositoryTest {
                     .identifiersMica(
                         listOf(
                             Identifier()
-                                .country(CountryCode.create("IE"))
-                                .identifier("mica_123")
-                                .identifierType("tax_id")
+                                .type(IdentifierType.MT_NIC)
+                                .value("mica_123")
                         )
                     )
                     .identifiersCarf(
                         listOf(
                             Identifier()
-                                .country(CountryCode.create("FR"))
-                                .identifier("carf_456")
+                                .type(IdentifierType.FR_SPI)
+                                .value("carf_456")
                         )
                     ),
                 consumerSessionClientSecret = "test-secret"
@@ -656,15 +701,17 @@ class CryptoApiRepositoryTest {
                     "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
                     "identifiers_mica" to listOf(
                         mapOf(
-                            "country" to "IE",
+                            "country" to "MT",
                             "identifier" to "mica_123",
-                            "identifier_type" to "tax_id"
+                            "identifier_type" to "mt_nic"
                         )
                     ),
                     "identifiers_carf" to listOf(
                         mapOf(
                             "country" to "FR",
                             "identifier" to "carf_456"
+                            ,
+                            "identifier_type" to "fr_spi"
                         )
                     )
                 )
@@ -673,11 +720,25 @@ class CryptoApiRepositoryTest {
 
     private fun assertUpdateKycInfoResult(result: UpdateKycInfoResult) {
         assertThat(result.valid).isFalse()
-        assertThat(result.missingIdentifiers?.missingIdentifiersMica)
-            .isEqualTo(listOf("tax_id"))
-        assertThat(result.missingIdentifiers?.missingIdentifiersCarf)
-            .isEqualTo(listOf("nationalities"))
-        assertThat(result.errors)
-            .isEqualTo(listOf("FR"))
+        assertThat(result.missingIdentifiers)
+            .containsExactly(
+                MissingIdentifier(
+                    type = IdentifierType.MT_NIC,
+                    placeholder = "123456M",
+                    alternateIdentifier = IdentifierHint(
+                        type = IdentifierType.MT_PP,
+                        placeholder = "AA1234567"
+                    ),
+                    regulation = RegulationType.EuMica
+                ),
+                MissingIdentifier(
+                    type = IdentifierType.FR_SPI,
+                    placeholder = "12 34 567 890 123",
+                    alternateIdentifier = null,
+                    regulation = RegulationType.EuCarf
+                )
+            )
+        assertThat(result.invalidIdentifiers)
+            .isEqualTo(listOf(IdentifierType.FR_SPI))
     }
 }

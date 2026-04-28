@@ -143,7 +143,7 @@ internal class CryptoApiRepository @Inject constructor(
         return execute(
             request = request,
             responseSerializer = IdentifierRequirementsResponse.serializer()
-        ).map { it.toIdentifierRequirements() }
+        ).mapCatching { it.toIdentifierRequirements() }
     }
 
     suspend fun updateKycInfo(
@@ -160,7 +160,7 @@ internal class CryptoApiRepository @Inject constructor(
                 ).jsonObject.filterValues { it != JsonNull }
             ),
             UpdateKycInfoResponse.serializer()
-        ).map { it.toUpdateKycInfoResult() }
+        ).mapCatching { it.toUpdateKycInfoResult() }
     }
 
     suspend fun retrieveCrsCarfDeclaration(

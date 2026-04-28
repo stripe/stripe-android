@@ -23,10 +23,12 @@ import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.Identifier
+import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
+import com.stripe.android.crypto.onramp.model.MissingIdentifier
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -815,20 +817,12 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycAddress = address) }
     }
 
-    fun updateMicaIdentifierCountry(value: String) {
-        _uiState.update { it.copy(micaIdentifierCountry = value) }
-    }
-
     fun updateMicaIdentifierValue(value: String) {
         _uiState.update { it.copy(micaIdentifierValue = value) }
     }
 
     fun updateMicaIdentifierType(value: String) {
         _uiState.update { it.copy(micaIdentifierType = value) }
-    }
-
-    fun updateCarfIdentifierCountry(value: String) {
-        _uiState.update { it.copy(carfIdentifierCountry = value) }
     }
 
     fun updateCarfIdentifierValue(value: String) {
@@ -930,9 +924,8 @@ internal class OnrampViewModel(
     private fun buildIdentifiersRequest(state: OnrampUiState): Identifiers? {
         val (micaIdentifier, micaError) = buildIdentifier(
             label = "MiCA identifier",
-            country = state.micaIdentifierCountry,
             value = state.micaIdentifierValue,
-            identifierType = state.micaIdentifierType
+            type = state.micaIdentifierType
         )
         if (micaError != null) {
             _message.value = micaError
@@ -941,9 +934,8 @@ internal class OnrampViewModel(
 
         val (carfIdentifier, carfError) = buildIdentifier(
             label = "CARF identifier",
-            country = state.carfIdentifierCountry,
             value = state.carfIdentifierValue,
-            identifierType = state.carfIdentifierType
+            type = state.carfIdentifierType
         )
         if (carfError != null) {
             _message.value = carfError
@@ -962,52 +954,57 @@ internal class OnrampViewModel(
 
     private fun buildIdentifier(
         label: String,
-        country: String,
         value: String,
-        identifierType: String
+        type: String
     ): Pair<Identifier?, String?> {
-        val trimmedCountry = country.trim()
         val trimmedValue = value.trim()
-        val trimmedIdentifierType = identifierType.trim()
+        val trimmedType = type.trim()
 
-        if (trimmedCountry.isEmpty() && trimmedValue.isEmpty() && trimmedIdentifierType.isEmpty()) {
+        if (trimmedValue.isEmpty() && trimmedType.isEmpty()) {
             return null to null
         }
 
-        if (trimmedCountry.isEmpty() || trimmedValue.isEmpty()) {
-            return null to "$label requires both country and identifier"
+        if (trimmedType.isEmpty() || trimmedValue.isEmpty()) {
+            return null to "$label requires both type and value"
         }
+
+        val identifierType = IdentifierType.fromValue(trimmedType)
+            ?: return null to "$label type must be a supported identifier type like fr_spi"
 
         val identifier = Identifier()
-            .country(CountryCode.create(trimmedCountry))
-            .identifier(trimmedValue)
-
-        if (trimmedIdentifierType.isNotEmpty()) {
-            identifier.identifierType(trimmedIdentifierType)
-        }
+            .type(identifierType)
+            .value(trimmedValue)
 
         return identifier to null
     }
 
     private fun formatIdentifierRequirements(requirements: IdentifierRequirements): String {
-        return buildString {
-            append("MiCA missing: ")
-            append(requirements.missingIdentifiersMica.joinToStringOrNone())
-            append("\nCARF missing: ")
-            append(requirements.missingIdentifiersCarf.joinToStringOrNone())
-        }
+        return formatMissingIdentifiers(requirements.missingIdentifiers)
     }
 
     private fun formatUpdateKycInfoResult(result: UpdateKycInfoResult): String {
         return buildString {
             append("Valid: ${result.valid}")
-            append("\nMiCA missing: ")
-            append(result.missingIdentifiers?.missingIdentifiersMica.orEmpty().joinToStringOrNone())
-            append("\nCARF missing: ")
-            append(result.missingIdentifiers?.missingIdentifiersCarf.orEmpty().joinToStringOrNone())
-            append("\nErrors: ")
-            append(result.errors.orEmpty().joinToStringOrNone())
+            append("\nMissing identifiers: ")
+            append(formatMissingIdentifiers(result.missingIdentifiers.orEmpty()))
+            append("\nInvalid identifiers: ")
+            append(result.invalidIdentifiers.orEmpty().map { it.value }.joinToStringOrNone())
         }
+    }
+
+    private fun formatMissingIdentifiers(missingIdentifiers: List<MissingIdentifier>): String {
+        return missingIdentifiers
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = "\n") { missingIdentifier ->
+                buildString {
+                    append("${missingIdentifier.regulation.value}: ${missingIdentifier.type.value}")
+                    append(" (${missingIdentifier.placeholder})")
+                    missingIdentifier.alternateIdentifier?.let { alternateIdentifier ->
+                        append(" or ${alternateIdentifier.type.value} (${alternateIdentifier.placeholder})")
+                    }
+                }
+            }
+            ?: "None"
     }
 
     private fun getPrefs(): SharedPreferences {
@@ -1049,10 +1046,8 @@ data class OnrampUiState(
     val kycBirthCity: String = "",
     val kycNationalities: String = "",
     val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
-    val micaIdentifierCountry: String = "",
     val micaIdentifierValue: String = "",
     val micaIdentifierType: String = "",
-    val carfIdentifierCountry: String = "",
     val carfIdentifierValue: String = "",
     val carfIdentifierType: String = "",
     val identifierRequirementsSummary: String? = null,
