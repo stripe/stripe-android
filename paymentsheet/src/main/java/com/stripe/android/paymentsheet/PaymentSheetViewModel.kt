@@ -216,7 +216,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
             cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter,
-            linkBrand = paymentMethodMetadata?.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
+            linkBrand = paymentMethodMetadata?.linkBrandOrDefault ?: LinkBrand.Link,
         )
     }
 
@@ -433,6 +433,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun checkoutWithLink() {
         checkout(
             PaymentSelection.Link(
+                linkBrand = paymentMethodMetadata.value?.linkBrandOrDefault ?: LinkBrand.Link,
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
             CheckoutIdentifier.SheetTopWallet
@@ -444,6 +445,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
+                linkBrand = paymentMethodMetadata.value?.linkBrandOrDefault ?: LinkBrand.Link,
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
             ),
             CheckoutIdentifier.SheetTopWallet

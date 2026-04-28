@@ -11,6 +11,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.link.linkBrandOrDefault
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -86,7 +87,10 @@ internal interface WalletButtonsInteractor {
             override val walletType = WalletType.Link
 
             override fun createSelection(): PaymentSelection {
-                return PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED)
+                return PaymentSelection.Link(
+                    linkBrand = linkBrand,
+                    linkExpressMode = LinkExpressMode.DISABLED,
+                )
             }
         }
 
@@ -198,7 +202,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                             ),
                             theme = arguments.configuration.walletButtons?.buttonThemes?.link
                                 ?: LinkButtonTheme.DEFAULT,
-                            linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link,
+                            linkBrand = linkConfiguration.linkBrandOrDefault,
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&

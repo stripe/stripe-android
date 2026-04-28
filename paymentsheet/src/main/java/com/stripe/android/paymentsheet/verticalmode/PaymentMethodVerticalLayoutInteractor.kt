@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
+import com.stripe.android.paymentsheet.model.resolvableString
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PromotionSupportedPaymentMethods
@@ -413,7 +414,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         return DisplayablePaymentMethod(
             code = PaymentMethod.Type.Link.code,
-            displayName = PaymentsCoreR.string.stripe_link.resolvableString,
+            displayName = link.linkBrand.resolvableString,
             iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
             iconResourceNight = null,
             lightThemeIconUrl = null,
@@ -421,7 +422,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = subtitle,
             onClick = {
-                updateSelection(PaymentSelection.Link(), false)
+                updateSelection(PaymentSelection.Link(linkBrand = link.linkBrand), false)
                 invokeRowSelectionCallback?.invoke()
             },
         )

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -178,7 +179,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 
 private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
     PaymentOptionsItem.AddCard,
-    PaymentOptionsItem.Link,
+    PaymentOptionsItem.Link(),
     PaymentOptionsItem.GooglePay,
     PaymentOptionsItem.SavedPaymentMethod(
         DisplayableSavedPaymentMethod.create(
@@ -300,6 +301,7 @@ private fun SavedPaymentMethodTab(
         }
         is PaymentOptionsItem.Link -> {
             LinkTab(
+                item = item,
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
@@ -375,12 +377,20 @@ private fun GooglePayTab(
 
 @Composable
 private fun LinkTab(
+    item: PaymentOptionsItem.Link,
     width: Dp,
     isEnabled: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val linkLabel = stringResource(
+        id = when (item.linkBrand) {
+            LinkBrand.Link -> StripeR.string.stripe_link
+            LinkBrand.Notlink -> StripeR.string.stripe_notlink
+        }
+    )
+
     SavedPaymentMethodTab(
         viewWidth = width,
         shouldShowModifyBadge = false,
@@ -389,9 +399,9 @@ private fun LinkTab(
         isEnabled = isEnabled,
         iconRes = getLinkIcon(showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()),
         iconTint = null,
-        labelText = stringResource(StripeR.string.stripe_link),
-        description = stringResource(StripeR.string.stripe_link),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.Link()) },
+        labelText = linkLabel,
+        description = linkLabel,
+        onItemSelectedListener = { onItemSelected(PaymentSelection.Link(linkBrand = item.linkBrand)) },
         cardArtUrl = null,
         modifier = modifier,
     )
