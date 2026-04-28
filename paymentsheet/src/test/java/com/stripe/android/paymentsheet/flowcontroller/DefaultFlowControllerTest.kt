@@ -529,7 +529,7 @@ internal class DefaultFlowControllerTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     hasCustomerConfiguration = true,
                     allowsDelayedPaymentMethods = false,
-                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
                 ),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),

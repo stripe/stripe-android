@@ -2355,6 +2355,48 @@ internal class PaymentMethodMetadataTest {
             attachDefaultsToPaymentMethod = true,
         )
 
+    @Test
+    fun `paymentMethodOrientation returns Horizontal when layout is Horizontal`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Vertical when layout is Vertical`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Vertical)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Vertical when layout is Automatic and has three payment methods`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna", "affirm"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Vertical)
+    }
+
+    @Test
+    fun `paymentMethodOrientation returns Horizontal when layout is Automatic and has two payment methods`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            ),
+            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
+        )
+
+        assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
     private fun createCustomerSheetConfiguration(
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         defaultBillingDetails: PaymentSheet.BillingDetails,

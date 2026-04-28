@@ -98,8 +98,12 @@ internal data class PaymentMethodMetadata(
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
             PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
-            PaymentSheet.PaymentMethodLayout.Vertical,
-            PaymentSheet.PaymentMethodLayout.Automatic -> PaymentMethodOrientation.Vertical
+            PaymentSheet.PaymentMethodLayout.Vertical -> PaymentMethodOrientation.Vertical
+            PaymentSheet.PaymentMethodLayout.Automatic -> if (supportedPaymentMethodTypes().size > 2) {
+                PaymentMethodOrientation.Vertical
+            } else {
+                PaymentMethodOrientation.Horizontal
+            }
         }
     }
 
