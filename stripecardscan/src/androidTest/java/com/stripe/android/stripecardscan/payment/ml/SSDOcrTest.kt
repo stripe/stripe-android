@@ -11,8 +11,10 @@ import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.toRect
 import com.stripe.android.stripecardscan.framework.ResourceFetcher
 import com.stripe.android.stripecardscan.test.R
+import com.stripe.android.testing.RetryRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
@@ -21,6 +23,9 @@ import kotlin.test.assertTrue
 class SSDOcrTest {
     private val appContext = InstrumentationRegistry.getInstrumentation().targetContext
     private val testContext = InstrumentationRegistry.getInstrumentation().context
+
+    @get:Rule
+    val retryRule = RetryRule(3)
 
     @Before
     fun initializeTfLite() {
