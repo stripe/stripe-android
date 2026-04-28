@@ -1,10 +1,11 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
 * [FIXED][12973](https://github.com/stripe/stripe-android/pull/12973) Fixed an issue where `FlowController` would bypass mandate display when `setupFutureUsage` was added via `configureWithIntentConfiguration()` after the user had already entered card details.
+* [CHANGED][12975](https://github.com/stripe/stripe-android/pull/12975) When `paymentMethodLayout` is set to `Automatic`, the layout is now horizontal when there are 2 or fewer payment methods available.
 
 ## 23.6.0 - 2026-04-27
 ### PaymentSheet
