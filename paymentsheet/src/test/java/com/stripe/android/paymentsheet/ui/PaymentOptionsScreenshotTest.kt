@@ -21,9 +21,9 @@ class PaymentOptionsScreenshotTest {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,
-                PaymentOptionsItem.Link,
+                PaymentOptionsItem.Link(),
             ),
-            selectedPaymentOptionsItem = PaymentOptionsItem.Link,
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link(),
             isEditing = false,
         )
     }
