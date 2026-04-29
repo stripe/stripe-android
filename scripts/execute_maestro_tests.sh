@@ -47,7 +47,7 @@ echo "test_environment: $test_environment"
 echo "MAESTRO_TAGS: $MAESTRO_TAGS"
 echo "MODULE: $MODULE"
 
-export MAESTRO_VERSION=1.38.1
+export MAESTRO_VERSION=1.41.0
 
 # Retry mechanism for Maestro installation
 MAX_RETRIES=5
@@ -93,7 +93,7 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
     if [ "$test_environment" != "edge" ] || contains_tag "$TEST_FILE_PATH" "edge"; then
       # Execute Maestro test flow and retry if failed
       while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
-        maestro test -e APP_ID=$TEST_APP_ID --format junit --output $TEST_RESULTS_PATH/$(basename "$TEST_FILE_PATH").xml "$TEST_FILE_PATH" && break
+        maestro test --platform android -e APP_ID=$TEST_APP_ID --format junit --output $TEST_RESULTS_PATH/$(basename "$TEST_FILE_PATH").xml "$TEST_FILE_PATH" && break
         let RETRY_COUNT=RETRY_COUNT+1
         echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
       done
