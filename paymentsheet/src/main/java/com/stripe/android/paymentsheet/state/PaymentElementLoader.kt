@@ -525,8 +525,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 if (
-                    elementsSession.forceVerticalPaymentMethodLayout
-                    && integrationConfiguration.configuration.paymentMethodLayout == PaymentMethodLayout.Automatic
+                    elementsSession.forceVerticalPaymentMethodLayout &&
+                    integrationConfiguration.configuration.paymentMethodLayout == PaymentMethodLayout.Automatic
                 ) {
                     PaymentMethodLayout.Vertical
                 } else {

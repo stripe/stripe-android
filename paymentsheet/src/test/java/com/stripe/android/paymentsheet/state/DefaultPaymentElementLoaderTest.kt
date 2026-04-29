@@ -34,8 +34,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
