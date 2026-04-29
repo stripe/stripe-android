@@ -5,8 +5,8 @@ import android.os.Build
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
-import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.model.CardBrand

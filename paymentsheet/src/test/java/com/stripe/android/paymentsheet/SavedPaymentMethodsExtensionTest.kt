@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
-import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.verticalmode.toDisplayableSavedPaymentMethod
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 import kotlin.test.assertEquals
