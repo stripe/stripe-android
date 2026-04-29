@@ -13,6 +13,7 @@ internal class PaymentOptionFactory @Inject constructor(
 ) {
     fun create(selection: PaymentSelection): PaymentOption {
         val drawableResourceId = selection.drawableResourceId
+        val drawableResourceIdNight = selection.drawableResourceIdNight
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
 
@@ -26,7 +27,7 @@ internal class PaymentOptionFactory @Inject constructor(
             imageLoader = {
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = drawableResourceId,
-                    drawableResourceIdNight = drawableResourceId,
+                    drawableResourceIdNight = drawableResourceIdNight,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
                 )
