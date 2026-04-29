@@ -364,7 +364,7 @@ workflows:
           title: Run PaymentSheet load synthetics
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew :paymentsheet-example:connectedBaseDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.lpm.PaymentSheetLoadTest -Pandroid.testInstrumentationRunnerArguments.mpe_synthetics_enabled=true
+            - content: ./scripts/retry.sh 3 ./gradlew :paymentsheet-example:connectedBaseDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.lpm.MPELatencyTest -Pandroid.testInstrumentationRunnerArguments.mpe_synthetics_enabled=true
   run-crypto-onramp-example-e2e-tests:
     before_run:
       - start_emulator

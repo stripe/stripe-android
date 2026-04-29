@@ -21,8 +21,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
+/** These tests are special; they don't fail and aren't meant to run in normal CI jobs.
+Instead, they measure MPE load times under various configurations and report the
+results under the `mpe.synthetic_latency` analytic via [MpeSyntheticsEventReporter]. */
 @RunWith(Parameterized::class)
-internal class PaymentSheetLoadTest(
+internal class MPELatencyTest(
+    private val testName: String,
     val testConfig: TestConfig,
 ) : BasePlaygroundTest() {
     private val appContext by lazy {
@@ -46,7 +50,7 @@ internal class PaymentSheetLoadTest(
     }
 
     @Test
-    fun testCardPaymentSheetLoads() {
+    fun latencyTest() {
         assumeRunningInSyntheticsWorkflow()
 
         testDriver.runLatencyTest(
@@ -60,7 +64,7 @@ internal class PaymentSheetLoadTest(
                 syntheticsEventReporter.onStart()
             },
             onLoad = {
-                syntheticsEventReporter.onLoad(testConfig.testName)
+                syntheticsEventReporter.onLoad(testName)
             }
         )
     }
@@ -75,28 +79,25 @@ internal class PaymentSheetLoadTest(
     }
 
     class TestConfig(
-        val testName: String,
         val isReturningCustomer: Boolean,
         val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
-    ) {
-        override fun toString(): String = testName
-    }
+    )
 
     companion object {
         private const val MPE_SYNTHETICS_ENABLED_ARGUMENT = "mpe_synthetics_enabled"
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
-        fun testConfigs(): List<TestConfig> {
+        fun testConfigs(): List<Array<Any>> {
             return listOf(
-                TestConfig(
+                testConfig(
                     testName = "test_link_off_with_no_customer",
                     isReturningCustomer = false,
                 ) { settings: PlaygroundSettings ->
                     settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.GUEST
                 },
-                TestConfig(
+                testConfig(
                     testName = "test_link_off_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -104,7 +105,7 @@ internal class PaymentSheetLoadTest(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                 },
-                TestConfig(
+                testConfig(
                     testName = "test_link_off_with_cs",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -112,14 +113,14 @@ internal class PaymentSheetLoadTest(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                 },
-                TestConfig(
+                testConfig(
                     testName = "test_link_on_with_no_customer",
                     isReturningCustomer = false,
                 ) { settings: PlaygroundSettings ->
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.GUEST
                 },
-                TestConfig(
+                testConfig(
                     testName = "test_link_on_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -127,7 +128,7 @@ internal class PaymentSheetLoadTest(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                 },
-                TestConfig(
+                testConfig(
                     testName = "test_link_on_with_cs",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -135,7 +136,7 @@ internal class PaymentSheetLoadTest(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                 },
-                TestConfig(
+                testConfig(
                     testName = "test_link_on_with_ek_default_email",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -144,7 +145,7 @@ internal class PaymentSheetLoadTest(
                     settings[CustomerSessionSettingsDefinition] = false
                     settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
                 },
-                TestConfig(
+                testConfig(
                     testName = "test_link_on_with_cs_default_email",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -153,6 +154,20 @@ internal class PaymentSheetLoadTest(
                     settings[CustomerSessionSettingsDefinition] = true
                     settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
                 },
+            )
+        }
+
+        private fun testConfig(
+            testName: String,
+            isReturningCustomer: Boolean,
+            playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
+        ): Array<Any> {
+            return arrayOf(
+                testName,
+                TestConfig(
+                    isReturningCustomer = isReturningCustomer,
+                    playgroundSettingsBlock = playgroundSettingsBlock,
+                )
             )
         }
     }
