@@ -106,10 +106,13 @@ class TerminalTestDelegate(
     }
 
     fun createSetupIntent(
-        paymentMethod: PaymentMethod? = null
+        paymentMethod: PaymentMethod? = null,
+        customerId: String? = null,
     ): SetupIntent {
         return mock {
             on { paymentMethodId } doReturn paymentMethod?.id
+            on { paymentMethodTypes } doReturn listOf("card_present")
+            on { this.customerId } doReturn customerId
         }
     }
 
@@ -145,12 +148,17 @@ class TerminalTestDelegate(
         val discoveredReaders: List<Reader> = listOf(DEFAULT_READER),
         val connectReaderResult: ConnectReaderResult = ConnectReaderResult.Success(DEFAULT_READER),
         val readerSupportResult: ReaderSupportResult = ReaderSupportResult.Supported,
-        val retrieveSetupIntentResult: SetupIntentResult = SetupIntentResult.Success(mock()),
+        val retrieveSetupIntentResult: SetupIntentResult = SetupIntentResult.Success(createSetupIntent()),
         val collectSetupIntentPaymentMethodResult: SetupIntentResult =
-            SetupIntentResult.Success(mock()),
-        val confirmSetupIntentResult: SetupIntentResult = SetupIntentResult.Success(mock()),
+            SetupIntentResult.Success(createSetupIntent()),
+        val confirmSetupIntentResult: SetupIntentResult = SetupIntentResult.Success(createSetupIntent()),
     ) {
         companion object {
+            fun createSetupIntent() = mock<SetupIntent> {
+                on { this.paymentMethodTypes } doReturn listOf("card_present")
+                on { this.customerId } doReturn "cus_123"
+            }
+
             fun withoutMocks() = Scenario(
                 retrieveSetupIntentResult = SetupIntentResult.Failure(DEFAULT_ERROR),
                 collectSetupIntentPaymentMethodResult = SetupIntentResult.Failure(DEFAULT_ERROR),

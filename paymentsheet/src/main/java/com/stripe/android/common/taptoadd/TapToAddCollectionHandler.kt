@@ -4,6 +4,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -20,6 +21,7 @@ import com.stripe.stripeterminal.external.callable.Cancelable
 import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
 import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
+import com.stripe.stripeterminal.external.models.PaymentMethodType
 import com.stripe.stripeterminal.external.models.SetupIntent
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
@@ -62,6 +64,7 @@ internal interface TapToAddCollectionHandler {
             paymentConfiguration: PaymentConfiguration,
             connectionManager: TapToAddConnectionManager,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
+            isSimulatedProvider: TapToAddIsSimulatedProvider,
             userFacingLogger: UserFacingLogger,
             errorReporter: ErrorReporter,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
@@ -73,6 +76,7 @@ internal interface TapToAddCollectionHandler {
                     stripeRepository = stripeRepository,
                     paymentConfiguration = paymentConfiguration,
                     tapToPayUxConfiguration = tapToPayUxConfiguration,
+                    isSimulatedProvider = isSimulatedProvider,
                     userFacingLogger = userFacingLogger,
                     errorReporter = errorReporter,
                     createCardPresentSetupIntentCallbackRetriever = createCardPresentSetupIntentCallbackRetriever,
@@ -91,6 +95,7 @@ internal class DefaultTapToAddCollectionHandler(
     private val paymentConfiguration: PaymentConfiguration,
     private val connectionManager: TapToAddConnectionManager,
     private val errorReporter: ErrorReporter,
+    private val isSimulatedProvider: TapToAddIsSimulatedProvider,
     private val userFacingLogger: UserFacingLogger,
     private val tapToPayUxConfiguration: TapToPayUxConfiguration,
     private val createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
@@ -163,6 +168,11 @@ internal class DefaultTapToAddCollectionHandler(
         customerMetadata: CustomerMetadata,
     ): TapToAddCollectionHandler.CollectionState {
         val setupIntent = retrieveSetupIntent(clientSecret)
+
+        validateSetupIntent(customerMetadata, setupIntent)?.let { failedValidationResult ->
+            return failedValidationResult
+        }
+
         val setupIntentWithAttachedPaymentMethod = collectPaymentMethod(setupIntent)
         val confirmedIntent = confirmSetupIntent(setupIntentWithAttachedPaymentMethod)
         val paymentMethod = fetchPaymentMethod(confirmedIntent, customerMetadata)
@@ -219,6 +229,55 @@ internal class DefaultTapToAddCollectionHandler(
                 options = getApiOptions(customerMetadata),
             ).getOrThrow()
         } ?: paymentMethod
+    }
+
+    private fun validateSetupIntent(
+        customerMetadata: CustomerMetadata,
+        setupIntent: SetupIntent,
+    ): TapToAddCollectionHandler.CollectionState.FailedCollection? {
+        val isSimulated = isSimulatedProvider.get()
+
+        if (!setupIntent.paymentMethodTypes.contains(PaymentMethodType.CARD_PRESENT.typeName)) {
+            val error = IllegalStateException("Missing 'card_present' payment method type on setup intent!")
+
+            return TapToAddCollectionHandler.CollectionState.FailedCollection(
+                error = error,
+                errorCode = DefaultErrorCode.Internal.MissingCardPresentPaymentMethodType,
+                errorMessage = if (isSimulated) {
+                    TapToAddErrorMessage(
+                        title = INTEGRATION_ERROR_TITLE.resolvableString,
+                        action = MISSING_CARD_PRESENT_ACTION.resolvableString,
+                    )
+                } else {
+                    TapToAddErrorMessageBuilder.build(error)
+                }
+            )
+        }
+
+        val setupIntentCustomer = setupIntent.customerId
+        val expectedCustomer = getCustomerId(customerMetadata)
+
+        if (setupIntentCustomer != expectedCustomer) {
+            val error = IllegalStateException("Incorrect customer attached to setup intent!")
+
+            return TapToAddCollectionHandler.CollectionState.FailedCollection(
+                error = error,
+                errorCode = DefaultErrorCode.Internal.IncorrectCustomerOnSetupIntent,
+                errorMessage = if (isSimulated) {
+                    TapToAddErrorMessage(
+                        title = INTEGRATION_ERROR_TITLE.resolvableString,
+                        action = createIncorrectCustomerActionMessage(
+                            actualCustomer = setupIntentCustomer,
+                            expectedCustomer = expectedCustomer,
+                        ).resolvableString,
+                    )
+                } else {
+                    TapToAddErrorMessageBuilder.build(error)
+                }
+            )
+        }
+
+        return null
     }
 
     private fun validatePaymentMethod(
@@ -306,17 +365,9 @@ internal class DefaultTapToAddCollectionHandler(
                 )
             }
 
-        val (customerId) = when (customerMetadata) {
-            is CustomerMetadata.CustomerSession -> customerMetadata.id to customerMetadata.ephemeralKeySecret
-            is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id to customerMetadata.ephemeralKeySecret
-            is CustomerMetadata.CheckoutSession -> {
-                throw NotImplementedError("Checkout sessions do not support retrieving individual payment methods!")
-            }
-        }
-
         return stripeRepository.retrieveSavedPaymentMethodFromCardPresentPaymentMethod(
             cardPresentPaymentMethodId = paymentMethodId,
-            customerId = customerId,
+            customerId = getCustomerId(customerMetadata),
             options = getApiOptions(customerMetadata)
         ).getOrThrow()
     }
@@ -345,6 +396,14 @@ internal class DefaultTapToAddCollectionHandler(
         }
     }
 
+    private fun getCustomerId(customerMetadata: CustomerMetadata): String {
+        return when (customerMetadata) {
+            is CustomerMetadata.CustomerSession -> customerMetadata.id
+            is CustomerMetadata.LegacyEphemeralKey -> customerMetadata.id
+            is CustomerMetadata.CheckoutSession -> customerMetadata.customerId
+        }
+    }
+
     private fun getApiOptions(customerMetadata: CustomerMetadata): ApiRequest.Options {
         val ephemeralKeySecret = when (customerMetadata) {
             is CustomerMetadata.CustomerSession -> customerMetadata.ephemeralKeySecret
@@ -367,7 +426,9 @@ internal class DefaultTapToAddCollectionHandler(
             NoCustomer("noCustomer"),
             NoCardPresentCallbackFailure("noCardPresentCallbackFailure"),
             FailureFromMerchantCardPresentCallback("failureFromMerchantCardPresentCallback"),
-            CardBrandNotSupportedByMerchant("cardBrandNotSupportedByMerchant")
+            CardBrandNotSupportedByMerchant("cardBrandNotSupportedByMerchant"),
+            MissingCardPresentPaymentMethodType("missingCardPresentPaymentMethodType"),
+            IncorrectCustomerOnSetupIntent("incorrectCustomerOnSetupIntent")
         }
 
         class Terminal(exception: TerminalException) : DefaultErrorCode {
@@ -377,6 +438,26 @@ internal class DefaultTapToAddCollectionHandler(
         class Exception(error: Throwable) : DefaultErrorCode {
             override val value: String = error.safeAnalyticsMessage
         }
+    }
+
+    private fun createIncorrectCustomerActionMessage(
+        expectedCustomer: String,
+        actualCustomer: String?,
+    ): String {
+        return when (actualCustomer) {
+            null ->
+                "Please attach the customer ($expectedCustomer) to the setup intent that was used to" +
+                " when initializing Payment Element"
+            else ->
+                "Setup intent had a different customer ($actualCustomer) than the expected customer " +
+                "initialized with Payment Element ($expectedCustomer). Please attach the expected customer."
+        }
+    }
+
+    private companion object {
+        const val INTEGRATION_ERROR_TITLE = "Integration error"
+        const val MISSING_CARD_PRESENT_ACTION = "Ensure the setup intent allows a `card_present` payment method " +
+            "type on it to allow for tapping cards"
     }
 }
 

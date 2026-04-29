@@ -28,13 +28,16 @@ class TapToAddCardCollectionTestHelper(
     private val delegate: TerminalTestDelegate
         get() = delegateRetriever()
 
-    fun enqueueSuccessfulTapToCollectFlow(shouldValidate: Boolean = false): TapToCollectAssertionInfo {
+    fun enqueueSuccessfulTapToCollectFlow(
+        shouldValidate: Boolean = false,
+        customerId: String = "cus_123"
+    ): TapToCollectAssertionInfo {
         val reader = delegate.createReader()
         val generatedPaymentMethod = PaymentMethodFactory.card("pm_1")
         val cardPaymentMethod = PaymentMethodFactory.card("pm_2")
         val setupIntentClientSecret = "seti_123_secret_123"
-        val setupIntent = delegate.createSetupIntent()
-        val confirmedIntent = delegate.createSetupIntent(generatedPaymentMethod)
+        val setupIntent = delegate.createSetupIntent(customerId = customerId)
+        val confirmedIntent = delegate.createSetupIntent(generatedPaymentMethod, customerId)
 
         delegate.setScenario(
             TerminalTestDelegate.Scenario(

@@ -42,6 +42,7 @@ internal interface TapToAddModule {
             paymentConfiguration: PaymentConfiguration,
             terminalWrapper: TerminalWrapper,
             tapToPayUxConfiguration: TapToPayUxConfiguration,
+            isSimulatedProvider: TapToAddIsSimulatedProvider,
             userFacingLogger: UserFacingLogger,
             errorReporter: ErrorReporter,
             createCardPresentSetupIntentCallbackRetriever: CreateCardPresentSetupIntentCallbackRetriever
@@ -51,6 +52,7 @@ internal interface TapToAddModule {
                 connectionManager = connectionManager,
                 terminalWrapper = terminalWrapper,
                 stripeRepository = stripeRepository,
+                isSimulatedProvider = isSimulatedProvider,
                 paymentConfiguration = paymentConfiguration,
                 tapToPayUxConfiguration = tapToPayUxConfiguration,
                 errorReporter = errorReporter,
