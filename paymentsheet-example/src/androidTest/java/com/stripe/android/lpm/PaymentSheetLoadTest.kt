@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.test.core.TestParameters
+import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -46,6 +47,8 @@ internal class PaymentSheetLoadTest(
 
     @Test
     fun testCardPaymentSheetLoads() {
+        assumeRunningInSyntheticsWorkflow()
+
         testDriver.runLatencyTest(
             testParameters = TestParameters.create(
                 paymentMethodCode = "card",
@@ -62,15 +65,25 @@ internal class PaymentSheetLoadTest(
         )
     }
 
+    private fun assumeRunningInSyntheticsWorkflow() {
+        assumeTrue(
+            "PaymentSheet load synthetics only run when explicitly enabled.",
+            InstrumentationRegistry.getArguments()
+                .getString(MPE_SYNTHETICS_ENABLED_ARGUMENT)
+                .equals("true", ignoreCase = true)
+        )
+    }
+
     class TestConfig(
         val testName: String,
         val isReturningCustomer: Boolean,
         val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
-    )
+    ) {
+        override fun toString(): String = testName
+    }
 
     companion object {
-        private const val LOG_TAG = "PaymentSheetLoadTest"
-        private const val RESULT_PREFIX = "RESULT"
+        private const val MPE_SYNTHETICS_ENABLED_ARGUMENT = "mpe_synthetics_enabled"
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
