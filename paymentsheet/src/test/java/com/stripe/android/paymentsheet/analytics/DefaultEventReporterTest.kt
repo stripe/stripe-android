@@ -100,6 +100,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("selected_lpm", "google_pay")
         assertThat(request.params).containsEntry("ordered_lpms", "card")
         assertThat(request.params).containsEntry("has_card_art", false)
+        assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
         assertThat(request.params).containsEntry("example_from_test", true)
     }
 

@@ -84,7 +84,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
-                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty()
+                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty(),
+                paymentMethodOrientation = paymentMethodMetadata.paymentMethodOrientation(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )

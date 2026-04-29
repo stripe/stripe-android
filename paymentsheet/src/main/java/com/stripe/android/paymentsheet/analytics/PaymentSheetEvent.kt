@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.utils.mapOfDurationInSeconds
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -31,6 +32,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         orderedLpms: List<String>,
         duration: Duration?,
         hasCardArt: Boolean,
+        paymentMethodOrientation: PaymentMethodOrientation,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val params: Map<String, Any?> = buildMap {
@@ -38,6 +40,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
             put(FIELD_HAS_CARD_ART, hasCardArt)
+            put(FIELD_PAYMENT_METHOD_ORIENTATION, paymentMethodOrientation.name.lowercase())
         }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
@@ -614,6 +617,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CAN_COLLECT_LINK_SIGNUP_INPUT = "can_collect_link_signup_input"
         const val FIELD_COMPLETED_LINK_SIGNUP_INPUT = "completed_link_signup_input"
         const val FIELD_PAYMENT_METHOD_LAYOUT = "payment_method_layout"
+        const val FIELD_PAYMENT_METHOD_ORIENTATION = "payment_method_orientation"
         const val FIELD_ORDERED_LPMS = "ordered_lpms"
         const val FIELD_HAS_CARD_ART = "has_card_art"
         const val INTENT_ID = "intent_id"
