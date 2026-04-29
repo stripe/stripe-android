@@ -38,6 +38,7 @@ import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -423,7 +424,13 @@ internal class DefaultFlowController @Inject internal constructor(
                     showPaymentOptionList(it, viewModel.paymentSelection)
                 }
             }
-            is LinkActivityResult.Completed -> with(Link(selectedPayment = result.selectedPayment)) {
+            is LinkActivityResult.Completed -> with(
+                Link(
+                    linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.linkBrandOrDefault
+                        ?: LinkBrand.Link,
+                    selectedPayment = result.selectedPayment,
+                )
+            ) {
                 viewModel.paymentSelection = this
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(

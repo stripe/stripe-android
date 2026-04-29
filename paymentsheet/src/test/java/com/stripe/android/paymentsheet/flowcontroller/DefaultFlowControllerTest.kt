@@ -45,6 +45,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -96,6 +97,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -1509,6 +1511,38 @@ internal class DefaultFlowControllerTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
             )
         )
+    }
+
+    @Test
+    fun `onLinkResultFromWalletsButton with Notlink preserves branded payment option label`() = runTest {
+        val flowController = createFlowController(
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(linkBrand = LinkBrand.Notlink),
+                loginState = LinkState.LoginState.LoggedIn,
+                signupMode = null,
+            )
+        )
+
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+        )
+
+        flowController.onLinkResultFromWalletsButton(
+            LinkActivityResult.Completed(
+                selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
+                    details = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
+                    collectedCvc = null,
+                    billingPhone = null,
+                ),
+                linkAccountUpdate = LinkAccountUpdate.Value(null),
+            )
+        )
+
+        verify(paymentOptionResultCallback).onPaymentOptionResult(
+            argThat { paymentOption?.label == "Notlink" && !didCancel }
+        )
+
+        assertThat(flowController.getPaymentOption()?.label).isEqualTo("Notlink")
     }
 
     @Test

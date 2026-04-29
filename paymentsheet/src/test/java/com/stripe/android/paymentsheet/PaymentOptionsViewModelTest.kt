@@ -35,6 +35,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -924,12 +925,19 @@ internal class PaymentOptionsViewModelTest {
             linkAccountUpdate = linkAccountUpdate,
             selectedPayment = null
         )
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(linkBrand = LinkBrand.Notlink),
+                signupMode = null,
+                loginState = LinkState.LoginState.NeedsVerification,
+            )
+        )
         viewModel.paymentOptionsActivityResult.test {
             viewModel.onLinkAuthenticationResult(result)
             val succeeded = awaitItem() as PaymentOptionsActivityResult.Succeeded
             val paymentSelection = succeeded.paymentSelection
             assertThat(paymentSelection).isInstanceOf<PaymentSelection.Link>()
+            assertThat((paymentSelection as PaymentSelection.Link).linkBrand).isEqualTo(LinkBrand.Notlink)
             assertThat(succeeded.linkAccountInfo.account).isEqualTo(linkAccountUpdate.account)
         }
     }

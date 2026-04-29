@@ -310,6 +310,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
+                            linkBrand = args.state.paymentMethodMetadata.linkBrandOrDefault,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),
