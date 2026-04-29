@@ -92,8 +92,20 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
-    val paymentMethodOrientation: PaymentMethodOrientation,
+    private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
+
+    fun paymentMethodOrientation(): PaymentMethodOrientation {
+        return when (paymentMethodLayout) {
+            PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
+            PaymentSheet.PaymentMethodLayout.Vertical -> PaymentMethodOrientation.Vertical
+            PaymentSheet.PaymentMethodLayout.Automatic -> if (supportedPaymentMethodTypes().size > 2) {
+                PaymentMethodOrientation.Vertical
+            } else {
+                PaymentMethodOrientation.Horizontal
+            }
+        }
+    }
 
     @IgnoredOnParcel
     val linkState: LinkState? =
@@ -411,11 +423,7 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
-                paymentMethodOrientation = when (paymentMethodLayout) {
-                    PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
-                    PaymentSheet.PaymentMethodLayout.Vertical,
-                    PaymentSheet.PaymentMethodLayout.Automatic -> PaymentMethodOrientation.Vertical
-                }
+                paymentMethodLayout = paymentMethodLayout,
             )
         }
 
@@ -486,7 +494,7 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
-                paymentMethodOrientation = PaymentMethodOrientation.Horizontal,
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }
     }
