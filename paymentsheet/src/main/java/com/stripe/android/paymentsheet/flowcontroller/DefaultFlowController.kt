@@ -427,7 +427,7 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             is LinkActivityResult.Completed -> with(
                 Link(
-                    linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.linkBrandOrDefault
+                    linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.linkBrand
                         ?: LinkBrand.Link,
                     selectedPayment = result.selectedPayment,
                 )

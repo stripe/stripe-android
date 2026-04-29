@@ -586,26 +586,26 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val primaryPaymentSelection = if (isDefaultPaymentMethodEnabled) {
             customer?.paymentMethods?.firstOrNull {
                 customer.defaultPaymentMethodId != null && it.id == customer.defaultPaymentMethodId
-            }?.toPaymentSelection(linkBrand = metadata.linkBrandOrDefault)
+            }?.toPaymentSelection(linkBrand = metadata.linkBrand)
         } else {
             when (val selection = savedSelection.await()) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
                     !isUsingWalletButtons && isGooglePayReady
                 }
                 is SavedSelection.Link -> PaymentSelection.Link(
-                    linkBrand = metadata.linkBrandOrDefault
+                    linkBrand = metadata.linkBrand
                 ).takeIf {
                     !isUsingWalletButtons
                 }
                 is SavedSelection.PaymentMethod -> {
                     val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
                     if (customerPaymentMethod != null) {
-                        customerPaymentMethod.toPaymentSelection(linkBrand = metadata.linkBrandOrDefault)
+                        customerPaymentMethod.toPaymentSelection(linkBrand = metadata.linkBrand)
                     } else if (selection.isLinkOrigin) {
                         // The payment method wasn't attached to the customer, but is of Link origin. Offer
                         // Link as the initial payment selection.
                         PaymentSelection.Link(
-                            linkBrand = metadata.linkBrandOrDefault
+                            linkBrand = metadata.linkBrand
                         ).takeIf {
                             !isUsingWalletButtons
                         }
@@ -618,7 +618,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         return primaryPaymentSelection
-            ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection(linkBrand = metadata.linkBrandOrDefault)
+            ?: customer?.paymentMethods?.firstOrNull()?.toPaymentSelection(linkBrand = metadata.linkBrand)
             ?: PaymentSelection.GooglePay.takeIf {
                 !isUsingWalletButtons && isGooglePayReady
             }

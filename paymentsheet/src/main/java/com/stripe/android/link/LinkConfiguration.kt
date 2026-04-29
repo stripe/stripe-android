@@ -55,9 +55,6 @@ internal data class LinkConfiguration(
     val customerIdForEceDefaultValues: String?
         get() = if (enableDisplayableDefaultValuesInEce) customerId else null
 
-    val linkBrandOrDefault: LinkBrand
-        get() = linkBrand
-
     val enableLinkPaymentSelectionHint: Boolean
         get() = flags["link_show_prefer_debit_card_hint"] == true
 

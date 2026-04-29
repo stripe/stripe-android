@@ -14,7 +14,7 @@ internal fun PaymentMethod.toDisplayableSavedPaymentMethod(
     return DisplayableSavedPaymentMethod.create(
         displayName = paymentMethodMetadata?.displayNameForCode(type?.code).orEmpty(),
         paymentMethod = this,
-        linkBrand = paymentMethodMetadata?.linkBrandOrDefault ?: LinkBrand.Link,
+        linkBrand = paymentMethodMetadata?.linkBrand ?: LinkBrand.Link,
         isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
         shouldShowDefaultBadge = id == defaultPaymentMethodId,
     )

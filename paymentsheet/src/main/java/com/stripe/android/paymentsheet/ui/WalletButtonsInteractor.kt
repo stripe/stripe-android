@@ -201,7 +201,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                             ),
                             theme = arguments.configuration.walletButtons?.buttonThemes?.link
                                 ?: LinkButtonTheme.DEFAULT,
-                            linkBrand = linkConfiguration?.linkBrandOrDefault ?: LinkBrand.Link,
+                            linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link,
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&

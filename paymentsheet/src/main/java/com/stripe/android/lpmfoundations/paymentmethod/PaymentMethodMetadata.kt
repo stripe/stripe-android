@@ -104,7 +104,7 @@ internal data class PaymentMethodMetadata(
         }
 
     @IgnoredOnParcel
-    val linkBrandOrDefault: LinkBrand
+    val linkBrand: LinkBrand
         get() = linkState?.configuration?.linkBrand ?: LinkBrand.Link
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {

@@ -75,7 +75,7 @@ internal class SavedPaymentMethodMutator(
             customerState = customerStateHolder.customer,
             isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
             isLinkEnabled = isLinkEnabled,
-            linkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkBrandOrDefault ?: LinkBrand.Link },
+            linkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkBrand ?: LinkBrand.Link },
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = { paymentMethodMetadataFlow.value?.displayNameForCode(it).orEmpty() },
             isCbcEligible = { paymentMethodMetadataFlow.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible },
@@ -220,7 +220,7 @@ internal class SavedPaymentMethodMutator(
                 setSelection(
                     PaymentSelection.Saved(
                         paymentMethod = paymentMethod,
-                        linkBrand = paymentMethodMetadataFlow.value?.linkBrandOrDefault ?: LinkBrand.Link,
+                        linkBrand = paymentMethodMetadataFlow.value?.linkBrand ?: LinkBrand.Link,
                     )
                 )
             }
@@ -297,7 +297,7 @@ internal class SavedPaymentMethodMutator(
                     setSelection(
                         PaymentSelection.Saved(
                             paymentMethod = updatedMethod,
-                            linkBrand = paymentMethodMetadataFlow.value?.linkBrandOrDefault ?: LinkBrand.Link,
+                            linkBrand = paymentMethodMetadataFlow.value?.linkBrand ?: LinkBrand.Link,
                         )
                     )
                 }

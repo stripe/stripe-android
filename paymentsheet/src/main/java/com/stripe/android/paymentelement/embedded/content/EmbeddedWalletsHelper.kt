@@ -40,7 +40,7 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 walletsAllowedInHeader = emptyList(), // Embedded: all wallets inline, none in header
                 cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                 cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                linkBrand = paymentMethodMetadata.linkBrandOrDefault,
+                linkBrand = paymentMethodMetadata.linkBrand,
             )
         }
     }

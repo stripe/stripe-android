@@ -246,7 +246,7 @@ internal class DefaultCustomerSheetLoader(
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
                 is SavedSelection.Link -> PaymentSelection.Link(
-                    linkBrand = metadata.linkBrandOrDefault
+                    linkBrand = metadata.linkBrand
                 )
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->

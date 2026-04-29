@@ -177,7 +177,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             },
             onLinkPressed = {
                 updateSelection(
-                    Link(linkBrand = linkConfiguration?.linkBrandOrDefault ?: LinkBrand.Link)
+                    Link(linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link)
                 )
                 onUserSelection()
             },
@@ -192,7 +192,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 hasLinkWithSelectedPayment.not(),
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-            linkBrand = linkConfiguration?.linkBrandOrDefault ?: LinkBrand.Link,
+            linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link,
         )
     }
 
@@ -310,7 +310,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
-                            linkBrand = args.state.paymentMethodMetadata.linkBrandOrDefault,
+                            linkBrand = args.state.paymentMethodMetadata.linkBrand,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),
