@@ -24,7 +24,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
 internal class FakePaymentElementLoader(
-    private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+    private var stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     private val shouldFail: Boolean = false,
     private var customer: CustomerState? = null,
     private var paymentSelection: PaymentSelection? = null,
@@ -39,6 +39,10 @@ internal class FakePaymentElementLoader(
     private val experimentsData: ElementsSession.ExperimentsData? = null,
     private val integrationMetadata: IntegrationMetadata? = null,
 ) : PaymentElementLoader {
+
+    fun updateStripeIntent(intent: StripeIntent) {
+        this.stripeIntent = intent
+    }
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
         this.customer = customer?.copy(
