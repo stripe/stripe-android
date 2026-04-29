@@ -34,6 +34,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
@@ -3680,6 +3681,42 @@ internal class DefaultPaymentElementLoaderTest {
             )
         )
     }
+
+    @Test
+    fun `Uses vertical payment method orientation when forced by elements session flag and layout is automatic`() =
+        runScenario {
+            val stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            )
+            val loader = createPaymentElementLoader(
+                stripeIntent = stripeIntent,
+                elementsSessionRepository = FakeElementsSessionRepository(
+                    stripeIntent = stripeIntent,
+                    error = null,
+                    linkSettings = null,
+                    flags = mapOf(
+                        ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT to true,
+                    ),
+                ),
+            )
+
+            val config = PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
+                .build()
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                paymentSheetConfiguration = config,
+                metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+            ).getOrThrow()
+
+            assertThat(result.paymentMethodMetadata.paymentMethodOrientation())
+                .isEqualTo(PaymentMethodOrientation.Vertical)
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
 
     @OptIn(CardFundingFilteringPrivatePreview::class)
     private fun testCardFundingFiltering(

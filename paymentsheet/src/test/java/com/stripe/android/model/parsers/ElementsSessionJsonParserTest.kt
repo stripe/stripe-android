@@ -1683,6 +1683,47 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `Parses elements_mobile_force_vertical_payment_method_layout flag when present and enabled`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val json = JSONObject(
+            """
+            {
+              "payment_method_preference": {
+                "object": "payment_method_preference",
+                "country_code": "US",
+                "payment_intent": {
+                  "id": "pi_123",
+                  "object": "payment_intent",
+                  "amount": 1099,
+                  "currency": "usd",
+                  "status": "requires_payment_method"
+                },
+                "ordered_payment_method_types": ["card"]
+              },
+              "flags": {
+                "elements_mobile_force_vertical_payment_method_layout": true
+              }
+            }
+            """.trimIndent()
+        )
+
+        val session = parser.parse(json)
+
+        assertThat(session?.flags?.get(ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT))
+            .isTrue()
+        assertThat(session?.forceVerticalPaymentMethodLayout).isTrue()
+    }
+
+    @Test
     fun `Parses elements_mobile_card_funding_filtering flag as false when disabled`() {
         testCardFundingFilteringFlag(enabled = false)
     }
