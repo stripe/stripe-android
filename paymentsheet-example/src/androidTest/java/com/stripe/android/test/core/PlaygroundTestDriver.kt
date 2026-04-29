@@ -582,16 +582,16 @@ internal class PlaygroundTestDriver(
     }
 
     @OptIn(ExperimentalTestApi::class)
-    fun loadComplete(
+    fun runLatencyTest(
         testParameters: TestParameters,
         isReturningCustomer: Boolean,
-        afterLaunch: (Selectors) -> Unit = {},
-        afterLoad: (Selectors) -> Unit = {},
-    ): PlaygroundState? {
+        onLaunch: () -> Unit,
+        onLoad: () -> Unit,
+    ) {
         setup(testParameters)
         launchComplete()
 
-        afterLaunch(selectors)
+        onLaunch()
 
         if (isReturningCustomer) {
             selectors.composeTestRule.waitUntilAtLeastOneExists(
@@ -602,24 +602,9 @@ internal class PlaygroundTestDriver(
             selectors.formElement.waitFor()
         }
 
-        afterLoad(selectors)
-
-        val result = playgroundState
+        onLoad()
 
         teardown()
-
-        return result
-    }
-
-    fun loadNewOrGuestComplete(
-        testParameters: TestParameters,
-        afterLoad: (Selectors) -> Unit = {},
-    ): PlaygroundState? {
-        return loadComplete(
-            testParameters = testParameters,
-            isReturningCustomer = false,
-            afterLoad = afterLoad,
-        )
     }
 
     fun confirmExistingComplete(

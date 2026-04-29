@@ -15,15 +15,16 @@ internal class MpeSyntheticsEventReporter(
     }
 
     fun onLoad(testName: String) {
-        val durationInMs = durationProvider.end(DurationProvider.Key.MpeSynthetics)?.inWholeMilliseconds ?: 0L
+        val duration = durationProvider.end(DurationProvider.Key.MpeSynthetics)
 
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = MpeSyntheticLatencyAnalyticsEvent,
                 additionalParams = mapOf(
                     "test" to testName,
-                    "duration" to durationInMs,
-                )
+                ) + duration?.let {
+                    mapOf("duration" to it.inWholeMilliseconds)
+                }.orEmpty()
             )
         )
     }

@@ -1,7 +1,6 @@
 package com.stripe.android.lpm
 
-import android.os.SystemClock
-import android.util.Log
+import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -17,11 +16,9 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.test.core.TestParameters
-import androidx.test.platform.app.InstrumentationRegistry
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
-import javax.inject.Provider
 
 @RunWith(Parameterized::class)
 internal class PaymentSheetLoadTest(
@@ -46,6 +43,30 @@ internal class PaymentSheetLoadTest(
             durationProvider = DefaultDurationProvider.instance,
         )
     }
+
+    @Test
+    fun testCardPaymentSheetLoads() {
+        testDriver.runLatencyTest(
+            testParameters = TestParameters.create(
+                paymentMethodCode = "card",
+                authorizationAction = null,
+                playgroundSettingsBlock = testConfig.playgroundSettingsBlock,
+            ),
+            isReturningCustomer = testConfig.isReturningCustomer,
+            onLaunch = {
+                syntheticsEventReporter.onStart()
+            },
+            onLoad = {
+                syntheticsEventReporter.onLoad(testConfig.testName)
+            }
+        )
+    }
+
+    class TestConfig(
+        val testName: String,
+        val isReturningCustomer: Boolean,
+        val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
+    )
 
     companion object {
         private const val LOG_TAG = "PaymentSheetLoadTest"
@@ -121,40 +142,5 @@ internal class PaymentSheetLoadTest(
                 },
             )
         }
-    }
-
-    class TestConfig(
-        val testName: String,
-        val isReturningCustomer: Boolean,
-        val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
-    ) {
-        override fun toString(): String = testName
-    }
-
-    @Test
-    fun testCardPaymentSheetLoads() {
-        var loadStartTimeMs = 0L
-
-        testDriver.loadComplete(
-            testParameters = TestParameters.create(
-                paymentMethodCode = "card",
-                authorizationAction = null,
-                playgroundSettingsBlock = testConfig.playgroundSettingsBlock,
-            ),
-            isReturningCustomer = testConfig.isReturningCustomer,
-            afterLaunch = {
-                loadStartTimeMs = SystemClock.elapsedRealtime()
-                syntheticsEventReporter.onStart()
-            },
-            afterLoad = {
-                val loadDurationMs = SystemClock.elapsedRealtime() - loadStartTimeMs
-                syntheticsEventReporter.onLoad(testConfig.testName)
-                Log.i(
-                    LOG_TAG,
-                    "Initial screen displayed for ${testConfig.testName} in ${loadDurationMs}ms"
-                )
-                Log.i(LOG_TAG, "$RESULT_PREFIX,${testConfig.testName},${loadDurationMs}")
-            }
-        )
     }
 }
