@@ -91,8 +91,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         validateAnalyticsRequest(eventName = "mc_form_shown")
-        // cardscan is not available in test mode
-        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
+        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
         validateAnalyticsRequest(
             eventName = "mc_initial_displayed_payment_methods",
             query("hidden_payment_methods", ""),
@@ -199,8 +198,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_embedded_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_carousel_payment_method_tapped")
         validateAnalyticsRequest(eventName = "mc_form_shown")
-        // cardscan is not available in test mode
-        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_failed")
+        validateAnalyticsRequest(eventName = "mc_cardscan_api_check_succeeded")
         validateAnalyticsRequest(eventName = "mc_initial_displayed_payment_methods")
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
@@ -239,7 +237,7 @@ internal class EmbeddedPaymentElementAnalyticsTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("confirmation_token", "ctoken_example"),
-            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.example")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
