@@ -2,7 +2,7 @@
 <html class="no-js" lang="en">
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="UTF-8">
-    <title>TranslatorManager</title>
+    <title>createCardPresentSetupIntent</title>
 <link href="../../../images/logo-icon.svg" rel="icon" type="image/svg"><script>var pathToRoot = "../../../";</script>
     <script>document.documentElement.classList.replace("no-js", "js");</script>
     <script>const storage = localStorage.getItem("dokka-dark-mode")
@@ -43,7 +43,7 @@
         </div>
         <div class="navigation-controls">
         <ul class="filter-section filter-section_loading" id="filter-section" aria-label="Target filter">
-                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":payments-core/main">androidJvm</button>
+                <button class="platform-tag platform-selector jvm-like" data-active="" aria-pressed="true" data-filter=":paymentsheet/main">androidJvm</button>
             <div class="dropdown filter-section--dropdown" data-role="dropdown" id="filter-section-dropdown">
                 <button class="button button_dropdown filter-section--dropdown-toggle" role="combobox" data-role="dropdown-toggle" aria-controls="platform-tags-listbox" aria-haspopup="listbox" aria-expanded="false" aria-label="Toggle source sets"></button>
                 <ul role="listbox" id="platform-tags-listbox" class="dropdown--list" data-role="dropdown-listbox" aria-label="Target filter">
@@ -54,7 +54,7 @@
                     </div>
                         <li role="option" class="dropdown--option platform-selector-option jvm-like" tabindex="0">
                             <label class="checkbox">
-                                <input type="checkbox" class="checkbox--input" id=":payments-core/main" data-filter=":payments-core/main">
+                                <input type="checkbox" class="checkbox--input" id=":paymentsheet/main" data-filter=":paymentsheet/main">
                                 <span class="checkbox--icon"></span>
                                 androidJvm
                             </label>
@@ -90,57 +90,12 @@
         </nav>
         <div id="resizer" class="resizer" data-item-type="BAR"></div>
         <div id="main" data-item-type="SECTION" role="main">
-<div class="main-content" data-page-type="classlike" id="content" pageids="payments-core::com.stripe.android.view.i18n/TranslatorManager///PointingToDeclaration//1599408092">
-  <div class="breadcrumbs"><a href="../../index.html">payments-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.view.i18n</a><span class="delimiter">/</span><span class="current">TranslatorManager</span></div>
+<div class="main-content" data-page-type="member" id="content" pageids="paymentsheet::com.stripe.android.paymentelement/CreateCardPresentSetupIntentCallback/createCardPresentSetupIntent/#/PointingToDeclaration//-1685933200">
+  <div class="breadcrumbs"><a href="../../index.html">paymentsheet</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.paymentelement</a><span class="delimiter">/</span><a href="index.html">CreateCardPresentSetupIntentCallback</a><span class="delimiter">/</span><span class="current">createCardPresentSetupIntent</span></div>
   <div class="cover ">
-    <h1 class="cover"><span>Translator</span><wbr><span><span>Manager</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">object </span><a href="index.html">TranslatorManager</a></div><p class="paragraph">A class that provides a <a href="../-error-message-translator/index.html">ErrorMessageTranslator</a> for translating server-provided error messages, as defined in <a href="https://stripe.com/docs/api/errors">Stripe API Errors Reference</a>.</p><p class="paragraph">See com.stripe.android.view.PaymentMethodsActivity for example usage.</p><p class="paragraph">To use a custom <a href="../-error-message-translator/index.html">ErrorMessageTranslator</a> in your app, override <a href="https://developer.android.com/reference/kotlin/android/app/Application.html#onCreate()">Application.onCreate</a> in your app's Application subclass and call <a href="set-error-message-translator.html">setErrorMessageTranslator</a>.</p><pre>public class MyApp extends Application {
-public void onCreate() {
-    super.onCreate();
-    TranslatorManager.setErrorMessageTranslator(new MyErrorMessageTranslator());
-}
-}
-</pre></div></div>
+    <h1 class="cover"><span>create</span><wbr><span>Card</span><wbr><span>Present</span><wbr><span>Setup</span><wbr><span><span>Intent</span></span></h1>
   </div>
-  <div class="tabbedcontent">
-    <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
-    <div class="tabs-section-body">
-      <div data-togglable="FUNCTION">
-        <h2 class="tableheader">Functions</h2>
-        <div class="table"><a data-name="1442760837%2FFunctions%2F1599408092" anchor-label="getErrorMessageTranslator" id="1442760837%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
-          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="get-error-message-translator.html"><span>get</span><wbr><span>Error</span><wbr><span>Message</span><wbr><span><span>Translator</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1442760837%2FFunctions%2F1599408092"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="get-error-message-translator.html"><span class="token function">getErrorMessageTranslator</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../-error-message-translator/index.html">ErrorMessageTranslator</a></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-<a data-name="1137055245%2FFunctions%2F1599408092" anchor-label="setErrorMessageTranslator" id="1137055245%2FFunctions%2F1599408092" data-filterable-set=":payments-core/main"></a>
-          <div class="table-row table-row_content" data-filterable-current=":payments-core/main" data-filterable-set=":payments-core/main">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="set-error-message-translator.html"><span>set</span><wbr><span>Error</span><wbr><span>Message</span><wbr><span><span>Translator</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1137055245%2FFunctions%2F1599408092"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":payments-core/main"><div class="symbol monospace"><span class="token keyword">fun </span><a href="set-error-message-translator.html"><span class="token function">setErrorMessageTranslator</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">errorMessageTranslator<span class="token operator">: </span><a href="../-error-message-translator/index.html">ErrorMessageTranslator</a><span class="token operator">?</span></span></span><span class="token punctuation">)</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":paymentsheet/main"><div class="symbol monospace"><span class="token keyword">abstract </span><span class="token keyword">suspend </span><span class="token keyword">fun </span><a href="create-card-present-setup-intent.html"><span class="token function">createCardPresentSetupIntent</span></a><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token operator">: </span><a href="../../com.stripe.android.paymentsheet/-create-intent-result/index.html">CreateIntentResult</a></div><p class="paragraph">Called when the customer attempts to save their card by tapping it on their device. This is called before the tap screen is presented to the customer.</p></div></div>
 </div>
     <div class="footer">
         <div class="footer--container">
