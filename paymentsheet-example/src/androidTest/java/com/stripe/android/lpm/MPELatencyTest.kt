@@ -1,5 +1,6 @@
 package com.stripe.android.lpm
 
+import android.os.Bundle
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.PaymentConfiguration
@@ -21,9 +22,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
+private const val MPE_SYNTHETICS_ENABLED_ARGUMENT = "mpe_synthetics_enabled"
+private const val MPE_BENCHMARK_ENABLED_ARGUMENT = "mpe_benchmark_enabled"
+
 /** These tests are special; they don't fail and aren't meant to run in normal CI jobs.
 Instead, they measure MPE load times under various configurations and report the
-results under the `mpe.synthetic_latency` analytic via [MpeSyntheticsEventReporter]. */
+results either via analytics for synthetics or via logcat for commit benchmarking. */
 @RunWith(Parameterized::class)
 internal class MPELatencyTest(
     private val testName: String,
@@ -33,25 +37,41 @@ internal class MPELatencyTest(
         InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
     }
 
-    private val syntheticsEventReporter by lazy {
-        MpeSyntheticsEventReporter(
-            analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-            analyticsRequestFactory = AnalyticsRequestFactory(
-                packageManager = appContext.packageManager,
-                packageInfo = appContext.packageInfo,
-                packageName = appContext.packageName,
-                publishableKeyProvider = {
-                    PaymentConfiguration.getInstance(appContext).publishableKey
-                },
-                networkTypeProvider = NetworkTypeDetector(appContext)::invoke,
-            ),
-            durationProvider = DefaultDurationProvider.instance,
-        )
+    private val reportingMode by lazy {
+        ReportingMode.fromInstrumentationArgs()
+    }
+
+    private val latencyReporter by lazy {
+        when (reportingMode) {
+            ReportingMode.Benchmark -> {
+                MpeBenchmarkEventReporter(
+                    durationProvider = DefaultDurationProvider.instance,
+                )
+            }
+            ReportingMode.Synthetics -> {
+                MpeSyntheticsEventReporter(
+                    analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
+                    analyticsRequestFactory = AnalyticsRequestFactory(
+                        packageManager = appContext.packageManager,
+                        packageInfo = appContext.packageInfo,
+                        packageName = appContext.packageName,
+                        publishableKeyProvider = {
+                            PaymentConfiguration.getInstance(appContext).publishableKey
+                        },
+                        networkTypeProvider = NetworkTypeDetector(appContext)::invoke,
+                    ),
+                    durationProvider = DefaultDurationProvider.instance,
+                )
+            }
+            null -> {
+                error("MPELatencyTest should only run when a reporting mode is enabled.")
+            }
+        }
     }
 
     @Test
     fun latencyTest() {
-        assumeRunningInSyntheticsWorkflow()
+        assumeRunningInLatencyWorkflow()
 
         testDriver.runLatencyTest(
             testParameters = TestParameters.create(
@@ -61,20 +81,18 @@ internal class MPELatencyTest(
             ),
             isReturningCustomer = testConfig.isReturningCustomer,
             onLaunch = {
-                syntheticsEventReporter.onStart()
+                latencyReporter.onStart()
             },
             onLoad = {
-                syntheticsEventReporter.onLoad(testName)
+                latencyReporter.onLoad(testName)
             }
         )
     }
 
-    private fun assumeRunningInSyntheticsWorkflow() {
+    private fun assumeRunningInLatencyWorkflow() {
         assumeTrue(
-            "PaymentSheet load synthetics only run when explicitly enabled.",
-            InstrumentationRegistry.getArguments()
-                .getString(MPE_SYNTHETICS_ENABLED_ARGUMENT)
-                .equals("true", ignoreCase = true)
+            "PaymentSheet latency tests only run when explicitly enabled.",
+            reportingMode != null
         )
     }
 
@@ -84,8 +102,6 @@ internal class MPELatencyTest(
     )
 
     companion object {
-        private const val MPE_SYNTHETICS_ENABLED_ARGUMENT = "mpe_synthetics_enabled"
-
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun testConfigs(): List<Array<Any>> {
@@ -169,6 +185,27 @@ internal class MPELatencyTest(
                     playgroundSettingsBlock = playgroundSettingsBlock,
                 )
             )
+        }
+    }
+
+    private enum class ReportingMode {
+        Benchmark,
+        Synthetics;
+
+        companion object {
+            fun fromInstrumentationArgs(): ReportingMode? {
+                val arguments = InstrumentationRegistry.getArguments()
+
+                return when {
+                    arguments.isEnabled(MPE_BENCHMARK_ENABLED_ARGUMENT) -> Benchmark
+                    arguments.isEnabled(MPE_SYNTHETICS_ENABLED_ARGUMENT) -> Synthetics
+                    else -> null
+                }
+            }
+
+            private fun Bundle.isEnabled(key: String): Boolean {
+                return getString(key).equals("true", ignoreCase = true)
+            }
         }
     }
 }

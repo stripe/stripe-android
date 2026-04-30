@@ -9,12 +9,12 @@ internal class MpeSyntheticsEventReporter(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory,
     private val durationProvider: DurationProvider,
-) {
-    fun onStart() {
+) : MpeLatencyReporter {
+    override fun onStart() {
         durationProvider.start(DurationProvider.Key.MpeSynthetics)
     }
 
-    fun onLoad(testName: String) {
+    override fun onLoad(testName: String) {
         val duration = durationProvider.end(DurationProvider.Key.MpeSynthetics)
 
         analyticsRequestExecutor.executeAsync(
