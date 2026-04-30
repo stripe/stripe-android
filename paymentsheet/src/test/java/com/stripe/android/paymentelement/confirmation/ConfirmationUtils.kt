@@ -152,6 +152,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                     context = ApplicationProvider.getApplicationContext(),
                     stripeRepository = stripeRepository,
                     checkoutSessionRepository = CheckoutSessionRepository(
+                        context = ApplicationProvider.getApplicationContext(),
                         stripeNetworkClient = DefaultStripeNetworkClient(),
                         publishableKeyProvider = { "pk" },
                         stripeAccountIdProvider = { null },

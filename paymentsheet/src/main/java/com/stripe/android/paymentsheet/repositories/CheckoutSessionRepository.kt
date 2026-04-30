@@ -1,10 +1,12 @@
 package com.stripe.android.paymentsheet.repositories
 
+import android.content.Context
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
@@ -18,6 +20,7 @@ import javax.inject.Named
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
+    private val context: Context,
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
@@ -64,6 +67,9 @@ internal class CheckoutSessionRepository @Inject constructor(
             "eid" to UUID.randomUUID().toString(),
             "redirect_type" to "embedded",
             "elements_session_client[is_aggregation_expected]" to "true",
+            "elements_session_client[locale]" to Locale.getDefault().toLanguageTag(),
+            "elements_session_client[mobile_session_id]" to AnalyticsRequestFactory.sessionId.toString(),
+            "elements_session_client[mobile_app_id]" to context.packageName,
             "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
         ),
     )

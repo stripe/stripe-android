@@ -39,6 +39,7 @@ class CheckoutCurrencyUpdaterTest {
         .around(CheckoutInstancesTestRule())
 
     private val checkoutSessionRepository = CheckoutSessionRepository(
+        context = ApplicationProvider.getApplicationContext(),
         stripeNetworkClient = DefaultStripeNetworkClient(),
         publishableKeyProvider = { "pk_test_123" },
         stripeAccountIdProvider = { null },
