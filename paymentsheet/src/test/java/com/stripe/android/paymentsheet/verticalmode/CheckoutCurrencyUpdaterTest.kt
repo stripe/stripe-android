@@ -42,6 +42,7 @@ class CheckoutCurrencyUpdaterTest {
         stripeNetworkClient = DefaultStripeNetworkClient(),
         publishableKeyProvider = { "pk_test_123" },
         stripeAccountIdProvider = { null },
+        context = ApplicationProvider.getApplicationContext(),
     )
 
     @Test

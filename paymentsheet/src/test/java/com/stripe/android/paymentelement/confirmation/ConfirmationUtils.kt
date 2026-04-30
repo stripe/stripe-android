@@ -155,6 +155,7 @@ internal suspend fun createIntentConfirmationInterceptor(
                         stripeNetworkClient = DefaultStripeNetworkClient(),
                         publishableKeyProvider = { "pk" },
                         stripeAccountIdProvider = { null },
+                        context = ApplicationProvider.getApplicationContext(),
                     ),
                     requestOptions = requestOptions,
                 )
