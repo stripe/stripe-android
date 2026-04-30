@@ -7,7 +7,7 @@ internal object LinkTypeSettingsDefinition :
     PlaygroundSettingDefinition.Saveable<LinkType> by EnumSaveable(
         key = "LinkType",
         values = LinkType.entries.toTypedArray(),
-        defaultValue = LinkType.Web
+        defaultValue = LinkType.Default
     ),
     PlaygroundSettingDefinition.Displayable<LinkType> {
     override val displayName: String = "Link Type"
@@ -30,6 +30,7 @@ internal object LinkTypeSettingsDefinition :
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<LinkType>> {
         return listOf(
+            option("Default (server)", LinkType.Default),
             option("Native", LinkType.Native),
             option("Native + Attest", LinkType.NativeAttest),
             option("Web", LinkType.Web),
@@ -38,6 +39,10 @@ internal object LinkTypeSettingsDefinition :
 
     override fun setValue(value: LinkType) {
         when (value) {
+            LinkType.Default -> {
+                FeatureFlags.nativeLinkEnabled.reset()
+                FeatureFlags.nativeLinkAttestationEnabled.reset()
+            }
             LinkType.Native -> {
                 FeatureFlags.nativeLinkEnabled.setEnabled(true)
                 FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
@@ -55,6 +60,7 @@ internal object LinkTypeSettingsDefinition :
 }
 
 enum class LinkType(override val value: String) : ValueEnum {
+    Default("Default"),
     Native("Native"),
     NativeAttest("Native + Attest"),
     Web("Web"),
