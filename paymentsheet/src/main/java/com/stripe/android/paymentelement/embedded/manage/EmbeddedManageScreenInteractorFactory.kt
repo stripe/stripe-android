@@ -35,7 +35,6 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
             onSelectPaymentMethod = {
                 val savedPmSelection = PaymentSelection.Saved(
                     paymentMethod = it.paymentMethod,
-                    linkBrand = it.linkBrand,
                 )
                 selectionHolder.set(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)

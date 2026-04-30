@@ -513,7 +513,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 selection = PaymentSelection.Saved(
                     paymentMethod = it.paymentMethod,
                     paymentMethodOptionsParams = paymentMethodOptionsParams,
-                    linkBrand = it.linkBrand,
                 )
             )
         }

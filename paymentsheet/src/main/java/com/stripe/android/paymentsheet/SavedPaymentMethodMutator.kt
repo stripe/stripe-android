@@ -219,7 +219,6 @@ internal class SavedPaymentMethodMutator(
                 setSelection(
                     PaymentSelection.Saved(
                         paymentMethod = paymentMethod,
-                        linkBrand = paymentMethodMetadataFlow.value?.linkBrand ?: LinkBrand.Link,
                     )
                 )
             }
@@ -296,7 +295,6 @@ internal class SavedPaymentMethodMutator(
                     setSelection(
                         PaymentSelection.Saved(
                             paymentMethod = updatedMethod,
-                            linkBrand = paymentMethodMetadataFlow.value?.linkBrand ?: LinkBrand.Link,
                         )
                     )
                 }

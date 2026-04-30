@@ -9,9 +9,11 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.ExtendedLabelsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -23,6 +25,7 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @Suppress("DEPRECATION")
+@OptIn(ExtendedLabelsInPaymentOptionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class PaymentOptionFactoryTest {
 
@@ -160,9 +163,39 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with Link should not include billing details`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.Link())
+        val paymentOption = factory.create(
+            selection = PaymentSelection.Link(),
+            linkBrand = LinkBrand.Link,
+        )
 
         assertThat(paymentOption.billingDetails).isNull()
+    }
+
+    @Test
+    fun `create() with Link uses provided Notlink brand for label`() {
+        val factory = createFactory()
+
+        val paymentOption = factory.create(
+            selection = PaymentSelection.Link(),
+            linkBrand = LinkBrand.Notlink,
+        )
+
+        assertThat(paymentOption.label).isEqualTo("Notlink")
+        assertThat(paymentOption.labels.label).isEqualTo("Notlink")
+    }
+
+    @Test
+    fun `create() with saved Link payment method uses provided Notlink brand for labels`() {
+        val factory = createFactory()
+
+        val paymentOption = factory.create(
+            selection = PaymentSelection.Saved(PaymentMethodFixtures.LINK_PAYMENT_METHOD),
+            linkBrand = LinkBrand.Notlink,
+        )
+
+        assertThat(paymentOption.label).isEqualTo("Notlink")
+        assertThat(paymentOption.labels.label).isEqualTo("Notlink")
+        assertThat(paymentOption.labels.sublabel).isEqualTo("Visa Credit •••• 4242")
     }
 
     @Test

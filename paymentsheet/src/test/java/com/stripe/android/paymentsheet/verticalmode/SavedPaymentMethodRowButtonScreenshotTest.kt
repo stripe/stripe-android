@@ -96,6 +96,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -109,6 +110,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )

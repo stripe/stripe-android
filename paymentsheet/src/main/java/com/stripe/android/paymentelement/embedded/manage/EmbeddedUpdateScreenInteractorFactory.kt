@@ -59,7 +59,6 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                                     paymentMethod = updatedPaymentMethod,
                                     paymentMethodOptionsParams = currentSelection.paymentMethodOptionsParams,
                                     linkInput = currentSelection.linkInput,
-                                    linkBrand = currentSelection.linkBrand,
                                 )
                             )
                         }

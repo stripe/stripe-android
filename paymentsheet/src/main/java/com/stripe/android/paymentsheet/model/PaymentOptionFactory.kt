@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.model
 
 import android.content.Context
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -11,16 +12,48 @@ internal class PaymentOptionFactory @Inject constructor(
     private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
 ) {
-    fun create(selection: PaymentSelection): PaymentOption {
+    fun create(
+        selection: PaymentSelection,
+    ): PaymentOption {
+        return createInternal(
+            selection = selection,
+            linkBrand = null,
+        )
+    }
+
+    fun create(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand,
+    ): PaymentOption {
+        return createInternal(
+            selection = selection,
+            linkBrand = linkBrand,
+        )
+    }
+
+    private fun createInternal(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+    ): PaymentOption {
         val drawableResourceId = selection.drawableResourceId
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
 
         return PaymentOption(
             drawableResourceId = drawableResourceId,
-            label = selection.label.resolve(context),
+            label = when (linkBrand) {
+                null -> selection.label
+                else -> selection.label(linkBrand)
+            }.resolve(context),
             paymentMethodType = selection.paymentMethodType,
-            _labels = PaymentOptionLabelsFactory.create(context, selection),
+            _labels = when (linkBrand) {
+                null -> PaymentOptionLabelsFactory.create(context, selection)
+                else -> PaymentOptionLabelsFactory.create(
+                    context = context,
+                    selection = selection,
+                    linkBrand = linkBrand,
+                )
+            },
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
             _shippingDetails = selection.shippingDetails,
             imageLoader = {

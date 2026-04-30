@@ -5,9 +5,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -76,9 +79,8 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with saved Link payment method returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentSelection.Saved(
-                paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD,
-            )
+            selection = PaymentSelection.Saved(paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD),
+            paymentMethodMetadata = paymentMethodMetadata(LinkBrand.Link),
         )
 
         assertThat(labels.label).isEqualTo("Link")
@@ -89,10 +91,8 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with saved Notlink payment method returns branded labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentSelection.Saved(
-                paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD,
-                linkBrand = LinkBrand.Notlink,
-            )
+            selection = PaymentSelection.Saved(paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD),
+            paymentMethodMetadata = paymentMethodMetadata(LinkBrand.Notlink),
         )
 
         assertThat(labels.label).isEqualTo("Notlink")
@@ -181,11 +181,10 @@ class PaymentOptionLabelsFactoryTest {
     }
 
     @Test
-    fun `create with Notlink payment selection returns branded labels`() {
+    fun `create with Link payment selection returns Link labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
             selection = PaymentSelection.Link(
-                linkBrand = LinkBrand.Notlink,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                     collectedCvc = null,
@@ -194,7 +193,7 @@ class PaymentOptionLabelsFactoryTest {
             ),
         )
 
-        assertThat(labels.label).isEqualTo("Notlink")
+        assertThat(labels.label).isEqualTo("Link")
         assertThat(labels.sublabel).isEqualTo("Stripe Test Bank Account •••• 4242")
     }
 
@@ -223,4 +222,12 @@ class PaymentOptionLabelsFactoryTest {
         assertThat(labels.label).isEqualTo("PayPal")
         assertThat(labels.sublabel).isNull()
     }
+
+    private fun paymentMethodMetadata(linkBrand: LinkBrand) = PaymentMethodMetadataFactory.create(
+        linkState = LinkState(
+            configuration = LinkTestUtils.createLinkConfiguration(linkBrand = linkBrand),
+            signupMode = null,
+            loginState = LinkState.LoginState.LoggedOut,
+        )
+    )
 }

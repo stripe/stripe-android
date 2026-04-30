@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.key
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.resolvableString
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.ui.core.elements.CvcController
@@ -83,6 +84,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
     SavedPaymentMethodTabLayoutUI(
         paymentOptionsItems = state.paymentOptionsItems,
         selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
+        linkBrand = interactor.linkBrand,
         isEditing = state.isEditing,
         isProcessing = state.isProcessing,
         onAddCardPressed = {
@@ -122,6 +124,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 internal fun SavedPaymentMethodTabLayoutUI(
     paymentOptionsItems: List<PaymentOptionsItem>,
     selectedPaymentOptionsItem: PaymentOptionsItem?,
+    linkBrand: LinkBrand? = null,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -160,6 +163,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 
                 SavedPaymentMethodTab(
                     item = item,
+                    linkBrand = linkBrand,
                     width = width,
                     isEditing = isEditing,
                     isEnabled = isEnabled,
@@ -179,7 +183,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 
 private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
     PaymentOptionsItem.AddCard,
-    PaymentOptionsItem.Link(),
+    PaymentOptionsItem.Link,
     PaymentOptionsItem.GooglePay,
     PaymentOptionsItem.SavedPaymentMethod(
         DisplayableSavedPaymentMethod.create(
@@ -238,6 +242,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            linkBrand = LinkBrand.Link,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -254,6 +259,7 @@ private fun SavedPaymentMethodsTabLayoutWithDefaultPreview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            linkBrand = LinkBrand.Link,
             isEditing = true,
             isProcessing = false,
             onAddCardPressed = { },
@@ -275,6 +281,7 @@ internal fun rememberItemWidth(maxWidth: Dp): Dp = remember(maxWidth) {
 @Composable
 private fun SavedPaymentMethodTab(
     item: PaymentOptionsItem,
+    linkBrand: LinkBrand?,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -302,9 +309,11 @@ private fun SavedPaymentMethodTab(
                 modifier = modifier,
             )
         }
-        is PaymentOptionsItem.Link -> {
+        PaymentOptionsItem.Link -> {
             LinkTab(
-                item = item,
+                linkBrand = requireNotNull(linkBrand) {
+                    "Link brand is required for the Link payment option tab."
+                },
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
@@ -315,6 +324,7 @@ private fun SavedPaymentMethodTab(
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethodTab(
                 paymentMethod = item,
+                linkBrand = linkBrand,
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
@@ -380,19 +390,14 @@ private fun GooglePayTab(
 
 @Composable
 private fun LinkTab(
-    item: PaymentOptionsItem.Link,
+    linkBrand: LinkBrand,
     width: Dp,
     isEnabled: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val linkLabel = stringResource(
-        id = when (item.linkBrand) {
-            LinkBrand.Link -> StripeR.string.stripe_link
-            LinkBrand.Notlink -> StripeR.string.stripe_notlink
-        }
-    )
+    val linkLabel = linkBrand.resolvableString.resolve()
 
     SavedPaymentMethodTab(
         viewWidth = width,
@@ -404,7 +409,7 @@ private fun LinkTab(
         iconTint = null,
         labelText = linkLabel,
         description = linkLabel,
-        onItemSelectedListener = { onItemSelected(PaymentSelection.Link(linkBrand = item.linkBrand)) },
+        onItemSelectedListener = { onItemSelected(PaymentSelection.Link()) },
         cardArtUrl = null,
         modifier = modifier,
     )
@@ -413,6 +418,7 @@ private fun LinkTab(
 @Composable
 private fun SavedPaymentMethodTab(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
+    linkBrand: LinkBrand?,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -424,7 +430,7 @@ private fun SavedPaymentMethodTab(
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel(
         canShowSublabel = false,
-        linkBrand = paymentMethod.displayableSavedPaymentMethod.linkBrand,
+        linkBrand = linkBrand,
     )?.resolve() ?: return
 
     Box(

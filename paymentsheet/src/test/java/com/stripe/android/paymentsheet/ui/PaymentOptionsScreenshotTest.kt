@@ -22,10 +22,11 @@ class PaymentOptionsScreenshotTest {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,
-                PaymentOptionsItem.Link(),
+                PaymentOptionsItem.Link,
             ),
-            selectedPaymentOptionsItem = PaymentOptionsItem.Link(),
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link,
             isEditing = false,
+            linkBrand = LinkBrand.Link,
         )
     }
 
@@ -175,12 +176,14 @@ class PaymentOptionsScreenshotTest {
         paymentOptionsItems: List<PaymentOptionsItem>,
         selectedPaymentOptionsItem: PaymentOptionsItem?,
         isEditing: Boolean,
+        linkBrand: LinkBrand? = null,
         scrollState: LazyListState? = null,
     ) {
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = selectedPaymentOptionsItem,
+                linkBrand = linkBrand,
                 isEditing = isEditing,
                 isProcessing = false,
                 onAddCardPressed = {},

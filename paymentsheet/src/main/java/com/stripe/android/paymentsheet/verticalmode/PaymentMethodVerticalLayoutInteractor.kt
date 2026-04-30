@@ -7,6 +7,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -60,6 +61,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
+        val linkBrand: LinkBrand? = null,
     )
 
     sealed interface Selection {
@@ -304,6 +306,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand,
         )
     }
 
@@ -556,7 +559,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 reportPaymentMethodTypeSelected("saved")
                 val selection = PaymentSelection.Saved(
                     paymentMethod = viewAction.savedPaymentMethod.paymentMethod,
-                    linkBrand = viewAction.savedPaymentMethod.linkBrand,
                 )
                 updateSelection(selection, true)
                 invokeRowSelectionCallback?.invoke()

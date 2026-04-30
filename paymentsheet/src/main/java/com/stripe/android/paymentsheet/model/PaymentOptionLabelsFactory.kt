@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.wallet.paymentOptionLabel
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
@@ -16,7 +17,46 @@ internal object PaymentOptionLabelsFactory {
         context: Context,
         selection: PaymentSelection,
     ): PaymentOption.Labels {
-        val label = selection.label.resolve(context)
+        return createInternal(
+            context = context,
+            selection = selection,
+            linkBrand = null,
+        )
+    }
+
+    fun create(
+        context: Context,
+        selection: PaymentSelection,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): PaymentOption.Labels {
+        return createInternal(
+            context = context,
+            selection = selection,
+            linkBrand = paymentMethodMetadata.linkBrand,
+        )
+    }
+
+    fun create(
+        context: Context,
+        selection: PaymentSelection,
+        linkBrand: LinkBrand,
+    ): PaymentOption.Labels {
+        return createInternal(
+            context = context,
+            selection = selection,
+            linkBrand = linkBrand,
+        )
+    }
+
+    private fun createInternal(
+        context: Context,
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+    ): PaymentOption.Labels {
+        val label = when (linkBrand) {
+            null -> selection.label
+            else -> selection.label(linkBrand)
+        }.resolve(context)
         val fallback = PaymentOption.Labels(
             label = label,
             sublabel = null,
@@ -38,7 +78,7 @@ internal object PaymentOptionLabelsFactory {
             }
             is PaymentSelection.Saved -> {
                 selection.paymentMethod.run {
-                    linkPaymentDetails?.let { savedLink(context, it, selection.linkBrand) }
+                    linkPaymentDetails?.let { savedLink(context, it, linkBrand ?: LinkBrand.Link) }
                         ?: card?.let { savedCard(context, it) }
                         ?: usBankAccount?.let { savedUSBankAccount(it, label) }
                         ?: fallback

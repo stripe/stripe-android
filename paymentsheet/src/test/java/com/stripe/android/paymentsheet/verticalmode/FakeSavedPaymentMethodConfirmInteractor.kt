@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -33,7 +32,7 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
                         last4 = "4242",
                     )
                 ),
-                linkBrand = LinkBrand.Link,
+                linkBrand = com.stripe.android.model.LinkBrand.Link,
             ),
             form = SavedPaymentMethodConfirmInteractor.State.Form(
                 elements = listOf(
@@ -53,6 +52,7 @@ internal class FakeSavedPaymentMethodConfirmInteractor(
                 ),
                 enabled = formEnabled,
             ),
+            linkBrand = null,
         )
     )
     override val state: StateFlow<SavedPaymentMethodConfirmInteractor.State> = _state.asStateFlow()

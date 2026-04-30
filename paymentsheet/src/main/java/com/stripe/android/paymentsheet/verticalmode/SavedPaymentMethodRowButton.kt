@@ -33,6 +33,7 @@ import com.stripe.android.uicore.strings.resolve
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    linkBrand: LinkBrand? = null,
     isEnabled: Boolean,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
@@ -47,7 +48,7 @@ internal fun SavedPaymentMethodRowButton(
     val paymentMethodTitle =
         displayableSavedPaymentMethod.paymentMethod.getLabel(
             canShowSublabel = true,
-            linkBrand = displayableSavedPaymentMethod.linkBrand,
+            linkBrand = linkBrand,
         )
             ?: displayableSavedPaymentMethod.displayName
 

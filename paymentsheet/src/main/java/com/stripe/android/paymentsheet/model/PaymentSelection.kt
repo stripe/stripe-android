@@ -163,7 +163,6 @@ internal sealed class PaymentSelection : Parcelable {
         val paymentMethod: PaymentMethod,
         val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
         val linkInput: UserInput? = null,
-        val linkBrand: LinkBrand = LinkBrand.Link,
     ) : PaymentSelection() {
         val showMandateAbovePrimaryButton: Boolean
             get() {
@@ -423,15 +422,19 @@ internal val PaymentSelection.darkThemeIconUrl: String?
     }
 
 internal val PaymentSelection.label: ResolvableString
-    get() = when (this) {
+    get() = labelWithLinkBrand()
+
+internal fun PaymentSelection.label(linkBrand: LinkBrand): ResolvableString = labelWithLinkBrand(linkBrand)
+
+private fun PaymentSelection.labelWithLinkBrand(linkBrand: LinkBrand? = null): ResolvableString = when (this) {
         is PaymentSelection.ExternalPaymentMethod -> label
         is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-        is PaymentSelection.Link -> linkBrand.resolvableString
+        is PaymentSelection.Link -> (linkBrand ?: this.linkBrand).resolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.USBankAccount -> label.resolvableString
-        is PaymentSelection.Saved -> getSavedLabel(this).orEmpty()
+        is PaymentSelection.Saved -> getSavedLabel(this, linkBrand ?: LinkBrand.Link).orEmpty()
         is PaymentSelection.ShopPay -> StripeR.string.stripe_shop_pay.resolvableString
     }
 
@@ -441,10 +444,13 @@ internal val LinkBrand.resolvableString: ResolvableString
         LinkBrand.Notlink -> StripeR.string.stripe_notlink.resolvableString
     }
 
-private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
+private fun getSavedLabel(
+    selection: PaymentSelection.Saved,
+    linkBrand: LinkBrand,
+): ResolvableString? {
     return selection.paymentMethod.getLabel(
         canShowSublabel = true,
-        linkBrand = selection.linkBrand,
+        linkBrand = linkBrand,
     )
 }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
@@ -17,7 +18,6 @@ internal object PaymentOptionsStateFactory {
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
-        linkBrand: LinkBrand = LinkBrand.Link,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
         isCbcEligible: Boolean,
         defaultPaymentMethodId: String?,
@@ -25,13 +25,13 @@ internal object PaymentOptionsStateFactory {
         return listOfNotNull(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
-            PaymentOptionsItem.Link(linkBrand).takeIf { showLink }
+            PaymentOptionsItem.Link.takeIf { showLink }
         ) + paymentMethods.map {
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
-                    linkBrand = linkBrand,
+                    linkBrand = LinkBrand.Link,
                     isCbcEligible = isCbcEligible,
                     shouldShowDefaultBadge = it.id == defaultPaymentMethodId,
                 ),
@@ -52,7 +52,6 @@ internal object PaymentOptionsStateFactory {
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
-        linkBrand: LinkBrand = LinkBrand.Link,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
         isCbcEligible: Boolean,
@@ -62,7 +61,6 @@ internal object PaymentOptionsStateFactory {
             paymentMethods = paymentMethods,
             showGooglePay = showGooglePay,
             showLink = showLink,
-            linkBrand = linkBrand,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = defaultPaymentMethodId
@@ -105,10 +103,9 @@ internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
     return when (this) {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
-        is PaymentOptionsItem.Link -> PaymentSelection.Link(linkBrand = linkBrand)
+        PaymentOptionsItem.Link -> PaymentSelection.Link()
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(
             paymentMethod = paymentMethod,
-            linkBrand = displayableSavedPaymentMethod.linkBrand,
         )
     }
 }
