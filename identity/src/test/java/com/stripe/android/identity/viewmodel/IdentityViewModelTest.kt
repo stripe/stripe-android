@@ -193,6 +193,16 @@ internal class IdentityViewModelTest {
     }
 
     @Test
+    fun `uploadManualResult bitmap front resizes file and notifies _documentUploadedState`() {
+        testUploadManualBitmapSuccessResult(true)
+    }
+
+    @Test
+    fun `uploadManualResult bitmap back resizes file and notifies _documentUploadedState`() {
+        testUploadManualBitmapSuccessResult(false)
+    }
+
+    @Test
     fun `uploadManualResult front failure notifies _documentUploadedState`() {
         testUploadManualFailureResult(true)
     }
@@ -996,6 +1006,56 @@ internal class IdentityViewModelTest {
         }
     }
 
+    private fun testUploadManualBitmapSuccessResult(isFront: Boolean) = runBlocking {
+        mockUploadSuccess()
+
+        val bitmap = mock<Bitmap>()
+        viewModel.uploadManualResult(
+            bitmap,
+            isFront,
+            DOCUMENT_CAPTURE,
+            DocumentUploadParam.UploadMethod.MANUALCAPTURE,
+            if (isFront) {
+                IdentityScanState.ScanType.DOC_FRONT
+            } else {
+                IdentityScanState.ScanType.DOC_BACK
+            }
+        )
+
+        verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(
+            same(bitmap),
+            eq(VERIFICATION_SESSION_ID),
+            eq("${VERIFICATION_SESSION_ID}_${if (isFront) FRONT else BACK}.jpeg"),
+            eq(HIGH_RES_IMAGE_MAX_DIMENSION),
+            eq(HIGH_RES_COMPRESSION_QUALITY)
+        )
+
+        verify(mockIdentityAnalyticsRequestFactory).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
+        )
+
+        if (isFront) {
+            viewModel.documentFrontUploadedState.value.highResResult
+        } else {
+            viewModel.documentBackUploadedState.value.highResResult
+        }.let { uploadedResult ->
+            assertThat(uploadedResult).isEqualTo(
+                Resource.success(
+                    UploadedResult(
+                        UPLOADED_STRIPE_FILE,
+                        null,
+                        DocumentUploadParam.UploadMethod.MANUALCAPTURE
+                    )
+                )
+            )
+        }
+    }
+
     private fun testUploadSelfieScanSuccessResult(
         selfie: FaceDetectorTransitioner.Selfie,
         isHighRes: Boolean
@@ -1067,7 +1127,7 @@ internal class IdentityViewModelTest {
         mockUploadFailure()
 
         viewModel.uploadManualResult(
-            mock(),
+            mock<Uri>(),
             isFront,
             DOCUMENT_CAPTURE,
             DocumentUploadParam.UploadMethod.FILEUPLOAD,
