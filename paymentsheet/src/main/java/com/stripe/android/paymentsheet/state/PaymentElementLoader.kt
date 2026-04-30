@@ -492,12 +492,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             isTapToAddAvailable = isTapToAddAvailable,
         )
 
-        val paymentMethodLayout = when (integrationConfiguration) {
-            is PaymentElementLoader.Configuration.PaymentSheet ->
-                integrationConfiguration.configuration.paymentMethodLayout
-            is PaymentElementLoader.Configuration.CryptoOnramp,
-            is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
-        }
+        val paymentMethodLayout = getPaymentMethodLayout(
+            integrationConfiguration = integrationConfiguration,
+            elementsSession = elementsSession,
+        )
 
         val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
             elementsSession = elementsSession,
@@ -516,6 +514,25 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return paymentMethodMetadata
+    }
+
+    private fun getPaymentMethodLayout(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+        elementsSession: ElementsSession,
+    ): PaymentMethodLayout {
+        return when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
+            is PaymentElementLoader.Configuration.PaymentSheet ->
+                if (
+                    elementsSession.forceVerticalPaymentMethodLayout &&
+                    integrationConfiguration.configuration.paymentMethodLayout == PaymentMethodLayout.Automatic
+                ) {
+                    PaymentMethodLayout.Vertical
+                } else {
+                    integrationConfiguration.configuration.paymentMethodLayout
+                }
+        }
     }
 
     private suspend fun isGooglePayReady(
