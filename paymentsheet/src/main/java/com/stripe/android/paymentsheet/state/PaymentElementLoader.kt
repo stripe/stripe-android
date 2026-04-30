@@ -475,6 +475,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         logCustomPaymentMethodErrors(elementsSession.customPaymentMethods)
 
+        Thread.sleep(300L)
+
         val integrationMetadata = initializationMode.integrationMetadata(
             paymentElementCallbacks = PaymentElementCallbackReferences[paymentElementCallbackIdentifier]
         )
