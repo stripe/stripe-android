@@ -9,9 +9,17 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 
-internal open class BasePlaygroundTest(disableAnimations: Boolean = true) {
+internal open class BasePlaygroundTest(
+    disableAnimations: Boolean = true,
+    retryEnabled: Boolean = false,
+    retryCount: Int = 3,
+) {
     @get:Rule
-    val rules = TestRules.create(disableAnimations = disableAnimations)
+    val rules = TestRules.create(
+        disableAnimations = disableAnimations,
+        retryEnabled = retryEnabled,
+        retryCount = retryCount,
+    )
 
     lateinit var device: UiDevice
     lateinit var testDriver: PlaygroundTestDriver

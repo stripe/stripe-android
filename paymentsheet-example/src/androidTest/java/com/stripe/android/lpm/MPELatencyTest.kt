@@ -32,7 +32,7 @@ results either via analytics for synthetics or via logcat for commit benchmarkin
 internal class MPELatencyTest(
     private val testName: String,
     val testConfig: TestConfig,
-) : BasePlaygroundTest() {
+) : BasePlaygroundTest(retryEnabled = true, retryCount = 3) {
     private val appContext by lazy {
         InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
     }

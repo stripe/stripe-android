@@ -31,6 +31,7 @@ class TestRules private constructor(
         fun create(
             disableAnimations: Boolean = true,
             retryCount: Int = 3,
+            retryEnabled: Boolean = BuildConfig.IS_RUNNING_IN_CI,
             block: RuleChain.() -> RuleChain = { this }
         ): TestRules {
             val composeTestRule = createEmptyComposeRule()
@@ -45,7 +46,7 @@ class TestRules private constructor(
                         chain
                     }
                 }.let { chain ->
-                    if (BuildConfig.IS_RUNNING_IN_CI) {
+                    if (retryEnabled) {
                         chain.around(RetryRule(retryCount))
                     } else {
                         chain

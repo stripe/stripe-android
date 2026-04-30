@@ -594,10 +594,11 @@ internal class PlaygroundTestDriver(
         onLaunch()
 
         if (isReturningCustomer) {
-            selectors.composeTestRule.waitUntilAtLeastOneExists(
-                hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
-                DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
-            )
+            selectors.composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+                selectors.composeTestRule.onAllNodes(
+                    hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)
+                ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+            }
         } else {
             selectors.formElement.waitFor()
         }
