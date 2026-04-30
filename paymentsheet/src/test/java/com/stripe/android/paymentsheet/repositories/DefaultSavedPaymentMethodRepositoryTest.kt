@@ -255,6 +255,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             stripeNetworkClient = DefaultStripeNetworkClient(),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
+            appId = "com.stripe.android.paymentsheet.test",
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,

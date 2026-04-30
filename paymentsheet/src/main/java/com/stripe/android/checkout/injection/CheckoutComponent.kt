@@ -1,7 +1,9 @@
 package com.stripe.android.checkout.injection
 
+import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.di.ApplicationIdModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -27,6 +29,7 @@ import javax.inject.Provider
         CoreCommonModule::class,
         CoroutineContextModule::class,
         PaymentElementRequestSurfaceModule::class,
+        ApplicationIdModule::class,
     ],
 )
 internal interface CheckoutComponent {
@@ -35,13 +38,16 @@ internal interface CheckoutComponent {
     @Component.Factory
     interface Factory {
         fun create(
-            @BindsInstance context: Context,
+            @BindsInstance application: Application,
         ): CheckoutComponent
     }
 }
 
 @Module(includes = [PaymentConfigurationModule::class, StripeNetworkClientModule::class])
 internal object CheckoutModule {
+    @Provides
+    fun provideContext(application: Application): Context = application
+
     @Provides
     @Named(ENABLE_LOGGING)
     fun provideEnabledLogging(): Boolean = BuildConfig.DEBUG

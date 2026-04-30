@@ -2,9 +2,11 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
+import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
@@ -21,6 +23,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    @Named(APPLICATION_ID) private val appId: String,
 ) {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
@@ -56,17 +59,23 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun init(
         sessionId: String,
         adaptivePricingAllowed: Boolean,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = initUrl(sessionId),
-        params = mapOf(
-            "browser_locale" to Locale.getDefault().toLanguageTag(),
-            "browser_timezone" to TimeZone.getDefault().id,
-            "eid" to UUID.randomUUID().toString(),
-            "redirect_type" to "embedded",
-            "elements_session_client[is_aggregation_expected]" to "true",
-            "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
-        ),
-    )
+    ): Result<CheckoutSessionResponse> {
+        val locale = Locale.getDefault().toLanguageTag()
+        return executePost(
+            url = initUrl(sessionId),
+            params = mapOf(
+                "browser_locale" to locale,
+                "browser_timezone" to TimeZone.getDefault().id,
+                "eid" to UUID.randomUUID().toString(),
+                "redirect_type" to "embedded",
+                "elements_session_client[is_aggregation_expected]" to "true",
+                "elements_session_client[locale]" to locale,
+                "elements_session_client[mobile_session_id]" to AnalyticsRequestFactory.sessionId.toString(),
+                "elements_session_client[mobile_app_id]" to appId,
+                "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
+            ),
+        )
+    }
 
     suspend fun confirm(
         id: String,

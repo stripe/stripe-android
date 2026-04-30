@@ -21,7 +21,7 @@ import javax.inject.Singleton
         StripeRepositoryModule::class,
         CoreCommonModule::class,
         AddressElementViewModelModule::class,
-        ResourceRepositoryModule::class
+        ResourceRepositoryModule::class,
     ]
 )
 internal interface AddressElementViewModelFactoryComponent {
