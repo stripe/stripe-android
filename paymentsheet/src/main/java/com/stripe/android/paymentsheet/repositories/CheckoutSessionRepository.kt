@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.repositories
 
+import android.content.Context
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
-import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -20,10 +20,10 @@ import javax.inject.Named
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
+    private val context: Context,
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
-    @Named(APPLICATION_ID) private val appId: String,
 ) {
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
@@ -71,7 +71,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 "elements_session_client[is_aggregation_expected]" to "true",
                 "elements_session_client[locale]" to locale,
                 "elements_session_client[mobile_session_id]" to AnalyticsRequestFactory.sessionId.toString(),
-                "elements_session_client[mobile_app_id]" to appId,
+                "elements_session_client[mobile_app_id]" to context.packageName,
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
             ),
         )

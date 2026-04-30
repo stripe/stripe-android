@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -27,10 +26,6 @@ import javax.inject.Singleton
     ]
 )
 internal class AddressElementViewModelModule {
-    @Provides
-    @Named(APPLICATION_ID)
-    fun provideApplicationId(context: Context): String = context.packageName
-
     @Provides
     @Singleton
     fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom

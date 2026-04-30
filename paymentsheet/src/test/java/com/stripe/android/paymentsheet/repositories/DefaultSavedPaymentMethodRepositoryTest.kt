@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -255,7 +256,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             stripeNetworkClient = DefaultStripeNetworkClient(),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
-            appId = "com.stripe.android.paymentsheet.test",
+            context = ApplicationProvider.getApplicationContext(),
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,

@@ -5,7 +5,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
@@ -24,7 +23,7 @@ import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
 internal class FakePaymentElementLoader(
-    private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
+    private var stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     private val shouldFail: Boolean = false,
     private var customer: CustomerState? = null,
     private var paymentSelection: PaymentSelection? = null,
@@ -39,6 +38,10 @@ internal class FakePaymentElementLoader(
     private val experimentsData: ElementsSession.ExperimentsData? = null,
     private val integrationMetadata: IntegrationMetadata? = null,
 ) : PaymentElementLoader {
+
+    fun updateStripeIntent(intent: StripeIntent) {
+        this.stripeIntent = intent
+    }
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
         this.customer = customer?.copy(
@@ -71,15 +74,11 @@ internal class FakePaymentElementLoader(
             experimentsData = experimentsData,
             integrationMetadata = integrationMetadata
                 ?: PaymentMethodMetadataFactory.defaultIntegrationMetadata(stripeIntent),
-            paymentMethodOrientation = when (integrationConfiguration) {
+            paymentMethodLayout = when (integrationConfiguration) {
                 is PaymentElementLoader.Configuration.CryptoOnramp,
-                is PaymentElementLoader.Configuration.Embedded -> PaymentMethodOrientation.Vertical
+                is PaymentElementLoader.Configuration.Embedded -> PaymentSheet.PaymentMethodLayout.Vertical
                 is PaymentElementLoader.Configuration.PaymentSheet ->
-                    when (integrationConfiguration.configuration.paymentMethodLayout) {
-                        PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
-                        PaymentSheet.PaymentMethodLayout.Vertical,
-                        PaymentSheet.PaymentMethodLayout.Automatic -> PaymentMethodOrientation.Vertical
-                    }
+                    integrationConfiguration.configuration.paymentMethodLayout
             }
         )
         }

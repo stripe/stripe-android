@@ -101,6 +101,9 @@ internal data class ElementsSession(
     val onBehalfOf: String?
         get() = accountId.takeIf { !it.equals(merchantId) }
 
+    val forceVerticalPaymentMethodLayout: Boolean
+        get() = flags[Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT] == true
+
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>,
@@ -240,6 +243,9 @@ internal data class ElementsSession(
         ELEMENTS_MOBILE_ALLOW_STRIPECARDSCAN("elements_mobile_allow_stripecardscan"),
         ELEMENTS_MOBILE_CARDSCAN_USE_MLKIT("elements_mobile_cardscan_use_mlkit"),
         ELEMENTS_MOBILE_CARDSCAN_DISABLE_SSDOCR("elements_mobile_cardscan_disable_ssdocr"),
+        ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT(
+            "elements_mobile_force_vertical_payment_method_layout"
+        ),
     }
 
     /**

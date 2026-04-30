@@ -437,7 +437,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             stripeNetworkClient = DefaultStripeNetworkClient(),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
-            appId = "com.stripe.android.paymentsheet.test",
+            context = ApplicationProvider.getApplicationContext(),
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(
