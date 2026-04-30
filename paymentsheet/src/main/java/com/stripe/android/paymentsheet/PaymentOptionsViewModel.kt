@@ -168,7 +168,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             isShopPayAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.ShopPay) &&
                 visibleWallets.contains(WalletType.ShopPay),
             buttonsEnabled = buttonsEnabled,
-            paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
+            paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes,
             googlePayLauncherConfig = null,
             googlePayButtonType = GooglePayButtonType.Pay,
             onGooglePayPressed = {
@@ -195,7 +195,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     private fun walletsAllowedInHeader(paymentMethodMetadata: PaymentMethodMetadata): List<WalletType> {
-        val showsDirectForm = paymentMethodMetadata.supportedPaymentMethodTypes().size == 1 &&
+        val showsDirectForm = paymentMethodMetadata.supportedPaymentMethodTypes.size == 1 &&
             customerStateHolder.paymentMethods.value.isEmpty()
         return if (showsDirectForm) {
             // Direct to form: show wallets in header

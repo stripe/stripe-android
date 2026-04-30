@@ -206,7 +206,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
             isShopPayAvailable = paymentMethodMetadata?.availableWallets?.contains(WalletType.ShopPay) == true,
             buttonsEnabled = buttonsEnabled,
-            paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
+            paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes.orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = args.googlePayConfig?.buttonType.asGooglePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,

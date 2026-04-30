@@ -3855,7 +3855,7 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState).isNotNull()
-        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes()).contains("link")
+        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes).contains("link")
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -3885,7 +3885,7 @@ internal class DefaultPaymentElementLoaderTest {
         ).getOrThrow()
 
         assertThat(result.paymentMethodMetadata.linkState).isNull()
-        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes()).doesNotContain("link")
+        assertThat(result.paymentMethodMetadata.supportedPaymentMethodTypes).doesNotContain("link")
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()

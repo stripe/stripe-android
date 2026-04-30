@@ -37,7 +37,7 @@ internal class FakeAddPaymentMethodInteractor(
                     signupMode = null,
                 ),
             ),
-            paymentMethodCode: PaymentMethodCode = metadata.supportedPaymentMethodTypes().first(),
+            paymentMethodCode: PaymentMethodCode = metadata.supportedPaymentMethodTypes.first(),
             isValidating: Boolean = false,
         ): AddPaymentMethodInteractor.State {
             val formArguments = FormArgumentsFactory.create(

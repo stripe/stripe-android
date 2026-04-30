@@ -16,7 +16,7 @@ internal object VerticalModeInitialScreenFactory {
         customerStateHolder: CustomerStateHolder,
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
     ): List<PaymentSheetScreen> {
-        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+        val supportedPaymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes
         val bankFormInteractor = BankFormInteractor.create(viewModel)
 
         if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {

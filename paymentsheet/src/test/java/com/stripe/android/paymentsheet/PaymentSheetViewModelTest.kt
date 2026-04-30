@@ -3620,7 +3620,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     private val BaseSheetViewModel.supportedPaymentMethodTypes: List<String>
-        get() = paymentMethodMetadata.value?.supportedPaymentMethodTypes().orEmpty()
+        get() = paymentMethodMetadata.value?.supportedPaymentMethodTypes.orEmpty()
 
     private companion object {
         private val ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP =

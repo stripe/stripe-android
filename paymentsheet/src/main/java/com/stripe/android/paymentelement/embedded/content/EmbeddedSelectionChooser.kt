@@ -117,7 +117,7 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
         previousSelection: PaymentSelection,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
-        val allowedTypes = paymentMethodMetadata.supportedPaymentMethodTypes()
+        val allowedTypes = paymentMethodMetadata.supportedPaymentMethodTypes
 
         return when (previousSelection) {
             is PaymentSelection.New -> {
