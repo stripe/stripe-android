@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.CameraSource
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
 import com.stripe.android.identity.camera.DocumentScanCameraManager
 import com.stripe.android.identity.camera.IdentityCameraManager
@@ -74,8 +75,11 @@ internal fun DocumentScanScreen(
             context = context
         ) { cause ->
             identityViewModel.identityAnalyticsRequestFactory.cameraError(
-                scanType = IdentityScanState.ScanType.DOC_FRONT,
-                throwable = IllegalStateException(cause)
+                scanType = documentScanViewModel.targetScanTypeFlow.value
+                    ?: IdentityScanState.ScanType.DOC_FRONT,
+                throwable = IllegalStateException(cause),
+                screenName = SCREEN_NAME_LIVE_CAPTURE,
+                cameraSource = CameraSource.CAMERA_SESSION
             )
         }
     }

@@ -131,13 +131,15 @@ internal class IdentityActivity :
                         if (it.submitted) {
                             identityViewModel.identityAnalyticsRequestFactory
                                 .verificationSucceeded(
-                                    isFromFallbackUrl = true
+                                    isFromFallbackUrl = true,
+                                    lastScreenName = identityViewModel.analyticsLastScreenName
                                 )
                             VerificationFlowResult.Completed
                         } else {
                             identityViewModel.identityAnalyticsRequestFactory
                                 .verificationCanceled(
-                                    isFromFallbackUrl = true
+                                    isFromFallbackUrl = true,
+                                    lastScreenName = identityViewModel.analyticsLastScreenName
                                 )
                             VerificationFlowResult.Canceled
                         }
@@ -146,7 +148,8 @@ internal class IdentityActivity :
                 onFailure = {
                     identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                         isFromFallbackUrl = true,
-                        throwable = IllegalStateException(it)
+                        throwable = IllegalStateException(it),
+                        lastScreenName = identityViewModel.analyticsLastScreenName
                     )
                     finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
                 }
@@ -210,7 +213,8 @@ internal class IdentityActivity :
 
     override fun finishWithResult(result: VerificationFlowResult) {
         identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
-            result.toString()
+            sessionResult = result.toAnalyticsSessionResult(),
+            lastScreenName = identityViewModel.analyticsLastScreenName
         )
         setResult(
             Activity.RESULT_OK,
@@ -225,6 +229,7 @@ internal class IdentityActivity :
      * [CameraPermissionCheckingActivity.requestCameraPermission].
      */
     override fun showPermissionRationaleDialog() {
+        identityViewModel.identityAnalyticsRequestFactory.cameraPermissionRationaleShown()
         val builder = AlertDialog.Builder(this)
         builder.setMessage(R.string.stripe_camera_permission_rationale)
             .setPositiveButton(R.string.stripe_ok) { _, _ ->
@@ -280,4 +285,10 @@ internal class IdentityActivity :
 
         const val KEY_PRESENTED = "presented"
     }
+}
+
+private fun VerificationFlowResult.toAnalyticsSessionResult(): String = when (this) {
+    VerificationFlowResult.Completed -> "completed"
+    VerificationFlowResult.Canceled -> "canceled"
+    is VerificationFlowResult.Failed -> "failed"
 }

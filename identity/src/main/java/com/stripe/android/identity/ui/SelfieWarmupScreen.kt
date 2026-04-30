@@ -97,6 +97,9 @@ internal fun SelfieWarmupScreen(
             state = continueButtonState
         ) {
             continueButtonState = LoadingButtonState.Loading
+            identityViewModel.screenTracker.screenTransitionStart(
+                IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE_WARMUP
+            )
             navController.navigateTo(SelfieDestination)
         }
     }

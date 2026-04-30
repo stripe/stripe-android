@@ -29,10 +29,18 @@ internal class ScreenTracker @Inject constructor(
         // create a StatTracker with fromScreenName
         // if there is a screen already started, drop it
         screenStatTracker?.let {
-            Log.e(
-                TAG,
+            val error = IllegalStateException(
                 "screenStateTracker is already set with ${it.fromScreenName}, when another " +
                     "screenTransition starts from $fromScreenName, dropping the old screenStateTracker."
+            )
+            Log.e(TAG, error.message, error)
+            identityAnalyticsRequestFactory.genericError(
+                throwable = error,
+                additionalMetadata = mapOf(
+                    IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                        IdentityAnalyticsRequestFactory.ERROR_CONTEXT_SCREEN_TRANSITION,
+                    IdentityAnalyticsRequestFactory.PARAM_FROM_SCREEN_NAME to fromScreenName
+                )
             )
         }
 
@@ -54,9 +62,17 @@ internal class ScreenTracker @Inject constructor(
             it.trackResult(toScreenName)
             screenStatTracker = null
         } ?: run {
-            Log.e(
-                TAG,
+            val error = IllegalStateException(
                 "screenStateTracker is not set when screenTransition ends at $toScreenName"
+            )
+            Log.e(TAG, error.message, error)
+            identityAnalyticsRequestFactory.genericError(
+                throwable = error,
+                additionalMetadata = mapOf(
+                    IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+                        IdentityAnalyticsRequestFactory.ERROR_CONTEXT_SCREEN_TRANSITION,
+                    IdentityAnalyticsRequestFactory.PARAM_TO_SCREEN_NAME to toScreenName
+                )
             )
         }
     }

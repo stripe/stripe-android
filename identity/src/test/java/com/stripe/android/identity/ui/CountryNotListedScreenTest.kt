@@ -12,6 +12,9 @@ import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_COUNTRY_NOT_LISTED
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.INDIVIDUAL
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -23,6 +26,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
@@ -47,9 +51,13 @@ class CountryNotListedScreenTest {
             )
         )
     }
+    private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
+        on { identityAnalyticsRequestFactory } doReturn mockIdentityAnalyticsRequestFactory
+        on { screenTracker } doReturn mockScreenTracker
     }
 
     private val mockNavController = mock<NavController>()
@@ -81,6 +89,7 @@ class CountryNotListedScreenTest {
     ) {
         setComposeTestRuleWith(isMissingID) {
             onNodeWithTag(COUNTRY_NOT_LISTED_OTHER_COUNTRY_TAG).performClick()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_COUNTRY_NOT_LISTED), any())
             verify(mockNavController).navigate(
                 argWhere {
                     it.startsWith(INDIVIDUAL)

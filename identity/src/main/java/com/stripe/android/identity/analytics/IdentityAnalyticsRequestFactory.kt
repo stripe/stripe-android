@@ -28,15 +28,40 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     val identityRepository: IdentityRepository,
     @Named(GLOBAL_SCOPE) val scope: CoroutineScope
 ) {
+    enum class CameraSource(val analyticsValue: String) {
+        CAMERA_SESSION("camera_session"),
+        IMAGE_PICKER("image_picker")
+    }
+
+    enum class CameraEventKind(val analyticsValue: String) {
+        PERMISSION("permission"),
+        RUNTIME_ERROR("runtime_error")
+    }
+
+    enum class ScannerName(val analyticsValue: String) {
+        DOCUMENT("document"),
+        SELFIE("selfie"),
+        UNKNOWN("unknown")
+    }
+
+    enum class ModelType(val analyticsValue: String) {
+        DOCUMENT("document"),
+        SELFIE("selfie")
+    }
     var verificationPage: VerificationPage? = null
     private val requestFactory = AnalyticsRequestV2Factory(
         context = context,
         clientId = CLIENT_ID,
         origin = ORIGIN
     )
+    private fun additionalParamWithEventMetadata(
+        vararg pairs: Pair<String, *>
+    ): Map<String, Any?> = additionalParamWithEventMetadata(mapOf(*pairs))
 
-    private fun additionalParamWithEventMetadata(vararg pairs: Pair<String, *>): Map<String, Any> {
-        val metadataMap = mutableMapOf(*pairs)
+    private fun additionalParamWithEventMetadata(
+        eventMetadata: Map<String, Any?>
+    ): Map<String, Any?> {
+        val metadataMap = eventMetadata.toMutableMap()
         verificationPage?.livemode?.let { liveMode ->
             metadataMap[PARAM_LIVE_MODE] = liveMode
         }
@@ -51,14 +76,14 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     @Suppress("UNCHECKED_CAST")
     private fun maybeLogExperimentAndSendLog(
         eventName: String,
-        additionalParams: Map<String, Any> = mapOf()
+        additionalParams: Map<String, Any?> = mapOf()
     ) {
         runCatching {
             verificationPage?.let { verificationPage ->
                 val experiments = verificationPage.experiments
                 val userSessionId = verificationPage.userSessionId
                 val metaDatas = if (additionalParams.containsKey(PARAM_EVENT_META_DATA)) {
-                    additionalParams[PARAM_EVENT_META_DATA] as Map<String, Any>?
+                    additionalParams[PARAM_EVENT_META_DATA] as Map<String, Any?>?
                 } else {
                     null
                 }
@@ -93,7 +118,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     private fun VerificationPageStaticContentExperiment.matches(
         eventName: String,
-        metadata: Map<String, Any>?
+        metadata: Map<String, Any?>?
     ): Boolean {
         return if (this.eventMetadata.isEmpty()) {
             this.eventName == eventName && metadata == null
@@ -104,6 +129,33 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         }
     }
 
+    private fun cameraMetadata(
+        screenName: String,
+        cameraSource: CameraSource,
+        cameraEventKind: CameraEventKind
+    ): Map<String, Any?> = mapOf(
+        PARAM_SCREEN_NAME to screenName,
+        PARAM_CAMERA_SOURCE to cameraSource.analyticsValue,
+        PARAM_CAMERA_EVENT_KIND to cameraEventKind.analyticsValue
+    )
+
+    private fun cameraAccessState(isGranted: Boolean?): String {
+        return when (isGranted) {
+            true -> CAMERA_ACCESS_STATE_GRANTED
+            false -> CAMERA_ACCESS_STATE_DENIED
+            null -> CAMERA_ACCESS_STATE_UNKNOWN
+        }
+    }
+
+    private fun serializeError(
+        throwable: Throwable,
+        message: String? = throwable.message
+    ): Map<String, Any?> = mapOf(
+        PARAM_EXCEPTION to throwable.javaClass.name,
+        PARAM_MESSAGE to message,
+        PARAM_STACKTRACE to throwable.stackTraceToString()
+    )
+
     fun sheetPresented() = maybeLogExperimentAndSendLog(
         eventName = EVENT_SHEET_PRESENTED,
         additionalParams = mapOf(
@@ -111,10 +163,14 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun sheetClosed(sessionResult: String) = maybeLogExperimentAndSendLog(
+    fun sheetClosed(
+        sessionResult: String,
+        lastScreenName: String? = null
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_SHEET_CLOSED,
         additionalParams = additionalParamWithEventMetadata(
-            PARAM_SESSION_RESULT to sessionResult
+            PARAM_SESSION_RESULT to sessionResult,
+            PARAM_LAST_SCREEN_NAME to lastScreenName
         )
     )
 
@@ -131,7 +187,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         docBackModelScore: Float? = null,
         selfieModelScore: Float? = null,
         docFrontBlurScore: Float? = null,
-        docBackBlurScore: Float? = null
+        docBackBlurScore: Float? = null,
+        lastScreenName: String? = null
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_SUCCEEDED,
         additionalParams = additionalParamWithEventMetadata(
@@ -147,7 +204,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             PARAM_DOC_BACK_MODEL_SCORE to docBackModelScore,
             PARAM_SELFIE_MODEL_SCORE to selfieModelScore,
             PARAM_DOC_FRONT_BLUR_SCORE to docFrontBlurScore,
-            PARAM_DOC_BACK_BLUR_SCORE to docBackBlurScore
+            PARAM_DOC_BACK_BLUR_SCORE to docBackBlurScore,
+            PARAM_LAST_SCREEN_NAME to lastScreenName
         )
     )
 
@@ -172,7 +230,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         requireSelfie: Boolean? = null,
         docFrontUploadType: DocumentUploadParam.UploadMethod? = null,
         docBackUploadType: DocumentUploadParam.UploadMethod? = null,
-        throwable: Throwable
+        throwable: Throwable,
+        lastScreenName: String? = null
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_FAILED,
         additionalParams = additionalParamWithEventMetadata(
@@ -181,44 +240,81 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             PARAM_REQUIRE_SELFIE to requireSelfie,
             PARAM_DOC_FRONT_UPLOAD_TYPE to docFrontUploadType?.name,
             PARAM_DOC_BACK_UPLOAD_TYPE to docBackUploadType?.name,
-            PARAM_ERROR to mapOf(
-                PARAM_EXCEPTION to throwable.javaClass.name,
-                PARAM_STACKTRACE to throwable.stackTrace.toString()
-            )
+            PARAM_LAST_SCREEN_NAME to lastScreenName,
+            PARAM_ERROR to serializeError(throwable)
         )
     )
 
     fun screenPresented(
         scanType: IdentityScanState.ScanType? = null,
-        screenName: String
+        screenName: String,
+        previousScreenName: String? = null
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_SCREEN_PRESENTED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType?.toParam(),
-            PARAM_SCREEN_NAME to screenName
+            PARAM_SCREEN_NAME to screenName,
+            PARAM_PREVIOUS_SCREEN_NAME to previousScreenName
         )
     )
 
     fun cameraError(
         scanType: IdentityScanState.ScanType,
-        throwable: Throwable
+        throwable: Throwable,
+        screenName: String = screenNameForScanType(scanType),
+        cameraSource: CameraSource = CameraSource.CAMERA_SESSION
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_CAMERA_ERROR,
         additionalParams = additionalParamWithEventMetadata(
-            PARAM_SCAN_TYPE to scanType.toParam(),
-            PARAM_ERROR to mapOf(
-                PARAM_EXCEPTION to throwable.javaClass.name,
-                PARAM_STACKTRACE to throwable.stackTrace.toString()
+            cameraMetadata(
+                screenName = screenName,
+                cameraSource = cameraSource,
+                cameraEventKind = CameraEventKind.RUNTIME_ERROR
+            ) + mapOf(
+                PARAM_SCAN_TYPE to scanType.toParam(),
+                PARAM_ERROR to serializeError(throwable)
             )
         )
     )
 
-    fun cameraPermissionDenied() = maybeLogExperimentAndSendLog(
-        eventName = EVENT_CAMERA_PERMISSION_DENIED
+    fun cameraPermissionDenied(
+        screenName: String = SCREEN_NAME_UNKNOWN,
+        cameraSource: CameraSource = CameraSource.CAMERA_SESSION,
+        isGranted: Boolean? = false
+    ) = maybeLogExperimentAndSendLog(
+        eventName = EVENT_CAMERA_PERMISSION_DENIED,
+        additionalParams = additionalParamWithEventMetadata(
+            cameraMetadata(
+                screenName = screenName,
+                cameraSource = cameraSource,
+                cameraEventKind = CameraEventKind.PERMISSION
+            ) + mapOf(
+                PARAM_CAMERA_ACCESS_STATE to cameraAccessState(isGranted)
+            )
+        )
+    )
+    fun cameraPermissionGranted(
+        screenName: String = SCREEN_NAME_UNKNOWN,
+        cameraSource: CameraSource = CameraSource.CAMERA_SESSION
+    ) = maybeLogExperimentAndSendLog(
+        eventName = EVENT_CAMERA_PERMISSION_GRANTED,
+        additionalParams = additionalParamWithEventMetadata(
+            cameraMetadata(
+                screenName = screenName,
+                cameraSource = cameraSource,
+                cameraEventKind = CameraEventKind.PERMISSION
+            ) + mapOf(
+                PARAM_CAMERA_ACCESS_STATE to cameraAccessState(true)
+            )
+        )
     )
 
-    fun cameraPermissionGranted() = maybeLogExperimentAndSendLog(
-        eventName = EVENT_CAMERA_PERMISSION_GRANTED
+    fun cameraPermissionRationaleShown() = maybeLogExperimentAndSendLog(
+        eventName = EVENT_CAMERA_PERMISSION_RATIONALE_SHOWN
+    )
+
+    fun cameraPermissionAppSettingsClicked() = maybeLogExperimentAndSendLog(
+        eventName = EVENT_CAMERA_PERMISSION_APP_SETTINGS_CLICKED
     )
 
     fun documentTimeout(
@@ -273,12 +369,37 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     fun genericError(
         message: String?,
-        stackTrace: String
+        stackTrace: String,
+        additionalMetadata: Map<String, Any?> = mapOf()
     ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_GENERIC_ERROR,
         additionalParams = additionalParamWithEventMetadata(
-            PARAM_MESSAGE to message,
-            PARAM_STACKTRACE to stackTrace
+            additionalMetadata + mapOf(
+                PARAM_MESSAGE to message,
+                PARAM_STACKTRACE to stackTrace,
+                PARAM_ERROR_DETAILS to mapOf(
+                    PARAM_MESSAGE to message,
+                    PARAM_STACKTRACE to stackTrace
+                )
+            )
+        )
+    )
+
+    fun genericError(
+        throwable: Throwable,
+        additionalMetadata: Map<String, Any?> = mapOf(),
+        overrideMessage: String? = throwable.message
+    ) = maybeLogExperimentAndSendLog(
+        eventName = EVENT_GENERIC_ERROR,
+        additionalParams = additionalParamWithEventMetadata(
+            additionalMetadata + mapOf(
+                PARAM_MESSAGE to overrideMessage,
+                PARAM_STACKTRACE to throwable.stackTraceToString(),
+                PARAM_ERROR_DETAILS to serializeError(
+                    throwable = throwable,
+                    message = overrideMessage
+                )
+            )
         )
     )
 
@@ -335,10 +456,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     )
 
     private fun IdentityScanState.ScanType.toParam(): String =
-        when (this) {
-            IdentityScanState.ScanType.DOC_FRONT -> DOC_FRONT
-            IdentityScanState.ScanType.DOC_BACK -> DOC_BACK
-            IdentityScanState.ScanType.SELFIE -> SELFIE
+        requireNotNull(analyticsValueForScanType(this)) {
+            "Unknown scan type: $this"
         }
 
     private fun IdentityScanState.ScanType.toSide(): String =
@@ -356,7 +475,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val ORIGIN = "stripe-identity-android"
         const val ID = "id"
         const val DOC_FRONT = "doc_front"
-        const val DOC_BACK = "doc_front"
+        const val DOC_BACK = "doc_back"
         const val SELFIE = "selfie"
         const val FRONT = "front"
         const val BACK = "back"
@@ -370,6 +489,9 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_CAMERA_ERROR = "camera_error"
         const val EVENT_CAMERA_PERMISSION_DENIED = "camera_permission_denied"
         const val EVENT_CAMERA_PERMISSION_GRANTED = "camera_permission_granted"
+        const val EVENT_CAMERA_PERMISSION_RATIONALE_SHOWN = "camera_permission_rationale_shown"
+        const val EVENT_CAMERA_PERMISSION_APP_SETTINGS_CLICKED =
+            "camera_permission_app_settings_clicked"
         const val EVENT_DOCUMENT_TIMEOUT = "document_timeout"
         const val EVENT_SELFIE_TIMEOUT = "selfie_timeout"
         const val EVENT_AVERAGE_FPS = "average_fps"
@@ -400,9 +522,22 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_DOC_BACK_BLUR_SCORE = "doc_back_blur_score"
         const val PARAM_LAST_SCREEN_NAME = "last_screen_name"
         const val PARAM_ERROR = "error"
+        const val PARAM_ERROR_DETAILS = "error_details"
         const val PARAM_EXCEPTION = "exception"
         const val PARAM_STACKTRACE = "stacktrace"
         const val PARAM_SCREEN_NAME = "screen_name"
+        const val PARAM_PREVIOUS_SCREEN_NAME = "previous_screen_name"
+        const val PARAM_CAMERA_SOURCE = "camera_source"
+        const val PARAM_CAMERA_EVENT_KIND = "camera_event_kind"
+        const val PARAM_CAMERA_ACCESS_STATE = "camera_access_state"
+        const val PARAM_ERROR_CONTEXT = "error_context"
+        const val PARAM_SCANNER_NAME = "scanner_name"
+        const val PARAM_UPLOAD_METHOD = "upload_method"
+        const val PARAM_UPLOAD_STAGE = "upload_stage"
+        const val PARAM_IS_HIGH_RES = "is_high_res"
+        const val PARAM_SELFIE_VARIANT = "selfie_variant"
+        const val PARAM_ML_MODEL_STAGE = "ml_model_stage"
+        const val PARAM_ML_MODEL_TYPE = "ml_model_type"
         const val PARAM_SIDE = "side"
         const val PARAM_TYPE = "type"
         const val PARAM_VALUE = "value"
@@ -442,5 +577,47 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val SCREEN_NAME_UNKNOWN = "unknown"
         const val TYPE_SELFIE = "selfie"
         const val TYPE_DOCUMENT = "document"
+        const val CAMERA_ACCESS_STATE_GRANTED = "granted"
+        const val CAMERA_ACCESS_STATE_DENIED = "denied"
+        const val CAMERA_ACCESS_STATE_UNKNOWN = "unknown"
+        const val ERROR_CONTEXT_ERROR_SCREEN = "error_screen"
+        const val ERROR_CONTEXT_IMAGE_SCAN = "image_scan"
+        const val ERROR_CONTEXT_IMAGE_UPLOAD = "image_upload"
+        const val ERROR_CONTEXT_MODEL_LOADING = "model_loading"
+        const val ERROR_CONTEXT_SCANNER_LOAD = "scanner_load"
+        const val ERROR_CONTEXT_SCREEN_TRANSITION = "screen_transition"
+        const val ERROR_CONTEXT_RESULT_PROCESSING = "result_processing"
+        const val MODEL_LOADING_STAGE_DOWNLOAD = "download"
+        const val MODEL_LOADING_STAGE_VALIDATE = "validate"
+        const val MODEL_LOADING_STAGE_INITIALIZE = "initialize"
+        const val UPLOAD_STAGE_PREPARE = "prepare"
+        const val UPLOAD_STAGE_REQUEST = "request"
+
+        internal fun analyticsValueForScanType(
+            scanType: IdentityScanState.ScanType?
+        ): String? = when (scanType) {
+            IdentityScanState.ScanType.DOC_FRONT -> DOC_FRONT
+            IdentityScanState.ScanType.DOC_BACK -> DOC_BACK
+            IdentityScanState.ScanType.SELFIE -> SELFIE
+            null -> null
+        }
+
+        internal fun screenNameForScanType(
+            scanType: IdentityScanState.ScanType?
+        ): String = when (scanType) {
+            IdentityScanState.ScanType.DOC_FRONT,
+            IdentityScanState.ScanType.DOC_BACK -> SCREEN_NAME_LIVE_CAPTURE
+            IdentityScanState.ScanType.SELFIE -> SCREEN_NAME_SELFIE
+            null -> SCREEN_NAME_UNKNOWN
+        }
+
+        internal fun scannerNameForScanType(
+            scanType: IdentityScanState.ScanType?
+        ): String = when (scanType) {
+            IdentityScanState.ScanType.DOC_FRONT,
+            IdentityScanState.ScanType.DOC_BACK -> ScannerName.DOCUMENT.analyticsValue
+            IdentityScanState.ScanType.SELFIE -> ScannerName.SELFIE.analyticsValue
+            null -> ScannerName.UNKNOWN.analyticsValue
+        }
     }
 }

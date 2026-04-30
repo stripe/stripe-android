@@ -47,7 +47,6 @@ internal fun BottomSheetHTML(
                     openURL.data = Uri.parse(urlString)
                     context.startActivity(openURL)
                 }
-
                 urlString.startsWith(STRIPE_BOTTOM_SHEET) -> {
                     val bottomSheetId = urlString.substringAfterLast('/')
                     bottomSheets?.get(bottomSheetId)?.let { bottomSheetContent ->

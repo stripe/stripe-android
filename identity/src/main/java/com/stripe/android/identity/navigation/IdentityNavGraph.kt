@@ -33,6 +33,7 @@ import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.ui.BottomSheet
 import com.stripe.android.identity.ui.ConfirmationScreen
 import com.stripe.android.identity.ui.ConsentScreen
@@ -221,10 +222,15 @@ internal fun IdentityNavGraph(
                     bottomButton = ErrorScreenButton(
                         buttonText = stringResource(id = R.string.stripe_app_settings)
                     ) {
+                        identityViewModel.identityAnalyticsRequestFactory
+                            .cameraPermissionAppSettingsClicked()
                         appSettingsOpenable.openAppSettings()
                         // navigate back to DocWarmup, so that when user is back to the app
                         // from settings
                         // the camera permission check can be triggered again from there.
+                        identityViewModel.screenTracker.screenTransitionStart(
+                            IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
+                        )
                         navController.navigateTo(DocWarmupDestination)
                     }
                 )
@@ -303,10 +309,17 @@ internal fun IdentityNavGraph(
                             IdentityAnalyticsRequestFactory.SCREEN_NAME_ERROR
                         )
                         if (ErrorDestination.shouldFail(it)) {
+                            val failedReason = identityViewModel.errorCause.value
+                                ?: IllegalStateException("Unknown verification error")
+                            identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                                isFromFallbackUrl = false,
+                                requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie(),
+                                throwable = failedReason,
+                                lastScreenName = identityViewModel.analyticsLastScreenName
+                            )
                             verificationFlowFinishable.finishWithResult(
                                 IdentityVerificationSheet.VerificationFlowResult.Failed(
-                                    identityViewModel.errorCause.value
-                                        ?: IllegalStateException("Unknown verification error")
+                                    failedReason
                                 )
                             )
                         } else {
