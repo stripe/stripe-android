@@ -63,3 +63,6 @@ example/gen
 
 # Git worktrees
 .worktrees/
+
+# Local latency benchmark output
+latency_experiment_logs/
