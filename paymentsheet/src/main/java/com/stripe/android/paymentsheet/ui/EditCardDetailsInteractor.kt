@@ -105,6 +105,9 @@ internal data class EditCardPayload(
 internal data class CardEditConfiguration(
     val cardBrandFilter: CardBrandFilter,
     val isCbcModifiable: Boolean,
+    // Flag that indicates if mandatory input of missing country & ZIP code
+    // are required for billing details in automatic mode.
+    val isAutomaticAddressInputMandatory: Boolean = true,
     // Local flag for whether expiry date and address can be edited.
     // This flag has no effect on Card Brand Choice.
     // It will be removed before release.
@@ -228,11 +231,19 @@ internal class DefaultEditCardDetailsInteractor(
     ): CardUpdateParams? {
         val hasChanges = hasCardDetailsChanged(cardDetailsEntry) ||
             hasBillingDetailsChanged(billingDetailsEntry)
-        val isComplete = (cardDetailsEntry?.isComplete() != false) &&
-            billingDetailsEntry?.isComplete(billingDetailsCollectionConfiguration) != false
+
+        val cardDetailsAreComplete = cardDetailsEntry?.isComplete() != false
+        val billingDetailsAreComplete = billingDetailsEntry
+            ?.isComplete(billingDetailsCollectionConfiguration) != false
+
+        val addressInputNotRequired =
+            billingDetailsCollectionConfiguration.address == AddressCollectionMode.Automatic &&
+                !(cardEditConfiguration?.isAutomaticAddressInputMandatory ?: true)
+
+        val isComplete = cardDetailsAreComplete && (billingDetailsAreComplete || addressInputNotRequired)
 
         return if ((hasChanges || requiresModification.not()) && isComplete) {
-            toUpdateParams(cardDetailsEntry, billingDetailsEntry)
+            toUpdateParams(cardDetailsEntry, billingDetailsEntry.takeIf { billingDetailsAreComplete })
         } else {
             null
         }

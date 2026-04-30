@@ -908,7 +908,14 @@ constructor(
         val displayBrand: String? = null,
         @JvmField
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        val cardArt: CardArt? = null
+        val cardArt: CardArt? = null,
+        /**
+         * Indicates whether this payment method was created from a card_present payment method, indicate that a
+         * customer uses a Terminal device or application to save their card.
+         */
+        @JvmField
+        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val createdFromCardPresent: Boolean = false,
     ) : TypeData() {
         override val type: Type get() = Type.Card
 
@@ -926,7 +933,8 @@ constructor(
             wallet: Wallet? = this.wallet,
             networks: Networks? = this.networks,
             displayBrand: String? = this.displayBrand,
-            cardArt: CardArt? = this.cardArt
+            cardArt: CardArt? = this.cardArt,
+            createdFromCardPresent: Boolean = this.createdFromCardPresent
         ): Card {
             return Card(
                 brand = brand,
@@ -941,7 +949,8 @@ constructor(
                 wallet = wallet,
                 networks = networks,
                 displayBrand = displayBrand,
-                cardArt = cardArt
+                cardArt = cardArt,
+                createdFromCardPresent = createdFromCardPresent
             )
         }
 
