@@ -692,9 +692,10 @@ class PaymentSheet internal constructor(
         @Parcelize
         @Poko
         class SellerDetails(
-            val businessName: String,
-            val networkId: String,
-            val externalId: String,
+            val businessName: String? = null,
+            val networkId: String? = null,
+            val externalId: String? = null,
+            val networkBusinessProfile: String? = null,
         ) : Parcelable
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
