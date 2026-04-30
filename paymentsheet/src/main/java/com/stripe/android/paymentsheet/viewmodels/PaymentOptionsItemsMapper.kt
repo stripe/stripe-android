@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.viewmodels
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -16,7 +15,6 @@ internal class PaymentOptionsItemsMapper(
     private val customerState: StateFlow<CustomerState?>,
     private val isGooglePayReady: StateFlow<Boolean>,
     private val isLinkEnabled: StateFlow<Boolean?>,
-    private val linkBrand: StateFlow<LinkBrand>,
     private val nameProvider: (PaymentMethodCode?) -> ResolvableString,
     private val isNotPaymentFlow: Boolean,
     private val isCbcEligible: () -> Boolean
@@ -28,13 +26,11 @@ internal class PaymentOptionsItemsMapper(
             isLinkEnabled,
             isGooglePayReady,
             customerMetadata,
-            linkBrand,
-        ) { customerState, isLinkEnabled, isGooglePayReady, customerMetadata, linkBrand ->
+        ) { customerState, isLinkEnabled, isGooglePayReady, customerMetadata ->
             createPaymentOptionsItems(
                 paymentMethods = customerState?.paymentMethods ?: listOf(),
                 isLinkEnabled = isLinkEnabled,
                 isGooglePayReady = isGooglePayReady,
-                linkBrand = linkBrand,
                 defaultPaymentMethodId = if (customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
                     customerState?.defaultPaymentMethodId
                 } else {
@@ -49,7 +45,6 @@ internal class PaymentOptionsItemsMapper(
         paymentMethods: List<PaymentMethod>,
         isLinkEnabled: Boolean?,
         isGooglePayReady: Boolean,
-        linkBrand: LinkBrand,
         defaultPaymentMethodId: String?,
     ): List<PaymentOptionsItem>? {
         if (isLinkEnabled == null) return null
@@ -58,7 +53,6 @@ internal class PaymentOptionsItemsMapper(
             paymentMethods = paymentMethods,
             showGooglePay = isGooglePayReady && isNotPaymentFlow,
             showLink = isLinkEnabled && isNotPaymentFlow,
-            linkBrand = linkBrand,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible(),
             defaultPaymentMethodId = defaultPaymentMethodId,
