@@ -38,6 +38,7 @@ import com.stripe.stripeterminal.external.callable.SetupIntentCallback
 import com.stripe.stripeterminal.external.models.AllowRedisplay
 import com.stripe.stripeterminal.external.models.CardDetails
 import com.stripe.stripeterminal.external.models.CollectSetupIntentConfiguration
+import com.stripe.stripeterminal.external.models.PaymentMethodType
 import com.stripe.stripeterminal.external.models.SetupIntent
 import com.stripe.stripeterminal.external.models.TapToPayUxConfiguration
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
@@ -74,6 +75,7 @@ class TapToAddCollectionHandlerTest {
             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
+            isSimulatedProvider = DEFAULT_IS_SIMULATED_PROVIDER,
             userFacingLogger = FakeUserFacingLogger(),
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
@@ -93,6 +95,7 @@ class TapToAddCollectionHandlerTest {
             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
             connectionManager = FakeTapToAddConnectionManager.noOp(isSupported = true),
             tapToPayUxConfiguration = tapToPayUxConfiguration,
+            isSimulatedProvider = DEFAULT_IS_SIMULATED_PROVIDER,
             userFacingLogger = FakeUserFacingLogger(),
             errorReporter = FakeErrorReporter(),
             createCardPresentSetupIntentCallbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever.noOp(
@@ -254,12 +257,167 @@ class TapToAddCollectionHandlerTest {
             assertFailedCollection(
                 result = collectionResult,
                 expectedErrorType = NotImplementedError::class.java,
-                expectedThrowableMessage = "Checkout sessions do not support retrieving individual payment methods!",
+                expectedThrowableMessage = "Checkout sessions does not support Tap to Add!",
                 expectedErrorCodeValue = "unknown",
                 expectedUserError = GENERIC_USER_ERROR,
             )
         }
     }
+
+    @Test
+    fun `handler returns FailedCollection when setup intent is missing card_present payment method type`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+            isSimulated = false,
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            checkRetrieveSetupIntent(
+                clientSecret = "si_123_secret",
+                paymentMethodTypes = listOf("card"),
+            )
+
+            assertFailedCollection(
+                result = result.await(),
+                expectedErrorType = IllegalStateException::class.java,
+                expectedThrowableMessage = "Missing 'card_present' payment method type on setup intent!",
+                expectedErrorCodeValue = "missingCardPresentPaymentMethodType",
+                expectedUserError = GENERIC_USER_ERROR,
+            )
+        }
+
+    @Test
+    fun `handler returns FailedCollection with integration error when SI missing card_present in simulated mode`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+            isSimulated = true,
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            checkRetrieveSetupIntent(
+                clientSecret = "si_123_secret",
+                paymentMethodTypes = listOf("card"),
+            )
+
+            assertFailedCollection(
+                result = result.await(),
+                expectedErrorType = IllegalStateException::class.java,
+                expectedThrowableMessage = "Missing 'card_present' payment method type on setup intent!",
+                expectedErrorCodeValue = "missingCardPresentPaymentMethodType",
+                expectedUserError = SIMULATED_MISSING_CARD_PRESENT_ERROR,
+            )
+        }
+
+    @Test
+    fun `handler returns FailedCollection when setup intent customer does not match Payment Element customer`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+            isSimulated = false,
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            checkRetrieveSetupIntent(
+                clientSecret = "si_123_secret",
+                customerId = "cus_other",
+            )
+
+            assertFailedCollection(
+                result = result.await(),
+                expectedErrorType = IllegalStateException::class.java,
+                expectedThrowableMessage = "Incorrect customer attached to setup intent!",
+                expectedErrorCodeValue = "incorrectCustomerOnSetupIntent",
+                expectedUserError = GENERIC_USER_ERROR,
+            )
+        }
+
+    @Test
+    fun `handler returns FailedCollection with integration error when SI customer mismatches in simulated mode`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+            isSimulated = true,
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            checkRetrieveSetupIntent(
+                clientSecret = "si_123_secret",
+                customerId = "cus_other",
+            )
+
+            assertFailedCollection(
+                result = result.await(),
+                expectedErrorType = IllegalStateException::class.java,
+                expectedThrowableMessage = "Incorrect customer attached to setup intent!",
+                expectedErrorCodeValue = "incorrectCustomerOnSetupIntent",
+                expectedUserError = SIMULATED_INCORRECT_CUSTOMER_DIFFERENT_IDS_ERROR,
+            )
+        }
+
+    @Test
+    fun `handler returns FailedCollection with integration error when SI has no customer in simulated mode`() =
+        runScenario(
+            callbackResult = Result.success(
+                CreateCardPresentSetupIntentCallback {
+                    CreateIntentResult.Success("si_123_secret")
+                }
+            ),
+            isSimulated = true,
+        ) {
+            val result = testScope.backgroundScope.async {
+                handler.collect(DEFAULT_METADATA)
+            }
+
+            assertThat(retrieverScenario.waitForCallbackCalls.awaitItem()).isNotNull()
+            assertThat(terminalScenario.setTapToPayUxConfigurationCalls.awaitItem()).isNotNull()
+
+            checkRetrieveSetupIntent(
+                clientSecret = "si_123_secret",
+                customerId = null,
+            )
+
+            assertFailedCollection(
+                result = result.await(),
+                expectedErrorType = IllegalStateException::class.java,
+                expectedThrowableMessage = "Incorrect customer attached to setup intent!",
+                expectedErrorCodeValue = "incorrectCustomerOnSetupIntent",
+                expectedUserError = SIMULATED_INCORRECT_CUSTOMER_MISSING_ON_SI_ERROR,
+            )
+        }
 
     @Test
     fun `handler returns Collected with updated payment method when attachDefaultsToPaymentMethod is true`() {
@@ -890,9 +1048,13 @@ class TapToAddCollectionHandlerTest {
         updatePaymentMethodResult: Result<PaymentMethod> = Result.failure(
             IllegalStateException("updatePaymentMethod was not expected"),
         ),
+        isSimulated: Boolean = false,
         coroutineContext: CoroutineContext = EmptyCoroutineContext,
         block: suspend Scenario.() -> Unit,
     ) = runTest(coroutineContext) {
+        val isSimulatedProvider = object : TapToAddIsSimulatedProvider {
+            override fun get(): Boolean = isSimulated
+        }
         val terminalScenario = createTerminalScenario()
         val terminalWrapper = TestTerminalWrapper.noOp(terminalScenario.terminalInstance)
         val errorReporter = FakeErrorReporter()
@@ -917,6 +1079,7 @@ class TapToAddCollectionHandlerTest {
                             paymentConfiguration = TEST_PAYMENT_CONFIGURATION,
                             connectionManager = managerScenario.tapToAddConnectionManager,
                             errorReporter = errorReporter,
+                            isSimulatedProvider = isSimulatedProvider,
                             userFacingLogger = FakeUserFacingLogger(),
                             tapToPayUxConfiguration = tapToPayUxConfiguration,
                             createCardPresentSetupIntentCallbackRetriever = retrieverScenario.retriever,
@@ -970,8 +1133,15 @@ class TapToAddCollectionHandlerTest {
         )
     }
 
-    private suspend fun Scenario.checkRetrieveSetupIntent(clientSecret: String): SetupIntent {
-        val retrievedSetupIntent = mock<SetupIntent>()
+    private suspend fun Scenario.checkRetrieveSetupIntent(
+        clientSecret: String,
+        customerId: String? = "cus_123",
+        paymentMethodTypes: List<String> = listOf(PaymentMethodType.CARD_PRESENT.typeName),
+    ): SetupIntent {
+        val retrievedSetupIntent = mock<SetupIntent> {
+            on { this.paymentMethodTypes } doReturn paymentMethodTypes
+            on { this.customerId } doReturn customerId
+        }
         val retrieveSetupIntentCall = terminalScenario.retrieveSetupIntentCalls.awaitItem()
         assertThat(retrieveSetupIntentCall.clientSecret).isEqualTo(clientSecret)
         retrieveSetupIntentCall.callback.onSuccess(retrievedSetupIntent)
@@ -1211,6 +1381,35 @@ class TapToAddCollectionHandlerTest {
             title = StripeCoreR.string.stripe_error.resolvableString,
             action = StripeCoreR.string.stripe_try_again_later.resolvableString,
         )
+
+        private const val INTEGRATION_ERROR_TITLE = "Integration error"
+        private const val MISSING_CARD_PRESENT_ACTION = "Ensure the setup intent allows a `card_present`" +
+            " payment method type on it to allow for tapping cards"
+        private const val SIMULATED_INCORRECT_CUSTOMER_MISSING_ON_SI_ACTION =
+            "Please attach the customer (cus_123) to the setup intent that was used to" +
+                " when initializing Payment Element"
+        private const val SIMULATED_INCORRECT_CUSTOMER_DIFFERENT_IDS_ACTION =
+            "Setup intent had a different customer (cus_other) than the expected customer " +
+                "initialized with Payment Element (cus_123). Please attach the expected customer."
+
+        val SIMULATED_MISSING_CARD_PRESENT_ERROR = TapToAddErrorMessage(
+            title = INTEGRATION_ERROR_TITLE.resolvableString,
+            action = MISSING_CARD_PRESENT_ACTION.resolvableString,
+        )
+
+        val SIMULATED_INCORRECT_CUSTOMER_MISSING_ON_SI_ERROR = TapToAddErrorMessage(
+            title = INTEGRATION_ERROR_TITLE.resolvableString,
+            action = SIMULATED_INCORRECT_CUSTOMER_MISSING_ON_SI_ACTION.resolvableString,
+        )
+
+        val SIMULATED_INCORRECT_CUSTOMER_DIFFERENT_IDS_ERROR = TapToAddErrorMessage(
+            title = INTEGRATION_ERROR_TITLE.resolvableString,
+            action = SIMULATED_INCORRECT_CUSTOMER_DIFFERENT_IDS_ACTION.resolvableString,
+        )
+
+        val DEFAULT_IS_SIMULATED_PROVIDER = object : TapToAddIsSimulatedProvider {
+            override fun get(): Boolean = false
+        }
 
         val tapToPayUxConfiguration = createTapToAddUxConfiguration()
         val DEFAULT_METADATA = PaymentMethodMetadataFactory.create(
