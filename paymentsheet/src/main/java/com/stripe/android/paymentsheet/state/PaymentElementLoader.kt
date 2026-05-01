@@ -258,156 +258,158 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
-        val configuration = integrationConfiguration.commonConfiguration
-        // Validate configuration before loading
-        initializationMode.validate()
-        configuration.validate(
-            initializationMode = initializationMode,
-            isLiveMode = paymentConfiguration.get().isLiveMode(),
-            callbackIdentifier = paymentElementCallbackIdentifier,
-        )
-
-        eventReporter.onLoadStarted(metadata.initializedViaCompose)
-        tapToAddConnectionStarter.start(configuration)
-
-        val isGooglePaySupportedOnDevice = async {
-            isGooglePaySupportedOnDevice()
-        }
-        val isGooglePaySupportedByConfiguration = async {
-            configuration.isGooglePayReady()
-        }
-
-        val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
-        val elementsSession = loadSession(
-            initializationMode = initializationMode,
-            configuration = configuration,
-            savedPaymentMethodSelection = savedPaymentMethodSelection,
-        )
-
-        // Preemptively prepare Integrity asynchronously if needed, as warm up can take
-        // a few seconds.
-        if (elementsSession.shouldWarmUpIntegrity()) {
-            launch { integrityRequestManager.prepare() }
-        }
-
-        // Pre-fetch PMM Promotions for BNPLs
-        paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
-
-        val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
-
-        val savedSelection = async {
-            retrieveSavedSelection(
-                configuration = configuration,
-                isGooglePayReady = isGooglePayReady,
-                elementsSession = elementsSession
+        PaymentSheetLoadTraceRecorder.traceSuspend("DefaultPaymentElementLoader.load") {
+            val configuration = integrationConfiguration.commonConfiguration
+            // Validate configuration before loading
+            initializationMode.validate()
+            configuration.validate(
+                initializationMode = initializationMode,
+                isLiveMode = paymentConfiguration.get().isLiveMode(),
+                callbackIdentifier = paymentElementCallbackIdentifier,
             )
-        }
 
-        val clientAttributionMetadata = ClientAttributionMetadata.create(
-            elementsSessionConfigId = elementsSession.elementsSessionConfigId,
-            initializationMode = initializationMode,
-            automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
-        )
+            eventReporter.onLoadStarted(metadata.initializedViaCompose)
+            tapToAddConnectionStarter.start(configuration)
 
-        val customerMetadata = PaymentSheetLoadTraceRecorder.trace("Create Customer Metadata") {
-            createCustomerMetadata(
+            val isGooglePaySupportedOnDevice = async {
+                isGooglePaySupportedOnDevice()
+            }
+            val isGooglePaySupportedByConfiguration = async {
+                configuration.isGooglePayReady()
+            }
+
+            val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
+            val elementsSession = loadSession(
                 initializationMode = initializationMode,
                 configuration = configuration,
-                elementsSession = elementsSession,
+                savedPaymentMethodSelection = savedPaymentMethodSelection,
             )
-        }
 
-        val linkState = async {
-            createLinkState(
-                elementsSession = elementsSession,
-                configuration = configuration,
+            // Preemptively prepare Integrity asynchronously if needed, as warm up can take
+            // a few seconds.
+            if (elementsSession.shouldWarmUpIntegrity()) {
+                launch { integrityRequestManager.prepare() }
+            }
+
+            // Pre-fetch PMM Promotions for BNPLs
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+
+            val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
+
+            val savedSelection = async {
+                retrieveSavedSelection(
+                    configuration = configuration,
+                    isGooglePayReady = isGooglePayReady,
+                    elementsSession = elementsSession
+                )
+            }
+
+            val clientAttributionMetadata = ClientAttributionMetadata.create(
+                elementsSessionConfigId = elementsSession.elementsSessionConfigId,
                 initializationMode = initializationMode,
-                customerMetadata = customerMetadata,
-                clientAttributionMetadata = clientAttributionMetadata,
+                automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
             )
-        }
 
-        val paymentMethodMetadata = async {
-            val linkStateResult = linkState.await()
-            val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
-            } ?: false
+            val customerMetadata = PaymentSheetLoadTraceRecorder.trace("Create Customer Metadata") {
+                createCustomerMetadata(
+                    initializationMode = initializationMode,
+                    configuration = configuration,
+                    elementsSession = elementsSession,
+                )
+            }
 
-            PaymentSheetLoadTraceRecorder.traceSuspend("Create Payment Method Metadata") {
-                createPaymentMethodMetadata(
-                    integrationConfiguration = integrationConfiguration,
+            val linkState = async {
+                createLinkState(
                     elementsSession = elementsSession,
                     configuration = configuration,
-                    linkStateResult = linkStateResult,
-                    isGooglePayReady = isGooglePayReady,
-                    isGooglePaySupported = isGooglePaySupported,
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
                 )
             }
-        }
 
-        val customer = async {
-            createCustomerState(
-                initializationMode = initializationMode,
-                elementsSession = elementsSession,
-                metadata = paymentMethodMetadata.await(),
-                savedSelection = savedSelection,
-            )
-        }
+            val paymentMethodMetadata = async {
+                val linkStateResult = linkState.await()
+                val isGooglePaySupported = isGooglePaySupportedOnDevice.completeResultOrNull {
+                    errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
+                } ?: false
 
-        val initialPaymentSelection = async {
-            PaymentSheetLoadTraceRecorder.traceSuspend("Resolve Initial Payment Selection") {
-                retrieveInitialPaymentSelection(
-                    savedSelection = savedSelection,
+                PaymentSheetLoadTraceRecorder.traceSuspend("Create Payment Method Metadata") {
+                    createPaymentMethodMetadata(
+                        integrationConfiguration = integrationConfiguration,
+                        elementsSession = elementsSession,
+                        configuration = configuration,
+                        linkStateResult = linkStateResult,
+                        isGooglePayReady = isGooglePayReady,
+                        isGooglePaySupported = isGooglePaySupported,
+                        initializationMode = initializationMode,
+                        customerMetadata = customerMetadata,
+                        clientAttributionMetadata = clientAttributionMetadata,
+                    )
+                }
+            }
+
+            val customer = async {
+                createCustomerState(
+                    initializationMode = initializationMode,
+                    elementsSession = elementsSession,
                     metadata = paymentMethodMetadata.await(),
-                    customer = customer.await(),
-                    isGooglePayReady = isGooglePayReady,
-                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                    savedSelection = savedSelection,
                 )
             }
+
+            val initialPaymentSelection = async {
+                PaymentSheetLoadTraceRecorder.traceSuspend("Resolve Initial Payment Selection") {
+                    retrieveInitialPaymentSelection(
+                        savedSelection = savedSelection,
+                        metadata = paymentMethodMetadata.await(),
+                        customer = customer.await(),
+                        isGooglePayReady = isGooglePayReady,
+                        isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                    )
+                }
+            }
+
+            val stripeIntent = elementsSession.stripeIntent
+            val pmMetadata = paymentMethodMetadata.await()
+
+            warnUnactivatedIfNeeded(stripeIntent)
+
+            if (!supportsIntent(pmMetadata)) {
+                val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+                throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
+            }
+
+            val state = PaymentElementLoader.State(
+                config = configuration,
+                customer = customer.await(),
+                paymentSelection = initialPaymentSelection.await(),
+                validationError = stripeIntent.validate(),
+                paymentMethodMetadata = pmMetadata,
+            )
+
+            cardArtExperimentHandler.logExposure(
+                elementsSession = elementsSession,
+                paymentMethodMetadata = pmMetadata,
+                savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
+                integrationConfiguration = integrationConfiguration,
+                defaultPaymentSelection = state.paymentSelection,
+            )
+
+            logLinkExperimentExposures(
+                elementsSession = elementsSession,
+                state = state
+            )
+
+            reportSuccessfulLoad(
+                elementsSession = elementsSession,
+                state = state,
+                isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
+                paymentMethodMetadata = state.paymentMethodMetadata,
+            )
+
+            state
         }
-
-        val stripeIntent = elementsSession.stripeIntent
-        val pmMetadata = paymentMethodMetadata.await()
-
-        warnUnactivatedIfNeeded(stripeIntent)
-
-        if (!supportsIntent(pmMetadata)) {
-            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
-            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
-        }
-
-        val state = PaymentElementLoader.State(
-            config = configuration,
-            customer = customer.await(),
-            paymentSelection = initialPaymentSelection.await(),
-            validationError = stripeIntent.validate(),
-            paymentMethodMetadata = pmMetadata,
-        )
-
-        cardArtExperimentHandler.logExposure(
-            elementsSession = elementsSession,
-            paymentMethodMetadata = pmMetadata,
-            savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
-            integrationConfiguration = integrationConfiguration,
-            defaultPaymentSelection = state.paymentSelection,
-        )
-
-        logLinkExperimentExposures(
-            elementsSession = elementsSession,
-            state = state
-        )
-
-        reportSuccessfulLoad(
-            elementsSession = elementsSession,
-            state = state,
-            isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
-            paymentMethodMetadata = state.paymentMethodMetadata,
-        )
-
-        return@runCatching state
     }
 
     private suspend fun loadSession(
