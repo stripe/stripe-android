@@ -207,35 +207,16 @@ class Checkout private constructor(
      */
     suspend fun runServerUpdate(
         serverUpdate: suspend () -> Result<Unit>,
-    ): Result<Unit> {
-        if (internalState.integrationLaunched) {
-            return Result.failure(
-                IllegalStateException(
-                    "Cannot mutate checkout session while a payment flow is presented."
+    ): Result<Unit> = withInternalState { sessionId ->
+        serverUpdate().fold(
+            onSuccess = {
+                component.checkoutSessionRepository.init(
+                    sessionId = sessionId,
+                    adaptivePricingAllowed = configuration.adaptivePricingAllowed,
                 )
-            )
-        }
-        return mutex.withLock {
-            _isLoading.value = true
-            val result = runCatching {
-                serverUpdate().getOrThrow()
-            }.fold(
-                onSuccess = {
-                    component.checkoutSessionRepository.init(
-                        sessionId = internalState.checkoutSessionResponse.id,
-                        adaptivePricingAllowed = internalState.configuration.adaptivePricingAllowed,
-                    ).map { response ->
-                        internalState = internalState.copy(checkoutSessionResponse = response)
-                        _checkoutSession.value = response.asCheckoutSession()
-                    }
-                },
-                onFailure = { throwable ->
-                    Result.failure(throwable)
-                },
-            )
-            _isLoading.value = false
-            result
-        }
+            },
+            onFailure = { Result.failure(it) },
+        )
     }
 
     /**
@@ -355,7 +336,9 @@ class Checkout private constructor(
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
             _isLoading.value = true
-            val result = internalState.block(internalState.checkoutSessionResponse.id).map { response ->
+            val result = runCatching {
+                internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
+            }.map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 _checkoutSession.value = response.asCheckoutSession()
             }
