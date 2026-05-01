@@ -242,7 +242,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     },
                     embeddedConfirmationState = confirmationStateHolder.state,
                     customerState = customerStateHolder.customer.value,
-                    promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(code)
+                    promotions = paymentMethodMessagePromotionsHelper.getPromotions()
                 )
             },
             paymentMethods = customerStateHolder.paymentMethods,

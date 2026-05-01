@@ -154,7 +154,7 @@ internal class FormActivityTest {
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                     paymentSelection = null,
                     customerState = createCustomerState(paymentMethods = emptyList()),
-                    promotion = null
+                    promotions = null
                 ),
             )
         ).use { scenario ->

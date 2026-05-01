@@ -434,8 +434,8 @@ private fun TitleContent(
                 )
             }
         } else {
-            val promotion = promotionProvider()
             AnimatedVisibility(isSelected) {
+                val promotion = promotionProvider()
                 if (promotion != null) {
                     PaymentMethodMessagePromotionText(promotion)
                 } else if (subtitle != null) {
