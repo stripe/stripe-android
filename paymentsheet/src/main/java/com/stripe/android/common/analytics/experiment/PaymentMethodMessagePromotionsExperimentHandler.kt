@@ -10,6 +10,10 @@ import javax.inject.Inject
 
 internal interface PaymentMethodMessagePromotionsExperimentHandler {
 
+    /**
+     * Logs exposure with full dimensions. Should be called when a promotion is displayed to the user i.e.
+     * when PaymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode is called.
+     */
     fun logExposure(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
