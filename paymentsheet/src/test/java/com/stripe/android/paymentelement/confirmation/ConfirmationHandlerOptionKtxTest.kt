@@ -336,7 +336,7 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Link selection but with no configuration, should return null`() {
         assertThat(
-            PaymentSelection.Link().toConfirmationOption(
+            PaymentSelection.Link(brand = LinkBrand.Link).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = null,
                 cardFundingFilter = DefaultCardFundingFilter
@@ -347,7 +347,7 @@ class ConfirmationHandlerOptionKtxTest {
     @Test
     fun `On Link selection with configuration, should return Link confirmation option`() {
         assertThat(
-            PaymentSelection.Link().toConfirmationOption(
+            PaymentSelection.Link(brand = LinkBrand.Link).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
                 linkConfiguration = LINK_CONFIGURATION,
                 cardFundingFilter = DefaultCardFundingFilter
@@ -364,6 +364,7 @@ class ConfirmationHandlerOptionKtxTest {
     fun `On Link selection with express configuration, should return Link confirmation option with express enabled`() {
         assertThat(
             PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 linkExpressMode = LinkExpressMode.ENABLED
             ).toConfirmationOption(
                 configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),

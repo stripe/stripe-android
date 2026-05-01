@@ -9,6 +9,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -613,22 +614,34 @@ class CustomerAdapterTest {
         val savedPaymentOption = CustomerAdapter.PaymentOption.StripeId(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
         )
-        val savedSelection = savedPaymentOption.toPaymentSelection(paymentMethodProvider)
+        val savedSelection = savedPaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(savedSelection)
             .isInstanceOf<PaymentSelection.Saved>()
 
         val googlePaymentOption = CustomerAdapter.PaymentOption.GooglePay
-        val googleSelection = googlePaymentOption.toPaymentSelection(paymentMethodProvider)
+        val googleSelection = googlePaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(googleSelection)
             .isInstanceOf<PaymentSelection.GooglePay>()
 
         val linkPaymentOption = CustomerAdapter.PaymentOption.Link
-        val linkSelection = linkPaymentOption.toPaymentSelection(paymentMethodProvider)
+        val linkSelection = linkPaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(linkSelection)
             .isInstanceOf<PaymentSelection.Link>()
 
         val nullSavedPaymentOption = CustomerAdapter.PaymentOption.StripeId("id_123")
-        val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(paymentMethodProvider)
+        val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(nullSavedSelection)
             .isNull()
     }

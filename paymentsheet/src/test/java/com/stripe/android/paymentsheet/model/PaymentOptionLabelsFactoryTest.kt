@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -153,6 +154,7 @@ class PaymentOptionLabelsFactoryTest {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
             selection = PaymentSelection.Link(
+                brand = LinkBrand.Notlink,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                     collectedCvc = null,
@@ -161,7 +163,7 @@ class PaymentOptionLabelsFactoryTest {
             ),
         )
 
-        assertThat(labels.label).isEqualTo("Link")
+        assertThat(labels.label).isEqualTo("Notlink")
         assertThat(labels.sublabel).isEqualTo("Stripe Test Bank Account •••• 4242")
     }
 

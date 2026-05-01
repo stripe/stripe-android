@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.FakeSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -156,6 +157,7 @@ internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
                     )
                 },
                 selectedPaymentOptionsItem = savedPaymentOptionItem,
+                linkBrand = LinkBrand.Link,
                 isEditing = isEditing,
                 isProcessing = isProcessing,
                 canEdit = canEdit,
