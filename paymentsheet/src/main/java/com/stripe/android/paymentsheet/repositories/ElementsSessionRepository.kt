@@ -56,6 +56,11 @@ internal class RealElementsSessionRepository @Inject constructor(
     @Named(APPLICATION_ID) private val appId: String,
 ) : ElementsSessionRepository {
 
+    private val clientParams = ElementsSessionClientParams(
+        mobileAppId = appId,
+        mobileSessionIdProvider = { mobileSessionIdProvider.get() },
+    )
+
     private val fraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(application, workContext)
 
@@ -90,8 +95,7 @@ internal class RealElementsSessionRepository @Inject constructor(
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-            mobileSessionId = mobileSessionIdProvider.get(),
-            appId = appId,
+            clientParams = clientParams,
             countryOverride = countryOverride,
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
@@ -207,8 +211,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
-    mobileSessionId: String,
-    appId: String,
+    clientParams: ElementsSessionClientParams,
     countryOverride: String?,
     linkDisallowedFundingSourceCreation: Set<String>,
 ): ElementsSessionParams {
@@ -229,8 +232,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
-                appId = appId,
+                mobileSessionId = clientParams.mobileSessionId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )
@@ -244,8 +247,8 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 externalPaymentMethods = externalPaymentMethods,
                 customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
-                appId = appId,
+                mobileSessionId = clientParams.mobileSessionId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )
@@ -259,9 +262,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
+                mobileSessionId = clientParams.mobileSessionId,
                 sellerDetails = intentConfiguration.toSellerDetails(),
-                appId = appId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )
@@ -278,9 +281,9 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
+                mobileSessionId = clientParams.mobileSessionId,
                 sellerDetails = intentConfiguration.toSellerDetails(),
-                appId = appId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )
