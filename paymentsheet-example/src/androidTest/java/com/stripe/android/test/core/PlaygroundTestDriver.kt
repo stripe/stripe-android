@@ -58,6 +58,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRec
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
@@ -578,6 +579,32 @@ internal class PlaygroundTestDriver(
         teardown()
 
         return result
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    fun runLatencyTest(
+        testParameters: TestParameters,
+        isReturningCustomer: Boolean,
+        onLaunch: () -> Unit,
+        onLoad: () -> Unit,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        onLaunch()
+
+        if (isReturningCustomer) {
+            selectors.composeTestRule.waitUntilAtLeastOneExists(
+                hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG),
+                DEFAULT_UI_TIMEOUT.inWholeMilliseconds,
+            )
+        } else {
+            selectors.formElement.waitFor()
+        }
+
+        onLoad()
+
+        teardown()
     }
 
     fun confirmExistingComplete(

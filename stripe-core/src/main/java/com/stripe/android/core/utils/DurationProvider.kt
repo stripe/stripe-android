@@ -27,7 +27,8 @@ interface DurationProvider {
         Attest,
         IntentConfirmationChallenge,
         IntentConfirmationChallengeWebViewLoaded,
-        PaymentMethodMessaging
+        PaymentMethodMessaging,
+        MpeSynthetics,
     }
 }
 

@@ -349,6 +349,22 @@ workflows:
           timeout: 2400
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
+  # Intended for a Bitrise scheduled build; the test class self-skips outside this workflow.
+  run-paymentsheet-load-synthetics:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Run PaymentSheet load synthetics
+          timeout: 1200
+          inputs:
+            - content: ./scripts/retry.sh 3 ./gradlew :paymentsheet-example:connectedBaseDebugAndroidTest -Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.lpm.MPELatencyTest -Pandroid.testInstrumentationRunnerArguments.mpe_synthetics_enabled=true
   run-crypto-onramp-example-e2e-tests:
     before_run:
       - start_emulator
