@@ -4,9 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
-import com.stripe.android.checkout.CheckoutConfigurationMerger
-import com.stripe.android.checkout.InternalState
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -23,8 +20,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParams.Companion.getNameFromParams
@@ -555,45 +550,6 @@ internal class FormHelperTest {
     }
 
     @Test
-    fun `checkout session customer_email is attached to payment method create params`() = runTest {
-        val mergedConfig = mergeCheckoutSessionConfig(customerEmail = "checkout@example.com")
-        val formHelper = createFormHelper(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                defaultBillingDetails = mergedConfig.defaultBillingDetails ?: PaymentSheet.BillingDetails(),
-                billingDetailsCollectionConfiguration = mergedConfig.billingDetailsCollectionConfiguration,
-            ),
-            newPaymentSelectionProvider = { null },
-        )
-
-        val formArguments = formHelper.createFormArguments("card")
-        val formFieldValues = formArguments.noUserInteractionFormFieldValues()
-        val params = formHelper.getPaymentMethodParams(formFieldValues, "card")
-
-        assertThat(params?.billingDetails?.email).isEqualTo("checkout@example.com")
-    }
-
-    @Test
-    fun `checkout session merchant email takes precedence over customer_email`() = runTest {
-        val mergedConfig = mergeCheckoutSessionConfig(
-            customerEmail = "checkout@example.com",
-            merchantBillingDetails = PaymentSheet.BillingDetails(email = "merchant@example.com"),
-        )
-        val formHelper = createFormHelper(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                defaultBillingDetails = mergedConfig.defaultBillingDetails ?: PaymentSheet.BillingDetails(),
-                billingDetailsCollectionConfiguration = mergedConfig.billingDetailsCollectionConfiguration,
-            ),
-            newPaymentSelectionProvider = { null },
-        )
-
-        val formArguments = formHelper.createFormArguments("card")
-        val formFieldValues = formArguments.noUserInteractionFormFieldValues()
-        val params = formHelper.getPaymentMethodParams(formFieldValues, "card")
-
-        assertThat(params?.billingDetails?.email).isEqualTo("merchant@example.com")
-    }
-
-    @Test
     fun `getPaymentMethodParams returns correct payment method params`() = runTest {
         val cardBrand = "visa"
         val name = "Joe"
@@ -784,22 +740,4 @@ internal class FormHelperTest {
         val eventReporter: FakeEventReporter,
     )
 
-    @OptIn(CheckoutSessionPreview::class)
-    private fun mergeCheckoutSessionConfig(
-        customerEmail: String?,
-        merchantBillingDetails: PaymentSheet.BillingDetails? = null,
-    ): PaymentSheet.Configuration {
-        val merchantConfig = PaymentSheet.Configuration.Builder("Test Merchant")
-            .defaultBillingDetails(merchantBillingDetails)
-            .build()
-        val state = InternalState(
-            key = "test_key",
-            configuration = Checkout.Configuration().build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                customerEmail = customerEmail,
-            ),
-        )
-        return CheckoutConfigurationMerger.PaymentSheetConfiguration(merchantConfig)
-            .forCheckoutSession(state)
-    }
 }

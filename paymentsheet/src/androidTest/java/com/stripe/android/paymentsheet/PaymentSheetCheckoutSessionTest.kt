@@ -303,6 +303,75 @@ internal class PaymentSheetCheckoutSessionTest {
         }
     }
 
+    // region customer_email billing details tests
+
+    @Test
+    fun testCheckoutSessionCustomerEmailIsAttachedToPaymentMethod() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init-with-email.json")
+        }
+
+        val noEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
+            .link(
+                PaymentSheet.LinkConfiguration.Builder()
+                    .display(PaymentSheet.LinkConfiguration.Display.Never)
+                    .build()
+            )
+            .build()
+
+        testContext.presentWithCheckout(configuration = noEmailConfiguration)
+
+        page.fillOutCardDetails()
+
+        networkRule.createPaymentMethod(
+            bodyPart("billing_details[email]", "session@example.com"),
+        )
+
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testMerchantEmailTakesPrecedenceOverCheckoutSessionEmail() = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init-with-email.json")
+        }
+
+        val merchantEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
+            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "merchant@example.com"))
+            .link(
+                PaymentSheet.LinkConfiguration.Builder()
+                    .display(PaymentSheet.LinkConfiguration.Display.Never)
+                    .build()
+            )
+            .build()
+
+        testContext.presentWithCheckout(configuration = merchantEmailConfiguration)
+
+        page.fillOutCardDetails()
+
+        networkRule.createPaymentMethod(
+            bodyPart("billing_details[email]", "merchant@example.com"),
+        )
+
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    // endregion
+
     // region SFU mandate tests
 
     /**
