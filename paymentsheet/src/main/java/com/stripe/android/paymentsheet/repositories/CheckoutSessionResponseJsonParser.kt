@@ -42,6 +42,7 @@ internal class CheckoutSessionResponseJsonParser(
         val mode = parseMode(json.optString(FIELD_MODE))
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
+        val taxStatus = parseTaxStatus(json.optJSONObject(FIELD_TAX))
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
         val customerEmail = StripeJsonUtils.optString(json, FIELD_CUSTOMER_EMAIL)
@@ -84,6 +85,7 @@ internal class CheckoutSessionResponseJsonParser(
             mode = mode,
             status = status,
             liveMode = liveMode,
+            taxStatus = taxStatus,
             customerEmail = customerEmail,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
@@ -111,6 +113,16 @@ internal class CheckoutSessionResponseJsonParser(
             "complete" -> CheckoutSessionResponse.Status.COMPLETE
             "expired" -> CheckoutSessionResponse.Status.EXPIRED
             else -> CheckoutSessionResponse.Status.UNKNOWN
+        }
+    }
+
+    private fun parseTaxStatus(taxJson: JSONObject?): CheckoutSessionResponse.TaxStatus {
+        val statusString = taxJson?.optString(FIELD_STATUS) ?: return CheckoutSessionResponse.TaxStatus.UNKNOWN
+        return when (statusString) {
+            "ready" -> CheckoutSessionResponse.TaxStatus.READY
+            "requires_shipping_address" -> CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
+            "requires_billing_address" -> CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+            else -> CheckoutSessionResponse.TaxStatus.UNKNOWN
         }
     }
 
@@ -476,6 +488,7 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_MODE = "mode"
         private const val FIELD_STATUS = "status"
         private const val FIELD_LIVE_MODE = "livemode"
+        private const val FIELD_TAX = "tax"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_CUSTOMER_EMAIL = "customer_email"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"

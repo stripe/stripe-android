@@ -72,6 +72,34 @@ class AsCheckoutSessionTest {
     }
 
     @Test
+    fun `maps tax status ready`() {
+        val session = createResponse(taxStatus = CheckoutSessionResponse.TaxStatus.READY).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Ready)
+    }
+
+    @Test
+    fun `maps tax status requires shipping address`() {
+        val session = createResponse(
+            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
+        ).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresShippingAddress)
+    }
+
+    @Test
+    fun `maps tax status requires billing address`() {
+        val session = createResponse(
+            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+        ).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresBillingAddress)
+    }
+
+    @Test
+    fun `maps tax status unknown`() {
+        val session = createResponse(taxStatus = CheckoutSessionResponse.TaxStatus.UNKNOWN).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Unknown)
+    }
+
+    @Test
     fun `null totalSummary maps to null`() {
         val session = createResponse(totalSummary = null).asCheckoutSession()
         assertThat(session.totalSummary).isNull()
@@ -256,6 +284,7 @@ class AsCheckoutSessionTest {
         liveMode: Boolean = false,
         currency: String = "usd",
         customerEmail: String? = null,
+        taxStatus: CheckoutSessionResponse.TaxStatus = CheckoutSessionResponse.TaxStatus.READY,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
@@ -266,6 +295,7 @@ class AsCheckoutSessionTest {
             liveMode = liveMode,
             currency = currency,
             customerEmail = customerEmail,
+            taxStatus = taxStatus,
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,

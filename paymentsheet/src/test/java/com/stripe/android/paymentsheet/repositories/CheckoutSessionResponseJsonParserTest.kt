@@ -1021,4 +1021,98 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.liveMode).isFalse()
     }
+
+    @Test
+    fun `parse tax status ready`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "ready" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.READY)
+    }
+
+    @Test
+    fun `parse tax status requires_shipping_address`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "requires_shipping_address" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS)
+    }
+
+    @Test
+    fun `parse tax status requires_billing_address`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "requires_billing_address" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS)
+    }
+
+    @Test
+    fun `parse tax status unknown for unrecognized value`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "something_new" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
+    }
+
+    @Test
+    fun `parse tax status defaults to unknown when tax object is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
+    }
 }
