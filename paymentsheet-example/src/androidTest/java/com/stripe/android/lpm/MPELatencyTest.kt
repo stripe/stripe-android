@@ -1,6 +1,7 @@
 package com.stripe.android.lpm
 
 import android.os.Bundle
+import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.PaymentConfiguration
@@ -25,6 +26,7 @@ import org.junit.runners.Parameterized
 private const val MPE_SYNTHETICS_ENABLED_ARGUMENT = "mpe_synthetics_enabled"
 private const val MPE_BENCHMARK_ENABLED_ARGUMENT = "mpe_benchmark_enabled"
 private const val MPE_LATENCY_SAMPLES_ARGUMENT = "mpe_latency_samples"
+private const val MPE_LATENCY_DEBUG_TAG = "MPELatencyTestDebug"
 
 /** These tests are special; they don't fail and aren't meant to run in normal CI jobs.
 Instead, they measure MPE load times under various configurations and report the
@@ -82,7 +84,16 @@ internal class MPELatencyTest(
     fun latencyTest() {
         assumeRunningInLatencyWorkflow()
 
-        repeat(latencySamples) {
+        Log.i(
+            MPE_LATENCY_DEBUG_TAG,
+            "Starting $testName mode=$reportingMode samples=$latencySamples benchmark=${InstrumentationRegistry.getArguments().getString(MPE_BENCHMARK_ENABLED_ARGUMENT)} synthetics=${InstrumentationRegistry.getArguments().getString(MPE_SYNTHETICS_ENABLED_ARGUMENT)} rawSamplesArg=${InstrumentationRegistry.getArguments().getString(MPE_LATENCY_SAMPLES_ARGUMENT)}"
+        )
+
+        repeat(latencySamples) { iteration ->
+            Log.i(
+                MPE_LATENCY_DEBUG_TAG,
+                "Executing $testName sample ${iteration + 1}/$latencySamples"
+            )
             testDriver.runLatencyTest(
                 testParameters = TestParameters.create(
                     paymentMethodCode = "card",
