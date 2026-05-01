@@ -49,7 +49,7 @@ internal class DefaultPaymentMethodMessagePromotionsExperimentHandler @Inject co
             mode = mode,
             selectedPaymentMethodType = code,
             promotionDisplayedSuccessfully = promotionDisplayedSuccessfully,
-            layout = metadata.paymentMethodOrientation.toLayout()
+            layout = metadata.paymentMethodOrientation().toLayout()
         )
 
         if (!loggedExposures.contains(exposure)) {
