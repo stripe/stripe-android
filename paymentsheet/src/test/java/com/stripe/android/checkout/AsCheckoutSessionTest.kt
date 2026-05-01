@@ -18,9 +18,57 @@ class AsCheckoutSessionTest {
     }
 
     @Test
+    fun `maps status open`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.OPEN).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Open)
+    }
+
+    @Test
+    fun `maps status complete`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.COMPLETE).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Complete)
+    }
+
+    @Test
+    fun `maps status expired`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.EXPIRED).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Expired)
+    }
+
+    @Test
+    fun `maps status unknown`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.UNKNOWN).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Unknown)
+    }
+
+    @Test
+    fun `maps livemode true`() {
+        val session = createResponse(liveMode = true).asCheckoutSession()
+        assertThat(session.liveMode).isTrue()
+    }
+
+    @Test
+    fun `maps livemode false`() {
+        val session = createResponse(liveMode = false).asCheckoutSession()
+        assertThat(session.liveMode).isFalse()
+    }
+
+    @Test
     fun `maps currency`() {
         val session = createResponse(currency = "eur").asCheckoutSession()
         assertThat(session.currency).isEqualTo("eur")
+    }
+
+    @Test
+    fun `maps customerEmail`() {
+        val session = createResponse(customerEmail = "test@example.com").asCheckoutSession()
+        assertThat(session.customerEmail).isEqualTo("test@example.com")
+    }
+
+    @Test
+    fun `null customerEmail maps to null`() {
+        val session = createResponse(customerEmail = null).asCheckoutSession()
+        assertThat(session.customerEmail).isNull()
     }
 
     @Test
@@ -204,6 +252,8 @@ class AsCheckoutSessionTest {
 
     private fun createResponse(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
+        status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
+        liveMode: Boolean = false,
         currency: String = "usd",
         customerEmail: String? = null,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
@@ -212,6 +262,8 @@ class AsCheckoutSessionTest {
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
             id = id,
+            status = status,
+            liveMode = liveMode,
             currency = currency,
             customerEmail = customerEmail,
             totalSummary = totalSummary,

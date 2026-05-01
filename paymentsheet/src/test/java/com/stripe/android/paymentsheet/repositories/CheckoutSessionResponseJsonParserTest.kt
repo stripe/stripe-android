@@ -28,6 +28,8 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.amount).isEqualTo(999L)
         assertThat(result?.currency).isEqualTo("usd")
         assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
+        assertThat(result?.liveMode).isFalse()
 
         // Verify ElementsSession is parsed correctly
         val elementsSession = result?.elementsSession
@@ -868,5 +870,155 @@ class CheckoutSessionResponseJsonParserTest {
         val stripeIntent = elementsSession?.stripeIntent as SetupIntent
         assertThat(stripeIntent.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
         assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun `parse status open`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "open",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
+    }
+
+    @Test
+    fun `parse status complete`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "complete",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
+    }
+
+    @Test
+    fun `parse status expired`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "expired",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.EXPIRED)
+    }
+
+    @Test
+    fun `parse status unknown for unrecognized value`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "something_new",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.UNKNOWN)
+    }
+
+    @Test
+    fun `parse status defaults to unknown when missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.UNKNOWN)
+    }
+
+    @Test
+    fun `parse livemode true`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "livemode": true,
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.liveMode).isTrue()
+    }
+
+    @Test
+    fun `parse livemode false`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "livemode": false,
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.liveMode).isFalse()
+    }
+
+    @Test
+    fun `parse livemode defaults to false when missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.liveMode).isFalse()
     }
 }

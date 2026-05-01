@@ -264,6 +264,8 @@ internal class CreateCustomerMetadataTest {
                     amount = 1000,
                     currency = "usd",
                     mode = CheckoutSessionResponse.Mode.PAYMENT,
+                    status = CheckoutSessionResponse.Status.OPEN,
+                    liveMode = false,
                     customerEmail = null,
                     elementsSession = null,
                     paymentIntent = null,
