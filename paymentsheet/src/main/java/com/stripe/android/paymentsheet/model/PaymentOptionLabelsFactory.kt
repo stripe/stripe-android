@@ -53,10 +53,7 @@ internal object PaymentOptionLabelsFactory {
         selection: PaymentSelection,
         linkBrand: LinkBrand?,
     ): PaymentOption.Labels {
-        val label = when (linkBrand) {
-            null -> selection.label
-            else -> selection.label(linkBrand)
-        }.resolve(context)
+        val label = selection.resolveLabel(context, linkBrand)
         val fallback = PaymentOption.Labels(
             label = label,
             sublabel = null,
@@ -77,16 +74,36 @@ internal object PaymentOptionLabelsFactory {
                 newUSBankAccount(context, selection)
             }
             is PaymentSelection.Saved -> {
-                selection.paymentMethod.run {
-                    linkPaymentDetails?.let { savedLink(context, it, linkBrand ?: LinkBrand.Link) }
-                        ?: card?.let { savedCard(context, it) }
-                        ?: usBankAccount?.let { savedUSBankAccount(it, label) }
-                        ?: fallback
-                }
+                savedSelection(context, selection, label, linkBrand) ?: fallback
             }
             is PaymentSelection.Link -> {
                 link(context, selection)
             }
+        }
+    }
+
+    private fun PaymentSelection.resolveLabel(
+        context: Context,
+        linkBrand: LinkBrand?,
+    ): String {
+        val resolvableLabel = if (linkBrand == null) {
+            label
+        } else {
+            label(linkBrand)
+        }
+        return resolvableLabel.resolve(context)
+    }
+
+    private fun savedSelection(
+        context: Context,
+        selection: PaymentSelection.Saved,
+        label: String,
+        linkBrand: LinkBrand?,
+    ): PaymentOption.Labels? {
+        return selection.paymentMethod.run {
+            linkPaymentDetails?.let { savedLink(context, it, linkBrand ?: LinkBrand.Link) }
+                ?: card?.let { savedCard(context, it) }
+                ?: usBankAccount?.let { savedUSBankAccount(it, label) }
         }
     }
 

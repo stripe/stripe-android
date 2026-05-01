@@ -4,7 +4,6 @@ import androidx.annotation.DrawableRes
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.ui.wallet.label
 import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
@@ -226,7 +225,6 @@ private fun getOverridableIcon(
 }
 
 internal fun PaymentMethod.getLabel(
-    canShowSublabel: Boolean = false,
     linkBrand: LinkBrand? = null,
 ): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> if (isLinkPassthroughMode || isLinkPaymentMethod) {

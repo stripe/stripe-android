@@ -47,7 +47,6 @@ internal fun SavedPaymentMethodRowButton(
         .readNumbersAsIndividualDigits()
     val paymentMethodTitle =
         displayableSavedPaymentMethod.paymentMethod.getLabel(
-            canShowSublabel = true,
             linkBrand = linkBrand ?: displayableSavedPaymentMethod.linkBrand,
         )
             ?: displayableSavedPaymentMethod.displayName

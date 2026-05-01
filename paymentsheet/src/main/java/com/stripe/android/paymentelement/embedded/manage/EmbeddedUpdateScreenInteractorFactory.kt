@@ -27,6 +27,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
 ) : EmbeddedUpdateScreenInteractorFactory {
+    @Suppress("LongMethod")
     override fun createUpdateScreenInteractor(
         displayableSavedPaymentMethod: DisplayableSavedPaymentMethod
     ): UpdatePaymentMethodInteractor {
@@ -41,7 +42,10 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
                 paymentMethodMetadata.billingDetailsCollectionConfiguration.allowedBillingCountries,
             removeExecutor = { method ->
                 val result = savedPaymentMethodMutatorProvider.get().removePaymentMethodInEditScreen(method)
-                if (result == null && method.id == (selectionHolder.selection.value as? PaymentSelection.Saved)?.paymentMethod?.id) {
+                if (
+                    result == null &&
+                    method.id == (selectionHolder.selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
+                ) {
                     selectionHolder.set(null)
                 }
                 result

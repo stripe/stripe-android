@@ -449,7 +449,6 @@ private fun getSavedLabel(
     linkBrand: LinkBrand,
 ): ResolvableString? {
     return selection.paymentMethod.getLabel(
-        canShowSublabel = true,
         linkBrand = linkBrand,
     )
 }
