@@ -244,10 +244,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            AddPaymentMethod(
-                interactor = interactor,
-                modifier.traceFirstDraw("Add First Payment Method First Draw")
-            )
+            AddPaymentMethod(interactor = interactor, modifier)
         }
 
         override fun close() {
@@ -299,7 +296,10 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            AddPaymentMethod(interactor = interactor, modifier)
+            AddPaymentMethod(
+                interactor = interactor,
+                modifier.traceFirstDraw("Add First Payment Method First Draw")
+            )
         }
 
         override fun close() {
