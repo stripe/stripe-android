@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -166,7 +165,7 @@ internal class EmbeddedNavigator private constructor(
         class Form @Inject constructor(
             private val formInteractor: DefaultVerticalModeFormInteractor,
             private val eventReporter: EventReporter,
-            private val formActivityStateHelper: FormActivityStateHelper,
+            private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
@@ -184,12 +183,12 @@ internal class EmbeddedNavigator private constructor(
             override fun title(): StateFlow<ResolvableString?> = stateFlowOf(null)
 
             override fun isPerformingNetworkOperation(): Boolean {
-                return formActivityStateHelper.state.value.isProcessing
+                return sheetActivityStateHolder.state.value.isProcessing
             }
 
             @Composable
             override fun Content() {
-                val state by formActivityStateHelper.state.collectAsState()
+                val state by sheetActivityStateHolder.state.collectAsState()
                 FormScreenContent(
                     interactor = formInteractor,
                     eventReporter = eventReporter,
@@ -197,7 +196,7 @@ internal class EmbeddedNavigator private constructor(
                         confirmationHelper.confirm()
                     },
                     onProcessingCompleted = {
-                        formActivityStateHelper.setResult(
+                        sheetActivityStateHolder.setResult(
                             FormResult.Complete(
                                 selection = null,
                                 hasBeenConfirmed = true,

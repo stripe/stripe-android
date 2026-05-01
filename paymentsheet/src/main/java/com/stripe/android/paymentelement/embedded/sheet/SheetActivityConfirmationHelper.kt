@@ -7,7 +7,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -25,7 +24,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val stateHelper: FormActivityStateHelper,
+    private val stateHelper: SheetActivityStateHolder,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,

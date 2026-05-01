@@ -22,11 +22,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityRegistrar
-import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
-import com.stripe.android.paymentelement.embedded.form.FormActivityRegistrar
-import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
@@ -36,8 +32,12 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInt
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -81,7 +81,7 @@ internal interface EmbeddedActivityModule {
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
 
     @Binds
-    fun bindsFormActivityStateHelper(helper: DefaultFormActivityStateHelper): FormActivityStateHelper
+    fun bindsSheetActivityStateHolder(helper: DefaultSheetActivityStateHolder): SheetActivityStateHolder
 
     @Binds
     fun bindsPrefsRepositoryFactory(factory: DefaultPrefsRepository.Factory): PrefsRepository.Factory
@@ -100,9 +100,9 @@ internal interface EmbeddedActivityModule {
     ): LinkInlineSignupAvailability
 
     @Binds
-    fun providesFormActivityConfirmationHandlerRegistrar(
-        implementation: DefaultFormActivityRegistrar
-    ): FormActivityRegistrar
+    fun providesSheetActivityRegistrar(
+        implementation: DefaultSheetActivityRegistrar
+    ): SheetActivityRegistrar
 
     @Binds
     fun bindsConfirmationHelper(
@@ -214,13 +214,13 @@ internal interface EmbeddedActivityModule {
         fun provideSavedPaymentMethodConfirmInteractorFactory(
             @ViewModelScope coroutineScope: CoroutineScope,
             paymentMethodMetadata: PaymentMethodMetadata,
-            formActivityStateHelper: FormActivityStateHelper,
+            sheetActivityStateHolder: SheetActivityStateHolder,
             savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         ): SavedPaymentMethodConfirmInteractor.Factory {
             return DefaultSavedPaymentMethodConfirmInteractor.Factory(
                 paymentMethodMetadata = paymentMethodMetadata,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
-                processing = formActivityStateHelper.state.mapAsStateFlow {
+                processing = sheetActivityStateHolder.state.mapAsStateFlow {
                     it.isProcessing
                 },
                 coroutineScope = coroutineScope,

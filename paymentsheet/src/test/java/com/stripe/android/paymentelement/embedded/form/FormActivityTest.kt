@@ -89,9 +89,9 @@ internal class FormActivityTest {
     }
 
     @Test
-    fun `When FormActivityStateHelper has result, activity finishes with that result`() = launch { scenario ->
+    fun `When SheetActivityStateHolder has result, activity finishes with that result`() = launch { scenario ->
         scenario.onActivity { activity ->
-            activity.formActivityStateHelper.setResult(
+            activity.sheetActivityStateHolder.setResult(
                 FormResult.Complete(
                     selection = null,
                     hasBeenConfirmed = true,
