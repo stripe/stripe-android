@@ -9,10 +9,7 @@ internal class ElementsSessionClientParams(
     val locale: String get() = Locale.getDefault().toLanguageTag()
     val mobileSessionId: String get() = mobileSessionIdProvider()
 
-    /**
-     * For checkout session init — values to nest under `elements_session_client`.
-     */
-    fun toCheckoutSessionMap(): Map<String, String> = mapOf(
+    fun toCheckoutSessionMap(locale: String = this.locale): Map<String, String> = mapOf(
         "is_aggregation_expected" to "true",
         "locale" to locale,
         "mobile_session_id" to mobileSessionId,
