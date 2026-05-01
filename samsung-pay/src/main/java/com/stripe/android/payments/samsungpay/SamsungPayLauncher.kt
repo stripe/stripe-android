@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.samsung.android.sdk.samsungpay.v2.PartnerInfo
 import com.samsung.android.sdk.samsungpay.v2.SpaySdk
+import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -162,7 +163,7 @@ class SamsungPayLauncher internal constructor(
         val environment: SamsungPayEnvironment,
         val productId: String,
         val merchantName: String,
-        val allowedCardBrands: Set<CardBrand> = CardBrand.DEFAULT_BRANDS,
+        val allowedCardBrands: Set<CardBrand> = DEFAULT_SAMSUNG_PAY_BRANDS,
         val addressConfig: AddressConfig = AddressConfig(),
         val cardHolderNameEnabled: Boolean = false,
     ) : Parcelable {
@@ -196,7 +197,7 @@ class SamsungPayLauncher internal constructor(
             private val productId: String,
             private val merchantName: String,
         ) {
-            private var allowedCardBrands: Set<CardBrand> = CardBrand.DEFAULT_BRANDS
+            private var allowedCardBrands: Set<CardBrand> = DEFAULT_SAMSUNG_PAY_BRANDS
             private var addressConfig: AddressConfig = AddressConfig()
             private var cardHolderNameEnabled: Boolean = false
 

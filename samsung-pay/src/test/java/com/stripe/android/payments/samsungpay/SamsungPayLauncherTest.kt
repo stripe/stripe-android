@@ -1,6 +1,7 @@
 package com.stripe.android.payments.samsungpay
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.CardBrand
 import org.junit.Test
 
 class SamsungPayLauncherTest {
@@ -15,7 +16,7 @@ class SamsungPayLauncherTest {
 
         assertThat(config.allowedCardBrands).containsExactly(
             CardBrand.Visa,
-            CardBrand.Mastercard,
+            CardBrand.MasterCard,
             CardBrand.AmericanExpress,
             CardBrand.Discover,
         )
@@ -28,7 +29,7 @@ class SamsungPayLauncherTest {
             productId = "my_product",
             merchantName = "My Store",
         )
-            .setAllowedCardBrands(setOf(CardBrand.Visa, CardBrand.Mastercard))
+            .setAllowedCardBrands(setOf(CardBrand.Visa, CardBrand.MasterCard))
             .setCardHolderNameEnabled(true)
             .setAddressConfig(AddressConfig(format = AddressConfig.Format.BillingOnly))
             .build()
@@ -36,7 +37,7 @@ class SamsungPayLauncherTest {
         assertThat(config.environment).isEqualTo(SamsungPayEnvironment.Test)
         assertThat(config.productId).isEqualTo("my_product")
         assertThat(config.merchantName).isEqualTo("My Store")
-        assertThat(config.allowedCardBrands).containsExactly(CardBrand.Visa, CardBrand.Mastercard)
+        assertThat(config.allowedCardBrands).containsExactly(CardBrand.Visa, CardBrand.MasterCard)
         assertThat(config.cardHolderNameEnabled).isTrue()
         assertThat(config.addressConfig.format).isEqualTo(AddressConfig.Format.BillingOnly)
     }
