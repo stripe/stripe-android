@@ -15,6 +15,8 @@ internal class DefaultLinkAccountStatusProvider @Inject constructor(
 ) : LinkAccountStatusProvider {
 
     override suspend fun invoke(configuration: LinkConfiguration): AccountStatus {
-        return linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Look Up Link Account") {
+            linkConfigurationCoordinator.getAccountStatusFlow(configuration).first()
+        }
     }
 }

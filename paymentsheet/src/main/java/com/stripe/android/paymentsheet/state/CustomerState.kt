@@ -28,50 +28,52 @@ internal class CreateCustomerState @Inject constructor(
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
     ): CustomerState? {
-        val customerMetadata = metadata.customerMetadata
-        val customerState = when (customerMetadata) {
-            is CustomerMetadata.CheckoutSession -> {
-                val checkoutInit = initializationMode as PaymentElementLoader.InitializationMode.CheckoutSession
-                checkoutInit.checkoutSessionResponse.customer?.let {
-                    createForCheckoutSession(
-                        customer = it,
-                        supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Create Customer State") {
+            val customerMetadata = metadata.customerMetadata
+            val customerState = when (customerMetadata) {
+                is CustomerMetadata.CheckoutSession -> {
+                    val checkoutInit = initializationMode as PaymentElementLoader.InitializationMode.CheckoutSession
+                    checkoutInit.checkoutSessionResponse.customer?.let {
+                        createForCheckoutSession(
+                            customer = it,
+                            supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
+                        )
+                    }
+                }
+                is CustomerMetadata.CustomerSession -> {
+                    elementsSession.customer?.let { customer ->
+                        createForCustomerSession(
+                            customer = customer,
+                            supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
+                        )
+                    }
+                }
+                is CustomerMetadata.LegacyEphemeralKey -> {
+                    createForLegacyEphemeralKey(
+                        paymentMethods = retrieveCustomerPaymentMethods(
+                            metadata = metadata,
+                            customerMetadata = customerMetadata,
+                        )
                     )
                 }
+                null -> null
             }
-            is CustomerMetadata.CustomerSession -> {
-                elementsSession.customer?.let { customer ->
-                    createForCustomerSession(
-                        customer = customer,
-                        supportedSavedPaymentMethodTypes = metadata.supportedSavedPaymentMethodTypes(),
-                    )
-                }
-            }
-            is CustomerMetadata.LegacyEphemeralKey -> {
-                createForLegacyEphemeralKey(
-                    paymentMethods = retrieveCustomerPaymentMethods(
-                        metadata = metadata,
-                        customerMetadata = customerMetadata,
-                    )
-                )
-            }
-            null -> null
-        }
 
-        return customerState?.let { state ->
-            state.copy(
-                paymentMethods = paymentMethodFilter.filter(
-                    paymentMethods = state.paymentMethods,
-                    params = PaymentMethodFilter.FilterParams(
-                        billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
-                        customerMetadata = customerMetadata,
-                        cardBrandFilter = metadata.cardBrandFilter,
-                        cardFundingFilter = metadata.cardFundingFilter,
-                        remoteDefaultPaymentMethodId = state.defaultPaymentMethodId,
-                        localSavedSelection = savedSelection,
+            customerState?.let { state ->
+                state.copy(
+                    paymentMethods = paymentMethodFilter.filter(
+                        paymentMethods = state.paymentMethods,
+                        params = PaymentMethodFilter.FilterParams(
+                            billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+                            customerMetadata = customerMetadata,
+                            cardBrandFilter = metadata.cardBrandFilter,
+                            cardFundingFilter = metadata.cardFundingFilter,
+                            remoteDefaultPaymentMethodId = state.defaultPaymentMethodId,
+                            localSavedSelection = savedSelection,
+                        )
                     )
                 )
-            )
+            }
         }
     }
 
@@ -112,17 +114,19 @@ internal class CreateCustomerState @Inject constructor(
         metadata: PaymentMethodMetadata,
         customerMetadata: CustomerMetadata.LegacyEphemeralKey,
     ): List<PaymentMethod> {
-        val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Fetch Saved Payment Methods") {
+            val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
-        val paymentMethods = customerRepository.getPaymentMethods(
-            customerId = customerMetadata.id,
-            ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-            types = paymentMethodTypes,
-            silentlyFail = metadata.stripeIntent.isLiveMode,
-        ).getOrThrow()
+            val paymentMethods = customerRepository.getPaymentMethods(
+                customerId = customerMetadata.id,
+                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                types = paymentMethodTypes,
+                silentlyFail = metadata.stripeIntent.isLiveMode,
+            ).getOrThrow()
 
-        return paymentMethods.filter { paymentMethod ->
-            paymentMethod.hasExpectedDetails()
+            paymentMethods.filter { paymentMethod ->
+                paymentMethod.hasExpectedDetails()
+            }
         }
     }
 }

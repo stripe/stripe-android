@@ -26,6 +26,7 @@ import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
@@ -135,19 +136,21 @@ internal class RealElementsSessionRepository @Inject constructor(
             mapOf("expand" to it)
         }.orEmpty()
 
-        return executeRequestWithResultParser(
-            stripeErrorJsonParser = stripeErrorJsonParser,
-            stripeNetworkClient = stripeNetworkClient,
-            request = apiRequestFactory.createGet(
-                url = ELEMENTS_SESSIONS_URL,
-                options = options,
-                params = requestParams + expandParam,
-            ),
-            responseJsonParser = ElementsSessionJsonParser(
-                params = params,
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
-        )
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Elements Session Network Request") {
+            executeRequestWithResultParser(
+                stripeErrorJsonParser = stripeErrorJsonParser,
+                stripeNetworkClient = stripeNetworkClient,
+                request = apiRequestFactory.createGet(
+                    url = ELEMENTS_SESSIONS_URL,
+                    options = options,
+                    params = requestParams + expandParam,
+                ),
+                responseJsonParser = ElementsSessionJsonParser(
+                    params = params,
+                    isLiveMode = options.apiKeyIsLiveMode,
+                ),
+            )
+        }
     }
 
     private suspend fun fallback(

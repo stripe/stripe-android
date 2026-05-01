@@ -13,6 +13,7 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -40,14 +41,16 @@ internal class CustomerApiRepository @Inject constructor(
         customerId: String,
         ephemeralKeySecret: String,
     ): Customer? {
-        return stripeRepository.retrieveCustomer(
-            customerId,
-            productUsageTokens,
-            ApiRequest.Options(
-                ephemeralKeySecret,
-                lazyPaymentConfig.get().stripeAccountId
-            )
-        ).getOrNull()
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Retrieve Customer") {
+            stripeRepository.retrieveCustomer(
+                customerId,
+                productUsageTokens,
+                ApiRequest.Options(
+                    ephemeralKeySecret,
+                    lazyPaymentConfig.get().stripeAccountId
+                )
+            ).getOrNull()
+        }
     }
 
     override suspend fun getPaymentMethods(

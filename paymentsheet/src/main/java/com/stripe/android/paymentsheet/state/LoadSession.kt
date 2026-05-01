@@ -31,14 +31,16 @@ internal class ElementsSessionLoader @Inject constructor(
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
     ): ElementsSession {
-        return elementsSessionRepository.get(
-            initializationMode = initializationMode,
-            customer = configuration.customer,
-            externalPaymentMethods = configuration.externalPaymentMethods,
-            customPaymentMethods = configuration.customPaymentMethods,
-            savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
-            countryOverride = configuration.userOverrideCountry,
-            linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
-        ).getOrThrow()
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Fetch Elements Session") {
+            elementsSessionRepository.get(
+                initializationMode = initializationMode,
+                customer = configuration.customer,
+                externalPaymentMethods = configuration.externalPaymentMethods,
+                customPaymentMethods = configuration.customPaymentMethods,
+                savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
+                countryOverride = configuration.userOverrideCountry,
+                linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
+            ).getOrThrow()
+        }
     }
 }

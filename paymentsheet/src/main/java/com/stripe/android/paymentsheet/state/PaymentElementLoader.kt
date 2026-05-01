@@ -309,11 +309,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
         )
 
-        val customerMetadata = createCustomerMetadata(
-            initializationMode = initializationMode,
-            configuration = configuration,
-            elementsSession = elementsSession,
-        )
+        val customerMetadata = PaymentSheetLoadTraceRecorder.trace("Create Customer Metadata") {
+            createCustomerMetadata(
+                initializationMode = initializationMode,
+                configuration = configuration,
+                elementsSession = elementsSession,
+            )
+        }
 
         val linkState = async {
             createLinkState(
@@ -331,17 +333,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
 
-            createPaymentMethodMetadata(
-                integrationConfiguration = integrationConfiguration,
-                elementsSession = elementsSession,
-                configuration = configuration,
-                linkStateResult = linkStateResult,
-                isGooglePayReady = isGooglePayReady,
-                isGooglePaySupported = isGooglePaySupported,
-                initializationMode = initializationMode,
-                customerMetadata = customerMetadata,
-                clientAttributionMetadata = clientAttributionMetadata,
-            )
+            PaymentSheetLoadTraceRecorder.traceSuspend("Create Payment Method Metadata") {
+                createPaymentMethodMetadata(
+                    integrationConfiguration = integrationConfiguration,
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    linkStateResult = linkStateResult,
+                    isGooglePayReady = isGooglePayReady,
+                    isGooglePaySupported = isGooglePaySupported,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
         }
 
         val customer = async {
@@ -354,13 +358,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(
-                savedSelection = savedSelection,
-                metadata = paymentMethodMetadata.await(),
-                customer = customer.await(),
-                isGooglePayReady = isGooglePayReady,
-                isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
-            )
+            PaymentSheetLoadTraceRecorder.traceSuspend("Resolve Initial Payment Selection") {
+                retrieveInitialPaymentSelection(
+                    savedSelection = savedSelection,
+                    metadata = paymentMethodMetadata.await(),
+                    customer = customer.await(),
+                    isGooglePayReady = isGooglePayReady,
+                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                )
+            }
         }
 
         val stripeIntent = elementsSession.stripeIntent

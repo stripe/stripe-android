@@ -51,9 +51,11 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
         customerId: String,
         ephemeralKeySecret: String,
     ): String? {
-        return customerRepository.retrieveCustomer(
-            customerId = customerId,
-            ephemeralKeySecret = ephemeralKeySecret,
-        )?.email
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Retrieve Customer Email") {
+            customerRepository.retrieveCustomer(
+                customerId = customerId,
+                ephemeralKeySecret = ephemeralKeySecret,
+            )?.email
+        }
     }
 }

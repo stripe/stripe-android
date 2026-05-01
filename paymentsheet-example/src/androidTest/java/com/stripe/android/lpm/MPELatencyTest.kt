@@ -25,6 +25,7 @@ import org.junit.runners.Parameterized
 
 private const val MPE_SYNTHETICS_ENABLED_ARGUMENT = "mpe_synthetics_enabled"
 private const val MPE_BENCHMARK_ENABLED_ARGUMENT = "mpe_benchmark_enabled"
+private const val MPE_TRACE_ENABLED_ARGUMENT = "mpe_trace_enabled"
 private const val MPE_LATENCY_SAMPLES_ARGUMENT = "mpe_latency_samples"
 private const val MPE_LATENCY_DEBUG_TAG = "MPELatencyTestDebug"
 
@@ -74,6 +75,9 @@ internal class MPELatencyTest(
                     durationProvider = DefaultDurationProvider.instance,
                 )
             }
+            ReportingMode.Trace -> {
+                MpeTraceReporter()
+            }
             null -> {
                 error("MPELatencyTest should only run when a reporting mode is enabled.")
             }
@@ -86,7 +90,7 @@ internal class MPELatencyTest(
 
         Log.i(
             MPE_LATENCY_DEBUG_TAG,
-            "Starting $testName mode=$reportingMode samples=$latencySamples benchmark=${InstrumentationRegistry.getArguments().getString(MPE_BENCHMARK_ENABLED_ARGUMENT)} synthetics=${InstrumentationRegistry.getArguments().getString(MPE_SYNTHETICS_ENABLED_ARGUMENT)} rawSamplesArg=${InstrumentationRegistry.getArguments().getString(MPE_LATENCY_SAMPLES_ARGUMENT)}"
+            "Starting $testName mode=$reportingMode samples=$latencySamples benchmark=${InstrumentationRegistry.getArguments().getString(MPE_BENCHMARK_ENABLED_ARGUMENT)} synthetics=${InstrumentationRegistry.getArguments().getString(MPE_SYNTHETICS_ENABLED_ARGUMENT)} trace=${InstrumentationRegistry.getArguments().getString(MPE_TRACE_ENABLED_ARGUMENT)} rawSamplesArg=${InstrumentationRegistry.getArguments().getString(MPE_LATENCY_SAMPLES_ARGUMENT)}"
         )
 
         repeat(latencySamples) { iteration ->
@@ -212,13 +216,15 @@ internal class MPELatencyTest(
 
     private enum class ReportingMode {
         Benchmark,
-        Synthetics;
+        Synthetics,
+        Trace;
 
         companion object {
             fun fromInstrumentationArgs(): ReportingMode? {
                 val arguments = InstrumentationRegistry.getArguments()
 
                 return when {
+                    arguments.isEnabled(MPE_TRACE_ENABLED_ARGUMENT) -> Trace
                     arguments.isEnabled(MPE_BENCHMARK_ENABLED_ARGUMENT) -> Benchmark
                     arguments.isEnabled(MPE_SYNTHETICS_ENABLED_ARGUMENT) -> Synthetics
                     else -> null

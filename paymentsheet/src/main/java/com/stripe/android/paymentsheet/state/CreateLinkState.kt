@@ -81,7 +81,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
-    ): LinkStateResult {
+    ): LinkStateResult = PaymentSheetLoadTraceRecorder.traceSuspend("Create Link State") {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
             configuration = configuration
@@ -89,7 +89,7 @@ internal class DefaultCreateLinkState @Inject constructor(
 
         val isLinkDisabled = linkDisabledReasons.isNotEmpty()
         if (isLinkDisabled) {
-            return LinkDisabledState(linkDisabledReasons)
+            return@traceSuspend LinkDisabledState(linkDisabledReasons)
         }
 
         val linkConfiguration = createLinkConfigurationWithoutValidation(
@@ -101,7 +101,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         )
         val accountStatus = accountStatusProvider(linkConfiguration)
         val loginState = accountStatus.toLoginState()
-        return LinkState(
+        LinkState(
             configuration = linkConfiguration,
             loginState = loginState,
             signupModeResult = getLinkSignupMode(
