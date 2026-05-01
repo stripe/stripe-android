@@ -39,6 +39,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
@@ -67,6 +68,7 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPrimaryButtonCo
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 import com.stripe.android.paymentsheet.state.WalletLocation
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -87,6 +89,7 @@ import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -145,6 +148,7 @@ private fun PaymentSheetScreen(
 
     BottomSheetScaffold(
         modifier = Modifier
+            .traceFirstDraw("PaymentSheet First Draw")
             .onGloballyPositioned {
                 contentHeight = with(density) { it.size.height.toDp() }
             }
@@ -191,6 +195,18 @@ private fun PaymentSheetScreen(
                     walletsProcessingState = walletsProcessingState
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun Modifier.traceFirstDraw(name: String): Modifier {
+    val hasTracedFirstDraw = remember(name) { AtomicBoolean(false) }
+
+    return this.drawWithContent {
+        drawContent()
+        if (hasTracedFirstDraw.compareAndSet(false, true)) {
+            PaymentSheetLoadTraceRecorder.trace(name) {}
         }
     }
 }
