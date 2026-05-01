@@ -73,7 +73,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 "browser_timezone" to TimeZone.getDefault().id,
                 "eid" to UUID.randomUUID().toString(),
                 "redirect_type" to "embedded",
-                "elements_session_client" to clientParams.toCheckoutSessionMap(locale),
+                "elements_session_client" to clientParams.toCheckoutSessionMap(),
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
             ),
         )
