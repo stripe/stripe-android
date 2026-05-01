@@ -703,7 +703,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private fun supportsIntent(
         metadata: PaymentMethodMetadata,
     ): Boolean {
-        return metadata.supportedPaymentMethodTypes().isNotEmpty()
+        return metadata.supportedPaymentMethodTypes.isNotEmpty()
     }
 
     private fun reportSuccessfulLoad(

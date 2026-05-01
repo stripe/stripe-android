@@ -31,7 +31,7 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 isGooglePayReady = paymentMethodMetadata.isGooglePayReady == true,
                 isShopPayAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.ShopPay),
                 buttonsEnabled = true,
-                paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
+                paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes,
                 googlePayLauncherConfig = null, // This isn't used for embedded.
                 googlePayButtonType = GooglePayButtonType.Pay, // The actual google pay button isn't shown for embedded.
                 onGooglePayPressed = { throw IllegalStateException("Not possible.") },

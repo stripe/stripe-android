@@ -94,12 +94,18 @@ internal data class PaymentMethodMetadata(
     val cardArts: List<PaymentMethod.Card.CardArt>,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
+    @IgnoredOnParcel
+    private val supportedPaymentMethodDefinitions: List<PaymentMethodDefinition> =
+        computeSupportedPaymentMethodDefinitions()
+
+    @IgnoredOnParcel
+    val supportedPaymentMethodTypes: List<String> = computeSupportedPaymentMethodTypes()
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
         return when (paymentMethodLayout) {
             PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
             PaymentSheet.PaymentMethodLayout.Vertical -> PaymentMethodOrientation.Vertical
-            PaymentSheet.PaymentMethodLayout.Automatic -> if (supportedPaymentMethodTypes().size > 2) {
+            PaymentSheet.PaymentMethodLayout.Automatic -> if (supportedPaymentMethodTypes.size > 2) {
                 PaymentMethodOrientation.Vertical
             } else {
                 PaymentMethodOrientation.Horizontal
@@ -138,8 +144,8 @@ internal data class PaymentMethodMetadata(
         return PaymentMethodRegistry.definitionsByCode[paymentMethodCode]?.requiresMandate(this) ?: false
     }
 
-    fun supportedPaymentMethodTypes(): List<String> {
-        return supportedPaymentMethodDefinitions().map { paymentMethodDefinition ->
+    private fun computeSupportedPaymentMethodTypes(): List<String> {
+        return supportedPaymentMethodDefinitions.map { paymentMethodDefinition ->
             paymentMethodDefinition.type.code
         }.plus(externalPaymentMethodTypes()).plus(customPaymentMethodIds()).run {
             if (paymentMethodOrder.isEmpty()) {
@@ -155,7 +161,7 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
-        val supportedTypes = supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
+        val supportedTypes = supportedPaymentMethodDefinitions.filter { paymentMethodDefinition ->
             paymentMethodDefinition.supportedAsSavedPaymentMethod
         }.map {
             it.type
@@ -178,7 +184,7 @@ internal data class PaymentMethodMetadata(
             getUiDefinitionFactoryForCustomPaymentMethod(code)
                 ?.createSupportedPaymentMethod(metadata = this)
         } else {
-            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+            val definition = supportedPaymentMethodDefinitions.firstOrNull { it.type.code == code } ?: return null
             definition.uiDefinitionFactory(this).supportedPaymentMethod(this, definition, sharedDataSpecs)
         }
     }
@@ -190,7 +196,7 @@ internal data class PaymentMethodMetadata(
     }
 
     fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
-        return supportedPaymentMethodTypes().mapNotNull { supportedPaymentMethodForCode(it) }
+        return supportedPaymentMethodTypes.mapNotNull { supportedPaymentMethodForCode(it) }
     }
 
     private fun orderedPaymentMethodTypes(): List<String> {
@@ -248,7 +254,7 @@ internal data class PaymentMethodMetadata(
         return ExternalPaymentMethodUiDefinitionFactory(externalPaymentMethodSpecForCode)
     }
 
-    private fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
+    private fun computeSupportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
         val supportedPaymentMethodTypes = stripeIntent.paymentMethodTypes.mapNotNull {
             PaymentMethodRegistry.definitionsByCode[it]
         }.filter {
@@ -297,7 +303,7 @@ internal data class PaymentMethodMetadata(
                 incentive = null,
             )
         } else {
-            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+            val definition = supportedPaymentMethodDefinitions.firstOrNull { it.type.code == code } ?: return null
 
             definition.uiDefinitionFactory(this).formHeaderInformation(
                 metadata = this,
@@ -323,7 +329,7 @@ internal data class PaymentMethodMetadata(
                 arguments = uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
             )
         } else {
-            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+            val definition = supportedPaymentMethodDefinitions.firstOrNull { it.type.code == code } ?: return null
 
             definition.uiDefinitionFactory(this).formElements(
                 metadata = this,
