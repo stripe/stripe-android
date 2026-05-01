@@ -557,7 +557,12 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun defaultParams(paymentMethodMetadata: PaymentMethodMetadata?): Map<String, Any> {
-        return paymentMethodMetadata?.analyticsMetadata?.paramsMap ?: emptyMap()
+        return if (paymentMethodMetadata != null) {
+            paymentMethodMetadata.analyticsMetadata.paramsMap +
+                ("payment_method_orientation" to paymentMethodMetadata.paymentMethodOrientation().name.lowercase())
+        } else {
+            emptyMap()
+        }
     }
 
     private fun fireEvent(
