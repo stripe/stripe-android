@@ -634,11 +634,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePayReady: Boolean,
         elementsSession: ElementsSession
     ): SavedSelection {
-        return retrieveSavedSelection(
-            configuration = configuration,
-            isGooglePayReady = isGooglePayReady,
-            isLinkAvailable = elementsSession.isLinkEnabled,
-        )
+        return PaymentSheetLoadTraceRecorder.traceSuspend("Retrieve Saved Selection") {
+            retrieveSavedSelection(
+                configuration = configuration,
+                isGooglePayReady = isGooglePayReady,
+                isLinkAvailable = elementsSession.isLinkEnabled,
+            )
+        }
     }
 
     private suspend fun retrieveSavedPaymentMethodSelection(
