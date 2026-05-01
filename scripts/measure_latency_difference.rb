@@ -16,33 +16,30 @@ def merge_results(target, source)
   target.merge!(source) { |_, old, new| old + new }
 end
 
-def run_latency_tests_for_commit(commit, iterations)
+def run_latency_tests_for_commit(commit, sample_count)
   puts "\n" + "=" * 80
   puts "Testing commit: #{commit}"
   puts "=" * 80
 
   checkout_commit(commit)
 
-  results = Hash.new { |h, k| h[k] = [] }
+  puts "Collecting #{sample_count} sample(s) in one Gradle invocation..."
 
-  iterations.times do |iteration|
-    puts "\nIteration #{iteration + 1}/#{iterations}"
-    output = run_android_latency_tests
-    merge_results(results, parse_latency_results(output))
-  end
-
+  output = run_android_latency_tests(sample_count)
+  results = parse_latency_results(output)
   puts "\nFound #{results.length} test(s) with results"
   results
 end
 
-def run_android_latency_tests
+def run_android_latency_tests(sample_count)
   clear_logcat
 
   command = [
     './gradlew',
     ':paymentsheet-example:connectedBaseDebugAndroidTest',
     "-Pandroid.testInstrumentationRunnerArguments.class=#{BENCHMARK_CLASS}",
-    '-Pandroid.testInstrumentationRunnerArguments.mpe_benchmark_enabled=true'
+    '-Pandroid.testInstrumentationRunnerArguments.mpe_benchmark_enabled=true',
+    "-Pandroid.testInstrumentationRunnerArguments.mpe_latency_samples=#{sample_count}"
   ]
 
   output = +''
@@ -353,7 +350,7 @@ OptionParser.new do |opts|
     Measures and compares Android PaymentSheet latency between two git commits.
 
     This script:
-    1. Checks out each commit and runs MPE latency tests multiple times
+    1. Checks out each commit and runs MPE latency tests in ABBA order
     2. Parses SYNTHETIC_LATENCY_RESULT output from adb logcat
     3. Performs Welch t-test analysis to compare latency differences
     4. Reports mean delta with 95% confidence intervals and statistical significance
@@ -373,7 +370,7 @@ OptionParser.new do |opts|
     options[:commit] = commit
   end
 
-  opts.on('--iterations N', Integer, 'Number of total iterations to run per commit (default: 20)') do |value|
+  opts.on('--iterations N', Integer, 'Number of total samples to collect per commit (default: 20)') do |value|
     options[:iterations] = value
   end
 
@@ -418,7 +415,7 @@ unless options[:iterations].even?
   exit 1
 end
 
-puts "\nUsing ABBA ordering (#{run_size} iterations x 2 runs per commit = #{options[:iterations]} total samples per commit)"
+puts "\nUsing ABBA ordering (2 runs per commit, #{run_size} samples per run = #{options[:iterations]} total samples per commit)"
 
 begin
   merge_results(all_results[:base], run_latency_tests_for_commit(options[:base_commit], run_size))

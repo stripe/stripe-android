@@ -24,6 +24,7 @@ import org.junit.runners.Parameterized
 
 private const val MPE_SYNTHETICS_ENABLED_ARGUMENT = "mpe_synthetics_enabled"
 private const val MPE_BENCHMARK_ENABLED_ARGUMENT = "mpe_benchmark_enabled"
+private const val MPE_LATENCY_SAMPLES_ARGUMENT = "mpe_latency_samples"
 
 /** These tests are special; they don't fail and aren't meant to run in normal CI jobs.
 Instead, they measure MPE load times under various configurations and report the
@@ -39,6 +40,14 @@ internal class MPELatencyTest(
 
     private val reportingMode by lazy {
         ReportingMode.fromInstrumentationArgs()
+    }
+
+    private val latencySamples by lazy {
+        InstrumentationRegistry.getArguments()
+            .getString(MPE_LATENCY_SAMPLES_ARGUMENT)
+            ?.toIntOrNull()
+            ?.takeIf { it >= 1 }
+            ?: 1
     }
 
     private val latencyReporter by lazy {
@@ -73,20 +82,22 @@ internal class MPELatencyTest(
     fun latencyTest() {
         assumeRunningInLatencyWorkflow()
 
-        testDriver.runLatencyTest(
-            testParameters = TestParameters.create(
-                paymentMethodCode = "card",
-                authorizationAction = null,
-                playgroundSettingsBlock = testConfig.playgroundSettingsBlock,
-            ),
-            isReturningCustomer = testConfig.isReturningCustomer,
-            onLaunch = {
-                latencyReporter.onStart()
-            },
-            onLoad = {
-                latencyReporter.onLoad(testName)
-            }
-        )
+        repeat(latencySamples) {
+            testDriver.runLatencyTest(
+                testParameters = TestParameters.create(
+                    paymentMethodCode = "card",
+                    authorizationAction = null,
+                    playgroundSettingsBlock = testConfig.playgroundSettingsBlock,
+                ),
+                isReturningCustomer = testConfig.isReturningCustomer,
+                onLaunch = {
+                    latencyReporter.onStart()
+                },
+                onLoad = {
+                    latencyReporter.onLoad(testName)
+                }
+            )
+        }
     }
 
     private fun assumeRunningInLatencyWorkflow() {
