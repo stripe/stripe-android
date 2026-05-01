@@ -311,7 +311,9 @@ internal class PaymentSheetCheckoutSessionTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init-with-email.json")
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "session@example.com")
+            }
         }
 
         val noEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
@@ -343,7 +345,9 @@ internal class PaymentSheetCheckoutSessionTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init-with-email.json")
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "session@example.com")
+            }
         }
 
         val collectEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
@@ -381,7 +385,9 @@ internal class PaymentSheetCheckoutSessionTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init-with-email.json")
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "session@example.com")
+            }
         }
 
         val merchantEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
