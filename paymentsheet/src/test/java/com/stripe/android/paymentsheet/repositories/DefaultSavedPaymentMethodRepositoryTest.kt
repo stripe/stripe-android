@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
