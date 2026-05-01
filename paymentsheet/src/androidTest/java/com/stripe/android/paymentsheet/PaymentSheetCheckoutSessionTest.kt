@@ -376,7 +376,7 @@ internal class PaymentSheetCheckoutSessionTest {
     }
 
     @Test
-    fun testMerchantEmailTakesPrecedenceOverCheckoutSessionEmail() = runPaymentSheetTest(
+    fun testMerchantEmailTakesPrecedenceOverFormAndCheckoutSessionEmail() = runPaymentSheetTest(
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -386,6 +386,11 @@ internal class PaymentSheetCheckoutSessionTest {
 
         val merchantEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
             .defaultBillingDetails(PaymentSheet.BillingDetails(email = "merchant@example.com"))
+            .billingDetailsCollectionConfiguration(
+                PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                )
+            )
             .link(
                 PaymentSheet.LinkConfiguration.Builder()
                     .display(PaymentSheet.LinkConfiguration.Display.Never)
@@ -396,6 +401,7 @@ internal class PaymentSheetCheckoutSessionTest {
         testContext.presentWithCheckout(configuration = merchantEmailConfiguration)
 
         page.fillOutCardDetails()
+        formPage.fillOutEmail()
 
         networkRule.createPaymentMethod(
             bodyPart("billing_details[email]", "merchant@example.com"),
