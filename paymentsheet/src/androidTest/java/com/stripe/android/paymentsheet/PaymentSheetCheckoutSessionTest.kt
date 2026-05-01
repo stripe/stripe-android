@@ -314,7 +314,6 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun testFormEnteredEmailTakesPrecedenceOverCheckoutSessionEmail() =
         runCheckoutSessionEmailPrecedenceTest(
-            collectEmail = true,
             fillOutEmail = true,
             expectedEmail = "janedoe@example.com",
         )
@@ -323,14 +322,12 @@ internal class PaymentSheetCheckoutSessionTest {
     fun testMerchantEmailTakesPrecedenceOverFormAndCheckoutSessionEmail() =
         runCheckoutSessionEmailPrecedenceTest(
             merchantEmail = "merchant@example.com",
-            collectEmail = true,
             fillOutEmail = true,
             expectedEmail = "merchant@example.com",
         )
 
     private fun runCheckoutSessionEmailPrecedenceTest(
         merchantEmail: String? = null,
-        collectEmail: Boolean = false,
         fillOutEmail: Boolean = false,
         expectedEmail: String,
     ) = runPaymentSheetTest(
@@ -349,7 +346,7 @@ internal class PaymentSheetCheckoutSessionTest {
                 if (merchantEmail != null) {
                     defaultBillingDetails(PaymentSheet.BillingDetails(email = merchantEmail))
                 }
-                if (collectEmail) {
+                if (fillOutEmail) {
                     billingDetailsCollectionConfiguration(
                         PaymentSheet.BillingDetailsCollectionConfiguration(
                             email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
