@@ -26,6 +26,7 @@ def run_latency_tests_for_commit(commit, sample_count)
   puts "Collecting #{sample_count} sample(s) in one Gradle invocation..."
 
   output = run_android_latency_tests(sample_count)
+  print_raw_result_debug_summary(output)
   results = parse_latency_results(output)
   puts "\nFound #{results.length} test(s) with results"
   results
@@ -103,6 +104,27 @@ def parse_latency_results(output)
   end
 
   results
+end
+
+def print_raw_result_debug_summary(output)
+  counts = Hash.new(0)
+
+  output.each_line do |line|
+    next unless line =~ /SYNTHETIC_LATENCY_RESULT:\s*(.+?):\s*([\d.]+)/
+
+    test_name = Regexp.last_match(1).strip
+    counts[test_name] += 1
+  end
+
+  puts "\nRaw result line counts for this invocation:"
+  if counts.empty?
+    puts '  No SYNTHETIC_LATENCY_RESULT lines found'
+    return
+  end
+
+  counts.sort.each do |test_name, count|
+    puts "  #{test_name}: #{count}"
+  end
 end
 
 # ============================================================================
