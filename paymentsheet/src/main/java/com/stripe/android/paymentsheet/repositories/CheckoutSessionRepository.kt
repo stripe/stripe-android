@@ -1,12 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
-import android.content.Context
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
@@ -19,12 +17,11 @@ import javax.inject.Named
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
-    context: Context,
+    private val clientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) {
-    private val appId: String = context.packageName
 
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
@@ -61,15 +58,10 @@ internal class CheckoutSessionRepository @Inject constructor(
         sessionId: String,
         adaptivePricingAllowed: Boolean,
     ): Result<CheckoutSessionResponse> {
-        val clientParams = ElementsSessionClientParams(
-            mobileAppId = appId,
-            mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
-        )
-        val locale = clientParams.locale
         return executePost(
             url = initUrl(sessionId),
             params = mapOf(
-                "browser_locale" to locale,
+                "browser_locale" to clientParams.locale,
                 "browser_timezone" to TimeZone.getDefault().id,
                 "eid" to UUID.randomUUID().toString(),
                 "redirect_type" to "embedded",

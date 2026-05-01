@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
@@ -28,7 +28,7 @@ import javax.inject.Singleton
         FormActivityModule::class,
         EmbeddedActivityModule::class,
         EmbeddedCommonModule::class,
-        ApplicationIdModule::class,
+        ElementsSessionClientParamsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class,

@@ -5,8 +5,6 @@ import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
-import com.stripe.android.common.di.APPLICATION_ID
-import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -30,7 +28,6 @@ import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
@@ -52,14 +49,8 @@ internal class RealElementsSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @IOContext private val workContext: CoroutineContext,
-    @Named(MOBILE_SESSION_ID) private val mobileSessionIdProvider: Provider<String>,
-    @Named(APPLICATION_ID) private val appId: String,
+    private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
-
-    private val clientParams = ElementsSessionClientParams(
-        mobileAppId = appId,
-        mobileSessionIdProvider = { mobileSessionIdProvider.get() },
-    )
 
     private val fraudDetectionDataRepository =
         DefaultFraudDetectionDataRepository(application, workContext)
