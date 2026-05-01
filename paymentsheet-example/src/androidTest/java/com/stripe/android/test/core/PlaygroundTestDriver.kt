@@ -55,6 +55,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRecollectionDefinition
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
@@ -597,14 +598,16 @@ internal class PlaygroundTestDriver(
             onLaunch()
         }
 
-        if (isReturningCustomer) {
-            selectors.composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-                selectors.composeTestRule.onAllNodes(
-                    hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)
-                ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        PaymentSheetLoadTraceRecorder.trace("Await PaymentSheet Ready UI") {
+            if (isReturningCustomer) {
+                selectors.composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+                    selectors.composeTestRule.onAllNodes(
+                        hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)
+                    ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+                }
+            } else {
+                selectors.formElement.waitFor()
             }
-        } else {
-            selectors.formElement.waitFor()
         }
 
         onLoad()
@@ -1314,8 +1317,10 @@ internal class PlaygroundTestDriver(
         selectors.complete.click()
         onPaymentSheetLaunch?.invoke()
 
-        // PaymentSheetActivity is now on screen
-        waitForNotPlaygroundActivity()
+        PaymentSheetLoadTraceRecorder.trace("Wait For PaymentSheet Activity") {
+            // PaymentSheetActivity is now on screen
+            waitForNotPlaygroundActivity()
+        }
     }
 
     private fun launchCustom(clickMultiStep: Boolean = true) {
