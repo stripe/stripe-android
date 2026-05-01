@@ -12,12 +12,39 @@ import dev.drewhamilton.poko.Poko
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CheckoutSession internal constructor(
     val id: String,
+    val status: Status,
+    val liveMode: Boolean,
     val currency: String,
+    val customerEmail: String?,
     val totalSummary: TotalSummary?,
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
     internal val currencySelectorOptions: CurrencySelectorOptions?,
 ) {
+
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Status {
+        /**
+         * The checkout session is still in progress. Payment processing has not started.
+         */
+        Open,
+
+        /**
+         * The checkout session is complete. Payment processing may still be in progress.
+         */
+        Complete,
+
+        /**
+         * The checkout session has expired. No further processing will occur.
+         */
+        Expired,
+
+        /**
+         * A status not recognized by this version of the SDK.
+         */
+        Unknown,
+    }
 
     @Poko
     @CheckoutSessionPreview
@@ -77,12 +104,25 @@ class CheckoutSession internal constructor(
 internal fun CheckoutSessionResponse.asCheckoutSession(): CheckoutSession {
     return CheckoutSession(
         id = id,
+        status = status.asStatus(),
+        liveMode = liveMode,
         currency = currency,
+        customerEmail = customerEmail,
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
         shippingOptions = shippingOptions.map { it.asShippingRate() },
         currencySelectorOptions = CurrencySelectorOptionsFactory.create(adaptivePricingInfo = adaptivePricingInfo)
     )
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.Status.asStatus(): CheckoutSession.Status {
+    return when (this) {
+        CheckoutSessionResponse.Status.OPEN -> CheckoutSession.Status.Open
+        CheckoutSessionResponse.Status.COMPLETE -> CheckoutSession.Status.Complete
+        CheckoutSessionResponse.Status.EXPIRED -> CheckoutSession.Status.Expired
+        CheckoutSessionResponse.Status.UNKNOWN -> CheckoutSession.Status.Unknown
+    }
 }
 
 @OptIn(CheckoutSessionPreview::class)

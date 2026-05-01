@@ -32,6 +32,7 @@ internal class CheckoutSessionResponseJsonParser(
     private val isLiveMode: Boolean,
 ) : ModelJsonParser<CheckoutSessionResponse> {
 
+    @Suppress("LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
         val sessionId = json.optString(FIELD_SESSION_ID).takeIf { it.isNotEmpty() } ?: return null
         val uiMode = json.optString(FIELD_UI_MODE)
@@ -39,6 +40,8 @@ internal class CheckoutSessionResponseJsonParser(
             "Expected ui_mode to be \"$UI_MODE_CUSTOM\" but was \"$uiMode\""
         }
         val mode = parseMode(json.optString(FIELD_MODE))
+        val status = parseStatus(json.optString(FIELD_STATUS))
+        val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
         val customerEmail = StripeJsonUtils.optString(json, FIELD_CUSTOMER_EMAIL)
@@ -79,6 +82,8 @@ internal class CheckoutSessionResponseJsonParser(
             amount = amount,
             currency = currency,
             mode = mode,
+            status = status,
+            liveMode = liveMode,
             customerEmail = customerEmail,
             elementsSession = elementsSession,
             paymentIntent = paymentIntent,
@@ -97,6 +102,15 @@ internal class CheckoutSessionResponseJsonParser(
             "payment" -> CheckoutSessionResponse.Mode.PAYMENT
             "setup" -> CheckoutSessionResponse.Mode.SETUP
             else -> CheckoutSessionResponse.Mode.UNKNOWN
+        }
+    }
+
+    private fun parseStatus(statusString: String): CheckoutSessionResponse.Status {
+        return when (statusString) {
+            "open" -> CheckoutSessionResponse.Status.OPEN
+            "complete" -> CheckoutSessionResponse.Status.COMPLETE
+            "expired" -> CheckoutSessionResponse.Status.EXPIRED
+            else -> CheckoutSessionResponse.Status.UNKNOWN
         }
     }
 
@@ -460,6 +474,8 @@ internal class CheckoutSessionResponseJsonParser(
         private const val FIELD_UI_MODE = "ui_mode"
         private const val UI_MODE_CUSTOM = "custom"
         private const val FIELD_MODE = "mode"
+        private const val FIELD_STATUS = "status"
+        private const val FIELD_LIVE_MODE = "livemode"
         private const val FIELD_CURRENCY = "currency"
         private const val FIELD_CUSTOMER_EMAIL = "customer_email"
         private const val FIELD_ELEMENTS_SESSION = "elements_session"

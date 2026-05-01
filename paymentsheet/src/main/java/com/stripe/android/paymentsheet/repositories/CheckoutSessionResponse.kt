@@ -36,6 +36,14 @@ internal data class CheckoutSessionResponse(
      */
     val mode: Mode,
     /**
+     * The status of the checkout session (open, complete, or expired).
+     */
+    val status: Status,
+    /**
+     * Whether this checkout session was created in live mode.
+     */
+    val liveMode: Boolean,
+    /**
      * The customer's email address from the checkout session.
      * Always available at the top level as `customer_email`, regardless of whether
      * a customer object exists (guest checkout) or not.
@@ -194,6 +202,13 @@ internal data class CheckoutSessionResponse(
     enum class Mode {
         PAYMENT,
         SETUP,
+        UNKNOWN,
+    }
+
+    enum class Status {
+        OPEN,
+        COMPLETE,
+        EXPIRED,
         UNKNOWN,
     }
 }
