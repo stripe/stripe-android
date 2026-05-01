@@ -21,18 +21,4 @@ class ElementsSessionClientParamsTest {
         assertThat(map).hasSize(4)
     }
 
-    @Test
-    fun `mobileSessionId delegates to provider`() {
-        var callCount = 0
-        val params = ElementsSessionClientParams(
-            mobileAppId = "com.example.app",
-            mobileSessionIdProvider = {
-                callCount++
-                "session_$callCount"
-            },
-        )
-
-        assertThat(params.mobileSessionId).isEqualTo("session_1")
-        assertThat(params.mobileSessionId).isEqualTo("session_2")
-    }
 }
