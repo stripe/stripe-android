@@ -1,0 +1,54 @@
+apply from: configs.androidLibrary
+
+apply plugin: 'checkstyle'
+apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'org.jetbrains.kotlin.plugin.compose'
+
+dependencies {
+    implementation project(':payments-core')
+    implementation libs.androidx.appCompat
+    implementation libs.androidx.coreKtx
+    implementation libs.androidx.activity
+    implementation libs.androidx.fragment
+    implementation libs.androidx.lifecycle
+    implementation libs.androidx.viewModel
+    implementation libs.androidx.savedState
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.compose.activity
+    implementation libs.compose.runtime
+    implementation libs.compose.ui
+
+    // Samsung Pay SDK v2.22
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    testImplementation testLibs.junit
+    testImplementation testLibs.kotlin.coroutines
+    testImplementation testLibs.kotlin.junit
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
+    testImplementation testLibs.turbine
+    testImplementation testLibs.mockito.core
+    testImplementation testLibs.mockito.inline
+    testImplementation testLibs.mockito.kotlin
+}
+
+android {
+    buildFeatures {
+        compose = true
+    }
+
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+}
+
+ext {
+    artifactId = "stripe-samsung-pay"
+    artifactName = "stripe-samsung-pay"
+    artifactDescrption = "The Samsung Pay module of Stripe Android Payments SDK"
+}
+
+apply from: "${rootDir}/deploy/deploy.gradle"

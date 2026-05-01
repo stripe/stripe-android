@@ -1,0 +1,3 @@
+# Samsung Pay SDK
+-keep class com.samsung.android.sdk.samsungpay.** { *; }
+-dontwarn com.samsung.android.sdk.samsungpay.**
