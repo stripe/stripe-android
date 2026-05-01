@@ -317,6 +317,7 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         val noEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
             .link(
                 PaymentSheet.LinkConfiguration.Builder()
                     .display(PaymentSheet.LinkConfiguration.Display.Never)
@@ -351,6 +352,7 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         val collectEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
             .billingDetailsCollectionConfiguration(
                 PaymentSheet.BillingDetailsCollectionConfiguration(
                     email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
@@ -392,6 +394,7 @@ internal class PaymentSheetCheckoutSessionTest {
 
         val merchantEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
             .defaultBillingDetails(PaymentSheet.BillingDetails(email = "merchant@example.com"))
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
             .billingDetailsCollectionConfiguration(
                 PaymentSheet.BillingDetailsCollectionConfiguration(
                     email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
