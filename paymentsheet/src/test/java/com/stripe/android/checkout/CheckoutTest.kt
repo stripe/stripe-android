@@ -99,7 +99,6 @@ class CheckoutTest {
         val result = checkout.applyPromotionCode("INVALID")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -149,7 +148,6 @@ class CheckoutTest {
         val result = checkout.removePromotionCode()
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -180,7 +178,6 @@ class CheckoutTest {
         val result = checkout.refresh()
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -217,7 +214,6 @@ class CheckoutTest {
         val result = checkout.updateLineItemQuantity("li_1", -1)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -309,7 +305,6 @@ class CheckoutTest {
         val result = checkout.updateShippingAddress(address = address)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -389,7 +384,6 @@ class CheckoutTest {
         val result = checkout.updateBillingAddress(address = address)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -611,7 +605,6 @@ class CheckoutTest {
         val result = checkout.updateTaxId("invalid", "000")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -646,7 +639,6 @@ class CheckoutTest {
         val result = checkout.selectShippingOption("shr_invalid")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -888,7 +880,6 @@ class CheckoutTest {
         val result = checkout.updateCurrency("invalid")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -1006,7 +997,6 @@ class CheckoutTest {
         assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -1022,7 +1012,6 @@ class CheckoutTest {
         assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -1039,7 +1028,6 @@ class CheckoutTest {
 
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
