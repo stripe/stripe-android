@@ -35,7 +35,9 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInt
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -101,6 +103,11 @@ internal interface EmbeddedActivityModule {
     fun providesFormActivityConfirmationHandlerRegistrar(
         implementation: DefaultFormActivityRegistrar
     ): FormActivityRegistrar
+
+    @Binds
+    fun bindsConfirmationHelper(
+        confirmationHelper: DefaultSheetActivityConfirmationHelper
+    ): SheetActivityConfirmationHelper
 
     @Suppress("TooManyFunctions")
     companion object {

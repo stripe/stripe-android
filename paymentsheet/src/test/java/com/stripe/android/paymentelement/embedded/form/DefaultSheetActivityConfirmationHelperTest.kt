@@ -4,11 +4,14 @@ package com.stripe.android.paymentelement.embedded.form
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
@@ -16,7 +19,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 
-class DefaultFormActivityConfirmationHelperTest {
+internal class DefaultSheetActivityConfirmationHelperTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -32,24 +35,39 @@ class DefaultFormActivityConfirmationHelperTest {
 
         assertThat(onClickTurbine.awaitItem()).isNotNull()
         onClickTurbine.ensureAllEventsConsumed()
+        confirmationHandler.startTurbine.expectNoEvents()
     }
 
     @Test
-    fun `confirm invokes eventReporter with the correct selection and starts confirmation`() = testScenario {
+    fun `confirm does not invoke onClickOverride after clearing`() = testScenario {
+        onClickDelegate.set { }
+        onClickDelegate.clear()
+
+        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        confirmationHelper.confirm()
+
+        assertThat(confirmationHandler.startTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `confirm starts confirmation with correct option when selection is not null`() = testScenario {
         selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         confirmationHelper.confirm()
 
+        val args = confirmationHandler.startTurbine.awaitItem()
+        assertThat(args.confirmationOption).isInstanceOf<PaymentMethodConfirmationOption.New>()
         assertThat(eventReporter.pressConfirmButtonCalls.awaitItem())
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(confirmationHandler.startTurbine.awaitItem()).isNotNull()
     }
 
     @Test
-    fun `confirm does not invoke eventReporter when selection is null`() = testScenario {
+    fun `confirm does not start confirmation or report event when selection is null`() = testScenario {
         confirmationHelper.confirm()
 
-        // Should not report button press when there's no selection
+        confirmationHandler.startTurbine.ensureAllEventsConsumed()
         eventReporter.pressConfirmButtonCalls.ensureAllEventsConsumed()
     }
 
@@ -92,7 +110,7 @@ class DefaultFormActivityConfirmationHelperTest {
         val stateHelper = FakeFormActivityStateHelper()
         val onClickDelegate = OnClickDelegateOverrideImpl()
         val eventReporter = FakeEventReporter()
-        val confirmationHelper = DefaultFormActivityConfirmationHelper(
+        val confirmationHelper = DefaultSheetActivityConfirmationHelper(
             paymentMethodMetadata = paymentMethodMetadata,
             confirmationHandler = confirmationHandler,
             configuration = configuration,
@@ -119,7 +137,7 @@ class DefaultFormActivityConfirmationHelperTest {
     }
 
     private class Scenario(
-        val confirmationHelper: DefaultFormActivityConfirmationHelper,
+        val confirmationHelper: DefaultSheetActivityConfirmationHelper,
         val confirmationHandler: FakeConfirmationHandler,
         val stateHelper: FakeFormActivityStateHelper,
         val onClickDelegate: OnClickDelegateOverrideImpl,

@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.form.FormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
@@ -168,7 +167,7 @@ internal class EmbeddedNavigator private constructor(
             private val formInteractor: DefaultVerticalModeFormInteractor,
             private val eventReporter: EventReporter,
             private val formActivityStateHelper: FormActivityStateHelper,
-            private val confirmationHelper: FormActivityConfirmationHelper,
+            private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
