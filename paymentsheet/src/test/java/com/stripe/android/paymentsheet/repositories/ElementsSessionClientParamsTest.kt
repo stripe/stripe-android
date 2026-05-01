@@ -20,5 +20,4 @@ class ElementsSessionClientParamsTest {
         assertThat(map).containsEntry("mobile_app_id", "com.example.app")
         assertThat(map).hasSize(4)
     }
-
 }
