@@ -37,6 +37,7 @@ def run_android_latency_tests(sample_count)
 
   command = [
     './gradlew',
+    '--no-configuration-cache',
     ':paymentsheet-example:connectedBaseDebugAndroidTest',
     "-Pandroid.testInstrumentationRunnerArguments.class=#{BENCHMARK_CLASS}",
     '-Pandroid.testInstrumentationRunnerArguments.mpe_benchmark_enabled=true',
