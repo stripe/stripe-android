@@ -81,7 +81,7 @@ internal data class WalletsState(
     data class Link(
         val state: LinkButtonState,
         val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-        val linkBrand: LinkBrand = LinkBrand.Link,
+        val linkBrand: LinkBrand,
     ) : Wallet
 
     data class GooglePay(
@@ -116,7 +116,7 @@ internal data class WalletsState(
             ),
             cardFundingFilter: CardFundingFilter,
             cardBrandFilter: CardBrandFilter,
-            linkBrand: LinkBrand = LinkBrand.Link,
+            linkBrand: LinkBrand?,
         ): WalletsState? {
             val link = createLink(
                 isLinkAvailable = isLinkAvailable,
@@ -160,9 +160,9 @@ internal data class WalletsState(
             paymentDetails: DisplayablePaymentDetails?,
             enableDefaultValues: Boolean,
             buttonThemes: PaymentSheet.ButtonThemes,
-            linkBrand: LinkBrand,
+            linkBrand: LinkBrand?,
         ): Link? {
-            return if (isLinkAvailable == true) {
+            return if (isLinkAvailable == true && linkBrand != null) {
                 Link(
                     state = LinkButtonState.create(
                         linkEmail = linkEmail,

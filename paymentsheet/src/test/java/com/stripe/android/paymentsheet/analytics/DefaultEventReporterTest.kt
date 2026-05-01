@@ -19,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -481,7 +482,7 @@ class DefaultEventReporterTest {
             paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 
             val walletsState = WalletsState(
-                link = WalletsState.Link(LinkButtonState.Email("test@example.com")),
+                link = WalletsState.Link(LinkButtonState.Email("test@example.com"), linkBrand = LinkBrand.Link),
                 googlePay = WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
@@ -540,7 +541,7 @@ class DefaultEventReporterTest {
             paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 
             val walletsState = WalletsState(
-                link = WalletsState.Link(LinkButtonState.Email("test@example.com")),
+                link = WalletsState.Link(LinkButtonState.Email("test@example.com"), linkBrand = LinkBrand.Link),
                 googlePay = WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -136,6 +137,46 @@ class PaymentOptionsTest {
         ).assertDoesNotExist()
     }
 
+    @Test
+    fun `Link tab uses provided Notlink brand`() {
+        composeTestRule.setContent {
+            SavedPaymentMethodTabLayoutUI(
+                onAddCardPressed = {},
+                onItemSelected = {},
+                isEditing = false,
+                paymentOptionsItems = listOf(PaymentOptionsItem.Link),
+                selectedPaymentOptionsItem = PaymentOptionsItem.Link,
+                linkBrand = com.stripe.android.model.LinkBrand.Notlink,
+                isProcessing = false,
+                onModifyItem = {},
+            )
+        }
+
+        composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Notlink").assertExists()
+    }
+
+    @Test
+    fun `saved Link tab uses provided Notlink brand`() {
+        composeTestRule.setContent {
+            SavedPaymentMethodTabLayoutUI(
+                onAddCardPressed = {},
+                onItemSelected = {},
+                isEditing = false,
+                paymentOptionsItems = listOf(
+                    PaymentOptionsItem.SavedPaymentMethod(
+                        PaymentMethodFixtures.displayableLinkPaymentMethod()
+                    )
+                ),
+                selectedPaymentOptionsItem = null,
+                linkBrand = com.stripe.android.model.LinkBrand.Notlink,
+                isProcessing = false,
+                onModifyItem = {},
+            )
+        }
+
+        composeTestRule.onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Notlink").assertExists()
+    }
+
     private fun createTabLayoutUiForTestingClicks(
         isEditing: Boolean,
         onAddCardPressed: () -> Unit = {},
@@ -148,6 +189,7 @@ class PaymentOptionsTest {
                 isEditing = isEditing,
                 paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
                 selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
+                linkBrand = null,
                 isProcessing = false,
                 onModifyItem = {},
             )
@@ -171,6 +213,7 @@ class PaymentOptionsTest {
                 paymentOptionsItems = paymentOptionsItemsWithDefault,
                 isEditing = isEditing,
                 selectedPaymentOptionsItem = null,
+                linkBrand = null,
                 onAddCardPressed = {},
                 onItemSelected = {},
                 isProcessing = false,

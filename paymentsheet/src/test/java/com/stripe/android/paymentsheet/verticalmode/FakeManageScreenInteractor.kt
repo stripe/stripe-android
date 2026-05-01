@@ -17,6 +17,7 @@ internal class FakeManageScreenInteractor(
                 currentSelection = null,
                 isEditing = false,
                 canEdit = true,
+                linkBrand = null,
             )
         )
 

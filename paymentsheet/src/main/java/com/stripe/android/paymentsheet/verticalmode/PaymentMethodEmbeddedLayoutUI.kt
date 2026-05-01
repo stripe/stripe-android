@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded.RowStyle
@@ -63,6 +64,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
     PaymentMethodEmbeddedLayoutUI(
         paymentMethods = state.displayablePaymentMethods,
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
+        linkBrand = state.linkBrand,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
         isEnabled = !state.isProcessing,
@@ -111,6 +113,7 @@ internal fun ColumnScope.PaymentMethodEmbeddedLayoutUI(
 internal fun PaymentMethodEmbeddedLayoutUI(
     paymentMethods: List<DisplayablePaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+    linkBrand: LinkBrand? = null,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
@@ -144,6 +147,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
         EmbeddedSavedPaymentMethodRowButton(
             paymentMethods = paymentMethods,
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
+            linkBrand = linkBrand,
             savedPaymentMethodAction = savedPaymentMethodAction,
             selection = selection,
             isEnabled = isEnabled,
@@ -257,6 +261,7 @@ private fun Embedded.RowStyle.endSeparatorInset(): Dp {
 internal fun EmbeddedSavedPaymentMethodRowButton(
     paymentMethods: List<DisplayablePaymentMethod>,
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
+    linkBrand: LinkBrand? = null,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
     isEnabled: Boolean,
@@ -269,6 +274,7 @@ internal fun EmbeddedSavedPaymentMethodRowButton(
     if (displayedSavedPaymentMethod != null) {
         SavedPaymentMethodRowButton(
             displayableSavedPaymentMethod = displayedSavedPaymentMethod,
+            linkBrand = linkBrand,
             isEnabled = isEnabled,
             isSelected = selection?.isSaved == true,
             trailingContent = {

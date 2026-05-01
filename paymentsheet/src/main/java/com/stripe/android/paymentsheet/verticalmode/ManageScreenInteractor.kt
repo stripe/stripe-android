@@ -142,7 +142,7 @@ internal class DefaultManageScreenInteractor(
             currentSelection = currentSelection,
             isEditing = editing,
             canEdit = canEdit,
-            linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand,
+            linkBrand = paymentMethodMetadata.linkBrand,
         )
     }
 

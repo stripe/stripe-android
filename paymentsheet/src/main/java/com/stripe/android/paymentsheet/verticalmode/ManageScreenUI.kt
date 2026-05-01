@@ -31,6 +31,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
 
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
+                linkBrand = state.linkBrand,
                 isEnabled = true,
                 isSelected = isSelected,
                 onClick = {

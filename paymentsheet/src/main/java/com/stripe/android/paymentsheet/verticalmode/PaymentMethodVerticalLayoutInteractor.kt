@@ -306,7 +306,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
-            linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand,
+            linkBrand = paymentMethodMetadata.linkBrand,
         )
     }
 

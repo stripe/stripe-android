@@ -24,6 +24,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.AnalyticEvent
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -259,6 +260,7 @@ class DefaultWalletButtonsInteractorTest {
                 button = WalletButtonsInteractor.WalletButton.Link(
                     state = LinkButtonState.Default,
                     theme = LinkButtonTheme.DEFAULT,
+                    linkBrand = LinkBrand.Link,
                 ),
                 clickHandler = { false },
             )
@@ -294,6 +296,7 @@ class DefaultWalletButtonsInteractorTest {
                 button = WalletButtonsInteractor.WalletButton.Link(
                     state = LinkButtonState.Default,
                     theme = LinkButtonTheme.DEFAULT,
+                    linkBrand = LinkBrand.Link,
                 ),
                 clickHandler = { false },
             )

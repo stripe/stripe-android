@@ -227,22 +227,12 @@ private fun getOverridableIcon(
 
 internal fun PaymentMethod.getLabel(
     canShowSublabel: Boolean = false,
-    linkBrand: LinkBrand = LinkBrand.Link,
+    linkBrand: LinkBrand? = null,
 ): ResolvableString? = when (type) {
-    PaymentMethod.Type.Card -> if (isLinkPassthroughMode) {
-        if (canShowSublabel) {
-            // For Link passthrough mode, show the active Link brand as the main label.
-            linkBrand.resolvableString
-        } else {
-            // Show original card label as sublabel
-            createCardLabel(card?.last4)
-        }
-    } else if (isLinkPaymentMethod) {
-        if (canShowSublabel) {
-            linkPaymentDetails?.label
-        } else {
-            linkPaymentDetails?.sublabel
-        }
+    PaymentMethod.Type.Card -> if (isLinkPassthroughMode || isLinkPaymentMethod) {
+        requireNotNull(linkBrand) {
+            "Link brand is required for Link-backed saved payment method labels."
+        }.resolvableString
     } else {
         createCardLabel(card?.last4)
     }
@@ -250,22 +240,20 @@ internal fun PaymentMethod.getLabel(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         sepaDebit?.last4
     )
-    PaymentMethod.Type.USBankAccount -> if (isLinkPassthroughMode && canShowSublabel) {
-        // For Link passthrough mode, show the active Link brand as the main label.
-        linkBrand.resolvableString
+    PaymentMethod.Type.USBankAccount -> if (isLinkPassthroughMode) {
+        requireNotNull(linkBrand) {
+            "Link brand is required for Link-backed saved payment method labels."
+        }.resolvableString
     } else {
-        // Show original bank account label
         resolvableString(
             R.string.stripe_paymentsheet_payment_method_item_card_number,
             usBankAccount?.last4
         )
     }
     PaymentMethod.Type.Link -> {
-        if (canShowSublabel) {
-            linkPaymentDetails?.label
-        } else {
-            linkPaymentDetails?.sublabel
-        }
+        requireNotNull(linkBrand) {
+            "Link brand is required for Link-backed saved payment method labels."
+        }.resolvableString
     }
     else -> null
 }

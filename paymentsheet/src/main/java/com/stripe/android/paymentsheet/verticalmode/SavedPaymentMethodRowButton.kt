@@ -48,7 +48,7 @@ internal fun SavedPaymentMethodRowButton(
     val paymentMethodTitle =
         displayableSavedPaymentMethod.paymentMethod.getLabel(
             canShowSublabel = true,
-            linkBrand = linkBrand,
+            linkBrand = linkBrand ?: displayableSavedPaymentMethod.linkBrand,
         )
             ?: displayableSavedPaymentMethod.displayName
 

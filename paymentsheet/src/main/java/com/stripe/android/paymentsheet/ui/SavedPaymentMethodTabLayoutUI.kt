@@ -430,7 +430,7 @@ private fun SavedPaymentMethodTab(
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel(
         canShowSublabel = false,
-        linkBrand = linkBrand,
+        linkBrand = linkBrand ?: paymentMethod.displayableSavedPaymentMethod.linkBrand,
     )?.resolve() ?: return
 
     Box(

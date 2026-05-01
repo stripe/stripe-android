@@ -6,10 +6,8 @@ import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.withLinkState
-import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -27,6 +25,7 @@ internal interface SavedPaymentMethodConfirmInteractor {
     data class State(
         val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
         val form: Form,
+        val linkBrand: LinkBrand? = null,
     ) {
         data class Form(
             val elements: List<FormElement>,
@@ -44,25 +43,21 @@ internal interface SavedPaymentMethodConfirmInteractor {
 
 internal class DefaultSavedPaymentMethodConfirmInteractor(
     val initialSelection: PaymentSelection.Saved,
-    val displayName: ResolvableString,
+    val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
     val processing: StateFlow<Boolean>,
     val updateSelection: (PaymentSelection.Saved) -> Unit,
     val coroutineScope: CoroutineScope,
+    val linkBrand: LinkBrand?,
 ) : SavedPaymentMethodConfirmInteractor {
-    private val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
-        displayName = displayName,
-        paymentMethod = initialSelection.paymentMethod,
-        linkBrand = initialSelection.linkBrand,
-    )
-
     override val state = processing.mapAsStateFlow { isProcessing ->
         SavedPaymentMethodConfirmInteractor.State(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             form = SavedPaymentMethodConfirmInteractor.State.Form(
                 elements = savedPaymentMethodLinkFormHelper.formElement?.let { listOf(it) } ?: emptyList(),
                 enabled = !isProcessing,
-            )
+            ),
+            linkBrand = linkBrand,
         )
     }
 
@@ -86,9 +81,10 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
         ): DefaultSavedPaymentMethodConfirmInteractor {
             return DefaultSavedPaymentMethodConfirmInteractor(
                 initialSelection = initialSelection,
-                displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
-                    PaymentMethod.Type.Card.code
-                )?.displayName.orEmpty(),
+                displayableSavedPaymentMethod = initialSelection.paymentMethod.toDisplayableSavedPaymentMethod(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    defaultPaymentMethodId = null,
+                ),
                 savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
                     linkInlineSignupAvailability = DefaultLinkInlineSignupAvailability(paymentMethodMetadata),
                     linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
@@ -98,6 +94,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 processing = viewModel.processing,
                 updateSelection = viewModel::updateSelection,
                 coroutineScope = viewModel.viewModelScope,
+                linkBrand = paymentMethodMetadata.linkBrand,
             )
         }
     }
@@ -114,13 +111,15 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
         ): SavedPaymentMethodConfirmInteractor {
             return DefaultSavedPaymentMethodConfirmInteractor(
                 initialSelection = initialSelection,
-                displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
-                    PaymentMethod.Type.Card.code
-                )?.displayName.orEmpty(),
+                displayableSavedPaymentMethod = initialSelection.paymentMethod.toDisplayableSavedPaymentMethod(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    defaultPaymentMethodId = null,
+                ),
                 processing = processing,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
                 updateSelection = updateSelection,
                 coroutineScope = coroutineScope,
+                linkBrand = paymentMethodMetadata.linkBrand,
             )
         }
     }

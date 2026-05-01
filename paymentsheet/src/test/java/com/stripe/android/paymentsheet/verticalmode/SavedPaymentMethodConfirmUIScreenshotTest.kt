@@ -20,7 +20,7 @@ internal class SavedPaymentMethodConfirmUIScreenshotTest {
             SavedPaymentMethodConfirmUI(
                 savedPaymentMethodConfirmInteractor = FakeSavedPaymentMethodConfirmInteractor(
                     formEnabled = false,
-                )
+                ),
             )
         }
     }
@@ -31,7 +31,7 @@ internal class SavedPaymentMethodConfirmUIScreenshotTest {
             SavedPaymentMethodConfirmUI(
                 savedPaymentMethodConfirmInteractor = FakeSavedPaymentMethodConfirmInteractor(
                     formEnabled = true,
-                )
+                ),
             )
         }
     }

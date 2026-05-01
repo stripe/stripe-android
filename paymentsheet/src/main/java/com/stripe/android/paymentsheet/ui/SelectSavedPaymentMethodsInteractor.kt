@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 
 internal interface SelectSavedPaymentMethodsInteractor {
     val isLiveMode: Boolean
+    val linkBrand: LinkBrand?
 
     val state: StateFlow<State>
 
@@ -63,6 +65,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val updateSelection: (selection: PaymentSelection?, isUserInput: Boolean) -> Unit,
     override val isLiveMode: Boolean,
+    override val linkBrand: LinkBrand?,
 ) : SelectSavedPaymentMethodsInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
@@ -272,6 +275,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 },
                 onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+                linkBrand = paymentMethodMetadata.linkBrand,
             )
         }
     }

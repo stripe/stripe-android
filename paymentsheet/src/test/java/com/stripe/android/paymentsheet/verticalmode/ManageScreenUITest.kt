@@ -10,8 +10,10 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -73,6 +75,21 @@ class ManageScreenUITest {
             ).assert(
                 hasContentDescriptionExactly("Visa ending in 4 2 4 2 ")
             )
+        }
+    }
+
+    @Test
+    fun savedLinkPaymentMethod_usesProvidedNotlinkBrand() {
+        runScenario(
+            initialState = ManageScreenInteractor.State(
+                paymentMethods = listOf(PaymentMethodFixtures.displayableLinkPaymentMethod()),
+                currentSelection = null,
+                isEditing = false,
+                canEdit = true,
+                linkBrand = LinkBrand.Notlink,
+            )
+        ) {
+            composeRule.onNodeWithText("Notlink").assertExists()
         }
     }
 
