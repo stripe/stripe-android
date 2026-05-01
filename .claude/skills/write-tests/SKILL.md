@@ -1,6 +1,6 @@
 ---
 name: write-tests
-description: Use when writing or structuring tests in stripe-android — covers runScenario pattern, fakes, Turbine Flow testing, Truth assertions, and NetworkRule integration tests with testBodyFromFile
+description: Use when writing or structuring tests in stripe-android — covers runScenario, fakes, Turbine, Truth, and NetworkRule integration tests
 ---
 # Setting Up Tests
 
@@ -152,7 +152,9 @@ fun `state updates when data changes`() = runScenario {
 
 ## NetworkRule Integration Tests
 
-For instrumentation tests that need mocked network responses, use `NetworkRule` with `testBodyFromFile`. JSON fixture files live alongside the test code in `src/androidTest/resources/`.
+For instrumentation tests that need mocked network responses, use `NetworkRule` (from `network-testing` module) with `testBodyFromFile`. JSON fixture files live in the module's `src/androidTest/resources/` directory (e.g., `paymentsheet/src/androidTest/resources/checkout-session-init.json`) and are resolved by filename from the resources root.
+
+Checkout-specific helpers like `checkoutInit` and `checkoutConfirm` are extension functions from the `checkout-testing` module (`NetworkRuleCheckoutExtensions.kt`).
 
 ### Basic Structure
 
@@ -260,9 +262,13 @@ fun testWithSfu() = runMyTest { json ->
 
 ### Request Matchers
 
-Use `RequestMatchers` to validate request body parameters:
+Use `RequestMatchers` (from `com.stripe.android.networktesting.RequestMatchers`) to validate request body parameters. Import the matchers you need statically:
 
 ```kotlin
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.not
+
 networkRule.checkoutConfirm(
     bodyPart("expected_amount", "5099"),
     not(hasBodyPart("save_payment_method")),
