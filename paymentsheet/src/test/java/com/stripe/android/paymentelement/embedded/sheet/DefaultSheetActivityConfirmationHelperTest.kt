@@ -1,5 +1,4 @@
-
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
@@ -11,7 +10,9 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
+import com.stripe.android.paymentelement.embedded.form.FakeFormActivityStateHelper
+import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.testing.CoroutineTestRule
