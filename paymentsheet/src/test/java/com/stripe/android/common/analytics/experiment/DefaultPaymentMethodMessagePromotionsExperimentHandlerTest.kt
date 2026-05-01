@@ -3,7 +3,6 @@ package com.stripe.android.common.analytics.experiment
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentIntentFixtures
@@ -11,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import kotlinx.coroutines.test.runTest
@@ -110,7 +110,7 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
     fun `logs vertical layout correctly`() = runScenario {
         logExposure(
             metadata = defaultMetadata.copy(
-                paymentMethodOrientation = PaymentMethodOrientation.Vertical
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical
             )
         )
 
@@ -123,7 +123,7 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
     fun `logs horizontal layout correctly`() = runScenario {
         logExposure(
             metadata = defaultMetadata.copy(
-                paymentMethodOrientation = PaymentMethodOrientation.Horizontal
+                paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
             )
         )
 
