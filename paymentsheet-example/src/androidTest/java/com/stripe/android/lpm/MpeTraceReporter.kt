@@ -1,7 +1,6 @@
 package com.stripe.android.lpm
 
-import android.os.Bundle
-import androidx.test.platform.app.InstrumentationRegistry
+import android.util.Log
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 
 internal class MpeTraceReporter : MpeLatencyReporter {
@@ -25,16 +24,11 @@ internal class MpeTraceReporter : MpeLatencyReporter {
     }
 
     private fun emitTraceLine(line: String) {
-        InstrumentationRegistry.getInstrumentation().sendStatus(
-            0,
-            Bundle().apply {
-                putString(TRACE_KEY, line)
-            }
-        )
+        Log.i(LOG_TAG, line)
     }
 
     companion object {
         const val OUTPUT_PREFIX: String = "MPE_LOAD_TRACE"
-        private const val TRACE_KEY: String = "mpe_load_trace"
+        private const val LOG_TAG: String = "MPELoadTrace"
     }
 }

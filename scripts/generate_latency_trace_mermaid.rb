@@ -7,6 +7,7 @@ require 'open3'
 PROJECT_ROOT = File.expand_path('..', __dir__)
 TRACE_CLASS = 'com.stripe.android.lpm.MPELatencyTest'
 TRACE_PREFIX = 'MPE_LOAD_TRACE'
+TRACE_LOG_TAG = 'MPELoadTrace'
 
 TraceSpan = Struct.new(:name, :start_offset_ms, :duration_ms, keyword_init: true)
 TraceSession = Struct.new(:test_name, :total_duration_ms, :spans, keyword_init: true)
@@ -50,6 +51,8 @@ def restore_checkout(target)
 end
 
 def run_android_trace_tests
+  clear_logcat
+
   command = [
     './gradlew',
     '--no-configuration-cache',
@@ -70,11 +73,39 @@ def run_android_trace_tests
       end
 
       exit_status = wait_thread.value
-      raise "Gradle command failed with status #{exit_status.exitstatus}" unless exit_status.success?
+      unless exit_status.success?
+        puts "\nWarning: Gradle command exited with status #{exit_status.exitstatus}"
+        puts 'Continuing to parse available logcat output...'
+      end
     end
   end
 
-  output
+  output + "\n" + dump_logcat
+end
+
+def clear_logcat
+  stdout, status = Open3.capture2e('adb', 'logcat', '-c', chdir: PROJECT_ROOT)
+  return if status.success?
+
+  warn stdout
+  raise 'Failed to clear adb logcat. Ensure adb is installed and a device/emulator is available.'
+end
+
+def dump_logcat
+  stdout, status = Open3.capture2e(
+    'adb',
+    'logcat',
+    '-d',
+    '-s',
+    "#{TRACE_LOG_TAG}:I",
+    '*:S',
+    chdir: PROJECT_ROOT
+  )
+
+  return stdout if status.success?
+
+  warn stdout
+  raise 'Failed to read adb logcat. Ensure adb is installed and a device/emulator is available.'
 end
 
 def parse_trace_output(output)
