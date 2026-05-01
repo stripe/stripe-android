@@ -162,6 +162,10 @@
   <string name="stripe_last_name">Last</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Loading</string>
+  <!-- Segmented control option for live identity document capture -->
+  <string name="stripe_live">Live</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Manual</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Move ID closer</string>
   <!-- Instructional text when camera is too close to a document -->
@@ -212,6 +216,8 @@
   <string name="stripe_rotate_document">Keep ID level</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="stripe_scanned">Scanned</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Image taken</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="stripe_select">Select</string>
   <!-- Instructional text when selfie is captured -->

@@ -1,8 +1,10 @@
 package com.stripe.android.identity.viewmodel
 
 import android.app.Application
+import android.graphics.Bitmap
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.VerificationFlowFinishable
@@ -15,9 +17,12 @@ import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 internal abstract class IdentityScanViewModel(
     private val applicationContext: Application,
@@ -37,6 +42,12 @@ internal abstract class IdentityScanViewModel(
 
     internal val scannerState: StateFlow<State> = _scannerState
 
+    private val _latestManualCaptureFrame = MutableStateFlow<CameraPreviewImage<Bitmap>?>(null)
+    internal val latestManualCaptureFrame: StateFlow<CameraPreviewImage<Bitmap>?> =
+        _latestManualCaptureFrame
+
+    private var manualCaptureFrameJob: Job? = null
+
     /**
      * StateFlow to keep track of current target scan type.
      */
@@ -53,6 +64,7 @@ internal abstract class IdentityScanViewModel(
         ) : State()
 
         class Scanned(val result: IdentityAggregator.FinalResult) : State()
+        data object ManualCaptured : State()
         class Timeout(val fromSelfie: Boolean) : State()
     }
 
@@ -86,6 +98,34 @@ internal abstract class IdentityScanViewModel(
                 IdentityAnalyticsRequestFactory.TYPE_DOCUMENT
             }
         )
+    }
+
+    fun startManualCapture(
+        scanType: IdentityScanState.ScanType,
+        lifecycleOwner: LifecycleOwner
+    ) {
+        requireNotNull(identityScanFlow).resetFlow()
+        resetManualCapture()
+        _scannerState.update { State.Scanning() }
+        targetScanTypeFlow.update { scanType }
+        cameraManager.requireCameraAdapter().bindToLifecycle(lifecycleOwner)
+        cameraManager.toggleInitial()
+        manualCaptureFrameJob = viewModelScope.launch {
+            cameraManager.requireCameraAdapter()
+                .getImageStream()
+                .collectLatest { frame ->
+                    _latestManualCaptureFrame.update { frame }
+                }
+        }
+    }
+
+    fun captureManualResult(
+        lifecycleOwner: LifecycleOwner
+    ): CameraPreviewImage<Bitmap>? {
+        val capturedFrame = latestManualCaptureFrame.value ?: return null
+        stopScan(lifecycleOwner)
+        _scannerState.update { State.ManualCaptured }
+        return capturedFrame
     }
 
     override fun onAnalyzerFailure(t: Throwable): Boolean {
@@ -138,6 +178,7 @@ internal abstract class IdentityScanViewModel(
         scanType: IdentityScanState.ScanType,
         lifecycleOwner: LifecycleOwner
     ) {
+        resetManualCapture()
         _scannerState.update { State.Scanning() }
         targetScanTypeFlow.update { scanType }
         cameraManager.requireCameraAdapter().bindToLifecycle(lifecycleOwner)
@@ -161,6 +202,7 @@ internal abstract class IdentityScanViewModel(
     }
 
     fun stopScan(lifecycleOwner: LifecycleOwner) {
+        resetManualCapture()
         runCatching {
             requireNotNull(identityScanFlow).resetFlow()
             cameraManager.requireCameraAdapter().unbindFromLifecycle(lifecycleOwner)
@@ -182,10 +224,18 @@ internal abstract class IdentityScanViewModel(
             faceDetectorModelFile = pageAndModelFiles.faceDetectorFile
         )
         this.cameraManager = cameraManager
+        resetManualCapture()
         _scannerState.update { State.Scanning() }
     }
 
     fun resetScannerState() {
+        resetManualCapture()
         _scannerState.update { State.Initializing }
+    }
+
+    private fun resetManualCapture() {
+        manualCaptureFrameJob?.cancel()
+        manualCaptureFrameJob = null
+        _latestManualCaptureFrame.update { null }
     }
 }

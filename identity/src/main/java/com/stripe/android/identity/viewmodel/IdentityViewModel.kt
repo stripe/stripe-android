@@ -465,6 +465,41 @@ internal class IdentityViewModel(
     }
 
     /**
+     * Upload high_res of a bitmap captured directly from the in-app camera preview.
+     */
+    internal fun uploadManualResult(
+        bitmap: Bitmap,
+        isFront: Boolean,
+        docCapturePage: VerificationPageStaticContentDocumentCapturePage,
+        uploadMethod: UploadMethod,
+        scanType: IdentityScanState.ScanType
+    ) {
+        uploadDocumentImagesAndNotify(
+            imageFile =
+            identityIO.resizeBitmapAndCreateFileToUpload(
+                bitmap = bitmap,
+                verificationId = verificationArgs.verificationSessionId,
+                fileName = buildString {
+                    append(verificationArgs.verificationSessionId)
+                    append("_")
+                    append(if (isFront) FRONT else BACK)
+                    append(".jpeg")
+                },
+                maxDimension = docCapturePage.highResImageMaxDimension,
+                compressionQuality = docCapturePage.highResImageCompressionQuality
+            ),
+            filePurpose = requireNotNull(
+                StripeFilePurpose.fromCode(docCapturePage.filePurpose)
+            ),
+            uploadMethod = uploadMethod,
+            isHighRes = true,
+            isFront = isFront,
+            scanType = scanType,
+            compressionQuality = docCapturePage.highResImageCompressionQuality
+        )
+    }
+
+    /**
      * Upload high_res and low_res of the [IdentityAggregator.FinalResult] from scan.
      */
     internal fun uploadScanResult(
@@ -1614,31 +1649,15 @@ internal class IdentityViewModel(
                 navController.navigateToErrorScreenWithDefaultValues(
                     getApplication()
                 )
-            } else if (uploadedState.isUploaded()) {
+            } else {
+                val collectedDataParam = createCollectedDataParamForDocumentCapture(
+                    uploadedState = uploadedState,
+                    isFront = isFront
+                ) ?: return@collectLatest
                 val route = DocumentScanDestination.ROUTE.route
                 postVerificationPageDataAndMaybeNavigate(
                     navController = navController,
-                    collectedDataParam = if (isFront) {
-                        CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
-                            frontHighResResult = requireNotNull(uploadedState.highResResult.data),
-                            frontLowResResult = requireNotNull(uploadedState.lowResResult.data),
-                            cameraLensModel = currentCameraLensModel,
-                            exposureIso = currentExposureIso,
-                            focalLength = currentFocalLength,
-                            exposureDuration = currentExposureDuration,
-                            isVirtualCamera = currentIsVirtualCamera
-                        )
-                    } else {
-                        CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
-                            backHighResResult = requireNotNull(uploadedState.highResResult.data),
-                            backLowResResult = requireNotNull(uploadedState.lowResResult.data),
-                            cameraLensModel = currentCameraLensModel,
-                            exposureIso = currentExposureIso,
-                            focalLength = currentFocalLength,
-                            exposureDuration = currentExposureDuration,
-                            isVirtualCamera = currentIsVirtualCamera
-                        )
-                    },
+                    collectedDataParam = collectedDataParam,
                     fromRoute = route,
                     onMissingBack = onMissingBack,
                     onReadyToSubmit = {
@@ -1666,23 +1685,14 @@ internal class IdentityViewModel(
                     if (frontUploadState.hasError()) {
                         errorCause.postValue(frontUploadState.getError())
                         navController.navigateToErrorScreenWithDefaultValues(getApplication())
-                    } else if (frontUploadState.isHighResUploaded()) {
-                        val front = requireNotNull(frontUploadState.highResResult.data)
+                    } else {
+                        val collectedDataParam = createCollectedDataParamForDocumentCapture(
+                            uploadedState = frontUploadState,
+                            isFront = true
+                        ) ?: return@collectLatest
                         postVerificationPageData(
                             navController = navController,
-                            collectedDataParam = CollectedDataParam(
-                                idDocumentFront = DocumentUploadParam(
-                                    highResImage = requireNotNull(front.uploadedStripeFile.id) {
-                                        "front uploaded file id is null"
-                                    },
-                                    uploadMethod = requireNotNull(front.uploadMethod),
-                                    cameraLensModel = currentCameraLensModel,
-                                    exposureIso = currentExposureIso,
-                                    focalLength = currentFocalLength,
-                                    exposureDuration = currentExposureDuration,
-                                    isVirtualCamera = currentIsVirtualCamera
-                                )
-                            ),
+                            collectedDataParam = collectedDataParam,
                             fromRoute = DocumentUploadDestination.ROUTE.route
                         )
                     }
@@ -1694,26 +1704,71 @@ internal class IdentityViewModel(
                     if (backUploadedState.hasError()) {
                         errorCause.postValue(backUploadedState.getError())
                         navController.navigateToErrorScreenWithDefaultValues(getApplication())
-                    } else if (backUploadedState.isHighResUploaded()) {
-                        val back = requireNotNull(backUploadedState.highResResult.data)
+                    } else {
+                        val collectedDataParam = createCollectedDataParamForDocumentCapture(
+                            uploadedState = backUploadedState,
+                            isFront = false
+                        ) ?: return@collectLatest
                         postVerificationPageData(
                             navController = navController,
-                            collectedDataParam = CollectedDataParam(
-                                idDocumentBack = DocumentUploadParam(
-                                    highResImage = requireNotNull(back.uploadedStripeFile.id) {
-                                        "back uploaded file id is null"
-                                    },
-                                    uploadMethod = requireNotNull(back.uploadMethod),
-                                    cameraLensModel = currentCameraLensModel,
-                                    exposureIso = currentExposureIso,
-                                    focalLength = currentFocalLength,
-                                    exposureDuration = currentExposureDuration,
-                                    isVirtualCamera = currentIsVirtualCamera
-                                )
-                            ),
+                            collectedDataParam = collectedDataParam,
                             fromRoute = DocumentUploadDestination.ROUTE.route
                         )
                     }
+                }
+            }
+        }
+    }
+
+    private fun createCollectedDataParamForDocumentCapture(
+        uploadedState: SingleSideDocumentUploadState,
+        isFront: Boolean
+    ): CollectedDataParam? {
+        val highResResult = uploadedState.highResResult.data ?: return null
+        val uploadMethod = requireNotNull(highResResult.uploadMethod)
+
+        return when (uploadMethod) {
+            UploadMethod.AUTOCAPTURE -> {
+                val lowResResult = uploadedState.lowResResult.data ?: return null
+                if (isFront) {
+                    CollectedDataParam.createFromFrontUploadedResultsForAutoCapture(
+                        frontHighResResult = highResResult,
+                        frontLowResResult = lowResResult,
+                        cameraLensModel = currentCameraLensModel,
+                        exposureIso = currentExposureIso,
+                        focalLength = currentFocalLength,
+                        exposureDuration = currentExposureDuration,
+                        isVirtualCamera = currentIsVirtualCamera
+                    )
+                } else {
+                    CollectedDataParam.createFromBackUploadedResultsForAutoCapture(
+                        backHighResResult = highResResult,
+                        backLowResResult = lowResResult,
+                        cameraLensModel = currentCameraLensModel,
+                        exposureIso = currentExposureIso,
+                        focalLength = currentFocalLength,
+                        exposureDuration = currentExposureDuration,
+                        isVirtualCamera = currentIsVirtualCamera
+                    )
+                }
+            }
+            UploadMethod.FILEUPLOAD,
+            UploadMethod.MANUALCAPTURE -> {
+                val documentUploadParam = DocumentUploadParam(
+                    highResImage = requireNotNull(highResResult.uploadedStripeFile.id) {
+                        "${if (isFront) "front" else "back"} uploaded file id is null"
+                    },
+                    uploadMethod = uploadMethod,
+                    cameraLensModel = currentCameraLensModel,
+                    exposureIso = currentExposureIso,
+                    focalLength = currentFocalLength,
+                    exposureDuration = currentExposureDuration,
+                    isVirtualCamera = currentIsVirtualCamera
+                )
+                if (isFront) {
+                    CollectedDataParam(idDocumentFront = documentUploadParam)
+                } else {
+                    CollectedDataParam(idDocumentBack = documentUploadParam)
                 }
             }
         }
