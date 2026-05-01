@@ -321,13 +321,13 @@ internal class PaymentSheetCheckoutSessionTest {
     @Test
     fun testMerchantEmailTakesPrecedenceOverFormAndCheckoutSessionEmail() =
         runCheckoutSessionEmailPrecedenceTest(
-            merchantEmail = "merchant@example.com",
+            defaultEmail = "merchant@example.com",
             fillOutEmail = true,
             expectedEmail = "merchant@example.com",
         )
 
     private fun runCheckoutSessionEmailPrecedenceTest(
-        merchantEmail: String? = null,
+        defaultEmail: String? = null,
         fillOutEmail: Boolean = false,
         expectedEmail: String,
     ) = runPaymentSheetTest(
@@ -343,8 +343,8 @@ internal class PaymentSheetCheckoutSessionTest {
         val configuration = PaymentSheet.Configuration.Builder("Test Merchant")
             .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
             .apply {
-                if (merchantEmail != null) {
-                    defaultBillingDetails(PaymentSheet.BillingDetails(email = merchantEmail))
+                if (defaultEmail != null) {
+                    defaultBillingDetails(PaymentSheet.BillingDetails(email = defaultEmail))
                 }
                 if (fillOutEmail) {
                     billingDetailsCollectionConfiguration(
