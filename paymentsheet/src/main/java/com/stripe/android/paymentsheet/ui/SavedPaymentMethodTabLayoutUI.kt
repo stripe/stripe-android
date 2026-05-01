@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -82,6 +83,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
     SavedPaymentMethodTabLayoutUI(
         paymentOptionsItems = state.paymentOptionsItems,
         selectedPaymentOptionsItem = state.selectedPaymentOptionsItem,
+        linkBrand = state.linkBrand,
         isEditing = state.isEditing,
         isProcessing = state.isProcessing,
         onAddCardPressed = {
@@ -121,6 +123,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 internal fun SavedPaymentMethodTabLayoutUI(
     paymentOptionsItems: List<PaymentOptionsItem>,
     selectedPaymentOptionsItem: PaymentOptionsItem?,
+    linkBrand: LinkBrand? = null,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -163,6 +166,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
                     isEditing = isEditing,
                     isEnabled = isEnabled,
                     isSelected = isSelected,
+                    linkBrand = linkBrand,
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
                     onModifyItem = onModifyItem,
@@ -234,6 +238,7 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            linkBrand = LinkBrand.Link,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -250,6 +255,7 @@ private fun SavedPaymentMethodsTabLayoutWithDefaultPreview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
+            linkBrand = LinkBrand.Link,
             isEditing = true,
             isProcessing = false,
             onAddCardPressed = { },
@@ -275,6 +281,7 @@ private fun SavedPaymentMethodTab(
     isEnabled: Boolean,
     isEditing: Boolean,
     isSelected: Boolean,
+    linkBrand: LinkBrand?,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
@@ -303,6 +310,7 @@ private fun SavedPaymentMethodTab(
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
+                linkBrand = requireNotNull(linkBrand),
                 onItemSelected = onItemSelected,
                 modifier = modifier,
             )
@@ -378,6 +386,7 @@ private fun LinkTab(
     width: Dp,
     isEnabled: Boolean,
     isSelected: Boolean,
+    linkBrand: LinkBrand,
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -391,7 +400,7 @@ private fun LinkTab(
         iconTint = null,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
-        onItemSelectedListener = { onItemSelected(PaymentSelection.Link()) },
+        onItemSelectedListener = { onItemSelected(PaymentSelection.Link(brand = linkBrand)) },
         cardArtUrl = null,
         modifier = modifier,
     )

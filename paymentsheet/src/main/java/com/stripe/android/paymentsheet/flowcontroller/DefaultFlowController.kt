@@ -68,6 +68,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkDisabledState
@@ -84,6 +85,7 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
+@Suppress("LargeClass")
 @OptIn(WalletButtonsPreview::class)
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
@@ -423,11 +425,16 @@ internal class DefaultFlowController @Inject internal constructor(
                     showPaymentOptionList(it, viewModel.paymentSelection)
                 }
             }
-            is LinkActivityResult.Completed -> with(Link(selectedPayment = result.selectedPayment)) {
-                viewModel.paymentSelection = this
+            is LinkActivityResult.Completed -> {
+                val selection = Link(
+                    brand = requireNotNull(viewModel.state?.paymentSheetState?.paymentMethodMetadata)
+                        .requireLinkBrand(),
+                    selectedPayment = result.selectedPayment,
+                )
+                viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(this),
+                        paymentOption = paymentOptionFactory.create(selection),
                         didCancel = false,
                     )
                 )

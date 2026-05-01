@@ -35,6 +35,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -244,7 +245,7 @@ internal class PaymentOptionsViewModelTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
         )
 
-        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.updateSelection(PaymentSelection.Link(brand = LinkBrand.Link))
         viewModel.onUserSelection()
 
         verify(linkPaymentLauncher).present(
@@ -263,7 +264,7 @@ internal class PaymentOptionsViewModelTest {
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         )
 
-        viewModel.updateSelection(PaymentSelection.Link())
+        viewModel.updateSelection(PaymentSelection.Link(brand = LinkBrand.Link))
         viewModel.paymentOptionsActivityResult.test {
             viewModel.onUserSelection()
             val result = awaitItem()
@@ -354,7 +355,7 @@ internal class PaymentOptionsViewModelTest {
             ),
         )
 
-        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isTrue()
     }
 
@@ -364,7 +365,7 @@ internal class PaymentOptionsViewModelTest {
             linkState = null,
         )
 
-        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.selection.value).isNotEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         assertThat(viewModel.linkHandler.isLinkEnabled.value).isFalse()
     }
 
@@ -616,16 +617,16 @@ internal class PaymentOptionsViewModelTest {
         runTest {
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT)
 
-            val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link()) }
+            val viewModel = createViewModel().apply { updateSelection(PaymentSelection.Link(brand = LinkBrand.Link)) }
 
             viewModel.paymentOptionsActivityResult.test {
                 viewModel.handlePaymentMethodSelected(selection)
                 expectNoEvents()
 
-                viewModel.handlePaymentMethodSelected(PaymentSelection.Link())
+                viewModel.handlePaymentMethodSelected(PaymentSelection.Link(brand = LinkBrand.Link))
 
                 val result = awaitItem() as? PaymentOptionsActivityResult.Succeeded
-                assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link())
+                assertThat(result?.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
             }
         }
 

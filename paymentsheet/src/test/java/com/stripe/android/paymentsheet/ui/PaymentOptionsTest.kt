@@ -7,6 +7,7 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -148,6 +149,7 @@ class PaymentOptionsTest {
                 isEditing = isEditing,
                 paymentOptionsItems = listOf(PaymentOptionsItem.AddCard, PaymentOptionsItem.GooglePay),
                 selectedPaymentOptionsItem = PaymentOptionsItem.GooglePay,
+                linkBrand = LinkBrand.Link,
                 isProcessing = false,
                 onModifyItem = {},
             )
@@ -171,6 +173,7 @@ class PaymentOptionsTest {
                 paymentOptionsItems = paymentOptionsItemsWithDefault,
                 isEditing = isEditing,
                 selectedPaymentOptionsItem = null,
+                linkBrand = LinkBrand.Link,
                 onAddCardPressed = {},
                 onItemSelected = {},
                 isProcessing = false,

@@ -11,6 +11,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -27,7 +28,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Doesn't display a mandate for Link`() {
-        val link = PaymentSelection.Link()
+        val link = PaymentSelection.Link(brand = LinkBrand.Link)
         val result = link.mandateText(
             merchantName = "Merchant",
             isSetupFlow = false,
@@ -37,7 +38,7 @@ class PaymentSelectionTest {
 
     @Test
     fun `Link billingDetails returns null when selectedPayment is null`() {
-        val link = PaymentSelection.Link(selectedPayment = null)
+        val link = PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = null)
 
         assertThat(link.billingDetails).isNull()
     }
@@ -75,7 +76,7 @@ class PaymentSelectionTest {
             billingPhone = "+1-555-123-4567"
         )
 
-        val link = PaymentSelection.Link(selectedPayment = selectedPayment)
+        val link = PaymentSelection.Link(brand = LinkBrand.Link, selectedPayment = selectedPayment)
 
         assertThat(link.billingDetails).isEqualTo(
             PaymentMethod.BillingDetails(
@@ -92,6 +93,15 @@ class PaymentSelectionTest {
                 name = "John Doe",
             )
         )
+    }
+
+    @Test
+    fun `Link label uses brand name`() {
+        val label = PaymentSelection.Link(
+            brand = LinkBrand.Notlink,
+        ).label.resolve(context)
+
+        assertThat(label).isEqualTo("Notlink")
     }
 
     @Test

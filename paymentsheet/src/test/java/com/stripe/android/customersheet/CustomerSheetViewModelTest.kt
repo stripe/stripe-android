@@ -21,6 +21,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
@@ -404,7 +405,7 @@ class CustomerSheetViewModelTest {
             val error = assertFailsWith<IllegalStateException> {
                 viewModel.handleViewAction(
                     CustomerSheetViewAction.OnItemSelected(
-                        selection = PaymentSelection.Link()
+                        selection = PaymentSelection.Link(brand = LinkBrand.Link)
                     )
                 )
             }

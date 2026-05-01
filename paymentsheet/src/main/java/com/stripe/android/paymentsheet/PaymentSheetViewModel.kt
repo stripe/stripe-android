@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherCompo
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Args
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
@@ -433,6 +434,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     fun checkoutWithLink() {
         checkout(
             PaymentSelection.Link(
+                brand = requireNotNull(paymentMethodMetadata.value).requireLinkBrand(),
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
             CheckoutIdentifier.SheetTopWallet
@@ -444,6 +446,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
+                brand = requireNotNull(paymentMethodMetadata.value).requireLinkBrand(),
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
             ),
             CheckoutIdentifier.SheetTopWallet

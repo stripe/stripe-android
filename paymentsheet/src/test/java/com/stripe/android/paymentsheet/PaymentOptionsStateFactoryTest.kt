@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -36,7 +37,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             defaultPaymentMethodId = null,
@@ -99,7 +100,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = null,
@@ -170,7 +171,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             defaultPaymentMethodId = null,
