@@ -16,6 +16,7 @@ class CheckoutSession internal constructor(
     val liveMode: Boolean,
     val currency: String,
     val customerEmail: String?,
+    val tax: Tax,
     val totalSummary: TotalSummary?,
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
@@ -44,6 +45,37 @@ class CheckoutSession internal constructor(
          * A status not recognized by this version of the SDK.
          */
         Unknown,
+    }
+
+    @Poko
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Tax internal constructor(
+        val status: Status,
+    ) {
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Status {
+            /**
+             * The final tax amount is computed, and the session is ready for confirmation.
+             */
+            Ready,
+
+            /**
+             * A shipping address must be provided to calculate tax.
+             */
+            RequiresShippingAddress,
+
+            /**
+             * A billing address must be provided to calculate tax.
+             */
+            RequiresBillingAddress,
+
+            /**
+             * A tax status not recognized by this version of the SDK.
+             */
+            Unknown,
+        }
     }
 
     @Poko
@@ -108,6 +140,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(): CheckoutSession {
         liveMode = liveMode,
         currency = currency,
         customerEmail = customerEmail,
+        tax = taxStatus.asTax(),
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
         shippingOptions = shippingOptions.map { it.asShippingRate() },
@@ -123,6 +156,25 @@ private fun CheckoutSessionResponse.Status.asStatus(): CheckoutSession.Status {
         CheckoutSessionResponse.Status.EXPIRED -> CheckoutSession.Status.Expired
         CheckoutSessionResponse.Status.UNKNOWN -> CheckoutSession.Status.Unknown
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionResponse.TaxStatus.asTax(): CheckoutSession.Tax {
+    val status = when (this) {
+        CheckoutSessionResponse.TaxStatus.READY -> {
+            CheckoutSession.Tax.Status.Ready
+        }
+        CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS -> {
+            CheckoutSession.Tax.Status.RequiresShippingAddress
+        }
+        CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS -> {
+            CheckoutSession.Tax.Status.RequiresBillingAddress
+        }
+        CheckoutSessionResponse.TaxStatus.UNKNOWN -> {
+            CheckoutSession.Tax.Status.Unknown
+        }
+    }
+    return CheckoutSession.Tax(status = status)
 }
 
 @OptIn(CheckoutSessionPreview::class)
