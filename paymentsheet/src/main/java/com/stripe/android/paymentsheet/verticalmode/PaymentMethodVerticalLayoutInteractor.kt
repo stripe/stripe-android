@@ -421,7 +421,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = subtitle,
             onClick = {
-                updateSelection(PaymentSelection.Link(), false)
+                updateSelection(PaymentSelection.Link(brand = link.linkBrand), false)
                 invokeRowSelectionCallback?.invoke()
             },
         )

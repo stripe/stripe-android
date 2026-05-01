@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import android.content.Context
 import com.stripe.android.customersheet.injection.DaggerStripeCustomerAdapterComponent
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -144,6 +145,7 @@ interface CustomerAdapter {
         internal data class StripeId(override val id: String) : PaymentOption(id)
 
         internal fun toPaymentSelection(
+            linkBrand: LinkBrand? = null,
             paymentMethodProvider: (paymentMethodId: String) -> PaymentMethod?,
         ): PaymentSelection? {
             return when (this) {
@@ -152,7 +154,7 @@ interface CustomerAdapter {
                 }
 
                 is Link -> {
-                    PaymentSelection.Link()
+                    PaymentSelection.Link(brand = requireNotNull(linkBrand))
                 }
 
                 is StripeId -> {

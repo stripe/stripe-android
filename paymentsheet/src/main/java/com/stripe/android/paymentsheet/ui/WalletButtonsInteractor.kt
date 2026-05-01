@@ -86,7 +86,10 @@ internal interface WalletButtonsInteractor {
             override val walletType = WalletType.Link
 
             override fun createSelection(): PaymentSelection {
-                return PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED)
+                return PaymentSelection.Link(
+                    brand = linkBrand,
+                    linkExpressMode = LinkExpressMode.DISABLED,
+                )
             }
         }
 

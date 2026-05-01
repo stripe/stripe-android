@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFa
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
+import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -176,7 +177,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(Link())
+                updateSelection(
+                    Link(
+                        brand = requireNotNull(linkConfiguration?.linkBrand),
+                    )
+                )
                 onUserSelection()
             },
             onShopPayPressed = {
@@ -308,6 +313,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
+                            brand = args.state.paymentMethodMetadata.requireLinkBrand(),
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),

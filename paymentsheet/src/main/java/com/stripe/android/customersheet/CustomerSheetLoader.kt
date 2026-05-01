@@ -28,6 +28,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
+import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.model.validate
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -229,18 +230,21 @@ internal class DefaultCustomerSheetLoader(
         return if (metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
             getDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
         } else {
-            useLocalSelectionAsPaymentSelection(customerSheetSession, paymentMethods)
+            useLocalSelectionAsPaymentSelection(customerSheetSession, metadata, paymentMethods)
         }
     }
 
     private fun useLocalSelectionAsPaymentSelection(
         customerSheetSession: CustomerSheetSession,
+        metadata: PaymentMethodMetadata,
         paymentMethods: List<PaymentMethod>
     ): PaymentSelection? {
         return customerSheetSession.savedSelection?.let { selection ->
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link()
+                is SavedSelection.Link -> PaymentSelection.Link(
+                    brand = metadata.requireLinkBrand(),
+                )
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->
                         paymentMethod.id == selection.id

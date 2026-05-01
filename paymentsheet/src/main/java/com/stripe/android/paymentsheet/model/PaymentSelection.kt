@@ -21,6 +21,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -73,6 +74,7 @@ internal sealed class PaymentSelection : Parcelable {
 
     @Parcelize
     data class Link(
+        val brand: LinkBrand,
         val linkExpressMode: LinkExpressMode = LinkExpressMode.DISABLED,
         val selectedPayment: LinkPaymentMethod? = null,
         val shippingAddress: ConsumerShippingAddress? = null,
@@ -424,7 +426,7 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.ExternalPaymentMethod -> label
         is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
-        is PaymentSelection.Link -> StripeR.string.stripe_link.resolvableString
+        is PaymentSelection.Link -> brand.brandName().resolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.USBankAccount -> label.resolvableString
@@ -480,6 +482,12 @@ internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
     metadata.merchantName,
     metadata.hasIntentToSetup(paymentMethod.type?.code ?: "")
 ).takeIf { metadata.mandateAllowed(paymentMethod.type) }
+
+internal fun PaymentMethodMetadata.requireLinkBrand(): LinkBrand {
+    return requireNotNull(linkState?.configuration?.linkBrand) {
+        "Expected Link brand to be available when constructing a Link payment selection."
+    }
+}
 
 /**
  * If setup_future_usage is set at the top level to "off_session" the payment method will
