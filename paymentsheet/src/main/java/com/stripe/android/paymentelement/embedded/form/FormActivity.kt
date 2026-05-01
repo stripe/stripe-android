@@ -93,9 +93,8 @@ internal class FormActivity : AppCompatActivity() {
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
     private fun FormSheetContent(formScreen: EmbeddedNavigator.Screen.Form) {
-        val state by formActivityStateHelper.state.collectAsState()
         val bottomSheetState = rememberStripeBottomSheetState(
-            confirmValueChange = { !state.isProcessing }
+            confirmValueChange = { !formScreen.isPerformingNetworkOperation() }
         )
         ElementsBottomSheetLayout(
             state = bottomSheetState,
