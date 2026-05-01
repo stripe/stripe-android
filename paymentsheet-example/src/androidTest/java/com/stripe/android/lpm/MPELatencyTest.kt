@@ -110,7 +110,8 @@ internal class MPELatencyTest(
                 },
                 onLoad = {
                     latencyReporter.onLoad(testName)
-                }
+                },
+                startOnPaymentSheetLaunch = reportingMode == ReportingMode.Trace,
             )
         }
     }

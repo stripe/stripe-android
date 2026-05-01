@@ -587,11 +587,15 @@ internal class PlaygroundTestDriver(
         isReturningCustomer: Boolean,
         onLaunch: () -> Unit,
         onLoad: () -> Unit,
+        startOnPaymentSheetLaunch: Boolean = false,
     ) {
         setup(testParameters)
-        launchComplete()
-
-        onLaunch()
+        if (startOnPaymentSheetLaunch) {
+            launchComplete(onPaymentSheetLaunch = onLaunch)
+        } else {
+            launchComplete()
+            onLaunch()
+        }
 
         if (isReturningCustomer) {
             selectors.composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
@@ -1302,10 +1306,13 @@ internal class PlaygroundTestDriver(
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
-    private fun launchComplete() {
+    private fun launchComplete(
+        onPaymentSheetLaunch: (() -> Unit)? = null,
+    ) {
         selectors.reload.click()
         selectors.complete.waitForEnabled()
         selectors.complete.click()
+        onPaymentSheetLaunch?.invoke()
 
         // PaymentSheetActivity is now on screen
         waitForNotPlaygroundActivity()
