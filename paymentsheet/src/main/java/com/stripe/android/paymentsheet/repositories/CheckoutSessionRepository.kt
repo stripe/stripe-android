@@ -50,9 +50,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 options = options,
                 params = params,
             ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser,
         )
     }
 

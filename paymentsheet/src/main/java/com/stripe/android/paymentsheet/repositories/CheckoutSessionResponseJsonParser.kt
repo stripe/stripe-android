@@ -28,9 +28,7 @@ import org.json.JSONObject
  * replaces that deferred intent with the actual confirmed intent from the top-level
  * `payment_intent` or `setup_intent` field.
  */
-internal class CheckoutSessionResponseJsonParser(
-    private val isLiveMode: Boolean,
-) : ModelJsonParser<CheckoutSessionResponse> {
+internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSessionResponse> {
 
     @Suppress("LongMethod")
     override fun parse(json: JSONObject): CheckoutSessionResponse? {
@@ -54,8 +52,9 @@ internal class CheckoutSessionResponseJsonParser(
         }
 
         val parsedElementsSession = parseElementsSession(
-            json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
-            json.optJSONObject(FIELD_ELEMENTS_SESSION),
+            serverBuiltElementsSessionParams = json.optJSONObject(FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS),
+            elementsSessionJson = json.optJSONObject(FIELD_ELEMENTS_SESSION),
+            liveMode = liveMode,
         )
         val elementsSession = if (parsedElementsSession != null) {
             val confirmedIntent = paymentIntent ?: setupIntent
@@ -172,6 +171,7 @@ internal class CheckoutSessionResponseJsonParser(
     private fun parseElementsSession(
         serverBuiltElementsSessionParams: JSONObject?,
         elementsSessionJson: JSONObject?,
+        liveMode: Boolean,
     ): ElementsSession? {
         val serverBuiltElementsSessionParams = serverBuiltElementsSessionParams?.let {
             parseElementsSessionParams(it)
@@ -180,7 +180,7 @@ internal class CheckoutSessionResponseJsonParser(
 
         return ElementsSessionJsonParser(
             serverBuiltElementsSessionParams,
-            isLiveMode = isLiveMode,
+            isLiveMode = liveMode,
         ).parse(elementsSessionJson)
     }
 
@@ -481,57 +481,55 @@ internal class CheckoutSessionResponseJsonParser(
         }
     }
 
-    private companion object {
-        private const val FIELD_SESSION_ID = "session_id"
-        private const val FIELD_UI_MODE = "ui_mode"
-        private const val UI_MODE_CUSTOM = "custom"
-        private const val FIELD_MODE = "mode"
-        private const val FIELD_STATUS = "status"
-        private const val FIELD_LIVE_MODE = "livemode"
-        private const val FIELD_TAX = "tax"
-        private const val FIELD_CURRENCY = "currency"
-        private const val FIELD_CUSTOMER_EMAIL = "customer_email"
-        private const val FIELD_ELEMENTS_SESSION = "elements_session"
-        private const val FIELD_TOTAL_SUMMARY = "total_summary"
-        private const val FIELD_DUE = "due"
-        private const val FIELD_PAYMENT_INTENT = "payment_intent"
-        private const val FIELD_SETUP_INTENT = "setup_intent"
-        private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
-        private const val FIELD_CUSTOMER = "customer"
-        private const val FIELD_CUSTOMER_ID = "id"
-        private const val FIELD_PAYMENT_METHODS = "payment_methods"
-        private const val FIELD_CAN_DETACH_PAYMENT_METHOD = "can_detach_payment_method"
-        private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =
-            "customer_managed_saved_payment_methods_offer_save"
-        private const val FIELD_OFFER_SAVE_ENABLED = "enabled"
-        private const val FIELD_OFFER_SAVE_STATUS = "status"
-        private const val FIELD_LINE_ITEM_GROUP = "line_item_group"
-        private const val FIELD_SUBTOTAL = "subtotal"
-        private const val FIELD_TOTAL = "total"
-        private const val FIELD_AMOUNT = "amount"
-        private const val FIELD_APPLIED_BALANCE = "applied_balance"
-        private const val FIELD_DISCOUNT_AMOUNTS = "discount_amounts"
-        private const val FIELD_COUPON = "coupon"
-        private const val FIELD_NAME = "name"
-        private const val FIELD_TAX_AMOUNTS = "tax_amounts"
-        private const val FIELD_INCLUSIVE = "inclusive"
-        private const val FIELD_TAX_RATE = "tax_rate"
-        private const val FIELD_DISPLAY_NAME = "display_name"
-        private const val FIELD_PERCENTAGE = "percentage"
-        private const val FIELD_SHIPPING_RATE = "shipping_rate"
-        private const val FIELD_SHIPPING = "shipping"
-        private const val FIELD_SHIPPING_OPTION = "shipping_option"
-        private const val FIELD_SHIPPING_OPTIONS = "shipping_options"
-        private const val FIELD_DELIVERY_ESTIMATE = "delivery_estimate"
-        private const val FIELD_LINE_ITEMS = "line_items"
-        private const val FIELD_ID = "id"
-        private const val FIELD_QUANTITY = "quantity"
-        private const val FIELD_ADAPTIVE_PRICING_INFO = "adaptive_pricing_info"
-        private const val FIELD_ACTIVE_PRESENTMENT_CURRENCY = "active_presentment_currency"
-        private const val FIELD_INTEGRATION_AMOUNT = "integration_amount"
-        private const val FIELD_INTEGRATION_CURRENCY = "integration_currency"
-        private const val FIELD_LOCAL_CURRENCY_OPTIONS = "local_currency_options"
-        private const val FIELD_CONVERSION_MARKUP_BPS = "conversion_markup_bps"
-        private const val FIELD_PRESENTMENT_EXCHANGE_RATE = "presentment_exchange_rate"
-    }
+    private const val FIELD_SESSION_ID = "session_id"
+    private const val FIELD_UI_MODE = "ui_mode"
+    private const val UI_MODE_CUSTOM = "custom"
+    private const val FIELD_MODE = "mode"
+    private const val FIELD_STATUS = "status"
+    private const val FIELD_LIVE_MODE = "livemode"
+    private const val FIELD_TAX = "tax"
+    private const val FIELD_CURRENCY = "currency"
+    private const val FIELD_CUSTOMER_EMAIL = "customer_email"
+    private const val FIELD_ELEMENTS_SESSION = "elements_session"
+    private const val FIELD_TOTAL_SUMMARY = "total_summary"
+    private const val FIELD_DUE = "due"
+    private const val FIELD_PAYMENT_INTENT = "payment_intent"
+    private const val FIELD_SETUP_INTENT = "setup_intent"
+    private const val FIELD_SERVER_BUILT_ELEMENTS_SESSION_PARAMS = "server_built_elements_session_params"
+    private const val FIELD_CUSTOMER = "customer"
+    private const val FIELD_CUSTOMER_ID = "id"
+    private const val FIELD_PAYMENT_METHODS = "payment_methods"
+    private const val FIELD_CAN_DETACH_PAYMENT_METHOD = "can_detach_payment_method"
+    private const val FIELD_SAVED_PAYMENT_METHODS_OFFER_SAVE =
+        "customer_managed_saved_payment_methods_offer_save"
+    private const val FIELD_OFFER_SAVE_ENABLED = "enabled"
+    private const val FIELD_OFFER_SAVE_STATUS = "status"
+    private const val FIELD_LINE_ITEM_GROUP = "line_item_group"
+    private const val FIELD_SUBTOTAL = "subtotal"
+    private const val FIELD_TOTAL = "total"
+    private const val FIELD_AMOUNT = "amount"
+    private const val FIELD_APPLIED_BALANCE = "applied_balance"
+    private const val FIELD_DISCOUNT_AMOUNTS = "discount_amounts"
+    private const val FIELD_COUPON = "coupon"
+    private const val FIELD_NAME = "name"
+    private const val FIELD_TAX_AMOUNTS = "tax_amounts"
+    private const val FIELD_INCLUSIVE = "inclusive"
+    private const val FIELD_TAX_RATE = "tax_rate"
+    private const val FIELD_DISPLAY_NAME = "display_name"
+    private const val FIELD_PERCENTAGE = "percentage"
+    private const val FIELD_SHIPPING_RATE = "shipping_rate"
+    private const val FIELD_SHIPPING = "shipping"
+    private const val FIELD_SHIPPING_OPTION = "shipping_option"
+    private const val FIELD_SHIPPING_OPTIONS = "shipping_options"
+    private const val FIELD_DELIVERY_ESTIMATE = "delivery_estimate"
+    private const val FIELD_LINE_ITEMS = "line_items"
+    private const val FIELD_ID = "id"
+    private const val FIELD_QUANTITY = "quantity"
+    private const val FIELD_ADAPTIVE_PRICING_INFO = "adaptive_pricing_info"
+    private const val FIELD_ACTIVE_PRESENTMENT_CURRENCY = "active_presentment_currency"
+    private const val FIELD_INTEGRATION_AMOUNT = "integration_amount"
+    private const val FIELD_INTEGRATION_CURRENCY = "integration_currency"
+    private const val FIELD_LOCAL_CURRENCY_OPTIONS = "local_currency_options"
+    private const val FIELD_CONVERSION_MARKUP_BPS = "conversion_markup_bps"
+    private const val FIELD_PRESENTMENT_EXCHANGE_RATE = "presentment_exchange_rate"
 }
