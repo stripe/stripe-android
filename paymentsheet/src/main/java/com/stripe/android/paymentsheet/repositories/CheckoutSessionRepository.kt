@@ -65,14 +65,15 @@ internal class CheckoutSessionRepository @Inject constructor(
             mobileAppId = appId,
             mobileSessionIdProvider = { AnalyticsRequestFactory.sessionId.toString() },
         )
+        val elementsSessionClient = clientParams.toCheckoutSessionMap()
         return executePost(
             url = initUrl(sessionId),
             params = mapOf(
-                "browser_locale" to clientParams.locale,
+                "browser_locale" to elementsSessionClient.getValue("locale"),
                 "browser_timezone" to TimeZone.getDefault().id,
                 "eid" to UUID.randomUUID().toString(),
                 "redirect_type" to "embedded",
-                "elements_session_client" to clientParams.toCheckoutSessionMap(),
+                "elements_session_client" to elementsSessionClient,
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
             ),
         )
