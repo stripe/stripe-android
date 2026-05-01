@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
@@ -15,6 +17,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcCompletionState
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionInteractor
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionPaymentSheetScreen
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -42,11 +45,24 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
+import java.util.concurrent.atomic.AtomicBoolean
 import com.stripe.android.R as PaymentsCoreR
 
 internal val formBottomContentPadding = 20.dp
 internal val horizontalModeWalletsDividerSpacing = 16.dp
 internal val verticalModeWalletsDividerSpacing = 24.dp
+
+@Composable
+private fun Modifier.traceFirstDraw(name: String): Modifier {
+    val hasTracedFirstDraw = remember(name) { AtomicBoolean(false) }
+
+    return this.drawWithContent {
+        drawContent()
+        if (hasTracedFirstDraw.compareAndSet(false, true)) {
+            PaymentSheetLoadTraceRecorder.trace(name) {}
+        }
+    }
+}
 
 internal data class BuyButtonState(
     val visible: Boolean,
@@ -176,7 +192,7 @@ internal sealed interface PaymentSheetScreen {
             SavedPaymentMethodTabLayoutUI(
                 interactor = interactor,
                 cvcRecollectionState = cvcRecollectionState,
-                modifier = modifier,
+                modifier = modifier.traceFirstDraw("Select Saved Payment Methods First Draw"),
             )
         }
 
@@ -228,7 +244,10 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(modifier: Modifier) {
-            AddPaymentMethod(interactor = interactor, modifier)
+            AddPaymentMethod(
+                interactor = interactor,
+                modifier.traceFirstDraw("Add First Payment Method First Draw")
+            )
         }
 
         override fun close() {

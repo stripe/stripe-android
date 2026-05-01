@@ -172,7 +172,7 @@ def print_mermaid(commit, sessions)
 
   sessions.each do |session|
     puts
-    puts "    section #{humanize_test_name(session.test_name)} (Latency: #{format('%.2f', session.total_duration_ms)}ms)"
+    puts "    section #{humanize_test_name(session.test_name)} (Latency #{format('%.2f', session.total_duration_ms)}ms)"
     puts "    Load (#{format('%.3f', session.total_duration_ms)}ms) :t#{task_index}, 0, #{gantt_value(session.total_duration_ms)}"
     task_index += 1
 
