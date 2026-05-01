@@ -158,6 +158,10 @@ def gantt_value(value)
   [value.round, 1].max
 end
 
+def gantt_end(start_offset_ms, duration_ms)
+  [gantt_value(start_offset_ms + duration_ms), gantt_value(start_offset_ms) + 1].max
+end
+
 def print_mermaid(commit, sessions)
   puts
   puts 'gantt'
@@ -177,7 +181,7 @@ def print_mermaid(commit, sessions)
       .each do |span|
         puts(
           "    #{span.name} (#{format('%.3f', span.duration_ms)}ms) " \
-          ":t#{task_index}, #{span.start_offset_ms.round}, #{gantt_value(span.duration_ms)}"
+          ":t#{task_index}, #{span.start_offset_ms.round}, #{gantt_end(span.start_offset_ms, span.duration_ms)}"
         )
         task_index += 1
       end
