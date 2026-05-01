@@ -739,5 +739,4 @@ internal class FormHelperTest {
     private data class Scenario(
         val eventReporter: FakeEventReporter,
     )
-
 }
