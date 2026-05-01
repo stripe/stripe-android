@@ -7,6 +7,7 @@ require 'open3'
 PROJECT_ROOT = File.expand_path('..', __dir__)
 LOGCAT_TAG = 'MPELatencyBenchmark'
 BENCHMARK_CLASS = 'com.stripe.android.lpm.MPELatencyTest'
+MAX_INVOCATION_ATTEMPTS = 3
 
 # ============================================================================
 # DATA COLLECTION
@@ -23,13 +24,36 @@ def run_latency_tests_for_commit(commit, sample_count)
 
   checkout_commit(commit)
 
-  puts "Collecting #{sample_count} sample(s) in one Gradle invocation..."
+  (1..MAX_INVOCATION_ATTEMPTS).each do |attempt|
+    puts "Collecting #{sample_count} sample(s) in one Gradle invocation..."
+    puts "Attempt #{attempt}/#{MAX_INVOCATION_ATTEMPTS}"
 
-  output = run_android_latency_tests(sample_count)
-  print_raw_result_debug_summary(output)
-  results = parse_latency_results(output)
-  puts "\nFound #{results.length} test(s) with results"
-  results
+    output = run_android_latency_tests(sample_count)
+    print_raw_result_debug_summary(output)
+    results = parse_latency_results(output)
+    expected_test_count = extract_expected_test_count(output)
+
+    if valid_invocation_results?(
+      results: results,
+      sample_count: sample_count,
+      expected_test_count: expected_test_count
+    )
+      puts "\nFound #{results.length} test(s) with results"
+      return results
+    end
+
+    puts "\nInvocation did not produce a complete sample set."
+    puts "  Expected tests: #{expected_test_count || 'unknown'}"
+    puts "  Actual tests:   #{results.length}"
+    if results.any?
+      puts '  Samples per test:'
+      results.sort.each do |test_name, durations|
+        puts "    #{test_name}: #{durations.length}"
+      end
+    end
+  end
+
+  raise "Failed to collect a complete sample set for commit #{commit} after #{MAX_INVOCATION_ATTEMPTS} attempts"
 end
 
 def run_android_latency_tests(sample_count)
@@ -126,6 +150,18 @@ def print_raw_result_debug_summary(output)
   counts.sort.each do |test_name, count|
     puts "  #{test_name}: #{count}"
   end
+end
+
+def extract_expected_test_count(output)
+  match = output.match(/Starting (\d+) tests on/)
+  match && match[1].to_i
+end
+
+def valid_invocation_results?(results:, sample_count:, expected_test_count:)
+  return false if expected_test_count.nil?
+  return false unless results.length == expected_test_count
+
+  results.values.all? { |durations| durations.length == sample_count }
 end
 
 # ============================================================================
