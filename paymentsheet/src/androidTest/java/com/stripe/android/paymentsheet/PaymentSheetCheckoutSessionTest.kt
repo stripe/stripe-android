@@ -306,83 +306,34 @@ internal class PaymentSheetCheckoutSessionTest {
     // region customer_email billing details tests
 
     @Test
-    fun testCheckoutSessionCustomerEmailIsAttachedToPaymentMethod() = runPaymentSheetTest(
-        networkRule = networkRule,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.put("customer_email", "session@example.com")
-            }
-        }
-
-        val noEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
-            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-            .link(
-                PaymentSheet.LinkConfiguration.Builder()
-                    .display(PaymentSheet.LinkConfiguration.Display.Never)
-                    .build()
-            )
-            .build()
-
-        testContext.presentWithCheckout(configuration = noEmailConfiguration)
-
-        page.fillOutCardDetails()
-
-        networkRule.createPaymentMethod(
-            bodyPart("billing_details[email]", "session@example.com"),
+    fun testCheckoutSessionCustomerEmailIsAttachedToPaymentMethod() =
+        runCheckoutSessionEmailPrecedenceTest(
+            expectedEmail = "session@example.com",
         )
 
-        networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm.json")
-        }
-
-        page.clickPrimaryButton()
-    }
-
     @Test
-    fun testFormEnteredEmailTakesPrecedenceOverCheckoutSessionEmail() = runPaymentSheetTest(
-        networkRule = networkRule,
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-init.json") { json ->
-                json.put("customer_email", "session@example.com")
-            }
-        }
-
-        val collectEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
-            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-            .billingDetailsCollectionConfiguration(
-                PaymentSheet.BillingDetailsCollectionConfiguration(
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                )
-            )
-            .link(
-                PaymentSheet.LinkConfiguration.Builder()
-                    .display(PaymentSheet.LinkConfiguration.Display.Never)
-                    .build()
-            )
-            .build()
-
-        testContext.presentWithCheckout(configuration = collectEmailConfiguration)
-
-        page.fillOutCardDetails()
-        formPage.fillOutEmail()
-
-        networkRule.createPaymentMethod(
-            bodyPart("billing_details[email]", "janedoe@example.com"),
+    fun testFormEnteredEmailTakesPrecedenceOverCheckoutSessionEmail() =
+        runCheckoutSessionEmailPrecedenceTest(
+            collectEmail = true,
+            fillOutEmail = true,
+            expectedEmail = "janedoe@example.com",
         )
 
-        networkRule.checkoutConfirm { response ->
-            response.testBodyFromFile("checkout-session-confirm.json")
-        }
-
-        page.clickPrimaryButton()
-    }
-
     @Test
-    fun testMerchantEmailTakesPrecedenceOverFormAndCheckoutSessionEmail() = runPaymentSheetTest(
+    fun testMerchantEmailTakesPrecedenceOverFormAndCheckoutSessionEmail() =
+        runCheckoutSessionEmailPrecedenceTest(
+            merchantEmail = "merchant@example.com",
+            collectEmail = true,
+            fillOutEmail = true,
+            expectedEmail = "merchant@example.com",
+        )
+
+    private fun runCheckoutSessionEmailPrecedenceTest(
+        merchantEmail: String? = null,
+        collectEmail: Boolean = false,
+        fillOutEmail: Boolean = false,
+        expectedEmail: String,
+    ) = runPaymentSheetTest(
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -392,14 +343,20 @@ internal class PaymentSheetCheckoutSessionTest {
             }
         }
 
-        val merchantEmailConfiguration = PaymentSheet.Configuration.Builder("Test Merchant")
-            .defaultBillingDetails(PaymentSheet.BillingDetails(email = "merchant@example.com"))
+        val configuration = PaymentSheet.Configuration.Builder("Test Merchant")
             .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
-            .billingDetailsCollectionConfiguration(
-                PaymentSheet.BillingDetailsCollectionConfiguration(
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                )
-            )
+            .apply {
+                if (merchantEmail != null) {
+                    defaultBillingDetails(PaymentSheet.BillingDetails(email = merchantEmail))
+                }
+                if (collectEmail) {
+                    billingDetailsCollectionConfiguration(
+                        PaymentSheet.BillingDetailsCollectionConfiguration(
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        )
+                    )
+                }
+            }
             .link(
                 PaymentSheet.LinkConfiguration.Builder()
                     .display(PaymentSheet.LinkConfiguration.Display.Never)
@@ -407,13 +364,15 @@ internal class PaymentSheetCheckoutSessionTest {
             )
             .build()
 
-        testContext.presentWithCheckout(configuration = merchantEmailConfiguration)
+        testContext.presentWithCheckout(configuration = configuration)
 
         page.fillOutCardDetails()
-        formPage.fillOutEmail()
+        if (fillOutEmail) {
+            formPage.fillOutEmail()
+        }
 
         networkRule.createPaymentMethod(
-            bodyPart("billing_details[email]", "merchant@example.com"),
+            bodyPart("billing_details[email]", expectedEmail),
         )
 
         networkRule.checkoutConfirm { response ->
