@@ -199,6 +199,27 @@ class Checkout private constructor(
     }
 
     /**
+     * Wraps an asynchronous function that communicates with your server to modify the
+     * Checkout Session. After the function completes, the session is re-fetched from the server.
+     *
+     * @param serverUpdate A suspend function responsible for making a server request that updates
+     * the Checkout Session.
+     */
+    suspend fun runServerUpdate(
+        serverUpdate: suspend () -> Result<Unit>,
+    ): Result<Unit> = withInternalState { sessionId ->
+        serverUpdate().fold(
+            onSuccess = {
+                component.checkoutSessionRepository.init(
+                    sessionId = sessionId,
+                    adaptivePricingAllowed = configuration.adaptivePricingAllowed,
+                )
+            },
+            onFailure = { Result.failure(it) },
+        )
+    }
+
+    /**
      * Selects a shipping option.
      *
      * @param id The ID of the shipping option to select.
@@ -315,7 +336,9 @@ class Checkout private constructor(
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
             _isLoading.value = true
-            val result = internalState.block(internalState.checkoutSessionResponse.id).map { response ->
+            val result = runCatching {
+                internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
+            }.map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 _checkoutSession.value = response.asCheckoutSession()
             }
