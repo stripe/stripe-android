@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddNextStep
@@ -10,6 +10,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -32,7 +34,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
 
-internal interface FormActivityStateHelper {
+internal interface SheetActivityStateHolder {
     val state: StateFlow<State>
     val result: SharedFlow<FormResult>
     fun updateMandate(mandateText: ResolvableString?)
@@ -56,7 +58,7 @@ internal interface FormActivityStateHelper {
 }
 
 @Singleton
-internal class DefaultFormActivityStateHelper @Inject constructor(
+internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val configuration: EmbeddedPaymentElement.Configuration,
@@ -66,9 +68,9 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val tapToAddHelper: TapToAddHelper,
     private val customerStateHolder: CustomerStateHolder,
-) : FormActivityStateHelper {
+) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
-        FormActivityStateHelper.State(
+        SheetActivityStateHolder.State(
             primaryButtonLabel = primaryButtonLabel(paymentMethodMetadata.stripeIntent, configuration),
             isEnabled = false,
             processingState = PrimaryButtonProcessingState.Idle(null),
@@ -77,7 +79,7 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
             savedPaymentSelectionToConfirm = null,
         )
     )
-    override val state: StateFlow<FormActivityStateHelper.State> = _state
+    override val state: StateFlow<SheetActivityStateHolder.State> = _state
 
     private val _result = MutableSharedFlow<FormResult>()
     override val result: SharedFlow<FormResult> = _result
@@ -193,9 +195,9 @@ internal class DefaultFormActivityStateHelper @Inject constructor(
         }
     }
 
-    private fun FormActivityStateHelper.State.updateWithConfirmationState(
+    private fun SheetActivityStateHolder.State.updateWithConfirmationState(
         state: ConfirmationHandler.State
-    ): FormActivityStateHelper.State {
+    ): SheetActivityStateHolder.State {
         return when (state) {
             is ConfirmationHandler.State.Complete -> {
                 eventReporter.reportPaymentResult(state.result, selectionHolder.selection.value)

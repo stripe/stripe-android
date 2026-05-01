@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
@@ -36,6 +37,7 @@ import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.fadeOut
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class EmbeddedSheetActivity : AppCompatActivity() {
@@ -61,6 +63,12 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     @Inject
     lateinit var selectionHolder: EmbeddedSelectionHolder
 
+    @Inject
+    lateinit var sheetActivityRegistrar: SheetActivityRegistrar
+
+    @Inject
+    lateinit var sheetActivityStateHolder: SheetActivityStateHolder
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -71,6 +79,21 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
 
         renderEdgeToEdge()
         viewModel.component.inject(this)
+
+        sheetActivityRegistrar.registerAndBootstrap(
+            activityResultCaller = this,
+            lifecycleOwner = this,
+        )
+
+        lifecycleScope.launch {
+            sheetActivityStateHolder.result.collect {
+                setEmbeddedResult(
+                    shouldInvokeSelectionCallback = false,
+                    hasBeenConfirmed = true,
+                )
+                finish()
+            }
+        }
 
         onBackPressedDispatcher.addCallback {
             if (!embeddedNavigator.screen.value.isPerformingNetworkOperation()) {
@@ -176,10 +199,13 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         }
     }
 
-    private fun setEmbeddedResult(shouldInvokeSelectionCallback: Boolean) {
+    private fun setEmbeddedResult(
+        shouldInvokeSelectionCallback: Boolean,
+        hasBeenConfirmed: Boolean = false,
+    ) {
         val result = EmbeddedSheetResult.Complete(
             selection = selectionHolder.selection.value,
-            hasBeenConfirmed = false,
+            hasBeenConfirmed = hasBeenConfirmed,
             customerState = customerStateHolder.customer.value,
             shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
         )

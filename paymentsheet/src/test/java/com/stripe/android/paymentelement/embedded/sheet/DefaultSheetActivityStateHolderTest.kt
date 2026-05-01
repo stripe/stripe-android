@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.TurbineTestContext
@@ -18,6 +18,11 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
+import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
+import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.paymentelement.embedded.form.confirmationStateComplete
+import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirming
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -29,7 +34,7 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
-class DefaultFormActivityStateHelperTest {
+class DefaultSheetActivityStateHolderTest {
     @Test
     fun `state initializes correctly`() = testScenario {
         stateHolder.state.test {
@@ -412,7 +417,7 @@ class DefaultFormActivityStateHelperTest {
 
     private class Scenario(
         val selectionHolder: EmbeddedSelectionHolder,
-        val stateHolder: DefaultFormActivityStateHelper,
+        val stateHolder: DefaultSheetActivityStateHolder,
         val confirmationHandler: FakeConfirmationHandler,
         val onClickOverrideDelegate: OnClickOverrideDelegate,
     )
@@ -428,7 +433,7 @@ class DefaultFormActivityStateHelperTest {
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
-        val stateHolder = DefaultFormActivityStateHelper(
+        val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = config,
@@ -448,7 +453,7 @@ class DefaultFormActivityStateHelperTest {
         ).block()
     }
 
-    private suspend fun TurbineTestContext<FormActivityStateHelper.State>.awaitAndVerifyInitialState() {
+    private suspend fun TurbineTestContext<SheetActivityStateHolder.State>.awaitAndVerifyInitialState() {
         val initialState = awaitItem()
         assertThat(initialState.processingState).isEqualTo(PrimaryButtonProcessingState.Idle(null))
         assertThat(initialState.isEnabled).isFalse()

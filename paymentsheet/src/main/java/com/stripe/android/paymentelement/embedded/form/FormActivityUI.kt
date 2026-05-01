@@ -10,6 +10,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.ErrorMessage
@@ -33,7 +34,7 @@ internal fun FormScreenContent(
     eventReporter: EventReporter,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
-    state: FormActivityStateHelper.State,
+    state: SheetActivityStateHolder.State,
     updateSelection: (PaymentSelection.Saved) -> Unit,
     savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
 ) {
@@ -69,7 +70,7 @@ internal fun FormScreenContent(
 
 @Composable
 internal fun USBankAccountMandate(
-    state: FormActivityStateHelper.State
+    state: SheetActivityStateHolder.State
 ) {
     state.mandateText?.let {
         Mandate(
@@ -83,7 +84,7 @@ internal fun USBankAccountMandate(
 
 @Composable
 internal fun FormActivityError(
-    state: FormActivityStateHelper.State
+    state: SheetActivityStateHolder.State
 ) {
     state.error?.let {
         ErrorMessage(
@@ -97,7 +98,7 @@ internal fun FormActivityError(
 
 @Composable
 internal fun FormActivityPrimaryButton(
-    state: FormActivityStateHelper.State,
+    state: SheetActivityStateHolder.State,
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
 ) {

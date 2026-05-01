@@ -10,7 +10,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FakeFormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
@@ -108,7 +107,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             .configurationModifier()
             .build()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val stateHelper = FakeFormActivityStateHelper()
+        val stateHelper = FakeSheetActivityStateHolder()
         val onClickDelegate = OnClickDelegateOverrideImpl()
         val eventReporter = FakeEventReporter()
         val confirmationHelper = DefaultSheetActivityConfirmationHelper(
@@ -140,7 +139,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     private class Scenario(
         val confirmationHelper: DefaultSheetActivityConfirmationHelper,
         val confirmationHandler: FakeConfirmationHandler,
-        val stateHelper: FakeFormActivityStateHelper,
+        val stateHelper: FakeSheetActivityStateHolder,
         val onClickDelegate: OnClickDelegateOverrideImpl,
         val eventReporter: FakeEventReporter,
         val selectionHolder: EmbeddedSelectionHolder,

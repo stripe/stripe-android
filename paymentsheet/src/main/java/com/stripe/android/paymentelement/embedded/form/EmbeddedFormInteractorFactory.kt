@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher.Companion.HOSTED_SURFACE_PAYMENT_ELEMENT
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -28,7 +29,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
-    private val formActivityStateHelper: FormActivityStateHelper,
+    private val sheetActivityStateHolder: SheetActivityStateHolder,
     private val tapToAddHelper: TapToAddHelper,
     private val eventReporter: EventReporter,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
@@ -53,10 +54,10 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->
-                formActivityStateHelper.updateMandate(mandateText)
+                sheetActivityStateHolder.updateMandate(mandateText)
             },
-            onUpdatePrimaryButtonUIState = formActivityStateHelper::updatePrimaryButton,
-            onError = formActivityStateHelper::updateError,
+            onUpdatePrimaryButtonUIState = sheetActivityStateHolder::updatePrimaryButton,
+            onError = sheetActivityStateHolder::updateError,
             onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
         )
 
@@ -84,7 +85,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods
             ),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-            processing = formActivityStateHelper.state.mapAsStateFlow { it.isProcessing },
+            processing = sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing },
             paymentMethodIncentive = PaymentMethodIncentiveInteractor(
                 paymentMethodMetadata.paymentMethodIncentive
             ).displayedIncentive,

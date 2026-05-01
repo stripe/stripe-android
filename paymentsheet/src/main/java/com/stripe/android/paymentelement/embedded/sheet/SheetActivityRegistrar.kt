@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
@@ -8,7 +8,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import javax.inject.Inject
 import javax.inject.Singleton
 
-internal interface FormActivityRegistrar {
+internal interface SheetActivityRegistrar {
     fun registerAndBootstrap(
         activityResultCaller: ActivityResultCaller,
         lifecycleOwner: LifecycleOwner,
@@ -16,11 +16,11 @@ internal interface FormActivityRegistrar {
 }
 
 @Singleton
-internal class DefaultFormActivityRegistrar @Inject constructor(
+internal class DefaultSheetActivityRegistrar @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val tapToAddHelper: TapToAddHelper,
     private val paymentMethodMetadata: PaymentMethodMetadata,
-) : FormActivityRegistrar {
+) : SheetActivityRegistrar {
 
     private var isBootstrapped = false
 

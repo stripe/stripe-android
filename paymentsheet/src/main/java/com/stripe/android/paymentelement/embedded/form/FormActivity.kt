@@ -15,12 +15,13 @@ import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
+import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.collectAsState
@@ -43,19 +44,16 @@ internal class FormActivity : AppCompatActivity() {
     lateinit var formScreen: EmbeddedNavigator.Screen.Form
 
     @Inject
-    lateinit var formInteractor: DefaultVerticalModeFormInteractor
-
-    @Inject
     lateinit var eventReporter: EventReporter
 
     @Inject
-    lateinit var formActivityStateHelper: FormActivityStateHelper
+    lateinit var sheetActivityStateHolder: SheetActivityStateHolder
 
     @Inject
     lateinit var customerStateHolder: CustomerStateHolder
 
     @Inject
-    lateinit var formActivityRegistrar: FormActivityRegistrar
+    lateinit var sheetActivityRegistrar: SheetActivityRegistrar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -69,13 +67,13 @@ internal class FormActivity : AppCompatActivity() {
 
         viewModel.component.inject(this)
 
-        formActivityRegistrar.registerAndBootstrap(
+        sheetActivityRegistrar.registerAndBootstrap(
             activityResultCaller = this,
             lifecycleOwner = this,
         )
 
         lifecycleScope.launch {
-            formActivityStateHelper.result.collect {
+            sheetActivityStateHolder.result.collect {
                 setFormResult(it)
                 finish()
             }
