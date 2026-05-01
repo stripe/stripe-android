@@ -227,6 +227,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
+                locale = clientParams.locale,
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 customPaymentMethods = customPaymentMethodIds,
@@ -242,6 +243,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.SetupIntent -> {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = clientSecret,
+                locale = clientParams.locale,
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 externalPaymentMethods = externalPaymentMethods,
@@ -256,6 +258,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
 
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
+                locale = clientParams.locale,
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
@@ -275,6 +278,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
             )
             ElementsSessionParams.DeferredIntentType(
+                locale = clientParams.locale,
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
