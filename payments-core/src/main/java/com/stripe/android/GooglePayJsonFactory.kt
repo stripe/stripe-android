@@ -58,7 +58,8 @@ class GooglePayJsonFactory internal constructor(
         googlePayConfig = GooglePayConfig(context),
         isJcbEnabled = isJcbEnabled,
         cardBrandFilter = cardBrandFilter,
-        cardFundingFilter = cardFundingFilter
+        cardFundingFilter = cardFundingFilter,
+        additionalEnabledNetworks = additionalEnabledNetworks
     )
 
     constructor(
