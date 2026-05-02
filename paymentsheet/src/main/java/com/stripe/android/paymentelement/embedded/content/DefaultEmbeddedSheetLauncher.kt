@@ -33,7 +33,7 @@ internal interface EmbeddedSheetLauncher {
         hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
         customerState: CustomerState?,
-        promotion: PaymentMethodMessagePromotion?,
+        promotions: List<PaymentMethodMessagePromotion>?,
     )
 
     fun launchManage(
@@ -115,7 +115,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
         customerState: CustomerState?,
-        promotion: PaymentMethodMessagePromotion?,
+        promotions: List<PaymentMethodMessagePromotion>?,
     ) {
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
@@ -143,7 +143,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             statusBarColor = statusBarColor,
             paymentSelection = currentSelection,
             customerState = customerState,
-            promotion = promotion
+            promotions = promotions
         )
         formActivityLauncher.launch(args)
     }

@@ -67,7 +67,7 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val statusBarColor: Int?,
         val paymentSelection: PaymentSelection?,
         val customerState: CustomerState?,
-        val promotion: PaymentMethodMessagePromotion?
+        val promotions: List<PaymentMethodMessagePromotion>?
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

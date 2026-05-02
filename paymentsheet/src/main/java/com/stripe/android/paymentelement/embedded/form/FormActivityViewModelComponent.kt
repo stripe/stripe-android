@@ -53,7 +53,7 @@ internal interface FormActivityViewModelComponent {
             paymentElementCallbackIdentifier: String,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
-            @BindsInstance promotion: PaymentMethodMessagePromotion?,
+            @BindsInstance promotions: List<PaymentMethodMessagePromotion>?,
         ): FormActivityViewModelComponent
     }
 }

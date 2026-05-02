@@ -33,7 +33,7 @@ internal class FormActivityViewModel @Inject constructor(
                 application = extras.requireApplication(),
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 savedStateHandle = extras.createSavedStateHandle(),
-                promotion = args.promotion,
+                promotions = args.promotions,
             )
 
             component.selectionHolder.set(args.paymentSelection)

@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.CardArtExperimentModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
+import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelperModule
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
@@ -75,6 +76,7 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class,
         CardArtExperimentModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {

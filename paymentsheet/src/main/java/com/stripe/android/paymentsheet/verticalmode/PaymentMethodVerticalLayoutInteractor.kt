@@ -646,7 +646,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled &&
             PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)
         ) {
-            { paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(code) }
+            {
+                paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(
+                    code,
+                    paymentMethodMetadata
+                )
+            }
         } else {
             null
         }

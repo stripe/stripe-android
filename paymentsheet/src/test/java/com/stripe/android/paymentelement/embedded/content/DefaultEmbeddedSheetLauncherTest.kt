@@ -86,12 +86,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
             statusBarColor = null,
             paymentSelection = null,
             customerState = customerState,
-            promotion = promotion
+            promotions = listOf(promotion)
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
-        sheetLauncher.launchForm(code, paymentMethodMetadata, false, state, customerState, promotion)
+        sheetLauncher.launchForm(code, paymentMethodMetadata, false, state, customerState, listOf(promotion))
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
