@@ -11,12 +11,15 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import kotlinx.coroutines.delay
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import kotlin.String
 
+@Category(PaparazziTest::class)
 class TapToAddLayoutScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

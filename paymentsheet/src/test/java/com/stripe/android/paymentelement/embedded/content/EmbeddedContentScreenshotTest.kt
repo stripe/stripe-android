@@ -8,10 +8,13 @@ import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLayoutInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
+import org.junit.experimental.categories.Category
 import kotlin.test.Test
 
+@Category(PaparazziTest::class)
 internal class EmbeddedContentScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

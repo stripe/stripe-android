@@ -10,6 +10,7 @@ import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -17,8 +18,10 @@ import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import java.util.Locale
 
+@Category(PaparazziTest::class)
 class LinkInline2FASectionScreenshotTest {
 
     @get:Rule

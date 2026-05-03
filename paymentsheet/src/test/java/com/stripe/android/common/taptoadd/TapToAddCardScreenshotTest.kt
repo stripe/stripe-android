@@ -6,9 +6,12 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.common.taptoadd.ui.TapToAddCard
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class TapToAddCardScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

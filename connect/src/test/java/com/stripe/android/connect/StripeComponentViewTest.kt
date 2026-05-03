@@ -12,9 +12,12 @@ import com.stripe.android.connect.appearance.Colors
 import com.stripe.android.connect.test.TestComponentView
 import com.stripe.android.connect.webview.StripeConnectWebViewContainerState
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class StripeComponentViewTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

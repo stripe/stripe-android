@@ -14,11 +14,14 @@ import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.utils.OutlinedIconsAppearance
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.flow.update
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class PaymentSheetScreenSelectSavedPaymentMethodsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

@@ -3,12 +3,15 @@ package com.stripe.android.paymentsheet.ui
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 @OptIn(WalletButtonsPreview::class)
+@Category(PaparazziTest::class)
 class WalletButtonsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()

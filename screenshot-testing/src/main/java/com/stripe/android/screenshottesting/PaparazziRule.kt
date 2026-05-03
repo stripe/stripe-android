@@ -13,6 +13,7 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import com.android.ide.common.rendering.api.SessionParams
 import com.stripe.android.uicore.StripeTheme
+import org.junit.experimental.categories.Category
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -32,9 +33,25 @@ class PaparazziRule(
 
     override fun apply(base: Statement, description: Description): Statement {
         this.description = description
-        return object : Statement() {
-            override fun evaluate() {
-                base.evaluate()
+
+        val categoryAnnotation = description.testClass.getAnnotation(Category::class.java)
+
+        return categoryAnnotation?.takeIf {
+            categoryAnnotation.value.any { it == PaparazziTest::class }
+        }?.let {
+            object : Statement() {
+                override fun evaluate() {
+                    base.evaluate()
+                }
+            }
+        } ?: run {
+            object : Statement() {
+                override fun evaluate() {
+                    throw IllegalStateException(
+                        "PaparazziRule was used without @Category(PaparazziTest::class). " +
+                            "Please annotate your test class with @Category(PaparazziTest::class)"
+                    )
+                }
             }
         }
     }

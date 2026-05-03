@@ -6,12 +6,15 @@ import androidx.compose.ui.Modifier
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.mockito.kotlin.mock
 
+@Category(PaparazziTest::class)
 internal class PaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(PaymentSheetAppearance.entries)

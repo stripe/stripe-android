@@ -56,6 +56,7 @@ dependencies {
 
     kspDebug libs.showkaseProcessor
 
+    testImplementation project(":screenshot-testing")
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment

@@ -3,10 +3,13 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.ui.core.R
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class VerticalModeFormHeaderUITest {
     @get:Rule
     val paparazziRule = PaparazziRule()

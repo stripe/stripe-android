@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.LayoutDirection
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -24,7 +25,9 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class CardUiDefinitionFactoryTest {
 
     @get:Rule

@@ -25,12 +25,15 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreOwnerContext
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

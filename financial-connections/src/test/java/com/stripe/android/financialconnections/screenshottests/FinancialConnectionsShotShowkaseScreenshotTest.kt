@@ -20,10 +20,13 @@ import com.stripe.android.financialconnections.getMetadata
 import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.TimeZoneRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 
+@Category(PaparazziTest::class)
 @RunWith(TestParameterInjector::class)
 class PaparazziSampleScreenshotTest {
 

@@ -5,14 +5,17 @@ import com.stripe.android.link.ui.LinkScreenshotSurface
 import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.uicore.elements.OTPElement
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
+@Category(PaparazziTest::class)
 internal class VerificationScreenshotTest(
     private val testCase: TestCase
 ) {

@@ -94,6 +94,30 @@ android {
     }
 }
 
+tasks.withType(Test).configureEach { test ->
+    if (!project.plugins.hasPlugin("app.cash.paparazzi")) {
+        return
+    }
+
+    def includeMode = project.property("stripe.android.unit.tests.include")
+
+    if (includeMode != "onlyScreenshots" && includeMode != "onlyUnitTests") {
+        return
+    }
+
+    def category = "com.stripe.android.screenshottesting.PaparazziTest"
+
+    if (includeMode == "onlyScreenshots") {
+        test.useJUnit {
+            includeCategories category
+        }
+    } else if (includeMode == "onlyUnitTests") {
+        test.useJUnit {
+            excludeCategories category
+        }
+    }
+}
+
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     dokka {
         dokkaSourceSets {

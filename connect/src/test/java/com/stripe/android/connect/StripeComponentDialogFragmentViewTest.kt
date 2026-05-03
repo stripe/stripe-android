@@ -15,9 +15,12 @@ import com.stripe.android.connect.appearance.fonts.CustomFontSource
 import com.stripe.android.connect.test.TestComponentView
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class StripeComponentDialogFragmentViewTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

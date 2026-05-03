@@ -5,12 +5,15 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.MockPaymentMethodsFactory
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.mockito.kotlin.mock
 
+@Category(PaparazziTest::class)
 internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule()
