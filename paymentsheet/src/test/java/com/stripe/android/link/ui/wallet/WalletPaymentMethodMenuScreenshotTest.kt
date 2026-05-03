@@ -9,10 +9,13 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class WalletPaymentMethodMenuScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

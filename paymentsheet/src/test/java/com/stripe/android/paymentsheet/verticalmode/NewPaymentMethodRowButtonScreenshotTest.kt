@@ -6,13 +6,16 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.mockito.Mockito
 
+@Category(PaparazziTest::class)
 internal class NewPaymentMethodRowButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

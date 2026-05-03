@@ -13,9 +13,12 @@ import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessageLegalDisclosure
 import com.stripe.android.paymentmethodmessaging.R
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class PaymentMethodMessagingContentScreenshotTest {
 
     @get:Rule

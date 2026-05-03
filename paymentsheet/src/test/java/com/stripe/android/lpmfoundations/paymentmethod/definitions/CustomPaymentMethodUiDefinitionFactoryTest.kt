@@ -8,10 +8,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryAr
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.ui.core.FormUI
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class CustomPaymentMethodUiDefinitionFactoryTest {
     @get:Rule
     val paparazziRule = PaparazziRule()

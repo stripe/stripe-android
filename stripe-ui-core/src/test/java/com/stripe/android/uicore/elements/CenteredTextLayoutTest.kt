@@ -12,9 +12,12 @@ import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class CenteredTextLayoutTest {
     private enum class FontSize(val scaleFactor: Float) : PaparazziConfigOption {
         SmallFont(scaleFactor = 0.5f),

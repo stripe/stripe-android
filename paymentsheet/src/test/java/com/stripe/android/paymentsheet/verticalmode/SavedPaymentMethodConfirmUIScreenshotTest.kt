@@ -4,9 +4,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import org.junit.Rule
+import org.junit.experimental.categories.Category
 import kotlin.test.Test
 
+@Category(PaparazziTest::class)
 internal class SavedPaymentMethodConfirmUIScreenshotTest {
 
     @get:Rule
