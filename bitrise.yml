@@ -91,10 +91,10 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - script@1:
-          timeout: 1200
+      - android-unit-test:
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+            - variant: debug
+            - arguments: -x :stripe-test-e2e:testDebugUnitTest --continue
   build-connect-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -251,22 +251,54 @@ workflows:
     after_run:
       - conclude_all
     steps:
-      - script@1:
-          title: Execute instrumentation tests
-          timeout: 1200
+      - gradle-runner@5:
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest
+            - gradlew_path: "./gradlew"
+            - gradle_task: pixel2api33DebugAndroidTest
+            - gradle_options: -Pandroid.experimental.androidTest.numManagedDeviceShards=1 -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest
   run-paymentsheet-instrumentation-tests:
+    envs:
+      - EXPORT_MANAGED_DEVICE_TEST_REPORTS: true
     before_run:
       - prepare_all
-    after_run:
-      - conclude_all
     steps:
-      - script@1:
-          title: Execute instrumentation tests
-          timeout: 1200
+      - gradle-runner@5:
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest
+            - gradlew_path: "./gradlew"
+            - gradle_task: :paymentsheet:pixel2api33DebugAndroidTest
+            - gradle_options: -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6
+      - script-runner@0:
+          is_always_run: true
+          title: Copy test results to tmp
+          inputs:
+            - file_path: ./scripts/copy_test_results_to_tmp.sh
+      - script@1:
+          title: Split managed device JUnit XML for Bitrise Test Reports
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                SPLIT_OUT=/tmp/split_managed_devices_test_results
+                rm -rf "$SPLIT_OUT"
+                mkdir -p "$SPLIT_OUT"
+                python3 scripts/split_managed_device_test_results.py \
+                  --input-dir /tmp/test_results \
+                  --out-dir "$SPLIT_OUT"
+      - custom-test-results-export@1:
+          inputs:
+            - test_name: Managed device instrumentation
+            - base_path: /tmp/split_managed_devices_test_results/**/*.xml
+            - search_pattern: '*'
+            - bitrise_test_result_dir: $BITRISE_TEST_RESULT_DIR
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - notify_user_groups: none
+            - is_compress: "true"
+            - deploy_path: /tmp/test_results
+            - is_enable_public_page: "false"
+          title: Deploy test results artifacts
+      - save-gradle-configuration-cache@1: { }
+      - save-gradle-cache@1: { }
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04
@@ -290,7 +322,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew :example:connectedAndroidTest
+            - content: ./gradlew :example:connectedAndroidTest
   run-financial-connections-instrumentation-tests:
     before_run:
       - start_emulator
@@ -359,7 +391,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
+            - content: ./gradlew :crypto-onramp-example:assembleDebug :crypto-onramp-example:assembleDebugAndroidTest
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600

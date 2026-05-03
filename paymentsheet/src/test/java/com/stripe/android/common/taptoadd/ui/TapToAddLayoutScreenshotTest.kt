@@ -88,7 +88,7 @@ class TapToAddLayoutScreenshotTest {
                 TapToAddLayout(
                     screen = TapToAddNavigator.Screen.Error(
                         message = TapToAddErrorMessage(
-                            title = "Something went wrong".resolvableString,
+                            title = "Something wrong".resolvableString,
                             action = "Try again".resolvableString,
                         ),
                         dueToUnsupportedDevice = false,
