@@ -9,10 +9,13 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.testing.CoroutineTestRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class PaymentSheetScreenLoadingScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

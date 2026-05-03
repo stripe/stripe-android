@@ -5,13 +5,16 @@ import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class AutocompleteScreenUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

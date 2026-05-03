@@ -18,11 +18,14 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class LinkControllerPaymentMethodPreviewScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(SystemAppearance.entries)

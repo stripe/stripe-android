@@ -23,13 +23,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.stripeColors
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class PaymentMethodsUiExtensionScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

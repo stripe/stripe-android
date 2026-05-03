@@ -10,6 +10,7 @@ import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -17,7 +18,9 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class LinkFieldsScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

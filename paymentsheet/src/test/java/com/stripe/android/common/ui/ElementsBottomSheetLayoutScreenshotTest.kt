@@ -11,11 +11,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 class ElementsBottomSheetLayoutScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(

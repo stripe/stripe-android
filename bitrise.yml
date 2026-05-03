@@ -93,8 +93,14 @@ workflows:
     steps:
       - script@1:
           timeout: 1200
+          is_always_run: true
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+            - content: ./scripts/retry.sh 3 ./gradlew -Pstripe.android.unit.tests.include=onlyUnitTests testDebugUnitTest -x :stripe-test-e2e:testDebugUnitTest --continue
+      - script@1:
+          timeout: 1200
+          is_always_run: true
+          inputs:
+            - content: ./scripts/retry.sh 3 ./gradlew -Pstripe.android.unit.tests.include=onlyScreenshots verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
   build-connect-debug:
     envs:
       - BUILD_VARIANT: debug

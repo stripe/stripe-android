@@ -19,13 +19,16 @@ import com.stripe.android.paymentsheet.ui.EditCardDetailsInteractor
 import com.stripe.android.paymentsheet.ui.EditCardPayload
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
+@Category(PaparazziTest::class)
 internal class UpdateCardScreenshotTest(
     private val testCase: TestCase
 ) {
