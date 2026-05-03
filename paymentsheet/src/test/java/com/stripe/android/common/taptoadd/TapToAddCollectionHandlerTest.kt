@@ -660,7 +660,7 @@ class TapToAddCollectionHandlerTest {
             assertThat(result)
                 .isInstanceOf(TapToAddCollectionHandler.CollectionState.Collected::class.java)
             val collected = result as TapToAddCollectionHandler.CollectionState.Collected
-            assertThat(collected.paymentMethod.card?.brand).isEqualTo(CardBrand.MasterCard)
+            assertThat(collected.paymentMethod.card?.brand).isEqualTo(CardBrand.Visa)
         }
 
     @Test
