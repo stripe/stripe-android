@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import android.os.SystemClock
 import android.os.Parcelable
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
@@ -269,6 +270,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             )
 
             eventReporter.onLoadStarted(metadata.initializedViaCompose)
+            val mcLoadStartedTimeNs = SystemClock.elapsedRealtimeNanos()
             tapToAddConnectionStarter.start(configuration)
 
             val isGooglePaySupportedOnDevice = async {
@@ -310,13 +312,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 automaticPaymentMethodsEnabled = elementsSession.stripeIntent.automaticPaymentMethodsEnabled,
             )
 
-            val customerMetadata = PaymentSheetLoadTraceRecorder.trace("Create Customer Metadata") {
-                createCustomerMetadata(
-                    initializationMode = initializationMode,
-                    configuration = configuration,
-                    elementsSession = elementsSession,
-                )
-            }
+            val customerMetadata = createCustomerMetadata(
+                initializationMode = initializationMode,
+                configuration = configuration,
+                elementsSession = elementsSession,
+            )
 
             val linkState = async {
                 createLinkState(
@@ -406,6 +406,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 state = state,
                 isReloadingAfterProcessDeath = metadata.isReloadingAfterProcessDeath,
                 paymentMethodMetadata = state.paymentMethodMetadata,
+                mcLoadStartedTimeNs = mcLoadStartedTimeNs,
             )
 
             state
@@ -634,13 +635,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePayReady: Boolean,
         elementsSession: ElementsSession
     ): SavedSelection {
-        return PaymentSheetLoadTraceRecorder.traceSuspend("Retrieve Saved Selection") {
-            retrieveSavedSelection(
-                configuration = configuration,
-                isGooglePayReady = isGooglePayReady,
-                isLinkAvailable = elementsSession.isLinkEnabled,
-            )
-        }
+        return retrieveSavedSelection(
+            configuration = configuration,
+            isGooglePayReady = isGooglePayReady,
+            isLinkAvailable = elementsSession.isLinkEnabled,
+        )
     }
 
     private suspend fun retrieveSavedPaymentMethodSelection(
@@ -706,6 +705,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         state: PaymentElementLoader.State,
         isReloadingAfterProcessDeath: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
+        mcLoadStartedTimeNs: Long,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
@@ -716,6 +716,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         if (state.validationError != null && treatValidationErrorAsFailure) {
             eventReporter.onLoadFailed(state.validationError)
         } else {
+            PaymentSheetLoadTraceRecorder.recordSpan(
+                name = "mc_load_succeeded Duration",
+                startTimeNs = mcLoadStartedTimeNs,
+                endTimeNs = SystemClock.elapsedRealtimeNanos(),
+            )
             eventReporter.onLoadSucceeded(
                 paymentSelection = state.paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,

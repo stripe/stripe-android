@@ -57,6 +57,19 @@ public object PaymentSheetLoadTraceRecorder {
         }
     }
 
+    public fun recordSpan(
+        name: String,
+        startTimeNs: Long,
+        endTimeNs: Long,
+    ) {
+        val session = currentSession.get() ?: return
+        session.record(
+            name = name,
+            startTimeNs = startTimeNs,
+            endTimeNs = endTimeNs,
+        )
+    }
+
     private fun nowNs(): Long = SystemClock.elapsedRealtimeNanos()
 
     private class Session(
