@@ -49,7 +49,6 @@ class NetworkDispatcherTest {
         assertThat(lines).contains("  Body params: {email=actual@test.com}")
     }
 
-
     @Test
     fun `validate shows only nearest miss when multiple mocks remain`() = runScenario {
         enqueue(RequestMatchers.path("/v1/payment_methods"), RequestMatchers.method("POST"))

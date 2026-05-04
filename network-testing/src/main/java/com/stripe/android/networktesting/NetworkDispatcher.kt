@@ -128,8 +128,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
             )
         )
 
-        @Suppress("MagicNumber")
-        return MockResponse().setResponseCode(500).setBody("Request not mocked")
+        return MockResponse().setResponseCode(UNMATCHED_RESPONSE_CODE).setBody("Request not mocked")
     }
 
     private fun buildNearMissDiagnostics(request: TestRecordedRequest): String {
@@ -172,5 +171,7 @@ private class UnmatchedRequest(
         return lines.joinToString("\n")
     }
 }
+
+private const val UNMATCHED_RESPONSE_CODE = 500
 
 internal class RequestNotFoundException(message: String) : Exception(message)
