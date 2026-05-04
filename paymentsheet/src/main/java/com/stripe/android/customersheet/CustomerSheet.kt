@@ -16,7 +16,6 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
