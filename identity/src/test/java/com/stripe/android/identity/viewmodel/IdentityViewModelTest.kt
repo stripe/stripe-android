@@ -119,7 +119,7 @@ internal class IdentityViewModelTest {
             File(IMAGE_FILE_NAME)
         )
 
-        on { cropAndPadBitmap(any(), any(), any()) }.thenReturn(
+        on { cropAndPadBitmap(any(), any(), any(), any()) }.thenReturn(
             CROPPED_BITMAP
         )
     }
@@ -932,7 +932,8 @@ internal class IdentityViewModelTest {
         verify(mockIdentityIO).cropAndPadBitmap(
             same(INPUT_BITMAP),
             same(BOUNDING_BOX),
-            any()
+            any(),
+            eq(true)
         )
 
         verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(
@@ -1004,7 +1005,8 @@ internal class IdentityViewModelTest {
             verify(mockIdentityIO).cropAndPadBitmap(
                 same(FILTERED_FRAMES[selfie.index].first.cameraPreviewImage.image),
                 same(FILTERED_FRAMES[selfie.index].second.boundingBox),
-                any()
+                any(),
+                eq(false)
             )
 
             verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(

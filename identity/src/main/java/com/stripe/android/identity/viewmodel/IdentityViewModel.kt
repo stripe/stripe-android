@@ -608,7 +608,8 @@ internal class IdentityViewModel(
         identityIO.cropAndPadBitmap(
             originalBitmap,
             boundingBox,
-            originalBitmap.longerEdge() * verificationPage.documentCapture.highResImageCropPadding
+            originalBitmap.longerEdge() * verificationPage.documentCapture.highResImageCropPadding,
+            fallbackIfMostlyOutOfBounds = true
         )
 
     /**
