@@ -1,4 +1,4 @@
-package com.stripe.android.crypto.onramp.model.Compliance
+package com.stripe.android.crypto.onramp.model.compliance
 
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
