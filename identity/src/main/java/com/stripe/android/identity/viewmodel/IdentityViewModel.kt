@@ -535,9 +535,11 @@ internal class IdentityViewModel(
         }
 
         // upload high res
+        // Use detectorOutput.croppedImage to ensure the crop is applied to the exact image
+        // the model ran on, avoiding any potential mismatch with the full camera frame.
         processAndUploadBitmap(
             bitmapToUpload = cropBitmapToUpload(
-                originalBitmap,
+                detectorOutput.croppedImage,
                 detectorOutput.boundingBox,
                 verificationPage
             ),

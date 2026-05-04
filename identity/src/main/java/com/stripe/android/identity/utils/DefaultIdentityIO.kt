@@ -115,14 +115,35 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
             )
         )
 
-        return modelInput.cropWithFill(
-            Rect(
-                (modelInput.width * boundingBox.left - paddingSize).toInt(),
-                (modelInput.height * boundingBox.top - paddingSize).toInt(),
-                (modelInput.width * (boundingBox.left + boundingBox.width) + paddingSize).toInt(),
-                (modelInput.height * (boundingBox.top + boundingBox.height) + paddingSize).toInt()
+        val cropLeft = (modelInput.width * boundingBox.left - paddingSize).toInt()
+        val cropTop = (modelInput.height * boundingBox.top - paddingSize).toInt()
+        val cropRight = (modelInput.width * (boundingBox.left + boundingBox.width) + paddingSize).toInt()
+        val cropBottom = (modelInput.height * (boundingBox.top + boundingBox.height) + paddingSize).toInt()
+
+        val cropRect = Rect(cropLeft, cropTop, cropRight, cropBottom)
+        val imageRect = Rect(0, 0, modelInput.width, modelInput.height)
+
+        val interLeft = maxOf(cropRect.left, imageRect.left)
+        val interTop = maxOf(cropRect.top, imageRect.top)
+        val interRight = minOf(cropRect.right, imageRect.right)
+        val interBottom = minOf(cropRect.bottom, imageRect.bottom)
+        val interWidth = maxOf(0, interRight - interLeft)
+        val interHeight = maxOf(0, interBottom - interTop)
+        val intersectionArea = interWidth * interHeight
+        val cropArea = maxOf(1, cropRect.width() * cropRect.height())
+        val intersectionRatio = intersectionArea.toFloat() / cropArea
+
+        if (intersectionRatio < 0.5f) {
+            android.util.Log.w(
+                "DefaultIdentityIO",
+                "Bounding box crop is mostly out of bounds (intersection=$intersectionRatio). " +
+                    "cropRect=$cropRect, image=$imageRect. " +
+                    "Falling back to full center-cropped image."
             )
-        )
+            return modelInput
+        }
+
+        return modelInput.cropWithFill(cropRect)
     }
 
     override fun createTFLiteFile(modelUrl: String): File {
