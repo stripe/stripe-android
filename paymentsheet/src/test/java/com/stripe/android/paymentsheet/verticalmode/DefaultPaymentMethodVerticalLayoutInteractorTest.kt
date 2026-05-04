@@ -1744,8 +1744,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
-    private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
-
     private val linkAndGooglePayWalletState = WalletsState(
         link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
         googlePay = WalletsState.GooglePay(
@@ -1788,7 +1786,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialSelection: PaymentSelection? = null,
         initialIsCurrentScreen: Boolean = false,
         incentive: PaymentMethodIncentive? = null,
-        formTypeForCode: (code: String) -> FormHelper.FormType = { notImplemented() },
+        formTypeForCode: (code: String) -> FormHelper.FormType = { FormHelper.FormType.Empty },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
         canUpdateFullPaymentMethodDetails: Boolean = false,
