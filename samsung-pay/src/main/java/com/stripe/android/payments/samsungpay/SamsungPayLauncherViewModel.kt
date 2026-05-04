@@ -117,7 +117,7 @@ internal class SamsungPayLauncherViewModel(
 
         return CustomSheetPaymentInfo.Builder()
             .setMerchantName(config.merchantName)
-            .setOrderNumber(args.clientSecret.substringBefore("_secret_"))
+            .setOrderNumber(args.clientSecret.substringBefore("_secret_").replace('_', '-'))
             .setAllowedCardBrands(brandList)
             .setCardHolderNameEnabled(config.cardHolderNameEnabled)
             .setAddressInPaymentSheet(addressType)
