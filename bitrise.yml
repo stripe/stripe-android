@@ -70,6 +70,7 @@ workflows:
     before_run:
       - prepare_all
     after_run:
+      - deploy_artifacts
       - conclude_all
     steps:
       - script@1:
@@ -89,6 +90,7 @@ workflows:
     before_run:
       - prepare_all
     after_run:
+      - deploy_artifacts
       - conclude_all
     steps:
       - script@1:
@@ -199,6 +201,7 @@ workflows:
       - start_connections_emulator
       - prepare_all
     after_run:
+      - deploy_artifacts
       - conclude_all
     steps:
       - wait-for-android-emulator@1:
@@ -218,6 +221,7 @@ workflows:
       - start_connections_emulator
       - prepare_all
     after_run:
+      - deploy_artifacts
       - conclude_all
     steps:
       - wait-for-android-emulator@1:
@@ -256,6 +260,9 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest
+      - bundle::export_android_test_results:
+          inputs:
+            - test_name: "instrumentation-tests"
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -267,6 +274,9 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest
+      - bundle::export_android_test_results:
+          inputs:
+            - test_name: "paymentsheet-instrumentation-tests"
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04
@@ -291,6 +301,9 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./scripts/retry.sh 3 ./gradlew :example:connectedAndroidTest
+      - bundle::export_android_test_results:
+          inputs:
+            - test_name: "example-instrumentation-tests"
   run-financial-connections-instrumentation-tests:
     before_run:
       - start_emulator
@@ -311,6 +324,9 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
+      - bundle::export_android_test_results:
+          inputs:
+            - test_name: "financial-connections-instrumentation-tests"
   run-cardscan-instrumentation-tests:
     before_run:
       - start_cardscan_emulator
@@ -331,10 +347,14 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest
+      - bundle::export_android_test_results:
+          inputs:
+            - test_name: "cardscan-instrumentation-tests"
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
     after_run:
+      - deploy_artifacts
       - conclude_all
     steps:
       - script@1:
@@ -368,12 +388,16 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
+      - bundle::export_android_test_results:
+          inputs:
+            - test_name: "crypto-onramp-example-e2e-tests"
   check-dependencies:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
     before_run:
       - prepare_all
     after_run:
+      - deploy_artifacts
       - conclude_all
     steps:
       - script@1:
@@ -389,6 +413,7 @@ workflows:
     before_run:
       - prepare_all
     after_run:
+      - deploy_artifacts
       - conclude_all
     steps:
       - script@1:
@@ -487,7 +512,7 @@ workflows:
           inputs:
             - push: 'true'
             - validation_level: warning
-  conclude_all:
+  deploy_artifacts:
     steps:
       - script-runner@0:
           is_always_run: true
@@ -501,8 +526,39 @@ workflows:
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
+  conclude_all:
+    steps:
       - save-gradle-configuration-cache@1: { }
       - save-gradle-cache@1: { }
+step_bundles:
+  export_android_test_results:
+    inputs:
+      - test_name: "emulator-tests"
+    steps:
+      - script@1:
+          timeout: 2400
+          title: "Split emulator test results"
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                mkdir -p "/tmp/test_results"
+                touch "/tmp/test_results/.keep"
+                python3 scripts/split_junit_reports_by_class.py '**/build/outputs/androidTest-results/**/*.xml' /tmp/test_results
+      - custom-test-results-export@1:
+          is_always_run: true
+          is_skippable: true
+          title: "Emulator test results"
+          inputs:
+            - test_name: $test_name
+            - base_path: /tmp/test_results
+            - search_pattern: '*.xml'
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - notify_user_groups: none
+            - is_compress: "true"
+            - deploy_path: /tmp/test_results
+            - is_enable_public_page: "false"
+          title: Deploy test results artifacts
 meta:
   bitrise.io:
     stack: linux-docker-android-22.04
