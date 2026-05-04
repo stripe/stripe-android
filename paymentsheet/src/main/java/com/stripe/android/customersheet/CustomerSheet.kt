@@ -16,6 +16,7 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.DefaultPaymentOptionCardArtProvider
@@ -143,13 +144,23 @@ class CustomerSheet internal constructor(
             val paymentMethodsDeferred = async {
                 CustomerSheetHacks.paymentMethodDataSource.await().retrievePaymentMethods().toResult()
             }
+            val elementsSessionDeferred = async {
+                CustomerSheetHacks
+                    .elementsSessionManager.await()
+                    ?.fetchElementsSession()
+                    ?.getOrNull()
+                    ?.elementsSession
+            }
+
             val savedSelection = savedSelectionDeferred.await()
             val paymentMethods = paymentMethodsDeferred.await()
+            val elementsSession = elementsSessionDeferred.await()
+            val linkBrand = elementsSession?.linkSettings?.linkBrand
 
             val selection = savedSelection.map { selection ->
                 selection?.toPaymentOption()
             }.mapCatching { paymentOption ->
-                paymentOption?.toPaymentSelection {
+                paymentOption?.toPaymentSelection(linkBrand) {
                     paymentMethods.getOrNull()?.find {
                         it.id == paymentOption.id
                     }

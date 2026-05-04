@@ -9,6 +9,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -614,6 +615,7 @@ class CustomerAdapterTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
         )
         val savedSelection = savedPaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
             paymentMethodProvider = paymentMethodProvider,
         )
         assertThat(savedSelection)
@@ -621,6 +623,7 @@ class CustomerAdapterTest {
 
         val googlePaymentOption = CustomerAdapter.PaymentOption.GooglePay
         val googleSelection = googlePaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
             paymentMethodProvider = paymentMethodProvider,
         )
         assertThat(googleSelection)
@@ -628,6 +631,7 @@ class CustomerAdapterTest {
 
         val linkPaymentOption = CustomerAdapter.PaymentOption.Link
         val linkSelection = linkPaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
             paymentMethodProvider = paymentMethodProvider,
         )
         assertThat(linkSelection)
@@ -635,6 +639,7 @@ class CustomerAdapterTest {
 
         val nullSavedPaymentOption = CustomerAdapter.PaymentOption.StripeId("id_123")
         val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(
+            linkBrand = LinkBrand.Link,
             paymentMethodProvider = paymentMethodProvider,
         )
         assertThat(nullSavedSelection)
