@@ -363,7 +363,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             supportedPaymentMethod.asDisplayablePaymentMethod(
                 customerSavedPaymentMethods = paymentMethods,
                 incentive = paymentMethodIncentive,
-                promotionProvider = getPromotionProvider(supportedPaymentMethod.code)
+                promotionProvider = getPromotionProvider(supportedPaymentMethod.code),
+                shouldExpandOnClick = formTypeForCode(supportedPaymentMethod.code) !is FormType.UserInteractionRequired
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
@@ -401,6 +402,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.GooglePay, false)
                 invokeRowSelectionCallback?.invoke()
             },
+            shouldExpandOnClick = false
         )
     }
 
@@ -424,6 +426,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.Link(), false)
                 invokeRowSelectionCallback?.invoke()
             },
+            shouldExpandOnClick = false
         )
     }
 
@@ -441,6 +444,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.ShopPay, false)
                 invokeRowSelectionCallback?.invoke()
             },
+            shouldExpandOnClick = false
         )
     }
 
