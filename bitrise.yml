@@ -102,8 +102,8 @@ workflows:
       - custom-test-results-export@1:
           inputs:
             - test_name: Unit tests
-            - base_path: /tmp/test_results/**/*.xml
-            - search_pattern: '*'
+            - base_path: /tmp/test_results
+            - search_pattern: '*.xml'
             - bitrise_test_result_dir: $BITRISE_TEST_RESULT_DIR
       - script@1:
           timeout: 1200
@@ -118,8 +118,8 @@ workflows:
       - custom-test-results-export@1:
           inputs:
             - test_name: Screenshot tests
-            - base_path: /tmp/test_results/**/*.xml
-            - search_pattern: '*'
+            - base_path: /tmp/test_results
+            - search_pattern: '*.xml'
             - bitrise_test_result_dir: $BITRISE_TEST_RESULT_DIR
       - deploy-to-bitrise-io@2:
           inputs:
