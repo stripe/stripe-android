@@ -5,6 +5,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavController
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
@@ -76,6 +77,13 @@ internal fun LiveCaptureLaunchedEffect(
                 }
             }
         } else if (scannerState is IdentityScanViewModel.State.Timeout) {
+            identityViewModel.screenTracker.screenTransitionStart(
+                identityViewModel.analyticsLastScreenName ?: if (scannerState.fromSelfie) {
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
+                } else {
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
+                }
+            )
             navController.navigateTo(
                 CouldNotCaptureDestination(fromSelfie = scannerState.fromSelfie)
             )

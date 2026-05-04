@@ -156,7 +156,8 @@ class IdentityOnBackPressedHandlerTest {
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
-            eq(exception)
+            eq(exception),
+            anyOrNull()
         )
         verify(mockFlowFinishable).finishWithResult(
             argWhere {

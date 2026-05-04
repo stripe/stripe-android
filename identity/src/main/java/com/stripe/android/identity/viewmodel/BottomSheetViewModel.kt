@@ -1,6 +1,5 @@
 package com.stripe.android.identity.viewmodel
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.lifecycle.ViewModel
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,7 +9,6 @@ import kotlinx.coroutines.flow.update
 /**
  * ViewModel to control if a bottomsheet should show.
  */
-@ExperimentalMaterialApi
 internal class BottomSheetViewModel : ViewModel() {
 
     data class BottomSheetState(
