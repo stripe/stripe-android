@@ -58,7 +58,7 @@ internal data class KycCollectionRequest(
                 dateOfBirth = kycInfo.dateOfBirth,
                 birthCountry = kycInfo.birthCountry?.value,
                 birthCity = kycInfo.birthCity.takeIf { !it.isNullOrEmpty() },
-                nationalities = kycInfo.nationalities?.map { it.value },
+                nationalities = kycInfo.nationalities?.map { it.value.trim() },
                 city = kycInfo.address?.city,
                 country = kycInfo.address?.country,
                 line1 = kycInfo.address?.line1,
