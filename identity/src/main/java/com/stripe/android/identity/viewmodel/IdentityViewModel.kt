@@ -460,8 +460,6 @@ internal class IdentityViewModel(
         scanType: IdentityScanState.ScanType
     ) {
         runCatching {
-            // Use detectorOutput.croppedImage to ensure the crop is applied to the exact image
-            // the model ran on, avoiding any potential mismatch with the full camera frame.
             uploadDocumentImagesAndNotify(
                 imageFile =
                 identityIO.resizeUriAndCreateFileToUpload(
@@ -566,6 +564,8 @@ internal class IdentityViewModel(
 
         // upload high res
         runCatching {
+            // Use detectorOutput.croppedImage to ensure the crop is applied to the exact image
+            // the model ran on, avoiding any potential mismatch with the full camera frame.
             processAndUploadBitmap(
                 bitmapToUpload = cropBitmapToUpload(
                     detectorOutput.croppedImage,
