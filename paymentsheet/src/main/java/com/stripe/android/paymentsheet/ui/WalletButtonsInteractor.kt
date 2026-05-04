@@ -130,6 +130,14 @@ internal interface WalletButtonsInteractor {
                 return PaymentSelection.ShopPay
             }
         }
+
+        data object SamsungPay : WalletButton {
+            override val walletType = WalletType.SamsungPay
+
+            override fun createSelection(): PaymentSelection {
+                return PaymentSelection.SamsungPay
+            }
+        }
     }
 
     sealed interface ViewAction {
@@ -208,6 +216,11 @@ internal class DefaultWalletButtonsInteractor constructor(
                     WalletType.ShopPay -> {
                         WalletButton.ShopPay.takeIf {
                             walletsAllowedByMerchant.contains(WalletType.ShopPay)
+                        }
+                    }
+                    WalletType.SamsungPay -> {
+                        WalletButton.SamsungPay.takeIf {
+                            walletsAllowedByMerchant.contains(WalletType.SamsungPay)
                         }
                     }
                 }

@@ -43,7 +43,8 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.GooglePay,
             is PaymentSelection.Link,
-            is PaymentSelection.ShopPay -> null
+            is PaymentSelection.ShopPay,
+            is PaymentSelection.SamsungPay -> null
         }
 
         return EmbeddedPaymentElement.PaymentOptionDisplayData(

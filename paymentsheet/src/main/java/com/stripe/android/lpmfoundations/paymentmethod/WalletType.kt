@@ -6,14 +6,16 @@ import com.stripe.android.paymentsheet.state.LinkState
 internal enum class WalletType(val code: String) {
     GooglePay(code = "google_pay"),
     Link(code = "link"),
-    ShopPay(code = "shop_pay");
+    ShopPay(code = "shop_pay"),
+    SamsungPay(code = "samsung_pay");
 
     companion object {
         fun listFrom(
             elementsSession: ElementsSession,
             isGooglePayReady: Boolean,
             linkState: LinkState?,
-            isShopPayAvailable: Boolean
+            isShopPayAvailable: Boolean,
+            isSamsungPayReady: Boolean = false,
         ): List<WalletType> {
             val availableWallets = WalletType.entries.filter { type ->
                 val isInOrderedPaymentMethods = elementsSession.orderedPaymentMethodTypesAndWallets.contains(type.code)
@@ -25,13 +27,14 @@ internal enum class WalletType(val code: String) {
                     ShopPay -> {
                         isShopPayAvailable && isInOrderedPaymentMethods
                     }
+                    SamsungPay -> isSamsungPayReady
                 }
             }
 
             val walletByIndex = availableWallets.associateWith { wallet ->
                 val position = elementsSession.orderedPaymentMethodTypesAndWallets.indexOf(wallet.code)
 
-                if (wallet == Link) {
+                if (wallet == Link || wallet == SamsungPay) {
                     -1
                 } else if (position == -1) {
                     null

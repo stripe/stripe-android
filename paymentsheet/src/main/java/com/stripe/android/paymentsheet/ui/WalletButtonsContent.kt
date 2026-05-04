@@ -104,6 +104,12 @@ internal class WalletButtonsContent(
                 is WalletButtonsInteractor.WalletButton.ShopPay -> ShopPayButton {
                     interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
                 }
+                is WalletButtonsInteractor.WalletButton.SamsungPay -> SamsungPayButton(
+                    isEnabled = state.buttonsEnabled,
+                    onPressed = {
+                        interactor.handleViewAction(OnButtonPressed(button, walletButtonsViewClickHandler))
+                    },
+                )
             }
         }
     }

@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -280,7 +281,8 @@ class SamsungPayLauncher internal constructor(
 
     companion object {
         @Volatile
-        internal var tokenExchangeHandlerHolder: TokenExchangeHandler? = null
+        var tokenExchangeHandlerHolder: TokenExchangeHandler? = null
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) set
 
         /**
          * Creates a [SamsungPayLauncher] that is remembered across compositions.

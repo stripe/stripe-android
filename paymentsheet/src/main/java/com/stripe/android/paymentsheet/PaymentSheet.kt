@@ -3879,7 +3879,8 @@ class PaymentSheet internal constructor(
         enum class Wallet {
             Link,
             GooglePay,
-            ShopPay
+            ShopPay,
+            SamsungPay,
         }
     }
 

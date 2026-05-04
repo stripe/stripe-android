@@ -28,6 +28,7 @@ internal object PaymentOptionLabelsFactory {
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.GooglePay,
             is PaymentSelection.ShopPay,
+            is PaymentSelection.SamsungPay,
             is PaymentSelection.New.GenericPaymentMethod -> {
                 fallback
             }

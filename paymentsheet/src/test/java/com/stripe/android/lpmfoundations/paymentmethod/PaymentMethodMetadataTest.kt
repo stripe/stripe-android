@@ -1154,7 +1154,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
-            availableWallets = listOf(WalletType.Link),
+            availableWallets = listOf(WalletType.Link, WalletType.SamsungPay),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(
@@ -1326,7 +1326,7 @@ internal class PaymentMethodMetadataTest {
             allowsDelayedPaymentMethods = true,
             allowsPaymentMethodsRequiringShippingAddress = false,
             allowsLinkInSavedPaymentMethods = false,
-            availableWallets = emptyList(),
+            availableWallets = listOf(WalletType.SamsungPay),
             paymentMethodOrder = listOf("us_bank_account", "card", "sepa_debit"),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
@@ -1833,7 +1833,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.SamsungPay, WalletType.GooglePay, WalletType.ShopPay),
     )
 
     @Test
@@ -1842,7 +1842,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay, WalletType.GooglePay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.SamsungPay, WalletType.ShopPay, WalletType.GooglePay),
     )
 
     @Test
@@ -1851,7 +1851,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = false,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = listOf(WalletType.GooglePay),
+        expectedWalletTypes = listOf(WalletType.SamsungPay, WalletType.GooglePay),
     )
 
     @Test
@@ -1860,7 +1860,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = false,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = emptyList(),
+        expectedWalletTypes = listOf(WalletType.SamsungPay),
     )
 
     @Test
@@ -1869,7 +1869,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = true,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = listOf(WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.SamsungPay),
     )
 
     @Test
@@ -1878,7 +1878,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = false,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.ShopPay),
+        expectedWalletTypes = listOf(WalletType.SamsungPay, WalletType.ShopPay),
     )
 
     @Test
@@ -1887,7 +1887,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = false,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = emptyList(),
+        expectedWalletTypes = listOf(WalletType.SamsungPay),
     )
 
     @Test
@@ -1896,7 +1896,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = false,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = emptyList(),
+        expectedWalletTypes = listOf(WalletType.SamsungPay),
     )
 
     @Test
@@ -1905,7 +1905,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = true,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = listOf(WalletType.Link),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.SamsungPay),
     )
 
     @Test
@@ -1914,7 +1914,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = false,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.SamsungPay, WalletType.GooglePay),
     )
 
     @Test
@@ -1923,7 +1923,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.GooglePay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.SamsungPay, WalletType.GooglePay),
     )
 
     @Test
@@ -1932,7 +1932,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = false,
         hasLinkState = true,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.Link, WalletType.ShopPay),
+        expectedWalletTypes = listOf(WalletType.Link, WalletType.SamsungPay, WalletType.ShopPay),
     )
 
     @Test
@@ -1941,7 +1941,7 @@ internal class PaymentMethodMetadataTest {
         isGooglePayReady = true,
         hasLinkState = false,
         hasShopPayConfiguration = true,
-        expectedWalletTypes = listOf(WalletType.GooglePay, WalletType.ShopPay),
+        expectedWalletTypes = listOf(WalletType.SamsungPay, WalletType.GooglePay, WalletType.ShopPay),
     )
 
     @Test

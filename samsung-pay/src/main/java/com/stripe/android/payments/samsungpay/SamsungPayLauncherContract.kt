@@ -4,10 +4,12 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 
-internal class SamsungPayLauncherContract :
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class SamsungPayLauncherContract :
     ActivityResultContract<SamsungPayLauncherContract.Args, SamsungPayLauncher.Result>() {
 
     override fun createIntent(context: Context, input: Args): Intent {

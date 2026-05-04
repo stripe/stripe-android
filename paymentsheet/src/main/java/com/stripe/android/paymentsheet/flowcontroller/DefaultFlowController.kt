@@ -523,6 +523,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New,
             is PaymentSelection.ShopPay,
+            is PaymentSelection.SamsungPay,
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,

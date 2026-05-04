@@ -13,6 +13,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.spay.SamsungPayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
@@ -34,6 +35,7 @@ internal fun PaymentSelection.toConfirmationOption(
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
+        is PaymentSelection.SamsungPay -> toSamsungPayConfirmationOption()
     }
 }
 
@@ -186,4 +188,14 @@ private fun PaymentSelection.ShopPay.toConfirmationOption(
             merchantDisplayName = configuration.merchantDisplayName
         )
     }
+}
+
+private fun PaymentSelection.SamsungPay.toSamsungPayConfirmationOption(): SamsungPayConfirmationOption {
+    return SamsungPayConfirmationOption(
+        config = com.stripe.android.payments.samsungpay.SamsungPayLauncher.Config(
+            environment = com.stripe.android.payments.samsungpay.SamsungPayEnvironment.Test,
+            productId = "stripe_samsung_pay_test",
+            merchantName = "Test Merchant",
+        )
+    )
 }

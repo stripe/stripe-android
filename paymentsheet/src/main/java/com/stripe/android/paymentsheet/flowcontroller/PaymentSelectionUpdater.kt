@@ -77,7 +77,8 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             is PaymentSelection.CustomPaymentMethod -> {
                 state.paymentMethodMetadata.isCustomPaymentMethod(potentialSelection.id)
             }
-            is PaymentSelection.ShopPay -> {
+            is PaymentSelection.ShopPay,
+            is PaymentSelection.SamsungPay -> {
                 false
             }
         }
