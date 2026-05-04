@@ -363,10 +363,10 @@ internal class PaymentSheetCheckoutSessionTest {
 
         testContext.presentWithCheckout(configuration = configuration)
 
-        page.fillOutCardDetails()
         if (fillOutEmail) {
             formPage.fillOutEmail()
         }
+        page.fillOutCardDetails()
 
         networkRule.createPaymentMethod(
             bodyPart("billing_details[email]", expectedEmail),
