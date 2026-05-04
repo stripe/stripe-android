@@ -16,16 +16,13 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
-import dagger.Module
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Component(
     modules = [
-        FormActivityModule::class,
         EmbeddedActivityModule::class,
         EmbeddedCommonModule::class,
         ApplicationIdModule::class,
@@ -59,12 +56,4 @@ internal interface FormActivityViewModelComponent {
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
         ): FormActivityViewModelComponent
     }
-}
-
-@Module
-internal interface FormActivityModule {
-    @Binds
-    fun bindsFormConfirmationHelper(
-        confirmationHandler: DefaultFormActivityConfirmationHelper
-    ): FormActivityConfirmationHelper
 }

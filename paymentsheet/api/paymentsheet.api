@@ -649,6 +649,9 @@ public abstract interface annotation class com/stripe/android/paymentelement/Shi
 public abstract interface annotation class com/stripe/android/paymentelement/ShopPayPreview : java/lang/annotation/Annotation {
 }
 
+public abstract interface annotation class com/stripe/android/paymentelement/TapToAddPreview : java/lang/annotation/Annotation {
+}
+
 public abstract interface annotation class com/stripe/android/paymentelement/WalletButtonsPreview : java/lang/annotation/Annotation {
 }
 

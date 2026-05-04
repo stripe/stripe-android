@@ -109,13 +109,15 @@ internal fun CheckVerificationPageModelFilesAndCompose(
         } // no-op
         Status.IDLE -> {} // no-op
         Status.ERROR -> {
-            identityViewModel.errorCause.postValue(
-                InvalidResponseException(
-                    cause = verificationPageState.throwable,
-                    message = verificationPageState.message
+            LaunchedEffect(verificationPageState.throwable, verificationPageState.message) {
+                identityViewModel.errorCause.postValue(
+                    InvalidResponseException(
+                        cause = verificationPageState.throwable,
+                        message = verificationPageState.message
+                    )
                 )
-            )
-            navController.navigateToErrorScreenWithDefaultValues(context)
+                navController.navigateToErrorScreenWithDefaultValues(context)
+            }
         }
     }
 }

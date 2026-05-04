@@ -13,6 +13,8 @@ import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_PHONE_OTP
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.OTPDestination
 import com.stripe.android.identity.networking.Resource
@@ -82,12 +84,14 @@ class OTPScreenTest {
     )
 
     private val mockErrorCause = mock<MutableLiveData<Throwable>>()
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     private val collectedDataFlow = MutableStateFlow(CollectedDataParam())
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageData
         on { collectedData } doReturn collectedDataFlow
         on { errorCause } doReturn mockErrorCause
+        on { screenTracker } doReturn mockScreenTracker
     }
 
     private val otpViewState = MutableStateFlow<OTPViewState>(OTPViewState.InputtingOTP)
@@ -221,6 +225,7 @@ class OTPScreenTest {
                 same(mockNavController),
                 any()
             )
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_PHONE_OTP), any())
             otpInputBox().assertIsEnabled()
             onNodeWithTag(OTP_ERROR_TAG).assertDoesNotExist()
             onNodeWithTag(OTP_RESEND_BUTTON_TAG).onChildAt(0).assertIsEnabled()
@@ -233,6 +238,7 @@ class OTPScreenTest {
         val cause = Throwable()
         otpViewState.update { OTPViewState.RequestingError(cause) }
         setComposeTestRuleWith {
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_PHONE_OTP), any())
             verify(mockErrorCause).postValue(same(cause))
             verify(mockNavController).navigate(
                 argWhere {

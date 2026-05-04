@@ -99,7 +99,6 @@ class CheckoutTest {
         val result = checkout.applyPromotionCode("INVALID")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -149,7 +148,6 @@ class CheckoutTest {
         val result = checkout.removePromotionCode()
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -180,7 +178,6 @@ class CheckoutTest {
         val result = checkout.refresh()
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -217,7 +214,6 @@ class CheckoutTest {
         val result = checkout.updateLineItemQuantity("li_1", -1)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -309,7 +305,6 @@ class CheckoutTest {
         val result = checkout.updateShippingAddress(address = address)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -389,7 +384,6 @@ class CheckoutTest {
         val result = checkout.updateBillingAddress(address = address)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -611,7 +605,6 @@ class CheckoutTest {
         val result = checkout.updateTaxId("invalid", "000")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -646,7 +639,6 @@ class CheckoutTest {
         val result = checkout.selectShippingOption("shr_invalid")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -888,7 +880,6 @@ class CheckoutTest {
         val result = checkout.updateCurrency("invalid")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -977,6 +968,114 @@ class CheckoutTest {
         assertThat(isLoadingTurbine.awaitItem()).isTrue()
         assertThat(isLoadingTurbine.awaitItem()).isFalse()
         isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `runServerUpdate refreshes checkoutSession after serverUpdate completes`() = runCreateWithStateScenario {
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(checkoutSessionTurbine.awaitItem().totalSummary).isNull()
+
+        val result = checkout.runServerUpdate { Result.success(Unit) }
+
+        val updated = checkoutSessionTurbine.awaitItem()
+        result.getOrThrow()
+        assertThat(updated.totalSummary).isNotNull()
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when serverUpdate throws`() = runCreateWithStateScenario {
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.runServerUpdate {
+            throw IllegalStateException("Server error")
+        }
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when serverUpdate fails`() = runCreateWithStateScenario {
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.runServerUpdate {
+            Result.failure(IllegalStateException("Server error"))
+        }
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when refresh fails`() = runCreateWithStateScenario {
+        networkRule.checkoutInit { response ->
+            response.setResponseCode(500)
+            response.setBody("""{"error": {"message": "Internal server error"}}""")
+        }
+
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.runServerUpdate { Result.success(Unit) }
+
+        assertThat(result.isFailure).isTrue()
+
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when integrationLaunched is true`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        checkout.markIntegrationLaunched()
+
+        val result = checkout.runServerUpdate { Result.success(Unit) }
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+    }
+
+    @Test
+    fun `runServerUpdate is serialized with other mutations`() = runCreateWithStateScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            response.setBodyDelay(200, TimeUnit.MILLISECONDS)
+            response.testBodyFromFile("checkout-session-concurrent-apply-promo.json")
+        }
+
+        // After runServerUpdate executes, it re-fetches using the updated session ID from the first mutation.
+        networkRule.checkoutInit(
+            sessionId = "cs_test_after_promo",
+        ) { response ->
+            response.testBodyFromFile("checkout-session-concurrent-update-address.json")
+        }
+
+        val initial = checkoutSessionTurbine.awaitItem()
+        assertThat(initial.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+
+        val results = listOf(
+            async { checkout.applyPromotionCode("10OFF") },
+            async { checkout.runServerUpdate { Result.success(Unit) } },
+        ).awaitAll()
+
+        assertThat(results[0].isSuccess).isTrue()
+        assertThat(results[1].isSuccess).isTrue()
+
+        val afterPromo = checkoutSessionTurbine.awaitItem()
+        assertThat(afterPromo.id).isEqualTo("cs_test_after_promo")
+
+        val afterRefresh = checkoutSessionTurbine.awaitItem()
+        assertThat(afterRefresh.id).isEqualTo("cs_test_after_address")
     }
 
     private fun runCreateWithStateScenario(

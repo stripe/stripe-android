@@ -269,10 +269,28 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">Kortelė pridėta</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Bakstelėkite, kad pridėtumėte kortelę</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
+  <string name="stripe_tap_to_add_card_declined_error_title">Kortelė atmesta</string>
+  <!-- Error message shown to the user to try tapping their card again as their next action. -->
+  <string name="stripe_tap_to_add_card_default_error_action">Pabandykite dar kartą priliesti kortelę</string>
+  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
+  <string name="stripe_tap_to_add_card_not_supported_error_title">Kortelė nepalaikoma</string>
+  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
+  <string name="stripe_tap_to_add_developer_options_error_action">Išjunkite kūrėjo parinktis ir bandykite dar kartą</string>
+  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
+  <string name="stripe_tap_to_add_network_error_action">Išbandykite kitą tinklą ir prilieskite dar kartą</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Apmokėta %s</string>
+  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
+  <string name="stripe_tap_to_add_timed_out_error_action">Grįžkite atgal ir dar kartą prilieskite kortelę</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">Bakstelėjimo, kad pridėtumėte funkcija naudojant jūsų įrenginį nepalaikoma</string>
+  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_action">Išbandykite kitą įrenginį</string>
+  <!-- Error message shown when Tap to Add is not supported by the current device. -->
+  <string name="stripe_tap_to_add_unsupported_device_error_title">Įrenginys nepalaikomas</string>
+  <!-- Error message shown to the user to try tapping their different card as their next action. -->
+  <string name="stripe_tap_to_add_unusable_error_action">Išbandykite kitą kortelę</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Atšaukti ir sumokėti kitu būdu</string>
   <!-- Text on a screen asking the user to approve a payment -->
