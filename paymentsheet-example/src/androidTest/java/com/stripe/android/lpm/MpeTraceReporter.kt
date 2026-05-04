@@ -4,7 +4,7 @@ import android.util.Log
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 
 internal class MpeTraceReporter : MpeLatencyReporter {
-    override fun onStart() {
+    override fun onStart(testName: String) {
         PaymentSheetLoadTraceRecorder.startSession()
     }
 

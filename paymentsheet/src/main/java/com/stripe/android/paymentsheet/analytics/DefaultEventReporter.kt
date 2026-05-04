@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import android.content.Context
+import android.util.Log
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -78,6 +79,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         durationProvider.start(DurationProvider.Key.Checkout)
 
         val duration = durationProvider.end(DurationProvider.Key.Loading)
+        reportMpeLatencyIfConfigured(duration)
 
         fireEvent(
             event = PaymentSheetEvent.LoadSucceeded(
@@ -94,6 +96,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         error: Throwable,
     ) {
         val duration = durationProvider.end(DurationProvider.Key.Loading)
+        MpeLatencyCapture.clear()
         fireEvent(
             event = PaymentSheetEvent.LoadFailed(
                 duration = duration,
@@ -600,6 +603,32 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
+    private fun reportMpeLatencyIfConfigured(duration: kotlin.time.Duration?) {
+        val config = MpeLatencyCapture.consume() ?: return
+
+        when (config.mode) {
+            MpeLatencyCapture.Mode.Benchmark -> {
+                val durationMs = duration?.inWholeMilliseconds ?: return
+                Log.i(
+                    MPE_LATENCY_BENCHMARK_LOG_TAG,
+                    "SYNTHETIC_LATENCY_RESULT: ${config.testName}: $durationMs"
+                )
+            }
+            MpeLatencyCapture.Mode.Synthetics -> {
+                analyticsRequestExecutor.executeAsync(
+                    paymentAnalyticsRequestFactory.createRequest(
+                        event = MpeSyntheticLatencyAnalyticsEvent,
+                        additionalParams = mapOf(
+                            "test" to config.testName,
+                        ) + duration?.let {
+                            mapOf("duration" to it.inWholeMilliseconds)
+                        }.orEmpty()
+                    )
+                )
+            }
+        }
+    }
+
     private fun determineLinkContextForPaymentMethodType(code: String): String? {
         return if (code == "link") {
             if (paymentMethodMetadataProvider.get()?.linkMode == LinkMode.LinkCardBrand) {
@@ -613,10 +642,15 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     companion object {
+        private const val MPE_LATENCY_BENCHMARK_LOG_TAG = "MPELatencyBenchmark"
         private const val CLIENT_ID = "stripe-mobile-sdk"
         private const val ORIGIN = "stripe-mobile-sdk-android"
 
         @Volatile
         var analyticEventCoroutineContext: CoroutineContext? = null
+    }
+
+    private data object MpeSyntheticLatencyAnalyticsEvent : AnalyticsEvent {
+        override val eventName: String = "mpe.synthetic_latency"
     }
 }

@@ -1,26 +1,11 @@
 package com.stripe.android.lpm
 
-import android.util.Log
-import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.paymentsheet.analytics.MpeLatencyCapture
 
-internal class MpeBenchmarkEventReporter(
-    private val durationProvider: DurationProvider,
-) : MpeLatencyReporter {
-    override fun onStart() {
-        durationProvider.start(DurationProvider.Key.MpeSynthetics)
+internal class MpeBenchmarkEventReporter : MpeLatencyReporter {
+    override fun onStart(testName: String) {
+        MpeLatencyCapture.registerBenchmark(testName)
     }
 
-    override fun onLoad(testName: String) {
-        val duration = durationProvider.end(DurationProvider.Key.MpeSynthetics)
-        val durationMs = duration?.inWholeMilliseconds ?: return
-
-        Log.i(
-            LOG_TAG,
-            "SYNTHETIC_LATENCY_RESULT: $testName: $durationMs"
-        )
-    }
-
-    companion object {
-        const val LOG_TAG: String = "MPELatencyBenchmark"
-    }
+    override fun onLoad(testName: String) = Unit
 }

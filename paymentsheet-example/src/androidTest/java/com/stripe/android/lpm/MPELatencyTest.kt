@@ -4,12 +4,6 @@ import android.os.Bundle
 import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.BasePlaygroundTest
-import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
-import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -37,10 +31,6 @@ internal class MPELatencyTest(
     private val testName: String,
     val testConfig: TestConfig,
 ) : BasePlaygroundTest(retryEnabled = true, retryCount = 3) {
-    private val appContext by lazy {
-        InstrumentationRegistry.getInstrumentation().targetContext.applicationContext
-    }
-
     private val reportingMode by lazy {
         ReportingMode.fromInstrumentationArgs()
     }
@@ -56,24 +46,10 @@ internal class MPELatencyTest(
     private val latencyReporter by lazy {
         when (reportingMode) {
             ReportingMode.Benchmark -> {
-                MpeBenchmarkEventReporter(
-                    durationProvider = DefaultDurationProvider.instance,
-                )
+                MpeBenchmarkEventReporter()
             }
             ReportingMode.Synthetics -> {
-                MpeSyntheticsEventReporter(
-                    analyticsRequestExecutor = DefaultAnalyticsRequestExecutor(),
-                    analyticsRequestFactory = AnalyticsRequestFactory(
-                        packageManager = appContext.packageManager,
-                        packageInfo = appContext.packageInfo,
-                        packageName = appContext.packageName,
-                        publishableKeyProvider = {
-                            PaymentConfiguration.getInstance(appContext).publishableKey
-                        },
-                        networkTypeProvider = NetworkTypeDetector(appContext)::invoke,
-                    ),
-                    durationProvider = DefaultDurationProvider.instance,
-                )
+                MpeSyntheticsEventReporter()
             }
             ReportingMode.Trace -> {
                 MpeTraceReporter()
@@ -106,12 +82,12 @@ internal class MPELatencyTest(
                 ),
                 isReturningCustomer = testConfig.isReturningCustomer,
                 onLaunch = {
-                    latencyReporter.onStart()
+                    latencyReporter.onStart(testName)
                 },
                 onLoad = {
                     latencyReporter.onLoad(testName)
                 },
-                startOnPaymentSheetLaunch = reportingMode == ReportingMode.Trace,
+                startOnPaymentSheetLaunch = true,
             )
         }
     }
