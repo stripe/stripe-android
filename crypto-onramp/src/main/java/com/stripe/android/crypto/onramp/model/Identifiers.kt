@@ -6,20 +6,20 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * A typed identifier entry.
+ * A compliance identifier collected for MiCA or CRS/CARF compliance.
  *
- * @property type The reviewed identifier type.
+ * @property type The type of identifier provided.
  * @property value The identifier value.
  */
 @ExperimentalCryptoOnramp
-class Identifier {
-    private var type: IdentifierType? = null
+class ComplianceIdentifier {
+    private var type: ComplianceIdentifierType? = null
     private var value: String? = null
 
     /**
      * Sets the identifier type.
      */
-    fun type(type: IdentifierType) = apply {
+    fun type(type: ComplianceIdentifierType) = apply {
         this.type = type
     }
 
@@ -31,7 +31,7 @@ class Identifier {
     }
 
     internal class State(
-        val type: IdentifierType,
+        val type: ComplianceIdentifierType,
         val value: String
     )
 
@@ -48,203 +48,197 @@ class Identifier {
 }
 
 /**
- * Supported identifier types for EU onramp compliance.
+ * The type of compliance identifier required or submitted for regulatory compliance.
  */
 @ExperimentalCryptoOnramp
-enum class IdentifierType(
+@Poko
+class ComplianceIdentifierType(
     val value: String
 ) {
-    AT_STN("at_stn"),
-    BE_NRN("be_nrn"),
-    BG_UCN("bg_ucn"),
-    HR_OIB("hr_oib"),
-    CY_TIC("cy_tic"),
-    CZ_RC("cz_rc"),
-    DK_CPR("dk_cpr"),
-    EE_IK("ee_ik"),
-    FI_HETU("fi_hetu"),
-    FR_SPI("fr_spi"),
-    DE_STN("de_stn"),
-    GR_AFM("gr_afm"),
-    HU_AD("hu_ad"),
-    IS_KT("is_kt"),
-    IE_PPSN("ie_ppsn"),
-    IT_CF("it_cf"),
-    LV_PK("lv_pk"),
-    LT_AK("lt_ak"),
-    LU_NIF("lu_nif"),
-    MT_NIC("mt_nic"),
-    MT_PP("mt_pp"),
-    NL_BSN("nl_bsn"),
-    PL_PESEL("pl_pesel"),
-    PL_NIP("pl_nip"),
-    PT_NIF("pt_nif"),
-    RO_CNP("ro_cnp"),
-    SK_RC("sk_rc"),
-    SI_PIN("si_pin"),
-    SE_PIN("se_pin");
+    init {
+        require(value.isNotBlank()) {
+            "value must not be blank"
+        }
+    }
 
     companion object {
-        fun fromValue(value: String): IdentifierType? {
-            return entries.firstOrNull { it.value == value.lowercase() }
+        val AT_STN = ComplianceIdentifierType("at_stn")
+        val BE_NRN = ComplianceIdentifierType("be_nrn")
+        val BG_UCN = ComplianceIdentifierType("bg_ucn")
+        val HR_OIB = ComplianceIdentifierType("hr_oib")
+        val CY_TIC = ComplianceIdentifierType("cy_tic")
+        val CZ_RC = ComplianceIdentifierType("cz_rc")
+        val DK_CPR = ComplianceIdentifierType("dk_cpr")
+        val EE_IK = ComplianceIdentifierType("ee_ik")
+        val FI_HETU = ComplianceIdentifierType("fi_hetu")
+        val FR_SPI = ComplianceIdentifierType("fr_spi")
+        val DE_STN = ComplianceIdentifierType("de_stn")
+        val GR_AFM = ComplianceIdentifierType("gr_afm")
+        val HU_AD = ComplianceIdentifierType("hu_ad")
+        val IS_KT = ComplianceIdentifierType("is_kt")
+        val IE_PPSN = ComplianceIdentifierType("ie_ppsn")
+        val IT_CF = ComplianceIdentifierType("it_cf")
+        val LV_PK = ComplianceIdentifierType("lv_pk")
+        val LT_AK = ComplianceIdentifierType("lt_ak")
+        val LU_NIF = ComplianceIdentifierType("lu_nif")
+        val MT_NIC = ComplianceIdentifierType("mt_nic")
+        val MT_PP = ComplianceIdentifierType("mt_pp")
+        val NL_BSN = ComplianceIdentifierType("nl_bsn")
+        val PL_PESEL = ComplianceIdentifierType("pl_pesel")
+        val PL_NIP = ComplianceIdentifierType("pl_nip")
+        val PT_NIF = ComplianceIdentifierType("pt_nif")
+        val RO_CNP = ComplianceIdentifierType("ro_cnp")
+        val SK_RC = ComplianceIdentifierType("sk_rc")
+        val SI_PIN = ComplianceIdentifierType("si_pin")
+        val SE_PIN = ComplianceIdentifierType("se_pin")
+
+        fun fromValue(value: String): ComplianceIdentifierType {
+            return ComplianceIdentifierType(value)
         }
     }
 }
 
 /**
- * Regulations that can require identifier collection.
+ * The regulation requiring a compliance identifier.
  */
 @ExperimentalCryptoOnramp
-enum class RegulationType(val value: String) {
+enum class ComplianceRegulation(val value: String) {
     EuCarf("eu_carf"),
     EuMica("eu_mica");
 
     companion object {
-        fun fromValue(value: String): RegulationType? {
-            return entries.firstOrNull { it.value == value.lowercase() }
+        fun fromValue(value: String): ComplianceRegulation? {
+            return entries.firstOrNull { it.value == value }
         }
     }
 }
 
 /**
- * An identifier requirement returned by the Crypto Onramp API.
+ * A compliance identifier the customer still needs to provide.
  */
 @ExperimentalCryptoOnramp
 @Poko
-class IdentifierRequirement internal constructor(
-    val type: IdentifierType,
-    val regulation: RegulationType
+class ComplianceIdentifierRequirement internal constructor(
+    val type: ComplianceIdentifierType,
+    val regulation: ComplianceRegulation
 )
 
 /**
- * A set of alternative identifiers that can satisfy a missing requirement.
+ * A group describing alternative identifier types that may satisfy a requirement.
  */
 @ExperimentalCryptoOnramp
 @Poko
-class AlternativeGroup internal constructor(
-    val originalMissingIdentifiers: List<IdentifierType>,
-    val alternativeMissingIdentifiers: List<IdentifierType>
+class ComplianceIdentifierAlternativeGroup internal constructor(
+    val originalMissingIdentifiers: List<ComplianceIdentifierType>,
+    val alternativeMissingIdentifiers: List<ComplianceIdentifierType>
 )
 
 /**
- * Identifier requirements returned by the Crypto Onramp API.
+ * The compliance identifiers a customer still needs to provide.
  */
 @ExperimentalCryptoOnramp
 @Poko
-class IdentifierRequirements internal constructor(
-    val identifiers: List<IdentifierRequirement>,
-    val alternatives: List<AlternativeGroup>
+class ComplianceIdentifierRequirements internal constructor(
+    val identifiers: List<ComplianceIdentifierRequirement>,
+    val alternatives: List<ComplianceIdentifierAlternativeGroup>
 )
 
 /**
- * Validation result returned after updating KYC info.
+ * The result of submitting compliance identifiers for MiCA and CRS/CARF compliance.
  */
 @ExperimentalCryptoOnramp
 @Poko
-class UpdateKycInfoResult internal constructor(
+class SubmitIdentifiersResult internal constructor(
     val valid: Boolean,
-    val identifiers: List<IdentifierRequirement>,
-    val alternatives: List<AlternativeGroup>,
-    val invalidIdentifiers: List<IdentifierType>
+    val identifiers: List<ComplianceIdentifierRequirement>,
+    val alternatives: List<ComplianceIdentifierAlternativeGroup>,
+    val invalidIdentifiers: List<ComplianceIdentifierType>
 )
 
 @Serializable
-internal data class UpdateKycInfoRequest(
+internal data class SubmitIdentifiersRequest(
     val credentials: CryptoCustomerRequestParams.Credentials,
-    val identifiers: List<IdentifierRequest>
+    val identifiers: List<ComplianceIdentifierRequest>
 )
 
 @Serializable
-internal data class IdentifierRequest(
+internal data class ComplianceIdentifierRequest(
     val type: String,
     val value: String
 )
 
 @Serializable
-internal data class IdentifierRequirementsResponse(
-    val identifiers: List<IdentifierRequirementResponse> = emptyList(),
-    val alternatives: List<AlternativeGroupResponse> = emptyList(),
+internal data class ComplianceIdentifierRequirementsResponse(
+    val identifiers: List<ComplianceIdentifierRequirementResponse> = emptyList(),
+    val alternatives: List<ComplianceIdentifierAlternativeGroupResponse> = emptyList(),
 ) {
-    fun toIdentifierRequirements(): IdentifierRequirements {
-        return IdentifierRequirements(
-            identifiers = identifiers.map { it.toIdentifierRequirement() },
-            alternatives = alternatives.map { it.toAlternativeGroup() }
+    fun toComplianceIdentifierRequirements(): ComplianceIdentifierRequirements {
+        return ComplianceIdentifierRequirements(
+            identifiers = identifiers.map { it.toComplianceIdentifierRequirement() },
+            alternatives = alternatives.map { it.toComplianceIdentifierAlternativeGroup() }
         )
     }
 }
 
 @Serializable
-internal data class UpdateKycInfoResponse(
+internal data class SubmitIdentifiersResponse(
     val valid: Boolean = true,
-    val identifiers: List<IdentifierRequirementResponse> = emptyList(),
-    val alternatives: List<AlternativeGroupResponse> = emptyList(),
+    val identifiers: List<ComplianceIdentifierRequirementResponse> = emptyList(),
+    val alternatives: List<ComplianceIdentifierAlternativeGroupResponse> = emptyList(),
+    @SerialName("invalid_identifiers")
     val invalidIdentifiers: List<String> = emptyList(),
 ) {
-    fun toUpdateKycInfoResult(): UpdateKycInfoResult {
-        return UpdateKycInfoResult(
+    fun toSubmitIdentifiersResult(): SubmitIdentifiersResult {
+        return SubmitIdentifiersResult(
             valid = valid,
-            identifiers = identifiers.map { it.toIdentifierRequirement() },
-            alternatives = alternatives.map { it.toAlternativeGroup() },
-            invalidIdentifiers = invalidIdentifiers.map { identifierType ->
-                requireNotNull(IdentifierType.fromValue(identifierType)) {
-                    "Unrecognized identifier type: $identifierType"
-                }
-            }
+            identifiers = identifiers.map { it.toComplianceIdentifierRequirement() },
+            alternatives = alternatives.map { it.toComplianceIdentifierAlternativeGroup() },
+            invalidIdentifiers = invalidIdentifiers.map(ComplianceIdentifierType::fromValue)
         )
     }
 }
 
 @Serializable
-internal data class IdentifierRequirementResponse(
+internal data class ComplianceIdentifierRequirementResponse(
     val type: String,
     val regulation: String
 ) {
-    fun toIdentifierRequirement(): IdentifierRequirement {
-        return IdentifierRequirement(
-            type = requireNotNull(IdentifierType.fromValue(type)) {
-                "Unrecognized identifier type: $type"
-            },
-            regulation = requireNotNull(RegulationType.fromValue(regulation)) {
-                "Unrecognized regulation type: $regulation"
+    fun toComplianceIdentifierRequirement(): ComplianceIdentifierRequirement {
+        return ComplianceIdentifierRequirement(
+            type = ComplianceIdentifierType.fromValue(type),
+            regulation = requireNotNull(ComplianceRegulation.fromValue(regulation)) {
+                "Unrecognized compliance regulation: $regulation"
             }
         )
     }
 }
 
 @Serializable
-internal data class AlternativeGroupResponse(
+internal data class ComplianceIdentifierAlternativeGroupResponse(
     @SerialName("original_missing_identifiers")
     val originalMissingIdentifiers: List<String>,
     @SerialName("alternative_missing_identifiers")
     val alternativeMissingIdentifiers: List<String>
 ) {
-    fun toAlternativeGroup(): AlternativeGroup {
-        return AlternativeGroup(
-            originalMissingIdentifiers = originalMissingIdentifiers.map { identifierType ->
-                requireNotNull(IdentifierType.fromValue(identifierType)) {
-                    "Unrecognized identifier type: $identifierType"
-                }
-            },
-            alternativeMissingIdentifiers = alternativeMissingIdentifiers.map { identifierType ->
-                requireNotNull(IdentifierType.fromValue(identifierType)) {
-                    "Unrecognized identifier type: $identifierType"
-                }
-            }
+    fun toComplianceIdentifierAlternativeGroup(): ComplianceIdentifierAlternativeGroup {
+        return ComplianceIdentifierAlternativeGroup(
+            originalMissingIdentifiers = originalMissingIdentifiers.map(ComplianceIdentifierType::fromValue),
+            alternativeMissingIdentifiers = alternativeMissingIdentifiers.map(ComplianceIdentifierType::fromValue)
         )
     }
 }
 
-internal fun List<Identifier>.toRequest(
+internal fun List<ComplianceIdentifier>.toRequest(
     credentials: CryptoCustomerRequestParams.Credentials
-): UpdateKycInfoRequest {
-    return UpdateKycInfoRequest(
+): SubmitIdentifiersRequest {
+    return SubmitIdentifiersRequest(
         credentials = credentials,
         identifiers = map { it.build().toRequest() }
     )
 }
 
-private fun Identifier.State.toRequest(): IdentifierRequest {
-    return IdentifierRequest(
+private fun ComplianceIdentifier.State.toRequest(): ComplianceIdentifierRequest {
+    return ComplianceIdentifierRequest(
         type = type.value,
         value = value
     )

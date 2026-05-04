@@ -11,6 +11,9 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.executeRequestWithKSerializerParser
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirements
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirementsResponse
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
@@ -21,9 +24,6 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.CryptoWalletRequestParams
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
-import com.stripe.android.crypto.onramp.model.IdentifierRequirements
-import com.stripe.android.crypto.onramp.model.IdentifierRequirementsResponse
-import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
@@ -31,8 +31,8 @@ import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
-import com.stripe.android.crypto.onramp.model.UpdateKycInfoResponse
-import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
+import com.stripe.android.crypto.onramp.model.SubmitIdentifiersResponse
+import com.stripe.android.crypto.onramp.model.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.toRequest
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.utils.isLinkAuthorizationError
@@ -126,9 +126,9 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
-    suspend fun getIdentifierRequirements(
+    suspend fun retrieveMissingIdentifiers(
         consumerSessionClientSecret: String
-    ): Result<IdentifierRequirements> {
+    ): Result<ComplianceIdentifierRequirements> {
         val request = apiRequestFactory.createGet(
             url = identifierRequirementsUrl,
             options = buildRequestOptions(),
@@ -137,23 +137,23 @@ internal class CryptoApiRepository @Inject constructor(
 
         return execute(
             request = request,
-            responseSerializer = IdentifierRequirementsResponse.serializer()
-        ).mapCatching { it.toIdentifierRequirements() }
+            responseSerializer = ComplianceIdentifierRequirementsResponse.serializer()
+        ).mapCatching { it.toComplianceIdentifierRequirements() }
     }
 
-    suspend fun updateKycInfo(
-        identifiers: List<Identifier>,
+    suspend fun submitIdentifiers(
+        identifiers: List<ComplianceIdentifier>,
         consumerSessionClientSecret: String
-    ): Result<UpdateKycInfoResult> {
+    ): Result<SubmitIdentifiersResult> {
         return executePost(
-            updateKycInfoUrl,
+            submitIdentifiersUrl,
             Json.encodeToJsonElement(
                 identifiers.toRequest(
                     credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
                 )
             ).jsonObject,
-            UpdateKycInfoResponse.serializer()
-        ).mapCatching { it.toUpdateKycInfoResult() }
+            SubmitIdentifiersResponse.serializer()
+        ).mapCatching { it.toSubmitIdentifiersResult() }
     }
 
     suspend fun retrieveCrsCarfDeclaration(
@@ -393,10 +393,10 @@ internal class CryptoApiRepository @Inject constructor(
             get() = getApiUrl("crypto/internal/identifier_requirements")
 
         /**
-         * @return `https://api.stripe.com/v1/crypto/internal/tax_attestation`
+         * @return `https://api.stripe.com/v1/crypto/internal/eu_identifiers`
          */
-        internal val updateKycInfoUrl: String
-            get() = getApiUrl("crypto/internal/tax_attestation")
+        internal val submitIdentifiersUrl: String
+            get() = getApiUrl("crypto/internal/eu_identifiers")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/crs_carf_declaration`

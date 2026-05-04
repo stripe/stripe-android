@@ -5,8 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
@@ -14,13 +14,13 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampGetIdentifierRequirementsResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
-import com.stripe.android.crypto.onramp.model.OnrampUpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -116,23 +116,23 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Retrieves identifier requirements for the current Link user.
+     * Retrieves compliance identifiers still required for MiCA and CRS/CARF compliance.
      * Requires an authenticated Link user.
      */
-    suspend fun getIdentifierRequirements(): OnrampGetIdentifierRequirementsResult {
-        return interactor.getIdentifierRequirements()
+    suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
+        return interactor.retrieveMissingIdentifiers()
     }
 
     /**
-     * Updates KYC info for the current Link user.
+     * Submits compliance identifiers for MiCA and CRS/CARF compliance.
      * Requires an authenticated Link user.
      *
-     * @param identifiers The identifiers to submit.
+     * @param identifiers The compliance identifiers to submit.
      */
-    suspend fun updateKycInfo(
-        identifiers: List<Identifier>
-    ): OnrampUpdateKycInfoResult {
-        return interactor.updateKycInfo(identifiers)
+    suspend fun submitIdentifiers(
+        identifiers: List<ComplianceIdentifier>
+    ): OnrampSubmitIdentifiersResult {
+        return interactor.submitIdentifiers(identifiers)
     }
 
     /**

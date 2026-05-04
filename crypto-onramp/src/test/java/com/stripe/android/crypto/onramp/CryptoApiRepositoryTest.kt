@@ -7,15 +7,15 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.crypto.onramp.model.AlternativeGroup
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierAlternativeGroup
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirement
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierType
+import com.stripe.android.crypto.onramp.model.ComplianceRegulation
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.Identifier
-import com.stripe.android.crypto.onramp.model.IdentifierRequirement
-import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
-import com.stripe.android.crypto.onramp.model.RegulationType
-import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
+import com.stripe.android.crypto.onramp.model.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.DateOfBirth
@@ -150,7 +150,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testGetIdentifierRequirementsSucceeds() {
+    fun testRetrieveMissingIdentifiersSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -180,7 +180,7 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.getIdentifierRequirements(
+            val result = cryptoApiRepository.retrieveMissingIdentifiers(
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -195,27 +195,27 @@ class CryptoApiRepositoryTest {
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrThrow().identifiers)
                 .containsExactly(
-                    IdentifierRequirement(
-                        type = IdentifierType.MT_NIC,
-                        regulation = RegulationType.EuMica
+                    ComplianceIdentifierRequirement(
+                        type = ComplianceIdentifierType.MT_NIC,
+                        regulation = ComplianceRegulation.EuMica
                     ),
-                    IdentifierRequirement(
-                        type = IdentifierType.FR_SPI,
-                        regulation = RegulationType.EuCarf
+                    ComplianceIdentifierRequirement(
+                        type = ComplianceIdentifierType.FR_SPI,
+                        regulation = ComplianceRegulation.EuCarf
                     )
                 )
             assertThat(result.getOrThrow().alternatives)
                 .containsExactly(
-                    AlternativeGroup(
-                        originalMissingIdentifiers = listOf(IdentifierType.MT_NIC),
-                        alternativeMissingIdentifiers = listOf(IdentifierType.MT_PP)
+                    ComplianceIdentifierAlternativeGroup(
+                        originalMissingIdentifiers = listOf(ComplianceIdentifierType.MT_NIC),
+                        alternativeMissingIdentifiers = listOf(ComplianceIdentifierType.MT_PP)
                     )
                 )
         }
     }
 
     @Test
-    fun testUpdateKycInfoSucceeds() {
+    fun testSubmitIdentifiersSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -245,7 +245,7 @@ class CryptoApiRepositoryTest {
                                 "type": "mt_nic"
                             }
                         ],
-                        "invalidIdentifiers": [
+                        "invalid_identifiers": [
                             "de_stn",
                             "mt_nic"
                         ],
@@ -259,13 +259,13 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.updateKycInfo(
+            val result = cryptoApiRepository.submitIdentifiers(
                 identifiers = listOf(
-                    Identifier()
-                        .type(IdentifierType.MT_NIC)
+                    ComplianceIdentifier()
+                        .type(ComplianceIdentifierType.MT_NIC)
                         .value("mica_123"),
-                    Identifier()
-                        .type(IdentifierType.FR_SPI)
+                    ComplianceIdentifier()
+                        .type(ComplianceIdentifierType.FR_SPI)
                         .value("carf_456")
                 ),
                 consumerSessionClientSecret = "test-secret"
@@ -274,12 +274,12 @@ class CryptoApiRepositoryTest {
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
             assertIdentifiersRequest(apiRequestArgumentCaptor.firstValue)
             assertThat(result.isSuccess).isTrue()
-            assertUpdateKycInfoResult(result.getOrThrow())
+            assertSubmitIdentifiersResult(result.getOrThrow())
         }
     }
 
     @Test
-    fun testUpdateKycInfoSucceedsWhenValid() {
+    fun testSubmitIdentifiersSucceedsWhenValid() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -287,7 +287,7 @@ class CryptoApiRepositoryTest {
                     {
                         "alternatives": [],
                         "identifiers": [],
-                        "invalidIdentifiers": [],
+                        "invalid_identifiers": [],
                         "valid": true
                     }
                     """,
@@ -297,10 +297,10 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.updateKycInfo(
+            val result = cryptoApiRepository.submitIdentifiers(
                 identifiers = listOf(
-                    Identifier()
-                        .type(IdentifierType.MT_NIC)
+                    ComplianceIdentifier()
+                        .type(ComplianceIdentifierType.MT_NIC)
                         .value("mica_123")
                 ),
                 consumerSessionClientSecret = "test-secret"
@@ -309,7 +309,7 @@ class CryptoApiRepositoryTest {
             assertThat(result.isSuccess).isTrue()
             assertThat(result.getOrThrow())
                 .isEqualTo(
-                    UpdateKycInfoResult(
+                    SubmitIdentifiersResult(
                         valid = true,
                         identifiers = emptyList(),
                         alternatives = emptyList(),
@@ -738,7 +738,7 @@ class CryptoApiRepositoryTest {
 
     private fun assertIdentifiersRequest(apiRequest: ApiRequest) {
         assertThat(apiRequest.baseUrl)
-            .isEqualTo("https://api.stripe.com/v1/crypto/internal/tax_attestation")
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/eu_identifiers")
         assertThat(apiRequest.params)
             .isEqualTo(
                 mapOf(
@@ -757,31 +757,31 @@ class CryptoApiRepositoryTest {
             )
     }
 
-    private fun assertUpdateKycInfoResult(result: UpdateKycInfoResult) {
+    private fun assertSubmitIdentifiersResult(result: SubmitIdentifiersResult) {
         assertThat(result.valid).isFalse()
         assertThat(result.identifiers)
             .containsExactly(
-                IdentifierRequirement(
-                    type = IdentifierType.DE_STN,
-                    regulation = RegulationType.EuCarf
+                ComplianceIdentifierRequirement(
+                    type = ComplianceIdentifierType.DE_STN,
+                    regulation = ComplianceRegulation.EuCarf
                 ),
-                IdentifierRequirement(
-                    type = IdentifierType.MT_NIC,
-                    regulation = RegulationType.EuCarf
+                ComplianceIdentifierRequirement(
+                    type = ComplianceIdentifierType.MT_NIC,
+                    regulation = ComplianceRegulation.EuCarf
                 ),
-                IdentifierRequirement(
-                    type = IdentifierType.MT_NIC,
-                    regulation = RegulationType.EuMica
+                ComplianceIdentifierRequirement(
+                    type = ComplianceIdentifierType.MT_NIC,
+                    regulation = ComplianceRegulation.EuMica
                 )
             )
         assertThat(result.alternatives)
             .containsExactly(
-                AlternativeGroup(
-                    originalMissingIdentifiers = listOf(IdentifierType.MT_NIC),
-                    alternativeMissingIdentifiers = listOf(IdentifierType.MT_PP)
+                ComplianceIdentifierAlternativeGroup(
+                    originalMissingIdentifiers = listOf(ComplianceIdentifierType.MT_NIC),
+                    alternativeMissingIdentifiers = listOf(ComplianceIdentifierType.MT_PP)
                 )
             )
         assertThat(result.invalidIdentifiers)
-            .isEqualTo(listOf(IdentifierType.DE_STN, IdentifierType.MT_NIC))
+            .isEqualTo(listOf(ComplianceIdentifierType.DE_STN, ComplianceIdentifierType.MT_NIC))
     }
 }

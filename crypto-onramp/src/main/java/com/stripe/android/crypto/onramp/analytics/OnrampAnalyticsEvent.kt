@@ -73,12 +73,12 @@ internal sealed class OnrampAnalyticsEvent(
         name = "kyc_info_verification_completed"
     )
 
-    data object IdentifierRequirementsRetrieved : OnrampAnalyticsEvent(
-        name = "identifier_requirements_retrieved"
+    data object MissingIdentifiersRetrieved : OnrampAnalyticsEvent(
+        name = "missing_identifiers_retrieved"
     )
 
-    data object EuIdentifiersSubmitted : OnrampAnalyticsEvent(
-        name = "eu_identifiers_submitted"
+    data object IdentifiersSubmitted : OnrampAnalyticsEvent(
+        name = "identifiers_submitted"
     )
 
     data object CrsCarfDeclarationStarted : OnrampAnalyticsEvent(
@@ -178,8 +178,8 @@ internal sealed class OnrampAnalyticsEvent(
             PerformCheckout("perform_checkout"),
             LogOut("log_out"),
             VerifyKyc("verify_kyc_info"),
-            GetIdentifierRequirements("identifier_requirements"),
-            CollectEuIdentifiers("collect_eu_identifiers"),
+            RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
+            SubmitIdentifiers("submit_identifiers"),
             ConfirmCrsCarfDeclaration("confirm_crs_carf_declaration")
         }
     }

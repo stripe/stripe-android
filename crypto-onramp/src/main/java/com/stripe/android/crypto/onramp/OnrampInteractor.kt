@@ -14,9 +14,9 @@ import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -28,15 +28,15 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
-import com.stripe.android.crypto.onramp.model.OnrampGetIdentifierRequirementsResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
-import com.stripe.android.crypto.onramp.model.OnrampUpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
@@ -336,64 +336,64 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
-    suspend fun getIdentifierRequirements(): OnrampGetIdentifierRequirementsResult {
+    suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = MissingConsumerSecretException()
             analyticsService?.track(
                 OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.GetIdentifierRequirements,
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RetrieveMissingIdentifiers,
                     error = error,
                 )
             )
-            return OnrampGetIdentifierRequirementsResult.Failed(error)
+            return OnrampRetrieveMissingIdentifiersResult.Failed(error)
         }
 
-        return cryptoApiRepository.getIdentifierRequirements(secret)
+        return cryptoApiRepository.retrieveMissingIdentifiers(secret)
             .fold(
                 onSuccess = { requirements ->
-                    analyticsService?.track(OnrampAnalyticsEvent.IdentifierRequirementsRetrieved)
-                    OnrampGetIdentifierRequirementsResult.Completed(requirements)
+                    analyticsService?.track(OnrampAnalyticsEvent.MissingIdentifiersRetrieved)
+                    OnrampRetrieveMissingIdentifiersResult.Completed(requirements)
                 },
                 onFailure = { error ->
                     analyticsService?.track(
                         OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.GetIdentifierRequirements,
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.RetrieveMissingIdentifiers,
                             error = error,
                         )
                     )
-                    OnrampGetIdentifierRequirementsResult.Failed(error)
+                    OnrampRetrieveMissingIdentifiersResult.Failed(error)
                 }
             )
     }
 
-    suspend fun updateKycInfo(identifiers: List<Identifier>): OnrampUpdateKycInfoResult {
+    suspend fun submitIdentifiers(identifiers: List<ComplianceIdentifier>): OnrampSubmitIdentifiersResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = MissingConsumerSecretException()
             analyticsService?.track(
                 OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectEuIdentifiers,
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.SubmitIdentifiers,
                     error = error,
                 )
             )
-            return OnrampUpdateKycInfoResult.Failed(error)
+            return OnrampSubmitIdentifiersResult.Failed(error)
         }
 
-        return cryptoApiRepository.updateKycInfo(identifiers, secret)
+        return cryptoApiRepository.submitIdentifiers(identifiers, secret)
             .fold(
                 onSuccess = { result ->
-                    analyticsService?.track(OnrampAnalyticsEvent.EuIdentifiersSubmitted)
-                    OnrampUpdateKycInfoResult.Completed(result)
+                    analyticsService?.track(OnrampAnalyticsEvent.IdentifiersSubmitted)
+                    OnrampSubmitIdentifiersResult.Completed(result)
                 },
                 onFailure = { error ->
                     analyticsService?.track(
                         OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectEuIdentifiers,
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.SubmitIdentifiers,
                             error = error,
                         )
                     )
-                    OnrampUpdateKycInfoResult.Failed(error)
+                    OnrampSubmitIdentifiersResult.Failed(error)
                 }
             )
     }

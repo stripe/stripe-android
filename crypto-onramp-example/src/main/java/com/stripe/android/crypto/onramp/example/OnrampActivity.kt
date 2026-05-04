@@ -506,8 +506,8 @@ internal fun OnrampScreen(
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
-                    onGetIdentifierRequirements = viewModel::getIdentifierRequirements,
-                    onUpdateKycInfo = viewModel::updateIdentifierInfo,
+                    onRetrieveMissingIdentifiers = viewModel::retrieveMissingIdentifiers,
+                    onSubmitIdentifiers = viewModel::submitIdentifiers,
                     onVerifyKyc = onVerifyKyc,
                     onStartVerification = onStartVerification,
                     onShowCRSCARFDeclaration = onShowCRSCARFDeclaration,
@@ -739,8 +739,8 @@ private fun AuthenticatedOperationsScreen(
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
-    onGetIdentifierRequirements: () -> Unit,
-    onUpdateKycInfo: () -> Unit,
+    onRetrieveMissingIdentifiers: () -> Unit,
+    onSubmitIdentifiers: () -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
     onShowCRSCARFDeclaration: () -> Unit,
@@ -1012,10 +1012,10 @@ private fun AuthenticatedOperationsScreen(
                 onIdentifierTypeChange = onIdentifierTypeChange,
                 onAddIdentifier = onAddIdentifier,
                 onRemoveIdentifier = onRemoveIdentifier,
-                identifierRequirementsSummary = state.identifierRequirementsSummary,
-                updateKycInfoSummary = state.updateKycInfoSummary,
-                onGetIdentifierRequirements = onGetIdentifierRequirements,
-                onUpdateKycInfo = onUpdateKycInfo,
+                missingIdentifiersSummary = state.missingIdentifiersSummary,
+                submitIdentifiersSummary = state.submitIdentifiersSummary,
+                onRetrieveMissingIdentifiers = onRetrieveMissingIdentifiers,
+                onSubmitIdentifiers = onSubmitIdentifiers,
             )
         }
 
@@ -1144,14 +1144,14 @@ private fun IdentifierInfoScreen(
     onIdentifierTypeChange: (Int, String) -> Unit,
     onAddIdentifier: () -> Unit,
     onRemoveIdentifier: (Int) -> Unit,
-    identifierRequirementsSummary: String?,
-    updateKycInfoSummary: String?,
-    onGetIdentifierRequirements: () -> Unit,
-    onUpdateKycInfo: () -> Unit,
+    missingIdentifiersSummary: String?,
+    submitIdentifiersSummary: String?,
+    onRetrieveMissingIdentifiers: () -> Unit,
+    onSubmitIdentifiers: () -> Unit,
 ) {
     Column {
         Text(
-            text = "Identifier Requirements",
+            text = "Missing Identifiers",
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -1162,23 +1162,23 @@ private fun IdentifierInfoScreen(
         )
 
         Button(
-            onClick = onGetIdentifierRequirements,
+            onClick = onRetrieveMissingIdentifiers,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
         ) {
-            Text("Get Identifier Requirements")
+            Text("Retrieve Missing Identifiers")
         }
 
-        identifierRequirementsSummary?.let { summary ->
+        missingIdentifiersSummary?.let { summary ->
             Text(
-                text = "Latest requirements:\n$summary",
+                text = "Latest response:\n$summary",
                 modifier = Modifier.padding(bottom = 20.dp)
             )
         }
 
         Text(
-            text = "Update Identifier Info",
+            text = "Submit Identifiers",
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 8.dp)
         )
@@ -1222,17 +1222,17 @@ private fun IdentifierInfoScreen(
         }
 
         Button(
-            onClick = onUpdateKycInfo,
+            onClick = onSubmitIdentifiers,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 12.dp)
         ) {
-            Text("Update Identifier Info")
+            Text("Submit Identifiers")
         }
 
-        updateKycInfoSummary?.let { summary ->
+        submitIdentifiersSummary?.let { summary ->
             Text(
-                text = "Latest update result:\n$summary",
+                text = "Latest submission result:\n$summary",
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }

@@ -20,12 +20,12 @@ import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
-import com.stripe.android.crypto.onramp.model.AlternativeGroup
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierAlternativeGroup
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirement
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirements
+import com.stripe.android.crypto.onramp.model.ComplianceIdentifierType
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.Identifier
-import com.stripe.android.crypto.onramp.model.IdentifierRequirement
-import com.stripe.android.crypto.onramp.model.IdentifierRequirements
-import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
@@ -36,18 +36,18 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
-import com.stripe.android.crypto.onramp.model.OnrampGetIdentifierRequirementsResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
-import com.stripe.android.crypto.onramp.model.OnrampUpdateKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
-import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
+import com.stripe.android.crypto.onramp.model.SubmitIdentifiersResult
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
@@ -563,30 +563,30 @@ internal class OnrampViewModel(
         }
     }
 
-    fun getIdentifierRequirements() {
+    fun retrieveMissingIdentifiers() {
         _uiState.update {
             it.copy(
                 screen = Screen.Loading,
-                loadingMessage = "Retrieving identifier requirements..."
+                loadingMessage = "Retrieving missing identifiers..."
             )
         }
 
         viewModelScope.launch {
-            val result = onrampCoordinator.getIdentifierRequirements()
+            val result = onrampCoordinator.retrieveMissingIdentifiers()
 
             when (result) {
-                is OnrampGetIdentifierRequirementsResult.Completed -> {
-                    _message.value = "Identifier requirements retrieved"
+                is OnrampRetrieveMissingIdentifiersResult.Completed -> {
+                    _message.value = "Missing identifiers retrieved"
                     _uiState.update {
                         it.copy(
                             screen = Screen.AuthenticatedOperations,
                             loadingMessage = null,
-                            identifierRequirementsSummary = formatIdentifierRequirements(result.requirements)
+                            missingIdentifiersSummary = formatIdentifierRequirements(result.requirements)
                         )
                     }
                 }
-                is OnrampGetIdentifierRequirementsResult.Failed -> handleError(result.error) {
-                    _message.value = "Failed to retrieve identifier requirements: ${result.error.message}"
+                is OnrampRetrieveMissingIdentifiersResult.Failed -> handleError(result.error) {
+                    _message.value = "Failed to retrieve missing identifiers: ${result.error.message}"
                     _uiState.update {
                         it.copy(
                             screen = Screen.AuthenticatedOperations,
@@ -598,32 +598,32 @@ internal class OnrampViewModel(
         }
     }
 
-    fun updateIdentifierInfo() {
+    fun submitIdentifiers() {
         val identifiers = buildIdentifiersRequest(_uiState.value) ?: return
 
         _uiState.update {
             it.copy(
                 screen = Screen.Loading,
-                loadingMessage = "Updating identifier information..."
+                loadingMessage = "Submitting identifiers..."
             )
         }
 
         viewModelScope.launch {
-            val result = onrampCoordinator.updateKycInfo(identifiers)
+            val result = onrampCoordinator.submitIdentifiers(identifiers)
 
             when (result) {
-                is OnrampUpdateKycInfoResult.Completed -> {
-                    _message.value = "Identifier update completed"
+                is OnrampSubmitIdentifiersResult.Completed -> {
+                    _message.value = "Identifiers submitted"
                     _uiState.update {
                         it.copy(
                             screen = Screen.AuthenticatedOperations,
                             loadingMessage = null,
-                            updateKycInfoSummary = formatUpdateKycInfoResult(result.result)
+                            submitIdentifiersSummary = formatSubmitIdentifiersResult(result.result)
                         )
                     }
                 }
-                is OnrampUpdateKycInfoResult.Failed -> handleError(result.error) {
-                    _message.value = "Identifier update failed: ${result.error.message}"
+                is OnrampSubmitIdentifiersResult.Failed -> handleError(result.error) {
+                    _message.value = "Submit identifiers failed: ${result.error.message}"
                     _uiState.update {
                         it.copy(
                             screen = Screen.AuthenticatedOperations,
@@ -936,8 +936,8 @@ internal class OnrampViewModel(
         getPrefs().edit { remove(userDataKey) }
     }
 
-    private fun buildIdentifiersRequest(state: OnrampUiState): List<Identifier>? {
-        val identifiers = mutableListOf<Identifier>()
+    private fun buildIdentifiersRequest(state: OnrampUiState): List<ComplianceIdentifier>? {
+        val identifiers = mutableListOf<ComplianceIdentifier>()
 
         state.identifierInputs.forEachIndexed { index, entry ->
             val (identifier, error) = buildIdentifier(
@@ -964,7 +964,7 @@ internal class OnrampViewModel(
         label: String,
         value: String,
         type: String
-    ): Pair<Identifier?, String?> {
+    ): Pair<ComplianceIdentifier?, String?> {
         val trimmedValue = value.trim()
         val trimmedType = type.trim()
 
@@ -976,17 +976,16 @@ internal class OnrampViewModel(
             return null to "$label requires both type and value"
         }
 
-        val identifierType = IdentifierType.fromValue(trimmedType)
-            ?: return null to "$label type must be a supported identifier type like fr_spi"
+        val identifierType = ComplianceIdentifierType.fromValue(trimmedType)
 
-        val identifier = Identifier()
+        val identifier = ComplianceIdentifier()
             .type(identifierType)
             .value(trimmedValue)
 
         return identifier to null
     }
 
-    private fun formatIdentifierRequirements(requirements: IdentifierRequirements): String {
+    private fun formatIdentifierRequirements(requirements: ComplianceIdentifierRequirements): String {
         return buildString {
             append("Identifiers: ")
             append(formatIdentifierRequirements(requirements.identifiers))
@@ -995,7 +994,7 @@ internal class OnrampViewModel(
         }
     }
 
-    private fun formatUpdateKycInfoResult(result: UpdateKycInfoResult): String {
+    private fun formatSubmitIdentifiersResult(result: SubmitIdentifiersResult): String {
         return buildString {
             append("Valid: ${result.valid}")
             append("\nIdentifiers: ")
@@ -1007,7 +1006,7 @@ internal class OnrampViewModel(
         }
     }
 
-    private fun formatIdentifierRequirements(identifierRequirements: List<IdentifierRequirement>): String {
+    private fun formatIdentifierRequirements(identifierRequirements: List<ComplianceIdentifierRequirement>): String {
         return identifierRequirements
             .takeIf { it.isNotEmpty() }
             ?.joinToString(separator = "\n") { identifierRequirement ->
@@ -1016,7 +1015,7 @@ internal class OnrampViewModel(
             ?: "None"
     }
 
-    private fun formatAlternativeGroups(alternativeGroups: List<AlternativeGroup>): String {
+    private fun formatAlternativeGroups(alternativeGroups: List<ComplianceIdentifierAlternativeGroup>): String {
         return alternativeGroups
             .takeIf { it.isNotEmpty() }
             ?.joinToString(separator = "\n") { alternativeGroup ->
@@ -1066,8 +1065,8 @@ data class OnrampUiState(
     val kycNationalities: String = "",
     val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
     val identifierInputs: List<IdentifierInputEntry> = listOf(IdentifierInputEntry()),
-    val identifierRequirementsSummary: String? = null,
-    val updateKycInfoSummary: String? = null,
+    val missingIdentifiersSummary: String? = null,
+    val submitIdentifiersSummary: String? = null,
 ) : Parcelable
 
 @Parcelize
@@ -1117,7 +1116,7 @@ private fun List<String>.joinToStringOrNone(): String {
     return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"
 }
 
-private fun List<IdentifierType>.joinToValueString(): String {
+private fun List<ComplianceIdentifierType>.joinToValueString(): String {
     return map { it.value }.joinToStringOrNone()
 }
 
