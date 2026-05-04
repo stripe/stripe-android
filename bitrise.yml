@@ -88,19 +88,48 @@ workflows:
         machine_type_id: g2.mac.4large # Appropriate Mac instance
     before_run:
       - prepare_all
-    after_run:
-      - conclude_all
     steps:
       - script@1:
           timeout: 1200
           is_always_run: true
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pstripe.android.unit.tests.include=onlyUnitTests testDebugUnitTest -x :stripe-test-e2e:testDebugUnitTest --continue
+            - content: ./gradlew -Pstripe.android.unit.tests.include=onlyUnitTests testDebugUnitTest -x :stripe-test-e2e:testDebugUnitTest --continue
+      - script-runner@0:
+          is_always_run: true
+          title: Copy test results to tmp
+          inputs:
+            - file_path: ./scripts/copy_test_results_to_tmp.sh
+      - custom-test-results-export@1:
+          inputs:
+            - test_name: Unit tests
+            - base_path: /tmp/test_results/**/*.xml
+            - search_pattern: '*'
+            - bitrise_test_result_dir: $BITRISE_TEST_RESULT_DIR
       - script@1:
           timeout: 1200
           is_always_run: true
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pstripe.android.unit.tests.include=onlyScreenshots verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+            - content: ./gradlew -Pstripe.android.unit.tests.include=onlyScreenshots verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+      - script-runner@0:
+          is_always_run: true
+          title: Copy test results to tmp
+          inputs:
+            - file_path: ./scripts/copy_test_results_to_tmp.sh
+      - custom-test-results-export@1:
+          inputs:
+            - test_name: Screenshot tests
+            - base_path: /tmp/test_results/**/*.xml
+            - search_pattern: '*'
+            - bitrise_test_result_dir: $BITRISE_TEST_RESULT_DIR
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - notify_user_groups: none
+            - is_compress: "true"
+            - deploy_path: /tmp/test_results
+            - is_enable_public_page: "false"
+          title: Deploy test results artifacts
+      - save-gradle-configuration-cache@1: { }
+      - save-gradle-cache@1: { }
   build-connect-debug:
     envs:
       - BUILD_VARIANT: debug

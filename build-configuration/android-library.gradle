@@ -5,6 +5,8 @@
  */
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "org.gradle.test-retry"
+
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     apply plugin: "org.jetbrains.dokka"
 }
@@ -95,6 +97,15 @@ android {
 }
 
 tasks.withType(Test).configureEach { test ->
+    retry {
+        if (gradle.ext.isCi) {
+            maxRetries = 2
+        }
+
+        failOnPassedAfterRetry = false
+        failOnSkippedAfterRetry = true
+    }
+
     if (!project.plugins.hasPlugin("app.cash.paparazzi")) {
         return
     }
