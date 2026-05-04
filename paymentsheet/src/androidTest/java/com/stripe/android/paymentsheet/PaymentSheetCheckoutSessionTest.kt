@@ -319,10 +319,9 @@ internal class PaymentSheetCheckoutSessionTest {
         )
 
     @Test
-    fun testMerchantEmailTakesPrecedenceOverFormAndCheckoutSessionEmail() =
+    fun testDefaultBillingEmailTakesPrecedenceOverCheckoutSessionEmail() =
         runCheckoutSessionEmailPrecedenceTest(
             defaultEmail = "merchant@example.com",
-            fillOutEmail = true,
             expectedEmail = "merchant@example.com",
         )
 
@@ -364,7 +363,8 @@ internal class PaymentSheetCheckoutSessionTest {
         testContext.presentWithCheckout(configuration = configuration)
 
         if (fillOutEmail) {
-            formPage.fillOutEmail()
+            page.waitForText("Email")
+            page.replaceText("Email", "janedoe@example.com")
         }
         page.fillOutCardDetails()
 
