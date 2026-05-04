@@ -194,7 +194,7 @@ private fun PaymentSelection.SamsungPay.toSamsungPayConfirmationOption(): Samsun
     return SamsungPayConfirmationOption(
         config = com.stripe.android.payments.samsungpay.SamsungPayLauncher.Config(
             environment = com.stripe.android.payments.samsungpay.SamsungPayEnvironment.Test,
-            productId = "stripe_samsung_pay_test",
+            productId = "fa50139e24b14a0686b58a",
             merchantName = "Test Merchant",
         )
     )
