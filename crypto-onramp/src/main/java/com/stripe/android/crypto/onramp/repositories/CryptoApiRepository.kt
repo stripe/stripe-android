@@ -11,9 +11,9 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.executeRequestWithKSerializerParser
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifier
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirements
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirementsResponse
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierRequirements
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierRequirementsResponse
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
@@ -31,9 +31,9 @@ import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
-import com.stripe.android.crypto.onramp.model.SubmitIdentifiersResponse
-import com.stripe.android.crypto.onramp.model.SubmitIdentifiersResult
-import com.stripe.android.crypto.onramp.model.toRequest
+import com.stripe.android.crypto.onramp.model.Compliance.SubmitIdentifiersResponse
+import com.stripe.android.crypto.onramp.model.Compliance.SubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.Compliance.toRequest
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.PaymentIntent

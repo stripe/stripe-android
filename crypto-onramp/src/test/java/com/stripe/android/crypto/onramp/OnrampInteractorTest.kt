@@ -10,12 +10,12 @@ import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifier
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifierAlternativeGroup
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirement
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifierRequirements
-import com.stripe.android.crypto.onramp.model.ComplianceIdentifierType
-import com.stripe.android.crypto.onramp.model.ComplianceRegulation
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierAlternativeGroup
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierRequirement
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierRequirements
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierType
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceRegulation
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
@@ -42,7 +42,7 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
-import com.stripe.android.crypto.onramp.model.SubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.Compliance.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
 import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationScreenAction
