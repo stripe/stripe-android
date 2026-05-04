@@ -717,7 +717,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             eventReporter.onLoadFailed(state.validationError)
         } else {
             PaymentSheetLoadTraceRecorder.recordSpan(
-                name = "mc_load_succeeded Duration",
+                name = "Load",
                 startTimeNs = mcLoadStartedTimeNs,
                 endTimeNs = SystemClock.elapsedRealtimeNanos(),
             )

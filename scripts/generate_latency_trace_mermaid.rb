@@ -11,6 +11,7 @@ TRACE_LOG_TAG = 'MPELoadTrace'
 
 TraceSpan = Struct.new(:name, :start_offset_ms, :duration_ms, keyword_init: true)
 TraceSession = Struct.new(:test_name, :total_duration_ms, :spans, keyword_init: true)
+PRIMARY_LOAD_SPAN_NAME = 'Load'
 
 def inside_clean_worktree?
   Dir.chdir(PROJECT_ROOT) do
@@ -171,10 +172,11 @@ def print_mermaid(commit, sessions)
   task_index = 0
 
   sessions.each do |session|
+    primary_load_span = session.spans.find { |span| span.name == PRIMARY_LOAD_SPAN_NAME }
+    displayed_latency_ms = primary_load_span&.duration_ms || session.total_duration_ms
+
     puts
-    puts "    section #{humanize_test_name(session.test_name)} (Latency #{format('%.2f', session.total_duration_ms)}ms)"
-    puts "    Load (#{format('%.3f', session.total_duration_ms)}ms) :t#{task_index}, 0, #{gantt_value(session.total_duration_ms)}"
-    task_index += 1
+    puts "    section #{humanize_test_name(session.test_name)} (Latency #{format('%.2f', displayed_latency_ms)}ms)"
 
     session.spans
       .sort_by { |span| [span.start_offset_ms, -span.duration_ms, span.name] }

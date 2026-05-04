@@ -54,7 +54,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.Cvc
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.SavedPaymentMethodRepository
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
-import com.stripe.android.paymentsheet.state.PaymentSheetLoadTraceRecorder
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -328,52 +327,50 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        PaymentSheetLoadTraceRecorder.traceSuspend("PaymentSheetViewModel.initializeWithState") {
-            withContext(Dispatchers.Main.immediate) {
-                val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
-                if (shouldLaunchEagerly) {
-                    checkoutWithLinkExpress()
-                }
-
-                customerStateHolder.setCustomerState(state.customer)
-
-                when (state.paymentSelection) {
-                    is PaymentSelection.GooglePay,
-                    is PaymentSelection.Link -> Unit
-                    else -> updateSelection(state.paymentSelection)
-                }
-
-                setPaymentMethodMetadata(state.paymentMethodMetadata)
-
-                val pendingFailedPaymentResult = confirmationHandler.awaitResult()
-                    as? ConfirmationHandler.Result.Failed
-                val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
-
-                if (!shouldLaunchEagerly) {
-                    initializeNavigationStateIfNeeded(
-                        metadata = state.paymentMethodMetadata,
-                        errorMessage = errorMessage,
-                    )
-                }
+        withContext(Dispatchers.Main.immediate) {
+            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
+            if (shouldLaunchEagerly) {
+                checkoutWithLinkExpress()
             }
 
-            viewModelScope.launch {
-                confirmationHandler.state.collectLatest { state ->
-                    when (state) {
-                        is ConfirmationHandler.State.Idle -> Unit
-                        is ConfirmationHandler.State.Confirming -> {
-                            startProcessing(checkoutIdentifier)
+            customerStateHolder.setCustomerState(state.customer)
 
-                            if (viewState.value !is PaymentSheetViewState.StartProcessing) {
-                                startProcessing(checkoutIdentifier)
-                            }
+            when (state.paymentSelection) {
+                is PaymentSelection.GooglePay,
+                is PaymentSelection.Link -> Unit
+                else -> updateSelection(state.paymentSelection)
+            }
+
+            setPaymentMethodMetadata(state.paymentMethodMetadata)
+
+            val pendingFailedPaymentResult = confirmationHandler.awaitResult()
+                as? ConfirmationHandler.Result.Failed
+            val errorMessage = pendingFailedPaymentResult?.cause?.stripeErrorMessage()
+
+            if (!shouldLaunchEagerly) {
+                initializeNavigationStateIfNeeded(
+                    metadata = state.paymentMethodMetadata,
+                    errorMessage = errorMessage,
+                )
+            }
+        }
+
+        viewModelScope.launch {
+            confirmationHandler.state.collectLatest { state ->
+                when (state) {
+                    is ConfirmationHandler.State.Idle -> Unit
+                    is ConfirmationHandler.State.Confirming -> {
+                        startProcessing(checkoutIdentifier)
+
+                        if (viewState.value !is PaymentSheetViewState.StartProcessing) {
+                            startProcessing(checkoutIdentifier)
                         }
-                        is ConfirmationHandler.State.Complete -> {
-                            paymentMethodMetadata.value?.let {
-                                initializeNavigationStateIfNeeded(metadata = it)
-                            }
-                            processConfirmationResult(state.result)
+                    }
+                    is ConfirmationHandler.State.Complete -> {
+                        paymentMethodMetadata.value?.let {
+                            initializeNavigationStateIfNeeded(metadata = it)
                         }
+                        processConfirmationResult(state.result)
                     }
                 }
             }
@@ -401,14 +398,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun navigateToInitialScreens(metadata: PaymentMethodMetadata) {
-        PaymentSheetLoadTraceRecorder.trace("PaymentSheetViewModel.navigateToInitialScreens") {
-            navigationHandler.resetTo(
-                determineInitialBackStack(
-                    paymentMethodMetadata = metadata,
-                    customerStateHolder = customerStateHolder,
-                )
+        navigationHandler.resetTo(
+            determineInitialBackStack(
+                paymentMethodMetadata = metadata,
+                customerStateHolder = customerStateHolder,
             )
-        }
+        )
     }
 
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
