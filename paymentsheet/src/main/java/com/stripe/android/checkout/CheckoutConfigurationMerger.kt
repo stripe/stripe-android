@@ -22,6 +22,9 @@ internal sealed class CheckoutConfigurationMerger<T> {
             return config.newBuilder().apply {
                 defaultBillingDetails(merged.billingDetails)
                 shippingDetails(merged.shippingDetails)
+                billingDetailsCollectionConfiguration(
+                    config.billingDetailsCollectionConfiguration.copy(attachDefaultsToPaymentMethod = true)
+                )
             }.build()
         }
     }
@@ -38,6 +41,9 @@ internal sealed class CheckoutConfigurationMerger<T> {
             return config.newBuilder().apply {
                 defaultBillingDetails(merged.billingDetails)
                 shippingDetails(merged.shippingDetails)
+                billingDetailsCollectionConfiguration(
+                    config.billingDetailsCollectionConfiguration.copy(attachDefaultsToPaymentMethod = true)
+                )
             }.build()
         }
     }

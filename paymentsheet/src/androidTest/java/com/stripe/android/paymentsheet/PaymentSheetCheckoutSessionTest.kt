@@ -303,6 +303,84 @@ internal class PaymentSheetCheckoutSessionTest {
         }
     }
 
+    // region customer_email billing details tests
+
+    @Test
+    fun testCheckoutSessionCustomerEmailIsAttachedToPaymentMethod() =
+        runCheckoutSessionEmailPrecedenceTest(
+            expectedEmail = "session@example.com",
+        )
+
+    @Test
+    fun testFormEnteredEmailTakesPrecedenceOverCheckoutSessionEmail() =
+        runCheckoutSessionEmailPrecedenceTest(
+            fillOutEmail = true,
+            expectedEmail = "janedoe@example.com",
+        )
+
+    @Test
+    fun testDefaultBillingEmailTakesPrecedenceOverCheckoutSessionEmail() =
+        runCheckoutSessionEmailPrecedenceTest(
+            defaultEmail = "merchant@example.com",
+            expectedEmail = "merchant@example.com",
+        )
+
+    private fun runCheckoutSessionEmailPrecedenceTest(
+        defaultEmail: String? = null,
+        fillOutEmail: Boolean = false,
+        expectedEmail: String,
+    ) = runPaymentSheetTest(
+        networkRule = networkRule,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-init.json") { json ->
+                json.put("customer_email", "session@example.com")
+            }
+        }
+
+        val configuration = PaymentSheet.Configuration.Builder("Test Merchant")
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
+            .apply {
+                if (defaultEmail != null) {
+                    defaultBillingDetails(PaymentSheet.BillingDetails(email = defaultEmail))
+                }
+                if (fillOutEmail) {
+                    billingDetailsCollectionConfiguration(
+                        PaymentSheet.BillingDetailsCollectionConfiguration(
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        )
+                    )
+                }
+            }
+            .link(
+                PaymentSheet.LinkConfiguration.Builder()
+                    .display(PaymentSheet.LinkConfiguration.Display.Never)
+                    .build()
+            )
+            .build()
+
+        testContext.presentWithCheckout(configuration = configuration)
+
+        if (fillOutEmail) {
+            page.waitForText("Email")
+            page.replaceText("Email", "janedoe@example.com")
+        }
+        page.fillOutCardDetails()
+
+        networkRule.createPaymentMethod(
+            bodyPart("billing_details[email]", expectedEmail),
+        )
+
+        networkRule.checkoutConfirm { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    // endregion
+
     // region SFU mandate tests
 
     /**
