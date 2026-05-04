@@ -5,7 +5,6 @@ import androidx.activity.ComponentActivity
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
-import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -23,6 +22,7 @@ import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 

@@ -1,7 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
-import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierRequirements
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirements
 
 /**
  * Result of retrieving missing compliance identifiers.
