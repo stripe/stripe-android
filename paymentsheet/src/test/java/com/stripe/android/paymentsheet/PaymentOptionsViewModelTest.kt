@@ -925,7 +925,13 @@ internal class PaymentOptionsViewModelTest {
             linkAccountUpdate = linkAccountUpdate,
             selectedPayment = null
         )
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(),
+                signupMode = null,
+                loginState = LinkState.LoginState.LoggedOut,
+            ),
+        )
         viewModel.paymentOptionsActivityResult.test {
             viewModel.onLinkAuthenticationResult(result)
             val succeeded = awaitItem() as PaymentOptionsActivityResult.Succeeded

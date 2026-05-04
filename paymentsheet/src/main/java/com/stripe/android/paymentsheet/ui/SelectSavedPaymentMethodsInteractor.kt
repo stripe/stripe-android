@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -37,7 +36,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
     data class State(
         val paymentOptionsItems: List<PaymentOptionsItem>,
         val selectedPaymentOptionsItem: PaymentOptionsItem?,
-        val linkBrand: LinkBrand,
+        val linkBrand: LinkBrand?,
         val isEditing: Boolean,
         val isProcessing: Boolean,
         val canEdit: Boolean,
@@ -66,7 +65,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val updateSelection: (selection: PaymentSelection?, isUserInput: Boolean) -> Unit,
     override val isLiveMode: Boolean,
-    private val linkBrand: LinkBrand,
+    private val linkBrand: LinkBrand?,
 ) : SelectSavedPaymentMethodsInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 
@@ -277,7 +276,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 },
                 onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                linkBrand = paymentMethodMetadata.requireLinkBrand(),
+                linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand,
             )
         }
     }

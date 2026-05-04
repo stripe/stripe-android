@@ -331,7 +331,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         withContext(Dispatchers.Main.immediate) {
             val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
             if (shouldLaunchEagerly) {
-                checkoutWithLinkExpress()
+                checkoutWithLinkExpress(state.paymentMethodMetadata)
             }
 
             customerStateHolder.setCustomerState(state.customer)
@@ -441,12 +441,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    private fun checkoutWithLinkExpress() {
+    private fun checkoutWithLinkExpress(
+        paymentMethodMetadata: PaymentMethodMetadata = requireNotNull(this.paymentMethodMetadata.value),
+    ) {
         // We don't want to fall back to web on express mode if attestation
         // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
-                brand = requireNotNull(paymentMethodMetadata.value).requireLinkBrand(),
+                brand = paymentMethodMetadata.requireLinkBrand(),
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
             ),
             CheckoutIdentifier.SheetTopWallet
