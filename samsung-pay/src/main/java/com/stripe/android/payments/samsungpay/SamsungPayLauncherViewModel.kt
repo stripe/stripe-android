@@ -15,6 +15,7 @@ import com.samsung.android.sdk.samsungpay.v2.payment.CardInfo
 import com.samsung.android.sdk.samsungpay.v2.payment.CustomSheetPaymentInfo
 import com.samsung.android.sdk.samsungpay.v2.payment.PaymentManager
 import com.samsung.android.sdk.samsungpay.v2.payment.sheet.AmountBoxControl
+import com.samsung.android.sdk.samsungpay.v2.payment.sheet.AmountConstants
 import com.samsung.android.sdk.samsungpay.v2.payment.sheet.CustomSheet
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.CardBrand
@@ -97,11 +98,7 @@ internal class SamsungPayLauncherViewModel(
         val brandList = config.allowedCardBrands.mapNotNull { it.toSpaySdkBrand() }
 
         val amountBox = AmountBoxControl("amount", currency)
-        amountBox.addItem(
-            "itemId", "Total",
-            amount.toDouble() / 100.0,
-            ""
-        )
+        amountBox.setAmountTotal(amount.toDouble() / 100.0, AmountConstants.FORMAT_TOTAL_PRICE_ONLY)
 
         val sheet = CustomSheet().apply {
             addControl(amountBox)
