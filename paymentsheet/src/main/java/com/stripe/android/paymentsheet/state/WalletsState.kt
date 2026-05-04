@@ -25,6 +25,7 @@ internal data class WalletsState(
     private val link: Link?,
     private val googlePay: GooglePay?,
     private val shopPay: ShopPay?,
+    private val samsungPay: SamsungPay?,
     private val walletsAllowedInHeader: List<WalletType>,
     val buttonsEnabled: Boolean,
     @StringRes val dividerTextResource: Int,
@@ -33,6 +34,7 @@ internal data class WalletsState(
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
     val onShopPayPressed: () -> Unit,
+    val onSamsungPayPressed: () -> Unit,
 ) {
 
     fun wallets(location: WalletLocation): List<Wallet> {
@@ -40,6 +42,7 @@ internal data class WalletsState(
             googlePay(location)?.let { add(it) }
             link(location)?.let { add(it) }
             shopPay(location)?.let { add(it) }
+            samsungPay(location)?.let { add(it) }
         }
     }
 
@@ -73,6 +76,16 @@ internal data class WalletsState(
         }
     }
 
+    /**
+     * Returns SamsungPay data if it should be displayed in the specified location, null otherwise.
+     */
+    fun samsungPay(location: WalletLocation): SamsungPay? {
+        return when (location) {
+            WalletLocation.HEADER -> samsungPay?.takeIf { walletsAllowedInHeader.contains(WalletType.SamsungPay) }
+            WalletLocation.INLINE -> samsungPay?.takeUnless { walletsAllowedInHeader.contains(WalletType.SamsungPay) }
+        }
+    }
+
     val walletsInHeader
         get() = wallets(WalletLocation.HEADER).isNotEmpty()
 
@@ -93,6 +106,8 @@ internal data class WalletsState(
 
     data object ShopPay : Wallet
 
+    data object SamsungPay : Wallet
+
     companion object {
 
         fun create(
@@ -100,6 +115,7 @@ internal data class WalletsState(
             linkEmail: String?,
             isGooglePayReady: Boolean,
             isShopPayAvailable: Boolean,
+            isSamsungPayReady: Boolean = true,
             googlePayButtonType: GooglePayButtonType,
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
@@ -107,6 +123,7 @@ internal data class WalletsState(
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
             onShopPayPressed: () -> Unit,
+            onSamsungPayPressed: () -> Unit = {},
             isSetupIntent: Boolean,
             walletsAllowedInHeader: List<WalletType>,
             paymentDetails: DisplayablePaymentDetails? = null,
@@ -134,17 +151,20 @@ internal data class WalletsState(
             )
 
             val shopPay = ShopPay.takeIf { isShopPayAvailable }
+            val samsungPay = SamsungPay.takeIf { isSamsungPayReady }
 
-            return if (link != null || googlePay != null || shopPay != null) {
+            return if (link != null || googlePay != null || shopPay != null || samsungPay != null) {
                 WalletsState(
                     link = link,
                     googlePay = googlePay,
                     shopPay = shopPay,
+                    samsungPay = samsungPay,
                     buttonsEnabled = buttonsEnabled,
                     dividerTextResource = getDividerTextResource(paymentMethodTypes, isSetupIntent),
                     onGooglePayPressed = onGooglePayPressed,
                     onLinkPressed = onLinkPressed,
                     onShopPayPressed = onShopPayPressed,
+                    onSamsungPayPressed = onSamsungPayPressed,
                     walletsAllowedInHeader = walletsAllowedInHeader,
                     cardFundingFilter = cardFundingFilter,
                     cardBrandFilter = cardBrandFilter

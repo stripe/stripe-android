@@ -356,6 +356,7 @@ private fun PaymentSheetContent(
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
                 onShopPayPressed = state.onShopPayPressed,
+                onSamsungPayPressed = state.onSamsungPayPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
@@ -417,6 +418,7 @@ internal fun Wallet(
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
     onShopPayPressed: () -> Unit,
+    onSamsungPayPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter,
@@ -430,6 +432,7 @@ internal fun Wallet(
             onGooglePayPressed = onGooglePayPressed,
             onLinkPressed = onLinkPressed,
             onShopPayPressed = onShopPayPressed,
+            onSamsungPayPressed = onSamsungPayPressed,
             cardBrandFilter = cardBrandFilter,
             cardFundingFilter = cardFundingFilter
         )
@@ -459,6 +462,7 @@ private fun WalletHeader(
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
     onShopPayPressed: () -> Unit,
+    onSamsungPayPressed: () -> Unit,
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter
 ) {
@@ -495,6 +499,12 @@ private fun WalletHeader(
                 }
                 WalletsState.ShopPay -> {
                     ShopPayButton(onClick = onShopPayPressed)
+                }
+                WalletsState.SamsungPay -> {
+                    SamsungPayButton(
+                        isEnabled = state.buttonsEnabled,
+                        onPressed = onSamsungPayPressed,
+                    )
                 }
             }
         }

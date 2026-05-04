@@ -383,6 +383,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     is WalletsState.GooglePay -> createGooglePayDisplayablePaymentMethod()
                     is WalletsState.Link -> createLinkDisplayablePaymentMethod(wallet)
                     WalletsState.ShopPay -> createShopPayDisplayablePaymentMethod()
+                    WalletsState.SamsungPay -> createSamsungPayDisplayablePaymentMethod()
                 }
             } ?: emptyList()
     }
@@ -444,6 +445,23 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         )
     }
 
+    private fun createSamsungPayDisplayablePaymentMethod(): DisplayablePaymentMethod {
+        return DisplayablePaymentMethod(
+            code = "samsung_pay",
+            displayName = "Samsung Pay".resolvableString,
+            iconResource = PaymentsCoreR.drawable.stripe_google_pay_mark, // TODO: Samsung Pay icon
+            iconResourceNight = null,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            iconRequiresTinting = false,
+            subtitle = null,
+            onClick = {
+                updateSelection(PaymentSelection.SamsungPay, false)
+                invokeRowSelectionCallback?.invoke()
+            },
+        )
+    }
+
     private fun getDisplayedSavedPaymentMethod(
         paymentMethods: List<PaymentMethod>?,
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -494,6 +512,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     }
                     WalletsState.ShopPay -> {
                         add("shop_pay")
+                    }
+                    WalletsState.SamsungPay -> {
+                        add("samsung_pay")
                     }
                 }
             }
