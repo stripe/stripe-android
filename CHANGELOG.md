@@ -3,6 +3,11 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### CryptoOnramp
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) Added new birth city, birth country, and nationalities properties to KYCInfo.
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) New public types for interacting with Compliance regulations and identifiers.
+* [REMOVED][13019](https://github.com/stripe/stripe-android/pull/13019) Removed KycRetrieveResponse from the public API as it was not intended to be accessible.
+
 ## 23.7.0 - 2026-05-04
 
 ### PaymentSheet
