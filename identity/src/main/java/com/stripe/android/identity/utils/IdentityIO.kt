@@ -63,7 +63,8 @@ internal interface IdentityIO {
         original: Bitmap,
         boundingBox: BoundingBox,
         paddingSize: Float,
-        fallbackIfMostlyOutOfBounds: Boolean = false
+        fallbackIfMostlyOutOfBounds: Boolean = false,
+        onFallback: ((Float) -> Unit)? = null
     ): Bitmap
 
     /**

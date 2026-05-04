@@ -107,7 +107,8 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
         original: Bitmap,
         boundingBox: BoundingBox,
         paddingSize: Float,
-        fallbackIfMostlyOutOfBounds: Boolean
+        fallbackIfMostlyOutOfBounds: Boolean,
+        onFallback: ((Float) -> Unit)?
     ): Bitmap {
         val modelInput = original.cropCenter(
             maxAspectRatioInSize(
@@ -132,6 +133,7 @@ internal class DefaultIdentityIO @Inject constructor(private val context: Contex
                         "cropRect=$cropRect, image=$imageRect. " +
                         "Falling back to full center-cropped image."
                 )
+                onFallback?.invoke(intersectionRatio)
                 return modelInput
             }
         }

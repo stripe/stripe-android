@@ -231,6 +231,18 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
+    fun documentCropFallback(
+        scanType: IdentityScanState.ScanType,
+        intersectionRatio: Float
+    ) = maybeLogExperimentAndSendLog(
+        eventName = EVENT_DOCUMENT_CROP_FALLBACK,
+        additionalParams = additionalParamWithEventMetadata(
+            PARAM_SCAN_TYPE to scanType.toParam(),
+            PARAM_SIDE to scanType.toSide(),
+            PARAM_INTERSECTION_RATIO to intersectionRatio
+        )
+    )
+
     fun selfieTimeout() = maybeLogExperimentAndSendLog(
         eventName = EVENT_SELFIE_TIMEOUT,
         additionalParams = additionalParamWithEventMetadata()
@@ -371,6 +383,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_CAMERA_PERMISSION_DENIED = "camera_permission_denied"
         const val EVENT_CAMERA_PERMISSION_GRANTED = "camera_permission_granted"
         const val EVENT_DOCUMENT_TIMEOUT = "document_timeout"
+        const val EVENT_DOCUMENT_CROP_FALLBACK = "document_crop_fallback"
         const val EVENT_SELFIE_TIMEOUT = "selfie_timeout"
         const val EVENT_AVERAGE_FPS = "average_fps"
         const val EVENT_MODEL_PERFORMANCE = "model_performance"
@@ -425,6 +438,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_EXPERIMENT_RETRIEVED = "experiment_retrieved"
         const val PARAM_ARB_ID = "arb_id"
         const val PARAM_CAPTURED_BY_MB = "captured_by_mb"
+        const val PARAM_INTERSECTION_RATIO = "intersection_ratio"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_WARMUP = "document_warmup"
