@@ -26,7 +26,6 @@ import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.IdentifierRequirement
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.IdentifierType
-import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
@@ -817,20 +816,36 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycAddress = address) }
     }
 
-    fun updateMicaIdentifierValue(value: String) {
-        _uiState.update { it.copy(micaIdentifierValue = value) }
+    fun updateIdentifierValue(index: Int, value: String) {
+        _uiState.update { state ->
+            state.copy(
+                identifierInputs = state.identifierInputs.replaceAt(index) { entry ->
+                    entry.copy(value = value)
+                }
+            )
+        }
     }
 
-    fun updateMicaIdentifierType(value: String) {
-        _uiState.update { it.copy(micaIdentifierType = value) }
+    fun updateIdentifierType(index: Int, value: String) {
+        _uiState.update { state ->
+            state.copy(
+                identifierInputs = state.identifierInputs.replaceAt(index) { entry ->
+                    entry.copy(type = value)
+                }
+            )
+        }
     }
 
-    fun updateCarfIdentifierValue(value: String) {
-        _uiState.update { it.copy(carfIdentifierValue = value) }
+    fun addIdentifierInput() {
+        _uiState.update { state ->
+            state.copy(identifierInputs = state.identifierInputs + IdentifierInputEntry())
+        }
     }
 
-    fun updateCarfIdentifierType(value: String) {
-        _uiState.update { it.copy(carfIdentifierType = value) }
+    fun removeIdentifierInput(index: Int) {
+        _uiState.update { state ->
+            state.copy(identifierInputs = state.identifierInputs.removeAt(index))
+        }
     }
 
     fun clearCheckoutEvent() {
@@ -921,35 +936,28 @@ internal class OnrampViewModel(
         getPrefs().edit { remove(userDataKey) }
     }
 
-    private fun buildIdentifiersRequest(state: OnrampUiState): Identifiers? {
-        val (micaIdentifier, micaError) = buildIdentifier(
-            label = "MiCA identifier",
-            value = state.micaIdentifierValue,
-            type = state.micaIdentifierType
-        )
-        if (micaError != null) {
-            _message.value = micaError
+    private fun buildIdentifiersRequest(state: OnrampUiState): List<Identifier>? {
+        val identifiers = mutableListOf<Identifier>()
+
+        state.identifierInputs.forEachIndexed { index, entry ->
+            val (identifier, error) = buildIdentifier(
+                label = "Identifier ${index + 1}",
+                value = entry.value,
+                type = entry.type
+            )
+            if (error != null) {
+                _message.value = error
+                return null
+            }
+            identifier?.let(identifiers::add)
+        }
+
+        if (identifiers.isEmpty()) {
+            _message.value = "Enter at least one identifier"
             return null
         }
 
-        val (carfIdentifier, carfError) = buildIdentifier(
-            label = "CARF identifier",
-            value = state.carfIdentifierValue,
-            type = state.carfIdentifierType
-        )
-        if (carfError != null) {
-            _message.value = carfError
-            return null
-        }
-
-        if (micaIdentifier == null && carfIdentifier == null) {
-            _message.value = "Enter at least one MiCA or CARF identifier"
-            return null
-        }
-
-        return Identifiers()
-            .identifiersMica(micaIdentifier?.let(::listOf))
-            .identifiersCarf(carfIdentifier?.let(::listOf))
+        return identifiers
     }
 
     private fun buildIdentifier(
@@ -1057,12 +1065,15 @@ data class OnrampUiState(
     val kycBirthCity: String = "",
     val kycNationalities: String = "",
     val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
-    val micaIdentifierValue: String = "",
-    val micaIdentifierType: String = "",
-    val carfIdentifierValue: String = "",
-    val carfIdentifierType: String = "",
+    val identifierInputs: List<IdentifierInputEntry> = listOf(IdentifierInputEntry()),
     val identifierRequirementsSummary: String? = null,
     val updateKycInfoSummary: String? = null,
+) : Parcelable
+
+@Parcelize
+data class IdentifierInputEntry(
+    val type: String = "",
+    val value: String = "",
 ) : Parcelable
 
 enum class Screen {
@@ -1108,4 +1119,23 @@ private fun List<String>.joinToStringOrNone(): String {
 
 private fun List<IdentifierType>.joinToValueString(): String {
     return map { it.value }.joinToStringOrNone()
+}
+
+private fun List<IdentifierInputEntry>.replaceAt(
+    index: Int,
+    transform: (IdentifierInputEntry) -> IdentifierInputEntry
+): List<IdentifierInputEntry> {
+    if (index !in indices) return this
+    return mapIndexed { currentIndex, entry ->
+        if (currentIndex == index) {
+            transform(entry)
+        } else {
+            entry
+        }
+    }
+}
+
+private fun List<IdentifierInputEntry>.removeAt(index: Int): List<IdentifierInputEntry> {
+    if (index !in indices) return this
+    return filterIndexed { currentIndex, _ -> currentIndex != index }
 }

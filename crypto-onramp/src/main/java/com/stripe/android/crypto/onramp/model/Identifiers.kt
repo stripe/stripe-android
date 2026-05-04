@@ -1,52 +1,9 @@
 package com.stripe.android.crypto.onramp.model
 
-import com.stripe.android.core.model.CountryCode
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import dev.drewhamilton.poko.Poko
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-
-/**
- * Identifier payload submitted to the Crypto Onramp API.
- *
- * The current backend path is still specialized, so callers continue to separate
- * MiCA and CARF submissions even though individual identifiers are modeled with
- * the reviewed typed enum surface.
- *
- * @property identifiersMica MiCA identifiers for the consumer.
- * @property identifiersCarf CARF identifiers for the consumer.
- */
-@ExperimentalCryptoOnramp
-class Identifiers {
-    private var identifiersMica: List<Identifier>? = null
-    private var identifiersCarf: List<Identifier>? = null
-
-    /**
-     * Sets MiCA identifiers for the consumer.
-     */
-    fun identifiersMica(identifiersMica: List<Identifier>?) = apply {
-        this.identifiersMica = identifiersMica
-    }
-
-    /**
-     * Sets CARF identifiers for the consumer.
-     */
-    fun identifiersCarf(identifiersCarf: List<Identifier>?) = apply {
-        this.identifiersCarf = identifiersCarf
-    }
-
-    internal class State(
-        val identifiersMica: List<Identifier.State>?,
-        val identifiersCarf: List<Identifier.State>?
-    )
-
-    internal fun build(): State {
-        return State(
-            identifiersMica = identifiersMica?.map { it.build() },
-            identifiersCarf = identifiersCarf?.map { it.build() }
-        )
-    }
-}
 
 /**
  * A typed identifier entry.
@@ -95,41 +52,37 @@ class Identifier {
  */
 @ExperimentalCryptoOnramp
 enum class IdentifierType(
-    val value: String,
-    private val countryCodeValue: String
+    val value: String
 ) {
-    AT_STN("at_stn", "AT"),
-    BE_NRN("be_nrn", "BE"),
-    BG_UCN("bg_ucn", "BG"),
-    HR_OIB("hr_oib", "HR"),
-    CY_TIC("cy_tic", "CY"),
-    CZ_RC("cz_rc", "CZ"),
-    DK_CPR("dk_cpr", "DK"),
-    EE_IK("ee_ik", "EE"),
-    FI_HETU("fi_hetu", "FI"),
-    FR_SPI("fr_spi", "FR"),
-    DE_STN("de_stn", "DE"),
-    GR_AFM("gr_afm", "GR"),
-    HU_AD("hu_ad", "HU"),
-    IS_KT("is_kt", "IS"),
-    IE_PPSN("ie_ppsn", "IE"),
-    IT_CF("it_cf", "IT"),
-    LV_PK("lv_pk", "LV"),
-    LT_AK("lt_ak", "LT"),
-    LU_NIF("lu_nif", "LU"),
-    MT_NIC("mt_nic", "MT"),
-    MT_PP("mt_pp", "MT"),
-    NL_BSN("nl_bsn", "NL"),
-    PL_PESEL("pl_pesel", "PL"),
-    PL_NIP("pl_nip", "PL"),
-    PT_NIF("pt_nif", "PT"),
-    RO_CNP("ro_cnp", "RO"),
-    SK_RC("sk_rc", "SK"),
-    SI_PIN("si_pin", "SI"),
-    SE_PIN("se_pin", "SE");
-
-    internal val countryCode: CountryCode
-        get() = CountryCode.create(countryCodeValue)
+    AT_STN("at_stn"),
+    BE_NRN("be_nrn"),
+    BG_UCN("bg_ucn"),
+    HR_OIB("hr_oib"),
+    CY_TIC("cy_tic"),
+    CZ_RC("cz_rc"),
+    DK_CPR("dk_cpr"),
+    EE_IK("ee_ik"),
+    FI_HETU("fi_hetu"),
+    FR_SPI("fr_spi"),
+    DE_STN("de_stn"),
+    GR_AFM("gr_afm"),
+    HU_AD("hu_ad"),
+    IS_KT("is_kt"),
+    IE_PPSN("ie_ppsn"),
+    IT_CF("it_cf"),
+    LV_PK("lv_pk"),
+    LT_AK("lt_ak"),
+    LU_NIF("lu_nif"),
+    MT_NIC("mt_nic"),
+    MT_PP("mt_pp"),
+    NL_BSN("nl_bsn"),
+    PL_PESEL("pl_pesel"),
+    PL_NIP("pl_nip"),
+    PT_NIF("pt_nif"),
+    RO_CNP("ro_cnp"),
+    SK_RC("sk_rc"),
+    SI_PIN("si_pin"),
+    SE_PIN("se_pin");
 
     companion object {
         fun fromValue(value: String): IdentifierType? {
@@ -196,30 +149,20 @@ class UpdateKycInfoResult internal constructor(
 )
 
 @Serializable
-internal data class IdentifiersRequest(
-    @SerialName("credentials")
+internal data class UpdateKycInfoRequest(
     val credentials: CryptoCustomerRequestParams.Credentials,
-    @SerialName("identifiers_mica")
-    val identifiersMica: List<IdentifierRequest>? = null,
-    @SerialName("identifiers_carf")
-    val identifiersCarf: List<IdentifierRequest>? = null
+    val identifiers: List<IdentifierRequest>
 )
 
 @Serializable
 internal data class IdentifierRequest(
-    @SerialName("country")
-    val country: String,
-    @SerialName("identifier")
-    val identifier: String,
-    @SerialName("identifier_type")
-    val identifierType: String
+    val type: String,
+    val value: String
 )
 
 @Serializable
 internal data class IdentifierRequirementsResponse(
-    @SerialName("identifiers")
     val identifiers: List<IdentifierRequirementResponse> = emptyList(),
-    @SerialName("alternatives")
     val alternatives: List<AlternativeGroupResponse> = emptyList(),
 ) {
     fun toIdentifierRequirements(): IdentifierRequirements {
@@ -232,13 +175,9 @@ internal data class IdentifierRequirementsResponse(
 
 @Serializable
 internal data class UpdateKycInfoResponse(
-    @SerialName("valid")
     val valid: Boolean = true,
-    @SerialName("identifiers")
     val identifiers: List<IdentifierRequirementResponse> = emptyList(),
-    @SerialName("alternatives")
     val alternatives: List<AlternativeGroupResponse> = emptyList(),
-    @SerialName("invalid_identifiers")
     val invalidIdentifiers: List<String> = emptyList(),
 ) {
     fun toUpdateKycInfoResult(): UpdateKycInfoResult {
@@ -257,9 +196,7 @@ internal data class UpdateKycInfoResponse(
 
 @Serializable
 internal data class IdentifierRequirementResponse(
-    @SerialName("type")
     val type: String,
-    @SerialName("regulation")
     val regulation: String
 ) {
     fun toIdentifierRequirement(): IdentifierRequirement {
@@ -297,22 +234,18 @@ internal data class AlternativeGroupResponse(
     }
 }
 
-internal fun Identifiers.toRequest(
+internal fun List<Identifier>.toRequest(
     credentials: CryptoCustomerRequestParams.Credentials
-): IdentifiersRequest {
-    val state = build()
-
-    return IdentifiersRequest(
+): UpdateKycInfoRequest {
+    return UpdateKycInfoRequest(
         credentials = credentials,
-        identifiersMica = state.identifiersMica?.map { it.toRequest() },
-        identifiersCarf = state.identifiersCarf?.map { it.toRequest() }
+        identifiers = map { it.build().toRequest() }
     )
 }
 
 private fun Identifier.State.toRequest(): IdentifierRequest {
     return IdentifierRequest(
-        country = type.countryCode.value,
-        identifier = value,
-        identifierType = type.value
+        type = type.value,
+        value = value
     )
 }

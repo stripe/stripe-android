@@ -499,10 +499,10 @@ internal fun OnrampScreen(
                     onKycBirthCityChange = viewModel::updateKycBirthCity,
                     onKycNationalitiesChange = viewModel::updateKycNationalities,
                     onKycAddressChange = viewModel::updateKycAddress,
-                    onMicaIdentifierValueChange = viewModel::updateMicaIdentifierValue,
-                    onMicaIdentifierTypeChange = viewModel::updateMicaIdentifierType,
-                    onCarfIdentifierValueChange = viewModel::updateCarfIdentifierValue,
-                    onCarfIdentifierTypeChange = viewModel::updateCarfIdentifierType,
+                    onIdentifierValueChange = viewModel::updateIdentifierValue,
+                    onIdentifierTypeChange = viewModel::updateIdentifierType,
+                    onAddIdentifier = viewModel::addIdentifierInput,
+                    onRemoveIdentifier = viewModel::removeIdentifierInput,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
@@ -732,10 +732,10 @@ private fun AuthenticatedOperationsScreen(
     onKycBirthCityChange: (String) -> Unit,
     onKycNationalitiesChange: (String) -> Unit,
     onKycAddressChange: (PaymentSheet.Address) -> Unit,
-    onMicaIdentifierValueChange: (String) -> Unit,
-    onMicaIdentifierTypeChange: (String) -> Unit,
-    onCarfIdentifierValueChange: (String) -> Unit,
-    onCarfIdentifierTypeChange: (String) -> Unit,
+    onIdentifierValueChange: (Int, String) -> Unit,
+    onIdentifierTypeChange: (Int, String) -> Unit,
+    onAddIdentifier: () -> Unit,
+    onRemoveIdentifier: (Int) -> Unit,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
@@ -1007,14 +1007,11 @@ private fun AuthenticatedOperationsScreen(
 
         AnimatedVisibility(visible = identifiersExpanded) {
             IdentifierInfoScreen(
-                micaIdentifierValue = state.micaIdentifierValue,
-                onMicaIdentifierValueChange = onMicaIdentifierValueChange,
-                micaIdentifierType = state.micaIdentifierType,
-                onMicaIdentifierTypeChange = onMicaIdentifierTypeChange,
-                carfIdentifierValue = state.carfIdentifierValue,
-                onCarfIdentifierValueChange = onCarfIdentifierValueChange,
-                carfIdentifierType = state.carfIdentifierType,
-                onCarfIdentifierTypeChange = onCarfIdentifierTypeChange,
+                identifierInputs = state.identifierInputs,
+                onIdentifierValueChange = onIdentifierValueChange,
+                onIdentifierTypeChange = onIdentifierTypeChange,
+                onAddIdentifier = onAddIdentifier,
+                onRemoveIdentifier = onRemoveIdentifier,
                 identifierRequirementsSummary = state.identifierRequirementsSummary,
                 updateKycInfoSummary = state.updateKycInfoSummary,
                 onGetIdentifierRequirements = onGetIdentifierRequirements,
@@ -1142,14 +1139,11 @@ private fun AuthenticatedOperationsScreen(
 @Composable
 @Suppress("LongMethod")
 private fun IdentifierInfoScreen(
-    micaIdentifierValue: String,
-    onMicaIdentifierValueChange: (String) -> Unit,
-    micaIdentifierType: String,
-    onMicaIdentifierTypeChange: (String) -> Unit,
-    carfIdentifierValue: String,
-    onCarfIdentifierValueChange: (String) -> Unit,
-    carfIdentifierType: String,
-    onCarfIdentifierTypeChange: (String) -> Unit,
+    identifierInputs: List<IdentifierInputEntry>,
+    onIdentifierValueChange: (Int, String) -> Unit,
+    onIdentifierTypeChange: (Int, String) -> Unit,
+    onAddIdentifier: () -> Unit,
+    onRemoveIdentifier: (Int) -> Unit,
     identifierRequirementsSummary: String?,
     updateKycInfoSummary: String?,
     onGetIdentifierRequirements: () -> Unit,
@@ -1163,7 +1157,7 @@ private fun IdentifierInfoScreen(
         )
 
         Text(
-            text = "Fetch missing MiCA and CARF identifier requirements for the current Link user.",
+            text = "Fetch missing identifier requirements for the current Link user.",
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
@@ -1190,33 +1184,42 @@ private fun IdentifierInfoScreen(
         )
 
         Text(
-            text = "This sample app submits one MiCA entry and one CARF entry.",
+            text = "Add as many identifiers as needed and submit them as a list.",
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        Text(
-            text = "MiCA",
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        KYCTextField(
-            micaIdentifierType,
-            "MiCA Identifier Type (e.g. mt_nic)",
-            onChange = onMicaIdentifierTypeChange
-        )
-        KYCTextField(micaIdentifierValue, "MiCA Identifier Value", onChange = onMicaIdentifierValueChange)
+        identifierInputs.forEachIndexed { index, identifierInput ->
+            Text(
+                text = "Identifier ${index + 1}",
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            KYCTextField(
+                identifierInput.type,
+                "Identifier Type (e.g. mt_nic)",
+                onChange = { onIdentifierTypeChange(index, it) }
+            )
+            KYCTextField(
+                identifierInput.value,
+                "Identifier Value",
+                onChange = { onIdentifierValueChange(index, it) }
+            )
+            TextButton(
+                onClick = { onRemoveIdentifier(index) },
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                Text("Remove Identifier")
+            }
+        }
 
-        Text(
-            text = "CARF",
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-        KYCTextField(
-            carfIdentifierType,
-            "CARF Identifier Type (e.g. fr_spi)",
-            onChange = onCarfIdentifierTypeChange
-        )
-        KYCTextField(carfIdentifierValue, "CARF Identifier Value", onChange = onCarfIdentifierValueChange)
+        Button(
+            onClick = onAddIdentifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Text("Add Identifier")
+        }
 
         Button(
             onClick = onUpdateKycInfo,

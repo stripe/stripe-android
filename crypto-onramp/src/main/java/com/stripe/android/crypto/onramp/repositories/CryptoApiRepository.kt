@@ -23,7 +23,7 @@ import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.IdentifierRequirementsResponse
-import com.stripe.android.crypto.onramp.model.Identifiers
+import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.KycCollectionRequest
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRefreshRequest
@@ -42,7 +42,6 @@ import com.stripe.android.utils.filterNotNullValues
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
@@ -75,10 +74,6 @@ internal class CryptoApiRepository @Inject constructor(
     private val json = Json {
         ignoreUnknownKeys = true
         encodeDefaults = true
-    }
-
-    private val nullOmittingJson = Json {
-        explicitNulls = false
     }
 
     /**
@@ -147,18 +142,16 @@ internal class CryptoApiRepository @Inject constructor(
     }
 
     suspend fun updateKycInfo(
-        identifiers: Identifiers,
+        identifiers: List<Identifier>,
         consumerSessionClientSecret: String
     ): Result<UpdateKycInfoResult> {
         return executePost(
             updateKycInfoUrl,
-            JsonObject(
-                nullOmittingJson.encodeToJsonElement(
-                    identifiers.toRequest(
-                        credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
-                    )
-                ).jsonObject.filterValues { it != JsonNull }
-            ),
+            Json.encodeToJsonElement(
+                identifiers.toRequest(
+                    credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+                )
+            ).jsonObject,
             UpdateKycInfoResponse.serializer()
         ).mapCatching { it.toUpdateKycInfoResult() }
     }
@@ -400,10 +393,10 @@ internal class CryptoApiRepository @Inject constructor(
             get() = getApiUrl("crypto/internal/identifier_requirements")
 
         /**
-         * @return `https://api.stripe.com/v1/crypto/internal/eu_identifiers`
+         * @return `https://api.stripe.com/v1/crypto/internal/tax_attestation`
          */
         internal val updateKycInfoUrl: String
-            get() = getApiUrl("crypto/internal/eu_identifiers")
+            get() = getApiUrl("crypto/internal/tax_attestation")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/crs_carf_declaration`

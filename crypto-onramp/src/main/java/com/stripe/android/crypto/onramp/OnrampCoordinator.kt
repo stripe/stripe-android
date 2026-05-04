@@ -6,7 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.crypto.onramp.di.OnrampComponentHolder
 import com.stripe.android.crypto.onramp.di.OnrampPresenterComponent
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.Identifiers
+import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
@@ -127,10 +127,10 @@ class OnrampCoordinator @Inject internal constructor(
      * Updates KYC info for the current Link user.
      * Requires an authenticated Link user.
      *
-     * @param identifiers The identifier payload to submit.
+     * @param identifiers The identifiers to submit.
      */
     suspend fun updateKycInfo(
-        identifiers: Identifiers
+        identifiers: List<Identifier>
     ): OnrampUpdateKycInfoResult {
         return interactor.updateKycInfo(identifiers)
     }

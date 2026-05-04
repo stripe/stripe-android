@@ -16,7 +16,7 @@ import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
-import com.stripe.android.crypto.onramp.model.Identifiers
+import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -367,7 +367,7 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
-    suspend fun updateKycInfo(identifiers: Identifiers): OnrampUpdateKycInfoResult {
+    suspend fun updateKycInfo(identifiers: List<Identifier>): OnrampUpdateKycInfoResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = MissingConsumerSecretException()

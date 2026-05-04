@@ -18,7 +18,6 @@ import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.IdentifierRequirement
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.IdentifierType
-import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -269,14 +268,11 @@ class OnrampInteractorTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
         val result = interactor.updateKycInfo(
-            Identifiers()
-                .identifiersMica(
-                    listOf(
-                        Identifier()
-                            .type(IdentifierType.MT_NIC)
-                            .value("mica_123")
-                    )
-                )
+            listOf(
+                Identifier()
+                    .type(IdentifierType.MT_NIC)
+                    .value("mica_123")
+            )
         )
 
         assertThat(result).isInstanceOf(OnrampUpdateKycInfoResult.Completed::class.java)

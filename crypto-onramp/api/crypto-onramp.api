@@ -13,7 +13,7 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator {
 	public final fun logOut (Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun registerLinkUser (Lcom/stripe/android/crypto/onramp/model/LinkUserInfo;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun registerWalletAddress (Ljava/lang/String;Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
-	public final fun updateKycInfo (Lcom/stripe/android/crypto/onramp/model/Identifiers;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun updateKycInfo (Ljava/util/List;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 	public final fun updatePhoneNumber (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
@@ -152,13 +152,6 @@ public final class com/stripe/android/crypto/onramp/model/IdentifierType : java/
 
 public final class com/stripe/android/crypto/onramp/model/IdentifierType$Companion {
 	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/IdentifierType;
-}
-
-public final class com/stripe/android/crypto/onramp/model/Identifiers {
-	public static final field $stable I
-	public fun <init> ()V
-	public final fun identifiersCarf (Ljava/util/List;)Lcom/stripe/android/crypto/onramp/model/Identifiers;
-	public final fun identifiersMica (Ljava/util/List;)Lcom/stripe/android/crypto/onramp/model/Identifiers;
 }
 
 public final class com/stripe/android/crypto/onramp/model/KycInfo {

@@ -12,7 +12,6 @@ import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.Identifier
 import com.stripe.android.crypto.onramp.model.IdentifierRequirement
 import com.stripe.android.crypto.onramp.model.IdentifierType
-import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.RegulationType
@@ -246,7 +245,7 @@ class CryptoApiRepositoryTest {
                                 "type": "mt_nic"
                             }
                         ],
-                        "invalid_identifiers": [
+                        "invalidIdentifiers": [
                             "de_stn",
                             "mt_nic"
                         ],
@@ -261,21 +260,14 @@ class CryptoApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.updateKycInfo(
-                identifiers = Identifiers()
-                    .identifiersMica(
-                        listOf(
-                            Identifier()
-                                .type(IdentifierType.MT_NIC)
-                                .value("mica_123")
-                        )
-                    )
-                    .identifiersCarf(
-                        listOf(
-                            Identifier()
-                                .type(IdentifierType.FR_SPI)
-                                .value("carf_456")
-                        )
-                    ),
+                identifiers = listOf(
+                    Identifier()
+                        .type(IdentifierType.MT_NIC)
+                        .value("mica_123"),
+                    Identifier()
+                        .type(IdentifierType.FR_SPI)
+                        .value("carf_456")
+                ),
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -295,7 +287,7 @@ class CryptoApiRepositoryTest {
                     {
                         "alternatives": [],
                         "identifiers": [],
-                        "invalid_identifiers": [],
+                        "invalidIdentifiers": [],
                         "valid": true
                     }
                     """,
@@ -306,14 +298,11 @@ class CryptoApiRepositoryTest {
                 .thenReturn(stripeResponse)
 
             val result = cryptoApiRepository.updateKycInfo(
-                identifiers = Identifiers()
-                    .identifiersMica(
-                        listOf(
-                            Identifier()
-                                .type(IdentifierType.MT_NIC)
-                                .value("mica_123")
-                        )
-                    ),
+                identifiers = listOf(
+                    Identifier()
+                        .type(IdentifierType.MT_NIC)
+                        .value("mica_123")
+                ),
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -749,23 +738,19 @@ class CryptoApiRepositoryTest {
 
     private fun assertIdentifiersRequest(apiRequest: ApiRequest) {
         assertThat(apiRequest.baseUrl)
-            .isEqualTo("https://api.stripe.com/v1/crypto/internal/eu_identifiers")
+            .isEqualTo("https://api.stripe.com/v1/crypto/internal/tax_attestation")
         assertThat(apiRequest.params)
             .isEqualTo(
                 mapOf(
                     "credentials" to mapOf("consumer_session_client_secret" to "test-secret"),
-                    "identifiers_mica" to listOf(
+                    "identifiers" to listOf(
                         mapOf(
-                            "country" to "MT",
-                            "identifier" to "mica_123",
-                            "identifier_type" to "mt_nic"
-                        )
-                    ),
-                    "identifiers_carf" to listOf(
+                            "type" to "mt_nic",
+                            "value" to "mica_123"
+                        ),
                         mapOf(
-                            "country" to "FR",
-                            "identifier" to "carf_456",
-                            "identifier_type" to "fr_spi"
+                            "type" to "fr_spi",
+                            "value" to "carf_456"
                         )
                     )
                 )
