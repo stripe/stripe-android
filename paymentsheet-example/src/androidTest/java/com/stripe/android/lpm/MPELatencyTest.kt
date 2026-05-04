@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.test.core.TestParameters
-import org.junit.Assume.assumeTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -54,26 +53,32 @@ internal class MPELatencyTest(
             ReportingMode.Trace -> {
                 MpeTraceReporter()
             }
-            null -> {
-                error("MPELatencyTest should only run when a reporting mode is enabled.")
+            ReportingMode.Local -> {
+                object : MpeLatencyReporter {
+                    override fun onStart(testName: String) = Unit
+
+                    override fun onLoad(testName: String) = Unit
+                }
             }
         }
     }
 
     @Test
     fun latencyTest() {
-        assumeRunningInLatencyWorkflow()
-
-        Log.i(
-            MPE_LATENCY_DEBUG_TAG,
-            "Starting $testName mode=$reportingMode samples=$latencySamples benchmark=${InstrumentationRegistry.getArguments().getString(MPE_BENCHMARK_ENABLED_ARGUMENT)} synthetics=${InstrumentationRegistry.getArguments().getString(MPE_SYNTHETICS_ENABLED_ARGUMENT)} trace=${InstrumentationRegistry.getArguments().getString(MPE_TRACE_ENABLED_ARGUMENT)} rawSamplesArg=${InstrumentationRegistry.getArguments().getString(MPE_LATENCY_SAMPLES_ARGUMENT)}"
-        )
-
-        repeat(latencySamples) { iteration ->
+        if (reportingMode != ReportingMode.Local) {
             Log.i(
                 MPE_LATENCY_DEBUG_TAG,
-                "Executing $testName sample ${iteration + 1}/$latencySamples"
+                "Starting $testName mode=$reportingMode samples=$latencySamples benchmark=${InstrumentationRegistry.getArguments().getString(MPE_BENCHMARK_ENABLED_ARGUMENT)} synthetics=${InstrumentationRegistry.getArguments().getString(MPE_SYNTHETICS_ENABLED_ARGUMENT)} trace=${InstrumentationRegistry.getArguments().getString(MPE_TRACE_ENABLED_ARGUMENT)} rawSamplesArg=${InstrumentationRegistry.getArguments().getString(MPE_LATENCY_SAMPLES_ARGUMENT)}"
             )
+        }
+
+        repeat(latencySamples) { iteration ->
+            if (reportingMode != ReportingMode.Local) {
+                Log.i(
+                    MPE_LATENCY_DEBUG_TAG,
+                    "Executing $testName sample ${iteration + 1}/$latencySamples"
+                )
+            }
             testDriver.runLatencyTest(
                 testParameters = TestParameters.create(
                     paymentMethodCode = "card",
@@ -90,13 +95,6 @@ internal class MPELatencyTest(
                 startOnPaymentSheetLaunch = true,
             )
         }
-    }
-
-    private fun assumeRunningInLatencyWorkflow() {
-        assumeTrue(
-            "PaymentSheet latency tests only run when explicitly enabled.",
-            reportingMode != null
-        )
     }
 
     class TestConfig(
@@ -194,17 +192,18 @@ internal class MPELatencyTest(
     private enum class ReportingMode {
         Benchmark,
         Synthetics,
-        Trace;
+        Trace,
+        Local;
 
         companion object {
-            fun fromInstrumentationArgs(): ReportingMode? {
+            fun fromInstrumentationArgs(): ReportingMode {
                 val arguments = InstrumentationRegistry.getArguments()
 
                 return when {
                     arguments.isEnabled(MPE_TRACE_ENABLED_ARGUMENT) -> Trace
                     arguments.isEnabled(MPE_BENCHMARK_ENABLED_ARGUMENT) -> Benchmark
                     arguments.isEnabled(MPE_SYNTHETICS_ENABLED_ARGUMENT) -> Synthetics
-                    else -> null
+                    else -> Local
                 }
             }
 
