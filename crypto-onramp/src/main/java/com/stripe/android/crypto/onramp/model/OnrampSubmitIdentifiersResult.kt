@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
+import com.stripe.android.crypto.onramp.model.Compliance.SubmitIdentifiersResult
 
 /**
  * Result of submitting compliance identifiers.
