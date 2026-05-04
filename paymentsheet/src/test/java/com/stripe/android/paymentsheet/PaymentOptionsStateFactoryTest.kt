@@ -11,6 +11,28 @@ import org.junit.Test
 class PaymentOptionsStateFactoryTest {
 
     @Test
+    fun `non-Link payment options convert without LinkBrand`() {
+        val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        assertThat(PaymentOptionsItem.AddCard.toPaymentSelection()).isNull()
+        assertThat(PaymentOptionsItem.GooglePay.toPaymentSelection()).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = savedPaymentMethod,
+                )
+            ).toPaymentSelection()
+        ).isEqualTo(PaymentSelection.Saved(savedPaymentMethod))
+    }
+
+    @Test
+    fun `Link payment option conversion requires LinkBrand`() {
+        assertThat(PaymentOptionsItem.Link.toPaymentSelection(LinkBrand.Notlink))
+            .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Notlink))
+    }
+
+    @Test
     fun `Returns current selection if available`() {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val paymentMethod = paymentMethods.random()
