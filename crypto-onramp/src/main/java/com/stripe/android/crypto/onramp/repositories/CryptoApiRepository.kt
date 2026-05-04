@@ -11,8 +11,13 @@ import com.stripe.android.core.networking.StripeRequest
 import com.stripe.android.core.networking.executeRequestWithKSerializerParser
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierRequirements
+import com.stripe.android.crypto.onramp.model.Compliance.ComplianceIdentifierRequirementsResponse
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
+import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
+import com.stripe.android.crypto.onramp.model.CrsCarfDeclarationResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -26,6 +31,9 @@ import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.Compliance.SubmitIdentifiersResponse
+import com.stripe.android.crypto.onramp.model.Compliance.SubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.Compliance.toRequest
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.model.PaymentIntent
@@ -46,6 +54,7 @@ import javax.inject.Singleton
 */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Singleton
+@Suppress("TooManyFunctions")
 internal class CryptoApiRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
@@ -114,6 +123,61 @@ internal class CryptoApiRepository @Inject constructor(
             retrieveKycInfoUrl,
             Json.encodeToJsonElement(params).jsonObject,
             KycRetrieveResponse.serializer()
+        )
+    }
+
+    suspend fun retrieveMissingIdentifiers(
+        consumerSessionClientSecret: String
+    ): Result<ComplianceIdentifierRequirements> {
+        val request = apiRequestFactory.createGet(
+            url = identifierRequirementsUrl,
+            options = buildRequestOptions(),
+            params = credentialsParams(consumerSessionClientSecret).toMap(),
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = ComplianceIdentifierRequirementsResponse.serializer()
+        ).mapCatching { it.toComplianceIdentifierRequirements() }
+    }
+
+    suspend fun submitIdentifiers(
+        identifiers: List<ComplianceIdentifier>,
+        consumerSessionClientSecret: String
+    ): Result<SubmitIdentifiersResult> {
+        return executePost(
+            submitIdentifiersUrl,
+            Json.encodeToJsonElement(
+                identifiers.toRequest(
+                    credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+                )
+            ).jsonObject,
+            SubmitIdentifiersResponse.serializer()
+        ).mapCatching { it.toSubmitIdentifiersResult() }
+    }
+
+    suspend fun retrieveCrsCarfDeclaration(
+        consumerSessionClientSecret: String
+    ): Result<CrsCarfDeclaration> {
+        val request = apiRequestFactory.createGet(
+            url = crsCarfDeclarationUrl,
+            options = buildRequestOptions(),
+            params = credentialsParams(consumerSessionClientSecret).toMap(),
+        )
+
+        return execute(
+            request = request,
+            responseSerializer = CrsCarfDeclarationResponse.serializer()
+        ).map { it.toDeclaration() }
+    }
+
+    suspend fun confirmCrsCarfDeclaration(
+        consumerSessionClientSecret: String
+    ): Result<Unit> {
+        return executePost(
+            crsCarfDeclarationUrl,
+            credentialsParams(consumerSessionClientSecret),
+            Unit.serializer()
         )
     }
 
@@ -264,6 +328,16 @@ internal class CryptoApiRepository @Inject constructor(
         )
     }
 
+    private fun credentialsParams(
+        consumerSessionClientSecret: String
+    ): JsonObject {
+        return Json.encodeToJsonElement(
+            CryptoCustomerRequestParams(
+                CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+            )
+        ).jsonObject
+    }
+
     private suspend fun <Response> executePost(
         url: String,
         paramsJson: JsonObject,
@@ -311,6 +385,24 @@ internal class CryptoApiRepository @Inject constructor(
          */
         internal val collectKycDataUrl: String
             get() = getApiUrl("crypto/internal/kyc_data_collection")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/identifier_requirements`
+         */
+        internal val identifierRequirementsUrl: String
+            get() = getApiUrl("crypto/internal/identifier_requirements")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/eu_identifiers`
+         */
+        internal val submitIdentifiersUrl: String
+            get() = getApiUrl("crypto/internal/eu_identifiers")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/crs_carf_declaration`
+         */
+        internal val crsCarfDeclarationUrl: String
+            get() = getApiUrl("crypto/internal/crs_carf_declaration")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/wallet`

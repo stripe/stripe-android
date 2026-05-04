@@ -52,6 +52,108 @@ public final class com/stripe/android/crypto/onramp/exception/PaymentFailedExcep
 	public static final field $stable I
 }
 
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifier {
+	public static final field $stable I
+	public fun <init> ()V
+	public final fun type (Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;)Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifier;
+	public final fun value (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifier;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierAlternativeGroup {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternativeMissingIdentifiers ()Ljava/util/List;
+	public final fun getOriginalMissingIdentifiers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierRequirement {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getRegulation ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation;
+	public final fun getType ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierRequirements {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternatives ()Ljava/util/List;
+	public final fun getIdentifiers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType {
+	public static final field $stable I
+	public static final field Companion Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType$Companion;
+	public fun <init> (Ljava/lang/String;)V
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getValue ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType$Companion {
+	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getAT_STN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getBE_NRN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getBG_UCN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getCY_TIC ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getCZ_RC ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getDE_STN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getDK_CPR ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getEE_IK ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getFI_HETU ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getFR_SPI ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getGR_AFM ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getHR_OIB ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getHU_AD ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getIE_PPSN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getIS_KT ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getIT_CF ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getLT_AK ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getLU_NIF ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getLV_PK ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getMT_NIC ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getMT_PP ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getNL_BSN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getPL_NIP ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getPL_PESEL ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getPT_NIF ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getRO_CNP ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getSE_PIN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getSI_PIN ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+	public final fun getSK_RC ()Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceIdentifierType;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation : java/lang/Enum {
+	public static final field Companion Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation$Companion;
+	public static final field EuCarf Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation;
+	public static final field EuMica Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public final fun getValue ()Ljava/lang/String;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation;
+	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation$Companion {
+	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/Compliance/ComplianceRegulation;
+}
+
+public final class com/stripe/android/crypto/onramp/model/Compliance/SubmitIdentifiersResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternatives ()Ljava/util/List;
+	public final fun getIdentifiers ()Ljava/util/List;
+	public final fun getInvalidIdentifiers ()Ljava/util/List;
+	public final fun getValid ()Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/lang/Enum {
 	public static final field Aptos Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Avalanche Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
@@ -79,56 +181,19 @@ public final class com/stripe/android/crypto/onramp/model/CryptoNetwork$Companio
 public final class com/stripe/android/crypto/onramp/model/KycInfo {
 	public static final field $stable I
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;Lcom/stripe/android/core/model/CountryCode;Ljava/lang/String;Ljava/util/List;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
+	public final fun getBirthCity ()Ljava/lang/String;
+	public final fun getBirthCountry ()Lcom/stripe/android/core/model/CountryCode;
 	public final fun getDateOfBirth ()Lcom/stripe/android/model/DateOfBirth;
 	public final fun getFirstName ()Ljava/lang/String;
 	public final fun getIdNumber ()Ljava/lang/String;
 	public final fun getLastName ()Ljava/lang/String;
+	public final fun getNationalities ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse : android/os/Parcelable {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse$Companion;
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)V
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun component3 ()Ljava/lang/String;
-	public final fun component4 ()Ljava/lang/String;
-	public final fun component5 ()Lcom/stripe/android/model/DateOfBirth;
-	public final fun component6 ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;)Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
-	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/model/DateOfBirth;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAddress ()Lcom/stripe/android/paymentsheet/PaymentSheet$Address;
-	public final fun getDateOfBirth ()Lcom/stripe/android/model/DateOfBirth;
-	public final fun getFirstName ()Ljava/lang/String;
-	public final fun getIdNumberLastFour ()Ljava/lang/String;
-	public final fun getIdType ()Ljava/lang/String;
-	public final fun getLastName ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final synthetic class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse$$serializer;
-	public final fun childSerializers ()[Lkotlinx/serialization/KSerializer;
-	public final fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;
-	public synthetic fun deserialize (Lkotlinx/serialization/encoding/Decoder;)Ljava/lang/Object;
-	public final fun getDescriptor ()Lkotlinx/serialization/descriptors/SerialDescriptor;
-	public final fun serialize (Lkotlinx/serialization/encoding/Encoder;Lcom/stripe/android/crypto/onramp/model/KycRetrieveResponse;)V
-	public synthetic fun serialize (Lkotlinx/serialization/encoding/Encoder;Ljava/lang/Object;)V
-	public fun typeParametersSerializers ()[Lkotlinx/serialization/KSerializer;
-}
-
-public final class com/stripe/android/crypto/onramp/model/KycRetrieveResponse$Companion {
-	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
 public final class com/stripe/android/crypto/onramp/model/LinkUserInfo : android/os/Parcelable {
