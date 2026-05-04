@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -128,7 +128,7 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
 
 @Component(
     modules = [
-        ApplicationIdModule::class,
+        ElementsSessionClientParamsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         ExtendedPaymentElementConfirmationTestModule::class,
         GooglePayLauncherModule::class,
