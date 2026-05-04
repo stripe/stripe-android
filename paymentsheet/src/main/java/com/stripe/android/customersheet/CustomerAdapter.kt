@@ -145,7 +145,6 @@ interface CustomerAdapter {
         internal data class StripeId(override val id: String) : PaymentOption(id)
 
         internal fun toPaymentSelection(
-            linkBrand: LinkBrand? = null,
             paymentMethodProvider: (paymentMethodId: String) -> PaymentMethod?,
         ): PaymentSelection? {
             return when (this) {
@@ -154,7 +153,7 @@ interface CustomerAdapter {
                 }
 
                 is Link -> {
-                    PaymentSelection.Link(brand = requireNotNull(linkBrand))
+                    PaymentSelection.Link(brand = LinkBrand.Link)
                 }
 
                 is StripeId -> {
