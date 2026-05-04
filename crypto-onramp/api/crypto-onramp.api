@@ -55,6 +55,15 @@ public final class com/stripe/android/crypto/onramp/exception/PaymentFailedExcep
 	public static final field $stable I
 }
 
+public final class com/stripe/android/crypto/onramp/model/AlternativeGroup {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternativeMissingIdentifiers ()Ljava/util/List;
+	public final fun getOriginalMissingIdentifiers ()Ljava/util/List;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/lang/Enum {
 	public static final field Aptos Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Avalanche Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
@@ -86,10 +95,10 @@ public final class com/stripe/android/crypto/onramp/model/Identifier {
 	public final fun value (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/Identifier;
 }
 
-public final class com/stripe/android/crypto/onramp/model/IdentifierHint {
+public final class com/stripe/android/crypto/onramp/model/IdentifierRequirement {
 	public static final field $stable I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPlaceholder ()Ljava/lang/String;
+	public final fun getRegulation ()Lcom/stripe/android/crypto/onramp/model/RegulationType;
 	public final fun getType ()Lcom/stripe/android/crypto/onramp/model/IdentifierType;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
@@ -98,7 +107,8 @@ public final class com/stripe/android/crypto/onramp/model/IdentifierHint {
 public final class com/stripe/android/crypto/onramp/model/IdentifierRequirements {
 	public static final field $stable I
 	public fun equals (Ljava/lang/Object;)Z
-	public final fun getMissingIdentifiers ()Ljava/util/List;
+	public final fun getAlternatives ()Ljava/util/List;
+	public final fun getIdentifiers ()Ljava/util/List;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 }
@@ -182,17 +192,6 @@ public final class com/stripe/android/crypto/onramp/model/LinkUserInfo : android
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/crypto/onramp/model/MissingIdentifier {
-	public static final field $stable I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAlternateIdentifier ()Lcom/stripe/android/crypto/onramp/model/IdentifierHint;
-	public final fun getPlaceholder ()Ljava/lang/String;
-	public final fun getRegulation ()Lcom/stripe/android/crypto/onramp/model/RegulationType;
-	public final fun getType ()Lcom/stripe/android/crypto/onramp/model/IdentifierType;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
 }
 
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampAttachKycInfoResult {
@@ -551,6 +550,7 @@ public final class com/stripe/android/crypto/onramp/model/PaymentMethodType : ja
 }
 
 public final class com/stripe/android/crypto/onramp/model/RegulationType : java/lang/Enum {
+	public static final field Companion Lcom/stripe/android/crypto/onramp/model/RegulationType$Companion;
 	public static final field EuCarf Lcom/stripe/android/crypto/onramp/model/RegulationType;
 	public static final field EuMica Lcom/stripe/android/crypto/onramp/model/RegulationType;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
@@ -559,11 +559,16 @@ public final class com/stripe/android/crypto/onramp/model/RegulationType : java/
 	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/RegulationType;
 }
 
+public final class com/stripe/android/crypto/onramp/model/RegulationType$Companion {
+	public final fun fromValue (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/RegulationType;
+}
+
 public final class com/stripe/android/crypto/onramp/model/UpdateKycInfoResult {
 	public static final field $stable I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getAlternatives ()Ljava/util/List;
+	public final fun getIdentifiers ()Ljava/util/List;
 	public final fun getInvalidIdentifiers ()Ljava/util/List;
-	public final fun getMissingIdentifiers ()Ljava/util/List;
 	public final fun getValid ()Z
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;

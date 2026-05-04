@@ -20,14 +20,15 @@ import com.stripe.android.crypto.onramp.OnrampCoordinator
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
+import com.stripe.android.crypto.onramp.model.AlternativeGroup
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.Identifier
+import com.stripe.android.crypto.onramp.model.IdentifierRequirement
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.MissingIdentifier
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
@@ -978,30 +979,41 @@ internal class OnrampViewModel(
     }
 
     private fun formatIdentifierRequirements(requirements: IdentifierRequirements): String {
-        return formatMissingIdentifiers(requirements.missingIdentifiers)
+        return buildString {
+            append("Identifiers: ")
+            append(formatIdentifierRequirements(requirements.identifiers))
+            append("\nAlternatives: ")
+            append(formatAlternativeGroups(requirements.alternatives))
+        }
     }
 
     private fun formatUpdateKycInfoResult(result: UpdateKycInfoResult): String {
         return buildString {
             append("Valid: ${result.valid}")
-            append("\nMissing identifiers: ")
-            append(formatMissingIdentifiers(result.missingIdentifiers.orEmpty()))
+            append("\nIdentifiers: ")
+            append(formatIdentifierRequirements(result.identifiers))
+            append("\nAlternatives: ")
+            append(formatAlternativeGroups(result.alternatives))
             append("\nInvalid identifiers: ")
-            append(result.invalidIdentifiers.orEmpty().map { it.value }.joinToStringOrNone())
+            append(result.invalidIdentifiers.map { it.value }.joinToStringOrNone())
         }
     }
 
-    private fun formatMissingIdentifiers(missingIdentifiers: List<MissingIdentifier>): String {
-        return missingIdentifiers
+    private fun formatIdentifierRequirements(identifierRequirements: List<IdentifierRequirement>): String {
+        return identifierRequirements
             .takeIf { it.isNotEmpty() }
-            ?.joinToString(separator = "\n") { missingIdentifier ->
-                buildString {
-                    append("${missingIdentifier.regulation.value}: ${missingIdentifier.type.value}")
-                    append(" (${missingIdentifier.placeholder})")
-                    missingIdentifier.alternateIdentifier?.let { alternateIdentifier ->
-                        append(" or ${alternateIdentifier.type.value} (${alternateIdentifier.placeholder})")
-                    }
-                }
+            ?.joinToString(separator = "\n") { identifierRequirement ->
+                "${identifierRequirement.regulation.value}: ${identifierRequirement.type.value}"
+            }
+            ?: "None"
+    }
+
+    private fun formatAlternativeGroups(alternativeGroups: List<AlternativeGroup>): String {
+        return alternativeGroups
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = "\n") { alternativeGroup ->
+                "${alternativeGroup.originalMissingIdentifiers.joinToValueString()} -> " +
+                    alternativeGroup.alternativeMissingIdentifiers.joinToValueString()
             }
             ?: "None"
     }
@@ -1092,4 +1104,8 @@ private object NullOnrampSessionResponseParceler : Parceler<OnrampSessionRespons
 
 private fun List<String>.joinToStringOrNone(): String {
     return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"
+}
+
+private fun List<IdentifierType>.joinToValueString(): String {
+    return map { it.value }.joinToStringOrNone()
 }

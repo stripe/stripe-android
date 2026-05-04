@@ -13,15 +13,15 @@ import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
+import com.stripe.android.crypto.onramp.model.AlternativeGroup
 import com.stripe.android.crypto.onramp.model.Identifier
-import com.stripe.android.crypto.onramp.model.IdentifierHint
+import com.stripe.android.crypto.onramp.model.IdentifierRequirement
 import com.stripe.android.crypto.onramp.model.IdentifierRequirements
 import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
-import com.stripe.android.crypto.onramp.model.MissingIdentifier
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
@@ -206,21 +206,20 @@ class OnrampInteractorTest {
     fun testGetIdentifierRequirementsIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val requirements = IdentifierRequirements(
-            missingIdentifiers = listOf(
-                MissingIdentifier(
+            identifiers = listOf(
+                IdentifierRequirement(
                     type = IdentifierType.MT_NIC,
-                    placeholder = "123456M",
-                    alternateIdentifier = IdentifierHint(
-                        type = IdentifierType.MT_PP,
-                        placeholder = "AA1234567"
-                    ),
                     regulation = RegulationType.EuMica
                 ),
-                MissingIdentifier(
+                IdentifierRequirement(
                     type = IdentifierType.FR_SPI,
-                    placeholder = "12 34 567 890 123",
-                    alternateIdentifier = null,
                     regulation = RegulationType.EuCarf
+                )
+            ),
+            alternatives = listOf(
+                AlternativeGroup(
+                    originalMissingIdentifiers = listOf(IdentifierType.MT_NIC),
+                    alternativeMissingIdentifiers = listOf(IdentifierType.MT_PP)
                 )
             )
         )
@@ -242,15 +241,27 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val submissionResult = UpdateKycInfoResult(
             valid = false,
-            missingIdentifiers = listOf(
-                MissingIdentifier(
-                    type = IdentifierType.FR_SPI,
-                    placeholder = "12 34 567 890 123",
-                    alternateIdentifier = null,
+            identifiers = listOf(
+                IdentifierRequirement(
+                    type = IdentifierType.DE_STN,
                     regulation = RegulationType.EuCarf
+                ),
+                IdentifierRequirement(
+                    type = IdentifierType.MT_NIC,
+                    regulation = RegulationType.EuCarf
+                ),
+                IdentifierRequirement(
+                    type = IdentifierType.MT_NIC,
+                    regulation = RegulationType.EuMica
                 )
             ),
-            invalidIdentifiers = listOf(IdentifierType.FR_SPI)
+            alternatives = listOf(
+                AlternativeGroup(
+                    originalMissingIdentifiers = listOf(IdentifierType.MT_NIC),
+                    alternativeMissingIdentifiers = listOf(IdentifierType.MT_PP)
+                )
+            ),
+            invalidIdentifiers = listOf(IdentifierType.DE_STN, IdentifierType.MT_NIC)
         )
         whenever(cryptoApiRepository.updateKycInfo(any(), any()))
             .thenReturn(Result.success(submissionResult))

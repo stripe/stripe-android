@@ -7,13 +7,13 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.AlternativeGroup
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.Identifier
-import com.stripe.android.crypto.onramp.model.IdentifierHint
+import com.stripe.android.crypto.onramp.model.IdentifierRequirement
 import com.stripe.android.crypto.onramp.model.IdentifierType
 import com.stripe.android.crypto.onramp.model.Identifiers
 import com.stripe.android.crypto.onramp.model.KycInfo
-import com.stripe.android.crypto.onramp.model.MissingIdentifier
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.RegulationType
 import com.stripe.android.crypto.onramp.model.UpdateKycInfoResult
@@ -157,20 +157,20 @@ class CryptoApiRepositoryTest {
                 200,
                 """
                     {
-                        "missing_identifiers_mica": [
+                        "alternatives": [
                             {
-                                "type": "mt_nic",
-                                "placeholder": "123456M",
-                                "alternate_identifier": {
-                                    "type": "mt_pp",
-                                    "placeholder": "AA1234567"
-                                }
+                                "alternative_missing_identifiers": ["mt_pp"],
+                                "original_missing_identifiers": ["mt_nic"]
                             }
                         ],
-                        "missing_identifiers_carf": [
+                        "identifiers": [
                             {
-                                "type": "fr_spi",
-                                "placeholder": "12 34 567 890 123"
+                                "regulation": "eu_mica",
+                                "type": "mt_nic"
+                            },
+                            {
+                                "regulation": "eu_carf",
+                                "type": "fr_spi"
                             }
                         ]
                     }
@@ -194,22 +194,22 @@ class CryptoApiRepositoryTest {
                 .isEqualTo(mapOf("credentials" to mapOf("consumer_session_client_secret" to "test-secret")))
 
             assertThat(result.isSuccess).isTrue()
-            assertThat(result.getOrThrow().missingIdentifiers)
+            assertThat(result.getOrThrow().identifiers)
                 .containsExactly(
-                    MissingIdentifier(
+                    IdentifierRequirement(
                         type = IdentifierType.MT_NIC,
-                        placeholder = "123456M",
-                        alternateIdentifier = IdentifierHint(
-                            type = IdentifierType.MT_PP,
-                            placeholder = "AA1234567"
-                        ),
                         regulation = RegulationType.EuMica
                     ),
-                    MissingIdentifier(
+                    IdentifierRequirement(
                         type = IdentifierType.FR_SPI,
-                        placeholder = "12 34 567 890 123",
-                        alternateIdentifier = null,
                         regulation = RegulationType.EuCarf
+                    )
+                )
+            assertThat(result.getOrThrow().alternatives)
+                .containsExactly(
+                    AlternativeGroup(
+                        originalMissingIdentifiers = listOf(IdentifierType.MT_NIC),
+                        alternativeMissingIdentifiers = listOf(IdentifierType.MT_PP)
                     )
                 )
         }
@@ -222,26 +222,36 @@ class CryptoApiRepositoryTest {
                 200,
                 """
                     {
+                        "alternatives": [
+                            {
+                                "alternative_missing_identifiers": [
+                                    "mt_pp"
+                                ],
+                                "original_missing_identifiers": [
+                                    "mt_nic"
+                                ]
+                            }
+                        ],
+                        "identifiers": [
+                            {
+                                "regulation": "eu_carf",
+                                "type": "de_stn"
+                            },
+                            {
+                                "regulation": "eu_carf",
+                                "type": "mt_nic"
+                            },
+                            {
+                                "regulation": "eu_mica",
+                                "type": "mt_nic"
+                            }
+                        ],
+                        "invalid_identifiers": [
+                            "de_stn",
+                            "mt_nic"
+                        ],
                         "valid": false,
-                        "missing_identifiers": {
-                            "missing_identifiers_mica": [
-                                {
-                                    "type": "mt_nic",
-                                    "placeholder": "123456M",
-                                    "alternate_identifier": {
-                                        "type": "mt_pp",
-                                        "placeholder": "AA1234567"
-                                    }
-                                }
-                            ],
-                            "missing_identifiers_carf": [
-                                {
-                                    "type": "fr_spi",
-                                    "placeholder": "12 34 567 890 123"
-                                }
-                            ]
-                        },
-                        "errors": ["fr_spi"]
+                        "ignored_field": "ignored"
                     }
                     """,
                 emptyMap()
@@ -273,6 +283,50 @@ class CryptoApiRepositoryTest {
             assertIdentifiersRequest(apiRequestArgumentCaptor.firstValue)
             assertThat(result.isSuccess).isTrue()
             assertUpdateKycInfoResult(result.getOrThrow())
+        }
+    }
+
+    @Test
+    fun testUpdateKycInfoSucceedsWhenValid() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "alternatives": [],
+                        "identifiers": [],
+                        "invalid_identifiers": [],
+                        "valid": true
+                    }
+                    """,
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.updateKycInfo(
+                identifiers = Identifiers()
+                    .identifiersMica(
+                        listOf(
+                            Identifier()
+                                .type(IdentifierType.MT_NIC)
+                                .value("mica_123")
+                        )
+                    ),
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(result.getOrThrow())
+                .isEqualTo(
+                    UpdateKycInfoResult(
+                        valid = true,
+                        identifiers = emptyList(),
+                        alternatives = emptyList(),
+                        invalidIdentifiers = emptyList()
+                    )
+                )
         }
     }
 
@@ -720,25 +774,29 @@ class CryptoApiRepositoryTest {
 
     private fun assertUpdateKycInfoResult(result: UpdateKycInfoResult) {
         assertThat(result.valid).isFalse()
-        assertThat(result.missingIdentifiers)
+        assertThat(result.identifiers)
             .containsExactly(
-                MissingIdentifier(
-                    type = IdentifierType.MT_NIC,
-                    placeholder = "123456M",
-                    alternateIdentifier = IdentifierHint(
-                        type = IdentifierType.MT_PP,
-                        placeholder = "AA1234567"
-                    ),
-                    regulation = RegulationType.EuMica
-                ),
-                MissingIdentifier(
-                    type = IdentifierType.FR_SPI,
-                    placeholder = "12 34 567 890 123",
-                    alternateIdentifier = null,
+                IdentifierRequirement(
+                    type = IdentifierType.DE_STN,
                     regulation = RegulationType.EuCarf
+                ),
+                IdentifierRequirement(
+                    type = IdentifierType.MT_NIC,
+                    regulation = RegulationType.EuCarf
+                ),
+                IdentifierRequirement(
+                    type = IdentifierType.MT_NIC,
+                    regulation = RegulationType.EuMica
+                )
+            )
+        assertThat(result.alternatives)
+            .containsExactly(
+                AlternativeGroup(
+                    originalMissingIdentifiers = listOf(IdentifierType.MT_NIC),
+                    alternativeMissingIdentifiers = listOf(IdentifierType.MT_PP)
                 )
             )
         assertThat(result.invalidIdentifiers)
-            .isEqualTo(listOf(IdentifierType.FR_SPI))
+            .isEqualTo(listOf(IdentifierType.DE_STN, IdentifierType.MT_NIC))
     }
 }

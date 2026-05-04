@@ -144,55 +144,55 @@ enum class IdentifierType(
 @ExperimentalCryptoOnramp
 enum class RegulationType(val value: String) {
     EuCarf("eu_carf"),
-    EuMica("eu_mica")
+    EuMica("eu_mica");
+
+    companion object {
+        fun fromValue(value: String): RegulationType? {
+            return entries.firstOrNull { it.value == value.lowercase() }
+        }
+    }
 }
 
 /**
- * A required identifier along with the merchant-facing placeholder shown to the user.
+ * An identifier requirement returned by the Crypto Onramp API.
  */
 @ExperimentalCryptoOnramp
 @Poko
-class IdentifierHint internal constructor(
+class IdentifierRequirement internal constructor(
     val type: IdentifierType,
-    val placeholder: String
-)
-
-/**
- * An identifier that is still required for a specific regulation.
- */
-@ExperimentalCryptoOnramp
-@Poko
-class MissingIdentifier internal constructor(
-    val type: IdentifierType,
-    val placeholder: String,
-    val alternateIdentifier: IdentifierHint?,
     val regulation: RegulationType
 )
 
 /**
+ * A set of alternative identifiers that can satisfy a missing requirement.
+ */
+@ExperimentalCryptoOnramp
+@Poko
+class AlternativeGroup internal constructor(
+    val originalMissingIdentifiers: List<IdentifierType>,
+    val alternativeMissingIdentifiers: List<IdentifierType>
+)
+
+/**
  * Identifier requirements returned by the Crypto Onramp API.
- *
- * @property missingIdentifiers Missing MiCA and CARF identifiers still required.
  */
 @ExperimentalCryptoOnramp
 @Poko
 class IdentifierRequirements internal constructor(
-    val missingIdentifiers: List<MissingIdentifier>
+    val identifiers: List<IdentifierRequirement>,
+    val alternatives: List<AlternativeGroup>
 )
 
 /**
  * Validation result returned after updating KYC info.
- *
- * @property valid Whether the submitted identifiers were accepted.
- * @property missingIdentifiers Missing identifiers, if more are required.
- * @property invalidIdentifiers Submitted identifier types rejected by the API.
  */
 @ExperimentalCryptoOnramp
 @Poko
 class UpdateKycInfoResult internal constructor(
     val valid: Boolean,
-    val missingIdentifiers: List<MissingIdentifier>?,
-    val invalidIdentifiers: List<IdentifierType>?
+    val identifiers: List<IdentifierRequirement>,
+    val alternatives: List<AlternativeGroup>,
+    val invalidIdentifiers: List<IdentifierType>
 )
 
 @Serializable
@@ -217,18 +217,15 @@ internal data class IdentifierRequest(
 
 @Serializable
 internal data class IdentifierRequirementsResponse(
-    @SerialName("missing_identifiers_mica")
-    val missingIdentifiersMica: List<MissingIdentifierResponse> = emptyList(),
-    @SerialName("missing_identifiers_carf")
-    val missingIdentifiersCarf: List<MissingIdentifierResponse> = emptyList(),
+    @SerialName("identifiers")
+    val identifiers: List<IdentifierRequirementResponse> = emptyList(),
+    @SerialName("alternatives")
+    val alternatives: List<AlternativeGroupResponse> = emptyList(),
 ) {
     fun toIdentifierRequirements(): IdentifierRequirements {
         return IdentifierRequirements(
-            missingIdentifiers = missingIdentifiersMica.map {
-                it.toMissingIdentifier(RegulationType.EuMica)
-            } + missingIdentifiersCarf.map {
-                it.toMissingIdentifier(RegulationType.EuCarf)
-            }
+            identifiers = identifiers.map { it.toIdentifierRequirement() },
+            alternatives = alternatives.map { it.toAlternativeGroup() }
         )
     }
 }
@@ -237,16 +234,19 @@ internal data class IdentifierRequirementsResponse(
 internal data class UpdateKycInfoResponse(
     @SerialName("valid")
     val valid: Boolean = true,
-    @SerialName("missing_identifiers")
-    val missingIdentifiers: MissingIdentifiersResponse? = null,
-    @SerialName("errors")
-    val errors: List<String>? = null,
+    @SerialName("identifiers")
+    val identifiers: List<IdentifierRequirementResponse> = emptyList(),
+    @SerialName("alternatives")
+    val alternatives: List<AlternativeGroupResponse> = emptyList(),
+    @SerialName("invalid_identifiers")
+    val invalidIdentifiers: List<String> = emptyList(),
 ) {
     fun toUpdateKycInfoResult(): UpdateKycInfoResult {
         return UpdateKycInfoResult(
             valid = valid,
-            missingIdentifiers = missingIdentifiers?.toMissingIdentifiers(),
-            invalidIdentifiers = errors?.map { identifierType ->
+            identifiers = identifiers.map { it.toIdentifierRequirement() },
+            alternatives = alternatives.map { it.toAlternativeGroup() },
+            invalidIdentifiers = invalidIdentifiers.map { identifierType ->
                 requireNotNull(IdentifierType.fromValue(identifierType)) {
                     "Unrecognized identifier type: $identifierType"
                 }
@@ -256,57 +256,43 @@ internal data class UpdateKycInfoResponse(
 }
 
 @Serializable
-internal data class MissingIdentifiersResponse(
-    @SerialName("missing_identifiers_mica")
-    val missingIdentifiersMica: List<MissingIdentifierResponse> = emptyList(),
-    @SerialName("missing_identifiers_carf")
-    val missingIdentifiersCarf: List<MissingIdentifierResponse> = emptyList(),
-) {
-    fun toMissingIdentifiers(): List<MissingIdentifier> {
-        return missingIdentifiersMica.map {
-            it.toMissingIdentifier(RegulationType.EuMica)
-        } + missingIdentifiersCarf.map {
-            it.toMissingIdentifier(RegulationType.EuCarf)
-        }
-    }
-}
-
-@Serializable
-internal data class MissingIdentifierResponse(
+internal data class IdentifierRequirementResponse(
     @SerialName("type")
     val type: String,
-    @SerialName("placeholder")
-    val placeholder: String,
-    @SerialName("alternate_identifier")
-    val alternateIdentifier: IdentifierHintResponse? = null
+    @SerialName("regulation")
+    val regulation: String
 ) {
-    fun toMissingIdentifier(regulation: RegulationType): MissingIdentifier {
-        val identifierType = requireNotNull(IdentifierType.fromValue(type)) {
-            "Unrecognized identifier type: $type"
-        }
-
-        return MissingIdentifier(
-            type = identifierType,
-            placeholder = placeholder,
-            alternateIdentifier = alternateIdentifier?.toIdentifierHint(),
-            regulation = regulation
+    fun toIdentifierRequirement(): IdentifierRequirement {
+        return IdentifierRequirement(
+            type = requireNotNull(IdentifierType.fromValue(type)) {
+                "Unrecognized identifier type: $type"
+            },
+            regulation = requireNotNull(RegulationType.fromValue(regulation)) {
+                "Unrecognized regulation type: $regulation"
+            }
         )
     }
 }
 
 @Serializable
-internal data class IdentifierHintResponse(
-    @SerialName("type")
-    val type: String,
-    @SerialName("placeholder")
-    val placeholder: String
+internal data class AlternativeGroupResponse(
+    @SerialName("original_missing_identifiers")
+    val originalMissingIdentifiers: List<String>,
+    @SerialName("alternative_missing_identifiers")
+    val alternativeMissingIdentifiers: List<String>
 ) {
-    fun toIdentifierHint(): IdentifierHint {
-        return IdentifierHint(
-            type = requireNotNull(IdentifierType.fromValue(type)) {
-                "Unrecognized identifier type: $type"
+    fun toAlternativeGroup(): AlternativeGroup {
+        return AlternativeGroup(
+            originalMissingIdentifiers = originalMissingIdentifiers.map { identifierType ->
+                requireNotNull(IdentifierType.fromValue(identifierType)) {
+                    "Unrecognized identifier type: $identifierType"
+                }
             },
-            placeholder = placeholder
+            alternativeMissingIdentifiers = alternativeMissingIdentifiers.map { identifierType ->
+                requireNotNull(IdentifierType.fromValue(identifierType)) {
+                    "Unrecognized identifier type: $identifierType"
+                }
+            }
         )
     }
 }
