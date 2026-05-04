@@ -18,7 +18,6 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -594,7 +593,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -612,8 +611,8 @@ internal class FlowControllerTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -734,7 +733,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -787,7 +786,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -848,7 +847,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -919,7 +918,7 @@ internal class FlowControllerTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
+            bodyPart("payment_method_options[card][cvc]", "123")
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -1287,7 +1286,7 @@ internal class FlowControllerTest {
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"
         networkRule.elementsSession(
-            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+            query("deferred_intent[on_behalf_of]", oboMerchantID)
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
