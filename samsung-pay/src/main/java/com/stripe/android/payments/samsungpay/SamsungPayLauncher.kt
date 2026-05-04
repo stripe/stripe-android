@@ -333,6 +333,10 @@ class SamsungPayLauncher internal constructor(
                     SpaySdk.PARTNER_SERVICE_TYPE,
                     SpaySdk.ServiceType.INAPP_PAYMENT.toString()
                 )
+                putString(
+                    SpaySdk.PARTNER_SDK_API_LEVEL,
+                    SpaySdk.SdkApiLevel.LEVEL_2_22.getLevel()
+                )
             }
             return PartnerInfo(config.productId, bundle)
         }
