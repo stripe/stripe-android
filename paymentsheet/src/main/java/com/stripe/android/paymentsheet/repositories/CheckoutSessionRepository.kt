@@ -1,18 +1,15 @@
 package com.stripe.android.paymentsheet.repositories
 
-import android.content.Context
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
@@ -20,11 +17,12 @@ import javax.inject.Named
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
-    private val context: Context,
+    private val clientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) {
+
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
         apiVersion = Stripe.API_VERSION,
@@ -58,18 +56,14 @@ internal class CheckoutSessionRepository @Inject constructor(
         sessionId: String,
         adaptivePricingAllowed: Boolean,
     ): Result<CheckoutSessionResponse> {
-        val locale = Locale.getDefault().toLanguageTag()
         return executePost(
             url = initUrl(sessionId),
             params = mapOf(
-                "browser_locale" to locale,
+                "browser_locale" to clientParams.locale,
                 "browser_timezone" to TimeZone.getDefault().id,
                 "eid" to UUID.randomUUID().toString(),
                 "redirect_type" to "embedded",
-                "elements_session_client[is_aggregation_expected]" to "true",
-                "elements_session_client[locale]" to locale,
-                "elements_session_client[mobile_session_id]" to AnalyticsRequestFactory.sessionId.toString(),
-                "elements_session_client[mobile_app_id]" to context.packageName,
+                "elements_session_client" to clientParams.toCheckoutSessionMap(),
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
             ),
         )

@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import android.app.Application
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
@@ -61,7 +62,7 @@ class Checkout private constructor(
             checkoutSessionClientSecret: String,
             configuration: Configuration = Configuration(),
         ): Result<Checkout> {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
+            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
             val configurationState = configuration.build()
             return component.checkoutSessionRepository.init(
                 sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
@@ -85,7 +86,7 @@ class Checkout private constructor(
             context: Context,
             state: State,
         ): Checkout {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
+            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
             return Checkout(
                 internalState = state.internalState,
                 component = component,
