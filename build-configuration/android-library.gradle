@@ -5,6 +5,8 @@
  */
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "org.gradle.test-retry"
+
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     apply plugin: "org.jetbrains.dokka"
 }
@@ -90,6 +92,39 @@ android {
 
         compilerOptions {
             jvmTarget.set("JVM_11")
+        }
+    }
+}
+
+tasks.withType(Test).configureEach { test ->
+    retry {
+        if (gradle.ext.isCi) {
+            maxRetries = 2
+        }
+
+        failOnPassedAfterRetry = false
+        failOnSkippedAfterRetry = true
+    }
+
+    if (!project.plugins.hasPlugin("app.cash.paparazzi")) {
+        return
+    }
+
+    def includeMode = project.property("stripe.android.unit.tests.include")
+
+    if (includeMode != "onlyScreenshots" && includeMode != "onlyUnitTests") {
+        return
+    }
+
+    def category = "com.stripe.android.screenshottesting.PaparazziTest"
+
+    if (includeMode == "onlyScreenshots") {
+        test.useJUnit {
+            includeCategories category
+        }
+    } else if (includeMode == "onlyUnitTests") {
+        test.useJUnit {
+            excludeCategories category
         }
     }
 }

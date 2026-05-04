@@ -19,12 +19,15 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.flow.MutableSharedFlow
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
+@Category(PaparazziTest::class)
 internal class LinkContentScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(

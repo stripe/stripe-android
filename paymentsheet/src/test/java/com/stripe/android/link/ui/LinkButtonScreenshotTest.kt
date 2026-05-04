@@ -14,10 +14,12 @@ import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.Locale
 import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.PaparazziTest
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
 import org.junit.Rule
 import org.junit.Test
+import org.junit.experimental.categories.Category
 
 private enum class LinkButtonAppearance(private val appearance: PaymentSheet.Appearance) : PaparazziConfigOption {
 
@@ -64,6 +66,7 @@ private enum class LinkButtonThemes(val buttonThemes: PaymentSheet.ButtonThemes)
     }
 }
 
+@Category(PaparazziTest::class)
 internal class LinkButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
