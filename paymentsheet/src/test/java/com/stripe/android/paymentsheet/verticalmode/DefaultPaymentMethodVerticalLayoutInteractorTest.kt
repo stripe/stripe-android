@@ -1702,6 +1702,48 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
+    @Test
+    fun `shouldExpandOnClick is false when form type is UserInteractionRequired`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired }
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val pm = paymentMethods.first { it.code == "klarna" }
+                assertThat(pm.shouldExpandOnClick).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun `shouldExpandOnClick is true when form type is not UserInteractionRequired`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata,
+            formTypeForCode = { FormHelper.FormType.Empty }
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val pm = paymentMethods.first { it.code == "affirm" }
+                assertThat(pm.shouldExpandOnClick).isTrue()
+            }
+        }
+    }
+
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
 
     private val linkAndGooglePayWalletState = WalletsState(
