@@ -297,6 +297,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
                 elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+                checkoutSessionId = null,
             )
         )
         val REQUEST_OPTIONS = ApiRequest.Options(

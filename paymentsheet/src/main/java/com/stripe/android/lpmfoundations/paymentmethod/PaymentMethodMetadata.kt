@@ -435,7 +435,6 @@ internal data class PaymentMethodMetadata(
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
-            val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
@@ -476,11 +475,9 @@ internal data class PaymentMethodMetadata(
                 openCardScanAutomatically = configuration.opensCardScannerAutomatically,
                 clientAttributionMetadata = ClientAttributionMetadata(
                     elementsSessionConfigId = elementsSession.elementsSessionConfigId,
-                    // We omit paymentIntentCreationFlow and paymentMethodSelectionFlow in CustomerSheet, because these
-                    // fields are not meaningful for CustomerSheet (since intent creation is functionally always
-                    // deferred and only a few PMs are supported).
                     paymentMethodSelectionFlow = null,
                     paymentIntentCreationFlow = null,
+                    checkoutSessionId = null,
                 ),
                 attestOnIntentConfirmation = elementsSession.enableAttestationOnIntentConfirmation,
                 appearance = configuration.appearance,
@@ -493,7 +490,7 @@ internal data class PaymentMethodMetadata(
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
-                cardArts = cardArts,
+                cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }
