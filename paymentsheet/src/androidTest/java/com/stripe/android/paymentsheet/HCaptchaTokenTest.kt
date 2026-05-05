@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.espresso.intent.rule.IntentsRule
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -264,7 +263,7 @@ internal class HCaptchaTokenTest {
         networkRule.enqueue(
             method("POST"),
             path(PAYMENT_INTENT_CONFIRM_PATH),
-            bodyPart(urlEncode(tokenPath), HCAPTCHA_TOKEN)
+            bodyPart(tokenPath, HCAPTCHA_TOKEN)
         ) { response ->
             response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
         }
@@ -274,7 +273,7 @@ internal class HCaptchaTokenTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
-            bodyPart(urlEncode(SAVED_PM_HCAPTCHA_TOKEN_PATH), HCAPTCHA_TOKEN),
+            bodyPart(SAVED_PM_HCAPTCHA_TOKEN_PATH, HCAPTCHA_TOKEN),
         ) { response ->
             response.testBodyFromFile(PAYMENT_METHOD_CREATE_FILE)
         }

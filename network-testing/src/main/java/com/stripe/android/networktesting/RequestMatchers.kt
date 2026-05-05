@@ -13,6 +13,31 @@ private class ToStringRequestMatcher(
     }
 }
 
+internal class CompositeRequestMatcher(
+    private val matchers: List<RequestMatcher>,
+) : RequestMatcher {
+    override fun matches(request: TestRecordedRequest): Boolean {
+        return matchers.all { it.matches(request) }
+    }
+
+    fun passCount(request: TestRecordedRequest): Int {
+        return matchers.count { it.matches(request) }
+    }
+
+    fun diagnose(request: TestRecordedRequest): String {
+        val results = matchers.map { matcher ->
+            val matched = matcher.matches(request)
+            val prefix = if (matched) "  + PASS" else "  - FAIL"
+            "$prefix: $matcher"
+        }
+        return results.joinToString("\n")
+    }
+
+    override fun toString(): String {
+        return "composite(${matchers.joinToString { it.toString() }})"
+    }
+}
+
 object RequestMatchers {
     fun host(host: String): RequestMatcher {
         return header("original-host", host)
@@ -75,9 +100,7 @@ object RequestMatchers {
 
     fun query(name: String, value: String?): RequestMatcher {
         return ToStringRequestMatcher("query($name, $value)") { request ->
-            request.path.substringAfter("?")
-                .split("&")
-                .associate { Pair(it.substringBefore("="), it.substringAfter("=")) }[name] == value
+            request.queryParams[name] == value || request.queryParams[urlDecode(name)] == urlDecode(value ?: "")
         }
     }
 
@@ -96,32 +119,22 @@ object RequestMatchers {
 
     fun hasBodyPart(name: String): RequestMatcher {
         return ToStringRequestMatcher("hasBodyPart($name)") { request ->
-            request.bodyText.substringAfter("?")
-                .split("&")
-                .map { it.substringBefore("=") }
-                .contains(name)
+            request.bodyParams.containsKey(name) || request.bodyParams.containsKey(urlDecode(name))
         }
     }
 
     fun bodyPart(name: String, value: String): RequestMatcher {
         return ToStringRequestMatcher("bodyPart($name, $value)") { request ->
-            request.bodyText.substringAfter("?")
-                .split("&")
-                .associate { Pair(it.substringBefore("="), it.substringAfter("=")) }[name] == value
+            request.bodyParams[name] == value ||
+                request.bodyParams[urlDecode(name)] == urlDecode(value)
         }
     }
 
     fun bodyPart(name: String, regex: Regex): RequestMatcher {
         return ToStringRequestMatcher("bodyPart($name, $regex)") { request ->
-            request.bodyText.substringAfter("?")
-                .split("&")
-                .associate {
-                    Pair(
-                        it.substringBefore("="),
-                        it.substringAfter("=")
-                    )
-                }.getOrElse(name) { "" }
-                .matches(regex)
+            request.bodyParams.getOrElse(name) {
+                request.bodyParams.getOrElse(urlDecode(name)) { "" }
+            }.matches(regex)
         }
     }
 
@@ -132,9 +145,6 @@ object RequestMatchers {
     }
 
     fun composite(vararg matchers: RequestMatcher): RequestMatcher {
-        val friendlyName = "composite(${matchers.joinToString { it.toString() }})"
-        return ToStringRequestMatcher(friendlyName) { request ->
-            matchers.all { it.matches(request) }
-        }
+        return CompositeRequestMatcher(matchers.toList())
     }
 }
