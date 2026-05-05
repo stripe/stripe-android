@@ -710,6 +710,30 @@ internal class DefaultCustomerSheetLoaderTest {
             .inOrder()
     }
 
+    @Test
+    fun `supportedPaymentMethods filters out unsupported types`() = runTest {
+        val loader = createCustomerSheetLoader(
+            isFinancialConnectionsAvailable = { true },
+            intent = STRIPE_INTENT.copy(
+                clientSecret = null,
+                paymentMethodTypes = listOf("card", "us_bank_account", "sepa_debit", "klarna"),
+                paymentMethodOptionsJsonString = """
+                        {
+                            "us_bank_account": {
+                                "verification_method": "automatic"
+                            }
+                        }
+                """.trimIndent(),
+            ),
+        )
+
+        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
+
+        val supportedPaymentMethods = loader.load(config).getOrThrow().supportedPaymentMethods
+        assertThat(supportedPaymentMethods.map { it.code })
+            .containsExactly("card", "us_bank_account")
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isCbcEligible: Boolean? = null,

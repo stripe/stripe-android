@@ -53,6 +53,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertEquals
 import com.stripe.android.R as StripeR
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Suppress("LargeClass")
@@ -133,6 +134,10 @@ internal class CardNumberControllerTest {
                             TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
                             TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
                             TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        ),
+                        contentDescription = resolvableString(
+                            PaymentsUiCoreR.string.stripe_card_brand_icons_content_description,
+                            "Visa, Mastercard, American Express, Discover, JCB, Diners Club, UnionPay"
                         )
                     )
                 )
@@ -164,6 +169,10 @@ internal class CardNumberControllerTest {
                             TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
                             TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
                             TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        ),
+                        contentDescription = resolvableString(
+                            PaymentsUiCoreR.string.stripe_card_brand_icons_content_description,
+                            "Visa, Mastercard, American Express, Discover, JCB, Diners Club, UnionPay, Cartes Bancaires"
                         )
                     )
                 )
@@ -195,6 +204,10 @@ internal class CardNumberControllerTest {
                             TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
                             TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
                             TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        ),
+                        contentDescription = resolvableString(
+                            PaymentsUiCoreR.string.stripe_card_brand_icons_content_description,
+                            "Visa, Mastercard, American Express, Discover, JCB, Diners Club, UnionPay"
                         )
                     )
                 )
@@ -217,6 +230,10 @@ internal class CardNumberControllerTest {
                 TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
                 TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false),
             ),
+            contentDescription = resolvableString(
+                PaymentsUiCoreR.string.stripe_card_brand_icons_content_description,
+                "Visa, Mastercard, American Express, Discover, JCB, Diners Club, UnionPay"
+            ),
         )
 
         val visaIcon = TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false)
@@ -224,6 +241,10 @@ internal class CardNumberControllerTest {
         val multiTrailingIconWithJustVisa = TextFieldIcon.MultiTrailing(
             staticIcons = listOf(visaIcon),
             animatedIcons = emptyList(),
+            contentDescription = resolvableString(
+                PaymentsUiCoreR.string.stripe_card_brand_icons_content_description,
+                "Visa"
+            ),
         )
 
         cardNumberController.trailingIcon.test {
@@ -300,6 +321,10 @@ internal class CardNumberControllerTest {
                         animatedIcons = listOf(
                             TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
                             TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false)
+                        ),
+                        contentDescription = resolvableString(
+                            PaymentsUiCoreR.string.stripe_card_brand_icons_content_description,
+                            "Visa, Discover, JCB, Diners Club, UnionPay"
                         )
                     )
                 )

@@ -558,9 +558,20 @@ internal class DefaultCardNumberController(
             addAll(cardBrands.drop(STATIC_ICON_COUNT).map { TextFieldIcon.Trailing(it.icon, isTintable = false) })
         }
 
+        val allBrands = cardBrands.toMutableList()
+        if (isEligibleForCardBrandChoice && cardBrandFilter.isAccepted(CardBrand.CartesBancaires)) {
+            if (CardBrand.CartesBancaires !in allBrands) {
+                allBrands.add(CardBrand.CartesBancaires)
+            }
+        }
+
         return TextFieldIcon.MultiTrailing(
             staticIcons = staticIcons,
-            animatedIcons = animatedIcons
+            animatedIcons = animatedIcons,
+            contentDescription = resolvableString(
+                R.string.stripe_card_brand_icons_content_description,
+                allBrands.joinToString(", ") { it.displayName }
+            )
         )
     }
 

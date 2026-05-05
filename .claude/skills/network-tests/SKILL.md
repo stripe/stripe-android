@@ -126,3 +126,23 @@ networkRule.checkoutConfirm(
     response.testBodyFromFile("checkout-session-confirm.json")
 }
 ```
+
+### bodyPart Encoding
+
+`bodyPart()` matches against the raw URL-encoded form body. Use `urlEncode()` for keys with brackets and values with special characters:
+
+```kotlin
+import com.stripe.android.core.utils.urlEncode
+
+// Encode keys with brackets and special-char values
+bodyPart(urlEncode("billing_details[email]"), urlEncode("user@example.com"))
+bodyPart(urlEncode("billing_details[address][line1]"), urlEncode("123 Main St"))
+
+// Simple alphanumeric keys/values don't need encoding
+bodyPart("allow_redisplay", "unspecified")
+
+// Without encoding, bracket keys won't match
+bodyPart("billing_details[email]", "user@example.com") // WRONG
+```
+
+See `PaymentSheetBillingConfigurationTest.kt` for more examples.

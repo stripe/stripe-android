@@ -139,8 +139,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
@@ -175,8 +174,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -252,8 +250,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         ).get(
             initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                 intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -287,8 +284,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         )
 
         repository.get(
@@ -323,8 +319,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         )
 
         repository.get(
@@ -359,8 +354,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         )
 
         repository.get(
@@ -392,8 +386,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         )
 
         repository.get(
@@ -442,8 +435,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         )
 
         repository.get(
@@ -486,8 +478,7 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository,
             { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
             testDispatcher,
-            { MOBILE_SESSION_ID },
-            appId = APP_ID
+            clientParams = TEST_CLIENT_PARAMS
         )
 
         repository.get(
@@ -1022,8 +1013,7 @@ internal class ElementsSessionRepositoryTest {
         stripeRepository,
         { PaymentConfiguration(publishableKey) },
         testDispatcher,
-        { MOBILE_SESSION_ID },
-        appId = APP_ID
+        clientParams = TEST_CLIENT_PARAMS,
     )
 
     private inline fun <T> withLocale(locale: Locale, block: () -> T): T {
@@ -1037,5 +1027,9 @@ internal class ElementsSessionRepositoryTest {
     companion object {
         private const val APP_ID = "com.app.id"
         private const val MOBILE_SESSION_ID = "session_123"
+        private val TEST_CLIENT_PARAMS = ElementsSessionClientParams(
+            mobileAppId = APP_ID,
+            mobileSessionIdProvider = { MOBILE_SESSION_ID },
+        )
     }
 }
