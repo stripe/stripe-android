@@ -364,7 +364,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 customerSavedPaymentMethods = paymentMethods,
                 incentive = paymentMethodIncentive,
                 promotionProvider = getPromotionProvider(supportedPaymentMethod.code),
-                shouldExpandOnClick = shouldTransitionToFormScreen(supportedPaymentMethod.code)
+                shouldExpandOnClick = !shouldTransitionToFormScreen(supportedPaymentMethod.code)
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
