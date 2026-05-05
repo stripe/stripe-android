@@ -2,6 +2,7 @@ package com.stripe.android.payments.samsungpay
 
 import android.app.Application
 import android.os.Bundle
+import android.util.Log
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -50,23 +51,31 @@ internal class SamsungPayLauncherViewModel(
         set(value) { savedStateHandle[HAS_LAUNCHED_KEY] = value }
 
     fun startPayment(args: SamsungPayLauncherContract.Args) {
+        Log.d(TAG, "startPayment called, hasLaunched=$hasLaunched")
         if (hasLaunched) return
         hasLaunched = true
 
         viewModelScope.launch(workContext) {
             try {
+                Log.d(TAG, "Fetching intent details for clientSecret=${args.clientSecret.take(20)}...")
                 val (amount, currency) = fetchIntentDetails(args)
+                Log.d(TAG, "Intent details: amount=$amount, currency=$currency")
+
                 val paymentInfo = buildPaymentInfo(args, amount, currency)
                 val partnerInfo = buildPartnerInfo(config)
+                Log.d(TAG, "PartnerInfo: serviceId=${config.productId}")
 
                 val manager = PaymentManager(context, partnerInfo)
                 paymentManager = manager
 
+                Log.d(TAG, "Calling startInAppPayWithCustomSheet...")
                 manager.startInAppPayWithCustomSheet(
                     paymentInfo,
                     createTransactionListener(args)
                 )
+                Log.d(TAG, "startInAppPayWithCustomSheet returned")
             } catch (e: Exception) {
+                Log.e(TAG, "startPayment failed", e)
                 _result.value = SamsungPayLauncher.Result.Failed(
                     SamsungPayException(errorCode = -1, message = e.message)
                 )
@@ -133,6 +142,7 @@ internal class SamsungPayLauncherViewModel(
             selectedCardInfo: CardInfo,
             sheet: CustomSheet
         ) {
+            Log.d(TAG, "onCardInfoUpdated: cardInfo=$selectedCardInfo")
             paymentManager?.updateSheet(sheet)
         }
 
@@ -141,12 +151,14 @@ internal class SamsungPayLauncherViewModel(
             paymentCredential: String,
             extraPaymentData: Bundle
         ) {
+            Log.d(TAG, "onSuccess: credential length=${paymentCredential.length}")
             viewModelScope.launch(workContext) {
                 handlePaymentCredential(args, paymentCredential)
             }
         }
 
         override fun onFailure(errorCode: Int, errorData: Bundle?) {
+            Log.e(TAG, "onFailure: errorCode=$errorCode, errorData=$errorData")
             val reason = errorData?.getInt(SpaySdk.EXTRA_ERROR_REASON)
             val message = errorData?.getString(SpaySdk.EXTRA_ERROR_REASON_MESSAGE)
             _result.value = SamsungPayLauncher.Result.Failed(
@@ -235,6 +247,8 @@ internal class SamsungPayLauncherViewModel(
     }
 
     companion object {
+        private const val TAG = "SamsungPayVM"
+
         @VisibleForTesting
         const val HAS_LAUNCHED_KEY = "has_launched"
     }
