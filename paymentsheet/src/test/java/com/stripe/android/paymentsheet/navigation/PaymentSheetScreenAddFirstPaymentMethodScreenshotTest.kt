@@ -10,6 +10,7 @@ import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -114,7 +115,8 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
 
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
-                state = LinkButtonState.Email("email@email.com"),
+                state = LinkButtonState.Email(email = "test@example.com"),
+                linkBrand = LinkBrand.Link
             ),
             googlePay = null,
             shopPay = null,

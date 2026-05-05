@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -148,6 +149,7 @@ class WalletsStateTest {
             walletsAllowedInHeader = emptyList(),
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+            linkBrand = LinkBrand.Link,
         )
     }
 
@@ -346,7 +348,7 @@ class WalletsStateTest {
         walletsAllowedInHeader: List<WalletType>,
     ): WalletsState {
         return WalletsState(
-            link = if (hasLink) WalletsState.Link(state = LinkButtonState.Default) else null,
+            link = if (hasLink) WalletsState.Link(state = LinkButtonState.Default, linkBrand = LinkBrand.Link) else null,
             googlePay = if (hasGooglePay) {
                 WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,

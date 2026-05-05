@@ -493,7 +493,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -529,7 +532,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -568,7 +574,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
         ) {
             walletsState.value = WalletsState(
-                link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+                link = WalletsState.Link(
+                    state = LinkButtonState.Email("email@email.com"),
+                    linkBrand = LinkBrand.Link
+                ),
                 googlePay = WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
@@ -683,7 +692,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = null,
             shopPay = null,
             buttonsEnabled = true,
@@ -753,7 +765,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         )
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = null,
             shopPay = null,
             buttonsEnabled = true,
@@ -1505,6 +1520,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+            linkBrand = LinkBrand.Link,
         )
         runScenario(
             initialWalletsState = walletsState,
@@ -1534,6 +1550,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+            linkBrand = LinkBrand.Link,
         )
         runScenario(
             initialWalletsState = walletsState,
@@ -1746,7 +1763,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     private val linkAndGooglePayWalletState = WalletsState(
-        link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+        link = WalletsState.Link(
+            state = LinkButtonState.Email("email@email.com"),
+            linkBrand = LinkBrand.Link,
+        ),
         googlePay = WalletsState.GooglePay(
             buttonType = GooglePayButtonType.Pay,
             allowCreditCards = true,
