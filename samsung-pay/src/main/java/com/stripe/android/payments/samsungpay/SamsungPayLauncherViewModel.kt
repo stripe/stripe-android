@@ -233,7 +233,7 @@ internal class SamsungPayLauncherViewModel(
 //                SpaySdk.SdkApiLevel.LEVEL_2_22.getLevel()
 //            )
         }
-        return PartnerInfo(serviceId, bundle)
+        return PartnerInfo("716e0e5ea6c64b47b467fe", bundle)
     }
 
     class Factory(
