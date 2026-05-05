@@ -97,11 +97,11 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
     }
 }
 
-internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
+internal fun PaymentOptionsItem.toPaymentSelection(linkBrand: LinkBrand?): PaymentSelection? {
     return when (this) {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
-        is PaymentOptionsItem.Link -> error("Link requires LinkBrand")
+        is PaymentOptionsItem.Link -> linkBrand?.let { PaymentSelection.Link(it) }
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
     }
 }

@@ -123,7 +123,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 internal fun SavedPaymentMethodTabLayoutUI(
     paymentOptionsItems: List<PaymentOptionsItem>,
     selectedPaymentOptionsItem: PaymentOptionsItem?,
-    linkBrand: LinkBrand? = null,
+    linkBrand: LinkBrand?,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -318,6 +318,7 @@ private fun SavedPaymentMethodTab(
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethodTab(
                 paymentMethod = item,
+                linkBrand = linkBrand,
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
@@ -409,6 +410,7 @@ private fun LinkTab(
 @Composable
 private fun SavedPaymentMethodTab(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
+    linkBrand: LinkBrand?,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -457,7 +459,7 @@ private fun SavedPaymentMethodTab(
                 .resolve()
                 .readNumbersAsIndividualDigits(),
             onItemSelectedListener = {
-                onItemSelected(paymentMethod.toPaymentSelection())
+                onItemSelected(paymentMethod.toPaymentSelection(linkBrand))
             },
             modifier = modifier,
         )
