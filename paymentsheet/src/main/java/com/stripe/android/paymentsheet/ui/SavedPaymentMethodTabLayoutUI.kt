@@ -459,7 +459,7 @@ private fun SavedPaymentMethodTab(
                 .resolve()
                 .readNumbersAsIndividualDigits(),
             onItemSelectedListener = {
-                onItemSelected(paymentMethod.toPaymentSelection(linkBrand))
+                onItemSelected(paymentMethod.toPaymentSelection())
             },
             modifier = modifier,
         )

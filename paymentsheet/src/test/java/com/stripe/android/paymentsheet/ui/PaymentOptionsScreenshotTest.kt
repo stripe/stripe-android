@@ -22,9 +22,9 @@ class PaymentOptionsScreenshotTest {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,
-                PaymentOptionsItem.Link,
+                PaymentOptionsItem.Link(LinkBrand.Link),
             ),
-            selectedPaymentOptionsItem = PaymentOptionsItem.Link,
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link(LinkBrand.Link),
             isEditing = false,
         )
     }
