@@ -132,6 +132,14 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
         assertThat(experiment.layout).isEqualTo("horizontal")
     }
 
+    @Test
+    fun `does not log repeat exposure`() = runScenario {
+        logExposure()
+        eventReporter.experimentExposureCalls.awaitItem()
+        logExposure()
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
     private fun runScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
