@@ -58,6 +58,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRec
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
@@ -426,6 +427,26 @@ internal class PlaygroundTestDriver(
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+    }
+
+    fun loadComplete(
+        testParameters: TestParameters,
+        isReturningCustomer: Boolean,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        if (isReturningCustomer) {
+            selectors.composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+                selectors.composeTestRule.onAllNodes(
+                    hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)
+                ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+            }
+        } else {
+            selectors.formElement.waitFor()
+        }
+
+        teardown()
     }
 
     /**

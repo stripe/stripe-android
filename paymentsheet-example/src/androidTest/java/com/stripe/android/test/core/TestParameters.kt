@@ -41,7 +41,7 @@ internal data class TestParameters(
 
     companion object {
         fun create(
-            paymentMethodCode: String,
+            paymentMethodCode: String = "card",
             requiresBrowser: Boolean = true,
             authorizationAction: AuthorizeAction? = AuthorizeAction.AuthorizePayment(requiresBrowser),
             saveForFutureUseCheckboxVisible: Boolean = false,
