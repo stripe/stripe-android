@@ -63,3 +63,4 @@ example/gen
 
 # Git worktrees
 .worktrees/
+latency_benchmark_sensitivity_logs/
