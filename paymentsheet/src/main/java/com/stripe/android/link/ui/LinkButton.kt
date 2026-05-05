@@ -159,6 +159,7 @@ private fun LinkButtonPreview(
             state = previewData.state,
             enabled = previewData.enabled,
             theme = previewData.theme,
+            linkBrand = LinkBrand.Link,
             onClick = {}
         )
     }
@@ -175,6 +176,7 @@ private fun LinkButtonLocalizedPreview(
             state = previewData.state,
             enabled = previewData.enabled,
             theme = previewData.theme,
+            linkBrand = LinkBrand.Link,
             onClick = {}
         )
     }
@@ -186,8 +188,8 @@ internal fun LinkButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    linkBrand: LinkBrand,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-    linkBrand: LinkBrand = LinkBrand.Link,
 ) {
     val alpha = if (enabled) {
         1f
