@@ -28,7 +28,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.model.validate
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject

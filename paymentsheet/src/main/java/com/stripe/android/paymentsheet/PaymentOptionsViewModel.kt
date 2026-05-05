@@ -176,12 +176,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(
-                    Link(
-                        brand = requireNotNull(linkConfiguration?.linkBrand),
-                    )
-                )
-                onUserSelection()
+                if (linkConfiguration?.linkBrand != null) {
+                    updateSelection(Link(linkConfiguration.linkBrand))
+                    onUserSelection()
+                }
             },
             onShopPayPressed = {
                 updateSelection(PaymentSelection.ShopPay)
