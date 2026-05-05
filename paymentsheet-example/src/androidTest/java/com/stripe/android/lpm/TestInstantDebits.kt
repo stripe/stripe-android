@@ -26,23 +26,10 @@ import com.stripe.android.utils.ForceNativeBankFlowTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
 internal class TestInstantDebits : BasePlaygroundTest() {
-
-    private val testParameters = TestParameters.create(
-        paymentMethodCode = "link",
-    ) { settings ->
-        settings[MerchantSettingsDefinition] = Merchant.US
-        settings[CurrencySettingsDefinition] = Currency.USD
-        settings[AutomaticPaymentMethodsSettingsDefinition] = false
-        settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
-        settings[LinkSettingsDefinition] = true
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
-            PaymentMethod.Type.Card,
-            PaymentMethod.Type.Link
-        ).joinToString(",")
-    }
 
     @get:Rule
     val forceNativeBankFlowTestRule = ForceNativeBankFlowTestRule(
@@ -51,12 +38,12 @@ internal class TestInstantDebits : BasePlaygroundTest() {
 
     @Test
     fun testInstantDebitsSuccess() {
-        val params = testParameters.copyPlaygroundSettings {
-            it[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
-        }
+        val email = "email_${UUID.randomUUID()}@email.com"
+
+        testDriver.signUpForLink(makeSignUpTestParameters(email))
 
         testDriver.confirmLinkBankPayment(
-            testParameters = params,
+            testParameters = makeLinkTestParameters(email),
             afterAuthorization = { _, _ ->
                 rules.compose.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                     rules.compose
@@ -70,8 +57,12 @@ internal class TestInstantDebits : BasePlaygroundTest() {
 
     @Test
     fun testInstantDebitsCancelAllowsUserToContinue() {
+        val email = "email_${UUID.randomUUID()}@email.com"
+
+        testDriver.signUpForLink(makeSignUpTestParameters(email))
+
         testDriver.confirmLinkBankPayment(
-            testParameters = testParameters.copy(
+            testParameters = makeLinkTestParameters(email).copy(
                 authorizationAction = AuthorizeAction.Cancel,
             ),
             afterAuthorization = { _, _ ->
@@ -79,5 +70,39 @@ internal class TestInstantDebits : BasePlaygroundTest() {
                     .waitFor(isEnabled())
             }
         )
+    }
+
+    private fun makeSignUpTestParameters(email: String): TestParameters {
+        return TestParameters.create(
+            paymentMethodCode = "card",
+            authorizationAction = null,
+            saveForFutureUseCheckboxVisible = true,
+        ) { settings ->
+            settings[MerchantSettingsDefinition] = Merchant.US
+            settings[CurrencySettingsDefinition] = Currency.USD
+            settings[AutomaticPaymentMethodsSettingsDefinition] = false
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
+            settings[LinkSettingsDefinition] = true
+            settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.Link
+            ).joinToString(",")
+        }
+    }
+
+    private fun makeLinkTestParameters(email: String): TestParameters {
+        return TestParameters.create(
+            paymentMethodCode = "link",
+        ) { settings ->
+            settings[MerchantSettingsDefinition] = Merchant.US
+            settings[CurrencySettingsDefinition] = Currency.USD
+            settings[AutomaticPaymentMethodsSettingsDefinition] = false
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
+            settings[LinkSettingsDefinition] = true
+            settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.Link
+            ).joinToString(",")
+        }
     }
 }

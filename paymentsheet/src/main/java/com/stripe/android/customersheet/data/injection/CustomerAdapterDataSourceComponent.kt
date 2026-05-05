@@ -1,8 +1,7 @@
 package com.stripe.android.customersheet.data.injection
 
 import android.app.Application
-import com.stripe.android.common.di.ApplicationIdModule
-import com.stripe.android.common.di.MobileSessionIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.customersheet.CustomerAdapter
@@ -27,8 +26,7 @@ import javax.inject.Singleton
         PaymentElementRequestSurfaceModule::class,
         CoroutineContextModule::class,
         CoreCommonModule::class,
-        ApplicationIdModule::class,
-        MobileSessionIdModule::class,
+        ElementsSessionClientParamsModule::class,
     ]
 )
 internal interface CustomerAdapterDataSourceComponent {
