@@ -364,7 +364,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 customerSavedPaymentMethods = paymentMethods,
                 incentive = paymentMethodIncentive,
                 promotionProvider = getPromotionProvider(supportedPaymentMethod.code),
-                shouldExpandOnClick = formTypeForCode(supportedPaymentMethod.code) !is FormType.UserInteractionRequired
+                shouldExpandOnClick = shouldTransitionToFormScreen(supportedPaymentMethod.code)
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
@@ -546,9 +546,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             is ViewAction.PaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
 
-                val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
-                val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
-                if (formType == FormType.UserInteractionRequired || displayFormForMandate) {
+                if (shouldTransitionToFormScreen(viewAction.selectedPaymentMethodCode)) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionToFormScreen(viewAction.selectedPaymentMethodCode)
                 } else {
@@ -654,5 +652,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         } else {
             null
         }
+    }
+
+    private fun shouldTransitionToFormScreen(paymentMethodCode: PaymentMethodCode): Boolean {
+        val formType = formTypeForCode(paymentMethodCode)
+        val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
+        return formType == FormType.UserInteractionRequired || displayFormForMandate
     }
 }
