@@ -51,6 +51,7 @@ import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -240,6 +241,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
 ) : PaymentElementLoader {
+    private companion object {
+        const val BENCHMARK_EXPERIMENT_SLEEP_MS = 300L
+    }
 
     fun interface AnalyticsMetadataFactory {
         fun create(
@@ -270,6 +274,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
+        delay(BENCHMARK_EXPERIMENT_SLEEP_MS)
         tapToAddConnectionStarter.start(configuration)
 
         val isGooglePaySupportedOnDevice = async {
