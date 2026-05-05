@@ -14,7 +14,7 @@ internal class FakeEmbeddedSheetLauncher : EmbeddedSheetLauncher {
         hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
         customerState: CustomerState?,
-        promotions: List<PaymentMethodMessagePromotion>?,
+        promotion: PaymentMethodMessagePromotion?,
     ) {
         error("Not expected.")
     }
