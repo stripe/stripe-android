@@ -14,15 +14,15 @@ class PaymentOptionsStateFactoryTest {
     fun `non-Link payment options convert without LinkBrand`() {
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        assertThat(PaymentOptionsItem.AddCard.toPaymentSelection()).isNull()
-        assertThat(PaymentOptionsItem.GooglePay.toPaymentSelection()).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(PaymentOptionsItem.AddCard.toPaymentSelection(linkBrand = null)).isNull()
+        assertThat(PaymentOptionsItem.GooglePay.toPaymentSelection(linkBrand = null)).isEqualTo(PaymentSelection.GooglePay)
         assertThat(
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = savedPaymentMethod,
                 )
-            ).toPaymentSelection()
+            ).toPaymentSelection(linkBrand = null)
         ).isEqualTo(PaymentSelection.Saved(savedPaymentMethod))
     }
 
