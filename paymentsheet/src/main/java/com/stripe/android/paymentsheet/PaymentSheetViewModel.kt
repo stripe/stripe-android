@@ -432,9 +432,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     fun checkoutWithLink() {
+        // Should always have Link configuration if we're checking out with Link.
+        val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
+            ?: return
         checkout(
             PaymentSelection.Link(
-                brand = requireNotNull(paymentMethodMetadata.value).requireLinkBrand(),
+                brand = linkConfiguration.linkBrand,
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
             CheckoutIdentifier.SheetTopWallet
@@ -444,11 +447,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private fun checkoutWithLinkExpress(
         paymentMethodMetadata: PaymentMethodMetadata = requireNotNull(this.paymentMethodMetadata.value),
     ) {
+        // Should always have Link configuration if we're checking out with Link.
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+            ?: return
         // We don't want to fall back to web on express mode if attestation
         // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
-                brand = paymentMethodMetadata.requireLinkBrand(),
+                brand = linkConfiguration.linkBrand,
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
             ),
             CheckoutIdentifier.SheetTopWallet

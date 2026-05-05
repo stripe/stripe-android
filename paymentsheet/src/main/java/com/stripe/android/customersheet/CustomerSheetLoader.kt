@@ -242,9 +242,7 @@ internal class DefaultCustomerSheetLoader(
         return customerSheetSession.savedSelection?.let { selection ->
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
-                is SavedSelection.Link -> PaymentSelection.Link(
-                    brand = metadata.requireLinkBrand(),
-                )
+                is SavedSelection.Link -> null
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->
                         paymentMethod.id == selection.id
