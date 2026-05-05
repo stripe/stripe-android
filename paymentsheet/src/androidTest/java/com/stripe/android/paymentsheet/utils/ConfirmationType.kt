@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.utils
 
 import com.google.testing.junit.testparameterinjector.TestParameterValuesProvider
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -54,8 +53,8 @@ internal sealed class ConfirmationType(
             return networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart(urlEncode("payment_method_data[allow_redisplay]"), "always"),
-                bodyPart(urlEncode("set_as_default_payment_method"), setAsDefault.toString())
+                bodyPart("payment_method_data[allow_redisplay]", "always"),
+                bodyPart("set_as_default_payment_method", setAsDefault.toString())
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -68,8 +67,8 @@ internal sealed class ConfirmationType(
             return networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart(urlEncode("payment_method_data[allow_redisplay]"), "always"),
-                bodyPart(urlEncode("set_as_default_payment_method"), setAsDefault.toString())
+                bodyPart("payment_method_data[allow_redisplay]", "always"),
+                bodyPart("set_as_default_payment_method", setAsDefault.toString())
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -79,8 +78,8 @@ internal sealed class ConfirmationType(
             return networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart(urlEncode("payment_method_data[allow_redisplay]"), "unspecified"),
-                not(bodyPart(urlEncode("set_as_default_payment_method"), "true")),
+                bodyPart("payment_method_data[allow_redisplay]", "unspecified"),
+                not(bodyPart("set_as_default_payment_method", "true")),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -132,7 +131,7 @@ internal sealed class ConfirmationType(
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart(urlEncode("set_as_default_payment_method"), setAsDefault.toString()),
+                bodyPart("set_as_default_payment_method", setAsDefault.toString()),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -159,7 +158,7 @@ internal sealed class ConfirmationType(
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart(urlEncode("set_as_default_payment_method"), setAsDefault.toString()),
+                bodyPart("set_as_default_payment_method", setAsDefault.toString()),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm-us_bank_account.json")
             }
@@ -183,7 +182,7 @@ internal sealed class ConfirmationType(
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                not(bodyPart(urlEncode("set_as_default_payment_method"), "true")),
+                not(bodyPart("set_as_default_payment_method", "true")),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }

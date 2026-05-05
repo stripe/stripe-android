@@ -9,7 +9,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -184,9 +183,9 @@ class CheckoutTest {
     @Test
     fun `updateLineItemQuantity updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("updated_line_item_quantity[line_item_id]"), "li_1"),
-            bodyPart(urlEncode("updated_line_item_quantity[quantity]"), "3"),
-            bodyPart(urlEncode("updated_line_item_quantity[fail_update_on_discount_error]"), "true"),
+            bodyPart("updated_line_item_quantity[line_item_id]", "li_1"),
+            bodyPart("updated_line_item_quantity[quantity]", "3"),
+            bodyPart("updated_line_item_quantity[fail_update_on_discount_error]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-update-quantity.json")
         }
@@ -221,7 +220,7 @@ class CheckoutTest {
     fun `selectShippingOption updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("shipping_rate", "shr_express"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-select-shipping-rate.json")
         }
@@ -248,11 +247,11 @@ class CheckoutTest {
     fun `updateShippingAddress sends address fields and updates checkoutSession on success`() =
         runCreateWithStateScenario {
             networkRule.checkoutUpdate(
-                bodyPart(urlEncode("tax_region[country]"), "US"),
-                bodyPart(urlEncode("tax_region[city]"), "Denver"),
-                bodyPart(urlEncode("tax_region[state]"), "CO"),
-                bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "Denver"),
+                bodyPart("tax_region[state]", "CO"),
+                bodyPart("tax_region[postal_code]", "80202"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -311,13 +310,13 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress omits empty fields from request`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_region[country]"), "US"),
-            bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-            not(hasBodyPart(urlEncode("tax_region[city]"))),
-            not(hasBodyPart(urlEncode("tax_region[state]"))),
-            not(hasBodyPart(urlEncode("tax_region[line1]"))),
-            not(hasBodyPart(urlEncode("tax_region[line2]"))),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            not(hasBodyPart("tax_region[city]")),
+            not(hasBodyPart("tax_region[state]")),
+            not(hasBodyPart("tax_region[line1]")),
+            not(hasBodyPart("tax_region[line2]")),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-update-shipping-address.json")
         }
@@ -337,11 +336,11 @@ class CheckoutTest {
     fun `updateBillingAddress sends address fields and updates checkoutSession on success`() =
         runCreateWithStateScenario {
             networkRule.checkoutUpdate(
-                bodyPart(urlEncode("tax_region[country]"), "US"),
-                bodyPart(urlEncode("tax_region[city]"), "Denver"),
-                bodyPart(urlEncode("tax_region[state]"), "CO"),
-                bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "Denver"),
+                bodyPart("tax_region[state]", "CO"),
+                bodyPart("tax_region[postal_code]", "80202"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -552,13 +551,13 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_region[country]"), "US"),
-            bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-            not(hasBodyPart(urlEncode("tax_region[city]"))),
-            not(hasBodyPart(urlEncode("tax_region[state]"))),
-            not(hasBodyPart(urlEncode("tax_region[line1]"))),
-            not(hasBodyPart(urlEncode("tax_region[line2]"))),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            not(hasBodyPart("tax_region[city]")),
+            not(hasBodyPart("tax_region[state]")),
+            not(hasBodyPart("tax_region[line1]")),
+            not(hasBodyPart("tax_region[line2]")),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-update-shipping-address.json")
         }
@@ -577,9 +576,9 @@ class CheckoutTest {
     @Test
     fun `updateTaxId sends type and value and updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
-            bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
+            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -611,9 +610,9 @@ class CheckoutTest {
     @Test
     fun `updateTaxId trims whitespace from type and value`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
-            bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
+            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -655,9 +654,9 @@ class CheckoutTest {
         // Second call: updateShippingAddress must use the session ID from the first response,
         // proving the mutex serialized the calls.
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_region[country]"), "US"),
-            bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             sessionId = "cs_test_after_promo",
         ) { response ->
             response.testBodyFromFile("checkout-session-concurrent-update-address.json")
@@ -854,7 +853,7 @@ class CheckoutTest {
     fun `updateCurrency updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "eur"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -888,7 +887,7 @@ class CheckoutTest {
         clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         networkSetup = {
             networkRule.checkoutInit(
-                bodyPart(urlEncode("adaptive_pricing[allowed]"), "false"),
+                bodyPart("adaptive_pricing[allowed]", "false"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-init.json")
             }
@@ -903,7 +902,7 @@ class CheckoutTest {
         configuration = Checkout.Configuration().adaptivePricingAllowed(true),
         networkSetup = {
             networkRule.checkoutInit(
-                bodyPart(urlEncode("adaptive_pricing[allowed]"), "true"),
+                bodyPart("adaptive_pricing[allowed]", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-init.json")
             }
