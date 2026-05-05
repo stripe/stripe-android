@@ -218,7 +218,7 @@ internal class DefaultCustomerSheetLoader(
                 "Ensure your integration is configured to accept card or US bank account payments."
         }
 
-        return supportedPaymentMethods
+        return validSupportedPaymentMethods
     }
 
     private fun getPaymentSelection(
