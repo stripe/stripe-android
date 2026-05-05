@@ -1,6 +1,8 @@
 package com.stripe.android.latency
 
+import android.util.Log
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -17,23 +19,52 @@ import org.junit.runners.Parameterized
 internal class TestLatency(
     val testConfig: TestConfig,
 ) : BasePlaygroundTest() {
-
     @Test
     fun testLatency() {
-        testDriver.loadComplete(
-            testParameters = TestParameters.create(
-                playgroundSettingsBlock = testConfig.playgroundSettingsBlock,
-            ),
-            isReturningCustomer = testConfig.isReturningCustomer,
-        )
+        Log.d(LOG_TAG, "LATENCY_TEST_CASE_STARTED: ${testConfig.name}")
+        var successfulSamples = 0
+        var failedAttempts = 0
+        var lastFailure: Throwable? = null
+
+        while (successfulSamples < BuildConfig.LATENCY_EXPERIMENT_ITERATIONS && failedAttempts < MAX_FAILED_ATTEMPTS) {
+            runCatching {
+                testDriver.loadComplete(
+                    testParameters = TestParameters.create(
+                        playgroundSettingsBlock = testConfig.playgroundSettingsBlock,
+                    ),
+                    isReturningCustomer = testConfig.isReturningCustomer,
+                )
+            }.onSuccess {
+                successfulSamples += 1
+            }.onFailure { error ->
+                failedAttempts += 1
+                lastFailure = error
+            }
+        }
+
+        if (successfulSamples < BuildConfig.LATENCY_EXPERIMENT_ITERATIONS) {
+            throw AssertionError(
+                "Collected $successfulSamples/${BuildConfig.LATENCY_EXPERIMENT_ITERATIONS} samples " +
+                    "for ${testConfig.name} after $failedAttempts failed attempts",
+                lastFailure,
+            )
+        }
+
+        Log.d(LOG_TAG, "LATENCY_TEST_CASE_FINISHED: ${testConfig.name}")
     }
 
     class TestConfig(
+        val name: String,
         val isReturningCustomer: Boolean,
         val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
-    )
+    ) {
+        override fun toString() = name
+    }
 
     companion object {
+        private const val LOG_TAG = "StripeSdk"
+        private const val MAX_FAILED_ATTEMPTS = 3
+
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun testConfigs(): List<Array<Any>> {
@@ -111,8 +142,8 @@ internal class TestLatency(
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
         ): Array<Any> {
             return arrayOf(
-                testName,
                 TestConfig(
+                    name = testName,
                     isReturningCustomer = isReturningCustomer,
                     playgroundSettingsBlock = playgroundSettingsBlock,
                 )
