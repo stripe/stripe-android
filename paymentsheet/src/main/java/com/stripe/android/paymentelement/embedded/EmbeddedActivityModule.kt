@@ -229,10 +229,10 @@ internal interface EmbeddedActivityModule {
 
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
-            promotions: List<PaymentMethodMessagePromotion>?,
+            promotion: PaymentMethodMessagePromotion?,
             experimentHandler: PaymentMethodMessagePromotionsExperimentHandler
         ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionsHelper(
-            promotions,
+            listOfNotNull(promotion),
             experimentHandler
         )
     }
