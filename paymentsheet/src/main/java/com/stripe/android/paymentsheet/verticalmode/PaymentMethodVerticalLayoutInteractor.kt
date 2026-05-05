@@ -364,7 +364,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 customerSavedPaymentMethods = paymentMethods,
                 incentive = paymentMethodIncentive,
                 promotionProvider = getPromotionProvider(supportedPaymentMethod.code),
-                shouldExpandOnClick = !shouldTransitionToFormScreen(supportedPaymentMethod.code)
+                shouldExpandOnClick = shouldExpandOnClick(supportedPaymentMethod.code)
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
@@ -402,7 +402,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.GooglePay, false)
                 invokeRowSelectionCallback?.invoke()
             },
-            shouldExpandOnClick = false
         )
     }
 
@@ -426,7 +425,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.Link(), false)
                 invokeRowSelectionCallback?.invoke()
             },
-            shouldExpandOnClick = false
         )
     }
 
@@ -444,7 +442,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 updateSelection(PaymentSelection.ShopPay, false)
                 invokeRowSelectionCallback?.invoke()
             },
-            shouldExpandOnClick = false
         )
     }
 
@@ -658,5 +655,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         val formType = formTypeForCode(paymentMethodCode)
         val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
         return formType == FormType.UserInteractionRequired || displayFormForMandate
+    }
+
+    private fun shouldExpandOnClick(paymentMethodCode: PaymentMethodCode): Boolean {
+        return PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(paymentMethodCode) &&
+            !shouldTransitionToFormScreen(paymentMethodCode)
     }
 }
