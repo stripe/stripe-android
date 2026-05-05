@@ -1,0 +1,98 @@
+title: Gradle test (flexible Gradle command)
+summary: Runs a Gradle invocation you specify (gradle-runner-style) and exports HTML/XML test outputs. Supports Bitrise test quarantine.
+description: |-
+  Derived from Bitrise ``android-unit-test`` but runs an explicit ``gradle_command`` instead of
+  enumerating Android ``test*`` variants. Use the same Gradle arguments as in a CI shell script
+  (tasks, modules, excludes, JVM flags).
+
+  Passes ``quarantined_tests`` (typically ``$BITRISE_QUARANTINED_TESTS_JSON``) into the same Gradle
+  init script exclusion flow as the stock step — do not combine that with ``--init-script`` or ``-I`` in
+  your command.
+
+website: https://github.com/stripe/stripe-android
+source_code_url: https://github.com/stripe/stripe-android
+support_url: https://github.com/stripe/stripe-android/issues
+
+host_os_tags:
+  - osx-10.10
+  - ubuntu-16.04
+
+project_type_tags:
+  - android
+
+type_tags:
+  - test
+
+is_requires_admin_user: true
+is_always_run: false
+is_skippable: false
+
+toolkit:
+  go:
+    package_name: github.com/stripe/stripe-android/bitrise-step-gradle-test
+
+inputs:
+  - project_location: $BITRISE_SOURCE_DIR
+    opts:
+      title: Project location
+      summary: Gradle project root containing ``settings.gradle``, ``gradlew``, etc.
+      is_required: true
+  - gradlew_path: gradlew
+    opts:
+      title: Gradlew executable
+      summary: Relative path under ``project_location`` (e.g. ``gradlew`` or ``./gradlew``).
+      is_required: true
+  - gradle_command:
+    opts:
+      title: Gradle command
+      summary: Tasks and Gradle options only (no ``./gradlew`` prefix). Quotes like a shell script; can include module tasks.
+      description: |-
+        Parsed with shell-style quoting (same as Bitrise Gradle Runner). Put all tasks and JVM/Gradle flags in this one string.
+
+        Examples::
+
+          ``testDebugUnitTest --continue``
+          ``:testDebugUnitTest verifyPaparazziDebug``
+          ``:payments-core:testReleaseUnitTest -Pci=true``
+      is_required: true
+  - allowed_retries: "0"
+    opts:
+      category: Options
+      title: Allowed retries
+      summary: Number of retries after a failed Gradle execution.
+      description: |-
+        Retries run only when the Gradle command exits with an error.
+        Test outputs are exported after each attempt before any retry starts.
+      is_required: true
+  - report_path_pattern: "*build/reports/tests"
+    opts:
+      category: Options
+      title: Unit test HTML report directory glob
+      description: Under ``project_location``. Zipped into ``$BITRISE_DEPLOY_DIR``.
+      is_required: true
+  - result_path_pattern: "*build/test-results"
+    opts:
+      category: Options
+      title: Unit test XML result directory glob
+      description: Under ``project_location``. Zipped into deploy dir and used for Ship / Test Addon when enabled.
+      is_required: true
+  - is_debug: "false"
+    opts:
+      category: Debug
+      title: Verbose logs
+      is_required: true
+      value_options:
+        - "false"
+        - "true"
+  - quarantined_tests: $BITRISE_QUARANTINED_TESTS_JSON
+    opts:
+      category: Debug
+      title: Quarantined tests
+      summary: JSON list from Bitrise; excluded via Gradle init script (same as Bitrise Android unit test).
+
+outputs:
+  - BITRISE_FLAKY_TEST_CASES:
+    opts:
+      title: Flaky test cases (Test Addon)
+      description: |-
+        Present when XML results are exported to ``$BITRISE_TEST_RESULT_DIR``. Format matches Bitrise flaky reporting.
