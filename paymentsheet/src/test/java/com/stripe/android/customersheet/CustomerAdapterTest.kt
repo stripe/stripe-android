@@ -9,7 +9,6 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -530,8 +529,6 @@ class CustomerAdapterTest {
     fun `PersistablePaymentMethodOption to SavedSelection`() {
         assertThat(CustomerAdapter.PaymentOption.GooglePay.toSavedSelection())
             .isEqualTo(SavedSelection.GooglePay)
-        assertThat(CustomerAdapter.PaymentOption.Link.toSavedSelection())
-            .isEqualTo(SavedSelection.Link)
         assertThat(CustomerAdapter.PaymentOption.StripeId("pm_1234").toSavedSelection())
             .isEqualTo(SavedSelection.PaymentMethod("pm_1234"))
     }
@@ -540,8 +537,6 @@ class CustomerAdapterTest {
     fun `SavedSelection to PersistablePaymentMethodOption`() {
         assertThat(SavedSelection.GooglePay.toPaymentOption())
             .isEqualTo(CustomerAdapter.PaymentOption.GooglePay)
-        assertThat(SavedSelection.Link.toPaymentOption())
-            .isEqualTo(CustomerAdapter.PaymentOption.Link)
         assertThat(SavedSelection.PaymentMethod("pm_1234").toPaymentOption())
             .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
     }
@@ -615,7 +610,6 @@ class CustomerAdapterTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
         )
         val savedSelection = savedPaymentOption.toPaymentSelection(
-            linkBrand = LinkBrand.Link,
             paymentMethodProvider = paymentMethodProvider,
         )
         assertThat(savedSelection)
@@ -623,23 +617,13 @@ class CustomerAdapterTest {
 
         val googlePaymentOption = CustomerAdapter.PaymentOption.GooglePay
         val googleSelection = googlePaymentOption.toPaymentSelection(
-            linkBrand = LinkBrand.Link,
             paymentMethodProvider = paymentMethodProvider,
         )
         assertThat(googleSelection)
             .isInstanceOf<PaymentSelection.GooglePay>()
 
-        val linkPaymentOption = CustomerAdapter.PaymentOption.Link
-        val linkSelection = linkPaymentOption.toPaymentSelection(
-            linkBrand = LinkBrand.Link,
-            paymentMethodProvider = paymentMethodProvider,
-        )
-        assertThat(linkSelection)
-            .isInstanceOf<PaymentSelection.Link>()
-
         val nullSavedPaymentOption = CustomerAdapter.PaymentOption.StripeId("id_123")
         val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(
-            linkBrand = LinkBrand.Link,
             paymentMethodProvider = paymentMethodProvider,
         )
         assertThat(nullSavedSelection)

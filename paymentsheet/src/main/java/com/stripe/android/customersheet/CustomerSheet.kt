@@ -143,23 +143,14 @@ class CustomerSheet internal constructor(
             val paymentMethodsDeferred = async {
                 CustomerSheetHacks.paymentMethodDataSource.await().retrievePaymentMethods().toResult()
             }
-            val elementsSessionDeferred = async {
-                CustomerSheetHacks
-                    .elementsSessionManager.await()
-                    ?.fetchElementsSession()
-                    ?.getOrNull()
-                    ?.elementsSession
-            }
 
             val savedSelection = savedSelectionDeferred.await()
             val paymentMethods = paymentMethodsDeferred.await()
-            val elementsSession = elementsSessionDeferred.await()
-            val linkBrand = elementsSession?.linkSettings?.linkBrand
 
             val selection = savedSelection.map { selection ->
                 selection?.toPaymentOption()
             }.mapCatching { paymentOption ->
-                paymentOption?.toPaymentSelection(linkBrand) {
+                paymentOption?.toPaymentSelection {
                     paymentMethods.getOrNull()?.find {
                         it.id == paymentOption.id
                     }

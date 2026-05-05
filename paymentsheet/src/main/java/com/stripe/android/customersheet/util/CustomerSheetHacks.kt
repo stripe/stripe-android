@@ -8,7 +8,6 @@ import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.asSingle
 import com.stripe.android.customersheet.CustomerSheetIntegration
-import com.stripe.android.customersheet.data.CustomerSessionElementsSessionManager
 import com.stripe.android.customersheet.data.CustomerSheetInitializationDataSource
 import com.stripe.android.customersheet.data.CustomerSheetIntentDataSource
 import com.stripe.android.customersheet.data.CustomerSheetPaymentMethodDataSource
@@ -38,10 +37,6 @@ internal object CustomerSheetHacks {
     val intentDataSource: Single<CustomerSheetIntentDataSource>
         get() = _intentDataSource.asSingle()
 
-    private val _elementsSessionManager = MutableStateFlow<CustomerSessionElementsSessionManager?>(null)
-    val elementsSessionManager: Single<CustomerSessionElementsSessionManager?>
-        get() = _elementsSessionManager.asSingle()
-
     fun initialize(
         application: Application,
         lifecycleOwner: LifecycleOwner,
@@ -60,7 +55,6 @@ internal object CustomerSheetHacks {
                 _paymentMethodDataSource.value = adapterDataSourceComponent.customerSheetPaymentMethodDataSource
                 _intentDataSource.value = adapterDataSourceComponent.customerSheetIntentDataSource
                 _savedSelectionDataSource.value = adapterDataSourceComponent.customerSheetSavedSelectionDataSource
-                _elementsSessionManager.value = null
             }
             is CustomerSheetIntegration.CustomerSession -> {
                 val customerSessionDataSourceComponent = DaggerCustomerSessionDataSourceComponent
@@ -78,8 +72,6 @@ internal object CustomerSheetHacks {
                     customerSessionDataSourceComponent.customerSheetIntentDataSource
                 _savedSelectionDataSource.value =
                     customerSessionDataSourceComponent.customerSheetSavedSelectionDataSource
-                _elementsSessionManager.value =
-                    customerSessionDataSourceComponent.customerSessionElementsSessionManager
             }
         }
 
@@ -107,6 +99,5 @@ internal object CustomerSheetHacks {
         _paymentMethodDataSource.value = null
         _savedSelectionDataSource.value = null
         _intentDataSource.value = null
-        _elementsSessionManager.value = null
     }
 }
