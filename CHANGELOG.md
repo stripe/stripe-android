@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: PATCH
 ### PaymentSheet
 * [FIXED][13020](https://github.com/stripe/stripe-android/pull/13020) `CustomerSheet` now correctly filters out unsupported payment method types.
 
+### Payments
+* [FIXED][12983](https://github.com/stripe/stripe-android/pull/12983) Fixed an issue where `additionalEnabledNetworks` would not be respected for Google Pay payments.
+
 ## 23.7.0 - 2026-05-04
 
 ### PaymentSheet
