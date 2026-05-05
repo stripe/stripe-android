@@ -22,15 +22,8 @@ internal class TestLink : BasePlaygroundTest() {
     fun testLinkPaymentWithBankAccountInPaymentMethodMode() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
-        // Sign up for Link by completing a card payment with the random email.
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = makeSignUpTestParameters(passthroughMode = false, email = email),
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-        )
+        testDriver.signUpForLink(makeSignUpTestParameters(passthroughMode = false, email = email))
 
-        // Re-use the Link account to confirm with a bank account (triggers OTP flow).
         testDriver.confirmWithBankAccountInLink(
             makeLinkTestParameters(passthroughMode = false, email = email)
         )
@@ -40,15 +33,8 @@ internal class TestLink : BasePlaygroundTest() {
     fun testLinkPaymentWithBankAccountInPassthroughMode() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
-        // Sign up for Link by completing a card payment with the random email.
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = makeSignUpTestParameters(passthroughMode = true, email = email),
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-        )
+        testDriver.signUpForLink(makeSignUpTestParameters(passthroughMode = true, email = email))
 
-        // Re-use the Link account to confirm with a bank account (triggers OTP flow).
         testDriver.confirmWithBankAccountInLink(
             makeLinkTestParameters(passthroughMode = true, email = email)
         )

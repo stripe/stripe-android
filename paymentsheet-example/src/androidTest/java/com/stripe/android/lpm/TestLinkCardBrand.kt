@@ -39,15 +39,8 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
     fun testLinkCardBrandSuccess() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
-        // Sign up for Link by completing a card payment with the random email.
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = makeSignUpTestParameters(email),
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-        )
+        testDriver.signUpForLink(makeSignUpTestParameters(email))
 
-        // Re-use the Link account to confirm with a bank payment.
         testDriver.confirmLinkBankPayment(
             testParameters = makeLinkTestParameters(email),
             afterAuthorization = { _, _ ->
@@ -65,15 +58,8 @@ internal class TestLinkCardBrand : BasePlaygroundTest() {
     fun testLinkCardBrandCancelAllowsUserToContinue() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
-        // Sign up for Link by completing a card payment with the random email.
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = makeSignUpTestParameters(email),
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-        )
+        testDriver.signUpForLink(makeSignUpTestParameters(email))
 
-        // Re-use the Link account to test cancel behavior.
         testDriver.confirmLinkBankPayment(
             testParameters = makeLinkTestParameters(email).copy(
                 authorizationAction = AuthorizeAction.Cancel,

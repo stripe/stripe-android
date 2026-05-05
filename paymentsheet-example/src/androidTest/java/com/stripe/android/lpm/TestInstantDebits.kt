@@ -40,15 +40,8 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     fun testInstantDebitsSuccess() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
-        // Sign up for Link by completing a card payment with the random email.
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = makeSignUpTestParameters(email),
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-        )
+        testDriver.signUpForLink(makeSignUpTestParameters(email))
 
-        // Re-use the Link account to confirm with instant debits.
         testDriver.confirmLinkBankPayment(
             testParameters = makeLinkTestParameters(email),
             afterAuthorization = { _, _ ->
@@ -66,15 +59,8 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     fun testInstantDebitsCancelAllowsUserToContinue() {
         val email = "email_${UUID.randomUUID()}@email.com"
 
-        // Sign up for Link by completing a card payment with the random email.
-        testDriver.confirmNewOrGuestComplete(
-            testParameters = makeSignUpTestParameters(email),
-            populateCustomLpmFields = {
-                populateCardDetails()
-            },
-        )
+        testDriver.signUpForLink(makeSignUpTestParameters(email))
 
-        // Re-use the Link account to test cancel behavior.
         testDriver.confirmLinkBankPayment(
             testParameters = makeLinkTestParameters(email).copy(
                 authorizationAction = AuthorizeAction.Cancel,
