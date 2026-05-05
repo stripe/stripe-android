@@ -16,6 +16,15 @@ interface DurationProvider {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Key {
         Loading,
+        PaymentSheetLoadSavedPaymentMethodSelection,
+        PaymentSheetLoadSession,
+        PaymentSheetLoadGooglePayReady,
+        PaymentSheetLoadSavedSelection,
+        PaymentSheetLoadCustomerMetadata,
+        PaymentSheetLoadLinkState,
+        PaymentSheetLoadPaymentMethodMetadata,
+        PaymentSheetLoadCustomerState,
+        PaymentSheetLoadInitialPaymentSelection,
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
