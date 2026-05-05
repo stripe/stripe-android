@@ -229,13 +229,15 @@ internal class DefaultCustomerSheetLoader(
         return if (metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true) {
             getDefaultPaymentMethodAsPaymentSelection(paymentMethods, customerSheetSession.defaultPaymentMethodId)
         } else {
-            useLocalSelectionAsPaymentSelection(customerSheetSession, metadata, paymentMethods)
+            useLocalSelectionAsPaymentSelection(
+                customerSheetSession = customerSheetSession,
+                paymentMethods = paymentMethods,
+            )
         }
     }
 
     private fun useLocalSelectionAsPaymentSelection(
         customerSheetSession: CustomerSheetSession,
-        metadata: PaymentMethodMetadata,
         paymentMethods: List<PaymentMethod>
     ): PaymentSelection? {
         return customerSheetSession.savedSelection?.let { selection ->

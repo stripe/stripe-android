@@ -143,7 +143,6 @@ class CustomerSheet internal constructor(
             val paymentMethodsDeferred = async {
                 CustomerSheetHacks.paymentMethodDataSource.await().retrievePaymentMethods().toResult()
             }
-
             val savedSelection = savedSelectionDeferred.await()
             val paymentMethods = paymentMethodsDeferred.await()
 
