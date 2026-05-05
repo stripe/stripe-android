@@ -57,12 +57,29 @@ internal class SamsungPayLauncherViewModel(
 
         viewModelScope.launch(workContext) {
             try {
+                // Check Samsung Pay availability first
+                val partnerInfo = buildPartnerInfo(config)
+                Log.d(TAG, "Checking Samsung Pay availability...")
+                val repository = DefaultSamsungPayRepository(context, partnerInfo)
+                val availability = repository.checkAvailability()
+                Log.d(TAG, "Availability result: $availability")
+
+                if (availability !is SamsungPayLauncher.AvailabilityResult.Ready) {
+                    Log.e(TAG, "Samsung Pay not ready: $availability")
+                    _result.value = SamsungPayLauncher.Result.Failed(
+                        SamsungPayException(
+                            errorCode = -1,
+                            message = "Samsung Pay is not available: $availability"
+                        )
+                    )
+                    return@launch
+                }
+
                 Log.d(TAG, "Fetching intent details for clientSecret=${args.clientSecret.take(20)}...")
                 val (amount, currency) = fetchIntentDetails(args)
                 Log.d(TAG, "Intent details: amount=$amount, currency=$currency")
 
                 val paymentInfo = buildPaymentInfo(args, amount, currency)
-                val partnerInfo = buildPartnerInfo(config)
                 Log.d(TAG, "PartnerInfo: serviceId=${config.productId}")
 
                 val manager = PaymentManager(context, partnerInfo)
