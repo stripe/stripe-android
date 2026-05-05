@@ -6,7 +6,6 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.BILLING_DETAILS
@@ -193,11 +192,7 @@ internal object PaymentSheetFixtures {
                     stripeIntent = stripeIntent,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkState,
-                    paymentMethodOrientation = when (config.paymentMethodLayout) {
-                        PaymentSheet.PaymentMethodLayout.Horizontal -> PaymentMethodOrientation.Horizontal
-                        PaymentSheet.PaymentMethodLayout.Vertical,
-                        PaymentSheet.PaymentMethodLayout.Automatic -> PaymentMethodOrientation.Vertical
-                    }
+                    paymentMethodLayout = config.paymentMethodLayout
                 ),
             ),
             configuration = config,

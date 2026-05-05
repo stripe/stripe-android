@@ -9,6 +9,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.analytics.AnalyticsState
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_LIVE_CAPTURE
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
@@ -47,11 +50,13 @@ class LiveCaptureLaunchedEffectTest {
         on { documentCapture } doReturn mockDocumentCapture
     }
     private val pageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
+    private val mockScreenTracker = mock<ScreenTracker>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { pageAndModelFiles } doReturn pageAndModel
         on { workContext } doReturn UnconfinedTestDispatcher()
+        on { screenTracker } doReturn mockScreenTracker
     }
     private val mockIdentityScanViewModel = mock<IdentityScanViewModel>()
     private val mockNavController = mock<NavController>()
@@ -90,6 +95,7 @@ class LiveCaptureLaunchedEffectTest {
         testLiveCaptureLaunchedEffect(
             scannerState = faceTimeoutState
         ) {
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_SELFIE), any())
             verify(mockNavController).navigate(
                 eq(
                     "${CouldNotCaptureDestination.COULD_NOT_CAPTURE}?${CouldNotCaptureDestination.ARG_FROM_SELFIE}=true"
@@ -139,6 +145,7 @@ class LiveCaptureLaunchedEffectTest {
         testLiveCaptureLaunchedEffect(
             scannerState = idTimeoutState
         ) {
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_LIVE_CAPTURE), any())
             verify(mockNavController).navigate(
                 eq(
                     "${CouldNotCaptureDestination.COULD_NOT_CAPTURE}?" +

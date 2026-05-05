@@ -3,6 +3,18 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### CryptoOnramp
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) Added new birth city, birth country, and nationalities properties to KYCInfo.
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) New public types for interacting with Compliance regulations and identifiers.
+* [REMOVED][13019](https://github.com/stripe/stripe-android/pull/13019) Removed KycRetrieveResponse from the public API as it was not intended to be accessible.
+
+## 23.7.0 - 2026-05-04
+
+### PaymentSheet
+* [FIXED][12965](https://github.com/stripe/stripe-android/issues/12965) Fixed an issue where a white screen would briefly appear during payment confirmation, hiding the bottom sheet.
+* [FIXED][12973](https://github.com/stripe/stripe-android/pull/12973) Fixed an issue where `FlowController` would bypass mandate display when `setupFutureUsage` was added via `configureWithIntentConfiguration()` after the user had already entered card details.
+* [CHANGED][12975](https://github.com/stripe/stripe-android/pull/12975) When `paymentMethodLayout` is set to `Automatic`, the layout is now horizontal when there are 2 or fewer payment methods available.
+
 ## 23.6.0 - 2026-04-27
 ### PaymentSheet
 * [ADDED] Stripe card scanning is back in public preview. [Add `stripecardscan` to the `dependencies` block of your build.gradle](https://docs.stripe.com/payments/accept-a-payment?payment-ui=mobile&platform=android#android-card-scanning) to enable the Stripe card scanner.

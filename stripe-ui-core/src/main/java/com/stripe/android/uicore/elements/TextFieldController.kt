@@ -90,7 +90,8 @@ sealed class TextFieldIcon {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
     data class MultiTrailing(
         val staticIcons: List<Trailing>,
-        val animatedIcons: List<Trailing>
+        val animatedIcons: List<Trailing>,
+        val contentDescription: ResolvableString? = null
     ) : TextFieldIcon()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)

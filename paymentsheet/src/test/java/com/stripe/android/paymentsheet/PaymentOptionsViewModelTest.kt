@@ -481,7 +481,7 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
-    fun `currentScreen is Form if payment methods is empty and supportedPaymentMethods contains one in automatic`() =
+    fun `currentScreen is AddFirstPaymentMethod if no SPMs and one supportedPaymentMethod in automatic`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -498,12 +498,12 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.navigationHandler.currentScreen.test {
-                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
+                assertThat(awaitItem()).isInstanceOf<AddFirstPaymentMethod>()
             }
         }
 
     @Test
-    fun `currentScreen is VerticalMode if payment methods is not empty in automatic`() =
+    fun `currentScreen is SelectSavedPaymentMethods if just one payment method in automatic`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -520,12 +520,12 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.navigationHandler.currentScreen.test {
-                assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
+                assertThat(awaitItem()).isInstanceOf<SelectSavedPaymentMethods>()
             }
         }
 
     @Test
-    fun `currentScreen is VerticalMode if supportedPaymentMethods is greater than 1 in Automatic`() =
+    fun `currentScreen is VerticalMode if supportedPaymentMethods is greater than 2 in Automatic`() =
         runTest {
             val viewModel = createViewModel(
                 args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
@@ -536,7 +536,7 @@ internal class PaymentOptionsViewModelTest {
                     isGooglePayReady = false,
                     linkState = null,
                     stripeIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!.copy(
-                        paymentMethodTypes = listOf("card", "cashapp")
+                        paymentMethodTypes = listOf("card", "cashapp", "klarna")
                     ),
                 )
             )

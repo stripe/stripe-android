@@ -1526,20 +1526,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `launched with correct screen when in automatic mode`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
-                    .build()
-            ),
-        )
-        viewModel.navigationHandler.currentScreen.test {
-            assertThat(awaitItem()).isInstanceOf<PaymentSheetScreen.VerticalMode>()
-        }
-    }
-
-    @Test
     fun `handleBackPressed is consumed when processing is true`() = runTest {
         val viewModel = createViewModel(customer = EMPTY_CUSTOMER_STATE)
         viewModel.savedStateHandle[SAVE_PROCESSING] = true
@@ -3058,66 +3044,11 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `requiresCvcRecollection should return correct value in automatic mode`() {
-        var viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
-                    .build()
-            )
-        )
-
-        val savedSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD)
-
-        cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isTrue()
-        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
-
-        viewModel.checkout()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
-        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
-
-        cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
-
-        viewModel = createViewModel()
-
-        cvcRecollectionHandler.requiresCVCRecollection = true
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
-        assertThat(viewModel.shouldAttachCvc(savedSelection)).isTrue()
-
-        cvcRecollectionHandler.requiresCVCRecollection = false
-        assertThat(viewModel.shouldAttachCvc(savedSelection)).isFalse()
-        assertThat(viewModel.shouldLaunchCvcRecollectionScreen(savedSelection)).isFalse()
-    }
-
-    @Test
     fun `CvcRecollection screen should be displayed on checkout when required in vertical mode`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build()
-            ),
-        )
-
-        cvcRecollectionHandler.requiresCVCRecollection = true
-        cvcRecollectionHandler.cvcRecollectionEnabled = true
-        viewModel.checkout()
-
-        viewModel.navigationHandler.currentScreen.test {
-            val screen = awaitItem()
-            assertThat(screen).isInstanceOf<PaymentSheetScreen.CvcRecollection>()
-        }
-    }
-
-    @Test
-    fun `CvcRecollection screen should be displayed on checkout when required in automatic mode`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
                     .build()
             ),
         )
@@ -3181,26 +3112,6 @@ internal class PaymentSheetViewModelTest {
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
                     .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Vertical)
-                    .build()
-            ),
-        )
-
-        cvcRecollectionHandler.requiresCVCRecollection = false
-        cvcRecollectionHandler.cvcRecollectionEnabled = true
-        viewModel.checkout()
-
-        viewModel.navigationHandler.currentScreen.test {
-            val screen = awaitItem()
-            assertThat(screen).isInstanceOf<PaymentSheetScreen.VerticalMode>()
-        }
-    }
-
-    @Test
-    fun `CvcRecollection screen should not be displayed on checkout when not required in automatic mode`() = runTest {
-        val viewModel = createViewModel(
-            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
-                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.newBuilder()
-                    .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Automatic)
                     .build()
             ),
         )

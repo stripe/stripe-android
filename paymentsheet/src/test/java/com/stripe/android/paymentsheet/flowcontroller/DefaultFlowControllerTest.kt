@@ -39,7 +39,6 @@ import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
@@ -458,6 +457,55 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `getPaymentOption() returns null when setupFutureUsage is added via reconfiguration`() = runTest {
+        val intentWithoutSFU = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        val cardSelection = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            brand = CardBrand.Visa,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+        )
+
+        val paymentSheetLoader = FakePaymentElementLoader(
+            stripeIntent = intentWithoutSFU,
+            paymentSelection = cardSelection,
+        )
+
+        val flowController = createFlowController(
+            paymentElementLoader = paymentSheetLoader,
+            paymentSelectionUpdater = DefaultPaymentSelectionUpdater(),
+        )
+
+        val intentConfig = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000,
+                currency = "usd",
+            ),
+        )
+
+        // First configure: no setupFutureUsage — card selection is preserved
+        flowController.configureWithIntentConfigurationExpectingSuccess(intentConfig)
+        assertThat(flowController.getPaymentOption()).isNotNull()
+
+        // Merchant reconfigures with setupFutureUsage = OffSession
+        paymentSheetLoader.updateStripeIntent(
+            intentWithoutSFU.copy(setupFutureUsage = StripeIntent.Usage.OffSession)
+        )
+
+        val intentConfigWithSFU = PaymentSheet.IntentConfiguration(
+            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
+                amount = 5000,
+                currency = "usd",
+                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
+            ),
+        )
+        flowController.configureWithIntentConfigurationExpectingSuccess(intentConfigWithSFU)
+
+        // Card selection should be invalidated — user must re-open payment sheet to see mandate
+        assertThat(flowController.getPaymentOption()).isNull()
+    }
+
+    @Test
     fun `init with failure should return expected value`() = runTest {
         createFlowController(
             paymentElementLoader = FakePaymentElementLoader(shouldFail = true)
@@ -481,7 +529,7 @@ internal class DefaultFlowControllerTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     hasCustomerConfiguration = true,
                     allowsDelayedPaymentMethods = false,
-                    paymentMethodOrientation = PaymentMethodOrientation.Vertical,
+                    paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Automatic,
                 ),
             ),
             configuration = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
@@ -2469,6 +2517,9 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: FlowControllerConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
+        paymentSelectionUpdater: PaymentSelectionUpdater = PaymentSelectionUpdater { _, _, newState, _, _ ->
+            newState.paymentSelection
+        },
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
@@ -2493,7 +2544,7 @@ internal class DefaultFlowControllerTest {
                 paymentElementLoader = paymentElementLoader,
                 uiContext = testDispatcher,
                 viewModel = viewModel,
-                paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
+                paymentSelectionUpdater = paymentSelectionUpdater,
                 confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             ),
             errorReporter = errorReporter,
@@ -2612,6 +2663,20 @@ private suspend fun PaymentSheet.FlowController.configureExpectingSuccess(
     val configureTurbine = Turbine<Throwable?>()
     configureWithPaymentIntent(
         paymentIntentClientSecret = clientSecret,
+        configuration = configuration,
+    ) { _, error ->
+        configureTurbine += error
+    }
+    assertThat(configureTurbine.awaitItem()).isNull()
+}
+
+private suspend fun PaymentSheet.FlowController.configureWithIntentConfigurationExpectingSuccess(
+    intentConfiguration: PaymentSheet.IntentConfiguration,
+    configuration: PaymentSheet.Configuration? = null,
+) {
+    val configureTurbine = Turbine<Throwable?>()
+    configureWithIntentConfiguration(
+        intentConfiguration = intentConfiguration,
         configuration = configuration,
     ) { _, error ->
         configureTurbine += error

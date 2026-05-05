@@ -13,6 +13,8 @@ import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_DEBUG
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.DebugDestination
 import com.stripe.android.identity.navigation.IndividualWelcomeDestination
@@ -44,8 +46,10 @@ class DebugScreenTest {
 
     private val verificationPageData = MutableLiveData<Resource<VerificationPage>>()
     private val mockNavController = mock<NavController>()
+    private val mockScreenTracker = mock<ScreenTracker>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageData
+        on { screenTracker } doReturn mockScreenTracker
     }
     private val mockVerificationFlowFinishable = mock<VerificationFlowFinishable>()
 
@@ -88,6 +92,7 @@ class DebugScreenTest {
                     simulateDelay = eq(false),
                     navController = same(mockNavController)
                 )
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DEBUG), any())
             }
         }
     }
@@ -105,6 +110,7 @@ class DebugScreenTest {
                     simulateDelay = eq(true),
                     navController = same(mockNavController)
                 )
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DEBUG), any())
             }
         }
     }
@@ -122,6 +128,7 @@ class DebugScreenTest {
                     simulateDelay = eq(false),
                     navController = same(mockNavController)
                 )
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DEBUG), any())
             }
         }
     }
@@ -139,6 +146,7 @@ class DebugScreenTest {
                     simulateDelay = eq(true),
                     navController = same(mockNavController)
                 )
+                verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DEBUG), any())
             }
         }
     }
@@ -181,6 +189,7 @@ class DebugScreenTest {
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DEBUG), any())
         }
     }
 
@@ -198,6 +207,7 @@ class DebugScreenTest {
                 },
                 any<NavOptionsBuilder.() -> Unit>()
             )
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_DEBUG), any())
         }
     }
 

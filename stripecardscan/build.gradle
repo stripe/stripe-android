@@ -38,6 +38,7 @@ dependencies {
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
 
+    androidTestImplementation project(':payments-core-testing')
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.testRunner

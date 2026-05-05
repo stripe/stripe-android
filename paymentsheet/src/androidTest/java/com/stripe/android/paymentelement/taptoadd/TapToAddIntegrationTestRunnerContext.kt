@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElementTestRunnerContext
 import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.PaymentSheet as StripePaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetPage
 import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
@@ -49,6 +50,7 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
         protected val configuration = StripePaymentSheet.Configuration.Builder(
             merchantDisplayName = "Merchant, Inc.",
         )
+            .paymentMethodLayout(PaymentMethodLayout.Vertical)
             .customer(customerConfig)
             .build()
 

@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
@@ -7,27 +7,29 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal interface FormActivityConfirmationHelper {
+internal interface SheetActivityConfirmationHelper {
     fun confirm()
 }
 
-internal class DefaultFormActivityConfirmationHelper @Inject constructor(
+internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
     private val confirmationHandler: ConfirmationHandler,
     private val configuration: EmbeddedPaymentElement.Configuration,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val stateHelper: FormActivityStateHelper,
+    private val stateHelper: SheetActivityStateHolder,
     private val onClickDelegate: OnClickOverrideDelegate,
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-) : FormActivityConfirmationHelper {
+) : SheetActivityConfirmationHelper {
 
     override fun confirm() {
         if (onClickDelegate.onClickOverride != null) {

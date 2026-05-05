@@ -31,6 +31,7 @@ import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.WalletButtonsPage
 import com.stripe.android.paymentelement.WalletButtonsPreview
+import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
@@ -1178,6 +1179,7 @@ internal class FlowControllerTest {
                 configuration = PaymentSheet.Configuration.Builder(
                     merchantDisplayName = "Example, Inc."
                 )
+                    .paymentMethodLayout(PaymentMethodLayout.Vertical)
                     .customer(
                         PaymentSheet.CustomerConfiguration.createWithCustomerSession(
                             id = "cus_1",

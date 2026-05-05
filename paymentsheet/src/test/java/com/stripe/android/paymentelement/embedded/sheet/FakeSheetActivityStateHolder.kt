@@ -1,8 +1,9 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -11,12 +12,12 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 
-internal class FakeFormActivityStateHelper : FormActivityStateHelper {
+internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
     val selectionTurbine = Turbine<PaymentSelection.Saved?>()
 
-    override val state: StateFlow<FormActivityStateHelper.State>
+    override val state: StateFlow<SheetActivityStateHolder.State>
         get() = stateFlowOf(
-            FormActivityStateHelper.State(
+            SheetActivityStateHolder.State(
                 primaryButtonLabel = "".resolvableString,
                 isEnabled = false,
                 processingState = PrimaryButtonProcessingState.Idle(null),

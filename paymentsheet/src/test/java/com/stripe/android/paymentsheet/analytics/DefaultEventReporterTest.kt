@@ -101,6 +101,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("ordered_lpms", "card")
         assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
     }
 
     @Test
@@ -189,6 +190,7 @@ class DefaultEventReporterTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_dismiss")
         assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
     }
 
     @Test
@@ -203,6 +205,7 @@ class DefaultEventReporterTest {
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_complete_sheet_savedpm_show")
         assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
     }
 
     @Test
@@ -1044,6 +1047,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).doesNotContainKey("deferred_intent_confirmation_type")
         assertThat(request.params).containsEntry("has_card_art", false)
         assertThat(request.params).containsEntry("example_from_test", true)
+        assertThat(request.params).containsEntry("payment_method_orientation", "horizontal")
     }
 
     @Test
