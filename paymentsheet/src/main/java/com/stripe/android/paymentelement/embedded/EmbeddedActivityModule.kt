@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
@@ -110,11 +109,6 @@ internal interface EmbeddedActivityModule {
     fun bindsConfirmationHelper(
         confirmationHelper: DefaultSheetActivityConfirmationHelper
     ): SheetActivityConfirmationHelper
-
-    @Binds
-    fun bindsPaymentMethodMessagePromotionsExperimentHandler(
-        impl: DefaultPaymentMethodMessagePromotionsExperimentHandler
-    ): PaymentMethodMessagePromotionsExperimentHandler
 
     @Suppress("TooManyFunctions")
     companion object {
