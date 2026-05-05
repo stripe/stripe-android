@@ -22,6 +22,15 @@ log() {
   printf '[%s] %s\n' "$(date +"%Y-%m-%d %H:%M:%S")" "$*"
 }
 
+progress() {
+  local completed_runs="$1"
+  local total_runs="$2"
+  local scenario="$3"
+  local run_number="$4"
+
+  log "Progress ${completed_runs}/${total_runs}: running ${scenario} iteration ${run_number}/${RUNS_PER_SCENARIO}"
+}
+
 parse_log() {
   local scenario="$1"
   local run_number="$2"
@@ -65,8 +74,12 @@ run_case() {
   local base_commit="$2"
   local compare_commit="$3"
   local run_number="$4"
+  local completed_runs_before="$5"
 
   local log_file="${LOG_ROOT}/${scenario}-run-${run_number}.log"
+  local total_runs=$((RUNS_PER_SCENARIO * 2))
+
+  progress "$((completed_runs_before + 1))" "${total_runs}" "${scenario}" "${run_number}"
 
   log "Starting ${scenario} run ${run_number}/${RUNS_PER_SCENARIO}"
   log "Base=${base_commit} Compare=${compare_commit}"
@@ -116,13 +129,18 @@ run_case() {
 } > "${SUMMARY_FILE}"
 
 log "Logs will be written under ${LOG_ROOT}"
+log "Plan: ${RUNS_PER_SCENARIO} same_commit run(s), then ${RUNS_PER_SCENARIO} sleep_commit run(s)"
+
+completed_runs=0
 
 for run_number in $(seq 1 "${RUNS_PER_SCENARIO}"); do
-  run_case "same_commit" "${BASE_COMMIT}" "${BASE_COMMIT}" "${run_number}"
+  run_case "same_commit" "${BASE_COMMIT}" "${BASE_COMMIT}" "${run_number}" "${completed_runs}"
+  completed_runs=$((completed_runs + 1))
 done
 
 for run_number in $(seq 1 "${RUNS_PER_SCENARIO}"); do
-  run_case "sleep_commit" "${BASE_COMMIT}" "${SLEEP_COMMIT}" "${run_number}"
+  run_case "sleep_commit" "${BASE_COMMIT}" "${SLEEP_COMMIT}" "${run_number}" "${completed_runs}"
+  completed_runs=$((completed_runs + 1))
 done
 
 ruby - "${CSV_FILE}" "${SUMMARY_FILE}" "${RUNS_PER_SCENARIO}" <<'RUBY'
