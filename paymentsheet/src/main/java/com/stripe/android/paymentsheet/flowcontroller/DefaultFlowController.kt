@@ -68,7 +68,6 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.model.isLink
-import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkDisabledState
@@ -426,9 +425,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 }
             }
             is LinkActivityResult.Completed -> {
+                // Should always have Link configuration here.
+                val linkConfiguration = viewModel.state?.linkConfiguration
+                    ?: return
                 val selection = Link(
-                    brand = requireNotNull(viewModel.state?.paymentSheetState?.paymentMethodMetadata)
-                        .requireLinkBrand(),
+                    brand = linkConfiguration.linkBrand,
                     selectedPayment = result.selectedPayment,
                 )
                 viewModel.paymentSelection = selection

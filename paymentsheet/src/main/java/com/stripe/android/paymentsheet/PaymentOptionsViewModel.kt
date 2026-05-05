@@ -39,7 +39,6 @@ import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFa
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
-import com.stripe.android.paymentsheet.model.requireLinkBrand
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
@@ -309,11 +308,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             // Link verification dialog completed -> close payment method selection with authenticated state
             is LinkActivityResult.Completed -> {
+                // Should always have Link configuration here.
+                val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
+                    ?: return
                 _paymentOptionsActivityResult.tryEmit(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
-                            brand = args.state.paymentMethodMetadata.requireLinkBrand(),
+                            brand = linkConfiguration.linkBrand,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),

@@ -483,12 +483,6 @@ internal fun PaymentSelection.Saved.mandateTextFromPaymentMethodMetadata(
     metadata.hasIntentToSetup(paymentMethod.type?.code ?: "")
 ).takeIf { metadata.mandateAllowed(paymentMethod.type) }
 
-internal fun PaymentMethodMetadata.requireLinkBrand(): LinkBrand {
-    return requireNotNull(linkState?.configuration?.linkBrand) {
-        "Expected Link brand to be available when constructing a Link payment selection."
-    }
-}
-
 /**
  * If setup_future_usage is set at the top level to "off_session" the payment method will
  * inherit this value so sending [ConfirmPaymentIntentParams.SetupFutureUsage.OnSession] and
