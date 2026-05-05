@@ -9,7 +9,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -99,7 +98,6 @@ class CheckoutTest {
         val result = checkout.applyPromotionCode("INVALID")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -149,7 +147,6 @@ class CheckoutTest {
         val result = checkout.removePromotionCode()
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -180,16 +177,15 @@ class CheckoutTest {
         val result = checkout.refresh()
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
     @Test
     fun `updateLineItemQuantity updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("updated_line_item_quantity[line_item_id]"), "li_1"),
-            bodyPart(urlEncode("updated_line_item_quantity[quantity]"), "3"),
-            bodyPart(urlEncode("updated_line_item_quantity[fail_update_on_discount_error]"), "true"),
+            bodyPart("updated_line_item_quantity[line_item_id]", "li_1"),
+            bodyPart("updated_line_item_quantity[quantity]", "3"),
+            bodyPart("updated_line_item_quantity[fail_update_on_discount_error]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-update-quantity.json")
         }
@@ -217,7 +213,6 @@ class CheckoutTest {
         val result = checkout.updateLineItemQuantity("li_1", -1)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -225,7 +220,7 @@ class CheckoutTest {
     fun `selectShippingOption updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("shipping_rate", "shr_express"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-select-shipping-rate.json")
         }
@@ -252,11 +247,11 @@ class CheckoutTest {
     fun `updateShippingAddress sends address fields and updates checkoutSession on success`() =
         runCreateWithStateScenario {
             networkRule.checkoutUpdate(
-                bodyPart(urlEncode("tax_region[country]"), "US"),
-                bodyPart(urlEncode("tax_region[city]"), "Denver"),
-                bodyPart(urlEncode("tax_region[state]"), "CO"),
-                bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "Denver"),
+                bodyPart("tax_region[state]", "CO"),
+                bodyPart("tax_region[postal_code]", "80202"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -309,20 +304,19 @@ class CheckoutTest {
         val result = checkout.updateShippingAddress(address = address)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
     @Test
     fun `updateShippingAddress omits empty fields from request`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_region[country]"), "US"),
-            bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-            not(hasBodyPart(urlEncode("tax_region[city]"))),
-            not(hasBodyPart(urlEncode("tax_region[state]"))),
-            not(hasBodyPart(urlEncode("tax_region[line1]"))),
-            not(hasBodyPart(urlEncode("tax_region[line2]"))),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            not(hasBodyPart("tax_region[city]")),
+            not(hasBodyPart("tax_region[state]")),
+            not(hasBodyPart("tax_region[line1]")),
+            not(hasBodyPart("tax_region[line2]")),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-update-shipping-address.json")
         }
@@ -342,11 +336,11 @@ class CheckoutTest {
     fun `updateBillingAddress sends address fields and updates checkoutSession on success`() =
         runCreateWithStateScenario {
             networkRule.checkoutUpdate(
-                bodyPart(urlEncode("tax_region[country]"), "US"),
-                bodyPart(urlEncode("tax_region[city]"), "Denver"),
-                bodyPart(urlEncode("tax_region[state]"), "CO"),
-                bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-                bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("tax_region[city]", "Denver"),
+                bodyPart("tax_region[state]", "CO"),
+                bodyPart("tax_region[postal_code]", "80202"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-update-shipping-address.json")
             }
@@ -389,7 +383,6 @@ class CheckoutTest {
         val result = checkout.updateBillingAddress(address = address)
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -558,13 +551,13 @@ class CheckoutTest {
     @Test
     fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_region[country]"), "US"),
-            bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-            not(hasBodyPart(urlEncode("tax_region[city]"))),
-            not(hasBodyPart(urlEncode("tax_region[state]"))),
-            not(hasBodyPart(urlEncode("tax_region[line1]"))),
-            not(hasBodyPart(urlEncode("tax_region[line2]"))),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            not(hasBodyPart("tax_region[city]")),
+            not(hasBodyPart("tax_region[state]")),
+            not(hasBodyPart("tax_region[line1]")),
+            not(hasBodyPart("tax_region[line2]")),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-update-shipping-address.json")
         }
@@ -583,9 +576,9 @@ class CheckoutTest {
     @Test
     fun `updateTaxId sends type and value and updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
-            bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
+            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -611,16 +604,15 @@ class CheckoutTest {
         val result = checkout.updateTaxId("invalid", "000")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
     @Test
     fun `updateTaxId trims whitespace from type and value`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_id_collection[tax_id][type]"), "us_ein"),
-            bodyPart(urlEncode("tax_id_collection[tax_id][value]"), "123456789"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_id_collection[tax_id][type]", "us_ein"),
+            bodyPart("tax_id_collection[tax_id][value]", "123456789"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -646,7 +638,6 @@ class CheckoutTest {
         val result = checkout.selectShippingOption("shr_invalid")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -663,9 +654,9 @@ class CheckoutTest {
         // Second call: updateShippingAddress must use the session ID from the first response,
         // proving the mutex serialized the calls.
         networkRule.checkoutUpdate(
-            bodyPart(urlEncode("tax_region[country]"), "US"),
-            bodyPart(urlEncode("tax_region[postal_code]"), "80202"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("tax_region[country]", "US"),
+            bodyPart("tax_region[postal_code]", "80202"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
             sessionId = "cs_test_after_promo",
         ) { response ->
             response.testBodyFromFile("checkout-session-concurrent-update-address.json")
@@ -862,7 +853,7 @@ class CheckoutTest {
     fun `updateCurrency updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "eur"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-apply-discount.json")
         }
@@ -888,7 +879,6 @@ class CheckoutTest {
         val result = checkout.updateCurrency("invalid")
         assertThat(result.isFailure).isTrue()
 
-        checkoutSessionTurbine.expectNoEvents()
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
     }
 
@@ -897,7 +887,7 @@ class CheckoutTest {
         clientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         networkSetup = {
             networkRule.checkoutInit(
-                bodyPart(urlEncode("adaptive_pricing[allowed]"), "false"),
+                bodyPart("adaptive_pricing[allowed]", "false"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-init.json")
             }
@@ -912,7 +902,7 @@ class CheckoutTest {
         configuration = Checkout.Configuration().adaptivePricingAllowed(true),
         networkSetup = {
             networkRule.checkoutInit(
-                bodyPart(urlEncode("adaptive_pricing[allowed]"), "true"),
+                bodyPart("adaptive_pricing[allowed]", "true"),
             ) { response ->
                 response.testBodyFromFile("checkout-session-init.json")
             }
@@ -977,6 +967,114 @@ class CheckoutTest {
         assertThat(isLoadingTurbine.awaitItem()).isTrue()
         assertThat(isLoadingTurbine.awaitItem()).isFalse()
         isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `runServerUpdate refreshes checkoutSession after serverUpdate completes`() = runCreateWithStateScenario {
+        networkRule.checkoutInit { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(checkoutSessionTurbine.awaitItem().totalSummary).isNull()
+
+        val result = checkout.runServerUpdate { Result.success(Unit) }
+
+        val updated = checkoutSessionTurbine.awaitItem()
+        result.getOrThrow()
+        assertThat(updated.totalSummary).isNotNull()
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when serverUpdate throws`() = runCreateWithStateScenario {
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.runServerUpdate {
+            throw IllegalStateException("Server error")
+        }
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when serverUpdate fails`() = runCreateWithStateScenario {
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.runServerUpdate {
+            Result.failure(IllegalStateException("Server error"))
+        }
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat().isEqualTo("Server error")
+
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when refresh fails`() = runCreateWithStateScenario {
+        networkRule.checkoutInit { response ->
+            response.setResponseCode(500)
+            response.setBody("""{"error": {"message": "Internal server error"}}""")
+        }
+
+        val initial = checkoutSessionTurbine.awaitItem()
+
+        val result = checkout.runServerUpdate { Result.success(Unit) }
+
+        assertThat(result.isFailure).isTrue()
+
+        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when integrationLaunched is true`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        checkout.markIntegrationLaunched()
+
+        val result = checkout.runServerUpdate { Result.success(Unit) }
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+    }
+
+    @Test
+    fun `runServerUpdate is serialized with other mutations`() = runCreateWithStateScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            response.setBodyDelay(200, TimeUnit.MILLISECONDS)
+            response.testBodyFromFile("checkout-session-concurrent-apply-promo.json")
+        }
+
+        // After runServerUpdate executes, it re-fetches using the updated session ID from the first mutation.
+        networkRule.checkoutInit(
+            sessionId = "cs_test_after_promo",
+        ) { response ->
+            response.testBodyFromFile("checkout-session-concurrent-update-address.json")
+        }
+
+        val initial = checkoutSessionTurbine.awaitItem()
+        assertThat(initial.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+
+        val results = listOf(
+            async { checkout.applyPromotionCode("10OFF") },
+            async { checkout.runServerUpdate { Result.success(Unit) } },
+        ).awaitAll()
+
+        assertThat(results[0].isSuccess).isTrue()
+        assertThat(results[1].isSuccess).isTrue()
+
+        val afterPromo = checkoutSessionTurbine.awaitItem()
+        assertThat(afterPromo.id).isEqualTo("cs_test_after_promo")
+
+        val afterRefresh = checkoutSessionTurbine.awaitItem()
+        assertThat(afterRefresh.id).isEqualTo("cs_test_after_address")
     }
 
     private fun runCreateWithStateScenario(

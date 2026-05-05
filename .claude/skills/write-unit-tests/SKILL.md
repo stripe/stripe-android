@@ -1,5 +1,5 @@
 ---
-name: write-tests
+name: write-unit-tests
 description: Use when writing or structuring unit tests in stripe-android — covers runScenario pattern, fakes, Turbine Flow testing, and Truth assertions
 ---
 # Setting Up Tests
@@ -149,6 +149,7 @@ fun `state updates when data changes`() = runScenario {
 | Fake validation | `ensureAllEventsConsumed()` — automatic in runScenario |
 | Compose UI tests | Invoke `compose-tests` skill |
 | Creating fakes | Invoke `create-fake` skill |
+| NetworkRule integration tests | Invoke `network-tests` skill |
 
 ## Common Mistakes
 

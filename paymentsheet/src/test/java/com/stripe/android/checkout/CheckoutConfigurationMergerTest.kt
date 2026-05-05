@@ -562,6 +562,26 @@ class CheckoutConfigurationMergerTest {
         assertThat(result.primaryButtonLabel).isEqualTo("Pay now")
     }
 
+    @Test
+    fun `paymentSheet - sets attachDefaultsToPaymentMethod to true`() {
+        val config = paymentSheetConfiguration()
+        val state = state()
+
+        val result = CheckoutConfigurationMerger.PaymentSheetConfiguration(config).forCheckoutSession(state)
+
+        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
+    }
+
+    @Test
+    fun `embedded - sets attachDefaultsToPaymentMethod to true`() {
+        val config = embeddedConfiguration()
+        val state = state()
+
+        val result = CheckoutConfigurationMerger.EmbeddedConfiguration(config).forCheckoutSession(state)
+
+        assertThat(result.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod).isTrue()
+    }
+
     private fun embeddedConfiguration(
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
         shippingDetails: AddressDetails? = null,

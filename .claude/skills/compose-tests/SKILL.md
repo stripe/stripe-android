@@ -31,7 +31,7 @@ internal class MyComposableTest {
 
 ## runScenario for Compose Tests
 
-Use the same `runScenario` pattern from `write-tests`, wrapping `composeRule.setContent`:
+Use the same `runScenario` pattern from `write-unit-tests`, wrapping `composeRule.setContent`:
 
 ```kotlin
 @Test

@@ -1,9 +1,18 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
+* [FIXED][13020](https://github.com/stripe/stripe-android/pull/13020) `CustomerSheet` now correctly filters out unsupported payment method types.
+
+### Payments
+* [FIXED][12983](https://github.com/stripe/stripe-android/pull/12983) Fixed an issue where `additionalEnabledNetworks` would not be respected for Google Pay payments.
+
+## 23.7.0 - 2026-05-04
+
+### PaymentSheet
+* [FIXED][12965](https://github.com/stripe/stripe-android/issues/12965) Fixed an issue where a white screen would briefly appear during payment confirmation, hiding the bottom sheet.
 * [FIXED][12973](https://github.com/stripe/stripe-android/pull/12973) Fixed an issue where `FlowController` would bypass mandate display when `setupFutureUsage` was added via `configureWithIntentConfiguration()` after the user had already entered card details.
 * [CHANGED][12975](https://github.com/stripe/stripe-android/pull/12975) When `paymentMethodLayout` is set to `Automatic`, the layout is now horizontal when there are 2 or fewer payment methods available.
 

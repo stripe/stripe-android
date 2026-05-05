@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.text.SpannableString
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -202,20 +201,20 @@ class PaymentSheetAddressAutocompleteTest {
             method("POST"),
             path("/v1/payment_intents/pi_123/confirm"),
             bodyPart(
-                urlEncode("payment_method_data[billing_details][address][line1]"),
-                urlEncode("123 Main Street")
+                "payment_method_data[billing_details][address][line1]",
+                "123 Main Street"
             ),
             bodyPart(
-                urlEncode("payment_method_data[billing_details][address][line2]"),
-                urlEncode("Unit #123")
+                "payment_method_data[billing_details][address][line2]",
+                "Unit #123"
             ),
             bodyPart(
-                urlEncode("payment_method_data[billing_details][address][city]"),
-                urlEncode("South San Francisco")
+                "payment_method_data[billing_details][address][city]",
+                "South San Francisco"
             ),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][state]"), "CA"),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][country]"), "US"),
-            bodyPart(urlEncode("payment_method_data[billing_details][address][postal_code]"), "94111"),
+            bodyPart("payment_method_data[billing_details][address][state]", "CA"),
+            bodyPart("payment_method_data[billing_details][address][country]", "US"),
+            bodyPart("payment_method_data[billing_details][address][postal_code]", "94111"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

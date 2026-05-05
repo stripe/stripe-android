@@ -8,12 +8,15 @@ import androidx.compose.ui.test.performClick
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE_WARMUP
+import com.stripe.android.identity.analytics.ScreenTracker
 import com.stripe.android.identity.navigation.SelfieDestination
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -27,7 +30,10 @@ class SelfieWarmupScreenTest {
     val composeTestRule = createComposeRule()
 
     private val mockNavController = mock<NavController>()
-    private val mockIdentityViewModel = mock<IdentityViewModel>()
+    private val mockScreenTracker = mock<ScreenTracker>()
+    private val mockIdentityViewModel = mock<IdentityViewModel> {
+        on { screenTracker } doReturn mockScreenTracker
+    }
 
     @Test
     fun verifyContentVisibleAndButtonClick() {
@@ -42,6 +48,7 @@ class SelfieWarmupScreenTest {
             onNodeWithTag(SELFIE_WARMUP_CONTENT_TAG).assertExists()
 
             onNodeWithTag(SELFIE_CONTINUE_BUTTON_TAG).onChildAt(0).performClick()
+            verify(mockScreenTracker).screenTransitionStart(eq(SCREEN_NAME_SELFIE_WARMUP), any())
             verify(mockNavController).navigate(
                 eq(SelfieDestination.routeWithArgs),
                 any<NavOptionsBuilder.() -> Unit>()

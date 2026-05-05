@@ -1,4 +1,4 @@
-package com.stripe.android.paymentelement.embedded.form
+package com.stripe.android.paymentelement.embedded.sheet
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
@@ -15,7 +15,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
 
-internal class DefaultFormActivityRegistrarTest {
+internal class DefaultSheetActivityRegistrarTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -67,7 +67,7 @@ internal class DefaultFormActivityRegistrarTest {
         val activityResultCaller = mock<ActivityResultCaller>()
         val lifecycleOwner = TestLifecycleOwner(coroutineDispatcher = Dispatchers.Unconfined)
 
-        val registrar = DefaultFormActivityRegistrar(
+        val registrar = DefaultSheetActivityRegistrar(
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -88,7 +88,7 @@ internal class DefaultFormActivityRegistrarTest {
     }
 
     private class Scenario(
-        val registrar: DefaultFormActivityRegistrar,
+        val registrar: DefaultSheetActivityRegistrar,
         val confirmationHandler: FakeConfirmationHandler,
         val tapToAddHelper: FakeTapToAddHelper,
         val activityResultCaller: ActivityResultCaller,

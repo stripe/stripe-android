@@ -19,6 +19,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.navigation.CountryNotListedDestination
+import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.Status
 import com.stripe.android.identity.networking.models.CollectedDataParam
@@ -51,6 +54,10 @@ internal fun IndividualScreen(
         identityViewModel = identityViewModel,
         navController = navController
     ) { verificationPage ->
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL
+        )
         val missing by remember {
             mutableStateOf(identityViewModel.missingRequirements.value)
         }
@@ -90,6 +97,7 @@ internal fun IndividualScreen(
                 IndividualScreenBodyContent(
                     enabled = submitButtonState != LoadingButtonState.Loading,
                     navController = navController,
+                    identityViewModel = identityViewModel,
                     individualPage = individualPage,
                     missing = missing,
                     collectedStates = collectedStates,
@@ -121,6 +129,7 @@ internal fun IndividualScreen(
 private fun IndividualScreenBodyContent(
     enabled: Boolean,
     navController: NavController,
+    identityViewModel: IdentityViewModel,
     individualPage: VerificationPageStaticContentIndividualPage,
     missing: Set<Requirement>,
     collectedStates: IndividualCollectedStates,
@@ -170,7 +179,16 @@ private fun IndividualScreenBodyContent(
             enabled,
             individualPage.idNumberCountries,
             individualPage.idNumberCountryNotListedTextButtonText,
-            navController
+            onCountryNotListedClick = {
+                identityViewModel.screenTracker.screenTransitionStart(
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL
+                )
+                navController.navigateTo(
+                    CountryNotListedDestination(
+                        isMissingId = true
+                    )
+                )
+            }
         ) {
             collectedStates.idNumber = it
             onUpdateLoadingButtonState(
@@ -185,7 +203,16 @@ private fun IndividualScreenBodyContent(
             enabled,
             individualPage.addressCountries,
             individualPage.addressCountryNotListedTextButtonText,
-            navController
+            onAddressNotListedClick = {
+                identityViewModel.screenTracker.screenTransitionStart(
+                    IdentityAnalyticsRequestFactory.SCREEN_NAME_INDIVIDUAL
+                )
+                navController.navigateTo(
+                    CountryNotListedDestination(
+                        isMissingId = false
+                    )
+                )
+            }
         ) {
             collectedStates.address = it
             onUpdateLoadingButtonState(

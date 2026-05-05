@@ -31,8 +31,11 @@ import androidx.navigation.NavController
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.R
 import com.stripe.android.identity.VerificationFlowFinishable
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_COUNTRY_NOT_LISTED
 import com.stripe.android.identity.navigation.IndividualDestination
 import com.stripe.android.identity.navigation.navigateTo
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentCountryNotListedPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
@@ -47,6 +50,10 @@ internal fun CountryNotListedScreen(
         identityViewModel = identityViewModel,
         navController = navController
     ) { verificationPage ->
+        ScreenTransitionLaunchedEffect(
+            identityViewModel = identityViewModel,
+            screenName = SCREEN_NAME_COUNTRY_NOT_LISTED
+        )
         val countryNotListedPage = requireNotNull(verificationPage.countryNotListedPage)
         Column(
             modifier = Modifier
@@ -63,12 +70,18 @@ internal fun CountryNotListedScreen(
             ) {
                 BodyContent(
                     navController = navController,
+                    identityViewModel = identityViewModel,
                     countryNotListedPage = countryNotListedPage,
                     isMissingID = isMissingID
                 )
             }
             Button(
                 onClick = {
+                    identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
+                        isFromFallbackUrl = false,
+                        lastScreenName = SCREEN_NAME_COUNTRY_NOT_LISTED,
+                        requireSelfie = verificationPage.requireSelfie()
+                    )
                     verificationFlowFinishable.finishWithResult(
                         IdentityVerificationSheet.VerificationFlowResult.Canceled
                     )
@@ -86,6 +99,7 @@ internal fun CountryNotListedScreen(
 @Composable
 private fun BodyContent(
     navController: NavController,
+    identityViewModel: IdentityViewModel,
     countryNotListedPage: VerificationPageStaticContentCountryNotListedPage,
     isMissingID: Boolean
 ) {
@@ -129,6 +143,9 @@ private fun BodyContent(
         modifier = Modifier.testTag(COUNTRY_NOT_LISTED_OTHER_COUNTRY_TAG),
         contentPadding = PaddingValues(0.dp),
         onClick = {
+            identityViewModel.screenTracker.screenTransitionStart(
+                IdentityAnalyticsRequestFactory.SCREEN_NAME_COUNTRY_NOT_LISTED
+            )
             navController.navigateTo(IndividualDestination)
         }
     ) {

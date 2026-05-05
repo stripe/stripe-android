@@ -44,6 +44,10 @@ internal data class CheckoutSessionResponse(
      */
     val liveMode: Boolean,
     /**
+     * The status of tax computation for this checkout session.
+     */
+    val taxStatus: TaxStatus,
+    /**
      * The customer's email address from the checkout session.
      * Always available at the top level as `customer_email`, regardless of whether
      * a customer object exists (guest checkout) or not.
@@ -209,6 +213,13 @@ internal data class CheckoutSessionResponse(
         OPEN,
         COMPLETE,
         EXPIRED,
+        UNKNOWN,
+    }
+
+    enum class TaxStatus {
+        READY,
+        REQUIRES_SHIPPING_ADDRESS,
+        REQUIRES_BILLING_ADDRESS,
         UNKNOWN,
     }
 }

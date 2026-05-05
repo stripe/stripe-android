@@ -1,5 +1,6 @@
 package com.stripe.android.checkout
 
+import android.app.Application
 import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
@@ -61,7 +62,7 @@ class Checkout private constructor(
             checkoutSessionClientSecret: String,
             configuration: Configuration = Configuration(),
         ): Result<Checkout> {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
+            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
             val configurationState = configuration.build()
             return component.checkoutSessionRepository.init(
                 sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
@@ -85,7 +86,7 @@ class Checkout private constructor(
             context: Context,
             state: State,
         ): Checkout {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext)
+            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
             return Checkout(
                 internalState = state.internalState,
                 component = component,
@@ -196,6 +197,27 @@ class Checkout private constructor(
      */
     suspend fun removePromotionCode(): Result<Unit> = withInternalState { sessionId ->
         component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
+    }
+
+    /**
+     * Wraps an asynchronous function that communicates with your server to modify the
+     * Checkout Session. After the function completes, the session is re-fetched from the server.
+     *
+     * @param serverUpdate A suspend function responsible for making a server request that updates
+     * the Checkout Session.
+     */
+    suspend fun runServerUpdate(
+        serverUpdate: suspend () -> Result<Unit>,
+    ): Result<Unit> = withInternalState { sessionId ->
+        serverUpdate().fold(
+            onSuccess = {
+                component.checkoutSessionRepository.init(
+                    sessionId = sessionId,
+                    adaptivePricingAllowed = configuration.adaptivePricingAllowed,
+                )
+            },
+            onFailure = { Result.failure(it) },
+        )
     }
 
     /**
@@ -315,7 +337,9 @@ class Checkout private constructor(
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
             _isLoading.value = true
-            val result = internalState.block(internalState.checkoutSessionResponse.id).map { response ->
+            val result = runCatching {
+                internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
+            }.map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 _checkoutSession.value = response.asCheckoutSession()
             }

@@ -5,7 +5,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -317,7 +316,7 @@ internal class FlowControllerAnalyticsTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("confirmation_token", "ctoken_example"),
-            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+            bodyPart("return_url", "stripesdk://payment_return_url/com.stripe.android.paymentsheet.test"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

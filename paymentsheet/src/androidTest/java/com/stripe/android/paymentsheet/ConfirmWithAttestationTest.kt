@@ -9,7 +9,6 @@ import androidx.test.espresso.intent.rule.IntentsRule
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -139,7 +138,7 @@ internal class ConfirmWithAttestationTest {
         networkRule.enqueue(
             method("POST"),
             path(PAYMENT_INTENT_CONFIRM_PATH),
-            bodyPart(urlEncode(tokenPath), ATTESTATION_TOKEN),
+            bodyPart(tokenPath, ATTESTATION_TOKEN),
         ) { response ->
             response.testBodyFromFile(PAYMENT_INTENT_CONFIRM_FILE)
         }
@@ -149,7 +148,7 @@ internal class ConfirmWithAttestationTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_methods"),
-            bodyPart(urlEncode(SAVED_PM_ATTESTATION_TOKEN_PATH), ATTESTATION_TOKEN),
+            bodyPart(SAVED_PM_ATTESTATION_TOKEN_PATH, ATTESTATION_TOKEN),
         ) { response ->
             response.testBodyFromFile(PAYMENT_METHOD_CREATE_FILE)
         }

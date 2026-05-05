@@ -13,31 +13,56 @@ import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaym
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.util.UUID
 
 @RunWith(AndroidJUnit4::class)
 internal class TestLink : BasePlaygroundTest() {
 
     @Test
     fun testLinkPaymentWithBankAccountInPaymentMethodMode() {
-        val testParameters = makeLinkTestParameters(passthroughMode = false)
-        testDriver.confirmWithBankAccountInLink(testParameters)
+        val email = "email_${UUID.randomUUID()}@email.com"
+
+        testDriver.signUpForLink(makeSignUpTestParameters(passthroughMode = false, email = email))
+
+        testDriver.confirmWithBankAccountInLink(
+            makeLinkTestParameters(passthroughMode = false, email = email)
+        )
     }
 
     @Test
     fun testLinkPaymentWithBankAccountInPassthroughMode() {
-        val testParameters = makeLinkTestParameters(passthroughMode = true)
-        testDriver.confirmWithBankAccountInLink(testParameters)
+        val email = "email_${UUID.randomUUID()}@email.com"
+
+        testDriver.signUpForLink(makeSignUpTestParameters(passthroughMode = true, email = email))
+
+        testDriver.confirmWithBankAccountInLink(
+            makeLinkTestParameters(passthroughMode = true, email = email)
+        )
     }
 
-    private fun makeLinkTestParameters(passthroughMode: Boolean): TestParameters {
+    private fun makeSignUpTestParameters(passthroughMode: Boolean, email: String): TestParameters {
         return TestParameters.create(
             paymentMethodCode = "card",
+            authorizationAction = null,
+            saveForFutureUseCheckboxVisible = true,
+        ) { settings ->
+            settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
+            settings[MerchantSettingsDefinition] = Merchant.US
+            settings[LinkSettingsDefinition] = true
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
+        }
+    }
+
+    private fun makeLinkTestParameters(passthroughMode: Boolean, email: String): TestParameters {
+        return TestParameters.create(
+            paymentMethodCode = "card",
+            authorizationAction = null,
         ) { settings ->
             settings[SupportedPaymentMethodsSettingsDefinition] = if (passthroughMode) "card" else "card,link"
             settings[MerchantSettingsDefinition] = Merchant.US
             settings[LinkSettingsDefinition] = true
             settings[LinkTypeSettingsDefinition] = LinkType.Native
-            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
+            settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.WithEmail(email)
         }
     }
 }
