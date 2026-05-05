@@ -8,7 +8,11 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
+import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Merchant
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -132,6 +136,45 @@ internal class TestLatency(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                     settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
+                },
+                testConfig(
+                    testName = "test_google_pay_on_link_off_with_no_customer",
+                    isReturningCustomer = false,
+                ) { settings: PlaygroundSettings ->
+                    settings[GooglePaySettingsDefinition] = GooglePayMode.Test
+                    settings[MerchantSettingsDefinition] = Merchant.US
+                    settings[LinkSettingsDefinition] = false
+                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
+                },
+                testConfig(
+                    testName = "test_google_pay_on_link_off_with_ek",
+                    isReturningCustomer = true,
+                ) { settings: PlaygroundSettings ->
+                    settings[GooglePaySettingsDefinition] = GooglePayMode.Test
+                    settings[MerchantSettingsDefinition] = Merchant.US
+                    settings[LinkSettingsDefinition] = false
+                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
+                    settings[CustomerSessionSettingsDefinition] = false
+                },
+                testConfig(
+                    testName = "test_google_pay_on_link_off_with_cs",
+                    isReturningCustomer = true,
+                ) { settings: PlaygroundSettings ->
+                    settings[GooglePaySettingsDefinition] = GooglePayMode.Test
+                    settings[MerchantSettingsDefinition] = Merchant.US
+                    settings[LinkSettingsDefinition] = false
+                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
+                    settings[CustomerSessionSettingsDefinition] = true
+                },
+                testConfig(
+                    testName = "test_google_pay_on_link_on_with_cs",
+                    isReturningCustomer = true,
+                ) { settings: PlaygroundSettings ->
+                    settings[GooglePaySettingsDefinition] = GooglePayMode.Test
+                    settings[MerchantSettingsDefinition] = Merchant.US
+                    settings[LinkSettingsDefinition] = true
+                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
+                    settings[CustomerSessionSettingsDefinition] = true
                 },
             )
         }
