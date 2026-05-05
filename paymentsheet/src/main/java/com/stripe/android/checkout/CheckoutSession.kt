@@ -8,7 +8,10 @@ import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFacto
 import dev.drewhamilton.poko.Poko
 
 /**
- * Represents a Checkout Session and its current state.
+ * A [CheckoutSession] tracks the process of collecting a payment from your customer.
+ *
+ * - [Checkout Sessions Overview](https://docs.stripe.com/payments/checkout)
+ * - [Checkout Sessions API Reference](https://docs.stripe.com/api/checkout/sessions)
  */
 @Poko
 @CheckoutSessionPreview
@@ -19,7 +22,7 @@ class CheckoutSession internal constructor(
      */
     val id: String,
     /**
-     * The status of the checkout session (open, complete, or expired).
+     * The status of the [CheckoutSession] (open, complete, or expired).
      */
     val status: Status,
     /**
@@ -43,7 +46,7 @@ class CheckoutSession internal constructor(
      */
     val totalSummary: TotalSummary?,
     /**
-     * The line items in this checkout session.
+     * The products or services being purchased in this checkout session.
      */
     val lineItems: List<LineItem>,
     /**
