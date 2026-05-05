@@ -414,7 +414,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         return DisplayablePaymentMethod(
             code = PaymentMethod.Type.Link.code,
-            displayName = PaymentsCoreR.string.stripe_link.resolvableString,
+            displayName = link.linkBrand.brandName().resolvableString,
             iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
             iconResourceNight = null,
             lightThemeIconUrl = null,
