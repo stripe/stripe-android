@@ -903,6 +903,17 @@ internal class PlaygroundTestDriver(
         )
     }
 
+    fun signUpForLink(
+        testParameters: TestParameters,
+    ) {
+        confirmNewOrGuestComplete(
+            testParameters = testParameters,
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+    }
+
     @OptIn(ExperimentalTestApi::class)
     fun confirmWithBankAccountInLink(
         testParameters: TestParameters,

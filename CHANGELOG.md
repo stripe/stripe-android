@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][13020](https://github.com/stripe/stripe-android/pull/13020) `CustomerSheet` now correctly filters out unsupported payment method types.
+
 ### CryptoOnramp
 * [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) Added new birth city, birth country, and nationalities properties to KYCInfo.
 * [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) New public types for interacting with Compliance regulations and identifiers.

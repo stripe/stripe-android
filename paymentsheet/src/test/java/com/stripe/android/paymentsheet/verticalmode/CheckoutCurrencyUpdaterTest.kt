@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.utils.FakePaymentElementLoader
@@ -39,10 +40,13 @@ class CheckoutCurrencyUpdaterTest {
         .around(CheckoutInstancesTestRule())
 
     private val checkoutSessionRepository = CheckoutSessionRepository(
+        clientParams = ElementsSessionClientParams(
+            mobileAppId = "com.stripe.android.test",
+            mobileSessionIdProvider = { "test_session" },
+        ),
         stripeNetworkClient = DefaultStripeNetworkClient(),
         publishableKeyProvider = { "pk_test_123" },
         stripeAccountIdProvider = { null },
-        context = ApplicationProvider.getApplicationContext(),
     )
 
     @Test

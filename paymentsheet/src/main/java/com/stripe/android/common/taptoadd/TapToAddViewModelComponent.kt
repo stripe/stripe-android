@@ -5,7 +5,7 @@ import android.content.Context
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.spms.CvcFormHelper
 import com.stripe.android.common.spms.DefaultCvcFormHelper
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
@@ -85,7 +85,7 @@ import javax.inject.Singleton
 
 @Component(
     modules = [
-        ApplicationIdModule::class,
+        ElementsSessionClientParamsModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,
         ConfirmationHandlerModule::class,

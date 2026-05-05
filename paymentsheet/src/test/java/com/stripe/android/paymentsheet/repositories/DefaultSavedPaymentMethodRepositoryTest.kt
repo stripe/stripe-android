@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
@@ -253,10 +252,13 @@ class DefaultSavedPaymentMethodRepositoryTest {
             onRetrievePaymentMethod = { _ -> retrievePaymentMethodResult },
         )
         val checkoutSessionRepository = CheckoutSessionRepository(
+            clientParams = ElementsSessionClientParams(
+                mobileAppId = "com.stripe.android.test",
+                mobileSessionIdProvider = { "test_session" },
+            ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
-            context = ApplicationProvider.getApplicationContext(),
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
