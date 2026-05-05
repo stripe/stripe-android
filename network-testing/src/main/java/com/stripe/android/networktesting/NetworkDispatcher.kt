@@ -99,7 +99,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
     }
 
     private fun extraRequestDescriptions(): String {
-        return unmatchedRequests.joinToString(separator = "\n\n") { it.describe() }
+        return unmatchedRequests.joinToString(separator = "\n\n")
     }
 
     override fun dispatch(request: RecordedRequest): MockResponse {
@@ -162,7 +162,7 @@ private class UnmatchedRequest(
     val bodyParams: Map<String, String>,
     val diagnostics: String,
 ) {
-    fun describe(): String {
+    override fun toString(): String {
         val lines = mutableListOf("$method $url")
         if (bodyParams.isNotEmpty()) {
             lines.add("  Body params: $bodyParams")
