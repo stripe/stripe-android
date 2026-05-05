@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -18,7 +19,8 @@ class WalletButtonsScreenshotTest {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
-                    state = LinkButtonState.Email("email@email.com")
+                    state = LinkButtonState.Email("email@email.com"),
+                    linkBrand = LinkBrand.Link,
                 )
             ),
             buttonsEnabled = true,
@@ -34,7 +36,8 @@ class WalletButtonsScreenshotTest {
         val walletButtonsContent = createWalletButtonsContent(
             walletButtons = listOf(
                 WalletButtonsInteractor.WalletButton.Link(
-                    state = LinkButtonState.Email("email@email.com")
+                    state = LinkButtonState.Email("email@email.com"),
+                    linkBrand = LinkBrand.Link,
                 ),
             ),
             buttonsEnabled = false,

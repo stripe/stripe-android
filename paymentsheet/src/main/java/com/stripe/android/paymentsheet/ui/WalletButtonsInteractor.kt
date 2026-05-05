@@ -80,8 +80,8 @@ internal interface WalletButtonsInteractor {
         @Stable
         data class Link(
             val state: LinkButtonState,
+            val linkBrand: LinkBrand,
             val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-            val linkBrand: LinkBrand = LinkBrand.Link,
         ) : WalletButton {
             override val walletType = WalletType.Link
 
@@ -293,7 +293,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                 WalletButton.Link(
                     state = LinkButtonState.Default,
                     theme = arguments.configuration.walletButtons?.buttonThemes?.link
-                        ?: LinkButtonTheme.DEFAULT
+                        ?: LinkButtonTheme.DEFAULT,
+                    linkBrand = LinkBrand.Link,
                 ),
                 arguments
             )
