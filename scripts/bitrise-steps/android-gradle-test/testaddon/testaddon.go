@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	"github.com/bitrise-io/go-utils/v2/log"
 )
@@ -16,7 +17,7 @@ const (
 	ResultDescriptorFileName = "test-info.json"
 )
 
-func ExportTestAddonArtifact(artifactPth, outputDir string, lastOtherDirIdx int, logger log.Logger) (int, error) {
+func ExportTestAddonArtifact(artifactPth, outputDir, fileNameSuffix string, lastOtherDirIdx int, logger log.Logger) (int, error) {
 	dir := getExportDir(artifactPth)
 
 	if dir == OtherDirName {
@@ -28,20 +29,21 @@ func ExportTestAddonArtifact(artifactPth, outputDir string, lastOtherDirIdx int,
 		}
 	}
 
-	if err := exportTestAddonArtifact(artifactPth, outputDir, dir, logger); err != nil {
+	artifactFileName := appendSuffixToFileName(filepath.Base(artifactPth), fileNameSuffix)
+	if err := exportTestAddonArtifact(artifactPth, outputDir, dir, artifactFileName, logger); err != nil {
 		return lastOtherDirIdx, err
 	} else {
 		src := artifactPth
 		if rel, err := workDirRel(artifactPth); err == nil {
 			src = "./" + rel
 		}
-		logger.Printf("Exporting %s => %s", src, filepath.Join("$BITRISE_TEST_RESULT_DIR", dir, filepath.Base(artifactPth)))
+		logger.Printf("Exporting %s => %s", src, filepath.Join("$BITRISE_TEST_RESULT_DIR", dir, artifactFileName))
 	}
 	return lastOtherDirIdx, nil
 }
 
 // exportTestAddonArtifact exports artifact found at path in directory uniqueDir, rooted at baseDir.
-func exportTestAddonArtifact(path, testDeployDir, testName string, logger log.Logger) error {
+func exportTestAddonArtifact(path, testDeployDir, testName, fileName string, logger log.Logger) error {
 	testResultDeployDir := filepath.Join(testDeployDir, testName)
 
 	if err := os.MkdirAll(testResultDeployDir, os.ModePerm); err != nil {
@@ -59,11 +61,20 @@ func exportTestAddonArtifact(path, testDeployDir, testName string, logger log.Lo
 		}
 	}
 
-	name := filepath.Base(path)
-	if err := copyFile(path, filepath.Join(testResultDeployDir, name), logger); err != nil {
-		return fmt.Errorf("failed to export artifact (%s), error: %v", name, err)
+	if err := copyFile(path, filepath.Join(testResultDeployDir, fileName), logger); err != nil {
+		return fmt.Errorf("failed to export artifact (%s), error: %v", fileName, err)
 	}
 	return nil
+}
+
+func appendSuffixToFileName(fileName, suffix string) string {
+	if suffix == "" {
+		return fileName
+	}
+
+	ext := filepath.Ext(fileName)
+	base := strings.TrimSuffix(fileName, ext)
+	return base + suffix + ext
 }
 
 func generateTestInfoFile(dir string, data []byte) error {

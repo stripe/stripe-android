@@ -135,7 +135,7 @@ func run(logger log.Logger) error {
 			logger.Donef("Gradle command finished successfully")
 		}
 
-		if err := exportResults(cfg, gradleProject, exporter, started, logger); err != nil {
+		if err := exportResults(cfg, gradleProject, exporter, started, attempt, maxAttempts, logger); err != nil {
 			return fmt.Errorf("export test outputs after attempt %d: %w", attempt, err)
 		}
 
@@ -158,8 +158,15 @@ func exportResults(
 	gradleProject gradle.Project,
 	exporter output.Exporter,
 	started time.Time,
+	attempt int,
+	maxAttempts int,
 	logger log.Logger,
 ) error {
+	attemptSuffix := ""
+	if maxAttempts > 1 {
+		attemptSuffix = fmt.Sprintf("-attempt-%d", attempt)
+	}
+
 	logger.Println()
 	logger.Infof("Export HTML results:")
 
@@ -167,6 +174,7 @@ func exportResults(
 	if err != nil {
 		return fmt.Errorf("export HTML: %w", err)
 	}
+	reports = artifactsWithNameSuffix(reports, attemptSuffix)
 
 	if err := exporter.ExportArtifacts(cfg.DeployDir, reports); err != nil {
 		return fmt.Errorf("export HTML artifacts: %w", err)
@@ -179,6 +187,7 @@ func exportResults(
 	if err != nil {
 		return fmt.Errorf("export XML dirs: %w", err)
 	}
+	results = artifactsWithNameSuffix(results, attemptSuffix)
 
 	if err := exporter.ExportArtifacts(cfg.DeployDir, results); err != nil {
 		return fmt.Errorf("export XML artifacts: %w", err)
@@ -197,7 +206,7 @@ func exportResults(
 		if err != nil {
 			logger.Warnf("find test addon XML files: %s", err)
 		} else {
-			exported, err := exporter.ExportTestAddonArtifacts(cfg.TestResultDir, resultXMLs)
+			exported, err := exporter.ExportTestAddonArtifacts(cfg.TestResultDir, resultXMLs, attemptSuffix)
 			if err != nil {
 				logger.Warnf("export test addon artifacts: %s", err)
 			}
@@ -208,6 +217,20 @@ func exportResults(
 	}
 
 	return nil
+}
+
+func artifactsWithNameSuffix(artifacts []gradle.Artifact, suffix string) []gradle.Artifact {
+	if suffix == "" {
+		return artifacts
+	}
+
+	renamed := make([]gradle.Artifact, 0, len(artifacts))
+	for _, artifact := range artifacts {
+		updated := artifact
+		updated.Name += suffix
+		renamed = append(renamed, updated)
+	}
+	return renamed
 }
 
 func getArtifacts(

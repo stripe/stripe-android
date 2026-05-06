@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/bitrise-io/go-android/v2/gradle"
+	"github.com/bitrise-io/go-android/v2/testresult/junitxml"
+	"github.com/bitrise-io/go-steputils/v2/testreport"
 	"github.com/bitrise-io/go-utils/v2/env"
 	"github.com/bitrise-io/go-utils/v2/log"
 	"github.com/bitrise-io/go-utils/v2/pathutil"
 	"github.com/stripe/stripe-android/bitrise-step-gradle-test/testaddon"
-	"github.com/bitrise-io/go-android/v2/testresult/junitxml"
-	"github.com/bitrise-io/go-steputils/v2/testreport"
 )
 
 const (
@@ -23,7 +23,7 @@ const (
 
 type Exporter interface {
 	ExportArtifacts(deployDir string, artifacts []gradle.Artifact) error
-	ExportTestAddonArtifacts(testDeployDir string, artifacts []gradle.Artifact) ([]gradle.Artifact, error)
+	ExportTestAddonArtifacts(testDeployDir string, artifacts []gradle.Artifact, fileNameSuffix string) ([]gradle.Artifact, error)
 	ExportFlakyTestsEnvVar(artifacts []gradle.Artifact) error
 }
 
@@ -71,7 +71,7 @@ func (e exporter) ExportArtifacts(deployDir string, artifacts []gradle.Artifact)
 	return nil
 }
 
-func (e exporter) ExportTestAddonArtifacts(testDeployDir string, artifacts []gradle.Artifact) ([]gradle.Artifact, error) {
+func (e exporter) ExportTestAddonArtifacts(testDeployDir string, artifacts []gradle.Artifact, fileNameSuffix string) ([]gradle.Artifact, error) {
 	if len(artifacts) == 0 {
 		return nil, nil
 	}
@@ -82,7 +82,7 @@ func (e exporter) ExportTestAddonArtifacts(testDeployDir string, artifacts []gra
 
 	for _, artifact := range artifacts {
 		var err error
-		lastOtherDirIdx, err = testaddon.ExportTestAddonArtifact(artifact.Path, testDeployDir, lastOtherDirIdx, e.logger)
+		lastOtherDirIdx, err = testaddon.ExportTestAddonArtifact(artifact.Path, testDeployDir, fileNameSuffix, lastOtherDirIdx, e.logger)
 		if err != nil {
 			exportErrs = append(exportErrs, fmt.Errorf("failed to export test addon artifact (%s): %w", artifact.Path, err))
 		} else {
