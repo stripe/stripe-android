@@ -21,6 +21,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
@@ -179,10 +180,12 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
 
             val mandateAllowed = metadata.mandateAllowed(CardDefinition.type)
             if (metadata.forceSetupFutureUseBehaviorAndNewMandate) {
+                val linkBrand = metadata.linkState?.configuration?.linkBrand ?: return@buildList
                 add(
                     CombinedLinkMandateElement(
                         identifier = IdentifierSpec.Generic("card_mandate"),
                         merchantName = metadata.merchantName,
+                        linkBrand = linkBrand,
                         signupMode = signupMode,
                         isLinkUI = arguments.isLinkUI,
                         canChangeSaveForFutureUse = canChangeSaveForFutureUsage,
@@ -298,6 +301,7 @@ internal class CombinedLinkMandateElement(
     signupMode: LinkSignupMode?,
     canChangeSaveForFutureUse: Boolean,
     private val merchantName: String,
+    private val linkBrand: LinkBrand,
     private val linkSignupStateFlow: StateFlow<InlineSignupViewState?>,
     private val isLinkUI: Boolean,
 ) : RenderableFormElement(
@@ -326,13 +330,13 @@ internal class CombinedLinkMandateElement(
             mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
                 stringResource(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3,
-                    formatArgs = arrayOf(merchantName)
-                ).replaceHyperlinks()
+                    formatArgs = arrayOf(merchantName, linkBrand.brandName())
+                ).replaceHyperlinks(linkBrand)
             } else {
                 stringResource(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,
                     formatArgs = arrayOf(merchantName)
-                ).replaceHyperlinks()
+                ).replaceHyperlinks(linkBrand)
             },
             textAlign = if (isLinkUI) TextAlign.Center else TextAlign.Start,
             modifier = Modifier.padding(top = topPadding)
