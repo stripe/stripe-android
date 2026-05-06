@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -254,7 +253,7 @@ internal class PaymentSheetConfirmationTokenTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart("confirmation_token", "ctoken_example"),
-            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+            bodyPart("return_url", "stripesdk://payment_return_url/com.stripe.android.paymentsheet.test"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -270,7 +269,7 @@ internal class PaymentSheetConfirmationTokenTest {
             method("POST"),
             path("/v1/setup_intents/seti_example/confirm"),
             bodyPart("confirmation_token", "ctoken_example"),
-            bodyPart("return_url", urlEncode("stripesdk://payment_return_url/com.stripe.android.paymentsheet.test")),
+            bodyPart("return_url", "stripesdk://payment_return_url/com.stripe.android.paymentsheet.test"),
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
         }
@@ -279,11 +278,11 @@ internal class PaymentSheetConfirmationTokenTest {
     private fun clientContext(isLiveMode: Boolean, isPayment: Boolean = true): RequestMatcher {
         // The client_context param is only sent in test mode when creating a confirmation token
         return if (isLiveMode) {
-            not(hasBodyPart(urlEncode("client_context[mode]")))
+            not(hasBodyPart("client_context[mode]"))
         } else {
             // we only verify client context is not null here
             bodyPart(
-                urlEncode("client_context[mode]"),
+                "client_context[mode]",
                 if (isPayment) {
                     "payment"
                 } else {
@@ -296,11 +295,11 @@ internal class PaymentSheetConfirmationTokenTest {
     private fun cvcRecollection(paymentMethodType: PaymentMethodType): RequestMatcher {
         return if (paymentMethodType == PaymentMethodType.SavedCardWithCvcRecollection) {
             bodyPart(
-                urlEncode("payment_method_options[card][cvc]"),
+                "payment_method_options[card][cvc]",
                 "123"
             )
         } else {
-            not(hasBodyPart(urlEncode("payment_method_options[card][cvc]")))
+            not(hasBodyPart("payment_method_options[card][cvc]"))
         }
     }
 
@@ -311,23 +310,23 @@ internal class PaymentSheetConfirmationTokenTest {
         return if (paymentMethodType == PaymentMethodType.CashAppWithSetupFutureUsage) {
             RequestMatchers.composite(
                 bodyPart(
-                    urlEncode("mandate_data[customer_acceptance][type]"),
+                    "mandate_data[customer_acceptance][type]",
                     "online"
                 ),
                 bodyPart(
-                    urlEncode("setup_future_usage"),
-                    urlEncode("off_session")
+                    "setup_future_usage",
+                    "off_session"
                 ),
             )
         } else {
             RequestMatchers.composite(
-                not(hasBodyPart(urlEncode("mandate_data[customer_acceptance][type]"))),
+                not(hasBodyPart("mandate_data[customer_acceptance][type]")),
                 if (isPayment) {
-                    not(hasBodyPart(urlEncode("setup_future_usage")))
+                    not(hasBodyPart("setup_future_usage"))
                 } else {
                     bodyPart(
-                        urlEncode("setup_future_usage"),
-                        urlEncode("off_session")
+                        "setup_future_usage",
+                        "off_session"
                     )
                 }
             )

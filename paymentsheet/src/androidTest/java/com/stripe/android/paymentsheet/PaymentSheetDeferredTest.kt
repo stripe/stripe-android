@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -75,7 +74,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
@@ -94,14 +93,14 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_options[card][setup_future_usage]"),
+                    "payment_method_options[card][setup_future_usage]",
                     "off_session"
                 )
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -267,7 +266,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -285,14 +284,14 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_options[card][setup_future_usage]"),
+                    "payment_method_options[card][setup_future_usage]",
                     "off_session"
                 )
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -410,7 +409,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -427,13 +426,13 @@ internal class PaymentSheetDeferredTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(
-                urlEncode("payment_method_options[card][setup_future_usage]"),
+                "payment_method_options[card][setup_future_usage]",
                 "off_session"
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -480,7 +479,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -527,7 +526,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -580,7 +579,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
             clientAttributionMetadataParamsForDeferredIntent(),
         ) { response ->
@@ -598,13 +597,13 @@ internal class PaymentSheetDeferredTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(
-                urlEncode("payment_method_options[konbini][confirmation_number]"),
+                "payment_method_options[konbini][confirmation_number]",
                 phone
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -649,7 +648,7 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -667,14 +666,14 @@ internal class PaymentSheetDeferredTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_options[card][setup_future_usage]"),
+                    "payment_method_options[card][setup_future_usage]",
                     "off_session"
                 )
             ),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet;deferred-intent;autopm")
                 )
             ),
         ) { response ->

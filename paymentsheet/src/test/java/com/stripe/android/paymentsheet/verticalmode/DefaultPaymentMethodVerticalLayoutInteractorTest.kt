@@ -1702,7 +1702,47 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
-    private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
+    @Test
+    fun `shouldExpandOnClick is false when form type is UserInteractionRequired`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired }
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val pm = paymentMethods.first { it.code == "klarna" }
+                assertThat(pm.shouldExpandOnClick).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun `shouldExpandOnClick is true when form type is not UserInteractionRequired`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata,
+            formTypeForCode = { FormHelper.FormType.Empty }
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val pm = paymentMethods.first { it.code == "affirm" }
+                assertThat(pm.shouldExpandOnClick).isTrue()
+            }
+        }
+    }
 
     private val linkAndGooglePayWalletState = WalletsState(
         link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -1746,7 +1786,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialSelection: PaymentSelection? = null,
         initialIsCurrentScreen: Boolean = false,
         incentive: PaymentMethodIncentive? = null,
-        formTypeForCode: (code: String) -> FormHelper.FormType = { notImplemented() },
+        formTypeForCode: (code: String) -> FormHelper.FormType = { FormHelper.FormType.Empty },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
         canUpdateFullPaymentMethodDetails: Boolean = false,

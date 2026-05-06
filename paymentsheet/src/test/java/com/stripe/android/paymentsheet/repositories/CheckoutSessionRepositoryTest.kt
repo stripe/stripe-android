@@ -6,7 +6,6 @@ import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
@@ -38,9 +37,9 @@ class CheckoutSessionRepositoryTest {
     fun `init sends elements_session_client params`() = runTest {
         val expectedSessionId = AnalyticsRequestFactory.sessionId.toString()
         networkRule.checkoutInit(
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
-            bodyPart(urlEncode("elements_session_client[mobile_session_id]"), expectedSessionId),
-            bodyPart(urlEncode("elements_session_client[mobile_app_id]"), clientParams.mobileAppId),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+            bodyPart("elements_session_client[mobile_session_id]", expectedSessionId),
+            bodyPart("elements_session_client[mobile_app_id]", clientParams.mobileAppId),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -57,7 +56,7 @@ class CheckoutSessionRepositoryTest {
     fun `updateCurrency sends currency code and returns response on success`() = runTest {
         networkRule.checkoutUpdate(
             bodyPart("updated_currency", "eur"),
-            bodyPart(urlEncode("elements_session_client[is_aggregation_expected]"), "true"),
+            bodyPart("elements_session_client[is_aggregation_expected]", "true"),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }

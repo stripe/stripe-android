@@ -23,8 +23,11 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodMessageLearnMore
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.ViewActionRecorder
@@ -175,7 +178,8 @@ internal class PaymentMethodLayoutUITest(
                             customerSavedPaymentMethods = emptyList(),
                             incentive = null,
                             onClick = { onClickCalled = true },
-                            promotionProvider = { null }
+                            promotionProvider = { null },
+                            shouldExpandOnClick = true
                         ),
                 ),
                 displayedSavedPaymentMethod = null,
@@ -187,6 +191,52 @@ internal class PaymentMethodLayoutUITest(
             assertThat(onClickCalled).isTrue()
             assertThat(viewActionRecorder.viewActions).isEmpty()
             composeRule.onNodeWithText("Pay over time with Affirm").isDisplayed()
+        }
+    }
+
+    @Test
+    fun does_not_expand_if_shouldExpandOnClick_is_false() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        var onClickCalled = false
+        runScenario(
+            initialState = createState(
+                displayablePaymentMethods = listOf(
+                    KlarnaDefinition.uiDefinitionFactory(metadata).supportedPaymentMethod(
+                        metadata = metadata,
+                        definition = KlarnaDefinition,
+                        sharedDataSpecs = emptyList()
+                    )!!
+                        .asDisplayablePaymentMethod(
+                            customerSavedPaymentMethods = emptyList(),
+                            incentive = null,
+                            onClick = { onClickCalled = true },
+                            shouldExpandOnClick = false,
+                            promotionProvider = {
+                                PaymentMethodMessagePromotion(
+                                    paymentMethodType = "klarna",
+                                    message = "This is a message",
+                                    learnMore = PaymentMethodMessageLearnMore(
+                                        message = "See plans",
+                                        url = ""
+                                    )
+                                )
+                            }
+                        ),
+                ),
+                displayedSavedPaymentMethod = null,
+            )
+        ) {
+            assertThat(onClickCalled).isFalse()
+            composeRule.onNodeWithText("This is a message").isNotDisplayed()
+            composeRule.onNodeWithTag(TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON + "_klarna").performClick()
+            assertThat(onClickCalled).isTrue()
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+            composeRule.onNodeWithText("This is a message").isNotDisplayed()
         }
     }
 

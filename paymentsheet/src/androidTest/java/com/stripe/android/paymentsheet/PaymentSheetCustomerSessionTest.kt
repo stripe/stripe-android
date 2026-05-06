@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -187,7 +186,7 @@ class PaymentSheetCustomerSessionTest {
         return networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_data[allow_redisplay]"), allowRedisplay)
+            bodyPart("payment_method_data[allow_redisplay]", allowRedisplay)
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -197,7 +196,7 @@ class PaymentSheetCustomerSessionTest {
         return networkRule.enqueue(
             method("POST"),
             path("/v1/setup_intents/seti_example/confirm"),
-            bodyPart(urlEncode("payment_method_data[allow_redisplay]"), allowRedisplay)
+            bodyPart("payment_method_data[allow_redisplay]", allowRedisplay)
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
         }

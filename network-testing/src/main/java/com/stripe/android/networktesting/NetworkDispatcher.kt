@@ -1,6 +1,5 @@
 package com.stripe.android.networktesting
 
-import com.stripe.android.networktesting.RequestMatchers.composite
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
@@ -12,12 +11,12 @@ import kotlin.time.Duration.Companion.milliseconds
 
 internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dispatcher() {
     private val enqueuedResponses: Queue<Entry> = ConcurrentLinkedQueue()
-    private val extraRequests: MutableList<RecordedRequest> = Collections.synchronizedList(mutableListOf())
+    private val unmatchedRequests: MutableList<UnmatchedRequest> = Collections.synchronizedList(mutableListOf())
 
     fun enqueue(vararg requestMatcher: RequestMatcher, responseFactory: (MockResponse) -> Unit) {
         validateEnqueueState()
         enqueuedResponses.add(
-            Entry(composite(*requestMatcher)) {
+            Entry(RequestMatchers.composite(*requestMatcher)) {
                 val response = MockResponse()
                 response.setResponseCode(200)
                 responseFactory(response)
@@ -32,7 +31,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
     ) {
         validateEnqueueState()
         enqueuedResponses.add(
-            Entry(composite(*requestMatcher)) {
+            Entry(RequestMatchers.composite(*requestMatcher)) {
                 val response = MockResponse()
                 response.setResponseCode(200)
                 responseFactory(it, response)
@@ -52,7 +51,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
 
     fun clear() {
         enqueuedResponses.clear()
-        extraRequests.clear()
+        unmatchedRequests.clear()
     }
 
     fun validate() {
@@ -70,13 +69,13 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
     }
 
     private fun addExtraRequestsToExceptionMessage(exceptionMessage: StringBuilder) {
-        if (extraRequests.isNotEmpty()) {
+        if (unmatchedRequests.isNotEmpty()) {
             if (exceptionMessage.isNotEmpty()) {
                 exceptionMessage.append('\n')
             }
             exceptionMessage.append(
-                "Production code made extra requests that your test did not enqueue. Remaining: " +
-                    "${extraRequests.size}.\n${extraRequestDescriptions()}"
+                "Production code made extra requests that your test did not enqueue. " +
+                    "Remaining: ${unmatchedRequests.size}.\n${extraRequestDescriptions()}"
             )
         }
     }
@@ -100,7 +99,7 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
     }
 
     private fun extraRequestDescriptions(): String {
-        return extraRequests.joinToString { it.requestUrl.toString() }
+        return unmatchedRequests.joinToString(separator = "\n\n") { it.describe() }
     }
 
     override fun dispatch(request: RecordedRequest): MockResponse {
@@ -114,12 +113,41 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
             return capturedEntry.responseFactory(testRequest)
         }
 
-        val exception = RequestNotFoundException("$request not mocked\n${testRequest.bodyText}")
-        println(exception)
+        val diagnostics = buildNearMissDiagnostics(testRequest)
+        val message = "$request not mocked\n" +
+            "Request body params: ${testRequest.bodyParams}\n" +
+            diagnostics
+        System.err.println("NetworkDispatcher: $message")
 
-        extraRequests.add(request)
+        unmatchedRequests.add(
+            UnmatchedRequest(
+                url = request.requestUrl.toString(),
+                method = request.method ?: "UNKNOWN",
+                bodyParams = testRequest.bodyParams,
+                diagnostics = diagnostics,
+            )
+        )
 
-        throw exception
+        return MockResponse().setResponseCode(UNMATCHED_RESPONSE_CODE).setBody("Request not mocked")
+    }
+
+    private fun buildNearMissDiagnostics(request: TestRecordedRequest): String {
+        if (enqueuedResponses.isEmpty()) return "No enqueued mocks to match against."
+
+        val nearestMiss = enqueuedResponses.maxByOrNull { entry ->
+            val matcher = entry.requestMatcher
+            if (matcher is CompositeRequestMatcher) matcher.passCount(request) else 0
+        } ?: return "No enqueued mocks to match against."
+
+        val matcher = nearestMiss.requestMatcher
+        val lines = mutableListOf("Nearest mock: $matcher")
+        if (matcher is CompositeRequestMatcher) {
+            lines.add(matcher.diagnose(request))
+        } else {
+            val matched = matcher.matches(request)
+            lines.add(if (matched) "  + PASS" else "  - FAIL")
+        }
+        return lines.joinToString("\n")
     }
 }
 
@@ -127,5 +155,23 @@ private class Entry(
     val requestMatcher: RequestMatcher,
     val responseFactory: (TestRecordedRequest) -> MockResponse
 )
+
+private class UnmatchedRequest(
+    val url: String,
+    val method: String,
+    val bodyParams: Map<String, String>,
+    val diagnostics: String,
+) {
+    fun describe(): String {
+        val lines = mutableListOf("$method $url")
+        if (bodyParams.isNotEmpty()) {
+            lines.add("  Body params: $bodyParams")
+        }
+        lines.add("  $diagnostics")
+        return lines.joinToString("\n")
+    }
+}
+
+private const val UNMATCHED_RESPONSE_CODE = 500
 
 internal class RequestNotFoundException(message: String) : Exception(message)

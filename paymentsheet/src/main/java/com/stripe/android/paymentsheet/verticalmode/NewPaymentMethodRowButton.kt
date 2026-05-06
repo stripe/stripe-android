@@ -44,7 +44,8 @@ internal fun NewPaymentMethodRowButton(
         modifier = modifier.testTag("${TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON}_${displayablePaymentMethod.code}"),
         appearance = appearance,
         trailingContent = trailingContent,
-        promotionProvider = displayablePaymentMethod.promotionProvider
+        promotionProvider = displayablePaymentMethod.promotionProvider,
+        shouldExpandOnClick = displayablePaymentMethod.shouldExpandOnClick
     )
 }
 
@@ -63,7 +64,8 @@ internal fun NewPaymentMethodRowButton(
     modifier: Modifier = Modifier,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
     appearance: Embedded = Embedded(Embedded.RowStyle.FloatingButton.default),
-    promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null
+    promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
+    shouldExpandOnClick: Boolean = false
 ) {
     PaymentMethodRowButton(
         isEnabled = isEnabled,
@@ -89,5 +91,6 @@ internal fun NewPaymentMethodRowButton(
         appearance = appearance,
         trailingContent = trailingContent,
         promotionProvider = promotionProvider,
+        shouldExpandOnClick = shouldExpandOnClick
     )
 }
