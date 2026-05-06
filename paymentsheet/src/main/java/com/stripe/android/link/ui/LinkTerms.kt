@@ -31,18 +31,19 @@ internal fun LinkTerms(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
 ) {
+    val brandName = linkBrand.brandName()
     val text = when (type) {
         LinkTermsType.InlineOptionalWithPhoneFirst -> {
-            stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
+            stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number, brandName)
         }
         LinkTermsType.InlineOptional -> {
-            stringResource(R.string.stripe_sign_up_terms_alternative)
+            stringResource(R.string.stripe_sign_up_terms_alternative, brandName)
         }
         LinkTermsType.Inline -> {
-            stringResource(R.string.stripe_sign_up_terms)
+            stringResource(R.string.stripe_sign_up_terms, brandName)
         }
         LinkTermsType.InlineWithDefaultOptIn -> {
-            "<img src=\"link_logo\"> • " + stringResource(R.string.stripe_sign_up_terms_default_opt_in)
+            "<img src=\"link_logo\"> • " + stringResource(R.string.stripe_sign_up_terms_default_opt_in, brandName)
         }
         LinkTermsType.Full -> {
             stringResource(R.string.stripe_link_sign_up_terms)
@@ -69,7 +70,7 @@ internal fun LinkTerms(
     }
 
     Mandate(
-        mandateText = text.replaceHyperlinks(),
+        mandateText = text.replaceHyperlinks(linkBrand),
         modifier = modifier,
         textAlign = textAlign,
         imageAlign = PlaceholderVerticalAlign.TextCenter,
@@ -77,15 +78,15 @@ internal fun LinkTerms(
     )
 }
 
-internal fun String.replaceHyperlinks() = this.replace(
+internal fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
     "<terms>",
-    "<a href=\"https://link.com/terms\">"
+    "<a href=\"${linkBrand.termsUrl()}\">"
 ).replace("</terms>", "</a>").replace(
     "<privacy>",
-    "<a href=\"https://link.com/privacy\">"
+    "<a href=\"${linkBrand.privacyUrl()}\">"
 ).replace("</privacy>", "</a>").replace(
     "<link>",
-    "<a href=\"https://link.com\">"
+    "<a href=\"${linkBrand.baseUrl()}\">"
 ).replace("</link>", "</a>")
 
 @Preview
