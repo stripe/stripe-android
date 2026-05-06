@@ -27,6 +27,7 @@ import okhttp3.mockwebserver.MockResponse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.random.Random
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(TapToAddPreview::class)
@@ -219,6 +220,8 @@ internal class TapToAddTest {
         }
 
         verticalModePage.waitUntilMissing()
+
+        assertThat(Random.nextInt(1, 3)).isEqualTo(2)
     }
 
     @Test
