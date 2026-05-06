@@ -150,7 +150,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testCollectKycDataTrimsNationalities() {
+    fun testCollectKycDataNormalizesNationalities() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -169,6 +169,7 @@ class CryptoApiRepositoryTest {
                     dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
                     address = PaymentSheet.Address(city = "Orlando", state = "FL"),
                     nationalities = listOf(
+                        CountryCode("  "),
                         CountryCode(" IE "),
                         CountryCode("\nFR\t"),
                     )
@@ -181,6 +182,41 @@ class CryptoApiRepositoryTest {
             assertThat(result.isSuccess).isTrue()
             assertThat(apiRequestArgumentCaptor.firstValue.params?.get("nationalities"))
                 .isEqualTo(listOf("IE", "FR"))
+        }
+    }
+
+    @Test
+    fun testCollectKycDataOmitsNationalitiesWhenAllValuesAreBlank() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                "{}",
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.collectKycData(
+                KycInfo(
+                    firstName = "Test",
+                    lastName = "User",
+                    idNumber = "999-88-7777",
+                    dateOfBirth = DateOfBirth(day = 1, month = 3, year = 1975),
+                    address = PaymentSheet.Address(city = "Orlando", state = "FL"),
+                    nationalities = listOf(
+                        CountryCode(" "),
+                        CountryCode("\n\t"),
+                    )
+                ),
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            assertThat(result.isSuccess).isTrue()
+            assertThat(apiRequestArgumentCaptor.firstValue.params?.get("nationalities"))
+                .isNull()
         }
     }
 
