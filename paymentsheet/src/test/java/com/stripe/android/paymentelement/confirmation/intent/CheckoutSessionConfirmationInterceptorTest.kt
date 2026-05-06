@@ -454,6 +454,7 @@ class CheckoutSessionConfirmationInterceptorTest {
                 elementsSessionConfigId = "test_session_id",
                 paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                 paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+                checkoutSessionId = null,
             ),
             context = applicationContext,
             stripeRepository = stripeRepository,
