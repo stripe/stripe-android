@@ -16,11 +16,15 @@ import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
+import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityArgs
+import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityContract
+import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
@@ -93,6 +97,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             callback = ::handleVerifyKycResult
         )
 
+    private val crsCarfDeclarationResultLauncher: ActivityResultLauncher<CrsCarfDeclarationActivityArgs> =
+        activity.activityResultRegistry.register(
+            key = "OnrampPresenterCoordinator_CrsCarfResultLauncher($onrampCallbackIdentifier)",
+            contract = CrsCarfDeclarationActivityContract(),
+            callback = ::handleCrsCarfDeclarationResult
+        )
+
     init {
         // Observe Link controller state
         lifecycleOwner.lifecycleScope.launch {
@@ -115,6 +126,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 override fun onDestroy(owner: LifecycleOwner) {
                     googlePayActivityResultLauncher.unregister()
                     verifyKycResultLauncher.unregister()
+                    crsCarfDeclarationResultLauncher.unregister()
 
                     if (activity.isFinishing) {
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
@@ -159,6 +171,23 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 is OnrampStartKycVerificationResult.Failed -> {
                     onrampCallbacksState.verifyKycCallback.onResult(
                         OnrampVerifyKycInfoResult.Failed(verification.error)
+                    )
+                }
+            }
+        }
+    }
+
+    fun presentCrsCarfDeclaration() {
+        coroutineScope.launch {
+            when (val result = interactor.startCrsCarfDeclaration()) {
+                is OnrampStartCrsCarfDeclarationResult.Completed -> {
+                    crsCarfDeclarationResultLauncher.launch(
+                        CrsCarfDeclarationActivityArgs(result.declaration, result.appearance)
+                    )
+                }
+                is OnrampStartCrsCarfDeclarationResult.Failed -> {
+                    onrampCallbacksState.crsCarfDeclarationCallback?.onResult(
+                        OnrampCrsCarfDeclarationResult.Failed(result.error)
                     )
                 }
             }
@@ -286,6 +315,14 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         coroutineScope.launch {
             onrampCallbacksState.verifyKycCallback.onResult(
                 interactor.handleVerifyKycResult(result)
+            )
+        }
+    }
+
+    private fun handleCrsCarfDeclarationResult(result: CrsCarfDeclarationActivityResult) {
+        coroutineScope.launch {
+            onrampCallbacksState.crsCarfDeclarationCallback?.onResult(
+                interactor.handleCrsCarfDeclarationResult(result)
             )
         }
     }

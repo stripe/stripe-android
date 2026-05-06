@@ -17,9 +17,12 @@ import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.paymentsheet.PaymentSheet
 import javax.inject.Inject
 
@@ -31,6 +34,7 @@ import javax.inject.Inject
  * @param presenterComponentFactory Factory for creating presenter components.
  */
 @ExperimentalCryptoOnramp
+@Suppress("TooManyFunctions")
 class OnrampCoordinator @Inject internal constructor(
     private val interactor: OnrampInteractor,
     private val presenterComponentFactory: OnrampPresenterComponent.Factory,
@@ -109,6 +113,26 @@ class OnrampCoordinator @Inject internal constructor(
      */
     suspend fun attachKycInfo(info: KycInfo): OnrampAttachKycInfoResult {
         return interactor.attachKycInfo(info)
+    }
+
+    /**
+     * Retrieves compliance identifiers still required for MiCA and CRS/CARF compliance.
+     * Requires an authenticated Link user.
+     */
+    suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
+        return interactor.retrieveMissingIdentifiers()
+    }
+
+    /**
+     * Submits compliance identifiers for MiCA and CRS/CARF compliance.
+     * Requires an authenticated Link user.
+     *
+     * @param identifiers The compliance identifiers to submit.
+     */
+    suspend fun submitIdentifiers(
+        identifiers: List<ComplianceIdentifier>
+    ): OnrampSubmitIdentifiersResult {
+        return interactor.submitIdentifiers(identifiers)
     }
 
     /**
@@ -204,6 +228,14 @@ class OnrampCoordinator @Inject internal constructor(
             onrampSessionId: String,
         ) {
             coordinator.performCheckout(onrampSessionId = onrampSessionId)
+        }
+
+        /**
+         * Presents the CRS/CARF declaration screen and records acceptance when the user confirms.
+         * The result will be delivered through the CRS/CARF declaration callback provided in OnrampCallbacks.
+         */
+        fun presentCrsCarfDeclaration() {
+            coordinator.presentCrsCarfDeclaration()
         }
     }
 
