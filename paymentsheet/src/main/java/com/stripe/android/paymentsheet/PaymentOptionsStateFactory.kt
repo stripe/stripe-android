@@ -17,6 +17,7 @@ internal object PaymentOptionsStateFactory {
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
+        linkBrand: LinkBrand,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
         isCbcEligible: Boolean,
         defaultPaymentMethodId: String?,
@@ -24,7 +25,7 @@ internal object PaymentOptionsStateFactory {
         return listOfNotNull(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
-            PaymentOptionsItem.Link.takeIf { showLink }
+            PaymentOptionsItem.Link(linkBrand).takeIf { showLink }
         ) + paymentMethods.map {
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(
@@ -50,6 +51,7 @@ internal object PaymentOptionsStateFactory {
         paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
+        linkBrand: LinkBrand,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
         isCbcEligible: Boolean,
@@ -59,6 +61,7 @@ internal object PaymentOptionsStateFactory {
             paymentMethods = paymentMethods,
             showGooglePay = showGooglePay,
             showLink = showLink,
+            linkBrand = linkBrand,
             nameProvider = nameProvider,
             isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = defaultPaymentMethodId
@@ -97,15 +100,11 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
     }
 }
 
-internal fun PaymentOptionsItem.toPaymentSelection(linkBrand: LinkBrand?): PaymentSelection? {
+internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
     return when (this) {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
-        is PaymentOptionsItem.Link -> linkBrand?.let { PaymentSelection.Link(it) }
+        is PaymentOptionsItem.Link -> PaymentSelection.Link(linkBrand)
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
     }
-}
-
-internal fun PaymentOptionsItem.Link.toPaymentSelection(linkBrand: LinkBrand): PaymentSelection.Link {
-    return PaymentSelection.Link(brand = linkBrand)
 }

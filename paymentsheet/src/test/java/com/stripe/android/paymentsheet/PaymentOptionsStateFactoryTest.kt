@@ -14,9 +14,9 @@ class PaymentOptionsStateFactoryTest {
     fun `non-Link payment options convert without LinkBrand`() {
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
-        assertThat(PaymentOptionsItem.AddCard.toPaymentSelection(linkBrand = null)).isNull()
+        assertThat(PaymentOptionsItem.AddCard.toPaymentSelection()).isNull()
         assertThat(
-            PaymentOptionsItem.GooglePay.toPaymentSelection(linkBrand = null)
+            PaymentOptionsItem.GooglePay.toPaymentSelection()
         ).isEqualTo(PaymentSelection.GooglePay)
         assertThat(
             PaymentOptionsItem.SavedPaymentMethod(
@@ -24,13 +24,13 @@ class PaymentOptionsStateFactoryTest {
                     displayName = "Card".resolvableString,
                     paymentMethod = savedPaymentMethod,
                 )
-            ).toPaymentSelection(linkBrand = null)
+            ).toPaymentSelection()
         ).isEqualTo(PaymentSelection.Saved(savedPaymentMethod))
     }
 
     @Test
     fun `Link payment option conversion requires LinkBrand`() {
-        assertThat(PaymentOptionsItem.Link.toPaymentSelection(LinkBrand.Notlink))
+        assertThat(PaymentOptionsItem.Link(linkBrand = LinkBrand.Notlink).toPaymentSelection())
             .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Notlink))
     }
 
@@ -43,6 +43,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = true,
             showLink = true,
+            linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
@@ -61,6 +62,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
+            linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
@@ -124,6 +126,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
+            linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = isCbcEligible,
@@ -174,6 +177,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = true,
             showLink = true,
+            linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
@@ -195,6 +199,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
+            linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,

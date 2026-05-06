@@ -27,6 +27,7 @@ import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
@@ -152,6 +153,7 @@ internal fun SelectPaymentMethod(
             paymentMethods = viewState.savedPaymentMethods,
             showGooglePay = viewState.showGooglePay,
             showLink = false,
+            linkBrand = LinkBrand.Link,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
             isCbcEligible = viewState.isCbcEligible,
