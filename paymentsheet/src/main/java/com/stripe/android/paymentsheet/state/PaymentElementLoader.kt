@@ -591,6 +591,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production)
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
         metadata: PaymentMethodMetadata,

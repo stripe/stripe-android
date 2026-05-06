@@ -15,7 +15,9 @@ class PaymentOptionsStateFactoryTest {
         val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
 
         assertThat(PaymentOptionsItem.AddCard.toPaymentSelection(linkBrand = null)).isNull()
-        assertThat(PaymentOptionsItem.GooglePay.toPaymentSelection(linkBrand = null)).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(
+            PaymentOptionsItem.GooglePay.toPaymentSelection(linkBrand = null)
+        ).isEqualTo(PaymentSelection.GooglePay)
         assertThat(
             PaymentOptionsItem.SavedPaymentMethod(
                 DisplayableSavedPaymentMethod.create(

@@ -310,7 +310,7 @@ private fun SavedPaymentMethodTab(
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
-                linkBrand = requireNotNull(linkBrand),
+                linkBrand = requireNotNull(linkBrand), // non-null: Link tab only shown when linkState != null
                 onItemSelected = onItemSelected,
                 modifier = modifier,
             )
