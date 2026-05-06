@@ -68,6 +68,7 @@ import com.stripe.android.link.ui.ScrollableTopLevelColumn
 import com.stripe.android.link.ui.SecondaryButton
 import com.stripe.android.link.utils.LinkScreenTransition
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.payments.financialconnections.getIntentBuilder
 import com.stripe.android.paymentsheet.R
@@ -269,7 +270,7 @@ private fun PaymentDetailsSection(
 
         AnimatedVisibility(visible = state.mandate != null) {
             state.mandate?.let { mandate ->
-                LinkMandate(mandate.resolve())
+                LinkMandate(mandate.resolve(), state.linkBrand)
             }
         }
 
@@ -766,9 +767,9 @@ private fun AddPaymentMethodRow(
 }
 
 @Composable
-private fun LinkMandate(text: String) {
+private fun LinkMandate(text: String, linkBrand: LinkBrand) {
     Html(
-        html = text.replaceHyperlinks(),
+        html = text.replaceHyperlinks(linkBrand),
         color = LinkTheme.colors.textTertiary,
         style = LinkTheme.typography.caption.copy(
             textAlign = TextAlign.Center,
@@ -892,9 +893,9 @@ private fun rememberFinancialConnectionsSheetInternal(
     }
 }
 
-private fun String.replaceHyperlinks() = this.replace(
+private fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
     "<terms>",
-    "<a href=\"https://link.com/terms/ach-authorization\">"
+    "<a href=\"${linkBrand.achAuthorizationUrl()}\">"
 ).replace("</terms>", "</a>")
 
 private const val CHEVRON_ICON_ROTATION = 180f
