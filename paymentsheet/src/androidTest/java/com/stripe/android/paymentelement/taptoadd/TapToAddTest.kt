@@ -221,7 +221,7 @@ internal class TapToAddTest {
 
         verticalModePage.waitUntilMissing()
 
-        assertThat(Random.nextInt(1, 3)).isEqualTo(2)
+        assertThat(Random.nextInt(1, 10)).isEqualTo(3)
     }
 
     @Test
