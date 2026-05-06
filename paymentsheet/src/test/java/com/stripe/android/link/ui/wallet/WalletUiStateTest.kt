@@ -14,6 +14,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -358,6 +359,7 @@ class WalletUiStateTest {
             collectMissingBillingDetailsForExistingPaymentMethods,
             signupToggleEnabled = signupToggleEnabled,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            linkBrand = LinkBrand.Link,
         )
     }
 
