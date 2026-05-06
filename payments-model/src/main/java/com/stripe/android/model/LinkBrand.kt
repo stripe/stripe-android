@@ -20,6 +20,17 @@ enum class LinkBrand(val value: String) {
         Notlink -> "Notlink"
     }
 
+    fun baseUrl(): String = when (this) {
+        Link -> "https://link.com"
+        Notlink -> "https://onelink.com"
+    }
+
+    fun termsUrl(): String = "${baseUrl()}/terms"
+
+    fun privacyUrl(): String = "${baseUrl()}/privacy"
+
+    fun achAuthorizationUrl(): String = "${baseUrl()}/terms/ach-authorization"
+
     internal object Serializer :
         EnumIgnoreUnknownSerializer<LinkBrand>(entries.toTypedArray(), Link)
 }
