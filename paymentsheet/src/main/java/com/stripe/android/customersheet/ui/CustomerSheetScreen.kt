@@ -161,6 +161,7 @@ internal fun SelectPaymentMethod(
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = paymentOptionsState.items,
             selectedPaymentOptionsItem = paymentOptionsState.selectedItem,
+            linkBrand = null, // Link is unsupported in CustomerSheet
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,
             onAddCardPressed = { viewActionHandler(CustomerSheetViewAction.OnAddCardPressed) },

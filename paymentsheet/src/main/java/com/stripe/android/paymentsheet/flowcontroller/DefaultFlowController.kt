@@ -84,6 +84,7 @@ import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Named
 
+@Suppress("LargeClass")
 @OptIn(WalletButtonsPreview::class)
 @FlowControllerScope
 internal class DefaultFlowController @Inject internal constructor(
@@ -423,11 +424,18 @@ internal class DefaultFlowController @Inject internal constructor(
                     showPaymentOptionList(it, viewModel.paymentSelection)
                 }
             }
-            is LinkActivityResult.Completed -> with(Link(selectedPayment = result.selectedPayment)) {
-                viewModel.paymentSelection = this
+            is LinkActivityResult.Completed -> {
+                // Should always have Link configuration here.
+                val linkConfiguration = viewModel.state?.linkConfiguration
+                    ?: return
+                val selection = Link(
+                    brand = linkConfiguration.linkBrand,
+                    selectedPayment = result.selectedPayment,
+                )
+                viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(this),
+                        paymentOption = paymentOptionFactory.create(selection),
                         didCancel = false,
                     )
                 )

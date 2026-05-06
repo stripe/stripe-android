@@ -44,6 +44,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -582,6 +583,7 @@ internal class DefaultFlowControllerTest {
         val verifiedLinkAccount = TestFactory.LINK_ACCOUNT
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null,
@@ -622,6 +624,7 @@ internal class DefaultFlowControllerTest {
         // Create flow controller with Link payment method
         val flowController = createFlowController(
             paymentSelection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null,
@@ -687,6 +690,7 @@ internal class DefaultFlowControllerTest {
         val flowController = createFlowController(
             customer = customer,
             paymentSelection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null,
@@ -745,6 +749,7 @@ internal class DefaultFlowControllerTest {
             val flowController = createFlowController(
                 customer = customer,
                 paymentSelection = PaymentSelection.Link(
+                    brand = LinkBrand.Link,
                     selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                         details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                         collectedCvc = null,
@@ -1059,7 +1064,7 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess()
 
         flowController.confirmPaymentSelection(
-            paymentSelection = PaymentSelection.Link(),
+            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             state = PAYMENT_SHEET_STATE_FULL,
         )
 
@@ -1073,7 +1078,7 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `confirmPaymentSelection() with link payment method should launch LinkPaymentLauncher`() = confirmationTest {
         val flowController = createFlowController(
-            paymentSelection = PaymentSelection.Link(),
+            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedOut,
@@ -1111,7 +1116,7 @@ internal class DefaultFlowControllerTest {
             )
 
             val flowController = createFlowController(
-                paymentSelection = PaymentSelection.Link(),
+                paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
                 linkState = LinkState(
                     configuration = TestFactory.LINK_CONFIGURATION,
                     loginState = LinkState.LoginState.LoggedOut,
@@ -1169,7 +1174,7 @@ internal class DefaultFlowControllerTest {
             )
 
             val flowController = createFlowController(
-                paymentSelection = PaymentSelection.Link(),
+                paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
                 linkState = LinkState(
                     configuration = linkConfiguration,
                     loginState = LinkState.LoginState.LoggedOut,
@@ -1223,7 +1228,7 @@ internal class DefaultFlowControllerTest {
             )
 
             val flowController = createFlowController(
-                paymentSelection = PaymentSelection.Link(),
+                paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
                 linkState = LinkState(
                     configuration = linkConfig,
                     loginState = LinkState.LoginState.LoggedOut,
@@ -1496,7 +1501,10 @@ internal class DefaultFlowControllerTest {
         )
         flowController.onPaymentOptionResult(
             PaymentOptionsActivityResult
-                .Succeeded(PaymentSelection.Link(), linkAccountInfo = LinkAccountUpdate.Value(null))
+                .Succeeded(
+                    PaymentSelection.Link(brand = LinkBrand.Link),
+                    linkAccountInfo = LinkAccountUpdate.Value(null),
+                )
         )
         flowController.confirm()
 
@@ -1575,7 +1583,7 @@ internal class DefaultFlowControllerTest {
                 linkHandler = linkHandler,
                 viewModel = viewModel,
                 linkState = linkState,
-                paymentSelection = PaymentSelection.Link()
+                paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
             )
 
             flowController.configureExpectingSuccess()
@@ -1606,7 +1614,7 @@ internal class DefaultFlowControllerTest {
                 linkHandler = linkHandler,
                 viewModel = viewModel,
                 linkState = linkState,
-                paymentSelection = PaymentSelection.Link()
+                paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
             )
 
             flowController.configureExpectingSuccess()

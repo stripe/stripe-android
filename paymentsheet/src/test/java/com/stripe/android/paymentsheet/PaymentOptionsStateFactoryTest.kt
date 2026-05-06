@@ -2,12 +2,37 @@ package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import org.junit.Test
 
 class PaymentOptionsStateFactoryTest {
+
+    @Test
+    fun `non-Link payment options convert without LinkBrand`() {
+        val savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        assertThat(PaymentOptionsItem.AddCard.toPaymentSelection(linkBrand = null)).isNull()
+        assertThat(
+            PaymentOptionsItem.GooglePay.toPaymentSelection(linkBrand = null)
+        ).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod.create(
+                    displayName = "Card".resolvableString,
+                    paymentMethod = savedPaymentMethod,
+                )
+            ).toPaymentSelection(linkBrand = null)
+        ).isEqualTo(PaymentSelection.Saved(savedPaymentMethod))
+    }
+
+    @Test
+    fun `Link payment option conversion requires LinkBrand`() {
+        assertThat(PaymentOptionsItem.Link.toPaymentSelection(LinkBrand.Notlink))
+            .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Notlink))
+    }
 
     @Test
     fun `Returns current selection if available`() {
@@ -36,7 +61,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = false,
             defaultPaymentMethodId = null,
@@ -99,7 +124,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = null,
@@ -170,7 +195,7 @@ class PaymentOptionsStateFactoryTest {
             paymentMethods = paymentMethods,
             showGooglePay = false,
             showLink = false,
-            currentSelection = PaymentSelection.Link(),
+            currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
             isCbcEligible = true,
             defaultPaymentMethodId = null,

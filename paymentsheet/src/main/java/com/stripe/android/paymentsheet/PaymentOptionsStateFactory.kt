@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -96,11 +97,15 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
     }
 }
 
-internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
+internal fun PaymentOptionsItem.toPaymentSelection(linkBrand: LinkBrand?): PaymentSelection? {
     return when (this) {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
-        is PaymentOptionsItem.Link -> PaymentSelection.Link()
+        is PaymentOptionsItem.Link -> linkBrand?.let { PaymentSelection.Link(it) }
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
     }
+}
+
+internal fun PaymentOptionsItem.Link.toPaymentSelection(linkBrand: LinkBrand): PaymentSelection.Link {
+    return PaymentSelection.Link(brand = linkBrand)
 }

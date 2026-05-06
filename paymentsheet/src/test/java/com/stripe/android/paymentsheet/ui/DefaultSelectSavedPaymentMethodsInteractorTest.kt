@@ -5,6 +5,7 @@ import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -186,7 +187,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
 
     @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink() {
-        val currentSelectionFlow = MutableStateFlow(PaymentSelection.Link())
+        val currentSelectionFlow = MutableStateFlow(PaymentSelection.Link(brand = LinkBrand.Link))
 
         runScenario(
             paymentOptionsItems = MutableStateFlow(
@@ -207,7 +208,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink_canBeChangedToGooglePay() {
         val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
-            MutableStateFlow(PaymentSelection.Link())
+            MutableStateFlow(PaymentSelection.Link(brand = LinkBrand.Link))
 
         runScenario(
             paymentOptionsItems = MutableStateFlow(
@@ -236,7 +237,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
     @Test
     fun selectedPaymentOptionItem_currentSelectionIsLink_doesNotChangeWhenSelectionBecomesNew() {
         val currentSelectionFlow: MutableStateFlow<PaymentSelection?> =
-            MutableStateFlow(PaymentSelection.Link())
+            MutableStateFlow(PaymentSelection.Link(brand = LinkBrand.Link))
 
         runScenario(
             paymentOptionsItems = MutableStateFlow(
@@ -394,7 +395,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 }
             }
 
-            currentSelectionFlow.value = PaymentSelection.Link()
+            currentSelectionFlow.value = PaymentSelection.Link(brand = LinkBrand.Link)
 
             interactor.state.test {
                 awaitItem().run {
@@ -531,6 +532,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 updateSelectionTurbine.add(Pair(selection, isUserInput))
             },
             isLiveMode = true,
+            linkBrand = LinkBrand.Link,
         )
 
         TestParams(
