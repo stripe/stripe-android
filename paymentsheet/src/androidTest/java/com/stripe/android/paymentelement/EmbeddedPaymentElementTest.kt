@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.model.PaymentMethod
@@ -357,7 +356,7 @@ internal class EmbeddedPaymentElementTest {
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"
         networkRule.elementsSession(
-            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+            query("deferred_intent[on_behalf_of]", oboMerchantID)
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }

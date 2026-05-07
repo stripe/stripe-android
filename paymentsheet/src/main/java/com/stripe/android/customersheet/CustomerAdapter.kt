@@ -139,8 +139,6 @@ interface CustomerAdapter {
 
         internal object GooglePay : PaymentOption("google_pay")
 
-        internal object Link : PaymentOption("link")
-
         internal data class StripeId(override val id: String) : PaymentOption(id)
 
         internal fun toPaymentSelection(
@@ -150,11 +148,6 @@ interface CustomerAdapter {
                 is GooglePay -> {
                     PaymentSelection.GooglePay
                 }
-
-                is Link -> {
-                    PaymentSelection.Link()
-                }
-
                 is StripeId -> {
                     paymentMethodProvider(id)?.let {
                         PaymentSelection.Saved(it)
@@ -166,7 +159,6 @@ interface CustomerAdapter {
         internal fun toSavedSelection(): SavedSelection {
             return when (this) {
                 is GooglePay -> SavedSelection.GooglePay
-                is Link -> SavedSelection.Link
                 is StripeId -> SavedSelection.PaymentMethod(id, isLinkOrigin = false)
             }
         }
@@ -177,7 +169,6 @@ interface CustomerAdapter {
             fun fromId(id: String): PaymentOption {
                 return when (id) {
                     "google_pay" -> GooglePay
-                    "link" -> Link
                     else -> StripeId(id)
                 }
             }
@@ -185,7 +176,7 @@ interface CustomerAdapter {
             internal fun SavedSelection.toPaymentOption(): PaymentOption? {
                 return when (this) {
                     is SavedSelection.GooglePay -> GooglePay
-                    is SavedSelection.Link -> Link
+                    is SavedSelection.Link -> null
                     is SavedSelection.None -> null
                     is SavedSelection.PaymentMethod -> StripeId(id)
                 }

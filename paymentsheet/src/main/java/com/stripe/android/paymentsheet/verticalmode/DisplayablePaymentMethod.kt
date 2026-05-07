@@ -19,6 +19,7 @@ internal data class DisplayablePaymentMethod(
     val subtitle: ResolvableString? = null,
     val promoBadge: String? = null,
     val promotionProvider: (() -> PaymentMethodMessagePromotion?)? = null,
+    val shouldExpandOnClick: Boolean = false,
     val onClick: () -> Unit,
     @DrawableRes private val outlinedIconResource: Int? = null,
 ) {

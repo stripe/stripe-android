@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -47,7 +48,10 @@ internal class PaymentOptionsViewModelModule {
     }
 
     @Provides
-    fun providesPaymentMethodMessageHelper(args: PaymentOptionContract.Args): PaymentMethodMessagePromotionsHelper {
-        return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions)
+    fun providesPaymentMethodMessageHelper(
+        args: PaymentOptionContract.Args,
+        experimentHandler: PaymentMethodMessagePromotionsExperimentHandler
+    ): PaymentMethodMessagePromotionsHelper {
+        return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, experimentHandler)
     }
 }

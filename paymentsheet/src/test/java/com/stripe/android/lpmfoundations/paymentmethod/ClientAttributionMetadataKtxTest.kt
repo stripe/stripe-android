@@ -5,6 +5,7 @@ import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import org.junit.Test
 
@@ -86,6 +87,45 @@ class ClientAttributionMetadataKtxTest {
         assertThat(clientAttributionMetadata.paymentMethodSelectionFlow).isEqualTo(
             PaymentMethodSelectionFlow.MerchantSpecified
         )
+    }
+
+    @Test
+    fun `payment intent creation flow is null for checkout session`() {
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "instances_key",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
+        )
+
+        val clientAttributionMetadata = createClientAttributionMetadata(
+            initializationMode = initializationMode,
+        )
+
+        assertThat(clientAttributionMetadata.paymentIntentCreationFlow).isNull()
+    }
+
+    @Test
+    fun `checkout session ID is set for checkout session`() {
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "instances_key",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(id = "cs_test_456"),
+        )
+
+        val clientAttributionMetadata = createClientAttributionMetadata(
+            initializationMode = initializationMode,
+        )
+
+        assertThat(clientAttributionMetadata.checkoutSessionId).isEqualTo("cs_test_456")
+    }
+
+    @Test
+    fun `checkout session ID is null for non-checkout-session modes`() {
+        val initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123")
+
+        val clientAttributionMetadata = createClientAttributionMetadata(
+            initializationMode = initializationMode,
+        )
+
+        assertThat(clientAttributionMetadata.checkoutSessionId).isNull()
     }
 
     private fun createClientAttributionMetadata(

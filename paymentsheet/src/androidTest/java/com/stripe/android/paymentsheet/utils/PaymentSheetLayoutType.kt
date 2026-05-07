@@ -48,7 +48,9 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         composeTestRule: ComposeTestRule,
     )
 
-    class Horizontal : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal) {
+    data object Horizontal : PaymentSheetLayoutType(
+        paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal
+    ) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
             context: Context,
@@ -129,7 +131,7 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
         }
     }
 
-    class Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
+    data object Vertical : PaymentSheetLayoutType(paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical) {
         override fun assertHasSelectedPaymentMethod(
             composeTestRule: ComposeTestRule,
             context: Context,
@@ -243,6 +245,6 @@ internal sealed class PaymentSheetLayoutType(val paymentMethodLayout: PaymentShe
 
 internal object PaymentSheetLayoutTypeProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<PaymentSheetLayoutType> {
-       return listOf(PaymentSheetLayoutType.Vertical(), PaymentSheetLayoutType.Horizontal())
+       return listOf(PaymentSheetLayoutType.Vertical, PaymentSheetLayoutType.Horizontal)
     }
 }

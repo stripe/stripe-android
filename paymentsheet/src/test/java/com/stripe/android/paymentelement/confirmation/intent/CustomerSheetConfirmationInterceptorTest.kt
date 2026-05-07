@@ -37,6 +37,7 @@ class CustomerSheetConfirmationInterceptorTest {
         elementsSessionConfigId = "test_session_id",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+        checkoutSessionId = null,
     )
 
     private val requestOptions = ApiRequest.Options(

@@ -3,6 +3,7 @@ package com.stripe.android.payments
 import android.content.Intent
 import android.net.Uri
 import androidx.browser.customtabs.CustomTabColorSchemeParams
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -26,6 +27,7 @@ internal class StripeBrowserLauncherViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     private val browserCapabilities: BrowserCapabilities,
+    private val customTabsPackage: String?,
     private val resolveErrorMessage: String,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -75,6 +77,7 @@ internal class StripeBrowserLauncherViewModel(
             .build()
             .apply {
                 intent.data = url
+                customTabsPackage?.let { intent.setPackage(it) }
             }
     }
 
@@ -136,6 +139,7 @@ internal class StripeBrowserLauncherViewModel(
                     publishableKey = config.publishableKey,
                 ),
                 browserCapabilities = browserCapabilitiesSupplier.get(),
+                customTabsPackage = CustomTabsClient.getPackageName(application, null),
                 resolveErrorMessage = application.getString(R.string.stripe_failure_reason_authentication),
                 savedStateHandle = savedStateHandle,
             ) as T

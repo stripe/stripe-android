@@ -5,7 +5,6 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -339,7 +338,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(
-                urlEncode("payment_method_data[card][networks][preferred]"),
+                "payment_method_data[card][networks][preferred]",
                 "cartes_bancaires"
             ),
         ) { response ->
@@ -480,7 +479,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
+            bodyPart("payment_method_options[card][cvc]", "123")
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -500,7 +499,7 @@ internal class PaymentSheetTest {
         }
     ) { testContext ->
         networkRule.elementsSession(
-            query(urlEncode("deferred_intent[payment_method_options][card][require_cvc_recollection]"), "true")
+            query("deferred_intent[payment_method_options][card][require_cvc_recollection]", "true")
         ) { response ->
             val cardsArray = JSONArray()
 
@@ -559,7 +558,7 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
+            bodyPart("payment_method_options[card][cvc]", "123")
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -899,7 +898,7 @@ internal class PaymentSheetTest {
         val oboMerchantID = "acct_connected_1234"
 
         networkRule.elementsSession(
-            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+            query("deferred_intent[on_behalf_of]", oboMerchantID)
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }

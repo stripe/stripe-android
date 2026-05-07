@@ -74,6 +74,7 @@ internal fun PaymentMethodRowButton(
     modifier: Modifier = Modifier,
     appearance: Appearance.Embedded = Appearance.Embedded(RowStyle.FloatingButton.default),
     promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    shouldExpandOnClick: Boolean = false,
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val defaultPadding = if (subtitle != null) {
@@ -124,6 +125,7 @@ internal fun PaymentMethodRowButton(
                 title = title,
                 subtitle = subtitle,
                 promotionProvider = promotionProvider,
+                shouldExpandOnClick = shouldExpandOnClick,
                 isSelected = isSelected,
                 contentDescription = contentDescription,
                 appearance = appearance,
@@ -366,6 +368,7 @@ private fun RowButtonInnerContent(
     title: String,
     subtitle: String?,
     promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    shouldExpandOnClick: Boolean,
     isSelected: Boolean,
     contentDescription: String? = null,
     appearance: Appearance.Embedded,
@@ -383,6 +386,7 @@ private fun RowButtonInnerContent(
             title = title,
             subtitle = subtitle,
             promotionProvider = promotionProvider,
+            shouldExpandOnClick = shouldExpandOnClick,
             isEnabled = isEnabled,
             isSelected = isSelected,
             contentDescription = contentDescription,
@@ -404,6 +408,7 @@ private fun TitleContent(
     title: String,
     subtitle: String?,
     promotionProvider: (() -> PaymentMethodMessagePromotion?)?,
+    shouldExpandOnClick: Boolean,
     isEnabled: Boolean,
     isSelected: Boolean,
     contentDescription: String?,
@@ -434,8 +439,8 @@ private fun TitleContent(
                 )
             }
         } else {
-            val promotion = promotionProvider()
-            AnimatedVisibility(isSelected) {
+            AnimatedVisibility(isSelected && shouldExpandOnClick) {
+                val promotion = promotionProvider()
                 if (promotion != null) {
                     PaymentMethodMessagePromotionText(promotion)
                 } else if (subtitle != null) {
@@ -496,6 +501,7 @@ private fun ButtonPreview() {
                 appearance = Appearance.Embedded.default,
                 promotionProvider = { null },
                 trailingContent = { Text("Edit") },
+                shouldExpandOnClick = false
             )
             PaymentMethodRowButton(
                 isEnabled = false,
@@ -518,6 +524,8 @@ private fun ButtonPreview() {
                 appearance = Appearance.Embedded.default,
                 promotionProvider = { null },
                 trailingContent = { Text("Edit") },
+                shouldExpandOnClick = false
+
             )
         }
     }

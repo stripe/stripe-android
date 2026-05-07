@@ -1,6 +1,7 @@
 #!/bin/python
 import argparse
 import os
+import shutil
 import requests
 import sys
 import time
@@ -288,16 +289,23 @@ def get_build_status(buildId):
     return requests.get(url, auth=(user, authKey))
 
 
-def zipFiles(files):
+def storeAndZipFiles(files):
+    build_results_dir = "paymentsheet-example/build/browserstack-results"
+
     def testReportName(idx):
         return f"test-reports/test-report-{idx}.xml"
 
+    shutil.rmtree(build_results_dir, ignore_errors=True)
+    os.makedirs(build_results_dir, exist_ok=True)
+
     zip = zipfile.ZipFile("test-reports/test-reports.zip", "w")
     for idx in range(len(files)):
-        f = open(testReportName(idx), "w")
+        fileName = testReportName(idx)
+        f = open(fileName, "w")
         f.write(files[idx])
         f.close()
-        zip.write(testReportName(idx))
+        zip.write(fileName)
+        shutil.copy2(fileName, build_results_dir)
     zip.close()
     return zip
 
@@ -344,7 +352,7 @@ def deleteObservabilityFiles():
 def updateObservabilityWithResults(buildId):
     os.makedirs("test-reports")
     reportsForBuildId = getJunitXmlReports(buildId)
-    zipFiles(reportsForBuildId)
+    storeAndZipFiles(reportsForBuildId)
     uploadTestReportsToObservability()
     deleteObservabilityFiles()
 

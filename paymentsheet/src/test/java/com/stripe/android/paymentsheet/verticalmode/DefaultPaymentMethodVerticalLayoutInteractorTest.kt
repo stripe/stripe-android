@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -588,7 +589,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
             displayablePaymentMethods.first { it.code == "link" }.onClick()
-            assertThat(selection.value).isEqualTo(PaymentSelection.Link())
+            assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
             assertThat(updateSelectionTurbine.awaitItem()).isFalse()
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
@@ -1041,7 +1042,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isNotUpdatedToNullWhenOnAnotherScreen() {
-        val expectedPaymentSelection = PaymentSelection.Link()
+        val expectedPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = expectedPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1059,7 +1060,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun verticalModeScreenSelection_isUpdatedToNullWhenCurrentScreen() {
         runScenario(
-            initialSelection = PaymentSelection.Link(),
+            initialSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             formTypeForCode = { FormHelper.FormType.Empty },
         ) {
             interactor.state.test {
@@ -1078,7 +1079,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isNeverUpdatedToNewPmWithFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1095,7 +1096,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isUpdatedToNewPmWithFormFields_withCustomShouldUpdateVerticalModeSelection() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1119,7 +1120,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_omitsCardBrand_whenUnknownCardBrand() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1143,7 +1144,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_retainsLast4_whenUpdatingTemporarySelection() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1240,7 +1241,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeANewPmWithoutFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1264,7 +1265,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeAnEpm() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1285,7 +1286,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeASavedPm() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1310,7 +1311,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
         ) {
-            val newSelection = PaymentSelection.Link()
+            val newSelection = PaymentSelection.Link(brand = LinkBrand.Link)
             selectionSource.value = newSelection
 
             interactor.state.test {
@@ -1323,7 +1324,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeGooglePay() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1341,7 +1342,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isUpdatedToTemporarySelection() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1702,7 +1703,47 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
-    private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }
+    @Test
+    fun `shouldExpandOnClick is false when form type is UserInteractionRequired`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata,
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired }
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val pm = paymentMethods.first { it.code == "klarna" }
+                assertThat(pm.shouldExpandOnClick).isFalse()
+            }
+        }
+    }
+
+    @Test
+    fun `shouldExpandOnClick is true when form type is not UserInteractionRequired`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata,
+            formTypeForCode = { FormHelper.FormType.Empty }
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val pm = paymentMethods.first { it.code == "affirm" }
+                assertThat(pm.shouldExpandOnClick).isTrue()
+            }
+        }
+    }
 
     private val linkAndGooglePayWalletState = WalletsState(
         link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
@@ -1746,7 +1787,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         initialSelection: PaymentSelection? = null,
         initialIsCurrentScreen: Boolean = false,
         incentive: PaymentMethodIncentive? = null,
-        formTypeForCode: (code: String) -> FormHelper.FormType = { notImplemented() },
+        formTypeForCode: (code: String) -> FormHelper.FormType = { FormHelper.FormType.Empty },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
         canUpdateFullPaymentMethodDetails: Boolean = false,

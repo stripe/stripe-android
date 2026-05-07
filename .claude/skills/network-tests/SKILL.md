@@ -129,20 +129,29 @@ networkRule.checkoutConfirm(
 
 ### bodyPart Encoding
 
-`bodyPart()` matches against the raw URL-encoded form body. Use `urlEncode()` for keys with brackets and values with special characters:
+`bodyPart()`, `hasBodyPart()`, and `query(name, value)` auto-decode both the matcher arguments and the request body before comparing. Use plain readable strings — `urlEncode()` is unnecessary:
 
 ```kotlin
-import com.stripe.android.core.utils.urlEncode
+// Keys with brackets and values with special characters — just use plain strings
+bodyPart("billing_details[email]", "user@example.com")
+bodyPart("billing_details[address][line1]", "123 Main St")
+bodyPart("payment_method_data[allow_redisplay]", "unspecified")
 
-// Encode keys with brackets and special-char values
-bodyPart(urlEncode("billing_details[email]"), urlEncode("user@example.com"))
-bodyPart(urlEncode("billing_details[address][line1]"), urlEncode("123 Main St"))
+// urlEncode() still works (backward compatible) but is unnecessary
+// bodyPart(urlEncode("billing_details[email]"), urlEncode("user@example.com"))
+```
 
-// Simple alphanumeric keys/values don't need encoding
-bodyPart("allow_redisplay", "unspecified")
+### Mismatch Debugging
 
-// Without encoding, bracket keys won't match
-bodyPart("billing_details[email]", "user@example.com") // WRONG
+When a request doesn't match a mock, the error message shows per-matcher diagnostics with the nearest-miss mock:
+
+```
+POST https://localhost/v1/payment_intents/pi_123/confirm
+  Body params: {billing_details[email]=actual@test.com, payment_method=pm_123}
+  Nearest mock: composite(path(/v1/confirm), bodyPart(billing_details[email], expected@test.com))
+    + PASS: path(/v1/confirm)
+    + PASS: method(POST)
+    - FAIL: bodyPart(billing_details[email], expected@test.com)
 ```
 
 See `PaymentSheetBillingConfigurationTest.kt` for more examples.

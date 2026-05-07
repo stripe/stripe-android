@@ -173,6 +173,7 @@ internal class DefaultCreateLinkStateTest {
             elementsSessionConfigId = FakeElementsSessionRepository.DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
             paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
             paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+            checkoutSessionId = null,
         )
     }
 }

@@ -363,7 +363,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             supportedPaymentMethod.asDisplayablePaymentMethod(
                 customerSavedPaymentMethods = paymentMethods,
                 incentive = paymentMethodIncentive,
-                promotionProvider = getPromotionProvider(supportedPaymentMethod.code)
+                promotionProvider = getPromotionProvider(supportedPaymentMethod.code),
+                shouldExpandOnClick = shouldExpandOnClick(supportedPaymentMethod.code)
             ) {
                 handleViewAction(ViewAction.PaymentMethodSelected(supportedPaymentMethod.code))
             }
@@ -421,7 +422,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = subtitle,
             onClick = {
-                updateSelection(PaymentSelection.Link(), false)
+                updateSelection(PaymentSelection.Link(brand = link.linkBrand), false)
                 invokeRowSelectionCallback?.invoke()
             },
         )
@@ -542,9 +543,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             is ViewAction.PaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
 
-                val formType = formTypeForCode(viewAction.selectedPaymentMethodCode)
-                val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
-                if (formType == FormType.UserInteractionRequired || displayFormForMandate) {
+                if (shouldTransitionToFormScreen(viewAction.selectedPaymentMethodCode)) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionToFormScreen(viewAction.selectedPaymentMethodCode)
                 } else {
@@ -646,9 +645,25 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled &&
             PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)
         ) {
-            { paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(code) }
+            {
+                paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(
+                    code,
+                    paymentMethodMetadata
+                )
+            }
         } else {
             null
         }
+    }
+
+    private fun shouldTransitionToFormScreen(paymentMethodCode: PaymentMethodCode): Boolean {
+        val formType = formTypeForCode(paymentMethodCode)
+        val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
+        return formType == FormType.UserInteractionRequired || displayFormForMandate
+    }
+
+    private fun shouldExpandOnClick(paymentMethodCode: PaymentMethodCode): Boolean {
+        return PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(paymentMethodCode) &&
+            !shouldTransitionToFormScreen(paymentMethodCode)
     }
 }

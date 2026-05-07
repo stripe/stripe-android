@@ -9,6 +9,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -160,7 +161,7 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with Link should not include billing details`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.Link())
+        val paymentOption = factory.create(PaymentSelection.Link(brand = LinkBrand.Link))
 
         assertThat(paymentOption.billingDetails).isNull()
     }

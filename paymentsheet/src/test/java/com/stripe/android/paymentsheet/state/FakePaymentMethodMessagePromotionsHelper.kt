@@ -2,6 +2,7 @@ package com.stripe.android.utils
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -18,7 +19,10 @@ internal class FakePaymentMethodMessagePromotionsHelper(
         _calls.add(Unit)
     }
 
-    override fun getPromotionIfAvailableForCode(code: PaymentMethodCode): PaymentMethodMessagePromotion? {
+    override fun getPromotionIfAvailableForCode(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): PaymentMethodMessagePromotion? {
         return promotions?.find {
             it.paymentMethodType.lowercase() == code
         }

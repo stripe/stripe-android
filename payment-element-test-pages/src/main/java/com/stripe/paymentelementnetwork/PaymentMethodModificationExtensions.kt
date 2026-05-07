@@ -3,7 +3,6 @@
 package com.stripe.paymentelementnetwork
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -40,7 +39,7 @@ fun NetworkRule.setupPaymentMethodUpdateResponse(
         host("api.stripe.com"),
         method("POST"),
         path("/v1/payment_methods/${paymentMethodDetails.id}"),
-        bodyPart(urlEncode("card[networks][preferred]"), cardBrand)
+        bodyPart("card[networks][preferred]", cardBrand)
     ) { response ->
         assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
         response.setBody(

@@ -372,8 +372,8 @@ internal class Selectors(
     }
 
     private fun ComposeTestRule.onNodeWithTextAfterWaiting(text: String): SemanticsNodeInteraction {
-        this.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
-            this.onAllNodes(hasText(text)).fetchSemanticsNodes().isNotEmpty()
+        waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            onAllNodes(hasText(text)).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
         }
         return this.onNodeWithText(
             text

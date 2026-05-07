@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerShippingAddress
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -110,6 +111,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `create adds shipping details for verified Link user`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
                     collectedCvc = null,
@@ -155,6 +157,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
     fun `create adds no shipping details for unverified Link user`() {
         val option = displayDataFactory.create(
             selection = PaymentSelection.Link(
+                brand = LinkBrand.Link,
                 selectedPayment = null,
                 shippingAddress = null,
             ),

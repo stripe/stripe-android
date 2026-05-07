@@ -45,7 +45,7 @@ internal class DefaultPaymentMethodsConfirmationTest {
     lateinit var paymentMethodType: PaymentMethodType
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
-    private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical()
+    private val layoutType: PaymentSheetLayoutType = PaymentSheetLayoutType.Vertical
 
     @Test
     fun setNewPMAsDefault_withSavedPaymentMethods_sendsSetAsDefaultParamInConfirmCall() = runProductIntegrationTest(

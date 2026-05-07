@@ -12,6 +12,8 @@ apply from: rootProject.file('build-configuration/detekt.gradle')
 
 apply from: rootProject.file('build-configuration/configurations.gradle')
 
+apply from: rootProject.file('build-configuration/instrumentation-test-report-splitter.gradle')
+
 android {
     namespace STRIPE_ANDROID_NAMESPACE
     compileSdkVersion rootProject.ext.compileSdkVersion

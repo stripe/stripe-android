@@ -18,7 +18,6 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
@@ -36,6 +35,7 @@ import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.MultipleInstancesTestType
 import com.stripe.android.paymentsheet.utils.MultipleInstancesTestTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
@@ -77,7 +77,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testSuccessfulCardPayment(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -116,7 +116,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testSuccessfulCardPaymentWithVerticalMode(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -158,7 +158,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCardRelaunchesIntoFormPage(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -200,7 +200,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCashappRelaunchesIntoListPageWithCashappSelected(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -244,7 +244,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCorrectMandatesDisplayedAfterNavigation(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -299,7 +299,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testFailedElementsSessionCall(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -387,7 +387,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testFailedConfirmCall(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) {
         runFlowControllerTest(
             networkRule = networkRule,
@@ -555,7 +555,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testDeferredIntentCardPayment(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -594,7 +594,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -612,8 +612,8 @@ internal class FlowControllerTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    urlEncode("payment_method_data[payment_user_agent]"),
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                    "payment_method_data[payment_user_agent]",
+                    Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
                 )
             ),
         ) { response ->
@@ -688,7 +688,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testDeferredIntentFailedCardPayment(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -734,7 +734,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -748,7 +748,7 @@ internal class FlowControllerTest {
     @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -787,7 +787,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -801,7 +801,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testDeferredIntentCardPaymentWithInvalidStripeIntent(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -848,7 +848,7 @@ internal class FlowControllerTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3Bdeferred-intent%3Bautopm")
+                Regex("stripe-android/\\d*.\\d*.\\d*;PaymentSheet.FlowController;deferred-intent;autopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -868,7 +868,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCvcRecollection(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -919,7 +919,7 @@ internal class FlowControllerTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart(urlEncode("payment_method_options[card][cvc]"), "123")
+            bodyPart("payment_method_options[card][cvc]", "123")
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -933,7 +933,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testSavedCardsInVerticalMode(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -1009,7 +1009,7 @@ internal class FlowControllerTest {
      */
     @Test
     fun testDefaultPaymentMethodOrderWithFailedSession(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -1228,7 +1228,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testFlowControllerConfigurationBuilderWithTermsDisplayNever(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -1274,7 +1274,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testOBO_PassedToElementsSessionCall(
-        @TestParameter integrationType: IntegrationType,
+        @TestParameter(valuesProvider = IntegrationTypeProvider ::class) integrationType: IntegrationType,
     ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
@@ -1287,7 +1287,7 @@ internal class FlowControllerTest {
     ) { testContext ->
         val oboMerchantID = "acct_connected_1234"
         networkRule.elementsSession(
-            query(urlEncode("deferred_intent[on_behalf_of]"), oboMerchantID)
+            query("deferred_intent[on_behalf_of]", oboMerchantID)
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }

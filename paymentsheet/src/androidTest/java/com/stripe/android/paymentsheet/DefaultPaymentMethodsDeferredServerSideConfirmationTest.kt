@@ -28,7 +28,7 @@ internal class DefaultPaymentMethodsDeferredServerSideConfirmationTest {
     lateinit var integrationType: ProductIntegrationType
 
     // Confirmation behavior between horizontal and vertical doesn't differ, so we're testing with vertical mode only.
-    private val layoutType = PaymentSheetLayoutType.Vertical()
+    private val layoutType = PaymentSheetLayoutType.Vertical
 
     @Test
     fun setNewCardAsDefault_withSavedPaymentMethods_failsInTestMode() = runProductIntegrationTest(

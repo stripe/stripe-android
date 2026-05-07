@@ -76,6 +76,13 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
                     stripeException = StripeException.create(e),
                 )
             finishWithFailure(args)
+        } catch (e: SecurityException) {
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
+                    stripeException = StripeException.create(e),
+                )
+            finishWithFailure(args)
         }
     }
 

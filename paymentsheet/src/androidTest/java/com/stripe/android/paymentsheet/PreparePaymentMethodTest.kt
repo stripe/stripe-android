@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
-import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.checkouttesting.createPaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -235,8 +234,8 @@ internal class PreparePaymentMethodTest {
         externalId: String,
     ) {
         networkRule.elementsSession(
-            query(urlEncode("seller_details[network_id]"), networkId),
-            query(urlEncode("seller_details[external_id]"), externalId),
+            query("seller_details[network_id]", networkId),
+            query("seller_details[external_id]", externalId),
         ) { response ->
             response.testBodyFromFile(
                 filename = "elements-sessions-requires_pm_with_cs.json",

@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.wallet.paymentOptionLabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
@@ -46,7 +45,7 @@ internal object PaymentOptionLabelsFactory {
                 }
             }
             is PaymentSelection.Link -> {
-                link(context, selection.selectedPayment)
+                link(context, selection)
             }
         }
     }
@@ -126,11 +125,11 @@ internal object PaymentOptionLabelsFactory {
 
     private fun link(
         context: Context,
-        paymentMethod: LinkPaymentMethod?,
+        selection: PaymentSelection.Link,
     ): PaymentOption.Labels {
-        val sublabel = paymentMethod?.details?.paymentOptionLabel?.resolve(context)
+        val sublabel = selection.selectedPayment?.details?.paymentOptionLabel?.resolve(context)
         return PaymentOption.Labels(
-            label = R.string.stripe_link.resolvableString.resolve(context),
+            label = selection.brand.brandName(),
             sublabel = sublabel,
         )
     }

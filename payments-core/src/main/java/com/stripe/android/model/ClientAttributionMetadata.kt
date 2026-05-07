@@ -13,6 +13,7 @@ data class ClientAttributionMetadata(
     @get:VisibleForTesting val elementsSessionConfigId: String?,
     @get:VisibleForTesting val paymentIntentCreationFlow: PaymentIntentCreationFlow?,
     @get:VisibleForTesting val paymentMethodSelectionFlow: PaymentMethodSelectionFlow?,
+    @get:VisibleForTesting val checkoutSessionId: String?,
     private val stripeSdkVersion: String = StripeSdkVersion.VERSION_NAME,
 ) : StripeParamsModel, Parcelable {
 
@@ -33,6 +34,10 @@ data class ClientAttributionMetadata(
         ).plus(
             elementsSessionConfigId?.let {
                 mapOf("elements_session_config_id" to it)
+            }.orEmpty()
+        ).plus(
+            checkoutSessionId?.let {
+                mapOf("checkout_session_id" to it)
             }.orEmpty()
         )
     }
