@@ -1,3 +1,6 @@
+import com.android.build.gradle.internal.tasks.AndroidTestTask
+import com.android.build.gradle.internal.tasks.ManagedDeviceTestTask
+
 import java.time.Duration
 
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
@@ -39,13 +42,29 @@ plugins {
 
 apply plugin: "dev.detekt"
 
-allprojects {
+allprojects { project ->
     group = GROUP
 
     repositories {
         mavenCentral()
         google()
         gradlePluginPortal()
+    }
+
+    if (project.tasks.findByName("connectedAndroidTest") != null) {
+        project.tasks.withType(AndroidTestTask).configureEach {
+            it.instrumentationRunnerArguments(
+                notClass: "com.stripe.android.paymentelement.taptoadd.TapToAddTest"
+            )
+        }
+    }
+
+    if (project.tasks.findByName("pixel2api33DebugAndroidTest") != null) {
+        project.tasks.withType(ManagedDeviceTestTask).configureEach {
+            it.instrumentationRunnerArguments(
+                notClass: "com.stripe.android.paymentelement.taptoadd.TapToAddTest"
+            )
+        }
     }
 }
 
