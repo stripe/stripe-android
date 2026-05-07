@@ -895,7 +895,7 @@ private fun rememberFinancialConnectionsSheetInternal(
 
 private fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
     "<terms>",
-    "<a href=\"${linkBrand.achAuthorizationUrl()}\">"
+    "<a href=\"${linkBrand.achAuthorizationTermsUrl()}\">"
 ).replace("</terms>", "</a>")
 
 private const val CHEVRON_ICON_ROTATION = 180f

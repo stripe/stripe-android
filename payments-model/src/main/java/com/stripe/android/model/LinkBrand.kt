@@ -29,7 +29,7 @@ enum class LinkBrand(val value: String) {
 
     fun privacyUrl(): String = "${baseUrl()}/privacy"
 
-    fun achAuthorizationUrl(): String = "${baseUrl()}/terms/ach-authorization"
+    fun achAuthorizationTermsUrl(): String = "${baseUrl()}/terms/ach-authorization"
 
     internal object Serializer :
         EnumIgnoreUnknownSerializer<LinkBrand>(entries.toTypedArray(), Link)
