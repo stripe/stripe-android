@@ -248,6 +248,7 @@ workflows:
     before_run:
       - prepare_all
     after_run:
+      - split_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -259,6 +260,7 @@ workflows:
     before_run:
       - prepare_all
     after_run:
+      - split_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -275,6 +277,7 @@ workflows:
       - start_emulator
       - prepare_all
     after_run:
+      - split_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -295,6 +298,7 @@ workflows:
       - start_cardscan_emulator
       - prepare_all
     after_run:
+      - split_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -333,6 +337,7 @@ workflows:
       - start_emulator
       - prepare_all
     after_run:
+      - split_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -466,6 +471,15 @@ workflows:
           inputs:
             - push: 'true'
             - validation_level: warning
+  split_instrumentation_test_results:
+    steps:
+      - script@1:
+          title: Split instrumentation test results
+          is_skippable: true
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - content: ./gradlew splitInstrumentationTestReportsByClass
   conclude_all:
     steps:
       - script-runner@0:

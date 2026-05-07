@@ -1,0 +1,158 @@
+import groovy.xml.MarkupBuilder
+import groovy.xml.XmlSlurper
+
+class InstrumentationTestReportSplitter {
+    private static final XmlSlurper SLURPER = new XmlSlurper(false, false)
+
+    static void split(File moduleDir, File outDir) {
+        def resultRoots = ['connected', 'managedDevice'].collect {
+            new File(moduleDir, "build/outputs/androidTest-results/$it")
+        }.findAll { it.directory }
+
+        def casesByClass = [:].withDefault { [] }
+        xmlFilesUnder(resultRoots).each { file ->
+            def suites = parseSuites(file)
+            if (!suites) {
+                return
+            }
+            suites.each { suite ->
+                def suiteClass = suiteClassName(suite)
+                suite.testcase.each { tc ->
+                    def fqcn = tc.@classname?.toString() ?: suiteClass
+                    casesByClass[fqcn] << tc
+                }
+            }
+        }
+
+        outDir.deleteDir()
+
+        if (casesByClass.isEmpty()) {
+            return
+        }
+
+        outDir.mkdirs()
+        casesByClass.each { fqcn, rows ->
+            writeReport(new File(outDir, "TEST-${fqcn.replace('.', '_')}.xml"), fqcn, rows)
+        }
+    }
+
+    private static List<File> xmlFilesUnder(List<File> roots) {
+        roots.collectMany { root ->
+            def list = []
+            root.eachFileRecurse { f ->
+                if (f.file && f.name.endsWith('.xml')) {
+                    list << f
+                }
+            }
+            list
+        }
+    }
+
+    private static List parseSuites(File file) {
+        try {
+            def root = SLURPER.parse(file)
+            switch (root.name()) {
+                case 'testsuite':
+                    return [root]
+                case 'testsuites':
+                    return root.children().findAll { it.name() == 'testsuite' }.toList()
+                default:
+                    return []
+            }
+        } catch (ignored) {
+            return []
+        }
+    }
+
+    private static String suiteClassName(def suite) {
+        def fromCase = suite.testcase.find { it.@classname?.toString() }?.@classname?.toString()
+        return fromCase ?: (suite.@name?.toString() ?: 'unknown.UnknownClass')
+    }
+
+    private static double parseTime(def tc) {
+        try {
+            Double.parseDouble(tc.@time?.toString() ?: '0')
+        } catch (NumberFormatException ignored) {
+            0d
+        }
+    }
+
+    private static void writeReport(File outFile, String className, List rows) {
+        outFile.parentFile.mkdirs()
+        def writer = new StringWriter()
+        writer << '<?xml version="1.0" encoding="UTF-8"?>\n'
+        def mb = new MarkupBuilder(writer)
+        mb.setDoubleQuotes(true)
+        mb.testsuite(
+                name: className,
+                tests: rows.size(),
+                failures: rows.count { it.failure.size() > 0 },
+                errors: rows.count { it.error.size() > 0 },
+                skipped: rows.count { it.skipped.size() > 0 },
+                time: String.format(Locale.US, '%.3f', rows.sum { parseTime(it) }),
+        ) {
+            rows.each { tc ->
+                emitTestCase(mb, tc)
+            }
+        }
+        outFile.setText(writer.toString(), 'UTF-8')
+    }
+
+    private static void emitTestCase(MarkupBuilder mb, def tc) {
+        mb.testcase(
+                classname: tc.@classname.toString(),
+                name: tc.@name.toString(),
+                time: tc.@time.toString(),
+        ) {
+            tc.failure.each { f ->
+                failure(type: f.@type.toString()) {
+                    mkp.yield(f.text().toString())
+                }
+            }
+            tc.error.each { e ->
+                error(type: e.@type.toString()) {
+                    mkp.yield(e.text().toString())
+                }
+            }
+            if (tc.skipped.size() > 0) {
+                skipped()
+            }
+            tc.'system-out'.each { so ->
+                'system-out' {
+                    mkp.yield(so.text().toString())
+                }
+            }
+            tc.'system-err'.each { se ->
+                'system-err' {
+                    mkp.yield(se.text().toString())
+                }
+            }
+        }
+    }
+}
+
+def modulePath = project.path
+def moduleRootPath = project.projectDir.absolutePath
+def outputDir =
+    project.layout.buildDirectory.dir('instrumentation-test-results')
+def taskName = 'splitInstrumentationTestReportsByClass'
+
+project.tasks.register(taskName) { task ->
+    task.group = 'verification'
+    task.description = 'Splits instrumentation JUnit XML from all devices into per-class reports.'
+    task.outputs.dir(outputDir)
+    task.doLast {
+        InstrumentationTestReportSplitter.split(new File(moduleRootPath), outputDir.get().asFile)
+    }
+}
+
+if (rootProject.tasks.findByName(taskName) == null) {
+    rootProject.tasks.register(taskName) {
+        group = 'verification'
+        description = "Runs ${taskName} on every Android application/library module."
+    }
+}
+
+rootProject.tasks.named(taskName).configure {
+    dependsOn("${modulePath}:${taskName}")
+}
