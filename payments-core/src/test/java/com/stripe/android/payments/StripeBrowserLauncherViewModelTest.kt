@@ -100,6 +100,7 @@ class StripeBrowserLauncherViewModelTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             browserCapabilities = browserCapabilities,
+            customTabsPackage = null,
             resolveErrorMessage = "Unable to resolve things",
             savedStateHandle = savedStateHandle,
         )

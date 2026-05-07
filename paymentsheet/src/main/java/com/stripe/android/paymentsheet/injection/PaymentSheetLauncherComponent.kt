@@ -36,6 +36,7 @@ import javax.inject.Singleton
         TapToAddConnectionStarterModule::class,
         PaymentElementConfirmationModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
 internal interface PaymentSheetLauncherComponent {

@@ -39,7 +39,7 @@ class PaymentMethodMessagingElementTest {
     )
 
     @Test
-    fun testNoContent() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testNoContent() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("no-content.json")
         }
@@ -50,7 +50,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testSinglePartner() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testSinglePartner() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("single-partner.json")
         }
@@ -63,7 +63,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testMultiPartner() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testMultiPartner() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("multi-partner.json")
         }
@@ -77,7 +77,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testError() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testError() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.setResponseCode(400)
             response.testBodyFromFile("error-invalid-currency.json")
@@ -93,7 +93,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testUpdatesContentOnConfigChange() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.testBodyFromFile("single-partner.json")
         }
@@ -117,7 +117,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testMalformedResponse() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testMalformedResponse() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         networkRule.enqueue(getConfigRequestMatcher) { response ->
             response.setBody("{}")
         }
@@ -129,7 +129,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testMultiPartnerLegalDisclosure() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testMultiPartnerLegalDisclosure() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         val replacement = ResponseReplacement(
             original = """
                 "legal_disclosure": null
@@ -152,7 +152,7 @@ class PaymentMethodMessagingElementTest {
     }
 
     @Test
-    fun testSinglePartnerLegalDisclosure() = runPaymentMethodMessagingElementTest { testContext ->
+    fun testSinglePartnerLegalDisclosure() = runPaymentMethodMessagingElementTest(composeTestRule) { testContext ->
         val replacement = ResponseReplacement(
             original = """
                 "legal_disclosure": null

@@ -61,7 +61,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
         builder: FormElementsBuilder,
     ) {
         builder
-            .header(formElement = getKlarnaHeader(arguments))
+            .header(formElement = getKlarnaHeader(arguments, metadata))
             .overrideContactInformationPosition(ContactInformationCollectionMode.Name)
             .requireContactInformationIfAllowed(ContactInformationCollectionMode.Email)
             .overrideContactInformationPosition(ContactInformationCollectionMode.Email)
@@ -109,9 +109,13 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.Simple() {
             }
     }
 
-    private fun getKlarnaHeader(arguments: UiDefinitionFactory.Arguments): FormElement {
+    private fun getKlarnaHeader(
+        arguments: UiDefinitionFactory.Arguments,
+        metadata: PaymentMethodMetadata
+    ): FormElement {
         val message = arguments.paymentMethodMessagingPromotionsHelper?.getPromotionIfAvailableForCode(
-            PaymentMethod.Type.Klarna.code
+            PaymentMethod.Type.Klarna.code,
+            metadata
         )
         return if (message != null) {
             PaymentMethodMessageHeaderElement(

@@ -182,7 +182,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 
 private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
     PaymentOptionsItem.AddCard,
-    PaymentOptionsItem.Link,
+    PaymentOptionsItem.Link(LinkBrand.Link),
     PaymentOptionsItem.GooglePay,
     PaymentOptionsItem.SavedPaymentMethod(
         DisplayableSavedPaymentMethod.create(
@@ -310,7 +310,7 @@ private fun SavedPaymentMethodTab(
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
-                linkBrand = requireNotNull(linkBrand), // non-null: Link tab only shown when linkState != null
+                linkBrand = item.linkBrand,
                 onItemSelected = onItemSelected,
                 modifier = modifier,
             )
@@ -318,7 +318,6 @@ private fun SavedPaymentMethodTab(
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethodTab(
                 paymentMethod = item,
-                linkBrand = linkBrand,
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
@@ -399,9 +398,9 @@ private fun LinkTab(
         isEnabled = isEnabled,
         iconRes = getLinkIcon(showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()),
         iconTint = null,
-        labelText = stringResource(StripeR.string.stripe_link),
-        description = stringResource(StripeR.string.stripe_link),
-        onItemSelectedListener = { onItemSelected(PaymentOptionsItem.Link.toPaymentSelection(linkBrand)) },
+        labelText = linkBrand.brandName(),
+        description = linkBrand.brandName(),
+        onItemSelectedListener = { onItemSelected(PaymentSelection.Link(brand = linkBrand)) },
         cardArtUrl = null,
         modifier = modifier,
     )
@@ -410,7 +409,6 @@ private fun LinkTab(
 @Composable
 private fun SavedPaymentMethodTab(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
-    linkBrand: LinkBrand?,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -459,7 +457,7 @@ private fun SavedPaymentMethodTab(
                 .resolve()
                 .readNumbersAsIndividualDigits(),
             onItemSelectedListener = {
-                onItemSelected(paymentMethod.toPaymentSelection(linkBrand))
+                onItemSelected(paymentMethod.toPaymentSelection())
             },
             modifier = modifier,
         )

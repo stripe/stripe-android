@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import javax.inject.Inject
 
@@ -51,7 +52,12 @@ internal class BrowserManager @Inject constructor(
     private fun createCustomTabIntent(uri: Uri): Intent = CustomTabsIntent.Builder()
         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
         .build()
-        .also { it.intent.data = uri }
+        .also { customTabsIntent ->
+            customTabsIntent.intent.data = uri
+            CustomTabsClient.getPackageName(context, null)?.let { browserPackage ->
+                customTabsIntent.intent.setPackage(browserPackage)
+            }
+        }
         .intent
 }
 
