@@ -99,7 +99,7 @@ internal fun DocumentScanScreen(
         identityViewModel = identityViewModel,
         navController = navController
     ) { pageAndModelFiles ->
-        val isManualCaptureAllowed = true
+        val isManualCaptureAllowed = !pageAndModelFiles.page.documentCapture.requireLiveCapture
         var captureMode by rememberSaveable {
             mutableStateOf(CaptureMode.LIVE)
         }

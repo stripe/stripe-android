@@ -43,6 +43,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -206,7 +207,7 @@ class DocumentScanScreenTest {
     }
 
     @Test
-    fun verifyManualCaptureControlShownWhenLiveCaptureRequired() {
+    fun verifyManualCaptureControlHiddenWhenLiveCaptureRequired() {
         pageAndModelFilesLiveData.value = Resource.success(
             createPageAndModelFiles(requireLiveCapture = true)
         )
@@ -214,8 +215,16 @@ class DocumentScanScreenTest {
         testDocumentScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(),
         ) {
-            onNodeWithTag(CAPTURE_MODE_CONTROL_TAG).assertExists()
-            onNodeWithTag(MANUAL_CAPTURE_MODE_TAG).assertExists()
+            onNodeWithTag(CAPTURE_MODE_CONTROL_TAG).assertDoesNotExist()
+            onNodeWithTag(MANUAL_CAPTURE_MODE_TAG).assertDoesNotExist()
+            verify(mockDocumentScanViewModel).startScan(
+                eq(IdentityScanState.ScanType.DOC_FRONT),
+                any()
+            )
+            verify(mockDocumentScanViewModel, never()).startManualCapture(
+                any(),
+                any()
+            )
         }
     }
 
