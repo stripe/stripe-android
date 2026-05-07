@@ -74,19 +74,22 @@ internal sealed class OnrampAnalyticsEvent(
     )
 
     data object MissingIdentifiersRetrieved : OnrampAnalyticsEvent(
-        name = "missing_identifiers_retrieved"
+        name = "identifier_requirements_retrieved"
     )
 
-    data object IdentifiersSubmitted : OnrampAnalyticsEvent(
-        name = "identifiers_submitted"
+    class IdentifiersSubmitted(valid: Boolean) : OnrampAnalyticsEvent(
+        name = "identifiers_submitted",
+        params = mapOf(
+            "valid" to valid.toString()
+        )
     )
 
     data object CrsCarfDeclarationStarted : OnrampAnalyticsEvent(
         name = "crs_carf_declaration_started"
     )
 
-    data object CrsCarfDeclarationConfirmed : OnrampAnalyticsEvent(
-        name = "crs_carf_declaration_confirmed"
+    data object CrsCarfDeclarationCompleted : OnrampAnalyticsEvent(
+        name = "crs_carf_declaration_completed"
     )
 
     class WalletRegistered(
@@ -180,7 +183,7 @@ internal sealed class OnrampAnalyticsEvent(
             VerifyKyc("verify_kyc_info"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
-            ConfirmCrsCarfDeclaration("confirm_crs_carf_declaration")
+            PresentCRSCARFDeclaration("prompt_for_crs_carf_declaration")
         }
     }
 

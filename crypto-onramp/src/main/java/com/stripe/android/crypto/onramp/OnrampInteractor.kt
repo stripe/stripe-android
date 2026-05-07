@@ -383,7 +383,7 @@ internal class OnrampInteractor @Inject constructor(
         return cryptoApiRepository.submitIdentifiers(identifiers, secret)
             .fold(
                 onSuccess = { result ->
-                    analyticsService?.track(OnrampAnalyticsEvent.IdentifiersSubmitted)
+                    analyticsService?.track(OnrampAnalyticsEvent.IdentifiersSubmitted(result.valid))
                     OnrampSubmitIdentifiersResult.Completed(result)
                 },
                 onFailure = { error ->
@@ -404,7 +404,7 @@ internal class OnrampInteractor @Inject constructor(
             val error = MissingConsumerSecretException()
             analyticsService?.track(
                 OnrampAnalyticsEvent.ErrorOccurred(
-                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PresentCRSCARFDeclaration,
                     error = error,
                 )
             )
@@ -423,7 +423,7 @@ internal class OnrampInteractor @Inject constructor(
                 onFailure = { error ->
                     analyticsService?.track(
                         OnrampAnalyticsEvent.ErrorOccurred(
-                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                            operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PresentCRSCARFDeclaration,
                             error = error,
                         )
                     )
@@ -810,14 +810,14 @@ internal class OnrampInteractor @Inject constructor(
 
                 confirmResult.fold(
                     onSuccess = {
-                        analyticsService?.track(OnrampAnalyticsEvent.CrsCarfDeclarationConfirmed)
+                        analyticsService?.track(OnrampAnalyticsEvent.CrsCarfDeclarationCompleted)
 
                         OnrampCrsCarfDeclarationResult.Confirmed()
                     },
                     onFailure = { error ->
                         analyticsService?.track(
                             OnrampAnalyticsEvent.ErrorOccurred(
-                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PresentCRSCARFDeclaration,
                                 error = error,
                             )
                         )
@@ -829,7 +829,7 @@ internal class OnrampInteractor @Inject constructor(
                 val error = MissingConsumerSecretException()
                 analyticsService?.track(
                     OnrampAnalyticsEvent.ErrorOccurred(
-                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.ConfirmCrsCarfDeclaration,
+                        operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PresentCRSCARFDeclaration,
                         error = error,
                     )
                 )

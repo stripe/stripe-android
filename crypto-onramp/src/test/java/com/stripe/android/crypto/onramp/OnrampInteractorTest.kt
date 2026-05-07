@@ -239,7 +239,7 @@ class OnrampInteractorTest {
     fun testSubmitIdentifiersIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val submissionResult = SubmitIdentifiersResult(
-            valid = false,
+            valid = true,
             identifiers = listOf(
                 ComplianceIdentifierRequirement(
                     type = ComplianceIdentifierType.DE_STN,
@@ -278,7 +278,7 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampSubmitIdentifiersResult.Completed::class.java)
         val completed = result as OnrampSubmitIdentifiersResult.Completed
         assertThat(completed.result).isEqualTo(submissionResult)
-        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.IdentifiersSubmitted)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.IdentifiersSubmitted(valid = true))
     }
 
     @Test
@@ -669,7 +669,7 @@ class OnrampInteractorTest {
         )
 
         assertThat(result).isInstanceOf(OnrampCrsCarfDeclarationResult.Confirmed::class.java)
-        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CrsCarfDeclarationConfirmed)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CrsCarfDeclarationCompleted)
     }
 
     @Test
