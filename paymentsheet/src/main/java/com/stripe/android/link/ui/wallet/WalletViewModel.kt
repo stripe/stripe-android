@@ -124,6 +124,7 @@ internal class WalletViewModel(
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
     val allowLogOut: Boolean = configuration.allowLogOut
+    val linkBrand = configuration.linkBrand
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()
