@@ -30,8 +30,14 @@
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Save my info for faster checkout with Link</string>
   <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Save my info for faster checkout with %s</string>
+  <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Create an account with Link for faster checkout across the web</string>
+  <!-- Label for a checkbox that when checked allows the payment information
+to be saved and used in future checkout sessions. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_inline_sign_up_toggle_with_brand">Create an account with %s for faster checkout across the web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -70,6 +76,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Save your payment information with Link, and securely check out in 1-click on Link-supported sites.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Pay faster everywhere Link is accepted.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Pay faster everywhere %s is accepted.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[By continuing you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -86,12 +94,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Update card</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log out of Link</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Log out of %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">or enter manually</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Pay with Link</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Pay with %s</string>
   <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_pay_with_link_format">Pay with %s</string>
   <!-- Text providing link to terms for ACH payments -->
