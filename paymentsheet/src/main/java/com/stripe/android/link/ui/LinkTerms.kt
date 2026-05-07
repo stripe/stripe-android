@@ -34,16 +34,33 @@ internal fun LinkTerms(
     val brandName = linkBrand.brandName()
     val text = when (type) {
         LinkTermsType.InlineOptionalWithPhoneFirst -> {
-            stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number, brandName)
+            if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number_branded, brandName)
+            }
         }
         LinkTermsType.InlineOptional -> {
-            stringResource(R.string.stripe_sign_up_terms_alternative, brandName)
+            if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms_alternative)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_alternative_branded, brandName)
+            }
         }
         LinkTermsType.Inline -> {
-            stringResource(R.string.stripe_sign_up_terms, brandName)
+            if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_branded, brandName)
+            }
         }
         LinkTermsType.InlineWithDefaultOptIn -> {
-            "<img src=\"link_logo\"> • " + stringResource(R.string.stripe_sign_up_terms_default_opt_in, brandName)
+            val terms = if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms_default_opt_in)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_default_opt_in_branded, brandName)
+            }
+            "<img src=\"link_logo\"> • $terms"
         }
         LinkTermsType.Full -> {
             stringResource(R.string.stripe_link_sign_up_terms)
