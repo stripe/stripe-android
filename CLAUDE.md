@@ -30,6 +30,7 @@ Multi-module Android library for payment processing and financial services.
 - Detekt for static analysis, Paparazzi for screenshot testing
 
 **Testing** — MUST invoke the relevant skill before writing any test code:
-- `write-tests` — unit test structure, runScenario pattern, Turbine Flow testing, Truth assertions
+- `write-unit-tests` — unit test structure, runScenario pattern, Turbine Flow testing, Truth assertions
 - `create-fake` — fake implementations with Turbine call tracking
 - `compose-tests` — Compose UI tests with composeRule, Robolectric, node assertions
+- `network-tests` — NetworkRule integration tests with testBodyFromFile and fixture patterns

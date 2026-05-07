@@ -5,8 +5,6 @@ import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
-import com.stripe.android.common.di.APPLICATION_ID
-import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -30,7 +28,6 @@ import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
@@ -52,8 +49,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @IOContext private val workContext: CoroutineContext,
-    @Named(MOBILE_SESSION_ID) private val mobileSessionIdProvider: Provider<String>,
-    @Named(APPLICATION_ID) private val appId: String,
+    private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
 
     private val fraudDetectionDataRepository =
@@ -90,8 +86,7 @@ internal class RealElementsSessionRepository @Inject constructor(
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethods = externalPaymentMethods,
             savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-            mobileSessionId = mobileSessionIdProvider.get(),
-            appId = appId,
+            clientParams = clientParams,
             countryOverride = countryOverride,
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
@@ -207,8 +202,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
     customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
     externalPaymentMethods: List<String>,
     savedPaymentMethodSelectionId: String?,
-    mobileSessionId: String,
-    appId: String,
+    clientParams: ElementsSessionClientParams,
     countryOverride: String?,
     linkDisallowedFundingSourceCreation: Set<String>,
 ): ElementsSessionParams {
@@ -224,13 +218,14 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
+                locale = clientParams.locale,
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
-                appId = appId,
+                mobileSessionId = clientParams.mobileSessionId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )
@@ -239,13 +234,14 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.SetupIntent -> {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = clientSecret,
+                locale = clientParams.locale,
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 externalPaymentMethods = externalPaymentMethods,
                 customPaymentMethods = customPaymentMethodIds,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
-                appId = appId,
+                mobileSessionId = clientParams.mobileSessionId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )
@@ -253,15 +249,16 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
 
         is PaymentElementLoader.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
+                locale = clientParams.locale,
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
+                mobileSessionId = clientParams.mobileSessionId,
                 sellerDetails = intentConfiguration.toSellerDetails(),
-                appId = appId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )
@@ -272,15 +269,16 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
             )
             ElementsSessionParams.DeferredIntentType(
+                locale = clientParams.locale,
                 deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 customPaymentMethods = customPaymentMethodIds,
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
                 legacyCustomerEphemeralKey = legacyCustomerEphemeralKey,
                 savedPaymentMethodSelectionId = savedPaymentMethodSelectionId,
-                mobileSessionId = mobileSessionId,
+                mobileSessionId = clientParams.mobileSessionId,
                 sellerDetails = intentConfiguration.toSellerDetails(),
-                appId = appId,
+                appId = clientParams.mobileAppId,
                 countryOverride = countryOverride,
                 link = linkParams,
             )

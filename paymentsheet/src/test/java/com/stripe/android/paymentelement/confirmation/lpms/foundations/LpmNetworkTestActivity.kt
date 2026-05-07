@@ -13,7 +13,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -132,7 +132,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
-        ApplicationIdModule::class,
+        ElementsSessionClientParamsModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
         DefaultConfirmationModule::class,

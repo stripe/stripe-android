@@ -18,9 +18,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse checkout session response`() {
-        val result = CheckoutSessionResponseJsonParser(
-            isLiveMode = false,
-        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+        val result = CheckoutSessionResponseJsonParser.parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
 
         // Verify CheckoutSessionResponse fields
         assertThat(result).isNotNull()
@@ -28,6 +26,8 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.amount).isEqualTo(999L)
         assertThat(result?.currency).isEqualTo("usd")
         assertThat(result?.mode).isEqualTo(CheckoutSessionResponse.Mode.PAYMENT)
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
+        assertThat(result?.liveMode).isFalse()
 
         // Verify ElementsSession is parsed correctly
         val elementsSession = result?.elementsSession
@@ -58,9 +58,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse checkout session response includes line items`() {
-        val result = CheckoutSessionResponseJsonParser(
-            isLiveMode = false,
-        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
+        val result = CheckoutSessionResponseJsonParser.parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
 
         assertThat(result).isNotNull()
         val lineItems = result!!.lineItems
@@ -75,9 +73,9 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse multiple line items`() {
-        val result = CheckoutSessionResponseJsonParser(
-            isLiveMode = false,
-        ).parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON)
+        val result = CheckoutSessionResponseJsonParser.parse(
+            json = CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_MULTIPLE_LINE_ITEMS_JSON
+        )
 
         assertThat(result).isNotNull()
         val lineItems = result!!.lineItems
@@ -110,7 +108,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result!!.lineItems).isEmpty()
@@ -127,7 +125,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNull()
     }
@@ -145,7 +143,7 @@ class CheckoutSessionResponseJsonParserTest {
         )
 
         val exception = org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
-            CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+            CheckoutSessionResponseJsonParser.parse(json)
         }
         assertThat(exception.message).contains("Expected ui_mode to be \"custom\"")
     }
@@ -164,7 +162,7 @@ class CheckoutSessionResponseJsonParserTest {
         )
 
         val exception = org.junit.Assert.assertThrows(IllegalArgumentException::class.java) {
-            CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+            CheckoutSessionResponseJsonParser.parse(json)
         }
         assertThat(exception.message).contains("Expected ui_mode to be \"custom\"")
     }
@@ -181,7 +179,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNull()
     }
@@ -198,7 +196,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNull()
     }
@@ -215,7 +213,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result?.id).isEqualTo("cs_test_123")
@@ -237,7 +235,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         // Response is parsed successfully but elements_session is null due to invalid JSON
         assertThat(result).isNotNull()
@@ -247,7 +245,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with succeeded payment intent`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_SUCCEEDED_JSON)
 
         assertThat(result).isNotNull()
@@ -268,7 +266,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with requires_action payment intent`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_REQUIRES_ACTION_JSON)
 
         assertThat(result).isNotNull()
@@ -287,7 +285,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response with customer and saved payment methods`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -314,7 +312,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response with customer but empty payment methods`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_EMPTY_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -325,7 +323,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response without customer returns null customer`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -335,7 +333,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response with save offer enabled and status not_accepted`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_ENABLED_JSON)
 
         assertThat(result).isNotNull()
@@ -349,7 +347,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response with save offer enabled and status accepted`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_ACCEPTED_JSON)
 
         assertThat(result).isNotNull()
@@ -363,7 +361,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response with save offer disabled`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SAVE_DISABLED_JSON)
 
         assertThat(result).isNotNull()
@@ -377,7 +375,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse init response without save offer returns null`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -404,7 +402,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         val customer = result?.customer
@@ -432,7 +430,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         val customer = result?.customer
@@ -443,7 +441,7 @@ class CheckoutSessionResponseJsonParserTest {
     @Test
     fun `parse customer without can_detach_payment_method defaults to false`() {
         // Use existing fixture that doesn't have can_detach_payment_method field
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -454,7 +452,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse full order summary with discounts, taxes, and shipping`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_ORDER_SUMMARY_JSON)
 
         assertThat(result).isNotNull()
@@ -493,7 +491,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse applied balance`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_APPLIED_BALANCE_JSON)
 
         assertThat(result).isNotNull()
@@ -507,7 +505,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse shipping option fallback`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTION_JSON)
 
         assertThat(result).isNotNull()
@@ -522,7 +520,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse without total_summary falls back to line_item_group`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_TOTAL_SUMMARY_JSON)
 
         assertThat(result).isNotNull()
@@ -564,7 +562,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         val totalSummary = result?.totalSummary
@@ -585,7 +583,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result?.totalSummary).isNull()
@@ -629,7 +627,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result?.amount).isEqualTo(4099L)
@@ -642,7 +640,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse shipping options from root level`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_SHIPPING_OPTIONS_JSON)
 
         assertThat(result).isNotNull()
@@ -665,7 +663,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse customer_email from top level when customer is null (guest checkout)`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_GUEST_WITH_EMAIL_JSON)
 
         assertThat(result).isNotNull()
@@ -686,7 +684,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         assertThat(result?.customerEmail).isNull()
@@ -694,7 +692,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `customerEmail is null when customer_email is not present in JSON`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITHOUT_CUSTOMER_JSON)
 
         assertThat(result).isNotNull()
@@ -703,7 +701,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse returns empty shipping options when not present`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
 
         assertThat(result).isNotNull()
@@ -712,7 +710,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse setup mode init response`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_MODE_RESPONSE_JSON)
 
         assertThat(result).isNotNull()
@@ -727,7 +725,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse setup mode confirm response with succeeded setup intent`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_SUCCEEDED_JSON)
 
         assertThat(result).isNotNull()
@@ -745,7 +743,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse setup mode confirm response with requires_action setup intent`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_REQUIRES_ACTION_JSON)
 
         assertThat(result).isNotNull()
@@ -761,7 +759,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse adaptive pricing info`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_WITH_ADAPTIVE_PRICING_JSON)
 
         assertThat(result).isNotNull()
@@ -810,7 +808,7 @@ class CheckoutSessionResponseJsonParserTest {
             }
             """.trimIndent()
         )
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false).parse(json)
+        val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
         val localCurrencyOptions = result?.adaptivePricingInfo?.localCurrencyOptions
@@ -827,7 +825,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse returns null adaptive pricing info when not present`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_RESPONSE_JSON)
 
         assertThat(result).isNotNull()
@@ -836,7 +834,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with elements_session replaces deferred intent with confirmed PaymentIntent`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
 
         assertThat(result).isNotNull()
@@ -854,7 +852,7 @@ class CheckoutSessionResponseJsonParserTest {
 
     @Test
     fun `parse confirm response with elements_session replaces deferred intent with confirmed SetupIntent`() {
-        val result = CheckoutSessionResponseJsonParser(isLiveMode = false)
+        val result = CheckoutSessionResponseJsonParser
             .parse(CheckoutSessionFixtures.CHECKOUT_SESSION_SETUP_CONFIRM_WITH_ELEMENTS_SESSION_JSON)
 
         assertThat(result).isNotNull()
@@ -868,5 +866,249 @@ class CheckoutSessionResponseJsonParserTest {
         val stripeIntent = elementsSession?.stripeIntent as SetupIntent
         assertThat(stripeIntent.id).isEqualTo("seti_1QWK2VIyGgrkZxL71xfPBWG5")
         assertThat(stripeIntent.status).isEqualTo(StripeIntent.Status.Succeeded)
+    }
+
+    @Test
+    fun `parse status open`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "open",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.OPEN)
+    }
+
+    @Test
+    fun `parse status complete`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "complete",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.COMPLETE)
+    }
+
+    @Test
+    fun `parse status expired`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "expired",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.EXPIRED)
+    }
+
+    @Test
+    fun `parse status unknown for unrecognized value`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "status": "something_new",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.UNKNOWN)
+    }
+
+    @Test
+    fun `parse status defaults to unknown when missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.status).isEqualTo(CheckoutSessionResponse.Status.UNKNOWN)
+    }
+
+    @Test
+    fun `parse livemode true`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "livemode": true,
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.liveMode).isTrue()
+    }
+
+    @Test
+    fun `parse livemode false`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "livemode": false,
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.liveMode).isFalse()
+    }
+
+    @Test
+    fun `parse livemode defaults to false when missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.liveMode).isFalse()
+    }
+
+    @Test
+    fun `parse tax status ready`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "ready" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.READY)
+    }
+
+    @Test
+    fun `parse tax status requires_shipping_address`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "requires_shipping_address" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS)
+    }
+
+    @Test
+    fun `parse tax status requires_billing_address`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "requires_billing_address" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS)
+    }
+
+    @Test
+    fun `parse tax status unknown for unrecognized value`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax": { "status": "something_new" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
+    }
+
+    @Test
+    fun `parse tax status defaults to unknown when tax object is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
     }
 }

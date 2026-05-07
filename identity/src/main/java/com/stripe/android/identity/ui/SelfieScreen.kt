@@ -21,6 +21,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Checkbox
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -58,6 +59,7 @@ import androidx.navigation.NavController
 import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.camera.scanui.CameraView
 import com.stripe.android.identity.R
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.CameraSource
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.camera.SelfieCameraManager
@@ -71,7 +73,6 @@ import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
-import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.launch
@@ -99,7 +100,9 @@ internal fun SelfieScanScreen(
         SelfieCameraManager(context = context) { cause ->
             identityViewModel.identityAnalyticsRequestFactory.cameraError(
                 scanType = IdentityScanState.ScanType.SELFIE,
-                throwable = IllegalStateException(cause)
+                throwable = IllegalStateException(cause),
+                screenName = SCREEN_NAME_SELFIE,
+                cameraSource = CameraSource.CAMERA_SESSION
             )
         }
     }
@@ -303,6 +306,8 @@ private fun SelfieCaptureScreen(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
+@Suppress("LongMethod")
 @Composable
 private fun ResultView(
     displayState: IdentityScanState,
@@ -378,9 +383,11 @@ private fun ResultView(
             enabled = !isSubmittingSelfie
         )
 
-        Html(
+        BottomSheetHTML(
             html = allowImageCollectionHtml,
+            bottomSheets = null,
             color = MaterialTheme.colors.onBackground,
+            style = MaterialTheme.typography.body1,
             urlSpanStyle = SpanStyle(
                 textDecoration = TextDecoration.Underline,
                 color = MaterialTheme.colors.secondary

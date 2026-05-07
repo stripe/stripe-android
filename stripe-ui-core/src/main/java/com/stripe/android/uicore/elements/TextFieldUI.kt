@@ -336,7 +336,20 @@ private fun TextFieldIcon.Composable(
             }
 
             is TextFieldIcon.MultiTrailing -> {
-                Row(modifier = Modifier.padding(10.dp)) {
+                val resolvedContentDescription = contentDescription?.resolve()
+                Row(
+                    modifier = Modifier
+                        .padding(10.dp)
+                        .then(
+                            if (resolvedContentDescription != null) {
+                                Modifier.clearAndSetSemantics {
+                                    this.contentDescription = resolvedContentDescription
+                                }
+                            } else {
+                                Modifier
+                            }
+                        )
+                ) {
                     staticIcons.forEach {
                         TrailingIcon(it, loading)
                     }

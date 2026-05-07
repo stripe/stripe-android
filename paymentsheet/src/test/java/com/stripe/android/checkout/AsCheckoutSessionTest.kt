@@ -18,9 +18,85 @@ class AsCheckoutSessionTest {
     }
 
     @Test
+    fun `maps status open`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.OPEN).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Open)
+    }
+
+    @Test
+    fun `maps status complete`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.COMPLETE).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Complete)
+    }
+
+    @Test
+    fun `maps status expired`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.EXPIRED).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Expired)
+    }
+
+    @Test
+    fun `maps status unknown`() {
+        val session = createResponse(status = CheckoutSessionResponse.Status.UNKNOWN).asCheckoutSession()
+        assertThat(session.status).isEqualTo(CheckoutSession.Status.Unknown)
+    }
+
+    @Test
+    fun `maps livemode true`() {
+        val session = createResponse(liveMode = true).asCheckoutSession()
+        assertThat(session.liveMode).isTrue()
+    }
+
+    @Test
+    fun `maps livemode false`() {
+        val session = createResponse(liveMode = false).asCheckoutSession()
+        assertThat(session.liveMode).isFalse()
+    }
+
+    @Test
     fun `maps currency`() {
         val session = createResponse(currency = "eur").asCheckoutSession()
         assertThat(session.currency).isEqualTo("eur")
+    }
+
+    @Test
+    fun `maps customerEmail`() {
+        val session = createResponse(customerEmail = "test@example.com").asCheckoutSession()
+        assertThat(session.customerEmail).isEqualTo("test@example.com")
+    }
+
+    @Test
+    fun `null customerEmail maps to null`() {
+        val session = createResponse(customerEmail = null).asCheckoutSession()
+        assertThat(session.customerEmail).isNull()
+    }
+
+    @Test
+    fun `maps tax status ready`() {
+        val session = createResponse(taxStatus = CheckoutSessionResponse.TaxStatus.READY).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Ready)
+    }
+
+    @Test
+    fun `maps tax status requires shipping address`() {
+        val session = createResponse(
+            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
+        ).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresShippingAddress)
+    }
+
+    @Test
+    fun `maps tax status requires billing address`() {
+        val session = createResponse(
+            taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+        ).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresBillingAddress)
+    }
+
+    @Test
+    fun `maps tax status unknown`() {
+        val session = createResponse(taxStatus = CheckoutSessionResponse.TaxStatus.UNKNOWN).asCheckoutSession()
+        assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Unknown)
     }
 
     @Test
@@ -204,16 +280,22 @@ class AsCheckoutSessionTest {
 
     private fun createResponse(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
+        status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
+        liveMode: Boolean = false,
         currency: String = "usd",
         customerEmail: String? = null,
+        taxStatus: CheckoutSessionResponse.TaxStatus = CheckoutSessionResponse.TaxStatus.READY,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
             id = id,
+            status = status,
+            liveMode = liveMode,
             currency = currency,
             customerEmail = customerEmail,
+            taxStatus = taxStatus,
             totalSummary = totalSummary,
             lineItems = lineItems,
             shippingOptions = shippingOptions,

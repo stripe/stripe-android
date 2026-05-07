@@ -15,9 +15,9 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
-import com.stripe.android.paymentelement.embedded.form.DefaultFormActivityStateHelper
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
+import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -246,7 +246,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             isPaymentMethodSetAsDefaultEnabled = true,
         )
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
-        val stateHolder = DefaultFormActivityStateHelper(
+        val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
@@ -272,7 +272,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
-            formActivityStateHelper = stateHolder,
+            sheetActivityStateHolder = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
@@ -300,7 +300,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         )
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         selectionHolder.set(paymentSelection)
-        val stateHolder = DefaultFormActivityStateHelper(
+        val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
             configuration = EmbeddedConfirmationStateFixtures.defaultStateWithOpenCardScanAutomatically().configuration,
@@ -326,7 +326,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
-            formActivityStateHelper = stateHolder,
+            sheetActivityStateHolder = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()

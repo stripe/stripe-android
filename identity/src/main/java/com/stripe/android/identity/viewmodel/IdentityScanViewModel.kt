@@ -129,10 +129,18 @@ internal abstract class IdentityScanViewModel(
     }
 
     override fun onAnalyzerFailure(t: Throwable): Boolean {
+        identityAnalyticsRequestFactory.genericError(
+            throwable = t,
+            overrideMessage = "Error executing analyzer: ${t.message}",
+            additionalMetadata = scanErrorMetadata(targetScanTypeFlow.value)
+        )
         identityAnalyticsRequestFactory.verificationFailed(
             isFromFallbackUrl = false,
             scanType = targetScanTypeFlow.value,
-            throwable = t
+            throwable = t,
+            lastScreenName = IdentityAnalyticsRequestFactory.screenNameForScanType(
+                targetScanTypeFlow.value
+            )
         )
 
         verificationFlowFinishable.finishWithResult(
@@ -194,6 +202,12 @@ internal abstract class IdentityScanViewModel(
             coroutineScope = viewModelScope,
             parameters = scanType,
             errorHandler = { e ->
+                identityAnalyticsRequestFactory.verificationFailed(
+                    isFromFallbackUrl = false,
+                    scanType = scanType,
+                    throwable = e,
+                    lastScreenName = IdentityAnalyticsRequestFactory.screenNameForScanType(scanType)
+                )
                 verificationFlowFinishable.finishWithResult(
                     IdentityVerificationSheet.VerificationFlowResult.Failed(e)
                 )
@@ -238,4 +252,15 @@ internal abstract class IdentityScanViewModel(
         manualCaptureFrameJob = null
         _latestManualCaptureFrame.update { null }
     }
+
+    private fun scanErrorMetadata(
+        scanType: IdentityScanState.ScanType?
+    ): Map<String, Any?> = mapOf(
+        IdentityAnalyticsRequestFactory.PARAM_ERROR_CONTEXT to
+            IdentityAnalyticsRequestFactory.ERROR_CONTEXT_IMAGE_SCAN,
+        IdentityAnalyticsRequestFactory.PARAM_SCANNER_NAME to
+            IdentityAnalyticsRequestFactory.scannerNameForScanType(scanType),
+        IdentityAnalyticsRequestFactory.PARAM_SCREEN_NAME to
+            IdentityAnalyticsRequestFactory.screenNameForScanType(scanType)
+    )
 }

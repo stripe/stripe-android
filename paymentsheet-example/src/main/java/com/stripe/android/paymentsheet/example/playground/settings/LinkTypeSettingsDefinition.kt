@@ -30,6 +30,7 @@ internal object LinkTypeSettingsDefinition :
         configurationData: PlaygroundConfigurationData
     ): List<PlaygroundSettingDefinition.Displayable.Option<LinkType>> {
         return listOf(
+            option("Server Controlled", LinkType.ServerControlled),
             option("Native", LinkType.Native),
             option("Native + Attest", LinkType.NativeAttest),
             option("Web", LinkType.Web),
@@ -38,6 +39,10 @@ internal object LinkTypeSettingsDefinition :
 
     override fun setValue(value: LinkType) {
         when (value) {
+            LinkType.ServerControlled -> {
+                FeatureFlags.nativeLinkEnabled.reset()
+                FeatureFlags.nativeLinkAttestationEnabled.reset()
+            }
             LinkType.Native -> {
                 FeatureFlags.nativeLinkEnabled.setEnabled(true)
                 FeatureFlags.nativeLinkAttestationEnabled.setEnabled(false)
@@ -55,6 +60,7 @@ internal object LinkTypeSettingsDefinition :
 }
 
 enum class LinkType(override val value: String) : ValueEnum {
+    ServerControlled("Server Controlled"),
     Native("Native"),
     NativeAttest("Native + Attest"),
     Web("Web"),

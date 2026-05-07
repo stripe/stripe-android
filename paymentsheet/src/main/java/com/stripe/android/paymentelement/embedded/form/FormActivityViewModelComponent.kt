@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.embedded.form
 
 import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.di.ApplicationIdModule
+import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
@@ -16,19 +16,16 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
-import dagger.Module
 import javax.inject.Named
 import javax.inject.Singleton
 
 @Component(
     modules = [
-        FormActivityModule::class,
         EmbeddedActivityModule::class,
         EmbeddedCommonModule::class,
-        ApplicationIdModule::class,
+        ElementsSessionClientParamsModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class,
@@ -59,12 +56,4 @@ internal interface FormActivityViewModelComponent {
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
         ): FormActivityViewModelComponent
     }
-}
-
-@Module
-internal interface FormActivityModule {
-    @Binds
-    fun bindsFormConfirmationHelper(
-        confirmationHandler: DefaultFormActivityConfirmationHelper
-    ): FormActivityConfirmationHelper
 }

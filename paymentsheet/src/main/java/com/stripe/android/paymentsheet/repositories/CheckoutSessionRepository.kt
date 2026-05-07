@@ -10,7 +10,6 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import java.util.Locale
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
@@ -18,10 +17,12 @@ import javax.inject.Named
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
+    private val clientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) {
+
     private val apiRequestFactory = ApiRequest.Factory(
         appInfo = Stripe.appInfo,
         apiVersion = Stripe.API_VERSION,
@@ -47,26 +48,26 @@ internal class CheckoutSessionRepository @Inject constructor(
                 options = options,
                 params = params,
             ),
-            responseJsonParser = CheckoutSessionResponseJsonParser(
-                isLiveMode = options.apiKeyIsLiveMode,
-            ),
+            responseJsonParser = CheckoutSessionResponseJsonParser,
         )
     }
 
     suspend fun init(
         sessionId: String,
         adaptivePricingAllowed: Boolean,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = initUrl(sessionId),
-        params = mapOf(
-            "browser_locale" to Locale.getDefault().toLanguageTag(),
-            "browser_timezone" to TimeZone.getDefault().id,
-            "eid" to UUID.randomUUID().toString(),
-            "redirect_type" to "embedded",
-            "elements_session_client[is_aggregation_expected]" to "true",
-            "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
-        ),
-    )
+    ): Result<CheckoutSessionResponse> {
+        return executePost(
+            url = initUrl(sessionId),
+            params = mapOf(
+                "browser_locale" to clientParams.locale,
+                "browser_timezone" to TimeZone.getDefault().id,
+                "eid" to UUID.randomUUID().toString(),
+                "redirect_type" to "embedded",
+                "elements_session_client" to clientParams.toCheckoutSessionMap(),
+                "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
+            ),
+        )
+    }
 
     suspend fun confirm(
         id: String,
