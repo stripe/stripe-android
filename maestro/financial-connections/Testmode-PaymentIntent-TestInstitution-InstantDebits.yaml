@@ -10,6 +10,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: "Customer email setting"
+    timeout: 30000
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail
