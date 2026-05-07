@@ -348,10 +348,14 @@ class WalletsStateTest {
         walletsAllowedInHeader: List<WalletType>,
     ): WalletsState {
         return WalletsState(
-            link = if (hasLink) WalletsState.Link(
-                state = LinkButtonState.Default,
-                linkBrand = LinkBrand.Link
-            ) else null,
+            link = if (hasLink) {
+                WalletsState.Link(
+                    state = LinkButtonState.Default,
+                    linkBrand = LinkBrand.Link
+                )
+            } else {
+                null
+            },
             googlePay = if (hasGooglePay) {
                 WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
