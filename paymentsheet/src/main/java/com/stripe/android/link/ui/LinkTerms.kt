@@ -31,8 +31,40 @@ internal fun LinkTerms(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
 ) {
+    val text = linkTermsText(type, linkBrand)
+
+    val imageLoader = buildMap {
+        if (type == LinkTermsType.InlineWithDefaultOptIn) {
+            put(
+                "link_logo",
+                EmbeddableImage.Drawable(
+                    id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutBlack)
+                    } else {
+                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutWhite)
+                    },
+                    contentDescription = when (linkBrand) {
+                        LinkBrand.Link -> com.stripe.android.R.string.stripe_link
+                        LinkBrand.Notlink -> com.stripe.android.R.string.stripe_notlink
+                    },
+                )
+            )
+        }
+    }
+
+    Mandate(
+        mandateText = text.replaceHyperlinks(linkBrand),
+        modifier = modifier,
+        textAlign = textAlign,
+        imageAlign = PlaceholderVerticalAlign.TextCenter,
+        imageLoader = imageLoader,
+    )
+}
+
+@Composable
+private fun linkTermsText(type: LinkTermsType, linkBrand: LinkBrand): String {
     val brandName = linkBrand.brandName()
-    val text = when (type) {
+    return when (type) {
         LinkTermsType.InlineOptionalWithPhoneFirst -> {
             if (linkBrand == LinkBrand.Link) {
                 stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
@@ -62,37 +94,8 @@ internal fun LinkTerms(
             }
             "<img src=\"link_logo\"> • $terms"
         }
-        LinkTermsType.Full -> {
-            stringResource(R.string.stripe_link_sign_up_terms)
-        }
+        LinkTermsType.Full -> stringResource(R.string.stripe_link_sign_up_terms)
     }
-
-    val imageLoader = buildMap {
-        if (type == LinkTermsType.InlineWithDefaultOptIn) {
-            put(
-                "link_logo",
-                EmbeddableImage.Drawable(
-                    id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutBlack)
-                    } else {
-                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutWhite)
-                    },
-                    contentDescription = when (linkBrand) {
-                        LinkBrand.Link -> com.stripe.android.R.string.stripe_link
-                        LinkBrand.Notlink -> com.stripe.android.R.string.stripe_notlink
-                    },
-                )
-            )
-        }
-    }
-
-    Mandate(
-        mandateText = text.replaceHyperlinks(linkBrand),
-        modifier = modifier,
-        textAlign = textAlign,
-        imageAlign = PlaceholderVerticalAlign.TextCenter,
-        imageLoader = imageLoader,
-    )
 }
 
 internal fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
