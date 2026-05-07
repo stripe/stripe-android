@@ -265,7 +265,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun getPaymentOption(): PaymentOption? {
         return viewModel.paymentSelection?.let {
-            paymentOptionFactory.create(it)
+            paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
         }
     }
 
@@ -435,7 +435,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(selection),
+                        paymentOption = paymentOptionFactory.create(selection, linkConfiguration.linkBrand),
                         didCancel = false,
                     )
                 )
@@ -492,7 +492,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.state?.paymentSheetState?.determineFallbackPaymentSelectionAfterLinkLogout()
             }
             viewModel.paymentSelection = newSelection
-            val paymentOption = newSelection?.let { paymentOptionFactory.create(it) }
+            val paymentOption = newSelection?.let {
+                paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+            }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
                 didCancel = canceled,
@@ -631,7 +633,9 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun onPaymentSelection(canceled: Boolean) {
         val paymentSelection = viewModel.paymentSelection
-        val paymentOption = paymentSelection?.let { paymentOptionFactory.create(it) }
+        val paymentOption = paymentSelection?.let {
+            paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+        }
 
         paymentOptionResultCallback.onPaymentOptionResult(
             PaymentOptionResult(
