@@ -115,7 +115,7 @@ internal class PaymentSheetScreenAddFirstPaymentMethodScreenshotTest {
 
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
-                state = LinkButtonState.Email(email = "test@example.com"),
+                state = LinkButtonState.Email(email = "email@email.com"),
                 linkBrand = LinkBrand.Link
             ),
             googlePay = null,
