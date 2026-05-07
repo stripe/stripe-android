@@ -294,6 +294,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                     state = LinkButtonState.Default,
                     theme = arguments.configuration.walletButtons?.buttonThemes?.link
                         ?: LinkButtonTheme.DEFAULT,
+                    // Defaulting to Link because this code path isn't accessible
                     linkBrand = LinkBrand.Link,
                 ),
                 arguments

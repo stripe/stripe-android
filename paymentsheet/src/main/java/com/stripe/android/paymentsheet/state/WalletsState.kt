@@ -82,7 +82,7 @@ internal data class WalletsState(
         val state: LinkButtonState,
         val linkBrand: LinkBrand,
         val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-        ) : Wallet
+    ) : Wallet
 
     data class GooglePay(
         val buttonType: GooglePayButtonType,
