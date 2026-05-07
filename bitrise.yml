@@ -88,6 +88,7 @@ workflows:
     before_run:
       - prepare_all
     after_run:
+      - export_unit_test_results
       - conclude_all
     steps:
       - script@1:
@@ -249,6 +250,7 @@ workflows:
       - prepare_all
     after_run:
       - split_instrumentation_test_results
+      - export_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -261,6 +263,7 @@ workflows:
       - prepare_all
     after_run:
       - split_instrumentation_test_results
+      - export_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -278,6 +281,7 @@ workflows:
       - prepare_all
     after_run:
       - split_instrumentation_test_results
+      - export_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -299,6 +303,7 @@ workflows:
       - prepare_all
     after_run:
       - split_instrumentation_test_results
+      - export_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -318,6 +323,7 @@ workflows:
     before_run:
       - prepare_all
     after_run:
+      - export_browserstack_test_results
       - conclude_all
     steps:
       - script@1:
@@ -338,6 +344,7 @@ workflows:
       - prepare_all
     after_run:
       - split_instrumentation_test_results
+      - export_instrumentation_test_results
       - conclude_all
     steps:
       - script@1:
@@ -480,6 +487,21 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew splitInstrumentationTestReportsByClass
+  export_unit_test_results:
+    steps:
+      - bundle::export_test_results:
+          inputs:
+            - test_type: unit
+  export_instrumentation_test_results:
+    steps:
+      - bundle::export_test_results:
+          inputs:
+            - test_type: instrumentation
+  export_browserstack_test_results:
+    steps:
+      - bundle::export_test_results:
+          inputs:
+            - test_type: browserstack
   conclude_all:
     steps:
       - script-runner@0:
@@ -496,6 +518,19 @@ workflows:
           title: Deploy test results artifacts
       - save-gradle-configuration-cache@1: { }
       - save-gradle-cache@1: { }
+step_bundles:
+  export_test_results:
+    inputs:
+      - test_type: unit
+    steps:
+      - script@1:
+          is_always_run: true
+          is_skippable: true
+          title: Export test results
+          inputs:
+            - content: |
+                #!/usr/bin/env bash
+                bash "$BITRISE_SOURCE_DIR/scripts/store_in_bitrise_test_results_folder.sh" "$test_type"
 meta:
   bitrise.io:
     stack: linux-docker-android-22.04
