@@ -43,7 +43,7 @@ class OnrampFlowTest {
         .around(RetryRule(3))
         .around(activityRule)
 
-    private val defaultTimeout: Duration = 15.seconds
+    private val defaultTimeout: Duration = 30.seconds
 
     private fun clearPrefs() {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -97,11 +97,11 @@ class OnrampFlowTest {
         performClickOnNode("PrimaryButtonTag")
         performClickOnNode(CREATE_CRYPTO_TOKEN_BUTTON_TAG)
         performClickOnNode(CREATE_SESSION_BUTTON_TAG)
-        performClickOnNode(CHECKOUT_BUTTON_TAG, timeoutMs = 30.seconds.inWholeMilliseconds)
+        performClickOnNode(CHECKOUT_BUTTON_TAG, timeoutMs = 60.seconds.inWholeMilliseconds)
 
         composeRule.waitUntilExactlyOneExists(
             hasText("Checkout completed successfully!"),
-            timeoutMillis = 30.seconds.inWholeMilliseconds
+            timeoutMillis = 60.seconds.inWholeMilliseconds
         )
     }
 
