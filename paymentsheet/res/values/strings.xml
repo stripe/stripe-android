@@ -259,16 +259,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[By joining Link, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[By providing your email, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
-  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[By providing your phone number, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
-  <!-- Legal text shown when creating a Link account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[By providing phone number and email, you agree to create a Link account subject to the Link <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account. -->
-  <string name="stripe_sign_up_terms_branded"><![CDATA[By joining %1$s, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[By providing your email, you agree to create a %1$s account and save your payment info to %1$s, according to the <terms>%1$s Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[By providing your phone number, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[By providing your phone number, you agree to create a %1$s account and save your payment info to %1$s, according to the <terms>%1$s Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[By joining %1$s, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[By providing phone number and email, you agree to create a Link account subject to the Link <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[By providing phone number and email, you agree to create a %1$s account subject to the %1$s <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
