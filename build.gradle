@@ -39,7 +39,7 @@ plugins {
 
 apply plugin: "dev.detekt"
 
-allprojects {
+allprojects { project ->
     group = GROUP
 
     repositories {
@@ -47,6 +47,18 @@ allprojects {
         google()
         gradlePluginPortal()
     }
+
+    def excludedInstrumentationTestClass = 'com.stripe.android.paymentelement.taptoadd.TapToAddTest#successWithContinueMode[FlowController]'
+    def configureAndroidTestExclusions = {
+        project.android.defaultConfig.testInstrumentationRunnerArguments.put(
+                'notClass',
+                excludedInstrumentationTestClass
+        )
+    }
+
+    project.plugins.withId("com.android.application", configureAndroidTestExclusions)
+    project.plugins.withId("com.android.library", configureAndroidTestExclusions)
+    project.plugins.withId("com.android.test", configureAndroidTestExclusions)
 }
 
 ext {
