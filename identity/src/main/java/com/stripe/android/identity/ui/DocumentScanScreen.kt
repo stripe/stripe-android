@@ -134,7 +134,6 @@ internal fun DocumentScanScreen(
             documentScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
         }
 
-
         LiveCaptureLaunchedEffect(
             scannerState = documentScannerState,
             identityScanViewModel = documentScanViewModel,
@@ -206,7 +205,7 @@ internal fun DocumentScanScreen(
     }
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun DocumentCaptureScreen(
     documentScannerState: IdentityScanViewModel.State,
