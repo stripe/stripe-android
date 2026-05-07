@@ -106,7 +106,7 @@ internal fun SignUpBody(
     }
 
     ScrollableTopLevelColumn {
-        SignUpHeader()
+        SignUpHeader(linkBrand = signUpScreenState.linkBrand)
         StripeThemeForLink(sectionStyle = SectionStyle.Bordered) {
             EmailCollectionSection(
                 canEditForm = signUpScreenState.canEditForm,
@@ -270,7 +270,7 @@ private fun SecondaryFields(
 }
 
 @Composable
-private fun ColumnScope.SignUpHeader() {
+private fun ColumnScope.SignUpHeader(linkBrand: LinkBrand) {
     Text(
         text = stringResource(R.string.stripe_link_sign_up_header_v2),
         modifier = Modifier
@@ -281,7 +281,14 @@ private fun ColumnScope.SignUpHeader() {
         color = LinkTheme.colors.textPrimary
     )
     Text(
-        text = stringResource(R.string.stripe_link_sign_up_message_v2),
+        text = if (linkBrand == LinkBrand.Link) {
+            stringResource(R.string.stripe_link_sign_up_message_v2)
+        } else {
+            stringResource(
+                R.string.stripe_link_sign_up_message_v2_with_brand,
+                linkBrand.brandName(),
+            )
+        },
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp, bottom = 30.dp),

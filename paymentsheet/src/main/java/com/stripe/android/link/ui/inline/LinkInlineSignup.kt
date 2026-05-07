@@ -61,6 +61,7 @@ import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
+import com.stripe.android.link.ui.buildBrandIconAnnotatedString
 import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
@@ -83,6 +84,7 @@ import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 private const val LINK_LOGO_SCALE = 0.95f
+private const val LINK_LOGO_INLINE_CONTENT_ID = "link_logo"
 
 @Composable
 internal fun LinkInlineSignup(
@@ -355,7 +357,14 @@ private fun LinkCheckbox(
     toggleExpanded: () -> Unit,
     useLinkLogoInCheckboxText: Boolean,
 ) {
-    val label = stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
+    val label = if (linkBrand == LinkBrand.Link) {
+        stringResource(id = R.string.stripe_inline_sign_up_header_default_opt_in)
+    } else {
+        stringResource(
+            id = R.string.stripe_inline_sign_up_header_default_opt_in_with_brand,
+            linkBrand.brandName(),
+        )
+    }
 
     val sublabel = if (!simplifiedCheckbox) {
         stringResource(R.string.stripe_sign_up_message, merchantName)
@@ -409,17 +418,25 @@ private fun TextWithLinkLogo(
     color: Color,
     linkBrand: LinkBrand,
 ) {
-    val label = stringResource(R.string.stripe_inline_sign_up_toggle)
+    val brandName = linkBrand.brandName()
+    val label = if (linkBrand == LinkBrand.Link) {
+        stringResource(R.string.stripe_inline_sign_up_toggle)
+    } else {
+        stringResource(R.string.stripe_inline_sign_up_toggle_with_brand, brandName)
+    }
     val painter = painterResource(linkBrand.logoRes(LinkLogoStyle.InlineKnockout))
     // Slightly smaller Link logo for better visual balance
     val logoHeight = style.fontSize * LINK_LOGO_SCALE
     val logoWidth = logoHeight * (painter.intrinsicSize.width / painter.intrinsicSize.height)
     Text(
-        text = label.buildLinkLogoAnnotatedString(),
+        text = label.buildBrandIconAnnotatedString(
+            brandToken = brandName,
+            inlineContentId = LINK_LOGO_INLINE_CONTENT_ID,
+        ),
         style = style,
         color = color,
         inlineContent = mapOf(
-            "link_logo" to InlineTextContent(
+            LINK_LOGO_INLINE_CONTENT_ID to InlineTextContent(
                 placeholder = Placeholder(
                     width = logoWidth,
                     height = logoHeight,
@@ -435,21 +452,6 @@ private fun TextWithLinkLogo(
             }
         )
     )
-}
-
-@Composable
-private fun String.buildLinkLogoAnnotatedString(): AnnotatedString = buildAnnotatedString {
-    val parts = split("Link")
-    val preLinkText = parts.getOrNull(0)
-    val postLinkText = parts.getOrNull(1)
-    if (preLinkText == null || postLinkText == null) {
-        // "Link" not found, just show the label as-is
-        append(this@buildLinkLogoAnnotatedString)
-    } else {
-        append(preLinkText)
-        appendInlineContent(id = "link_logo")
-        append(postLinkText)
-    }
 }
 
 @Composable
