@@ -5,8 +5,12 @@ class InstrumentationTestReportSplitter {
     private static final XmlSlurper SLURPER = new XmlSlurper(false, false)
 
     static void split(File moduleDir, File outDir) {
-        def resultRoots = ['connected', 'managedDevice'].collect {
-            new File(moduleDir, "build/outputs/androidTest-results/$it")
+        def resultRoots = [
+            'build/browserstack-results',
+            'build/outputs/androidTest-results/connected',
+            'build/outputs/androidTest-results/managedDevice'
+        ].collect {
+            new File(moduleDir, it)
         }.findAll { it.directory }
 
         def casesByClass = [:].withDefault { [] }
