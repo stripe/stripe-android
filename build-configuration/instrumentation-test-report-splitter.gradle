@@ -81,6 +81,13 @@ class InstrumentationTestReportSplitter {
         }
     }
 
+    private static String stripBrowserStackRetrySuffix(String testName) {
+        if (!testName) {
+            return testName
+        }
+        return testName.replaceFirst(/_bstackretry\d+$/, '')
+    }
+
     private static void writeReport(File outFile, String className, List rows) {
         outFile.parentFile.mkdirs()
         def writer = new StringWriter()
@@ -105,7 +112,7 @@ class InstrumentationTestReportSplitter {
     private static void emitTestCase(MarkupBuilder mb, def tc) {
         mb.testcase(
                 classname: tc.@classname.toString(),
-                name: tc.@name.toString(),
+                name: stripBrowserStackRetrySuffix(tc.@name.toString()),
                 time: tc.@time.toString(),
         ) {
             tc.failure.each { f ->

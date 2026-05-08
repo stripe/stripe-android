@@ -212,7 +212,7 @@ def getAllTestClassNames():
 
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
-def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
+def executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParams):
     baseParams = {
         "app": appUrl,
         "devices": devices,
@@ -220,6 +220,9 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
         "networkLogs": True,
         "deviceLogs": True,
         "video": True,
+        "retryTestsOnFailure": True,
+        "runWholeSession": False,
+        "testIterations": numRetries,
         "acceptInsecureCerts": True,
         "locale": "en_US",
         "enableSpoonFramework": False,
@@ -268,18 +271,14 @@ def executeTests(appUrl, testUrl):
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
     numberOfShards = 10.0
 
+    numRetries = int(args.num_retries) if args.num_retries is not None else 0
+
     addedParams = {
         "shards": {
             "numberOfShards": numberOfShards,
         },
     }
-    return executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams)
-
-def executeTestsForFailure(appUrl, testUrl, device, testClasses):
-    addedParams = {
-        "class": testClasses,
-    }
-    return executeTestsWithAddedParams(appUrl, testUrl, [device], addedParams)
+    return executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParams)
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
 def get_build_status(buildId):
@@ -398,16 +397,6 @@ def runTests(appUrl, testUrl):
         deleteTestSuite(testUrl.replace("bs://", ""))
     return {"exitStatus": exitStatus, "buildId": buildId}
 
-def runTestsForFailure(appUrl, testUrl, device, testClasses):
-    print(f"RUNNING {str(len(testClasses))} test cases on {device}")
-    buildId = executeTestsForFailure(appUrl, testUrl, device, testClasses)
-    exitStatus = 1
-    if buildId != None:
-        exitStatus = waitForBuildComplete(buildId)
-    else:
-        deleteTestSuite(testUrl.replace("bs://", ""))
-    return {"exitStatus": exitStatus, "buildId": buildId}
-
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/sessions#get-session-details
 def getFailedTestClassesForSession(buildId, sessionId):
     failedTestClasses = []
@@ -461,7 +450,7 @@ def getSessionIdsAndDeviceForBuild(buildId):
     return sessionIds
 
 
-def getFailedTestsForBuild(buildId):
+def printFailedTestsForBuild(buildId):
     print(f"Getting failed tests for build {buildId}")
     sessionIdsAndDevices = getSessionIdsAndDeviceForBuild(buildId)
     devicesWithFailedClasses = defaultdict(list)
@@ -471,24 +460,6 @@ def getFailedTestsForBuild(buildId):
             devicesWithFailedClasses[item["device"]].append(classNameToFullyQualifiedClassName(failedClass))
             print(f"Device failed: {item['device']} - {failedClass}")
     return devicesWithFailedClasses
-
-
-def retryFailedTests(buildId, numRetries):
-    failedTestsDictionary = getFailedTestsForBuild(buildId)
-    while numRetries > 0:
-        updatedFailedTestsDictionary = {}
-        numRetries -= 1
-        for failedDevice in failedTestsDictionary:
-            deviceTestResults = runTestsForFailure(appUrl, testUrl, failedDevice, failedTestsDictionary[failedDevice])
-            deviceExitStatus = deviceTestResults["exitStatus"]
-            if deviceExitStatus != 0:
-                updatedFailedTestsDictionary[failedDevice] = getFailedTestsForBuild(deviceTestResults["buildId"])[failedDevice]
-
-        # prevent error cases where not a single test is run.
-        if len(updatedFailedTestsDictionary) == 0 and len(failedTestsDictionary) != 0:
-            return 0
-        failedTestsDictionary = updatedFailedTestsDictionary
-    return -1
 
 
 if __name__ == "__main__":
@@ -569,18 +540,15 @@ if __name__ == "__main__":
             print("-----------------")
             testUrl = uploadEspressoApk(args.espresso)
             print("-----------------")
-            numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
             exitStatus = 1
             testResults = runTests(appUrl, testUrl)
             print("-----------------")
             exitStatus = testResults["exitStatus"]
             updateObservabilityWithResults(testResults["buildId"])
-            if exitStatus != 0 and numRetries > 0:
-                os.environ["BROWSERSTACK_RERUN"] = "true"
-                exitStatus = retryFailedTests(testResults["buildId"], numRetries)
+            if exitStatus != 0:
+                printFailedTestsForBuild(testResults["buildId"])
 
-            os.environ["BROWSERSTACK_RERUN"] = "false"
             sys.exit(exitStatus)
     else:
         parser.print_help()
