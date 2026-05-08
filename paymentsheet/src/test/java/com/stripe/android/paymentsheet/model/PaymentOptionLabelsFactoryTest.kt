@@ -21,7 +21,8 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with card payment selection returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("Visa")
@@ -32,7 +33,8 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with generic payment selection returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentMethodFixtures.GENERIC_PAYMENT_SELECTION
+            selection = PaymentMethodFixtures.GENERIC_PAYMENT_SELECTION,
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("PayPal")
@@ -43,7 +45,8 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with US Bank Account payment selection returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION
+            selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION,
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("Stripe Bank")
@@ -54,7 +57,8 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with US Bank Account payment selection without bank name returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION_WITHOUT_BANK_NAME
+            selection = PaymentMethodFixtures.US_BANK_PAYMENT_SELECTION_WITHOUT_BANK_NAME,
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("Bank")
@@ -65,7 +69,8 @@ class PaymentOptionLabelsFactoryTest {
     fun `create with Link Inline payment selection returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
-            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK
+            selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION_WITH_LINK,
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("Visa")
@@ -78,7 +83,36 @@ class PaymentOptionLabelsFactoryTest {
             context = context,
             selection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD
-            )
+            ),
+            linkBrand = LinkBrand.Link,
+        )
+
+        assertThat(labels.label).isEqualTo("Link")
+        assertThat(labels.sublabel).isEqualTo("Visa Credit •••• 4242")
+    }
+
+    @Test
+    fun `create with saved Link payment method and Notlink brand returns correct labels`() {
+        val labels = PaymentOptionLabelsFactory.create(
+            context = context,
+            selection = PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD
+            ),
+            linkBrand = LinkBrand.Notlink,
+        )
+
+        assertThat(labels.label).isEqualTo("Notlink")
+        assertThat(labels.sublabel).isEqualTo("Visa Credit •••• 4242")
+    }
+
+    @Test
+    fun `create with saved Link payment method and null brand falls back to Link string`() {
+        val labels = PaymentOptionLabelsFactory.create(
+            context = context,
+            selection = PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD
+            ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("Link")
@@ -91,7 +125,8 @@ class PaymentOptionLabelsFactoryTest {
             context = context,
             selection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-            )
+            ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("Visa")
@@ -104,7 +139,8 @@ class PaymentOptionLabelsFactoryTest {
             context = context,
             selection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT
-            )
+            ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("STRIPE TEST BANK")
@@ -123,7 +159,8 @@ class PaymentOptionLabelsFactoryTest {
             context = context,
             selection = PaymentSelection.Saved(
                 paymentMethod = cardWithoutBrand
-            )
+            ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("···· 4242")
@@ -142,7 +179,8 @@ class PaymentOptionLabelsFactoryTest {
             context = context,
             selection = PaymentSelection.Saved(
                 paymentMethod = bankAccountWithoutName
-            )
+            ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isNotEmpty()
@@ -161,6 +199,7 @@ class PaymentOptionLabelsFactoryTest {
                     billingPhone = null,
                 ),
             ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("Notlink")
@@ -173,7 +212,8 @@ class PaymentOptionLabelsFactoryTest {
             context = context,
             selection = PaymentMethodFixtures.createExternalPaymentMethod(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
-            )
+            ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("external_paypal")
@@ -186,7 +226,8 @@ class PaymentOptionLabelsFactoryTest {
             context = context,
             selection = PaymentMethodFixtures.createCustomPaymentMethod(
                 PaymentMethodFixtures.PAYPAL_CUSTOM_PAYMENT_METHOD
-            )
+            ),
+            linkBrand = null,
         )
 
         assertThat(labels.label).isEqualTo("PayPal")
