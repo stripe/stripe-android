@@ -6,7 +6,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 internal class BrandTextUtilsTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
