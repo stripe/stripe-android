@@ -508,6 +508,12 @@ workflows:
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
+      - deploy-to-bitrise-io@2:
+          inputs:
+            - notify_user_groups: none
+            - is_compress: "true"
+            - is_enable_public_page: "false"
+          title: Deploy test results artifacts v2
       - save-gradle-configuration-cache@1: { }
       - save-gradle-cache@1: { }
 step_bundles:

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# For each module under the staging root (default /tmp/test_results, override TEST_RESULTS_ROOT),
+# For each module under the staging root (default repo root via BITRISE_SOURCE_DIR),
 # copies test output from the path for the given test type into $BITRISE_TEST_RESULT_DIR/<test-name>/
-# and writes test-info.json there.
+# and writes test-info.json there. If BITRISE_DEPLOY_DIR is set, copies the full test result tree there too.
 #
 # Usage: store_in_bitrise_test_results_folder.sh {unit|instrumentation} [test_title]
 #
@@ -56,4 +56,11 @@ done < <(find "$ROOT" -type d -regex "$find_regex" -print0)
 
 if [[ "$n" -eq 0 ]]; then
   echo "No matching folders for '$1'." >&2
+fi
+
+if [[ -n "${BITRISE_DEPLOY_DIR:-}" ]]; then
+  mkdir -p "$BITRISE_DEPLOY_DIR"
+  [[ -d "$BITRISE_TEST_RESULT_DIR" ]] || { echo "Not a directory: $BITRISE_TEST_RESULT_DIR" >&2; exit 1; }
+  cp -R "$BITRISE_TEST_RESULT_DIR"/. "$BITRISE_DEPLOY_DIR"/
+  echo "Copied $BITRISE_TEST_RESULT_DIR → $BITRISE_DEPLOY_DIR"
 fi
