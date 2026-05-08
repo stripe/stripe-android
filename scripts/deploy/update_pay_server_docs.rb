@@ -16,7 +16,6 @@ def update_pay_server_docs()
     unless Dir.exist?(mint_repo)
         puts 'Mint repo not found. Cloning mint (this may take a while)...'
         execute_or_fail("cd .. && pay get mint")
-        execute_or_fail("pay mint --enable")
     end
 
     puts 'Ensuring mint repo is up-to-date.'
