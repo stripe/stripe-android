@@ -93,7 +93,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --init-script build-configuration/unit-test-init.gradle --continue
+            - content: ./gradlew runUnitAndScreenshotTests --init-script build-configuration/unit-test-init.gradle --continue
       - bundle::export_unit_test_results:
           title: Export unit & screenshot test results
           inputs:
