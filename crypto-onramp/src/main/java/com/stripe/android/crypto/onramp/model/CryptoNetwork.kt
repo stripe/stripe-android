@@ -45,5 +45,8 @@ enum class CryptoNetwork(val value: String) {
     Xrpl("xrpl"),
 
     @SerialName("sui")
-    Sui("sui")
+    Sui("sui"),
+
+    @SerialName("arbitrum")
+    Arbitrum("arbitrum")
 }
