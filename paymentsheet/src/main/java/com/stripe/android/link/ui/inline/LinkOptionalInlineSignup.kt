@@ -7,6 +7,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
@@ -233,9 +234,9 @@ internal fun LinkLogo(
             }
         ),
         contentDescription = linkBrand.brandName(),
-        modifier = modifier.semantics {
-            testTag = "LinkLogoIcon"
-        },
+        modifier = modifier
+            .semantics { testTag = "LinkLogoIcon" }
+            .height(16.dp),
         tint = Color.Unspecified,
     )
 }
