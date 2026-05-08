@@ -95,6 +95,7 @@ internal class WalletViewModel(
             paymentSelectionHint = paymentSelectionHint,
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
+            linkBrand = configuration.linkBrand,
         )
     )
 

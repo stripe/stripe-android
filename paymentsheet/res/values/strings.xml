@@ -142,6 +142,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[By continuing, you agree to save your information for future purchases with %s and <link>Link</link> (see <terms>Terms</terms> and <privacy>Privacy</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[By continuing, you agree to save your information for future purchases with %s and <link>Link</link> according to Link <terms>terms</terms> and <privacy>privacy</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link, where a different brand name is supplied for Link. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[By continuing, you agree to save your information for future purchases with %1$s and <link>%2$s</link> according to %2$s <terms>terms</terms> and <privacy>privacy</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Card was not updated. Please try again.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -257,10 +259,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[By joining Link, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[By providing your email, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow, where a different brand name for Link is supplied. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[By providing your email, you agree to create a %1$s account and save your payment info to %1$s, according to the <terms>%1$s Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[By providing your phone number, you agree to create a Link account and save your payment info to Link, according to the <terms>Link Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow, where a different brand name for Link is supplied. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[By providing your phone number, you agree to create a %1$s account and save your payment info to %1$s, according to the <terms>%1$s Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account, where a different brand name for Link is supplied. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[By joining %1$s, you agree to the <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[By providing phone number and email, you agree to create a Link account subject to the Link <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow, where a different brand name for Link is supplied. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[By providing phone number and email, you agree to create a %1$s account subject to the %1$s <terms>Terms</terms> and <privacy>Privacy Policy</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Your account has been deactivated</string>
   <!-- Generic failure message -->
