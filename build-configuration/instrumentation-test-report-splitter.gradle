@@ -1,6 +1,10 @@
 import groovy.xml.MarkupBuilder
 import groovy.xml.XmlSlurper
 
+import java.nio.file.Files
+import java.nio.file.Path
+import java.util.stream.Stream
+
 class InstrumentationTestReportSplitter {
     private static final XmlSlurper SLURPER = new XmlSlurper(false, false)
 
@@ -19,11 +23,14 @@ class InstrumentationTestReportSplitter {
             if (!suites) {
                 return
             }
+            def resultRoot = resultRoots.find { root ->
+                file.canonicalPath.startsWith(root.canonicalPath)
+            }
             suites.each { suite ->
                 def suiteClass = suiteClassName(suite)
                 suite.testcase.each { tc ->
                     def fqcn = tc.@classname?.toString() ?: suiteClass
-                    casesByClass[fqcn] << tc
+                    casesByClass[fqcn] << [testcase: tc, sourceXml: file, resultRoot: resultRoot]
                 }
             }
         }
@@ -90,22 +97,87 @@ class InstrumentationTestReportSplitter {
         mb.testsuite(
                 name: className,
                 tests: rows.size(),
-                failures: rows.count { it.failure.size() > 0 },
-                errors: rows.count { it.error.size() > 0 },
-                skipped: rows.count { it.skipped.size() > 0 },
-                time: String.format(Locale.US, '%.3f', rows.sum { parseTime(it) }),
+                failures: rows.count { it.testcase.failure.size() > 0 },
+                errors: rows.count { it.testcase.error.size() > 0 },
+                skipped: rows.count { it.testcase.skipped.size() > 0 },
+                time: String.format(Locale.US, '%.3f', rows.sum { parseTime(it.testcase) }),
         ) {
-            rows.each { tc ->
-                emitTestCase(mb, tc)
+            rows.each { row ->
+                def tc = row.testcase
+                emitTestCase(mb, tc, row.sourceXml as File, row.resultRoot as File)
             }
         }
         outFile.setText(writer.toString(), 'UTF-8')
     }
 
-    private static void emitTestCase(MarkupBuilder mb, def tc) {
+    private static List<String> logcatBaseNames(String fqcn, String testName) {
+        List<String> names = new ArrayList<>()
+        names.add('logcat-' + fqcn + '-' + testName + '.txt')
+        String simple = fqcn.contains('.') ? fqcn.substring(fqcn.lastIndexOf('.') + 1) : fqcn
+        if (!simple.equals(fqcn)) {
+            names.add('logcat-' + simple + '-' + testName + '.txt')
+        }
+        return names.unique()
+    }
+
+    private static File findLogcatFile(File sourceXml, File resultRoot, String fqcn, String testName) {
+        if (sourceXml == null || resultRoot == null || !resultRoot.directory) {
+            return null
+        }
+        Set<String> names = new LinkedHashSet<>(logcatBaseNames(fqcn, testName))
+        def rootPath = resultRoot.canonicalPath
+        File searchBase = sourceXml.parentFile
+        while (searchBase != null && searchBase.directory &&
+                searchBase.canonicalPath.startsWith(rootPath)) {
+            File hit = findFirstMatchingFileNameUnder(searchBase, names, 12)
+            if (hit != null) {
+                return hit
+            }
+            searchBase = searchBase.parentFile
+        }
+        return null
+    }
+
+    private static File findFirstMatchingFileNameUnder(File rootDir, Set<String> baseNames, int maxDepth) {
+        if (rootDir == null || !rootDir.directory) {
+            return null
+        }
+        Path start = rootDir.toPath()
+        try (Stream<Path> stream = Files.walk(start, maxDepth)) {
+            return stream
+                    .filter { Files.isRegularFile(it) }
+                    .filter { baseNames.contains(it.fileName.toString()) }
+                    .map { it.toFile() }
+                    .findFirst()
+                    .orElse(null)
+        } catch (IOException ignored) {
+            return null
+        }
+    }
+
+    private static String cdata(String text) {
+        '<![CDATA[' + text.replace(']]>', ']]]]><![CDATA[') + ']]>'
+    }
+
+    private static void emitTestCase(MarkupBuilder mb, def tc, File sourceXml, File resultRoot) {
+        def fqcn = tc.@classname.toString()
+        def testName = tc.@name.toString()
+        def logcatFile = findLogcatFile(sourceXml, resultRoot, fqcn, testName)
+        String logcatText = null
+        if (logcatFile != null && logcatFile.isFile()) {
+            try {
+                logcatText = logcatFile.getText('UTF-8')
+            } catch (IOException ignored) {
+                logcatText = null
+            }
+        }
+        if (logcatText != null && logcatText.trim().isEmpty()) {
+            logcatText = null
+        }
+
         mb.testcase(
-                classname: tc.@classname.toString(),
-                name: tc.@name.toString(),
+                classname: fqcn,
+                name: testName,
                 time: tc.@time.toString(),
         ) {
             tc.failure.each { f ->
@@ -124,6 +196,11 @@ class InstrumentationTestReportSplitter {
             tc.'system-out'.each { so ->
                 'system-out' {
                     mkp.yield(so.text().toString())
+                }
+            }
+            if (logcatText != null) {
+                'system-out' {
+                    mkp.yieldUnescaped(cdata(logcatText))
                 }
             }
             tc.'system-err'.each { se ->
