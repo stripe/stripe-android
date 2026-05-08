@@ -53,7 +53,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
-private val LOGO_WIDTH = 50.dp
 private val LOGO_HEIGHT = 20.dp
 private val PILL_HORIZONTAL_PADDING = 4.dp
 private val PILL_VERTICAL_PADDING = 2.dp
