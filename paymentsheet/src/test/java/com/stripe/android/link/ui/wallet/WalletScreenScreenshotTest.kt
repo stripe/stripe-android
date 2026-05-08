@@ -284,6 +284,7 @@ internal class WalletScreenScreenshotTest {
             LinkScreenshotSurface {
                 WalletBody(
                     state = state,
+                    linkBrand = LinkBrand.Link,
                     onItemSelected = {},
                     onExpandedChanged = {},
                     onPrimaryButtonClick = {},

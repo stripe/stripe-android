@@ -119,6 +119,7 @@ internal fun WalletScreen(
 
     WalletBody(
         state = state,
+        linkBrand = viewModel.linkBrand,
         expiryDateController = viewModel.expiryDateController,
         cvcController = viewModel.cvcController,
         onItemSelected = viewModel::onItemSelected,
@@ -140,6 +141,7 @@ internal fun WalletScreen(
 @Composable
 internal fun WalletBody(
     state: WalletUiState,
+    linkBrand: LinkBrand,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -183,6 +185,7 @@ internal fun WalletBody(
                 PaymentDetailsSection(
                     modifier = Modifier,
                     state = state,
+                    linkBrand = linkBrand,
                     isExpanded = state.isExpanded,
                     expiryDateController = expiryDateController,
                     cvcController = cvcController,
@@ -231,6 +234,7 @@ internal fun WalletBody(
 private fun PaymentDetailsSection(
     modifier: Modifier,
     state: WalletUiState,
+    linkBrand: LinkBrand,
     isExpanded: Boolean,
     expiryDateController: TextFieldController,
     cvcController: CvcController,
@@ -249,6 +253,7 @@ private fun PaymentDetailsSection(
     ) {
         PaymentMethodSection(
             state = state,
+            linkBrand = linkBrand,
             isExpanded = isExpanded,
             onItemSelected = onItemSelected,
             onExpandedChanged = onExpandedChanged,
@@ -419,6 +424,7 @@ private fun ActionSection(
 @Composable
 private fun PaymentMethodSection(
     state: WalletUiState,
+    linkBrand: LinkBrand,
     isExpanded: Boolean,
     onItemSelected: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
     onExpandedChanged: (Boolean) -> Unit,
@@ -446,7 +452,10 @@ private fun PaymentMethodSection(
         labelMaxWidth = labelMaxWidthDp,
         onAccountMenuClicked = {
             showBottomSheetContent {
-                LinkAppBarMenu(onLogoutClicked)
+                LinkAppBarMenu(
+                    linkBrand = linkBrand,
+                    onLogoutClicked = onLogoutClicked,
+                )
             }
         },
         expandedContent = {

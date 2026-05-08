@@ -135,7 +135,6 @@ private val LinkButtonShape: RoundedCornerShape
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
     )
 
-private const val LINK_BRAND_NAME = "Link"
 private const val LINK_ICON_ID = "LinkIcon"
 private const val LINK_DIVIDER_SPACER_ID = "LinkDividerSpacer"
 private const val LINK_DIVIDER_ID = "LinkDivider"
@@ -328,17 +327,17 @@ private fun SignedInButtonContent(
 @Suppress("UnusedReceiverParameter")
 @Composable
 private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: LinkBrand) {
-    val text = stringResource(R.string.stripe_pay_with_link)
-    val contentDescription = stringResource(R.string.stripe_pay_with_link_format, linkBrand.brandName())
-
-    val iconizedText = buildAnnotatedString {
-        append(text.substringBefore(LINK_BRAND_NAME))
-        appendInlineContent(
-            id = LINK_ICON_ID,
-            alternateText = "[icon]"
-        )
-        append(text.substringAfter(LINK_BRAND_NAME))
+    val brandName = linkBrand.brandName()
+    val text = if (linkBrand == LinkBrand.Link) {
+        stringResource(R.string.stripe_pay_with_link)
+    } else {
+        stringResource(R.string.stripe_pay_with_link_with_brand, brandName)
     }
+    val contentDescription = stringResource(R.string.stripe_pay_with_link_format, brandName)
+    val iconizedText = text.buildBrandIconAnnotatedString(
+        brandToken = brandName,
+        inlineContentId = LINK_ICON_ID,
+    )
 
     Text(
         text = iconizedText,

@@ -774,6 +774,7 @@ internal class WalletScreenTest {
                 linkBrand = LinkBrand.Link,
                 cardFundingFilter = PaymentSheetCardFundingFilter(PaymentSheet.CardFundingType.entries),
             ),
+            linkBrand = LinkBrand.Link,
             onItemSelected = {},
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
