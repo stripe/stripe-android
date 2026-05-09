@@ -388,7 +388,7 @@ private fun SavedPaymentMethodsTabLayoutWithDefaultPreview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
-            linkBrand = LinkBrand.Link,
+            linkBrand = LinkBrand.Notlink,
             isEditing = true,
             isProcessing = false,
             onAddCardPressed = { },
