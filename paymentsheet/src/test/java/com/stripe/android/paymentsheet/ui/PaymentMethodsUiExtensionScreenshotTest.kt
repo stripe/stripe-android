@@ -125,9 +125,6 @@ class PaymentMethodsUiExtensionScreenshotTest {
                 }
                 items(
                     items = icons,
-                    key = {
-                        "icon_$it"
-                    }
                 ) { iconRes ->
                     iconCard(
                         iconRes,
@@ -143,6 +140,8 @@ class PaymentMethodsUiExtensionScreenshotTest {
             it.getCardBrandIconForHorizontalMode(showNightIcon = showNightIcon)
         }.plus(
             getLinkIcon(brand = LinkBrand.Link, showNightIcon = showNightIcon)
+        ).plus(
+            getLinkIcon(brand = LinkBrand.Notlink, showNightIcon = showNightIcon)
         ).plus(
             getSepaIcon(showNightIcon = showNightIcon)
         )

@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.LINK_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.paymentsheet.R
@@ -56,5 +57,32 @@ class SavedPaymentMethodIconTest {
                 card = CARD_PAYMENT_METHOD.card?.copy()
             ).getSavedPaymentMethodIcon(linkBrand = LinkBrand.Link)
         ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
+    }
+
+    @Test
+    fun `on Link payment method with Link brand, should return Link day icon`() {
+        assertThat(
+            LINK_PAYMENT_METHOD.getSavedPaymentMethodIcon(
+                linkBrand = LinkBrand.Link,
+                showNightIcon = false,
+            )
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_day)
+    }
+
+    @Test
+    fun `on Link payment method with Notlink brand, should return arrow-only icon`() {
+        assertThat(
+            LINK_PAYMENT_METHOD.getSavedPaymentMethodIcon(linkBrand = LinkBrand.Notlink)
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
+    }
+
+    @Test
+    fun `on Link payment method with forVerticalMode, should return arrow-only icon`() {
+        assertThat(
+            LINK_PAYMENT_METHOD.getSavedPaymentMethodIcon(
+                linkBrand = LinkBrand.Link,
+                forVerticalMode = true,
+            )
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)
     }
 }
