@@ -69,9 +69,7 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
     val backgroundColor: Color
 
     @Parcelize
-    data class Link(
-        val linkBrand: LinkBrand,
-    ) : AutocompleteAppearanceContext {
+    data object Link : AutocompleteAppearanceContext {
         override val backgroundColor: Color
             @Composable
             get() = LinkTheme.colors.surfacePrimary
@@ -100,7 +98,7 @@ internal sealed interface AutocompleteAppearanceContext : Parcelable {
                     canNavigateBack = !isRootScreen,
                     title = null,
                     isElevated = false,
-                    linkBrand = linkBrand,
+                    linkBrand = LinkBrand.Link,
                 )
             ) {
                 onBack()

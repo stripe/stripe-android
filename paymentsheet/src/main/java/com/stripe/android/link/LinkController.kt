@@ -13,7 +13,6 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -308,7 +307,6 @@ class LinkController @Inject internal constructor(
     /**
      * Contains information about the current state of the Link controller.
      *
-     * @param linkBrand The current Link brand resolved from backend configuration.
      * @param selectedPaymentMethodPreview A preview of the currently selected payment method from Link, if any.
      * @param createdPaymentMethod The [PaymentMethod] created from the selected Link payment method, if any.
      */
@@ -326,7 +324,6 @@ class LinkController @Inject internal constructor(
         @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val merchantLogoUrl: String? = null,
-        val linkBrand: LinkBrand = LinkBrand.Link,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
     ) {
@@ -808,11 +805,7 @@ class LinkController @Inject internal constructor(
                 val imageLoader = DefaultStripeImageLoader(context)
                 val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
 
-                return details.toPreview(
-                    context = context,
-                    iconLoader = iconLoader,
-                    linkBrand = LinkBrand.Link,
-                )
+                return details.toPreview(context = context, iconLoader = iconLoader)
             }
         }
     }

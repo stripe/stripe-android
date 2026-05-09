@@ -19,7 +19,6 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkAccountUpdate
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.account.DefaultLinkAccountManager
@@ -248,9 +247,8 @@ internal interface NativeLinkModule {
 
         @Provides
         @NativeLinkScope
-        fun provideAutocompleteLauncher(linkConfiguration: LinkConfiguration) =
-            DefaultAutocompleteLauncher(
-                appearanceContext = AutocompleteAppearanceContext.Link(linkConfiguration.linkBrand),
+        fun provideAutocompleteLauncher() = DefaultAutocompleteLauncher(
+            appearanceContext = AutocompleteAppearanceContext.Link,
         )
 
         @Provides

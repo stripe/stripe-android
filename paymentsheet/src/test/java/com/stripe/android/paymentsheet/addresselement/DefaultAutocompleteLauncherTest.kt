@@ -5,7 +5,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CoroutineTestRule
@@ -148,8 +147,7 @@ class DefaultAutocompleteLauncherTest {
 
     @Test
     fun `launch passes Link context with custom appearance to contract args`() = test {
-        val linkContext = AutocompleteAppearanceContext.Link(LinkBrand.Link)
-        val launcher = createLauncher(linkContext)
+        val launcher = createLauncher(AutocompleteAppearanceContext.Link)
 
         launcher.register(activityResultCaller, TestLifecycleOwner())
 
@@ -167,7 +165,7 @@ class DefaultAutocompleteLauncherTest {
         val autocompleteArgs = launchArgs as AutocompleteContract.Args
 
         assertThat(autocompleteArgs.appearanceContext)
-            .isEqualTo(linkContext)
+            .isEqualTo(AutocompleteAppearanceContext.Link)
     }
 
     @Test

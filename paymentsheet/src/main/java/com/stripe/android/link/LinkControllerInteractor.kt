@@ -29,7 +29,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -109,17 +108,11 @@ internal class LinkControllerInteractor @Inject constructor(
         val iconLoader = PaymentSelection.IconLoader(context.resources, imageLoader)
 
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
-            val linkBrand = state.linkConfiguration?.linkBrand ?: LinkBrand.Link
             LinkController.State(
                 elementsSessionId = state.linkComponent?.configuration?.elementsSessionId,
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
-                linkBrand = linkBrand,
-                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(
-                    context = context,
-                    iconLoader = iconLoader,
-                    linkBrand = linkBrand,
-                ),
+                selectedPaymentMethodPreview = state.selectedPaymentMethod?.details?.toPreview(context, iconLoader),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
@@ -671,10 +664,9 @@ sealed interface PaymentMethodPreviewDetails {
 
 internal fun PaymentMethodPreviewDetails.toPreview(
     context: Context,
-    iconLoader: PaymentSelection.IconLoader,
-    linkBrand: LinkBrand,
+    iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
-    val label = linkBrand.brandName()
+    val label = context.getString(com.stripe.android.R.string.stripe_link)
     val drawableResourceId = getIconDrawableRes(this, context.isSystemDarkTheme())
     val sublabel = buildString {
         val name: ResolvableString
@@ -722,10 +714,9 @@ internal fun PaymentMethodPreviewDetails.toPreview(
 
 internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
     context: Context,
-    iconLoader: PaymentSelection.IconLoader,
-    linkBrand: LinkBrand,
+    iconLoader: PaymentSelection.IconLoader
 ): LinkController.PaymentMethodPreview {
-    val label = linkBrand.brandName()
+    val label = context.getString(com.stripe.android.R.string.stripe_link)
     val sublabel = buildString {
         // It should never be `Passthrough`, but handling it here just in case.
         if (this@toPreview !is ConsumerPaymentDetails.Passthrough) {
