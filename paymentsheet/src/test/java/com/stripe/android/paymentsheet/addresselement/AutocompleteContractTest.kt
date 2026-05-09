@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract.EXTRA_ARGS
 import org.junit.Test
@@ -23,7 +24,7 @@ class AutocompleteContractTest {
 
     @Test
     fun `on create intent with Link context, should have expected extras`() = testCreateIntent(
-        appearanceContext = AutocompleteAppearanceContext.Link,
+        appearanceContext = AutocompleteAppearanceContext.Link(LinkBrand.Link),
     )
 
     @Test

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.addresselement
 import android.text.SpannableString
 import androidx.compose.runtime.Composable
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -33,7 +34,7 @@ class AutocompleteScreenUIScreenshotTest {
     fun withLink() {
         paparazziRule.snapshot {
             AutocompleteTestScreen(
-                appearanceContext = AutocompleteAppearanceContext.Link,
+                appearanceContext = AutocompleteAppearanceContext.Link(LinkBrand.Link),
             )
         }
     }

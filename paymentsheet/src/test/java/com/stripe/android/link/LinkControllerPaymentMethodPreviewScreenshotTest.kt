@@ -16,6 +16,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -56,7 +57,8 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                                 iconLoader = PaymentSelection.IconLoader(
                                     resources = LocalResources.current,
                                     imageLoader = DefaultStripeImageLoader(context),
-                                )
+                                ),
+                                linkBrand = LinkBrand.Link,
                             )
                         )
                     }
