@@ -8,6 +8,7 @@ import com.stripe.android.link.ui.wallet.label
 import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
@@ -19,17 +20,20 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(
+    linkBrand: LinkBrand,
     forVerticalMode: Boolean = false,
     forPaymentOption: Boolean = false,
     showNightIcon: Boolean? = null,
 ): Int {
+    val linkIconOnly = forVerticalMode || forPaymentOption || linkBrand != LinkBrand.Link
     return when (type) {
         PaymentMethod.Type.Card -> {
             if (isLinkPaymentMethod || isLinkPassthroughMode) {
                 // Link card brand or passthrough mode
                 getLinkIcon(
+                    brand = linkBrand,
                     showNightIcon = showNightIcon,
-                    iconOnly = forVerticalMode || forPaymentOption,
+                    iconOnly = linkIconOnly,
                 )
             } else {
                 card?.getSavedPaymentMethodIcon(
@@ -43,15 +47,20 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
             if (isLinkPassthroughMode) {
                 // Link passthrough mode for US bank account
                 getLinkIcon(
+                    brand = linkBrand,
                     showNightIcon = showNightIcon,
-                    iconOnly = forVerticalMode || forPaymentOption,
+                    iconOnly = linkIconOnly,
                 )
             } else {
                 TransformToBankIcon(usBankAccount?.bankName)
             }
         }
         PaymentMethod.Type.Link -> {
-            getLinkIcon(showNightIcon = showNightIcon, iconOnly = forVerticalMode || forPaymentOption)
+            getLinkIcon(
+                brand = linkBrand,
+                showNightIcon = showNightIcon,
+                iconOnly = linkIconOnly
+            )
         }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
@@ -181,19 +190,32 @@ internal fun CardBrand.getDayIcon(): Int {
 }
 
 @DrawableRes
+internal fun getLinkIconArrow(): Int = R.drawable.stripe_ic_paymentsheet_link_arrow
+
+@DrawableRes
 internal fun getLinkIcon(
+    brand: LinkBrand,
     showNightIcon: Boolean? = null,
     iconOnly: Boolean = false,
 ): Int {
     if (iconOnly) {
-        return R.drawable.stripe_ic_paymentsheet_link_arrow
+        return getLinkIconArrow()
+    }
+
+    val nightIcon = when (brand) {
+        LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_night
+        LinkBrand.Notlink -> R.drawable.stripe_ic_paymentsheet_notlink_night
+    }
+    val dayIcon = when (brand) {
+        LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_day
+        LinkBrand.Notlink -> R.drawable.stripe_ic_paymentsheet_notlink_day
     }
 
     return getOverridableIcon(
         showNightIcon = showNightIcon,
         systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_ref,
-        nightIcon = R.drawable.stripe_ic_paymentsheet_link_night,
-        dayIcon = R.drawable.stripe_ic_paymentsheet_link_day
+        nightIcon = nightIcon,
+        dayIcon = dayIcon
     )
 }
 
