@@ -321,9 +321,9 @@ internal class OnrampPresenterCoordinator @Inject constructor(
 
     private fun handleCrsCarfDeclarationResult(result: CrsCarfDeclarationActivityResult) {
         coroutineScope.launch {
-            onrampCallbacksState.crsCarfDeclarationCallback?.onResult(
-                interactor.handleCrsCarfDeclarationResult(result)
-            )
+            val declarationResult = interactor.handleCrsCarfDeclarationResult(result)
+
+            onrampCallbacksState.crsCarfDeclarationCallback?.onResult(declarationResult)
         }
     }
 
