@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+"""Exit 0 if test_name matches testCaseName in BITRISE_QUARANTINED_TESTS_JSON (JSON body); else exit 1."""
 
 from __future__ import annotations
 
@@ -6,7 +7,6 @@ import argparse
 import json
 import os
 import sys
-from pathlib import Path
 
 
 def main() -> None:
@@ -17,21 +17,18 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    json_path = os.environ.get("BITRISE_QUARANTINED_TESTS_JSON", "").strip()
-    if not json_path:
-        sys.exit(1)
+    raw = os.environ.get("BITRISE_QUARANTINED_TESTS_JSON", "").strip()
 
-    path = Path(json_path)
-    if not path.is_file():
-        print(
-            f"Warning: BITRISE_QUARANTINED_TESTS_JSON set but file not found: {json_path}",
-            file=sys.stderr,
-        )
+    if not raw:
         sys.exit(1)
 
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+        data = json.loads(raw)
+    except json.JSONDecodeError as e:
+        print(
+            f"Invalid JSON in BITRISE_QUARANTINED_TESTS_JSON: {e}",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     if not isinstance(data, list):
