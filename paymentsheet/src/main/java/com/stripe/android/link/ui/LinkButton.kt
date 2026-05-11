@@ -436,7 +436,7 @@ private fun LinkButtonIcon(
             .aspectRatio(aspectRatio)
             .alpha(LocalContentAlpha.current),
         painter = painterResource(logoRes),
-        contentDescription = stringResource(com.stripe.android.R.string.stripe_link),
+        contentDescription = linkBrand.brandName(),
         tint = Color.Unspecified
     )
 }
