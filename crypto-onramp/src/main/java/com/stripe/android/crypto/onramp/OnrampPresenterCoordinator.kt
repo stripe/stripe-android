@@ -227,8 +227,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 // Nothing to do - let the interactor work
             }
             is CheckoutState.Status.RequiresNextAction -> {
-                // Launch PaymentLauncher for next action
-                handleNextAction(status.paymentIntent, status.platformKey)
+                // Launch PaymentLauncher for next action, unless it has already been launched
+                if (interactor.markNextActionLaunched(status)) {
+                    handleNextAction(status.paymentIntent, status.platformKey)
+                }
             }
             is CheckoutState.Status.Completed -> {
                 // Checkout finished - notify callback

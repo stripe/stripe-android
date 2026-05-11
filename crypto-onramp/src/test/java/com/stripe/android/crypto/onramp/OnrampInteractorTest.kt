@@ -42,6 +42,7 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowRes
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.DateOfBirth
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -429,6 +430,39 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun markNextActionLaunched_returnsFalseForDuplicateRequiresNextAction() {
+        val status = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+        assertThat(interactor.markNextActionLaunched(status)).isFalse()
+
+        interactor.onHandleNextActionCanceled()
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+    }
+
+    @Test
+    fun markNextActionLaunched_returnsTrueForDifferentNextActionPayloadSameType() {
+        val firstStatus = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(transactionId = "txn_123"),
+            platformKey = "pk_platform_123"
+        )
+        val secondStatus = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(transactionId = "txn_456"),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(firstStatus)).isTrue()
+        assertThat(interactor.markNextActionLaunched(secondStatus)).isTrue()
+    }
+
+    @Test
     fun testAttachKycInfoFailsMissingSecret() = runTest {
         whenever(
             linkController.state(any())
@@ -685,7 +719,28 @@ class OnrampInteractorTest {
                 publishableKey = "pk_platform_123"
             )
         ).thenReturn(
-            Result.success(paymentIntent(status = StripeIntent.Status.RequiresAction))
+            Result.success(paymentIntentRequiringCard3ds())
+        )
+    }
+
+    private fun paymentIntentRequiringCard3ds(
+        transactionId: String = "txn_123"
+    ): PaymentIntent {
+        return paymentIntent(
+            status = StripeIntent.Status.RequiresAction,
+            nextActionData = StripeIntent.NextActionData.SdkData.Use3DS2(
+                source = "src_123",
+                serverName = "server_name",
+                transactionId = transactionId,
+                serverEncryption = StripeIntent.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption(
+                    directoryServerId = "dir_server_123",
+                    dsCertificateData = "cert_data",
+                    rootCertsData = listOf("root_cert"),
+                    keyId = "key_123"
+                ),
+                threeDS2IntentId = null,
+                publishableKey = "pk_platform_123"
+            )
         )
     }
 }

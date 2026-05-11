@@ -55,6 +55,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.parcelize.Parcelize
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -725,6 +726,7 @@ internal class OnrampInteractor @Inject constructor(
             )
         )
 
+        clearLaunchedNextAction()
         clearPendingCheckout()
 
         _state.update {
@@ -737,6 +739,7 @@ internal class OnrampInteractor @Inject constructor(
     }
 
     fun onHandleNextActionCanceled() {
+        clearLaunchedNextAction()
         clearPendingCheckout()
 
         _state.update {
@@ -757,6 +760,7 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun startCheckout(onrampSessionId: String) {
         if (_state.value.checkoutState?.status?.inProgress == true) return
 
+        clearLaunchedNextAction()
         savePendingCheckout(onrampSessionId)
 
         _state.update {
@@ -779,6 +783,7 @@ internal class OnrampInteractor @Inject constructor(
     suspend fun continueCheckout() {
         val onrampSessionId = resolveOnrampSessionId()
         if (onrampSessionId == null) {
+            clearLaunchedNextAction()
             _state.update {
                 it.copy(
                     checkoutState = CheckoutState(
@@ -869,6 +874,18 @@ internal class OnrampInteractor @Inject constructor(
         _state.update { it.copy(checkoutState = CheckoutState(checkoutStatus)) }
     }
 
+    fun markNextActionLaunched(status: Status.RequiresNextAction): Boolean {
+        val deduplicationKey = status.nextActionLaunchDeduplicationKey()
+        val previousDeduplicationKey = savedStateHandle.get<String>(KEY_LAUNCHED_NEXT_ACTION)
+
+        return if (previousDeduplicationKey == deduplicationKey) {
+            false
+        } else {
+            savedStateHandle[KEY_LAUNCHED_NEXT_ACTION] = deduplicationKey
+            true
+        }
+    }
+
     private fun savePendingCheckout(onrampSessionId: String) {
         savedStateHandle[KEY_PENDING_CHECKOUT] = PendingCheckout(
             onrampSessionId = onrampSessionId,
@@ -878,6 +895,10 @@ internal class OnrampInteractor @Inject constructor(
 
     internal fun clearPendingCheckout() {
         savedStateHandle.remove<PendingCheckout>(KEY_PENDING_CHECKOUT)
+    }
+
+    private fun clearLaunchedNextAction() {
+        savedStateHandle.remove<String>(KEY_LAUNCHED_NEXT_ACTION)
     }
 
     /**
@@ -928,6 +949,22 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
+    private fun Status.RequiresNextAction.nextActionLaunchDeduplicationKey(): String {
+        return deduplicationKey(
+            onrampSessionId,
+            paymentIntent.id ?: paymentIntent.clientSecret,
+            paymentIntent.nextActionData?.launchDeduplicationKeyComponent() ?: paymentIntent.nextActionType?.code
+        )
+    }
+
+    private fun StripeIntent.NextActionData.launchDeduplicationKeyComponent(): String {
+        return UUID.nameUUIDFromBytes("${javaClass.name}:$this".toByteArray()).toString()
+    }
+
+    private fun deduplicationKey(vararg parts: String?): String {
+        return parts.filterNotNull().joinToString("|")
+    }
+
     /**
      * Gets the platform publishable key from state, or fetches it if not available.
      * Returns null if fetch fails or key is null.
@@ -966,6 +1003,7 @@ internal class OnrampInteractor @Inject constructor(
 }
 
 private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
+private const val KEY_LAUNCHED_NEXT_ACTION = "onramp_launched_next_action"
 
 @Parcelize
 private data class PendingCheckout(
