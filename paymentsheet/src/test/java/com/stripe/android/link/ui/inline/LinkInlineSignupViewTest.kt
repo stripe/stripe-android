@@ -153,7 +153,7 @@ internal class LinkInlineSignupViewTest {
         setContent(
             expanded = false,
             allowsDefaultOptIn = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
         composeTestRule
@@ -165,7 +165,7 @@ internal class LinkInlineSignupViewTest {
     fun inline_logo_content_description_uses_dynamic_brand_name() {
         setContent(
             expanded = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
         onInlineLinkLogo().assertContentDescriptionContains("Notlink")
@@ -176,7 +176,7 @@ internal class LinkInlineSignupViewTest {
         setContent(
             expanded = false,
             linkSignUpOptInFeatureEnabled = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
         composeTestRule

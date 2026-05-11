@@ -63,7 +63,7 @@ internal class LinkAppBarScreenshotTest(
                         showHeader = true,
                         title = null,
                         isElevated = false,
-                        linkBrand = LinkBrand.Notlink,
+                        linkBrand = LinkBrand.Onelink,
                     )
                 ),
                 TestCase(

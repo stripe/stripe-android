@@ -98,7 +98,7 @@ class PaymentSelectionTest {
     @Test
     fun `Link label uses brand name`() {
         val label = PaymentSelection.Link(
-            brand = LinkBrand.Notlink,
+            brand = LinkBrand.Onelink,
         ).label.resolve(context)
 
         assertThat(label).isEqualTo("Notlink")

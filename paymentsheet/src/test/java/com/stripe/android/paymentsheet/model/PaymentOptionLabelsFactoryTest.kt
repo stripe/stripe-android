@@ -98,7 +98,7 @@ class PaymentOptionLabelsFactoryTest {
             selection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.LINK_PAYMENT_METHOD
             ),
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
         assertThat(labels.label).isEqualTo("Notlink")
@@ -192,7 +192,7 @@ class PaymentOptionLabelsFactoryTest {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
             selection = PaymentSelection.Link(
-                brand = LinkBrand.Notlink,
+                brand = LinkBrand.Onelink,
                 selectedPayment = LinkPaymentMethod.ConsumerPaymentDetails(
                     details = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
                     collectedCvc = null,

@@ -49,7 +49,7 @@ class LinkButtonTest {
                 state = LinkButtonState.Email("email@email.com"),
                 enabled = true,
                 onClick = {},
-                linkBrand = LinkBrand.Notlink,
+                linkBrand = LinkBrand.Onelink,
             )
         }
 
@@ -83,7 +83,7 @@ class LinkButtonTest {
                 state = LinkButtonState.Default,
                 enabled = true,
                 onClick = {},
-                linkBrand = LinkBrand.Notlink,
+                linkBrand = LinkBrand.Onelink,
             )
         }
 

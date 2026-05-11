@@ -148,7 +148,7 @@ class DefaultLinkInlineInteractorTest {
             val metadata = createPaymentMethodMetadata(
                 linkState = LinkState(
                     loginState = LoginState.NeedsVerification,
-                    configuration = createLinkConfiguration(linkBrand = LinkBrand.Notlink),
+                    configuration = createLinkConfiguration(linkBrand = LinkBrand.Onelink),
                     signupMode = null
                 )
             )
@@ -163,7 +163,7 @@ class DefaultLinkInlineInteractorTest {
                 linkAccountManager.awaitStartVerificationCall()
 
                 val state = awaitItem().verificationState as Render2FA
-                assertThat(state.viewState.linkBrand).isEqualTo(LinkBrand.Notlink)
+                assertThat(state.viewState.linkBrand).isEqualTo(LinkBrand.Onelink)
             }
         }
 

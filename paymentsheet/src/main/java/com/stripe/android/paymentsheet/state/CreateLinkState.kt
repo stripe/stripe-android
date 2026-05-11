@@ -297,7 +297,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = if (FeatureFlags.forceNotlink.isEnabled) {
-            LinkBrand.Notlink
+            LinkBrand.Onelink
         } else {
             elementsSession.linkSettings?.linkBrand ?: LinkBrand.Link
         },

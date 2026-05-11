@@ -126,7 +126,7 @@ internal class SignUpBodyTest {
 
     @Test
     fun `signup subtitle uses Notlink brand name`() {
-        setContent(SignUpState.InputtingPrimaryField, linkBrand = LinkBrand.Notlink)
+        setContent(SignUpState.InputtingPrimaryField, linkBrand = LinkBrand.Onelink)
 
         composeTestRule
             .onNodeWithText("Pay faster everywhere Notlink is accepted.")

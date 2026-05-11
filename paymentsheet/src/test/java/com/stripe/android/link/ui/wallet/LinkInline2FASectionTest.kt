@@ -41,7 +41,7 @@ internal class LinkInline2FASectionTest {
                     defaultPayment = null,
                     isDialog = false,
                     allowLogout = true,
-                    linkBrand = LinkBrand.Notlink,
+                    linkBrand = LinkBrand.Onelink,
                 ),
                 otpElement = OTPElement(
                     identifier = IdentifierSpec.Generic("otp"),

@@ -232,7 +232,7 @@ internal class VerificationScreenTest {
     fun `header image content description uses dynamic brand name`() = runTest(dispatcher) {
         val viewModel = createViewModel(
             isDialog = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
         composeTestRule.setContent {
             DefaultLinkTheme {
