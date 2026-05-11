@@ -7,7 +7,7 @@ internal object CheckoutSessionConnectSettingsDefinition :
     PlaygroundSettingDefinition.Saveable<CheckoutSessionConnectSettingsDefinition.ConnectMode>,
     PlaygroundSettingDefinition.Displayable<CheckoutSessionConnectSettingsDefinition.ConnectMode> {
 
-    private const val US_CONNECTED_ACCOUNT_ID = "acct_1SG4B2LapbQGsfjG"
+    private const val CONNECTED_ACCOUNT_ID = "acct_1SGP1sPvdtoA7EjP"
     private const val APPLICATION_FEE_AMOUNT = 400L
 
     override val key: String = "checkoutSessionConnectMode"
@@ -30,10 +30,10 @@ internal object CheckoutSessionConnectSettingsDefinition :
         when (value) {
             ConnectMode.NONE -> { }
             ConnectMode.ON_BEHALF_OF -> {
-                checkoutRequestBuilder.onBehalfOf(US_CONNECTED_ACCOUNT_ID)
+                checkoutRequestBuilder.onBehalfOf(CONNECTED_ACCOUNT_ID)
             }
             ConnectMode.DESTINATION -> {
-                checkoutRequestBuilder.transferDataDestination(US_CONNECTED_ACCOUNT_ID)
+                checkoutRequestBuilder.transferDataDestination(CONNECTED_ACCOUNT_ID)
                 checkoutRequestBuilder.applicationFeeAmount(APPLICATION_FEE_AMOUNT)
             }
         }
