@@ -70,12 +70,8 @@ class OnrampInteractorTest {
     }
     private val savedStateHandle = SavedStateHandle()
 
-    private val interactor: OnrampInteractor = OnrampInteractor(
-        application = RuntimeEnvironment.getApplication(),
-        linkController = linkController,
+    private val interactor: OnrampInteractor = createInteractor(
         cryptoApiRepository = cryptoApiRepository,
-        analyticsServiceFactory = analyticsServiceFactory,
-        checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
         savedStateHandle = savedStateHandle
     )
 
@@ -446,6 +442,24 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun markNextActionLaunched_returnsFalseAfterInteractorRecreation() {
+        val status = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+
+        val recreatedInteractor = createInteractor(
+            cryptoApiRepository = cryptoApiRepository,
+            savedStateHandle = savedStateHandle
+        )
+
+        assertThat(recreatedInteractor.markNextActionLaunched(status)).isFalse()
+    }
+
+    @Test
     fun markNextActionLaunched_returnsTrueForDifferentNextActionPayloadSameType() {
         val firstStatus = CheckoutState.Status.RequiresNextAction(
             onrampSessionId = "cos_test_session_id",
@@ -460,6 +474,74 @@ class OnrampInteractorTest {
 
         assertThat(interactor.markNextActionLaunched(firstStatus)).isTrue()
         assertThat(interactor.markNextActionLaunched(secondStatus)).isTrue()
+    }
+
+    @Test
+    fun startCheckout_clearsPreviouslyLaunchedNextActionForSameSession() = runTest {
+        val status = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+
+        stubCheckoutRequiresNextAction()
+        interactor.startCheckout("cos_test_session_id")
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+    }
+
+    @Test
+    fun continueCheckout_recoversPendingCheckoutAfterInteractorRecreation() = runTest {
+        stubCheckoutRequiresNextAction()
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+        interactor.startCheckout("cos_test_session_id")
+
+        val recoveredRepository: CryptoApiRepository = mock()
+        val recreatedInteractor = createInteractor(
+            cryptoApiRepository = recoveredRepository,
+            savedStateHandle = savedStateHandle
+        )
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            recoveredRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+        whenever(
+            recoveredRepository.getOnrampSession(
+                sessionId = "cos_test_session_id",
+                sessionClientSecret = "test_secret"
+            )
+        ).thenReturn(
+            Result.success(
+                GetOnrampSessionResponse(
+                    id = "cos_test_session_id",
+                    clientSecret = "test_secret",
+                    paymentIntentClientSecret = "pi_test_secret"
+                )
+            )
+        )
+        whenever(
+            recoveredRepository.retrievePaymentIntent(
+                clientSecret = "pi_test_secret",
+                publishableKey = "pk_platform_123"
+            )
+        ).thenReturn(Result.success(paymentIntentRequiringCard3ds()))
+
+        recreatedInteractor.continueCheckout()
+
+        assertThat(recreatedInteractor.state.value.cryptoCustomerId).isEqualTo("cpt_123")
+        val checkoutStatus = recreatedInteractor.state.value.checkoutState?.status
+        assertThat(checkoutStatus).isInstanceOf(CheckoutState.Status.RequiresNextAction::class.java)
+        verify(recoveredRepository).getOnrampSession(
+            sessionId = "cos_test_session_id",
+            sessionClientSecret = "test_secret"
+        )
     }
 
     @Test
@@ -684,6 +766,20 @@ class OnrampInteractorTest {
             .appearance(mock())
             .cryptoCustomerId(cryptoCustomerId)
             .build()
+
+    private fun createInteractor(
+        cryptoApiRepository: CryptoApiRepository,
+        savedStateHandle: SavedStateHandle,
+    ): OnrampInteractor {
+        return OnrampInteractor(
+            application = RuntimeEnvironment.getApplication(),
+            linkController = linkController,
+            cryptoApiRepository = cryptoApiRepository,
+            analyticsServiceFactory = analyticsServiceFactory,
+            checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+            savedStateHandle = savedStateHandle
+        )
+    }
 
     private suspend fun stubCheckoutRequiresNextAction() {
         whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
