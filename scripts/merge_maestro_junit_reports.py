@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Merge Maestro JUnit try-reports, attach screen recordings, publish for Bitrise Test Reports."""
+"""Merge Maestro JUnit try-reports and publish for Bitrise Test Reports."""
 from __future__ import annotations
 
 import argparse
@@ -10,30 +10,33 @@ import sys
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
-DEFAULT_STAGING = Path("/tmp/maestro_tests")
-MERGED_NAME = "maestro_merged.xml"
-VIDEO_EXTENSIONS = {".mp4", ".webm", ".ogg"}
+DEFAULT_STAGING = Path("/tmp/test_results")
+
+
+def merged_junit_path(staging: Path, module: str) -> Path:
+    return staging / f"{module}.xml"
 
 
 def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--tag", required=True, help="JUnit testsuite name (e.g. Maestro tag)")
     p.add_argument("--module", required=True, help="Module label for paths and test-info.json")
-    p.add_argument("--staging", type=Path, default=DEFAULT_STAGING, help="Directory containing *_try*.xml")
     p.add_argument(
-        "--video-scan",
+        "--staging",
         type=Path,
-        nargs="*",
-        default=[Path("/tmp/test_results"), DEFAULT_STAGING],
-        help="Extra directories to search for recording files",
+        default=DEFAULT_STAGING,
+        help="Directory containing per-attempt JUnit XML (*-try*.xml)",
     )
     return p.parse_args()
 
 
-def iter_try_junit_files(staging: Path) -> list[Path]:
-    files = sorted(staging.glob("*_try*.xml"))
-    merged = staging / MERGED_NAME
-    return [p for p in files if p.resolve() != merged.resolve()]
+def iter_try_junit_files(staging: Path, merged_report: Path) -> list[Path]:
+    """Maestro outputs *-tryN.xml per attempt."""
+    merged_res = merged_report.resolve()
+    return sorted(
+        (p for p in staging.glob("*-try*.xml") if p.is_file() and p.resolve() != merged_res),
+        key=lambda x: x.name,
+    )
 
 
 def collect_testcases(root: ET.Element) -> list[ET.Element]:
@@ -46,68 +49,11 @@ def collect_testcases(root: ET.Element) -> list[ET.Element]:
     return out
 
 
-def testcase_identity(tc: ET.Element) -> str:
-    return tc.get("id") or tc.get("name") or tc.get("classname") or "unknown"
-
-
-def normalized_lower_id(raw: str) -> str:
-    return raw.lower().replace("_", "-")
-
-
-def video_prefixes(module: str, testcase_id: str) -> list[str]:
-    lid = normalized_lower_id(testcase_id)
-    prefixes = [lid]
-    if module == "connect":
-        prefixes.append(f"connect-{lid}")
-    prefixes.sort(key=len, reverse=True)
-    return prefixes
-
-
-def list_video_paths(*dirs: Path) -> list[Path]:
-    found: list[Path] = []
-    for d in dirs:
-        if not d.is_dir():
-            continue
-        try:
-            for p in d.iterdir():
-                if p.is_file() and p.suffix.lower() in VIDEO_EXTENSIONS:
-                    found.append(p)
-        except OSError:
-            continue
-    return found
-
-
-def pick_video_for_testcase(module: str, testcase_id: str, dirs: list[Path]) -> Path | None:
-    prefs = video_prefixes(module, testcase_id)
-    candidates: list[Path] = []
-    for p in list_video_paths(*dirs):
-        name_lower = p.name.lower()
-        for pref in prefs:
-            if name_lower.startswith(pref):
-                candidates.append(p)
-                break
-    if not candidates:
-        return None
-    candidates.sort(key=lambda x: x.stat().st_mtime, reverse=True)
-    return candidates[0]
-
-
-def ensure_attachment_property(testcase: ET.Element, relative_name: str) -> None:
-    props = None
-    for child in testcase:
-        local = child.tag.split("}")[-1]
-        if local == "properties":
-            props = child
-            break
-    if props is None:
-        props = ET.SubElement(testcase, "properties")
-    ET.SubElement(props, "property", {"name": "attachment_video", "value": relative_name})
-
-
-def merge_junits(staging: Path, suite_name: str, module: str, video_scan: list[Path]) -> Path | None:
-    inputs = iter_try_junit_files(staging)
+def merge_junits(staging: Path, suite_name: str, module: str) -> Path | None:
+    out_path = merged_junit_path(staging, module)
+    inputs = iter_try_junit_files(staging, out_path)
     if not inputs:
-        print("No *_try*.xml files to merge.", file=sys.stderr)
+        print("No per-attempt JUnit XML (*-try*.xml) to merge.", file=sys.stderr)
         return None
 
     merged_cases: list[ET.Element] = []
@@ -122,22 +68,6 @@ def merge_junits(staging: Path, suite_name: str, module: str, video_scan: list[P
     if not merged_cases:
         print("No test cases found in try reports.", file=sys.stderr)
         return None
-
-    scan_dirs = [staging, *video_scan]
-    used_names: dict[str, Path] = {}
-
-    for tc in merged_cases:
-        tid = testcase_identity(tc)
-        src = pick_video_for_testcase(module, tid, scan_dirs)
-        if src is None:
-            continue
-        dest_name = src.name
-        dest = staging / dest_name
-        if dest.resolve() != src.resolve():
-            if dest.exists():
-                dest.unlink()
-            shutil.copy2(src, dest)
-        ensure_attachment_property(tc, dest_name)
 
     total = len(merged_cases)
     failures = errors = skipped = 0
@@ -188,7 +118,6 @@ def merge_junits(staging: Path, suite_name: str, module: str, video_scan: list[P
     for tc in merged_cases:
         suite.append(tc)
 
-    out_path = staging / MERGED_NAME
     tree = ET.ElementTree(testsuites)
     ET.indent(tree, space="  ")
     tree.write(out_path, encoding="utf-8", xml_declaration=True)
@@ -214,32 +143,51 @@ def copy_tree_contents(src: Path, dest: Path) -> None:
             shutil.copy2(child, target)
 
 
+def bitrise_test_results_dir() -> str | None:
+    return os.environ.get("BITRISE_TEST_RESULT_DIR")
+
+
+def maestro_test_info_name(module: str, tag: str) -> str:
+    if module == "financial-connections":
+        base = "FC Maestro Tests"
+    elif module == "connect":
+        base = "Connect Maestro Tests"
+    else:
+        base = "Maestro Tests"
+    return f"{base} - {tag}"
+
+
 def main() -> None:
     args = parse_args()
     staging: Path = args.staging
     module = args.module
+    test_results = Path("/tmp/test_results")
 
     if not staging.is_dir():
         print(f"Staging directory missing: {staging}", file=sys.stderr)
         sys.exit(0)
 
-    merged = merge_junits(staging, args.tag, module, list(args.video_scan))
+    merged = merge_junits(staging, args.tag, module)
     if merged is None:
         sys.exit(0)
 
-    test_results = Path("/tmp/test_results")
-    copy_tree_contents(staging, test_results)
+    if staging.resolve() != test_results.resolve():
+        copy_tree_contents(staging, test_results)
 
-    bitrise_dir = os.environ.get("BITRISE_TEST_RESULT_DIR")
-    if bitrise_dir:
-        dest = Path(bitrise_dir) / module
-        copy_tree_contents(staging, dest)
+    bitrise_dir_raw = bitrise_test_results_dir()
+    if bitrise_dir_raw:
+        dest = Path(bitrise_dir_raw) / module
+        dest.mkdir(parents=True, exist_ok=True)
+        copy_tree_contents(test_results, dest)
+        test_name = maestro_test_info_name(module, args.tag)
         info_path = dest / "test-info.json"
-        test_name = f"{module} - {args.tag}"
         info_path.write_text(json.dumps({"test-name": test_name}, separators=(",", ":")), encoding="utf-8")
         print(f"Published Maestro results under {dest}")
     else:
-        print("BITRISE_TEST_RESULT_DIR unset; skipped Bitrise export.", file=sys.stderr)
+        print(
+            "BITRISE_TEST_RESULT_DIR unset; skipped Bitrise export.",
+            file=sys.stderr,
+        )
 
 
 if __name__ == "__main__":

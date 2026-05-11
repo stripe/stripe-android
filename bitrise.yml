@@ -216,6 +216,13 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 bash ./scripts/execute_maestro_tests.sh -m connect -t $MAESTRO_TAGS
+      - script@1:
+          title: Test results
+          is_always_run: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                python3 "$BITRISE_SOURCE_DIR/scripts/merge_maestro_junit_reports.py" --tag "$MAESTRO_TAGS" --module connect
   _run-connections-e2e-tests:
     before_run:
       - start_connections_emulator
@@ -235,6 +242,13 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 bash ./scripts/execute_maestro_tests.sh -m financial-connections -t $MAESTRO_TAGS
+      - script@1:
+          title: Test results
+          is_always_run: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                python3 "$BITRISE_SOURCE_DIR/scripts/merge_maestro_junit_reports.py" --tag "$MAESTRO_TAGS" --module financial-connections
   notify-connections-e2e-failure:
     steps:
       # Notify all executions.
