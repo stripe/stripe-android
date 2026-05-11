@@ -724,6 +724,28 @@ internal class OnrampInteractor @Inject constructor(
                 error = error,
             )
         )
+
+        clearPendingCheckout()
+
+        _state.update {
+            it.copy(
+                checkoutState = CheckoutState(
+                    Status.Completed(OnrampCheckoutResult.Failed(error))
+                )
+            )
+        }
+    }
+
+    fun onHandleNextActionCanceled() {
+        clearPendingCheckout()
+
+        _state.update {
+            it.copy(
+                checkoutState = CheckoutState(
+                    Status.Completed(OnrampCheckoutResult.Canceled())
+                )
+            )
+        }
     }
 
     /**
