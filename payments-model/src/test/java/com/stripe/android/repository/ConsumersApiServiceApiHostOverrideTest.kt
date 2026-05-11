@@ -3,12 +3,14 @@ package com.stripe.android.repository
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 internal class ConsumersApiServiceApiHostOverrideTest {
 
+    @Before
     @After
-    fun tearDown() {
+    fun resetApiHostOverride() {
         ApiRequest.API_HOST_OVERRIDE = null
     }
 

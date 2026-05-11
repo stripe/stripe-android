@@ -4,12 +4,14 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiServiceImpl
 import org.junit.After
+import org.junit.Before
 import org.junit.Test
 
 internal class FinancialConnectionsApiHostOverrideTest {
 
+    @Before
     @After
-    fun tearDown() {
+    fun resetApiHostOverride() {
         ApiRequest.API_HOST_OVERRIDE = null
     }
 
