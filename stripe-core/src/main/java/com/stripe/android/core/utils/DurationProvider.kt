@@ -55,7 +55,7 @@ class DefaultDurationProvider private constructor() : DurationProvider {
     override fun end(key: DurationProvider.Key): Duration? {
         val startTime = store.remove(key) ?: return null
         val endTime = SystemClock.uptimeMillis()
-        logger.debug("DURATION_ENDED: ${key.name}: ${endTime}")
+        logger.debug("DURATION_ENDED: ${key.name}: $endTime")
         return (endTime - startTime).milliseconds
     }
 
