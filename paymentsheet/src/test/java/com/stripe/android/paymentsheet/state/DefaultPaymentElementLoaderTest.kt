@@ -4656,6 +4656,7 @@ internal class DefaultPaymentElementLoaderTest {
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
+            customerRepository = customerRepo,
             createCustomerState = CreateCustomerState(
                 customerRepository = customerRepo,
                 paymentMethodFilter = paymentMethodFilter,

@@ -44,10 +44,12 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -231,6 +233,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
+    private val customerRepository: CustomerRepository,
     private val createCustomerState: CreateCustomerState,
     private val checkoutSessionLoader: CheckoutSessionLoader,
     private val elementsSessionLoader: ElementsSessionLoader,
@@ -276,6 +279,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val isGooglePaySupportedByConfiguration = async {
             configuration.isGooglePayReady()
         }
+
+        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
@@ -350,6 +355,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 elementsSession = elementsSession,
                 metadata = paymentMethodMetadata.await(),
                 savedSelection = savedSelection,
+                prefetchedPaymentMethods = prefetchedPaymentMethods,
             )
         }
 
@@ -402,6 +408,27 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
+        configuration: CommonConfiguration,
+    ): Deferred<Result<List<PaymentMethod>>>? {
+        val customer = configuration.customer ?: return null
+        val accessType = customer.accessType
+        if (accessType !is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey) return null
+
+        return async {
+            customerRepository.getPaymentMethods(
+                customerId = customer.id,
+                ephemeralKeySecret = accessType.ephemeralKeySecret,
+                types = listOf(
+                    PaymentMethod.Type.Card,
+                    PaymentMethod.Type.USBankAccount,
+                    PaymentMethod.Type.SepaDebit,
+                ),
+                silentlyFail = paymentConfiguration.get().isLiveMode(),
+            )
+        }
     }
 
     private suspend fun loadSession(
