@@ -24,7 +24,7 @@ internal sealed class ConfirmationType(
         networkRule: NetworkRule,
     )
 
-    class IntentFirst : ConfirmationType(
+    data object IntentFirst : ConfirmationType(
         createIntentCallback = null,
         isDeferredIntent = false,
     ) {
@@ -86,7 +86,7 @@ internal sealed class ConfirmationType(
         }
     }
 
-    class DeferredClientSideConfirmation : ConfirmationType(
+    data object DeferredClientSideConfirmation : ConfirmationType(
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success(clientSecret = "pi_example_secret_example")
         },
@@ -193,8 +193,8 @@ internal sealed class ConfirmationType(
 internal object ConfirmationTypeProvider : TestParameterValuesProvider() {
     override fun provideValues(context: Context?): List<ConfirmationType> {
         return listOf(
-            ConfirmationType.IntentFirst(),
-            ConfirmationType.DeferredClientSideConfirmation(),
+            ConfirmationType.IntentFirst,
+            ConfirmationType.DeferredClientSideConfirmation,
         )
     }
 }

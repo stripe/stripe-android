@@ -93,7 +93,11 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --continue
+            - content: ./gradlew runUnitAndScreenshotTests --init-script build-configuration/unit-test-init.gradle --continue
+      - bundle::export_unit_test_results:
+          title: Export unit & screenshot test results
+          inputs:
+            - test_title: Unit & screenshot tests
   build-connect-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -254,7 +258,11 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export instrumentation test results
+          inputs:
+            - test_title: Instrumentation tests
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -265,7 +273,11 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest
+            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet instrumentation test results
+          inputs:
+            - test_title: PaymentSheet instrumentation tests
     meta:
       bitrise.io:
         stack: linux-docker-android-22.04
@@ -289,7 +301,11 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
+            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export FC instrumentation test results
+          inputs:
+            - test_title: FC instrumentation tests
   run-cardscan-instrumentation-tests:
     before_run:
       - start_cardscan_emulator
@@ -309,7 +325,11 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest
+            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export CardScan instrumentation test results
+          inputs:
+            - test_title: CardScan instrumentation tests
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
@@ -328,6 +348,10 @@ workflows:
           timeout: 2400
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk --num-retries 2
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet E2E test results
+          inputs:
+            - test_title: PaymentSheet E2E tests
   run-crypto-onramp-example-e2e-tests:
     before_run:
       - start_emulator
@@ -346,7 +370,11 @@ workflows:
           title: Run Crypto Onramp Example E2E Tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest
+            - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+      - bundle::export_instrumentation_test_results:
+          title: Export Crypto Onramp Example E2E test results
+          inputs:
+            - test_title: Crypto Onramp E2E tests
   check-dependencies:
     envs:
       - INCLUDE_DEPENDENCIES_ON_FAILURE: true
@@ -482,6 +510,43 @@ workflows:
           title: Deploy test results artifacts
       - save-gradle-configuration-cache@1: { }
       - save-gradle-cache@1: { }
+step_bundles:
+  export_unit_test_results:
+    inputs:
+      - test_title: Unit tests
+    steps:
+      - bundle::export_test_results:
+          inputs:
+            - test_title: $test_title
+            - test_type: unit
+  export_instrumentation_test_results:
+    inputs:
+      - test_title: Instrumentation tests
+    steps:
+      - script@1:
+          title: Split instrumentation test results
+          is_skippable: true
+          is_always_run: true
+          timeout: 1200
+          inputs:
+            - content: ./gradlew splitInstrumentationTestReportsByClass
+      - bundle::export_test_results:
+          inputs:
+            - test_title: $test_title
+            - test_type: instrumentation
+  export_test_results:
+    inputs:
+      - test_title: tests
+      - test_type: unit
+    steps:
+      - script@1:
+          is_always_run: true
+          is_skippable: true
+          title: Test results
+          inputs:
+            - content: |
+                #!/usr/bin/env bash
+                bash "$BITRISE_SOURCE_DIR/scripts/store_in_bitrise_test_results_folder.sh" "$test_type" "$test_title"
 meta:
   bitrise.io:
     stack: linux-docker-android-22.04

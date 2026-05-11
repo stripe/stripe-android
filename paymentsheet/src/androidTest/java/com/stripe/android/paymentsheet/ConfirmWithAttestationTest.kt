@@ -53,7 +53,7 @@ internal class ConfirmWithAttestationTest {
             integrationType = ProductIntegrationType.PaymentSheet,
             resultCallback = ::assertCompleted,
             builder = {
-                ConfirmationType.DeferredClientSideConfirmation().createIntentCallback?.let {
+                ConfirmationType.DeferredClientSideConfirmation.createIntentCallback?.let {
                     createIntentCallback(it)
                 }
             }

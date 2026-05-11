@@ -25,6 +25,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

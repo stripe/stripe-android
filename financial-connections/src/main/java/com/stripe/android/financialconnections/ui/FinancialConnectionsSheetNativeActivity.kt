@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.ui
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -133,9 +134,15 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                 .filterNotNull()
                 .collect { viewEffect ->
                     when (viewEffect) {
-                        is OpenUrl -> startActivity(
-                            browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
-                        )
+                        is OpenUrl -> try {
+                            startActivity(
+                                browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
+                            )
+                        } catch (_: ActivityNotFoundException) {
+                            // No browser available on the device.
+                        } catch (_: SecurityException) {
+                            // A non-exported activity on the device matched the URL intent filter.
+                        }
 
                         is Finish -> {
                             setResult(

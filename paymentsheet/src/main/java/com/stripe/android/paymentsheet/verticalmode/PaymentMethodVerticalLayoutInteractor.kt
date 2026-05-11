@@ -414,7 +414,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         }
         return DisplayablePaymentMethod(
             code = PaymentMethod.Type.Link.code,
-            displayName = PaymentsCoreR.string.stripe_link.resolvableString,
+            displayName = link.linkBrand.brandName().resolvableString,
             iconResource = R.drawable.stripe_ic_paymentsheet_link_arrow,
             iconResourceNight = null,
             lightThemeIconUrl = null,
@@ -422,7 +422,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             iconRequiresTinting = false,
             subtitle = subtitle,
             onClick = {
-                updateSelection(PaymentSelection.Link(), false)
+                updateSelection(PaymentSelection.Link(brand = link.linkBrand), false)
                 invokeRowSelectionCallback?.invoke()
             },
         )
@@ -645,7 +645,12 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled &&
             PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)
         ) {
-            { paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(code) }
+            {
+                paymentMethodMessagePromotionsHelper?.getPromotionIfAvailableForCode(
+                    code,
+                    paymentMethodMetadata
+                )
+            }
         } else {
             null
         }

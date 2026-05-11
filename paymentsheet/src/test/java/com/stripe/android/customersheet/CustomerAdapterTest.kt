@@ -529,8 +529,6 @@ class CustomerAdapterTest {
     fun `PersistablePaymentMethodOption to SavedSelection`() {
         assertThat(CustomerAdapter.PaymentOption.GooglePay.toSavedSelection())
             .isEqualTo(SavedSelection.GooglePay)
-        assertThat(CustomerAdapter.PaymentOption.Link.toSavedSelection())
-            .isEqualTo(SavedSelection.Link)
         assertThat(CustomerAdapter.PaymentOption.StripeId("pm_1234").toSavedSelection())
             .isEqualTo(SavedSelection.PaymentMethod("pm_1234"))
     }
@@ -539,8 +537,6 @@ class CustomerAdapterTest {
     fun `SavedSelection to PersistablePaymentMethodOption`() {
         assertThat(SavedSelection.GooglePay.toPaymentOption())
             .isEqualTo(CustomerAdapter.PaymentOption.GooglePay)
-        assertThat(SavedSelection.Link.toPaymentOption())
-            .isEqualTo(CustomerAdapter.PaymentOption.Link)
         assertThat(SavedSelection.PaymentMethod("pm_1234").toPaymentOption())
             .isEqualTo(CustomerAdapter.PaymentOption.StripeId("pm_1234"))
     }
@@ -613,22 +609,23 @@ class CustomerAdapterTest {
         val savedPaymentOption = CustomerAdapter.PaymentOption.StripeId(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.id
         )
-        val savedSelection = savedPaymentOption.toPaymentSelection(paymentMethodProvider)
+        val savedSelection = savedPaymentOption.toPaymentSelection(
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(savedSelection)
             .isInstanceOf<PaymentSelection.Saved>()
 
         val googlePaymentOption = CustomerAdapter.PaymentOption.GooglePay
-        val googleSelection = googlePaymentOption.toPaymentSelection(paymentMethodProvider)
+        val googleSelection = googlePaymentOption.toPaymentSelection(
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(googleSelection)
             .isInstanceOf<PaymentSelection.GooglePay>()
 
-        val linkPaymentOption = CustomerAdapter.PaymentOption.Link
-        val linkSelection = linkPaymentOption.toPaymentSelection(paymentMethodProvider)
-        assertThat(linkSelection)
-            .isInstanceOf<PaymentSelection.Link>()
-
         val nullSavedPaymentOption = CustomerAdapter.PaymentOption.StripeId("id_123")
-        val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(paymentMethodProvider)
+        val nullSavedSelection = nullSavedPaymentOption.toPaymentSelection(
+            paymentMethodProvider = paymentMethodProvider,
+        )
         assertThat(nullSavedSelection)
             .isNull()
     }

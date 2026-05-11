@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -8,6 +9,7 @@ internal class FakeSelectSavedPaymentMethodsInteractor(
     initialState: SelectSavedPaymentMethodsInteractor.State = SelectSavedPaymentMethodsInteractor.State(
         paymentOptionsItems = emptyList(),
         selectedPaymentOptionsItem = null,
+        linkBrand = LinkBrand.Link,
         isEditing = false,
         isProcessing = false,
         canEdit = false,

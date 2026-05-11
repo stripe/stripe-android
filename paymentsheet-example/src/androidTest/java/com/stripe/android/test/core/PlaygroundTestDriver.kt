@@ -1156,7 +1156,7 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodes(hasTestTag(TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT))
-                .fetchSemanticsNodes()
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
                 .isNotEmpty()
         }
 
@@ -1789,9 +1789,13 @@ internal class PlaygroundTestDriver(
         return composeTestRule.onNodeWithTag(ADD_PAYMENT_METHOD_NODE_TAG)
     }
 
-    @OptIn(ExperimentalTestApi::class)
     private fun waitForAddPaymentMethodNode() {
-        composeTestRule.waitUntilAtLeastOneExists(hasTestTag(ADD_PAYMENT_METHOD_NODE_TAG), 5000L)
+        composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            composeTestRule
+                .onAllNodesWithTag(ADD_PAYMENT_METHOD_NODE_TAG)
+                .fetchSemanticsNodes(atLeastOneRootRequired = false)
+                .isNotEmpty()
+        }
     }
 
     @OptIn(ExperimentalTestApi::class)

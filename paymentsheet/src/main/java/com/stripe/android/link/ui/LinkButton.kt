@@ -135,7 +135,6 @@ private val LinkButtonShape: RoundedCornerShape
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
     )
 
-private const val LINK_BRAND_NAME = "Link"
 private const val LINK_ICON_ID = "LinkIcon"
 private const val LINK_DIVIDER_SPACER_ID = "LinkDividerSpacer"
 private const val LINK_DIVIDER_ID = "LinkDivider"
@@ -145,6 +144,7 @@ private const val LINK_PAY_WITH_FONT_SIZE = 21
 private const val LINK_EMAIL_FONT_SIZE = 16
 
 private const val LINK_ICON_ASPECT_RATIO = 72f / 26f
+private const val NOTLINK_ICON_ASPECT_RATIO = 125f / 24f
 
 internal const val LinkButtonTestTag = "LinkButtonTestTag"
 
@@ -159,6 +159,7 @@ private fun LinkButtonPreview(
             state = previewData.state,
             enabled = previewData.enabled,
             theme = previewData.theme,
+            linkBrand = LinkBrand.Link,
             onClick = {}
         )
     }
@@ -175,6 +176,7 @@ private fun LinkButtonLocalizedPreview(
             state = previewData.state,
             enabled = previewData.enabled,
             theme = previewData.theme,
+            linkBrand = LinkBrand.Link,
             onClick = {}
         )
     }
@@ -186,8 +188,8 @@ internal fun LinkButton(
     enabled: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    linkBrand: LinkBrand,
     theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-    linkBrand: LinkBrand = LinkBrand.Link,
 ) {
     val alpha = if (enabled) {
         1f
@@ -325,23 +327,28 @@ private fun SignedInButtonContent(
 @Suppress("UnusedReceiverParameter")
 @Composable
 private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: LinkBrand) {
-    val text = stringResource(R.string.stripe_pay_with_link)
-    val contentDescription = stringResource(R.string.stripe_pay_with_link_format, linkBrand.brandName())
-
-    val iconizedText = buildAnnotatedString {
-        append(text.substringBefore(LINK_BRAND_NAME))
-        appendInlineContent(
-            id = LINK_ICON_ID,
-            alternateText = "[icon]"
-        )
-        append(text.substringAfter(LINK_BRAND_NAME))
+    val brandName = linkBrand.brandName()
+    val text = if (linkBrand == LinkBrand.Link) {
+        stringResource(R.string.stripe_pay_with_link)
+    } else {
+        stringResource(R.string.stripe_pay_with_link_with_brand, brandName)
     }
+    val contentDescription = stringResource(R.string.stripe_pay_with_link_format, brandName)
+    val iconizedText = text.buildBrandIconAnnotatedString(
+        brandToken = brandName,
+        inlineContentId = LINK_ICON_ID,
+    )
 
     Text(
         text = iconizedText,
         textAlign = TextAlign.Center,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkButtonIcon(theme.logoRes(linkBrand)) }
+            val iconHeight = 0.9.em
+            val iconWidth = when (linkBrand) {
+                LinkBrand.Link -> iconHeight * LINK_ICON_ASPECT_RATIO
+                LinkBrand.Notlink -> iconHeight * NOTLINK_ICON_ASPECT_RATIO
+            }
+            add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) { LinkButtonIcon(theme, linkBrand) }
         }.build(),
         modifier = Modifier
             .padding(start = 6.dp)
@@ -391,7 +398,12 @@ private fun LinkIconAndDivider(
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
-            add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkButtonIcon(theme.logoRes(linkBrand)) }
+            val iconHeight = 1.1.em
+            val iconWidth = when (linkBrand) {
+                LinkBrand.Link -> iconHeight * LINK_ICON_ASPECT_RATIO
+                LinkBrand.Notlink -> iconHeight * NOTLINK_ICON_ASPECT_RATIO
+            }
+            add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) { LinkButtonIcon(theme, linkBrand) }
             add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(theme.dividerColor) }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
         }.build(),
@@ -411,11 +423,17 @@ private fun LinkDivider(color: Color) {
 
 @Composable
 private fun LinkButtonIcon(
-    @DrawableRes logoRes: Int
+    theme: LinkButtonTheme,
+    linkBrand: LinkBrand,
 ) {
+    val logoRes = theme.logoRes(linkBrand)
+    val aspectRatio = when (linkBrand) {
+        LinkBrand.Link -> LINK_ICON_ASPECT_RATIO
+        LinkBrand.Notlink -> NOTLINK_ICON_ASPECT_RATIO
+    }
     Icon(
         modifier = Modifier
-            .aspectRatio(LINK_ICON_ASPECT_RATIO)
+            .aspectRatio(aspectRatio)
             .alpha(LocalContentAlpha.current),
         painter = painterResource(logoRes),
         contentDescription = stringResource(com.stripe.android.R.string.stripe_link),

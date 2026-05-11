@@ -31,23 +31,7 @@ internal fun LinkTerms(
     modifier: Modifier = Modifier,
     textAlign: TextAlign = TextAlign.Center,
 ) {
-    val text = when (type) {
-        LinkTermsType.InlineOptionalWithPhoneFirst -> {
-            stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
-        }
-        LinkTermsType.InlineOptional -> {
-            stringResource(R.string.stripe_sign_up_terms_alternative)
-        }
-        LinkTermsType.Inline -> {
-            stringResource(R.string.stripe_sign_up_terms)
-        }
-        LinkTermsType.InlineWithDefaultOptIn -> {
-            "<img src=\"link_logo\"> • " + stringResource(R.string.stripe_sign_up_terms_default_opt_in)
-        }
-        LinkTermsType.Full -> {
-            stringResource(R.string.stripe_link_sign_up_terms)
-        }
-    }
+    val text = linkTermsText(type, linkBrand)
 
     val imageLoader = buildMap {
         if (type == LinkTermsType.InlineWithDefaultOptIn) {
@@ -69,7 +53,7 @@ internal fun LinkTerms(
     }
 
     Mandate(
-        mandateText = text.replaceHyperlinks(),
+        mandateText = text.replaceHyperlinks(linkBrand),
         modifier = modifier,
         textAlign = textAlign,
         imageAlign = PlaceholderVerticalAlign.TextCenter,
@@ -77,15 +61,52 @@ internal fun LinkTerms(
     )
 }
 
-internal fun String.replaceHyperlinks() = this.replace(
+@Composable
+private fun linkTermsText(type: LinkTermsType, linkBrand: LinkBrand): String {
+    val brandName = linkBrand.brandName()
+    return when (type) {
+        LinkTermsType.InlineOptionalWithPhoneFirst -> {
+            if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number_branded, brandName)
+            }
+        }
+        LinkTermsType.InlineOptional -> {
+            if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms_alternative)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_alternative_branded, brandName)
+            }
+        }
+        LinkTermsType.Inline -> {
+            if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_branded, brandName)
+            }
+        }
+        LinkTermsType.InlineWithDefaultOptIn -> {
+            val terms = if (linkBrand == LinkBrand.Link) {
+                stringResource(R.string.stripe_sign_up_terms_default_opt_in)
+            } else {
+                stringResource(R.string.stripe_sign_up_terms_default_opt_in_branded, brandName)
+            }
+            "<img src=\"link_logo\"> • $terms"
+        }
+        LinkTermsType.Full -> stringResource(R.string.stripe_link_sign_up_terms)
+    }
+}
+
+internal fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
     "<terms>",
-    "<a href=\"https://link.com/terms\">"
+    "<a href=\"${linkBrand.termsUrl()}\">"
 ).replace("</terms>", "</a>").replace(
     "<privacy>",
-    "<a href=\"https://link.com/privacy\">"
+    "<a href=\"${linkBrand.privacyUrl()}\">"
 ).replace("</privacy>", "</a>").replace(
     "<link>",
-    "<a href=\"https://link.com\">"
+    "<a href=\"${linkBrand.baseUrl()}\">"
 ).replace("</link>", "</a>")
 
 @Preview

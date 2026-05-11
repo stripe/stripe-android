@@ -42,6 +42,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
@@ -161,6 +162,7 @@ internal class DefaultPaymentElementLoaderTest {
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
                         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+                        checkoutSessionId = null,
                     ),
                     integrationMetadata = IntegrationMetadata.IntentFirst("pi_1234_secret_1234"),
                     elementsSessionId = "session_1234",
@@ -1891,7 +1893,7 @@ internal class DefaultPaymentElementLoaderTest {
     @Test
     fun `Emits correct events when loading succeeds with saved Link selection`() = runScenario {
         testSuccessfulLoadSendsEventsCorrectly(
-            paymentSelection = PaymentSelection.Link()
+            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         )
     }
 

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -131,11 +132,17 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
     ) {
         when (viewEffect) {
             is OpenAuthFlowWithUrl -> {
-                startBrowserForResult.launch(
-                    browserManager.createBrowserIntentForUrl(
-                        uri = Uri.parse(viewEffect.url)
+                try {
+                    startBrowserForResult.launch(
+                        browserManager.createBrowserIntentForUrl(
+                            uri = Uri.parse(viewEffect.url)
+                        )
                     )
-                )
+                } catch (_: ActivityNotFoundException) {
+                    // No browser available on the device.
+                } catch (_: SecurityException) {
+                    // A non-exported activity on the device matched the URL intent filter.
+                }
             }
 
             is FinishWithResult -> {

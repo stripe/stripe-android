@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -21,9 +22,9 @@ class PaymentOptionsScreenshotTest {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,
-                PaymentOptionsItem.Link,
+                PaymentOptionsItem.Link(LinkBrand.Link),
             ),
-            selectedPaymentOptionsItem = PaymentOptionsItem.Link,
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link(LinkBrand.Link),
             isEditing = false,
         )
     }
@@ -168,6 +169,7 @@ class PaymentOptionsScreenshotTest {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = selectedPaymentOptionsItem,
+                linkBrand = LinkBrand.Link,
                 isEditing = isEditing,
                 isProcessing = false,
                 onAddCardPressed = {},

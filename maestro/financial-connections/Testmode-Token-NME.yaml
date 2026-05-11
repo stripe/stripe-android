@@ -13,6 +13,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: "connect_accounts"
+    timeout: 30000
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail

@@ -1357,6 +1357,7 @@ internal class PaymentMethodMetadataTest {
                 elementsSessionConfigId = elementsSession.elementsSessionConfigId,
                 paymentMethodSelectionFlow = null,
                 paymentIntentCreationFlow = null,
+                checkoutSessionId = null,
             ),
             attestOnIntentConfirmation = false,
             appearance = configuration.appearance,

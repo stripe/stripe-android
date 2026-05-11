@@ -348,6 +348,9 @@ class Checkout private constructor(
         }
     }
 
+    /**
+     * A Composable that renders a currency selector toggle for adaptive pricing.
+     */
     @Composable
     fun CurrencySelectorContent() {
         val context = LocalContext.current
