@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-require 'octokit'
-
 require_relative 'common'
 
 @release_url = nil
@@ -83,16 +81,4 @@ private def changelog_entries_for_version
     end
 
     raise ArgumentError.new("Version #{@version} not found in changelog. Have you finished merging the version bump PR?")
-end
-
-private def octokit_client
-  @octokit_client ||= begin
-    # Fetch the per-user secret from password-vault
-    token = fetch_password("bindings/gh-tokens/#{ENV['USER']}")
-    if token.nil? || token == ""
-      raise "Got empty Github token from password-vault"
-    end
-
-    Octokit::Client.new(access_token: token)
-  end
 end

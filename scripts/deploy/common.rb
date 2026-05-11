@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'octokit'
 require 'open3'
 
 def fetch_password(password)
@@ -124,6 +125,17 @@ def create_pr(
 
     rputs user_message
     wait_for_user
+end
+
+private def octokit_client
+  @octokit_client ||= begin
+    token = fetch_password("bindings/gh-tokens/#{ENV['USER']}")
+    if token.nil? || token == ""
+      raise "Got empty Github token from password-vault"
+    end
+
+    Octokit::Client.new(access_token: token)
+  end
 end
 
 private def github_login
