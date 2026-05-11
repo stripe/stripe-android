@@ -80,9 +80,16 @@ def create_release_tag
 end
 
 def checkout_release_source
-    prepare_release_source_from_merged_pr
-    verify_release_tag_matches_release_source
-    checkout_release_tag
+    begin
+        prepare_release_source_from_merged_pr
+        verify_release_tag_matches_release_source
+        checkout_release_tag
+    rescue StandardError => e
+        raise unless @is_dry_run
+
+        rputs "Dry run: continuing without checked-out release source: #{e.message}"
+        rputs "Dry run: remaining deploy release steps will run from the current checkout instead of #{release_tag_name}."
+    end
 end
 
 def verify_release_tag_matches_release_source

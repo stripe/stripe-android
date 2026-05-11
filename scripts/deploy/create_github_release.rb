@@ -5,8 +5,14 @@ require_relative 'common'
 @release_url = nil
 
 def create_github_release
-    unless local_git_tag_exists?(release_tag_name)
+    tag_exists_locally = local_git_tag_exists?(release_tag_name)
+
+    unless tag_exists_locally || @is_dry_run
         raise "Release tag #{release_tag_name} does not exist locally. Run `git fetch origin --tags` before creating the GitHub release."
+    end
+
+    if @is_dry_run && !tag_exists_locally
+        rputs "Dry run: local release tag #{release_tag_name} is unavailable. Creating a draft GitHub release without validating a checked-out tag first."
     end
 
     begin
@@ -24,7 +30,11 @@ def create_github_release
         open_url(release_response.html_url)
 
         if (@is_dry_run)
-            rputs "Please verify that deploy release created a draft GitHub release for #{release_tag_name}. It should contain the changelog entries and point at the existing signed tag."
+            if tag_exists_locally
+                rputs "Please verify that deploy release created a draft GitHub release for #{release_tag_name}. It should contain the changelog entries and point at the existing signed tag."
+            else
+                rputs "Please verify that deploy release created a draft GitHub release for #{release_tag_name}. Because the release source was unavailable, it may be missing tag or source attachments."
+            end
             wait_for_user
         end
     rescue StandardError => e
@@ -48,6 +58,16 @@ private def release_description
 
     release_body = <<~EOS
         #{changelog_entries}
+
+        See [the changelog for more details](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
+    EOS
+rescue ArgumentError => e
+    raise unless @is_dry_run
+
+    rputs "Dry run: #{e.message}"
+
+    <<~EOS
+        Dry run: changelog entries for #{@version} are not available in the current checkout.
 
         See [the changelog for more details](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
     EOS
