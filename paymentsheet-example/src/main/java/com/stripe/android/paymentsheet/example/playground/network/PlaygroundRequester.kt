@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState.Companion.asPlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutSessionConnectSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
@@ -47,10 +48,17 @@ internal class PlaygroundRequester(
 
                 // Init PaymentConfiguration with the publishable key returned from the backend,
                 // which will be used on all Stripe API calls
+                val connectMode = playgroundSettings[CheckoutSessionConnectSettingsDefinition]
+                val stripeAccountId = when (connectMode) {
+                    CheckoutSessionConnectSettingsDefinition.ConnectMode.DIRECT ->
+                        CheckoutSessionConnectSettingsDefinition.CONNECTED_ACCOUNT_ID
+                    else -> null
+                }
                 withContext(Dispatchers.IO) {
                     PaymentConfiguration.init(
                         applicationContext,
                         checkoutResponse.publishableKey,
+                        stripeAccountId,
                     )
                 }
 
