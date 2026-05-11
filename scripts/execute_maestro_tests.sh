@@ -80,7 +80,7 @@ contains_tag() {
 }
 
 TEST_DIR_PATH=maestro/$MODULE
-TEST_RESULTS_PATH=/tmp/test_results
+TEST_RESULTS_PATH=/tmp/staging_test_results
 RETRY_COUNT=0
 
 # Create test results folder.
