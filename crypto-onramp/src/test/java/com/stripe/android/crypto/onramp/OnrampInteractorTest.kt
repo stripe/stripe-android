@@ -61,6 +61,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class OnrampInteractorTest {
     private val linkController: LinkController = mock()
     private val cryptoApiRepository: CryptoApiRepository = mock()
