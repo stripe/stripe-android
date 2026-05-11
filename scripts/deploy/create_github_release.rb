@@ -1,25 +1,20 @@
 #!/usr/bin/env ruby
 
 require 'octokit'
-require 'subprocess'
 
 require_relative 'common'
-require_relative 'gnupg_utils'
 
 @release_url = nil
 
 def create_github_release
-    # Must be run on the deploy branch, because it depends on changes made in
-    # create_version_bump_pr (updating CHANGELOG.md)
-    execute_or_fail("git checkout #{@deploy_branch}")
-    execute_or_fail("git pull")
-
-    tag_release
+    unless local_git_tag_exists?(release_tag_name)
+        raise "Release tag #{release_tag_name} does not exist locally. Run `git fetch origin --tags` before creating the GitHub release."
+    end
 
     begin
         release_response = octokit_client.create_release(
           "stripe/stripe-android",
-          "v#{@version}",
+          release_tag_name,
           name: "stripe-android v#{@version}",
           body: release_description,
           draft: @is_dry_run
@@ -31,20 +26,16 @@ def create_github_release
         open_url(release_response.html_url)
 
         if (@is_dry_run)
-            rputs "Please verify that the release was opened + created properly. It should contain a changelog of the changes for this release."
-            rputs "Since this is a dry run, you should see the release as a draft. It will be missing a tag + source code attachments."
+            rputs "Please verify that deploy release created a draft GitHub release for #{release_tag_name}. It should contain the changelog entries and point at the existing signed tag."
             wait_for_user
         end
     rescue StandardError => e
-        rputs "Failed to create GitHub release for #{tag_name}: #{e.class}: #{e.message}"
-        delete_release_tag
+        rputs "Failed to create GitHub release for #{release_tag_name}: #{e.class}: #{e.message}"
         raise
     end
 end
 
 def delete_github_release
-   delete_release_tag
-
    if (@release_url != nil)
        puts "Deleting release..."
        deleting_release_succeeded = octokit_client.delete_release("#{@release_url}__")
@@ -52,25 +43,6 @@ def delete_github_release
            rputs "Deleting release failed! Please manually delete release."
        end
    end
-end
-
-private def tag_name
-    "v#{@version}"
-end
-
-private def tag_release
-    gnupg_env do |env|
-        Subprocess.check_call(["git", "tag", "-s", "-u", "#{gnupg_key_id}", "#{tag_name}", "-m", "\"Version #{@version}\""], env: env)
-    end
-
-    # There's no way to create a "draft" tag, so we skip pushing tags if this is a dry run.
-    if(!@is_dry_run)
-        execute_or_fail("git push origin #{tag_name}")
-    end
-end
-
-private def delete_release_tag
-    execute("git tag -d #{tag_name}")
 end
 
 private def release_description
@@ -123,9 +95,4 @@ private def octokit_client
 
     Octokit::Client.new(access_token: token)
   end
-end
-
-# Gets the GnuPG key ID used to sign tagged commits.
-private def gnupg_key_id
-  fetch_password("bindings/gnupg/fingerprint").strip
 end
