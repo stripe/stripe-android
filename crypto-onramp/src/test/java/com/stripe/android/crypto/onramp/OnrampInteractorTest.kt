@@ -11,12 +11,14 @@ import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
@@ -41,6 +43,7 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -64,6 +67,7 @@ class OnrampInteractorTest {
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory = mock {
         on { create(any()) } doReturn testAnalyticsService
     }
+    private val savedStateHandle = SavedStateHandle()
 
     private val interactor: OnrampInteractor = OnrampInteractor(
         application = RuntimeEnvironment.getApplication(),
@@ -71,7 +75,7 @@ class OnrampInteractorTest {
         cryptoApiRepository = cryptoApiRepository,
         analyticsServiceFactory = analyticsServiceFactory,
         checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = savedStateHandle
     )
 
     @Test
@@ -375,6 +379,9 @@ class OnrampInteractorTest {
     fun testOnHandleNextActionError() = runTest {
         val error = RuntimeException("Payment failed")
         interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+
+        interactor.startCheckout("cos_test_session_id")
 
         interactor.onHandleNextActionError(error)
 
@@ -383,6 +390,41 @@ class OnrampInteractorTest {
                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
                 error = error
             )
+        )
+
+        val completedStatus = interactor.state.value.checkoutState?.status
+        assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (completedStatus as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        assertThat((result as OnrampCheckoutResult.Failed).error).isSameInstanceAs(error)
+
+        interactor.startCheckout("cos_retry_session_id")
+
+        verify(cryptoApiRepository).getOnrampSession(
+            sessionId = "cos_retry_session_id",
+            sessionClientSecret = "test_secret"
+        )
+    }
+
+    @Test
+    fun testOnHandleNextActionCanceled() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+
+        interactor.startCheckout("cos_test_session_id")
+
+        interactor.onHandleNextActionCanceled()
+
+        val completedStatus = interactor.state.value.checkoutState?.status
+        assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (completedStatus as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Canceled::class.java)
+
+        interactor.startCheckout("cos_retry_session_id")
+
+        verify(cryptoApiRepository).getOnrampSession(
+            sessionId = "cos_retry_session_id",
+            sessionClientSecret = "test_secret"
         )
     }
 
@@ -608,4 +650,42 @@ class OnrampInteractorTest {
             .appearance(mock())
             .cryptoCustomerId(cryptoCustomerId)
             .build()
+
+    private suspend fun stubCheckoutRequiresNextAction() {
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+
+        whenever(
+            cryptoApiRepository.getOnrampSession(
+                sessionId = any(),
+                sessionClientSecret = any()
+            )
+        ).thenReturn(
+            Result.success(
+                GetOnrampSessionResponse(
+                    id = "cos_test_session_id",
+                    clientSecret = "test_secret",
+                    paymentIntentClientSecret = "pi_test_secret"
+                )
+            )
+        )
+
+        whenever(
+            cryptoApiRepository.retrievePaymentIntent(
+                clientSecret = "pi_test_secret",
+                publishableKey = "pk_platform_123"
+            )
+        ).thenReturn(
+            Result.success(paymentIntent(status = StripeIntent.Status.RequiresAction))
+        )
+    }
 }
