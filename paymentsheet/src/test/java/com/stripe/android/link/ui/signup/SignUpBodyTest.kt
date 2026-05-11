@@ -115,12 +115,31 @@ internal class SignUpBodyTest {
         onEmailField().assertIsNotEnabled()
     }
 
+    @Test
+    fun `signup subtitle uses Link brand name`() {
+        setContent(SignUpState.InputtingPrimaryField, linkBrand = LinkBrand.Link)
+
+        composeTestRule
+            .onNodeWithText("Pay faster everywhere Link is accepted.")
+            .assertExists()
+    }
+
+    @Test
+    fun `signup subtitle uses Notlink brand name`() {
+        setContent(SignUpState.InputtingPrimaryField, linkBrand = LinkBrand.Notlink)
+
+        composeTestRule
+            .onNodeWithText("Pay faster everywhere Notlink is accepted.")
+            .assertExists()
+    }
+
     private fun setContent(
         signUpState: SignUpState,
         isReadyToSignUp: Boolean = true,
         requiresNameCollection: Boolean = false,
         errorMessage: ResolvableString? = null,
-        canEditEmail: Boolean = true
+        canEditEmail: Boolean = true,
+        linkBrand: LinkBrand = LinkBrand.Link,
     ) = composeTestRule.setContent {
         DefaultLinkTheme {
             SignUpBody(
@@ -134,7 +153,7 @@ internal class SignUpBodyTest {
                     signUpEnabled = isReadyToSignUp,
                     requiresNameCollection = requiresNameCollection,
                     canEditEmail = canEditEmail,
-                    linkBrand = LinkBrand.Link,
+                    linkBrand = linkBrand,
                     errorMessage = errorMessage,
                     signUpState = signUpState,
                 ),

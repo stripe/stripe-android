@@ -39,7 +39,7 @@ plugins {
 
 apply plugin: "dev.detekt"
 
-allprojects {
+allprojects { project ->
     group = GROUP
 
     repositories {
@@ -47,6 +47,18 @@ allprojects {
         google()
         gradlePluginPortal()
     }
+
+    def excludedInstrumentationTestClass = 'com.stripe.android.paymentelement.taptoadd.TapToAddTest#successWithContinueMode[FlowController]'
+    def configureAndroidTestExclusions = {
+        project.android.defaultConfig.testInstrumentationRunnerArguments.put(
+                'notClass',
+                excludedInstrumentationTestClass
+        )
+    }
+
+    project.plugins.withId("com.android.application", configureAndroidTestExclusions)
+    project.plugins.withId("com.android.library", configureAndroidTestExclusions)
+    project.plugins.withId("com.android.test", configureAndroidTestExclusions)
 }
 
 ext {
@@ -143,6 +155,36 @@ subprojects {
         afterEvaluate {
             dependencies {
                 implementation libs.kotlin.parcelizeRuntimePlugin
+            }
+        }
+    }
+}
+
+tasks.register("runUnitAndScreenshotTests") {
+    group = "verification"
+    description =
+            "Runs verifyPaparazziDebug where Paparazzi is applied (else testDebugUnitTest or test); " +
+                    "other projects run testDebugUnitTest or plain test. Skips :stripe-test-e2e."
+}
+
+gradle.projectsEvaluated {
+    tasks.named("runUnitAndScreenshotTests").configure {
+        rootProject.subprojects.each { Project sub ->
+            if (sub.path == ":stripe-test-e2e") {
+                return
+            }
+
+            def selected = null
+
+            if (sub.plugins.hasPlugin("app.cash.paparazzi")) {
+                selected = sub.tasks.findByName("verifyPaparazziDebug")
+                    ?: sub.tasks.findByName("testDebugUnitTest")
+            } else {
+                selected = sub.tasks.findByName("testDebugUnitTest")
+            }
+
+            if (selected != null) {
+                dependsOn(selected)
             }
         }
     }

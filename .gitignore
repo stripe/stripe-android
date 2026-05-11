@@ -10,6 +10,9 @@
 # Java class files
 *.class
 
+# PyCache files
+__pycache__/
+
 # Generated files
 bin/
 gen/

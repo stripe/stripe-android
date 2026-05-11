@@ -11,6 +11,7 @@ import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.SetupIntentFixtures
@@ -378,6 +379,7 @@ internal class VerticalModeFormUIScreenshotTest {
         viewModel.walletsStateSource.value = WalletsState(
             link = WalletsState.Link(
                 state = LinkButtonState.Default,
+                linkBrand = LinkBrand.Link,
             ),
             googlePay = null,
             shopPay = null,

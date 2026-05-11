@@ -1,6 +1,7 @@
 package com.stripe.android.crypto.onramp.model
 
 import android.os.Parcelable
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -15,6 +16,9 @@ import kotlinx.parcelize.Parcelize
  * @property idNumber The full identification number.
  * @property dateOfBirth The user’s date of birth.
  * @property address The user’s billing address.
+ * @property birthCountry The country where the user was born.
+ * @property birthCity The city where the user was born.
+ * @property nationalities The user's nationalities.
  */
 @ExperimentalCryptoOnramp
 @Poko
@@ -23,8 +27,28 @@ class KycInfo(
     val lastName: String?,
     val idNumber: String?,
     val dateOfBirth: DateOfBirth?,
-    val address: PaymentSheet.Address?
-)
+    val address: PaymentSheet.Address?,
+    val birthCountry: CountryCode? = null,
+    val birthCity: String? = null,
+    val nationalities: List<CountryCode>? = null
+) {
+    constructor(
+        firstName: String?,
+        lastName: String?,
+        idNumber: String?,
+        dateOfBirth: DateOfBirth?,
+        address: PaymentSheet.Address?
+    ) : this(
+        firstName = firstName,
+        lastName = lastName,
+        idNumber = idNumber,
+        dateOfBirth = dateOfBirth,
+        address = address,
+        birthCountry = null,
+        birthCity = null,
+        nationalities = null
+    )
+}
 
 /**
  * Represents a set of KYC information used when refreshing or revalidating

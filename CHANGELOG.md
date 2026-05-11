@@ -1,6 +1,6 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
 ### PaymentSheet
@@ -8,6 +8,11 @@ NEXT_VERSION_BUMP: PATCH
 
 ### Payments
 * [FIXED][12983](https://github.com/stripe/stripe-android/pull/12983) Fixed an issue where `additionalEnabledNetworks` would not be respected for Google Pay payments.
+
+### CryptoOnramp
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) Added new birth city, birth country, and nationalities properties to KYCInfo.
+* [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) New public types for interacting with Compliance regulations and identifiers.
+* [REMOVED][13019](https://github.com/stripe/stripe-android/pull/13019) Removed KycRetrieveResponse from the public API as it was not intended to be accessible.
 
 ## 23.7.0 - 2026-05-04
 

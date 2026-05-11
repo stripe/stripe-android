@@ -136,6 +136,32 @@ internal class LinkInlineSignupViewTest {
     }
 
     @Test
+    fun checkbox_label_uses_link_brand_name_for_default_opt_in() {
+        setContent(
+            expanded = false,
+            allowsDefaultOptIn = true,
+            linkBrand = LinkBrand.Link,
+        )
+
+        composeTestRule
+            .onNodeWithText("Save my info for faster checkout with Link")
+            .assertExists()
+    }
+
+    @Test
+    fun checkbox_label_uses_notlink_brand_name_for_default_opt_in() {
+        setContent(
+            expanded = false,
+            allowsDefaultOptIn = true,
+            linkBrand = LinkBrand.Notlink,
+        )
+
+        composeTestRule
+            .onNodeWithText("Save my info for faster checkout with Notlink")
+            .assertExists()
+    }
+
+    @Test
     fun inline_logo_content_description_uses_dynamic_brand_name() {
         setContent(
             expanded = true,

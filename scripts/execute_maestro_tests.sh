@@ -87,22 +87,27 @@ RETRY_COUNT=0
 mkdir -p $TEST_RESULTS_PATH
 
 for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
+  # Skip glob when no matches
+  [ -e "$TEST_FILE_PATH" ] || continue
   # Check if MAESTRO_TAGS are present in the test file
   if contains_tag "$TEST_FILE_PATH" "$MAESTRO_TAGS"; then
     # Just run the test if it's tagged as edge, if on an edge environment
     if [ "$test_environment" != "edge" ] || contains_tag "$TEST_FILE_PATH" "edge"; then
-      # Execute Maestro test flow and retry if failed
-      while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do
-        maestro test -e APP_ID=$TEST_APP_ID --format junit --output $TEST_RESULTS_PATH/$(basename "$TEST_FILE_PATH").xml "$TEST_FILE_PATH" && break
-        let RETRY_COUNT=RETRY_COUNT+1
-        echo "Maestro test attempt $RETRY_COUNT failed. Retrying..."
+      FLOW_STEM=$(basename "$TEST_FILE_PATH" .yaml)
+      ATTEMPT=0
+      # Execute Maestro test flow and retry if failed (each try writes a distinct JUnit file).
+      while [ "$ATTEMPT" -lt "$MAX_RETRIES" ]; do
+        ATTEMPT=$((ATTEMPT + 1))
+        OUT_XML="$TEST_RESULTS_PATH/${FLOW_STEM}-try${ATTEMPT}.xml"
+        if maestro test -e APP_ID=$TEST_APP_ID --format junit --output "$OUT_XML" "$TEST_FILE_PATH"; then
+          break
+        fi
+        echo "Maestro test attempt $ATTEMPT failed. Retrying..."
+        if [ "$ATTEMPT" -eq "$MAX_RETRIES" ]; then
+          echo "Maestro tests failed after $MAX_RETRIES attempts."
+          exit 1
+        fi
       done
-      if [ "$RETRY_COUNT" -eq "$MAX_RETRIES" ]; then
-        echo "Maestro tests failed after $MAX_RETRIES attempts."
-        exit 1
-      else
-        RETRY_COUNT=0
-      fi
     else
       echo "Skipping test file without 'edge' tag: $TEST_FILE_PATH"
     fi
