@@ -29,9 +29,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Tallenna tietoni nopeammalle maksamiselle Link-palvelulla</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Tallenna tietoni nopeampaa maksamista varten kohteella %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Luo tili Link-palvelulla nopeampaa verkkomaksamista varten</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Luo tili palvelussa %s nopeampaa maksamista varten verkossa</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s-luottokortti</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -68,6 +70,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Tallenna maksutiedot Link-palveluun ja maksa turvallisesti yhdellä napsautuksella Link-palvelun tukemilla sivustoilla.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Maksa nopeammin kaikkialla, missä Link hyväksytään.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Maksa nopeammin kaikkialla, missä %s on hyväksytty.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Jatkamalla hyväksyt <terms>ehdot</terms> ja <privacy>tietosuojaselosteen</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,6 +88,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Päivitä kortti</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Kirjaudu ulos Link-palvelusta</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Kirjaudu ulos kohteesta %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Tapahtui virhe. Tarkasta yhteys ja yritä uudelleen.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -92,6 +98,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pay_with_link">Maksa Link-palvelulla</string>
   <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_pay_with_link_format">Maksa kohteella %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Maksa kohteella %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Jatkamalla hyväksyt maksujen valtuutuksen <terms>näiden ehtojen mukaisesti</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -140,6 +148,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s kanssa ja <link>Linkki</link> (katso <terms>Ehdot</terms> ja <privacy>tietosuoja</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Jatkamalla hyväksyt, että tietosi tallennetaan tulevia ostoksia varten tahon %s ja <link>Linkin kanssa</link> Linkin <terms>ehtojen</terms> ja <privacy>tietosuojakäytännön</privacy> mukaisesti.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Jatkamalla hyväksyt tallentavasi tietosi tulevia ostoksia varten kohteilla %1$s ja <link>%2$s</link> %2$s <terms>ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Korttia ei päivitetty. Yritä uudelleen.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -253,10 +263,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Liittymällä Linkiin hyväksyt <terms>ehdot</terms> ja <privacy>tietosuojaselosteen</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Antamalla sähköpostisi hyväksyt Link-tilin luomisen ja tallennat maksutietosi Link-palveluun <terms>Link-ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Antamalla sähköpostisi hyväksyt %1$s -tilin luomisen ja tallennat maksutietosi kohteeseen %1$s %1$s <terms>ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Antamalla puhelinnumerosi hyväksyt Link-tilin luomisen ja tallennat maksutietosi Link-palveluun <terms>Link-ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Antamalla puhelinnumerosi hyväksyt %1$s -tilin luomisen ja tallennat maksutietosi kohteeseen %1$s %1$s <terms>ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Liittymällä kohteeseen %1$s hyväksyt <terms>ehdot</terms> ja <privacy>tietosuojaselosteen</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Antamalla puhelinnumeron ja sähköpostin hyväksyt Link-tilin, joka noudattaa Link-palvelun <terms>ehtoja</terms> ja <privacy>tietosuojaselostetta</privacy>, luomisen.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Antamalla puhelinnumeron ja sähköpostin hyväksyt %1$s-tilin luomisen ja noudatat %1$s-palvelun <terms>ehtoja</terms> ja <privacy>tietosuojaselostetta</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Tilisi on deaktivoitu</string>
   <!-- Generic failure message -->
