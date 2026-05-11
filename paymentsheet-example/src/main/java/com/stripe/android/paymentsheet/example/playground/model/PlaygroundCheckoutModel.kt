@@ -21,6 +21,10 @@ class CheckoutRequest private constructor(
     val mode: String?,
     @SerialName("on_behalf_of")
     val onBehalfOf: String?,
+    @SerialName("transfer_data_destination")
+    val transferDataDestination: String?,
+    @SerialName("application_fee_amount")
+    val applicationFeeAmount: Long?,
     @SerialName("set_shipping_address")
     val setShippingAddress: Boolean?,
     @SerialName("automatic_payment_methods")
@@ -101,6 +105,8 @@ class CheckoutRequest private constructor(
         private var amount: Long? = null
         private var mode: String? = null
         private var onBehalfOf: String? = null
+        private var transferDataDestination: String? = null
+        private var applicationFeeAmount: Long? = null
         private var setShippingAddress: Boolean? = null
         private var automaticPaymentMethods: Boolean? = null
         private var useLink: Boolean? = null
@@ -237,6 +243,14 @@ class CheckoutRequest private constructor(
             this.onBehalfOf = onBehalfOf
         }
 
+        fun transferDataDestination(destination: String?) = apply {
+            this.transferDataDestination = destination
+        }
+
+        fun applicationFeeAmount(amount: Long?) = apply {
+            this.applicationFeeAmount = amount
+        }
+
         fun customStripeApi(customStripeApi: String?) = apply {
             this.customStripeApi = customStripeApi
         }
@@ -298,6 +312,8 @@ class CheckoutRequest private constructor(
                 amount = amount,
                 mode = mode,
                 onBehalfOf = onBehalfOf,
+                transferDataDestination = transferDataDestination,
+                applicationFeeAmount = applicationFeeAmount,
                 setShippingAddress = setShippingAddress,
                 automaticPaymentMethods = automaticPaymentMethods,
                 useLink = useLink,

@@ -2,12 +2,17 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.PaymentIntentCreationFlow
+import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.testBodyFromFile
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -31,6 +36,15 @@ class CheckoutSessionRepositoryTest {
         stripeNetworkClient = DefaultStripeNetworkClient(),
         publishableKeyProvider = { "pk_test_123" },
         stripeAccountIdProvider = { null },
+    )
+
+    private val connectedAccountId = "acct_connected123"
+
+    private val connectRepository = CheckoutSessionRepository(
+        clientParams = clientParams,
+        stripeNetworkClient = DefaultStripeNetworkClient(),
+        publishableKeyProvider = { "pk_test_123" },
+        stripeAccountIdProvider = { connectedAccountId },
     )
 
     @Test
@@ -82,5 +96,62 @@ class CheckoutSessionRepositoryTest {
         )
 
         assertThat(result.isFailure).isTrue()
+    }
+
+    @Test
+    fun `init sends Stripe-Account header when stripeAccountId is set`() = runTest {
+        networkRule.checkoutInit(
+            header("Stripe-Account", connectedAccountId),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = connectRepository.init(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            adaptivePricingAllowed = true,
+        )
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `confirm sends Stripe-Account header when stripeAccountId is set`() = runTest {
+        networkRule.checkoutConfirm(
+            header("Stripe-Account", connectedAccountId),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-confirm.json")
+        }
+
+        val result = connectRepository.confirm(
+            id = DEFAULT_CHECKOUT_SESSION_ID,
+            params = ConfirmCheckoutSessionParams(
+                paymentMethodId = "pm_123",
+                clientAttributionMetadata = ClientAttributionMetadata(
+                    elementsSessionConfigId = "test_session",
+                    paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
+                    paymentMethodSelectionFlow = PaymentMethodSelectionFlow.MerchantSpecified,
+                    checkoutSessionId = null,
+                ),
+                returnUrl = "stripesdk://return_url",
+            ),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `update sends Stripe-Account header when stripeAccountId is set`() = runTest {
+        networkRule.checkoutUpdate(
+            header("Stripe-Account", connectedAccountId),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = connectRepository.updateCurrency(
+            sessionId = DEFAULT_CHECKOUT_SESSION_ID,
+            currencyCode = "eur",
+        )
+
+        assertThat(result.isSuccess).isTrue()
     }
 }

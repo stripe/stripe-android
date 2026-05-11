@@ -1111,4 +1111,79 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
     }
+
+    @Test
+    fun `parse succeeds with on_behalf_of in server_built_elements_session_params`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_connect123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "mode": "payment",
+                "total_summary": { "due": 7000, "subtotal": 7000, "total": 7000 },
+                "server_built_elements_session_params": {
+                    "type": "deferred_intent",
+                    "locale": "en-US",
+                    "deferred_intent": {
+                        "mode": "payment",
+                        "amount": 7000,
+                        "currency": "usd",
+                        "payment_method_types": ["card"],
+                        "on_behalf_of": "acct_connected123"
+                    }
+                },
+                "elements_session": ${CheckoutSessionFixtures.MINIMAL_ELEMENTS_SESSION_JSON}
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.elementsSession).isNotNull()
+    }
+
+    @Test
+    fun `parse succeeds with on_behalf_of and accountId set for Connect OBO`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_connect123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "mode": "payment",
+                "total_summary": { "due": 7000, "subtotal": 7000, "total": 7000 },
+                "server_built_elements_session_params": {
+                    "type": "deferred_intent",
+                    "locale": "en-US",
+                    "deferred_intent": {
+                        "mode": "payment",
+                        "amount": 7000,
+                        "currency": "usd",
+                        "payment_method_types": ["card"],
+                        "on_behalf_of": "acct_connected123"
+                    }
+                },
+                "elements_session": {
+                    "session_id": "es_123",
+                    "merchant_country": "US",
+                    "account_id": "acct_connected123",
+                    "merchant_id": "acct_platform456",
+                    "google_pay_preference": "enabled",
+                    "payment_method_preference": {
+                        "object": "payment_method_preference",
+                        "country_code": "US",
+                        "ordered_payment_method_types": ["card"],
+                        "type": "deferred_intent"
+                    }
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.elementsSession).isNotNull()
+        assertThat(result?.elementsSession?.onBehalfOf).isEqualTo("acct_connected123")
+    }
 }
