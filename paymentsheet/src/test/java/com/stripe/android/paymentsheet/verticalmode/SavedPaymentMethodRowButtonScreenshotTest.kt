@@ -144,9 +144,49 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         }
     }
 
+    @Test
+    fun testSavedLinkPassthroughCard() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedLinkPassthroughCard,
+                linkBrand = LinkBrand.Link,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
+    @Test
+    fun testSavedNotlinkPassthroughCard() {
+        paparazziRule.snapshot {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = savedLinkPassthroughCard,
+                linkBrand = LinkBrand.Notlink,
+                isEnabled = true,
+                isSelected = false,
+            )
+        }
+    }
+
     private companion object {
         const val SAMPLE_CARD_ART_URL =
             "https://b.stripecdn.com/cardart/assets/pfE0FkDGaiFhdoOj9to8po-ZLiJhetgfdKELIZCj3xA"
+
+        val savedLinkPassthroughCard = DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "001",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                isLinkPassthroughMode = true,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.Visa,
+                    last4 = "4242",
+                )
+            ),
+        )
 
         val savedVisaWithCardArt = DisplayableSavedPaymentMethod.create(
             displayName = "···· 4242".resolvableString,
