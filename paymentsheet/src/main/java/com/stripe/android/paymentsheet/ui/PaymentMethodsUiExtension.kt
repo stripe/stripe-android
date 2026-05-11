@@ -250,13 +250,14 @@ private fun getOverridableIcon(
     }
 }
 
-internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
+internal fun PaymentMethod.getLabel(
+    linkBrand: LinkBrand,
+    canShowSublabel: Boolean = false,
+): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> if (isLinkPassthroughMode) {
         if (canShowSublabel) {
-            // For Link passthrough mode, show "Link" as main label
-            StripeR.string.stripe_link.resolvableString
+            linkBrand.brandName().resolvableString
         } else {
-            // Show original card label as sublabel
             createCardLabel(card?.last4)
         }
     } else if (isLinkPaymentMethod) {
@@ -273,10 +274,8 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
         sepaDebit?.last4
     )
     PaymentMethod.Type.USBankAccount -> if (isLinkPassthroughMode && canShowSublabel) {
-        // For Link passthrough mode, show "Link" as main label
-        StripeR.string.stripe_link.resolvableString
+        linkBrand.brandName().resolvableString
     } else {
-        // Show original bank account label
         resolvableString(
             R.string.stripe_paymentsheet_payment_method_item_card_number,
             usBankAccount?.last4

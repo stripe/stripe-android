@@ -35,6 +35,7 @@ internal fun SavedPaymentMethodConfirmUI(
 
         SavedPaymentMethodRowButton(
             displayableSavedPaymentMethod = state.displayableSavedPaymentMethod,
+            linkBrand = state.linkBrand,
             isEnabled = true,
             isSelected = true,
             onClick = { },

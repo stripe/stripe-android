@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.FormElement
@@ -79,6 +80,7 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
         return DefaultSavedPaymentMethodConfirmInteractor(
             initialSelection = PaymentSelection.Saved(paymentMethod),
             displayName = "Card".resolvableString,
+            linkBrand = LinkBrand.Link,
             savedPaymentMethodLinkFormHelper = linkFormHelper,
             processing = processing,
             updateSelection = updateSelection,

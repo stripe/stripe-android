@@ -18,7 +18,7 @@ internal object PaymentOptionLabelsFactory {
         selection: PaymentSelection,
         linkBrand: LinkBrand?,
     ): PaymentOption.Labels {
-        val label = selection.label.resolve(context)
+        val label = selection.label(linkBrand).resolve(context)
         val fallback = PaymentOption.Labels(
             label = label,
             sublabel = null,
@@ -58,7 +58,8 @@ internal object PaymentOptionLabelsFactory {
     ): PaymentOption.Labels {
         return PaymentOption.Labels(
             label = selection.brand.displayName,
-            sublabel = selection.label.resolve(context),
+            // linkBrand is irrelevant for New.Card — label() returns card last4, not brand name.
+            sublabel = selection.label(null).resolve(context),
         )
     }
 

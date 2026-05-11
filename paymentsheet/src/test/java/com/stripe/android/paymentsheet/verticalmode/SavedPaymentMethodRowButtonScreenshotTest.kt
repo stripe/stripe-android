@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -46,6 +47,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -57,6 +59,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = true,
             )
@@ -68,6 +71,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )
@@ -81,6 +85,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )
@@ -94,6 +99,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -107,6 +113,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedDefaultVisa,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -118,6 +125,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisaWithCardArt,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = false,
             )
@@ -129,6 +137,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedVisaWithCardArt,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = true,
             )
