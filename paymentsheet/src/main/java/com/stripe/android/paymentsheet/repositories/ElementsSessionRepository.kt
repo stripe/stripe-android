@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import android.app.Application
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -182,8 +183,9 @@ internal class RealElementsSessionRepository @Inject constructor(
         } ?: false
     }
 
-    private companion object {
-        private val ELEMENTS_SESSIONS_URL: String
+    internal companion object {
+        @VisibleForTesting
+        internal val ELEMENTS_SESSIONS_URL: String
             get() = "${ApiRequest.API_HOST}/v1/elements/sessions"
     }
 }

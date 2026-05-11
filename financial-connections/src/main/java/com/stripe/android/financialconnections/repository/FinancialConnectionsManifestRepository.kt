@@ -196,7 +196,7 @@ internal interface FinancialConnectionsManifestRepository {
     }
 }
 
-private class FinancialConnectionsManifestRepositoryImpl(
+internal class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
     val provideApiRequestOptions: ProvideApiRequestOptions,
