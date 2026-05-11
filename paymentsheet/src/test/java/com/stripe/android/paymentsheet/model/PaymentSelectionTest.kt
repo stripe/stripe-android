@@ -14,8 +14,10 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
+import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.testing.PaymentMethodFactory
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -100,6 +102,30 @@ class PaymentSelectionTest {
         val label = PaymentSelection.Link(
             brand = LinkBrand.Notlink,
         ).label(linkBrand = LinkBrand.Notlink).resolve(context)
+
+        assertThat(label).isEqualTo("Notlink")
+    }
+
+    @Test
+    fun `Saved Link passthrough card label uses linkBrand`() {
+        val pm = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true)
+        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Notlink).resolve(context)
+
+        assertThat(label).isEqualTo("Notlink")
+    }
+
+    @Test
+    fun `Saved Link passthrough card label without sublabel shows card last4`() {
+        val pm = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true)
+        val label = pm.getLabel(linkBrand = LinkBrand.Notlink, canShowSublabel = false)?.resolve(context)
+
+        assertThat(label).isEqualTo("···· 4242")
+    }
+
+    @Test
+    fun `Saved Link passthrough US bank label uses linkBrand`() {
+        val pm = PaymentMethodFixtures.US_BANK_ACCOUNT!!.copy(isLinkPassthroughMode = true)
+        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Notlink).resolve(context)
 
         assertThat(label).isEqualTo("Notlink")
     }
