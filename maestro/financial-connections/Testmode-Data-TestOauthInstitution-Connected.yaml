@@ -16,6 +16,7 @@ tags:
 - scrollUntilVisible:
     element:
       id: "connect_accounts"
+    timeout: 30000
 - tapOn:
     id: "connect_accounts"
 # Wait until the consent button is visible
