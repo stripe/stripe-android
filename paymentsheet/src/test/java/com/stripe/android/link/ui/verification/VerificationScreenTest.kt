@@ -251,7 +251,7 @@ internal class VerificationScreenTest {
             }
         }
 
-        onVerificationHeaderImageTag().assertContentDescriptionContains("Notlink")
+        onVerificationHeaderImageTag().assertContentDescriptionContains("Onelink")
     }
 
     @Test

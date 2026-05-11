@@ -178,7 +178,7 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `link_brand is parsed as Notlink`() {
+    fun `link_brand is parsed as Onelink`() {
         val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("notlink"))
         assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Onelink)
     }

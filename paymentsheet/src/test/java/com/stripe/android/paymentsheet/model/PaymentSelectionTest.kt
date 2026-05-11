@@ -101,7 +101,7 @@ class PaymentSelectionTest {
             brand = LinkBrand.Onelink,
         ).label.resolve(context)
 
-        assertThat(label).isEqualTo("Notlink")
+        assertThat(label).isEqualTo("Onelink")
     }
 
     @Test

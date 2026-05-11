@@ -92,7 +92,7 @@ class PaymentOptionLabelsFactoryTest {
     }
 
     @Test
-    fun `create with saved Link payment method and Notlink brand returns correct labels`() {
+    fun `create with saved Link payment method and Onelink brand returns correct labels`() {
         val labels = PaymentOptionLabelsFactory.create(
             context = context,
             selection = PaymentSelection.Saved(
@@ -101,7 +101,7 @@ class PaymentOptionLabelsFactoryTest {
             linkBrand = LinkBrand.Onelink,
         )
 
-        assertThat(labels.label).isEqualTo("Notlink")
+        assertThat(labels.label).isEqualTo("Onelink")
         assertThat(labels.sublabel).isEqualTo("Visa Credit •••• 4242")
     }
 
@@ -202,7 +202,7 @@ class PaymentOptionLabelsFactoryTest {
             linkBrand = null,
         )
 
-        assertThat(labels.label).isEqualTo("Notlink")
+        assertThat(labels.label).isEqualTo("Onelink")
         assertThat(labels.sublabel).isEqualTo("Stripe Test Bank Account •••• 4242")
     }
 

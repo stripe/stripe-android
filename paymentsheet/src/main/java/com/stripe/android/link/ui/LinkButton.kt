@@ -144,7 +144,7 @@ private const val LINK_PAY_WITH_FONT_SIZE = 21
 private const val LINK_EMAIL_FONT_SIZE = 16
 
 private const val LINK_ICON_ASPECT_RATIO = 72f / 26f
-private const val NOTLINK_ICON_ASPECT_RATIO = 125f / 24f
+private const val ONELINK_ICON_ASPECT_RATIO = 125f / 24f
 
 internal const val LinkButtonTestTag = "LinkButtonTestTag"
 
@@ -346,7 +346,7 @@ private fun RowScope.SignedOutButtonContent(theme: LinkButtonTheme, linkBrand: L
             val iconHeight = 0.9.em
             val iconWidth = when (linkBrand) {
                 LinkBrand.Link -> iconHeight * LINK_ICON_ASPECT_RATIO
-                LinkBrand.Onelink -> iconHeight * NOTLINK_ICON_ASPECT_RATIO
+                LinkBrand.Onelink -> iconHeight * ONELINK_ICON_ASPECT_RATIO
             }
             add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) { LinkButtonIcon(theme, linkBrand) }
         }.build(),
@@ -401,7 +401,7 @@ private fun LinkIconAndDivider(
             val iconHeight = 1.1.em
             val iconWidth = when (linkBrand) {
                 LinkBrand.Link -> iconHeight * LINK_ICON_ASPECT_RATIO
-                LinkBrand.Onelink -> iconHeight * NOTLINK_ICON_ASPECT_RATIO
+                LinkBrand.Onelink -> iconHeight * ONELINK_ICON_ASPECT_RATIO
             }
             add(id = LINK_ICON_ID, width = iconWidth, height = iconHeight) { LinkButtonIcon(theme, linkBrand) }
             add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider(theme.dividerColor) }
@@ -429,7 +429,7 @@ private fun LinkButtonIcon(
     val logoRes = theme.logoRes(linkBrand)
     val aspectRatio = when (linkBrand) {
         LinkBrand.Link -> LINK_ICON_ASPECT_RATIO
-        LinkBrand.Onelink -> NOTLINK_ICON_ASPECT_RATIO
+        LinkBrand.Onelink -> ONELINK_ICON_ASPECT_RATIO
     }
     Icon(
         modifier = Modifier

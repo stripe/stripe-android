@@ -33,7 +33,7 @@ internal class GetOrFetchSync @Inject constructor(
     }
 
     private fun SynchronizeSessionResponse.maybeOverrideLinkBrand(): SynchronizeSessionResponse {
-        if (debugConfiguration.forceNotlink) {
+        if (debugConfiguration.forceOnelink) {
             return copy(manifest = manifest.copy(linkBrand = LinkBrand.Onelink))
         }
         return this

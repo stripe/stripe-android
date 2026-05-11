@@ -173,7 +173,7 @@ internal data class PlaygroundSettings(
             PublicKeySetting(),
             PrivateKeySetting(),
             TestModeSetting(),
-            ForceNotlinkSetting(),
+            ForceOnelinkSetting(),
             FlowSetting(),
             ConfirmIntentSetting(),
             NativeSetting(),

@@ -53,6 +53,6 @@ internal class LinkInline2FASectionTest {
 
         composeRule
             .onNodeWithTag(VERIFICATION_HEADER_IMAGE_TAG)
-            .assertContentDescriptionContains("Notlink")
+            .assertContentDescriptionContains("Onelink")
     }
 }

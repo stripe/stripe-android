@@ -57,7 +57,7 @@ internal class LinkAppBarScreenshotTest(
                     )
                 ),
                 TestCase(
-                    name = "NotlinkAppBarWithLogoAndCloseButton",
+                    name = "OnelinkAppBarWithLogoAndCloseButton",
                     state = LinkAppBarState(
                         canNavigateBack = false,
                         showHeader = true,

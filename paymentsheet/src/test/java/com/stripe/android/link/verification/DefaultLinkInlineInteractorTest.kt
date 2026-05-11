@@ -140,7 +140,7 @@ class DefaultLinkInlineInteractorTest {
     }
 
     @Test
-    fun `when account status is NeedsVerification with Notlink brand, view state uses Notlink`() =
+    fun `when account status is NeedsVerification with Onelink brand, view state uses Onelink`() =
         runTest(testDispatcher) {
             linkAccountManager.setLinkAccount(
                 LinkAccountUpdate.Value(createLinkAccount(AccountStatus.NeedsVerification()))

@@ -27,10 +27,10 @@ internal class LinkAppBarMenuTest {
     }
 
     @Test
-    fun logout_label_uses_notlink_brand_name() {
+    fun logout_label_uses_onelink_brand_name() {
         setContent(LinkBrand.Onelink)
 
-        composeRule.onNodeWithTag(LOGOUT_MENU_ROW_TAG).assertTextEquals("Log out of Notlink")
+        composeRule.onNodeWithTag(LOGOUT_MENU_ROW_TAG).assertTextEquals("Log out of Onelink")
     }
 
     private fun setContent(linkBrand: LinkBrand) {
