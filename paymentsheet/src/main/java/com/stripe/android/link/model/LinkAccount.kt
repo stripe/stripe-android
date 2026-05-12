@@ -1,6 +1,7 @@
 package com.stripe.android.link.model
 
 import android.os.Parcelable
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
@@ -22,7 +23,11 @@ internal data class LinkAccount(
 ) : Parcelable {
 
     val linkBrand: LinkBrand
-        get() = consumerSession.linkBrand ?: LinkBrand.Link
+        get() = if (FeatureFlags.forceNotlinkConsumer.isEnabled) {
+            LinkBrand.Notlink
+        } else {
+            consumerSession.linkBrand ?: LinkBrand.Link
+        }
 
     @IgnoredOnParcel
     val redactedPhoneNumber = consumerSession.redactedFormattedPhoneNumber.replace("*", "•")
