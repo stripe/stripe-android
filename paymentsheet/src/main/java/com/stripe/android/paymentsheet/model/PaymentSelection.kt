@@ -37,7 +37,7 @@ import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.paymentsheet.ui.getLinkIconArrow
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -366,7 +366,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
+        is PaymentSelection.Link -> getLinkIconArrow()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
         is PaymentSelection.New.USBankAccount -> iconResource
@@ -379,7 +379,7 @@ internal val PaymentSelection.drawableResourceIdNight: Int
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
+        is PaymentSelection.Link -> getLinkIconArrow()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResourceNight ?: iconResource
         is PaymentSelection.New.USBankAccount -> iconResource
@@ -389,10 +389,14 @@ internal val PaymentSelection.drawableResourceIdNight: Int
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
     if (selection.paymentMethod.isLinkCardBrand) {
-        return R.drawable.stripe_ic_paymentsheet_link_arrow
+        return getLinkIconArrow()
     }
 
-    return selection.paymentMethod.getSavedPaymentMethodIcon(forPaymentOption = true)
+    return selection.paymentMethod.getSavedPaymentMethodIcon(
+        // Any brand is fine if `forPaymentOption` is true, only showing the icon (no text).
+        linkBrand = LinkBrand.Link,
+        forPaymentOption = true,
+    )
 }
 
 internal val PaymentSelection.lightThemeIconUrl: String?
