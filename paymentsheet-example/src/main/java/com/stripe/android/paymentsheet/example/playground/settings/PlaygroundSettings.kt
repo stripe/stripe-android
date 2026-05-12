@@ -524,6 +524,7 @@ internal class PlaygroundSettings private constructor(
             LinkSettingsDefinition,
             LinkTypeSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.forceNotlink),
+            FeatureFlagSettingsDefinition(FeatureFlags.forceNotlinkConsumer),
             MerchantSettingsDefinition,
             CustomSecretKeyDefinition,
             CustomPublishableKeyDefinition,

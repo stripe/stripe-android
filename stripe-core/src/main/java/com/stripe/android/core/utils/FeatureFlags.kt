@@ -15,6 +15,7 @@ object FeatureFlags {
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
     val forceNotlink = FeatureFlag("Link: Force Notlink brand")
+    val forceNotlinkConsumer = FeatureFlag("Link: Force Notlink consumer")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
 }

@@ -174,6 +174,7 @@ internal data class PlaygroundSettings(
             PrivateKeySetting(),
             TestModeSetting(),
             ForceNotlinkSetting(),
+            ForceNotlinkConsumerSetting(),
             FlowSetting(),
             ConfirmIntentSetting(),
             NativeSetting(),
