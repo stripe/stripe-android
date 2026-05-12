@@ -33,6 +33,9 @@ tags:
     # Maestro does not yet support tapping on annotated strings.
     # https://github.com/mobile-dev-inc/maestro/issues/389
     point: "50%,93%"
+- extendedWaitUntil:
+    visible: "Use test account"
+    timeout: 30000
 - tapOn: "Use test account"
 ## ENTER PHONE FOR NEW NETWORKED USER
 - waitForAnimationToEnd
@@ -42,6 +45,10 @@ tags:
 - inputText: "6223115555"
 - tapOn: "Save with Link"
 # CONFIRM AND COMPLETE
+- extendedWaitUntil:
+    visible:
+      id: "done_button"
+    timeout: 30000
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:
@@ -60,16 +67,31 @@ tags:
 - tapOn:
     id: "consent_cta"
 ## LOGIN TO NETWORKING
+- extendedWaitUntil:
+    visible:
+      id: "existing_email-button"
+    timeout: 30000
 - tapOn:
     id: "existing_email-button"
 ## 2FA
+- extendedWaitUntil:
+    visible:
+      id: "OTP-0"
+    timeout: 30000
 - assertVisible:
     id: "OTP-0"
 - inputText: "111111"
 ## SELECT NETWORKED ACCOUNT
 # First institution should be auto selected.
+- extendedWaitUntil:
+    visible: "Connect account"
+    timeout: 30000
 - tapOn: "Connect account"
 # CONFIRM AND COMPLETE
+- extendedWaitUntil:
+    visible:
+      id: "done_button"
+    timeout: 30000
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:

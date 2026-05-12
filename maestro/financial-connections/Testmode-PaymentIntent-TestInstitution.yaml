@@ -21,6 +21,9 @@ tags:
 - tapOn:
     id: "consent_cta"
 # SELECT LEGACY INSTITUTION
+- extendedWaitUntil:
+    visible: "Test (Non-OAuth)"
+    timeout: 30000
 - tapOn: "Test (Non-OAuth)"
 ####### Bypass Chrome on-boarding screen #######
 - runFlow:
@@ -36,10 +39,18 @@ tags:
     text: "Connect account"
     retryTapIfNoChange: false
 # SKIP NETWORKING
+- extendedWaitUntil:
+    visible:
+      id: "skip_cta"
+    timeout: 30000
 - tapOn:
     id: "skip_cta"
     optional: true # Networking might not be enabled
 # CONFIRM AND COMPLETE
+- extendedWaitUntil:
+    visible:
+      id: "done_button"
+    timeout: 30000
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:
