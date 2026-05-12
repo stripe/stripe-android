@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetFlowType
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.VisualUpdate
+import com.stripe.android.model.LinkBrand
 import org.junit.Test
 
 internal class FinancialConnectionsSheetNativeStateTest {
@@ -47,11 +48,56 @@ internal class FinancialConnectionsSheetNativeStateTest {
         ).isFalse()
     }
 
-    private fun args(visual: VisualUpdate) = FinancialConnectionsSheetNativeActivityArgs(
+    @Test
+    fun `init - linkBrand prefers configuration override over manifest`() {
+        assertThat(
+            FinancialConnectionsSheetNativeState(
+                args = args(
+                    visual = ApiKeyFixtures.visual(),
+                    configuration = configuration.copy(linkBrand = LinkBrand.Notlink),
+                    manifestLinkBrand = LinkBrand.Link,
+                ),
+                savedState = null
+            ).linkBrand,
+        ).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `init - linkBrand falls back to manifest when configuration override is absent`() {
+        assertThat(
+            FinancialConnectionsSheetNativeState(
+                args = args(
+                    visual = ApiKeyFixtures.visual(),
+                    manifestLinkBrand = LinkBrand.Notlink,
+                ),
+                savedState = null
+            ).linkBrand,
+        ).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `init - linkBrand falls back to Link when configuration override and manifest are absent`() {
+        assertThat(
+            FinancialConnectionsSheetNativeState(
+                args = args(
+                    visual = ApiKeyFixtures.visual(),
+                    manifestLinkBrand = null,
+                ),
+                savedState = null
+            ).linkBrand,
+        ).isEqualTo(LinkBrand.Link)
+    }
+
+    private fun args(
+        visual: VisualUpdate,
+        configuration: FinancialConnectionsSheetConfiguration = this.configuration,
+        manifestLinkBrand: LinkBrand? = null,
+    ) = FinancialConnectionsSheetNativeActivityArgs(
         flowType = FinancialConnectionsSheetFlowType.ForInstantDebits,
         configuration = configuration,
         initialSyncResponse = ApiKeyFixtures.syncResponse().copy(
-            visual = visual
+            visual = visual,
+            manifest = ApiKeyFixtures.sessionManifest().copy(linkBrand = manifestLinkBrand),
         )
     )
 }

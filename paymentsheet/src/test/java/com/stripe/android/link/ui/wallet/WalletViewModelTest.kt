@@ -188,6 +188,7 @@ class WalletViewModelTest {
                 val expectedConfig = FinancialConnectionsSheetConfiguration(
                     financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
                     publishableKey = linkAccount.consumerPublishableKey!!,
+                    linkBrand = LinkBrand.Link,
                 )
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
@@ -204,6 +205,33 @@ class WalletViewModelTest {
                 assertThat(selectedItemId).isEqualTo(newBankAccountId)
                 assertThat(userSetIsExpanded).isFalse()
                 assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+        }
+    }
+
+    @Test
+    fun `viewmodel should propagate Notlink brand when adding bank account`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION.copy(linkBrand = LinkBrand.Notlink)
+
+        testAddBankAccount(
+            linkAccount = TestFactory.LINK_ACCOUNT_WITH_PK,
+            configuration = configuration,
+        ) { vm, _ ->
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Idle)
+            }
+
+            vm.onAddPaymentMethodOptionClicked(AddPaymentMethodOption.Bank(FinancialConnectionsAvailability.Full))
+            awaitItem().run {
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing())
+            }
+            awaitItem().run {
+                val expectedConfig = FinancialConnectionsSheetConfiguration(
+                    financialConnectionsSessionClientSecret = TestFactory.LINK_ACCOUNT_SESSION.clientSecret,
+                    publishableKey = TestFactory.LINK_ACCOUNT_WITH_PK.consumerPublishableKey!!,
+                    linkBrand = LinkBrand.Notlink,
+                )
+                assertThat(addBankAccountState).isEqualTo(AddBankAccountState.Processing(expectedConfig))
             }
         }
     }
@@ -1177,12 +1205,14 @@ class WalletViewModelTest {
 
     private suspend fun testAddBankAccount(
         linkAccount: LinkAccount = TestFactory.LINK_ACCOUNT_WITH_PK,
+        configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         validate: suspend TurbineTestContext<WalletUiState>.(WalletViewModel, WalletLinkAccountManager) -> Unit,
     ) {
         val linkAccountManager = WalletLinkAccountManager()
         val vm = createViewModel(
             linkAccount = linkAccount,
             linkAccountManager = linkAccountManager,
+            configuration = configuration,
         )
         vm.onExpandedChanged(true)
 
