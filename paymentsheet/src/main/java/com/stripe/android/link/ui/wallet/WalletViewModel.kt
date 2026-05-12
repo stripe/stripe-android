@@ -52,6 +52,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
@@ -126,7 +127,6 @@ internal class WalletViewModel(
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
     val allowLogOut: Boolean = configuration.allowLogOut
-    val linkBrand = configuration.effectiveLinkBrand(linkAccount)
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()
@@ -144,6 +144,13 @@ internal class WalletViewModel(
 
         viewModelScope.launch {
             loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
+        }
+
+        viewModelScope.launch {
+            linkAccountManager.linkAccountInfo.collect { accountUpdate ->
+                val linkBrand = configuration.effectiveLinkBrand(accountUpdate.account)
+                _uiState.update { it.copy(linkBrand = linkBrand) }
+            }
         }
 
         viewModelScope.launch {
