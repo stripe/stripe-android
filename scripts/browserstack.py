@@ -5,6 +5,7 @@ import shutil
 import requests
 import sys
 import time
+import json
 import zipfile
 from collections import defaultdict
 
@@ -228,7 +229,7 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParam
         "enableSpoonFramework": False,
         "project": PROJECT_NAME,
     }
-    json = {**baseParams, **addedParams}
+    jsonObj = {**baseParams, **addedParams}
     print(
         "RUNNING the tests (appUrl: {app}, testUrl: {test})...".format(
             app=appUrl, test=testUrl
@@ -238,7 +239,7 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParam
     url = "https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     response = requests.post(
         url,
-        json=json,
+        json=jsonObj,
         auth=(user, authKey),
     )
     jsonResponse = response.json()
@@ -285,7 +286,9 @@ def get_build_status(buildId):
     url = (
         "https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
     )
-    return requests.get(url, auth=(user, authKey))
+    response = requests.get(url, auth=(user, authKey))
+    print("RESPONSE IS: " + json.dumps(response.json()))
+    return response
 
 
 def storeAndZipFiles(files):
@@ -365,7 +368,9 @@ def waitForBuildComplete(buildId):
         print(".", end="")
         try:
             response = get_build_status(buildId)
-            responseStatus = response.json()["status"]
+            jsonObj = response.json()
+            responseStatus = jsonObj["status"]
+            print()
         except:
             print("Failed to get build status, trying again.")
     print("DONE.\nRESULT is: " + responseStatus)

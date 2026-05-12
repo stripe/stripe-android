@@ -35,6 +35,7 @@ import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.random.Random
 
 @RunWith(AndroidJUnit4::class)
 internal class TestCard : BasePlaygroundTest() {
@@ -47,6 +48,8 @@ internal class TestCard : BasePlaygroundTest() {
 
     @Test
     fun testCard() {
+        assert(Random.nextInt(1, 4) == 3)
+
         testDriver.confirmNewOrGuestComplete(
             testParameters,
             populateCustomLpmFields = {
