@@ -29,8 +29,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
+
+private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 
 /**
  * Manages a Checkout Session, providing methods to observe and mutate its state.
@@ -200,16 +204,19 @@ class Checkout private constructor(
     }
 
     /**
-     * Wraps an asynchronous function that communicates with your server to modify the
-     * Checkout Session. After the function completes, the session is re-fetched from the server.
+     * Runs an async function that calls your server to update the Checkout Session,
+     * then automatically refreshes [checkoutSession] with the latest session data.
      *
-     * @param serverUpdate A suspend function responsible for making a server request that updates
+     * A 20-second timeout is enforced. If [serverUpdate] doesn't complete within 20 seconds,
+     * this method returns a [Result.failure] with a timeout exception.
+     *
+     * @param serverUpdate A suspend function that makes a request to your server to update
      * the Checkout Session.
      */
     suspend fun runServerUpdate(
         serverUpdate: suspend () -> Result<Unit>,
     ): Result<Unit> = withInternalState { sessionId ->
-        serverUpdate().fold(
+        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
             onSuccess = {
                 component.checkoutSessionRepository.init(
                     sessionId = sessionId,
