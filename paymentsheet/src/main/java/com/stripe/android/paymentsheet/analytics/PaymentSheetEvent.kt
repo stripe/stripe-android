@@ -365,6 +365,23 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         ) + experiment.dimensions.mapKeys { "dimensions-${it.key}" }
     }
 
+    class AdaptivePricingCurrencySelectorInit : PaymentSheetEvent() {
+        override val eventName: String = "elements.adaptive_pricing.currency_selector_init"
+    }
+
+    class AdaptivePricingCurrencyToggled : PaymentSheetEvent() {
+        override val eventName: String = "elements.adaptive_pricing.currency_toggled"
+    }
+
+    class AdaptivePricingCurrencyToggledFailed(
+        error: String,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "elements.adaptive_pricing.currency_toggled_failed"
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_ERROR_MESSAGE to error,
+        )
+    }
+
     class ShopPayWebviewLoadAttempt : PaymentSheetEvent() {
         override val eventName: String = "mc_shoppay_webview_load_attempt"
     }
