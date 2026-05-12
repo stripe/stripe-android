@@ -472,7 +472,7 @@ internal class WalletViewModel(
                     FinancialConnectionsSheetConfiguration(
                         financialConnectionsSessionClientSecret = session.clientSecret,
                         publishableKey = linkAccount.consumerPublishableKey!!,
-                        linkBrand = configuration.linkBrand,
+                        linkBrand = _uiState.value.linkBrand,
                     )
                 }
                 .fold(
