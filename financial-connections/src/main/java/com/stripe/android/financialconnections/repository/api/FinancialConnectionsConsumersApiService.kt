@@ -30,7 +30,7 @@ internal interface FinancialConnectionsConsumersApiService {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-internal class FinancialConnectionsConsumersApiServiceImpl(
+private class FinancialConnectionsConsumersApiServiceImpl(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
     private val apiOptions: ApiRequest.Options,
     private val apiRequestFactory: ApiRequest.Factory
@@ -59,7 +59,7 @@ internal class FinancialConnectionsConsumersApiServiceImpl(
         )
     }
 
-    internal companion object {
+    private companion object {
         /**
          * @return `https://api.stripe.com/v1/connections/link_account_sessions/consumer_sessions`
          */

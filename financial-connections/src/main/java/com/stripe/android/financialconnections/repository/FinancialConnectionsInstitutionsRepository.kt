@@ -31,7 +31,7 @@ internal interface FinancialConnectionsInstitutionsRepository {
     }
 }
 
-internal class FinancialConnectionsInstitutionsRepositoryImpl(
+private class FinancialConnectionsInstitutionsRepositoryImpl(
     private val requestExecutor: FinancialConnectionsRequestExecutor,
     private val provideApiRequestOptions: ProvideApiRequestOptions,
     private val apiRequestFactory: ApiRequest.Factory

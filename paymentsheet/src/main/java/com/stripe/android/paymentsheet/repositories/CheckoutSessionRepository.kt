@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -163,17 +162,14 @@ internal class CheckoutSessionRepository @Inject constructor(
         ),
     )
 
-    internal companion object {
-        @VisibleForTesting
-        internal fun initUrl(sessionId: String): String =
+    private companion object {
+        private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
 
-        @VisibleForTesting
-        internal fun confirmUrl(checkoutSessionId: String): String =
+        private fun confirmUrl(checkoutSessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$checkoutSessionId/confirm"
 
-        @VisibleForTesting
-        internal fun updateUrl(sessionId: String): String =
+        private fun updateUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId"
     }
 }
