@@ -265,7 +265,9 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun getPaymentOption(): PaymentOption? {
         return viewModel.paymentSelection?.let {
-            paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+            val linkBrand = linkAccountHolder.linkAccountInfo.value.account?.linkBrand
+                ?: viewModel.state?.linkConfiguration?.linkBrand
+            paymentOptionFactory.create(it, linkBrand)
         }
     }
 
@@ -428,14 +430,16 @@ internal class DefaultFlowController @Inject internal constructor(
                 // Should always have Link configuration here.
                 val linkConfiguration = viewModel.state?.linkConfiguration
                     ?: return
+                val effectiveBrand = linkAccountHolder.linkAccountInfo.value.account?.linkBrand
+                    ?: linkConfiguration.linkBrand
                 val selection = Link(
-                    brand = linkConfiguration.linkBrand,
+                    brand = effectiveBrand,
                     selectedPayment = result.selectedPayment,
                 )
                 viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(selection, linkConfiguration.linkBrand),
+                        paymentOption = paymentOptionFactory.create(selection, effectiveBrand),
                         didCancel = false,
                     )
                 )
@@ -493,7 +497,9 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             viewModel.paymentSelection = newSelection
             val paymentOption = newSelection?.let {
-                paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+                val linkBrand = linkAccountHolder.linkAccountInfo.value.account?.linkBrand
+                    ?: viewModel.state?.linkConfiguration?.linkBrand
+                paymentOptionFactory.create(it, linkBrand)
             }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
@@ -634,7 +640,9 @@ internal class DefaultFlowController @Inject internal constructor(
     private fun onPaymentSelection(canceled: Boolean) {
         val paymentSelection = viewModel.paymentSelection
         val paymentOption = paymentSelection?.let {
-            paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+            val linkBrand = linkAccountHolder.linkAccountInfo.value.account?.linkBrand
+                ?: viewModel.state?.linkConfiguration?.linkBrand
+            paymentOptionFactory.create(it, linkBrand)
         }
 
         paymentOptionResultCallback.onPaymentOptionResult(

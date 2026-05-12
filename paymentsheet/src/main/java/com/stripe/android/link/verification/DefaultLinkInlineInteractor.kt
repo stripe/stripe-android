@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
@@ -149,7 +150,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 linkConfiguration.enableDisplayableDefaultValuesInEce
             ),
             allowLogout = true,
-            linkBrand = linkConfiguration.linkBrand,
+            linkBrand = linkConfiguration.effectiveLinkBrand(this@initial2FAState),
         )
     )
 

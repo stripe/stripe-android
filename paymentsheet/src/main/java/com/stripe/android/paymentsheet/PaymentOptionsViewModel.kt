@@ -161,6 +161,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
         val hasLinkWithSelectedPayment = currentSelection is Link && currentSelection.selectedPayment != null
+        val accountLinkBrand = linkAccountInfo.account?.linkBrand
         WalletsState.create(
             isLinkAvailable = isLinkAvailable == true && visibleWallets.contains(WalletType.Link),
             linkEmail = linkEmail,
@@ -176,8 +177,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                if (linkConfiguration?.linkBrand != null) {
-                    updateSelection(Link(linkConfiguration.linkBrand))
+                if (linkConfiguration != null) {
+                    val brand = accountLinkBrand ?: linkConfiguration.linkBrand
+                    updateSelection(Link(brand))
                     onUserSelection()
                 }
             },
@@ -192,7 +194,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 hasLinkWithSelectedPayment.not(),
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-            linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link,
+            linkBrand = accountLinkBrand ?: linkConfiguration?.linkBrand ?: LinkBrand.Link,
         )
     }
 
@@ -309,11 +311,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // Should always have Link configuration here.
                 val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
                     ?: return
+                val effectiveBrand = linkAccountHolder.linkAccountInfo.value.account?.linkBrand
+                    ?: linkConfiguration.linkBrand
                 _paymentOptionsActivityResult.tryEmit(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
-                            brand = linkConfiguration.linkBrand,
+                            brand = effectiveBrand,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),

@@ -31,6 +31,8 @@ data class ConsumerSession(
     val currentAuthenticationLevel: AuthenticationLevel? = null,
     @SerialName("minimum_authentication_level")
     val minimumAuthenticationLevel: AuthenticationLevel? = null,
+    @SerialName("link_brand")
+    val linkBrand: LinkBrand? = null,
 ) : StripeModel {
 
     val meetsMinimumAuthenticationLevel: Boolean

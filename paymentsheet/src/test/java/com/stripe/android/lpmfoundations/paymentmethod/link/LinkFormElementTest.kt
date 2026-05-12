@@ -19,6 +19,7 @@ import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkInlineSignupAssistedViewModelFactory
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.inline.InlineSignupViewModel
 import com.stripe.android.link.ui.inline.LINK_INLINE_SIGNUP_REMAINING_FIELDS_TEST_TAG
@@ -38,6 +39,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.utils.FakeLinkComponent
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -187,6 +189,9 @@ class LinkFormElementTest {
     }
 
     private object FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
+        override val accountFlow: StateFlow<LinkAccount?>
+            get() = stateFlowOf(null)
+
         override val emailFlow: StateFlow<String?>
             get() {
                 error("Not implemented!")
