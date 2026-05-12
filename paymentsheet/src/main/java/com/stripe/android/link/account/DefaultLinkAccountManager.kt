@@ -331,7 +331,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
             consumerSession = consumerSession,
             consumerPublishableKey = newConsumerPublishableKey,
             displayablePaymentDetails = newPaymentDetails,
-            linkAuthIntentInfo = newLaiInfo
+            linkAuthIntentInfo = newLaiInfo,
         )
         withContext(Dispatchers.Main.immediate) {
             linkAccountHolder.set(LinkAccountUpdate.Value(newAccount))

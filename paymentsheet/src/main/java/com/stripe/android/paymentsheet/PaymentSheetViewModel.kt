@@ -200,6 +200,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         buttonsEnabled,
         paymentMethodMetadata,
     ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodMetadata ->
+        val accountLinkBrand = linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
@@ -216,7 +217,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
             cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter,
-            linkBrand = paymentMethodMetadata?.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
+            linkBrand = accountLinkBrand
+                ?: paymentMethodMetadata?.linkState?.configuration?.linkBrand
+                ?: LinkBrand.Link,
         )
     }
 
@@ -434,9 +437,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         // Should always have Link configuration if we're checking out with Link.
         val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
             ?: return
+        val effectiveBrand = linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
+            ?: linkConfiguration.linkBrand
         checkout(
             PaymentSelection.Link(
-                brand = linkConfiguration.linkBrand,
+                brand = effectiveBrand,
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
             CheckoutIdentifier.SheetTopWallet
@@ -447,11 +452,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         // Should always have Link configuration if we're checking out with Link.
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
             ?: return
+        val effectiveBrand = linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
+            ?: linkConfiguration.linkBrand
         // We don't want to fall back to web on express mode if attestation
         // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
-                brand = linkConfiguration.linkBrand,
+                brand = effectiveBrand,
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
             ),
             CheckoutIdentifier.SheetTopWallet

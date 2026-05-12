@@ -3,6 +3,7 @@ package com.stripe.android.link.model
 import android.os.Parcelable
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.DisplayablePaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.MobileFallbackWebviewParams
 import com.stripe.android.uicore.elements.convertPhoneNumberToE164
 import kotlinx.parcelize.IgnoredOnParcel
@@ -19,6 +20,9 @@ internal data class LinkAccount(
     val linkAuthIntentInfo: LinkAuthIntentInfo? = null,
     val viewedWebviewOpenUrl: Boolean = false,
 ) : Parcelable {
+
+    val linkBrand: LinkBrand
+        get() = consumerSession.linkBrand ?: LinkBrand.Link
 
     @IgnoredOnParcel
     val redactedPhoneNumber = consumerSession.redactedFormattedPhoneNumber.replace("*", "•")

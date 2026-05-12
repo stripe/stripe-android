@@ -276,7 +276,8 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 },
                 onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand,
+                linkBrand = viewModel.linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
+                    ?: paymentMethodMetadata.linkState?.configuration?.linkBrand,
             )
         }
     }

@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.MobileFallbackWebviewParams
 import org.json.JSONObject
 
@@ -32,6 +33,10 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             optString(consumerSessionJson, FIELD_MINIMUM_AUTHENTICATION_LEVEL)
                 ?.let { ConsumerSession.AuthenticationLevel.fromValue(it) }
 
+        val linkBrand = optString(consumerSessionJson, FIELD_LINK_BRAND)?.let { value ->
+            LinkBrand.entries.firstOrNull { it.value == value }
+        }
+
         return ConsumerSession(
             clientSecret = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_SECRET),
             emailAddress = consumerSessionJson.getString(FIELD_CONSUMER_SESSION_EMAIL),
@@ -43,6 +48,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             mobileFallbackWebviewParams = mobileFallbackWebviewParams,
             currentAuthenticationLevel = currentAuthenticationLevel,
             minimumAuthenticationLevel = minimumAuthenticationLevel,
+            linkBrand = linkBrand,
         )
     }
 
@@ -81,6 +87,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
         private const val FIELD_VERIFICATION_SESSION_TYPE = "type"
         private const val FIELD_VERIFICATION_SESSION_STATE = "state"
 
+        private const val FIELD_LINK_BRAND = "link_brand"
         private const val FIELD_WEBVIEW_REQUIREMENT_TYPE = "webview_requirement_type"
         private const val FIELD_WEBVIEW_OPEN_URL = "webview_open_url"
     }

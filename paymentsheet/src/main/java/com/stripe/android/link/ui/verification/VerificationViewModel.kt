@@ -9,6 +9,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.WebLinkAuthResult
 import com.stripe.android.link.account.LinkAccountHolder
@@ -311,7 +312,7 @@ internal class VerificationViewModel @Inject constructor(
                         logger = parentComponent.logger,
                         linkLaunchMode = parentComponent.linkLaunchMode,
                         webLinkAuthChannel = parentComponent.webLinkAuthChannel,
-                        linkBrand = parentComponent.configuration.linkBrand,
+                        linkBrand = parentComponent.configuration.effectiveLinkBrand(linkAccount),
                         onVerificationSucceeded = parentComponent.viewModel::onVerificationSucceeded,
                         onChangeEmailRequested = onChangeEmailClicked,
                         onDismissClicked = onDismissClicked,

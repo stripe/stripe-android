@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
@@ -95,7 +96,7 @@ internal class WalletViewModel(
             paymentSelectionHint = paymentSelectionHint,
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-            linkBrand = configuration.linkBrand,
+            linkBrand = configuration.effectiveLinkBrand(linkAccount),
         )
     )
 
@@ -125,7 +126,7 @@ internal class WalletViewModel(
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
     val allowLogOut: Boolean = configuration.allowLogOut
-    val linkBrand = configuration.linkBrand
+    val linkBrand = configuration.effectiveLinkBrand(linkAccount)
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()
