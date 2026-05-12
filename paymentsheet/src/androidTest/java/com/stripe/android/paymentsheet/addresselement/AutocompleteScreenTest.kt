@@ -63,23 +63,25 @@ class AutocompleteScreenTest {
 
     private fun setContent(
         mockClient: FakeGooglePlacesClient = FakeGooglePlacesClient()
-    ) =
+    ) {
+        val viewModel = AutocompleteViewModel(
+            mockClient,
+            AutocompleteViewModel.Args(
+                "US"
+            ),
+            eventReporter,
+            application
+        )
         composeTestRule.setContent {
             DefaultStripeTheme {
                 AutocompleteScreenUI(
-                    viewModel = AutocompleteViewModel(
-                        mockClient,
-                        AutocompleteViewModel.Args(
-                            "US"
-                        ),
-                        eventReporter,
-                        application
-                    ),
+                    viewModel = viewModel,
                     navigator = NavHostAddressElementNavigator(),
                     attributionDrawable = null,
                 )
             }
         }
+    }
 
     private fun onAddressOptionsAppBar() = composeTestRule.onNodeWithContentDescription("Back")
     private fun onQueryField() = composeTestRule.onNodeWithText("Address")
