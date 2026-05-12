@@ -143,7 +143,7 @@ class PaymentOptionsScreenshotTest {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,
-                PaymentOptionsItem.Link(LinkBrand.Notlink),
+                PaymentOptionsItem.Link(LinkBrand.Onelink),
                 PaymentOptionsItem.SavedPaymentMethod(
                     DisplayableSavedPaymentMethod.create(
                         displayName = "4242".resolvableString,
@@ -165,9 +165,9 @@ class PaymentOptionsScreenshotTest {
                     ),
                 )
             ),
-            selectedPaymentOptionsItem = PaymentOptionsItem.Link(LinkBrand.Notlink),
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link(LinkBrand.Onelink),
             isEditing = false,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
     }
 

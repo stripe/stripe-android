@@ -204,15 +204,15 @@ internal fun getLinkIcon(
 
     val nightIcon = when (brand) {
         LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_night
-        LinkBrand.Notlink -> R.drawable.stripe_ic_paymentsheet_notlink_night
+        LinkBrand.Onelink -> R.drawable.stripe_ic_paymentsheet_notlink_night
     }
     val dayIcon = when (brand) {
         LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_day
-        LinkBrand.Notlink -> R.drawable.stripe_ic_paymentsheet_notlink_day
+        LinkBrand.Onelink -> R.drawable.stripe_ic_paymentsheet_notlink_day
     }
     val systemThemeAwareIconRef = when (brand) {
         LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_ref
-        LinkBrand.Notlink -> R.drawable.stripe_ic_paymentsheet_notlink_ref
+        LinkBrand.Onelink -> R.drawable.stripe_ic_paymentsheet_notlink_ref
     }
 
     return getOverridableIcon(
