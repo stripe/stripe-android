@@ -276,6 +276,68 @@ class PaymentIntentTest {
     }
 
     @Test
+    fun `isConfirmed returns true only for Processing, RequiresCapture, and Succeeded statuses`() {
+        val base = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
+
+        val confirmedStatuses = listOf(
+            StripeIntent.Status.Processing,
+            StripeIntent.Status.RequiresCapture,
+            StripeIntent.Status.Succeeded,
+        )
+        confirmedStatuses.forEach { status ->
+            assertThat(base.copy(status = status).isConfirmed)
+                .isTrue()
+        }
+
+        val notConfirmedStatuses = listOf(
+            StripeIntent.Status.RequiresPaymentMethod,
+            StripeIntent.Status.RequiresConfirmation,
+            StripeIntent.Status.RequiresAction,
+            StripeIntent.Status.Canceled,
+        )
+        notConfirmedStatuses.forEach { status ->
+            assertThat(base.copy(status = status).isConfirmed)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `requireCvcRecollection returns true when set in payment method options`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "require_cvc_recollection": true
+                  }
+                }
+            """.trimIndent()
+        )
+        assertThat(paymentIntent.requireCvcRecollection).isTrue()
+    }
+
+    @Test
+    fun `requireCvcRecollection returns false when not set in payment method options`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = """
+                {
+                  "card": {
+                    "request_three_d_secure": "automatic"
+                  }
+                }
+            """.trimIndent()
+        )
+        assertThat(paymentIntent.requireCvcRecollection).isFalse()
+    }
+
+    @Test
+    fun `requireCvcRecollection returns false when payment method options is null`() {
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodOptionsJsonString = null
+        )
+        assertThat(paymentIntent.requireCvcRecollection).isFalse()
+    }
+
+    @Test
     fun `getPaymentMethodOptions returns expected results`() {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
             paymentMethodOptionsJsonString = """
