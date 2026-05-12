@@ -35,6 +35,10 @@ tags:
 - inputText: "6223115555"
 - tapOn: "Continue with Link"
 # Select "Payment Success" institution
+- extendedWaitUntil:
+    visible:
+      id: "bcinst_QsDedeogZ5PA7V"
+    timeout: 30000
 - tapOn:
     id: "bcinst_QsDedeogZ5PA7V"
 # Bypass Chrome on-boarding screen
@@ -49,6 +53,9 @@ tags:
     timeout: 60000
 - tapOn: "Success"
 - tapOn: "Connect account"
+- extendedWaitUntil:
+    visible: "Your account was connected"
+    timeout: 30000
 - assertVisible: "Your account was connected"
 - tapOn:
     id: "done_button"
@@ -65,14 +72,28 @@ tags:
 - tapOn:
     id: "consent_cta"
 # Continue with existing account
+- extendedWaitUntil:
+    visible:
+      id: "existing_email-button"
+    timeout: 30000
 - tapOn:
     id: "existing_email-button"
+- extendedWaitUntil:
+    visible:
+      id: "OTP-0"
+    timeout: 30000
 - assertVisible:
     id: "OTP-0"
 - inputText: "111111"
 # Select previously networked account and complete
+- extendedWaitUntil:
+    visible: "Success"
+    timeout: 30000
 - tapOn: "Success"
 - tapOn: "Connect account"
+- extendedWaitUntil:
+    visible: "Your account was connected"
+    timeout: 30000
 - assertVisible: "Your account was connected"
 - tapOn:
     id: "done_button"
