@@ -580,16 +580,6 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "us_bank_account"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
@@ -643,16 +633,6 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "us_bank_account"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
@@ -702,18 +682,8 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "us_bank_account"),
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
 
         testContext.presentPaymentSheet {
@@ -935,7 +905,6 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
             header("Authorization", "Bearer uk_12345"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")

@@ -181,7 +181,6 @@ internal class PaymentSheetDeferredTest {
         networkRule.enqueue(
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
             query("customer", "cus_foobar"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
@@ -238,7 +237,6 @@ internal class PaymentSheetDeferredTest {
         networkRule.enqueue(
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
             query("customer", "cus_foobar"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
@@ -320,7 +318,6 @@ internal class PaymentSheetDeferredTest {
         networkRule.enqueue(
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
             query("customer", "cus_foobar"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
@@ -380,7 +377,6 @@ internal class PaymentSheetDeferredTest {
         networkRule.enqueue(
             method("GET"),
             path("/v1/payment_methods"),
-            query("type", "card"),
             query("customer", "cus_foobar"),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
