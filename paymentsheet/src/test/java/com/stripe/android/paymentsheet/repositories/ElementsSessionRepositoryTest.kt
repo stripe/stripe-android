@@ -689,6 +689,34 @@ internal class ElementsSessionRepositoryTest {
     }
 
     @Test
+    fun `Request URL uses API_HOST_OVERRIDE when set`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
+        )
+
+        ApiRequest.API_HOST_OVERRIDE = "https://custom-devbox.example.com"
+        try {
+            createRepository().get(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret",
+                ),
+                customer = null,
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                savedPaymentMethodSelectionId = null,
+                countryOverride = null,
+            )
+
+            verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+            val request = requestCaptor.firstValue as ApiRequest
+            assertThat(request.baseUrl)
+                .isEqualTo("https://custom-devbox.example.com/v1/elements/sessions")
+        } finally {
+            ApiRequest.API_HOST_OVERRIDE = null
+        }
+    }
+
+    @Test
     fun `Verify payment intent params include type, client_secret, and expand`() = runTest {
         whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
