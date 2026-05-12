@@ -20,6 +20,11 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
+/**
+ * This test is special -- it's intended to be used to measure loading latency of PaymentSheet. As such, it doesn't
+ * run in CI, but can be run locally (to test changes) and via the latency benchmarking script:
+ * scripts/measure_latency_difference.rb.
+ * */
 @RunWith(Parameterized::class)
 internal class TestLatency(
     val testConfig: TestConfig,
