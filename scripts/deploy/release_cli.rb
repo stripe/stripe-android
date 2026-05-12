@@ -5,7 +5,7 @@ require 'optparse'
 require_relative 'common'
 require_relative 'validate_version_number'
 
-def parse_release_options!(flow_name:)
+def parse_release_options!(flow_name:, version_required: false)
     @flow_name = flow_name
     @step_index = 1
     @is_dry_run = false
@@ -37,6 +37,9 @@ def parse_release_options!(flow_name:)
     end.parse!
 
     if @version.nil?
+        if version_required
+            raise ArgumentError, "--version is required for #{flow_name}"
+        end
         @version = infer_version_from_changelog()
     end
 end

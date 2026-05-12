@@ -19,7 +19,7 @@ def prepare_deploy_release_resume(step_index)
     checkout_release_source
 end
 
-parse_release_options!(flow_name: 'deploy release')
+parse_release_options!(flow_name: 'deploy release', version_required: true)
 
 steps = [
     method(:check_permissions),
