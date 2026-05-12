@@ -33,7 +33,7 @@ class ConsumerSessionJsonParser : ModelJsonParser<ConsumerSession> {
             optString(consumerSessionJson, FIELD_MINIMUM_AUTHENTICATION_LEVEL)
                 ?.let { ConsumerSession.AuthenticationLevel.fromValue(it) }
 
-        val linkBrand = optString(consumerSessionJson, FIELD_LINK_BRAND)?.let { value ->
+        val linkBrand = optString(json, FIELD_LINK_BRAND)?.let { value ->
             LinkBrand.entries.firstOrNull { it.value == value }
         }
 

@@ -29,6 +29,10 @@ internal data class LinkAccount(
             consumerSession.linkBrand ?: LinkBrand.Link
         }
 
+    // Raw value from the backend, used to carry forward across session updates.
+    internal val consumerLinkBrand: LinkBrand?
+        get() = consumerSession.linkBrand
+
     @IgnoredOnParcel
     val redactedPhoneNumber = consumerSession.redactedFormattedPhoneNumber.replace("*", "•")
 
