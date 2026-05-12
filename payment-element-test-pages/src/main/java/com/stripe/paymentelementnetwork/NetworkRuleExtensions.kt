@@ -10,18 +10,11 @@ import org.json.JSONArray
 
 fun NetworkRule.setupV1PaymentMethodsResponse(
     vararg paymentMethodDetails: PaymentMethodDetails,
-    type: String = paymentMethodDetails.first().type,
 ) {
-    for (paymentMethodDetail in paymentMethodDetails) {
-        // All types must match.
-        assertThat(type).isEqualTo(paymentMethodDetail.type)
-    }
-
     enqueue(
         host("api.stripe.com"),
         method("GET"),
         path("/v1/payment_methods"),
-        query("type", type),
     ) { response ->
         val paymentMethodsArray = JSONArray()
 

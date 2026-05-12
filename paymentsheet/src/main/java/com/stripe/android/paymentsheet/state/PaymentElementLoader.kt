@@ -421,11 +421,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             customerRepository.getPaymentMethods(
                 customerId = customer.id,
                 ephemeralKeySecret = accessType.ephemeralKeySecret,
-                types = listOf(
-                    PaymentMethod.Type.Card,
-                    PaymentMethod.Type.USBankAccount,
-                    PaymentMethod.Type.SepaDebit,
-                ),
+                types = null,
                 silentlyFail = paymentConfiguration.get().isLiveMode(),
             )
         }

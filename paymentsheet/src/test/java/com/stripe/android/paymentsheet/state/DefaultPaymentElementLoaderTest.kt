@@ -763,38 +763,6 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `load() with customer should fetch only supported payment method types`() =
-        runScenario {
-            val paymentMethodTypes = listOf(
-                "card", // valid and supported
-                "fpx", // valid but not supported
-                "invalid_type" // unknown type
-            )
-
-            val loader = createPaymentElementLoader(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = paymentMethodTypes
-                ),
-            )
-
-            loader.load(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-                ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                metadata = PaymentElementLoader.Metadata(
-                    initializedViaCompose = false,
-                ),
-            )
-
-            val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
-
-            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
-        }
-
-    @Test
     fun `when allowsDelayedPaymentMethods is false then delayed payment methods are filtered out`() =
         runScenario {
             val loader = createPaymentElementLoader(
@@ -817,8 +785,7 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
-            val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
+            customerRepository.getPaymentMethodsRequests.awaitItem()
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -915,16 +882,14 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load() with customer should allow sepa`() = runScenario {
-        var requestPaymentMethodTypes: List<PaymentMethod.Type>? = null
         val result = createPaymentElementLoader(
             customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
                     customerId: String,
                     ephemeralKeySecret: String,
-                    types: List<PaymentMethod.Type>,
+                    types: List<PaymentMethod.Type>?,
                     silentlyFail: Boolean,
                 ): Result<List<PaymentMethod>> {
-                    requestPaymentMethodTypes = types
                     return Result.success(
                         listOf(
                             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -953,8 +918,6 @@ internal class DefaultPaymentElementLoaderTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             )
-        assertThat(requestPaymentMethodTypes)
-            .containsExactly(PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit)
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()

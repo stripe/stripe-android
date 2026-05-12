@@ -10,7 +10,7 @@ import kotlinx.parcelize.Parcelize
 @Poko
 class ListPaymentMethodsParams(
     private val customerId: String,
-    internal val paymentMethodType: PaymentMethod.Type,
+    internal val paymentMethodType: PaymentMethod.Type?,
     private val limit: Int? = null,
     private val endingBefore: String? = null,
     private val startingAfter: String? = null
@@ -18,7 +18,7 @@ class ListPaymentMethodsParams(
     override fun toParamMap(): Map<String, Any> {
         return listOf(
             PARAM_CUSTOMER to customerId,
-            PARAM_TYPE to paymentMethodType.code,
+            PARAM_TYPE to paymentMethodType?.code,
             PARAM_LIMIT to limit,
             PARAM_ENDING_BEFORE to endingBefore,
             PARAM_STARTING_AFTER to startingAfter

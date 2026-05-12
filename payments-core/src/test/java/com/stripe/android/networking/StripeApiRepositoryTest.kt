@@ -1258,6 +1258,56 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
+    fun getPaymentMethods_whenTypeNotSpecified_omitsTypeQueryParam() = runTest {
+        val responseBody =
+            """
+            {
+                "object": "list",
+                "data": [],
+                "has_more": false,
+                "url": "/v1/payment_methods"
+            }
+            """.trimIndent()
+        val stripeResponse = StripeResponse(200, responseBody)
+        val queryParams = mapOf(
+            "customer" to "cus_123"
+        )
+
+        val options = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+        val url = DEFAULT_API_REQUEST_FACTORY.createGet(
+            StripeApiRepository.paymentMethodsUrl,
+            options,
+            queryParams
+        ).url
+
+        whenever(
+            stripeNetworkClient.executeRequest(
+                argThat<ApiRequest> {
+                    ApiRequestMatcher(StripeRequest.Method.GET, url, options, queryParams)
+                        .matches(this)
+                }
+            )
+        ).thenReturn(stripeResponse)
+        val stripeApiRepository = create()
+        val paymentMethods = stripeApiRepository
+            .getPaymentMethods(
+                listPaymentMethodsParams = ListPaymentMethodsParams(
+                    "cus_123",
+                    null
+                ),
+                productUsageTokens = emptySet(),
+                requestOptions = ApiRequest.Options(ApiKeyFixtures.FAKE_EPHEMERAL_KEY)
+            ).getOrThrow()
+
+        assertThat(paymentMethods).isEmpty()
+
+        verifyAnalyticsRequest(
+            PaymentAnalyticsEvent.CustomerRetrievePaymentMethods,
+            null
+        )
+    }
+
+    @Test
     fun getPaymentMethods_whenNotPopulated_returnsEmptyList() = runTest {
         val responseBody =
             """

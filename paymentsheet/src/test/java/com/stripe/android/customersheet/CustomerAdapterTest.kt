@@ -30,6 +30,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -240,7 +241,7 @@ class CustomerAdapterTest {
     }
 
     @Test
-    fun `retrievePaymentMethods requests US Bank Account payment methods`() = runTest {
+    fun `retrievePaymentMethods does not filter payment methods when paymentMethodTypes are not specified`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
         val adapter = createAdapter(
@@ -252,12 +253,7 @@ class CustomerAdapterTest {
         verify(customerRepository).getPaymentMethods(
             customerId = any(),
             ephemeralKeySecret = any(),
-            types = eq(
-                listOf(
-                    PaymentMethod.Type.Card,
-                    PaymentMethod.Type.USBankAccount,
-                )
-            ),
+            types = isNull(),
             silentlyFail = eq(false),
         )
     }

@@ -74,7 +74,7 @@ internal open class FakeCustomerRepository(
     override suspend fun getPaymentMethods(
         customerId: String,
         ephemeralKeySecret: String,
-        types: List<PaymentMethod.Type>,
+        types: List<PaymentMethod.Type>?,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> {
         _getPaymentMethodsRequests.add(
@@ -177,7 +177,7 @@ internal open class FakeCustomerRepository(
     data class GetPaymentMethodsRequest(
         val customerId: String,
         val ephemeralKeySecret: String,
-        val types: List<PaymentMethod.Type>,
+        val types: List<PaymentMethod.Type>?,
         val silentlyFail: Boolean,
     )
 

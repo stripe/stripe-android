@@ -78,6 +78,33 @@ internal class CustomerRepositoryTest {
             )
         }
 
+    @Test
+    fun `getPaymentMethods() should omit payment method type when types are not specified`() =
+        runTest {
+            givenGetPaymentMethodsReturns(
+                Result.success(emptyList())
+            )
+
+            repository.getPaymentMethods(
+                customerId = "customer_id",
+                ephemeralKeySecret = "ephemeral_key",
+                types = null,
+                silentlyFail = true,
+            )
+
+            verify(stripeRepository).getPaymentMethods(
+                listPaymentMethodsParams = eq(
+                    ListPaymentMethodsParams(
+                        customerId = "customer_id",
+                        paymentMethodType = null,
+                        limit = 100,
+                    )
+                ),
+                productUsageTokens = any(),
+                requestOptions = any()
+            )
+        }
+
     // PayPal isn't supported as a saved payment method due to issues with on-session.
     // See: https://docs.google.com/document/d/1_bCPJXxhV4Kdgy7LX7HPwpZfElN3a2DcYUooiWC9SgM
     @Test

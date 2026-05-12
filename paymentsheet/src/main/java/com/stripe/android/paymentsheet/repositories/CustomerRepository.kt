@@ -18,13 +18,14 @@ internal interface CustomerRepository {
 
     /**
      * Retrieve a Customer's payment methods of all types requested.
+     * If [types] is null, retrieve payment methods without filtering by type.
      * @param silentlyFail Silently handle failures by returning an empty list for the payment method
      * types that failed.
      */
     suspend fun getPaymentMethods(
         customerId: String,
         ephemeralKeySecret: String,
-        types: List<PaymentMethod.Type>,
+        types: List<PaymentMethod.Type>?,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>>
 

@@ -121,7 +121,7 @@ internal class VerticalModePaymentSheetActivityTest {
         initialLoadWaiter = { formPage.waitUntilVisible() },
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
-            networkRule.setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse()
         },
     ) {
         verticalModePage.assertIsNotVisible()
@@ -361,8 +361,7 @@ internal class VerticalModePaymentSheetActivityTest {
         customer = PaymentSheet.CustomerConfiguration(id = "cus_1", ephemeralKeySecret = "ek_test"),
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
-            networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
-            networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(card1, card2, usBankAccount1)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -397,7 +396,6 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
-            networkRule.setupV1PaymentMethodsResponse(type = "card")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -412,7 +410,6 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
-            networkRule.setupV1PaymentMethodsResponse(type = "card")
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()

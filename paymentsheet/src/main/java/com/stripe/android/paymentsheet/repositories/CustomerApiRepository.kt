@@ -53,16 +53,20 @@ internal class CustomerApiRepository @Inject constructor(
     override suspend fun getPaymentMethods(
         customerId: String,
         ephemeralKeySecret: String,
-        types: List<PaymentMethod.Type>,
+        types: List<PaymentMethod.Type>?,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
-        val requests = types.filter { paymentMethodType ->
+        val filteredTypes = types?.filter { paymentMethodType ->
             paymentMethodType in setOf(
                 PaymentMethod.Type.Card,
                 PaymentMethod.Type.USBankAccount,
                 PaymentMethod.Type.SepaDebit,
             )
-        }.map { paymentMethodType ->
+        }
+
+        val requestTypes = filteredTypes ?: listOf(null)
+
+        val requests = requestTypes.map { paymentMethodType ->
             async {
                 stripeRepository.getPaymentMethods(
                     listPaymentMethodsParams = ListPaymentMethodsParams(
