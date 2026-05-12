@@ -4,6 +4,7 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import kotlinx.parcelize.Parcelize
 import java.io.Serializable
@@ -13,7 +14,8 @@ import java.io.Serializable
 data class FinancialConnectionsSheetConfiguration(
     val financialConnectionsSessionClientSecret: String,
     val publishableKey: String,
-    val stripeAccountId: String? = null
+    val stripeAccountId: String? = null,
+    val linkBrand: LinkBrand? = null,
 ) : Parcelable
 
 /**
