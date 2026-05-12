@@ -27,6 +27,7 @@ internal object PaymentMethodMetadataFixtures {
         elementsSessionConfigId = "e961790f-43ed-4fcc-a534-74eeca28d042",
         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
         paymentMethodSelectionFlow = PaymentMethodSelectionFlow.Automatic,
+        checkoutSessionId = null,
     )
 
     internal val CUSTOMER_SESSIONS_CUSTOMER_METADATA = CustomerMetadata.CustomerSession(

@@ -183,7 +183,8 @@ internal class RealElementsSessionRepository @Inject constructor(
     }
 
     private companion object {
-        private val ELEMENTS_SESSIONS_URL = "${ApiRequest.API_HOST}/v1/elements/sessions"
+        private val ELEMENTS_SESSIONS_URL: String
+            get() = "${ApiRequest.API_HOST}/v1/elements/sessions"
     }
 }
 

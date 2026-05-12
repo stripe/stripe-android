@@ -11,6 +11,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.DisplayableCustomPaymentM
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -433,7 +434,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
+            selection = PaymentSelection.Link(brand = LinkBrand.Link, linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -453,7 +454,12 @@ class PaymentSelectionUpdaterTest {
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
+        assertThat(result).isEqualTo(
+            PaymentSelection.Link(
+                brand = LinkBrand.Link,
+                linkExpressMode = LinkExpressMode.DISABLED,
+            )
+        )
     }
 
     @OptIn(WalletButtonsPreview::class)
@@ -491,7 +497,7 @@ class PaymentSelectionUpdaterTest {
         val updater = createUpdater()
 
         val result = updater(
-            selection = PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED),
+            selection = PaymentSelection.Link(brand = LinkBrand.Link, linkExpressMode = LinkExpressMode.DISABLED),
             previousConfig = null,
             newState = mockPaymentSheetStateWithPaymentIntent(),
             newConfig = defaultPaymentSheetConfiguration.newBuilder()
@@ -511,7 +517,12 @@ class PaymentSelectionUpdaterTest {
             walletButtonsAlreadyShown = false,
         )
 
-        assertThat(result).isEqualTo(PaymentSelection.Link(linkExpressMode = LinkExpressMode.DISABLED))
+        assertThat(result).isEqualTo(
+            PaymentSelection.Link(
+                brand = LinkBrand.Link,
+                linkExpressMode = LinkExpressMode.DISABLED,
+            )
+        )
     }
 
     private fun mockPaymentSheetStateWithPaymentIntent(

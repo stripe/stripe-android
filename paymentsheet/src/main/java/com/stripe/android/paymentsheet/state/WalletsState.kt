@@ -80,8 +80,8 @@ internal data class WalletsState(
 
     data class Link(
         val state: LinkButtonState,
+        val linkBrand: LinkBrand,
         val theme: LinkButtonTheme = LinkButtonTheme.DEFAULT,
-        val linkBrand: LinkBrand = LinkBrand.Link,
     ) : Wallet
 
     data class GooglePay(
@@ -116,7 +116,7 @@ internal data class WalletsState(
             ),
             cardFundingFilter: CardFundingFilter,
             cardBrandFilter: CardBrandFilter,
-            linkBrand: LinkBrand = LinkBrand.Link,
+            linkBrand: LinkBrand,
         ): WalletsState? {
             val link = createLink(
                 isLinkAvailable = isLinkAvailable,

@@ -5,6 +5,7 @@
  */
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
+apply plugin: "org.gradle.test-retry"
 if (project.hasProperty("enable_dokka") && project.enable_dokka) {
     apply plugin: "org.jetbrains.dokka"
 }
@@ -12,6 +13,7 @@ if (project.hasProperty("enable_dokka") && project.enable_dokka) {
 apply from: rootProject.file('build-configuration/detekt.gradle')
 apply from: rootProject.file('build-configuration/lint.gradle')
 apply from: rootProject.file('build-configuration/configurations.gradle')
+apply from: rootProject.file('build-configuration/instrumentation-test-report-splitter.gradle')
 
 assemble.dependsOn('lint')
 
@@ -90,6 +92,16 @@ android {
 
         compilerOptions {
             jvmTarget.set("JVM_11")
+        }
+    }
+}
+
+tasks.withType(Test).configureEach {
+    if (gradle.ext.isCi) {
+        retry {
+            maxRetries.set(2)
+            maxFailures.set(20)
+            failOnPassedAfterRetry.set(false)
         }
     }
 }

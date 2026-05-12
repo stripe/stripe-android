@@ -5,6 +5,7 @@ package com.stripe.android.paymentmethodmessaging.element
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Column
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
@@ -31,6 +32,7 @@ internal class PaymentMethodMessagingElementTestRunnerContext(
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun runPaymentMethodMessagingElementTest(
+    composeTestRule: ComposeTestRule,
     block: suspend (PaymentMethodMessagingElementTestRunnerContext) -> Unit
 ) {
     val factory: (ComponentActivity) -> PaymentMethodMessagingElement = {
@@ -62,5 +64,8 @@ internal fun runPaymentMethodMessagingElementTest(
         runTest {
             block(testContext)
         }
+
+        composeTestRule.waitForIdle()
+        scenario.moveToState(Lifecycle.State.CREATED)
     }
 }

@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require 'octokit'
 require 'open3'
 
 def fetch_password(password)
@@ -78,6 +79,32 @@ def switch_to_new_branch(branch_to_create, main_branch, repo: ".")
     execute_or_fail("git -C #{repo} branch -u #{main_branch}")
 end
 
+def local_git_tag_exists?(tag, repo: ".")
+    system("git -C #{repo} show-ref --verify --quiet refs/tags/#{tag}")
+end
+
+def remote_git_tag_exists?(tag, repo: ".", remote: "origin")
+    stdout, stderr, status = Open3.capture3("git -C #{repo} ls-remote --tags #{remote} refs/tags/#{tag}")
+    raise("Failed to query #{remote} for tag #{tag}: #{stderr}") unless status.success?
+
+    !stdout.empty?
+end
+
+def git_commit_for_ref(ref, repo: ".")
+    stdout, stderr, status = Open3.capture3("git", "-C", repo, "rev-list", "-n", "1", ref)
+    raise("Failed to resolve #{ref}: #{stderr}") unless status.success?
+
+    stdout.strip
+end
+
+def git_commit_exists?(commit, repo: ".")
+    system("git", "-C", repo, "cat-file", "-e", "#{commit}^{commit}")
+end
+
+def release_tag_name
+    "v#{@version}"
+end
+
 def create_pr(
     pr_branch,
     pr_title,
@@ -98,6 +125,17 @@ def create_pr(
 
     rputs user_message
     wait_for_user
+end
+
+private def octokit_client
+  @octokit_client ||= begin
+    token = fetch_password("bindings/gh-tokens/#{ENV['USER']}")
+    if token.nil? || token == ""
+      raise "Got empty Github token from password-vault"
+    end
+
+    Octokit::Client.new(access_token: token)
+  end
 end
 
 private def github_login

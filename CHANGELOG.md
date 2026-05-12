@@ -3,6 +3,8 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.8.0 - 2026-05-11
+
 ### PaymentSheet
 * [FIXED][13020](https://github.com/stripe/stripe-android/pull/13020) `CustomerSheet` now correctly filters out unsupported payment method types.
 

@@ -22,12 +22,14 @@ import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
+import com.stripe.android.paymentsheet.R
 
 @Composable
 @Suppress("LongMethod")
@@ -65,13 +67,13 @@ fun CrsCarfDeclarationScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Declarations",
+                            text = stringResource(R.string.stripe_link_onramp_carf_declaration_screen_title),
                             style = LinkTheme.typography.title,
                             color = LinkTheme.colors.textPrimary
                         )
                         TextButton(onClick = onClose) {
                             Text(
-                                text = "Cancel",
+                                text = stringResource(R.string.stripe_link_onramp_carf_declaration_cancel_button_text),
                                 style = LinkTheme.typography.detailEmphasized,
                                 color = LinkTheme.colors.textSecondary
                             )
@@ -93,7 +95,7 @@ fun CrsCarfDeclarationScreen(
                     Spacer(Modifier.height(24.dp))
 
                     PrimaryButton(
-                        label = "Accept",
+                        label = stringResource(R.string.stripe_link_onramp_carf_declaration_accept_button_text),
                         state = PrimaryButtonState.Enabled,
                         onButtonClick = onConfirm,
                         modifier = Modifier.fillMaxWidth()

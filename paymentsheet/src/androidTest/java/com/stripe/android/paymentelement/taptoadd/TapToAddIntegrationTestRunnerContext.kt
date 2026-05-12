@@ -112,6 +112,8 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
                 )
 
                 context.flowController.confirm()
+
+                context.consumeNullPaymentOptionEventForFlowController()
             }
 
             override fun markTestSucceeded() {
@@ -168,6 +170,8 @@ internal sealed class TapToAddIntegrationTestRunnerContext(
             assertThat(paymentOption?.paymentMethodType).isEqualTo("card")
 
             context.confirm()
+
+            assertThat(context.paymentOptionTurbine.awaitItem()).isNull()
         }
 
         protected fun hasPrimaryButton(): Boolean {

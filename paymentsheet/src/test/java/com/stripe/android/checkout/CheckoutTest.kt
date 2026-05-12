@@ -776,7 +776,7 @@ class CheckoutTest {
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
         latch.countDown()
-        deferred.cancel()
+        deferred.await()
     }
 
     @Test
@@ -801,7 +801,7 @@ class CheckoutTest {
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
         latch.countDown()
-        deferred.cancel()
+        deferred.await()
     }
 
     @Test

@@ -29,9 +29,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Spara mina uppgifter för snabbare betalning med Link</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Spara mina uppgifter för snabbare betalningar i kassan med %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Skapa ett konto med Link för en snabbare kassaupplevelse på webben</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Skapa ett konto hos %s för snabbare betalningar i kassan på nätet</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kreditkort</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -68,6 +70,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Spara dina betalningsuppgifter med Link och betala på ett säkert sätt med ett klick på webbplatser som erbjuder Link.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Betala snabbare överallt där Link accepteras.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Betala snabbare överallt där %s accepteras.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Genom att fortsätta godkänner du <terms>villkoren</terms> och <privacy>integritetspolicyn</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,6 +88,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Uppdatera kort</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Logga ut från Link</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Logga ut från %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Ett fel uppstod. Kontrollera din anslutning och försök igen.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -92,6 +98,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pay_with_link">Betala med Link</string>
   <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_pay_with_link_format">Betala med %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Betala med %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Genom att fortsätta samtycker du till att godkänna betalningar i enlighet med dessa <terms>villkor</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -140,6 +148,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Genom att fortsätta godkänner du att dina uppgifter sparas för framtida köp hos %s och <link>Link</link> (se <terms>Villkor</terms> och <privacy>Integritet</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Genom att fortsätta godkänner du att dina uppgifter sparas för framtida köp hos %s och <link>Link</link> enligt Links <terms>villkor</terms> och <privacy>integritetspolicy</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Genom att fortsätta samtycker du till att spara dina uppgifter för framtida köp med %1$s och <link>%2$s</link> enligt <terms>villkoren</terms> och <privacy>integritetspolicyn</privacy> för %2$s.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortet uppdaterades inte. Försök igen.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -253,10 +263,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Genom att registrera dig på Link, godkänner du våra <terms>villkor</terms> och vår <privacy>integritetspolicy</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Genom att tillhandahålla din e-postadress godkänner du att skapa ett Link-konto och spara dina betalningsuppgifter hos Link, i enlighet med <terms>Links villkor</terms> och <privacy>integritetspolicy</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Genom att tillhandahålla din e-post samtycker du till att skapa ett %1$s-konto och spara din betalningsinformation till %1$s, enligt <terms>villkoren</terms> och <privacy>integritetspolicyn</privacy> för %1$s.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Genom att tillhandahålla ditt telefonnummer godkänner du att skapa ett Link-konto och spara dina betalningsuppgifter hos Link, i enlighet med <terms>Links villkor</terms> och <privacy>integritetspolicy</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Genom att ange ditt telefonnummer samtycker du till att skapa ett %1$s-konto och spara din betalningsinformation till %1$s, enligt <terms>villkoren</terms> och <privacy>integritetspolicyn</privacy> för %1$s.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Genom att gå med i %1$s godkänner du <terms>villkoren</terms> och <privacy>integritetspolicyn</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Genom att tillhandahålla ditt telefonnummer och din e-postadress godkänner du att skapa ett Link-konto som omfattas av Links <terms>villkor</terms> och <privacy>integritetspolicy</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Genom att ange telefonnummer och e-post samtycker du till att skapa ett %1$s-konto som omfattas av <terms>villkoren</terms> och <privacy>integritetspolicyn</privacy> för %1$s.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Ditt konto har inaktiverats</string>
   <!-- Generic failure message -->

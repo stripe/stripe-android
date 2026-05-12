@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -40,6 +41,7 @@ internal data class WalletUiState(
     val paymentSelectionHint: ResolvableString? = null,
     val signupToggleEnabled: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val linkBrand: LinkBrand,
     val isValidating: Boolean = false,
 ) {
 

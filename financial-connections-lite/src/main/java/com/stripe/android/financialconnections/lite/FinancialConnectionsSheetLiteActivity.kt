@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.lite
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -17,6 +18,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.viewModels
 import androidx.annotation.RestrictTo
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -156,12 +158,21 @@ internal class FinancialConnectionsSheetLiteActivity : ComponentActivity(R.layou
     }
 
     private fun openCustomTab(uri: String) {
-        CustomTabsIntent.Builder()
-            .setShowTitle(true)
-            .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
-            .setBookmarksButtonEnabled(false)
-            .build()
-            .launchUrl(this, uri.toUri())
+        try {
+            val customTabsIntent = CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                .setBookmarksButtonEnabled(false)
+                .build()
+            CustomTabsClient.getPackageName(this, null)?.let { browserPackage ->
+                customTabsIntent.intent.setPackage(browserPackage)
+            }
+            customTabsIntent.launchUrl(this, uri.toUri())
+        } catch (_: ActivityNotFoundException) {
+            finish()
+        } catch (_: SecurityException) {
+            finish()
+        }
     }
 
     private fun handleUrl(uri: Uri?): Boolean {

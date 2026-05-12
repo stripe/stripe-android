@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -102,7 +103,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
     @Test
     fun confirmCallsConfirmationHandlerStartWithLink() = testScenario(
         loadedState = defaultLoadedState().copy(
-            selection = PaymentSelection.Link(),
+            selection = PaymentSelection.Link(brand = LinkBrand.Link),
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 linkState = LinkState(
                     configuration = LinkTestUtils.createLinkConfiguration(),

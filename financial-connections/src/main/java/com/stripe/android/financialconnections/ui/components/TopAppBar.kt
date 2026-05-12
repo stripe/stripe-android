@@ -7,8 +7,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -29,6 +29,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
@@ -52,7 +53,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import com.stripe.android.uicore.R as StripeUiCoreR
 
-private val LOGO_WIDTH = 50.dp
 private val LOGO_HEIGHT = 20.dp
 private val PILL_HORIZONTAL_PADDING = 4.dp
 private val PILL_VERTICAL_PADDING = 2.dp
@@ -196,7 +196,8 @@ private fun Title(
     ) {
         if (hideStripeLogo.not()) {
             Image(
-                modifier = Modifier.size(width = LOGO_WIDTH, height = LOGO_HEIGHT),
+                modifier = Modifier.height(LOGO_HEIGHT),
+                contentScale = ContentScale.FillHeight,
                 painter = painterResource(id = theme.icon(linkBrand)),
                 colorFilter = if (isSystemInDarkTheme()) {
                     ColorFilter.tint(FinancialConnectionsTheme.colors.textDefault)

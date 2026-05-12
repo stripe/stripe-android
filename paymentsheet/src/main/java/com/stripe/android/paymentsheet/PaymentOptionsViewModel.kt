@@ -176,8 +176,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                updateSelection(Link())
-                onUserSelection()
+                if (linkConfiguration?.linkBrand != null) {
+                    updateSelection(Link(linkConfiguration.linkBrand))
+                    onUserSelection()
+                }
             },
             onShopPayPressed = {
                 updateSelection(PaymentSelection.ShopPay)
@@ -304,10 +306,14 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
             // Link verification dialog completed -> close payment method selection with authenticated state
             is LinkActivityResult.Completed -> {
+                // Should always have Link configuration here.
+                val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
+                    ?: return
                 _paymentOptionsActivityResult.tryEmit(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
+                            brand = linkConfiguration.linkBrand,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),

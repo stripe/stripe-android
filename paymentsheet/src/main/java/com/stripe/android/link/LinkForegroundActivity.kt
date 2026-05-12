@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.browser.customtabs.CustomTabsClient
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
 
@@ -84,11 +85,17 @@ internal class LinkForegroundActivity : AppCompatActivity() {
             return
         }
         try {
-            CustomTabsIntent.Builder()
+            val customTabsIntent = CustomTabsIntent.Builder()
                 .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
                 .build()
-                .launchUrl(this, popupUri)
+            CustomTabsClient.getPackageName(this, null)?.let { browserPackage ->
+                customTabsIntent.intent.setPackage(browserPackage)
+            }
+            customTabsIntent.launchUrl(this, popupUri)
         } catch (e: ActivityNotFoundException) {
+            setResult(RESULT_FAILURE, Intent().putExtra(EXTRA_FAILURE, e))
+            finish()
+        } catch (e: SecurityException) {
             setResult(RESULT_FAILURE, Intent().putExtra(EXTRA_FAILURE, e))
             finish()
         }

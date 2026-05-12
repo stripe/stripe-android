@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.Stripe
 import com.stripe.android.confirmPaymentIntent
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -23,6 +24,7 @@ import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
+import com.stripe.android.financialconnections.example.settings.ForceNotlinkSetting
 import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
 import com.stripe.android.financialconnections.example.settings.MerchantSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
@@ -56,6 +58,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
     val viewEffect: SharedFlow<FinancialConnectionsPlaygroundViewEffect?> = _viewEffect
 
     init {
+        syncDebugOverrides(_state.value.settings)
         _state.update { it.copy(backendUrl = settings.backendUrl) }
         FinancialConnections.setEventListener { event: FinancialConnectionsEvent ->
             _state.update { state ->
@@ -438,11 +441,20 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }.getOrThrow()
 
     fun onSettingsChanged(playgroundSettings: PlaygroundSettings) {
+        syncDebugOverrides(playgroundSettings)
         _state.update {
             it.copy(
                 settings = playgroundSettings,
             )
         }
+    }
+
+    private fun syncDebugOverrides(playgroundSettings: PlaygroundSettings) {
+        // FC standalone flows read this setting from DebugConfiguration, but PaymentSheet-driven
+        // Link surfaces in this app still rely on the global feature flag override.
+        FeatureFlags.forceNotlink.setEnabled(
+            playgroundSettings.get<ForceNotlinkSetting>().selectedOption
+        )
     }
 
     override fun onCleared() {

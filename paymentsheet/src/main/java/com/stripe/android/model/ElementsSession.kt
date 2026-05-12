@@ -256,6 +256,7 @@ internal data class ElementsSession(
         LINK_GLOBAL_HOLD_BACK_AA("link_global_holdback_aa"),
         LINK_AB_TEST("link_ab_test"),
         OCS_MOBILE_CARD_ART("ocs_mobile_card_art"),
+        OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS("ocs_mobile_payment_method_messaging_promotions")
     }
 
     companion object {

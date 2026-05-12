@@ -591,6 +591,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         return isGooglePayReadyForEnvironment(GooglePayEnvironment.Production)
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
         metadata: PaymentMethodMetadata,
@@ -608,9 +609,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
                     !isUsingWalletButtons && isGooglePayReady
                 }
-                is SavedSelection.Link -> PaymentSelection.Link().takeIf {
-                    !isUsingWalletButtons
-                }
+                is SavedSelection.Link ->
+                    metadata.linkState?.configuration?.linkBrand
+                        ?.let { PaymentSelection.Link(brand = it) }
+                        ?.takeIf { !isUsingWalletButtons }
                 is SavedSelection.PaymentMethod -> {
                     val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
                     if (customerPaymentMethod != null) {
@@ -618,9 +620,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     } else if (selection.isLinkOrigin) {
                         // The payment method wasn't attached to the customer, but is of Link origin. Offer
                         // Link as the initial payment selection.
-                        PaymentSelection.Link().takeIf {
-                            !isUsingWalletButtons
-                        }
+                        metadata.linkState?.configuration?.linkBrand
+                            ?.let { PaymentSelection.Link(brand = it) }
+                            ?.takeIf { !isUsingWalletButtons }
                     } else {
                         null
                     }

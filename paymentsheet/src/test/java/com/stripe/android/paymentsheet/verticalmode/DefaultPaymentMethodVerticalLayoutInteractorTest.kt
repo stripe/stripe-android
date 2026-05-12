@@ -15,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -492,7 +493,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -528,7 +532,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = WalletsState.GooglePay(
                 buttonType = GooglePayButtonType.Pay,
                 allowCreditCards = true,
@@ -567,7 +574,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             )
         ) {
             walletsState.value = WalletsState(
-                link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+                link = WalletsState.Link(
+                    state = LinkButtonState.Email("email@email.com"),
+                    linkBrand = LinkBrand.Link
+                ),
                 googlePay = WalletsState.GooglePay(
                     buttonType = GooglePayButtonType.Pay,
                     allowCreditCards = true,
@@ -588,7 +598,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
             val displayablePaymentMethods = interactor.state.value.displayablePaymentMethods
             displayablePaymentMethods.first { it.code == "link" }.onClick()
-            assertThat(selection.value).isEqualTo(PaymentSelection.Link())
+            assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
             assertThat(updateSelectionTurbine.awaitItem()).isFalse()
             displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
             assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
@@ -682,7 +692,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         ),
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = null,
             shopPay = null,
             buttonsEnabled = true,
@@ -752,7 +765,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         )
     ) {
         walletsState.value = WalletsState(
-            link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+            link = WalletsState.Link(
+                state = LinkButtonState.Email("email@email.com"),
+                linkBrand = LinkBrand.Link
+            ),
             googlePay = null,
             shopPay = null,
             buttonsEnabled = true,
@@ -1041,7 +1057,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isNotUpdatedToNullWhenOnAnotherScreen() {
-        val expectedPaymentSelection = PaymentSelection.Link()
+        val expectedPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = expectedPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1059,7 +1075,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     @Test
     fun verticalModeScreenSelection_isUpdatedToNullWhenCurrentScreen() {
         runScenario(
-            initialSelection = PaymentSelection.Link(),
+            initialSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             formTypeForCode = { FormHelper.FormType.Empty },
         ) {
             interactor.state.test {
@@ -1078,7 +1094,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isNeverUpdatedToNewPmWithFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1095,7 +1111,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isUpdatedToNewPmWithFormFields_withCustomShouldUpdateVerticalModeSelection() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1119,7 +1135,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_omitsCardBrand_whenUnknownCardBrand() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1143,7 +1159,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_retainsLast4_whenUpdatingTemporarySelection() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
@@ -1240,7 +1256,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeANewPmWithoutFormFields() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1264,7 +1280,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeAnEpm() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1285,7 +1301,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeASavedPm() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1310,7 +1326,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
         ) {
-            val newSelection = PaymentSelection.Link()
+            val newSelection = PaymentSelection.Link(brand = LinkBrand.Link)
             selectionSource.value = newSelection
 
             interactor.state.test {
@@ -1323,7 +1339,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_canBeGooglePay() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1341,7 +1357,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun verticalModeScreenSelection_isUpdatedToTemporarySelection() {
-        val initialPaymentSelection = PaymentSelection.Link()
+        val initialPaymentSelection = PaymentSelection.Link(brand = LinkBrand.Link)
         runScenario(
             initialSelection = initialPaymentSelection,
             formTypeForCode = { FormHelper.FormType.Empty },
@@ -1504,6 +1520,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+            linkBrand = LinkBrand.Link,
         )
         runScenario(
             initialWalletsState = walletsState,
@@ -1533,6 +1550,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             walletsAllowedInHeader = emptyList(), // Link inline to test row subtitle
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
+            linkBrand = LinkBrand.Link,
         )
         runScenario(
             initialWalletsState = walletsState,
@@ -1745,7 +1763,10 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     private val linkAndGooglePayWalletState = WalletsState(
-        link = WalletsState.Link(LinkButtonState.Email("email@email.com")),
+        link = WalletsState.Link(
+            state = LinkButtonState.Email("email@email.com"),
+            linkBrand = LinkBrand.Link,
+        ),
         googlePay = WalletsState.GooglePay(
             buttonType = GooglePayButtonType.Pay,
             allowCreditCards = true,

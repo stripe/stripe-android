@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -104,7 +105,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isNotNull()
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
         assertThat(viewModel.state).isNotNull()
         assertThat(StripeTheme.primaryButtonStyle.shape.height).isEqualTo(80f)
 
@@ -175,7 +176,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
     }
 
     @Test
@@ -208,7 +209,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(configureErrors.awaitItem()).isNull()
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
-        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link())
+        assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
     }
 
     @Test
@@ -449,7 +450,7 @@ class FlowControllerConfigurationHandlerTest {
         return FakePaymentElementLoader(
             customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            paymentSelection = PaymentSelection.Link(),
+            paymentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             linkState = LinkState(
                 configuration = mock(),
                 loginState = LinkState.LoginState.LoggedIn,

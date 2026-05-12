@@ -1,25 +1,24 @@
 #!/usr/bin/env ruby
 
-require 'octokit'
-require 'subprocess'
-
 require_relative 'common'
-require_relative 'gnupg_utils'
 
 @release_url = nil
 
 def create_github_release
-    # Must be run on the deploy branch, because it depends on changes made in
-    # create_version_bump_pr (updating CHANGELOG.md)
-    execute_or_fail("git checkout #{@deploy_branch}")
-    execute_or_fail("git pull")
+    tag_exists_locally = local_git_tag_exists?(release_tag_name)
 
-    tag_release
+    unless tag_exists_locally || @is_dry_run
+        raise "Release tag #{release_tag_name} does not exist locally. Run `git fetch origin --tags` before creating the GitHub release."
+    end
+
+    if @is_dry_run && !tag_exists_locally
+        rputs "Dry run: local release tag #{release_tag_name} is unavailable. Creating a draft GitHub release without validating a checked-out tag first."
+    end
 
     begin
         release_response = octokit_client.create_release(
           "stripe/stripe-android",
-          "v#{@version}",
+          release_tag_name,
           name: "stripe-android v#{@version}",
           body: release_description,
           draft: @is_dry_run
@@ -31,20 +30,20 @@ def create_github_release
         open_url(release_response.html_url)
 
         if (@is_dry_run)
-            rputs "Please verify that the release was opened + created properly. It should contain a changelog of the changes for this release."
-            rputs "Since this is a dry run, you should see the release as a draft. It will be missing a tag + source code attachments."
+            if tag_exists_locally
+                rputs "Please verify that deploy release created a draft GitHub release for #{release_tag_name}. It should contain the changelog entries and point at the existing signed tag."
+            else
+                rputs "Please verify that deploy release created a draft GitHub release for #{release_tag_name}. Because the release source was unavailable, it may be missing tag or source attachments."
+            end
             wait_for_user
         end
     rescue StandardError => e
-        rputs "Failed to create GitHub release for #{tag_name}: #{e.class}: #{e.message}"
-        delete_release_tag
+        rputs "Failed to create GitHub release for #{release_tag_name}: #{e.class}: #{e.message}"
         raise
     end
 end
 
 def delete_github_release
-   delete_release_tag
-
    if (@release_url != nil)
        puts "Deleting release..."
        deleting_release_succeeded = octokit_client.delete_release("#{@release_url}__")
@@ -54,30 +53,21 @@ def delete_github_release
    end
 end
 
-private def tag_name
-    "v#{@version}"
-end
-
-private def tag_release
-    gnupg_env do |env|
-        Subprocess.check_call(["git", "tag", "-s", "-u", "#{gnupg_key_id}", "#{tag_name}", "-m", "\"Version #{@version}\""], env: env)
-    end
-
-    # There's no way to create a "draft" tag, so we skip pushing tags if this is a dry run.
-    if(!@is_dry_run)
-        execute_or_fail("git push origin #{tag_name}")
-    end
-end
-
-private def delete_release_tag
-    execute("git tag -d #{tag_name}")
-end
-
 private def release_description
     changelog_entries = changelog_entries_for_version()
 
     release_body = <<~EOS
         #{changelog_entries}
+
+        See [the changelog for more details](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
+    EOS
+rescue ArgumentError => e
+    raise unless @is_dry_run
+
+    rputs "Dry run: #{e.message}"
+
+    <<~EOS
+        Dry run: changelog entries for #{@version} are not available in the current checkout.
 
         See [the changelog for more details](https://github.com/stripe/stripe-android/blob/master/CHANGELOG.md).
     EOS
@@ -111,21 +101,4 @@ private def changelog_entries_for_version
     end
 
     raise ArgumentError.new("Version #{@version} not found in changelog. Have you finished merging the version bump PR?")
-end
-
-private def octokit_client
-  @octokit_client ||= begin
-    # Fetch the per-user secret from password-vault
-    token = fetch_password("bindings/gh-tokens/#{ENV['USER']}")
-    if token.nil? || token == ""
-      raise "Got empty Github token from password-vault"
-    end
-
-    Octokit::Client.new(access_token: token)
-  end
-end
-
-# Gets the GnuPG key ID used to sign tagged commits.
-private def gnupg_key_id
-  fetch_password("bindings/gnupg/fingerprint").strip
 end
