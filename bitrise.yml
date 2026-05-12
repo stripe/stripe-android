@@ -5,6 +5,10 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
+  - pull_request_source_branch: 'deflake-connections-e2e'
+    pipeline: pipeline-connections-e2e-deflake
+  - pull_request_source_branch: 'deflake-connections-e2e-baseline'
+    pipeline: pipeline-connections-e2e-deflake
   - pull_request_source_branch: '*'
     pipeline: main-trigger-pipeline
 app:
