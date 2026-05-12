@@ -19,6 +19,7 @@ fi
 
 adb install -r "$APK_PATH" || { echo "Install failed"; exit 1; }
 export BITRISE_APK_PATH="$APK_PATH"
+export MAESTRO_MAX_RETRIES=1
 
 echo "App installed successfully."
 echo ""

@@ -49,8 +49,9 @@ echo "MODULE: $MODULE"
 
 export MAESTRO_VERSION=1.38.1
 
+MAX_RETRIES=${MAESTRO_MAX_RETRIES:-5}
+
 # Retry mechanism for Maestro installation
-MAX_RETRIES=5
 RETRY_COUNT=0
 
 while [ "$RETRY_COUNT" -lt "$MAX_RETRIES" ]; do

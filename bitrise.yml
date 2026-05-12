@@ -29,6 +29,10 @@ pipelines:
       - stage-build-connections-release: { }
       - stage-run-connections-e2e-tests: { }
       - stage-notify-connections-e2e-failure: { }
+  pipeline-connections-e2e-deflake:
+    stages:
+      - stage-build-connections-debug: { }
+      - stage-connections-e2e-deflake: { }
 stages:
   stage-trigger-run-all:
     workflows:
@@ -60,6 +64,11 @@ stages:
       - run-connections-e2e-data-tests: { }
       - run-connections-e2e-token-tests: { }
       - run-connections-e2e-livemode-tests: { }
+  stage-connections-e2e-deflake:
+    workflows:
+      - deflake-connections-e2e-payments: { }
+      - deflake-connections-e2e-data: { }
+      - deflake-connections-e2e-token: { }
   stage-notify-connections-e2e-failure:
     should_always_run: true
     workflows:
@@ -196,6 +205,70 @@ workflows:
       - MAESTRO_TAGS: livemode-data
     before_run:
       - _run-connections-e2e-tests
+  deflake-connections-e2e-payments:
+    envs:
+      - MAESTRO_TAGS: testmode-payments
+    before_run:
+      - _deflake-connections-e2e-tests
+  deflake-connections-e2e-data:
+    envs:
+      - MAESTRO_TAGS: testmode-data
+    before_run:
+      - _deflake-connections-e2e-tests
+  deflake-connections-e2e-token:
+    envs:
+      - MAESTRO_TAGS: testmode-token
+    before_run:
+      - _deflake-connections-e2e-tests
+  _deflake-connections-e2e-tests:
+    before_run:
+      - start_connections_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - pull-intermediate-files@1:
+          inputs:
+            - artifact_sources: .*
+      - script@1:
+          title: Run deflake iterations
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                set -o pipefail
+                export MAESTRO_MAX_RETRIES=1
+                ITERATIONS=20
+                MODULE="financial-connections"
+                RESULTS_FILE="/tmp/test_results/deflake-${MAESTRO_TAGS}.txt"
+
+                adb install $BITRISE_APK_PATH
+
+                pass=0
+                fail=0
+
+                for i in $(seq 1 $ITERATIONS); do
+                  echo "[$MAESTRO_TAGS] Run $i/$ITERATIONS..."
+                  if bash ./scripts/execute_maestro_tests.sh -m "$MODULE" -t "$MAESTRO_TAGS"; then
+                    echo "[$MAESTRO_TAGS] Run $i: PASS" >> "$RESULTS_FILE"
+                    ((pass++))
+                  else
+                    echo "[$MAESTRO_TAGS] Run $i: FAIL" >> "$RESULTS_FILE"
+                    ((fail++))
+                  fi
+                done
+
+                rate=$(echo "scale=1; $pass * 100 / $ITERATIONS" | bc)
+                echo "" >> "$RESULTS_FILE"
+                echo "=== SUMMARY ===" >> "$RESULTS_FILE"
+                echo "Tag: $MAESTRO_TAGS" >> "$RESULTS_FILE"
+                echo "Passed: $pass/$ITERATIONS ($rate%)" >> "$RESULTS_FILE"
+                echo "Failed: $fail/$ITERATIONS" >> "$RESULTS_FILE"
+
+                echo "=== DEFLAKE RESULTS ==="
+                cat "$RESULTS_FILE"
   _run-connect-e2e-tests:
     before_run:
       - build-connect-debug
