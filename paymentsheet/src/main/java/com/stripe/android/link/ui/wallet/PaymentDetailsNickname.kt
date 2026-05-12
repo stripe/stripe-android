@@ -21,12 +21,14 @@ internal val LinkPaymentDetails.label: ResolvableString
     get() = when (this) {
         is Card -> makeCardDisplayName(nickname, funding, brand)
         is BankAccount -> bankName?.resolvableString ?: "••••$last4".resolvableString
+        is LinkPaymentDetails.Unknown -> label?.resolvableString ?: sublabel?.resolvableString ?: "".resolvableString
     }
 
 internal val LinkPaymentDetails.sublabel: ResolvableString?
     get() = when (this) {
         is Card -> "•••• $last4".resolvableString
         is BankAccount -> if (bankName != null) "••••$last4".resolvableString else null
+        is LinkPaymentDetails.Unknown -> sublabel?.resolvableString
     }
 
 internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
@@ -36,6 +38,7 @@ internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
         is ConsumerPaymentDetails.Passthrough -> {
             "•••• $last4".resolvableString
         }
+        is ConsumerPaymentDetails.Unknown -> display?.label?.resolvableString ?: "".resolvableString
     }
 
 internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: ResolvableString
@@ -49,6 +52,9 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
             }
             is ConsumerPaymentDetails.Passthrough -> {
                 listOf("•••• $last4".resolvableString)
+            }
+            is ConsumerPaymentDetails.Unknown -> {
+                listOfNotNull(display?.label?.resolvableString, display?.sublabel?.resolvableString)
             }
         }
         return components.joinToString(separator = " ")

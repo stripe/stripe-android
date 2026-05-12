@@ -160,6 +160,22 @@ internal object TestFactory {
         paymentMethodId = "pm_123"
     )
 
+    val CONSUMER_PAYMENT_DETAILS_UNKNOWN = ConsumerPaymentDetails.Unknown(
+        id = "csmrpd_126",
+        last4 = "0x••••22Dd",
+        isDefault = false,
+        nickname = null,
+        billingAddress = null,
+        billingEmailAddress = null,
+        rawType = "CRYPTO",
+        display = ConsumerPaymentDetails.DisplayMetadata(
+            label = "Crypto",
+            sublabel = "0x••••22Dd",
+            icon = ConsentUi.Icon(default = "")
+        ),
+        nextActionTypes = emptyList()
+    )
+
     val LINK_ACCOUNT_SESSION = LinkAccountSession(
         id = "fcsess_123",
         clientSecret = CLIENT_SECRET,
@@ -214,6 +230,7 @@ internal object TestFactory {
             CONSUMER_PAYMENT_DETAILS_CARD,
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
             CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
+            CONSUMER_PAYMENT_DETAILS_UNKNOWN
         )
     )
 

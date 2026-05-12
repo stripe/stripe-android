@@ -76,6 +76,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                             editCardDetailsInteractor = interactor.editCardDetailsInteractor,
                         )
                     }
+                    is LinkPaymentDetails.Unknown -> {}
                 }
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
@@ -376,6 +377,9 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
                     }
                     is LinkPaymentDetails.Card -> {
                         PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                    }
+                    is LinkPaymentDetails.Unknown -> {
+                        PaymentSheetR.string.stripe_paymentsheet_unknown_details_cannot_be_changed
                     }
                 }
             }

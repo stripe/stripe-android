@@ -435,6 +435,7 @@ internal class WalletViewModel(
                                             details.copy(isDefault = item.id == details.id)
                                         }
                                         is ConsumerPaymentDetails.Passthrough -> details
+                                        is ConsumerPaymentDetails.Unknown -> details
                                     }
                                 },
                                 cardBeingUpdated = null

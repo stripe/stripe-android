@@ -26,4 +26,14 @@ sealed interface LinkPaymentDetails : Parcelable {
         val bankName: String?,
         override val last4: String,
     ) : LinkPaymentDetails
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Unknown(
+        val nickname: String?,
+        val label: String?,
+        val sublabel: String?,
+        val icon: ConsentUi.Icon?,
+        override val last4: String
+    ) : LinkPaymentDetails
 }

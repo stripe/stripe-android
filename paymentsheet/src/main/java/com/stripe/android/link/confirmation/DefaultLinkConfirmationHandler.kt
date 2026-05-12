@@ -276,8 +276,9 @@ internal fun computeExpectedPaymentMethodType(
 ): String {
     return when (paymentDetails) {
         is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType(configuration)
-        is ConsumerPaymentDetails.Card -> ConsumerPaymentDetails.Card.TYPE
-        is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
+        is ConsumerPaymentDetails.Card,
+        is ConsumerPaymentDetails.Passthrough,
+        is ConsumerPaymentDetails.Unknown -> ConsumerPaymentDetails.Card.TYPE
     }
 }
 

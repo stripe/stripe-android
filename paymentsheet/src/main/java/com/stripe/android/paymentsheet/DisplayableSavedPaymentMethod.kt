@@ -87,6 +87,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                         savedPaymentMethod.paymentDetails.last4
                     )
                 }
+                is LinkPaymentDetails.Unknown -> displayName
             }
         }
         is SavedPaymentMethod.Unexpected -> resolvableString("")

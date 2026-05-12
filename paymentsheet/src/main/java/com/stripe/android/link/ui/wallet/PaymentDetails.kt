@@ -47,6 +47,7 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
@@ -204,6 +205,21 @@ private fun PaymentDetailsListItemPreview() {
         billingAddress = null,
         billingEmailAddress = null
     )
+    val unknown = ConsumerPaymentDetails.Unknown(
+        id = "unknown_id",
+        last4 = "4444",
+        isDefault = false,
+        nickname = null,
+        billingAddress = null,
+        billingEmailAddress = null,
+        rawType = "CRYPTO",
+        display = ConsumerPaymentDetails.DisplayMetadata(
+            label = "Crypto",
+            sublabel = "0x••••22Dd",
+            icon = ConsentUi.Icon(default = "")
+        ),
+        nextActionTypes = emptyList()
+    )
     DefaultLinkTheme {
         Column {
             PaymentDetailsListItem(
@@ -243,6 +259,16 @@ private fun PaymentDetailsListItemPreview() {
                 isSelected = false,
                 isAvailable = false,
                 isUpdating = true,
+                onClick = {},
+                onMenuButtonClick = {}
+            )
+            PaymentDetailsListItem(
+                paymentDetails = unknown,
+                isClickable = true,
+                isMenuButtonClickable = true,
+                isSelected = true,
+                isAvailable = true,
+                isUpdating = false,
                 onClick = {},
                 onMenuButtonClick = {}
             )
@@ -332,6 +358,14 @@ internal fun RowScope.PaymentDetails(
                 title = paymentDetails.displayName.resolve(),
                 subtitle = null,
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
+            )
+        }
+        is ConsumerPaymentDetails.Unknown -> {
+            PaymentMethodInfo(
+                modifier = modifier,
+                title = paymentDetails.displayName.resolve(),
+                subtitle = paymentDetails.display?.sublabel,
+                icon = { UnknownIcon(iconUrl = paymentDetails.display?.icon?.default?.takeIf { it.isNotBlank() }) }
             )
         }
     }

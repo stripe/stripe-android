@@ -2,6 +2,7 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -220,6 +221,69 @@ class ConsumerPaymentDetailsJsonParserTest {
         val json = createCardJsonWithFunding("UNKNOWN")
         val expected = createExpectedCardWithFunding(ConsumerPaymentDetails.Card.Funding.Unknown)
         assertEquals(expected, ConsumerPaymentDetailsJsonParser.parse(json))
+    }
+
+    @Test
+    fun `parse unknown payment type`() {
+        assertEquals(
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Unknown(
+                        id = "csmrpd_126",
+                        last4 = "0x••••22Dd",
+                        isDefault = false,
+                        nickname = null,
+                        billingAddress = null,
+                        billingEmailAddress = null,
+                        rawType = "CRYPTO",
+                        display = ConsumerPaymentDetails.DisplayMetadata(
+                            label = "Crypto",
+                            sublabel = "0x••••22Dd",
+                            icon = ConsentUi.Icon(default = "https://example.com/crypto-icon.png")
+                        ),
+                        nextActionTypes = listOf("STRIPE_REDIRECT")
+                    )
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_SINGLE_UNKNOWN_PAYMENT_DETAILS_JSON),
+        )
+    }
+
+    @Test
+    fun `parse unknown payment type without sublabel or icon`() {
+        assertEquals(
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Unknown(
+                        id = "csmrpd_126",
+                        last4 = "",
+                        isDefault = false,
+                        nickname = null,
+                        billingAddress = null,
+                        billingEmailAddress = null,
+                        rawType = "CRYPTO",
+                        display = ConsumerPaymentDetails.DisplayMetadata(
+                            label = "Crypto",
+                            sublabel = null,
+                            icon = null
+                        ),
+                        nextActionTypes = emptyList()
+                    )
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_UNKNOWN_PAYMENT_DETAILS_NO_SUBLABEL_ICON_JSON),
+        )
+    }
+
+    @Test
+    fun `parse unknown payment type without display is dropped`() {
+        assertEquals(
+            ConsumerPaymentDetails(emptyList()),
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_UNKNOWN_PAYMENT_DETAILS_NO_DISPLAY_JSON),
+        )
     }
 
     @Test

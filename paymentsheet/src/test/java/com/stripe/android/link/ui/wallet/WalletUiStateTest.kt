@@ -122,6 +122,34 @@ class WalletUiStateTest {
     }
 
     @Test
+    fun testShowNoTermsForSelectedUnknownPaymentMethod() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN,
+        )
+
+        assertThat(state.mandate).isNull()
+    }
+
+    @Test
+    fun testShowNoTermsForSelectedUnknownPaymentMethodWhenSettingUp() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN,
+            isSettingUp = true,
+        )
+
+        assertThat(state.mandate).isNull()
+    }
+
+    @Test
+    fun testEnabledButtonStateForUnknown() {
+        val state = walletUiState(
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN,
+        )
+
+        assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
+    }
+
+    @Test
     fun testDisabledButtonStateForExpiredCardWithIncompleteExpiryDate() {
         val selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(expiryYear = 1900)
 
@@ -300,8 +328,17 @@ class WalletUiStateTest {
         )
         val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
         val passthrough = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN
         val state = walletUiState(
-            paymentDetailsList = listOf(creditCard, debitCard, prepaidCard, unknownCard, bankAccount, passthrough),
+            paymentDetailsList = listOf(
+                creditCard,
+                debitCard,
+                prepaidCard,
+                unknownCard,
+                bankAccount,
+                passthrough,
+                unknown
+            ),
             selectedItem = creditCard,
             cardFundingFilter = PaymentSheetCardFundingFilter(listOf(PaymentSheet.CardFundingType.Credit))
         )
@@ -312,6 +349,7 @@ class WalletUiStateTest {
         assertThat(state.isItemAvailable(unknownCard)).isTrue()
         assertThat(state.isItemAvailable(bankAccount)).isTrue()
         assertThat(state.isItemAvailable(passthrough)).isTrue()
+        assertThat(state.isItemAvailable(unknown)).isTrue()
     }
 
     private fun walletUiState(
