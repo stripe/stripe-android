@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.mockito.kotlin.any
@@ -104,7 +105,7 @@ class LinkSignupHandlerForNetworkingTest {
             verificationToken = eq(expectedToken),
             appId = eq("applicationId")
         )
-        verify(saveAccountToLink).existing(any(), any(), any())
+        verify(saveAccountToLink).existing(any(), any(), any(), any())
         assertEquals(expectedPane, result)
     }
 
@@ -158,7 +159,8 @@ class LinkSignupHandlerForNetworkingTest {
             phoneNumber = eq("+1987654321"),
             selectedAccounts = eq(cachedAccounts),
             country = eq("US"),
-            shouldPollAccountNumbers = eq(true)
+            shouldPollAccountNumbers = eq(true),
+            linkBrand = eq(LinkBrand.Link),
         )
         assertEquals(expectedPane, result)
     }
