@@ -1,7 +1,9 @@
 apply from: configs.androidLibrary
 
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
+apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
     implementation project(':payments-core')
@@ -11,6 +13,9 @@ dependencies {
     implementation libs.androidx.lifecycle
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
+    implementation libs.dagger
+
+    ksp libs.daggerCompiler
 
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
