@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.Companion.KEY_NEXT_PANE_ON_DISABLE_NETWORKING
 import com.stripe.android.financialconnections.navigation.destination
@@ -207,6 +208,7 @@ internal data class NetworkingLinkLoginWarmupState(
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val continueAsync: Async<Unit> = Uninitialized,
     val isInstantDebits: Boolean = false,
+    val linkBrand: LinkBrand,
 ) {
 
     val secondaryButtonLabel: Int
@@ -225,6 +227,7 @@ internal data class NetworkingLinkLoginWarmupState(
         payload = Uninitialized,
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = state.isLinkWithStripe,
+        linkBrand = state.linkBrand,
     )
 
     data class Payload(
