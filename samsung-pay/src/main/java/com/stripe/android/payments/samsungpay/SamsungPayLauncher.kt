@@ -32,7 +32,7 @@ class SamsungPayLauncher internal constructor(
         },
         getSamsungPayStatus = DefaultGetSamsungPayStatus(
             context = activity.applicationContext,
-            logger = Logger.noop()
+            logger = Logger.getInstance(true)
         )
     )
 

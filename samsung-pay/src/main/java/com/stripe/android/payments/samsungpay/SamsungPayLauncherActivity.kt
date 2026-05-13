@@ -32,6 +32,8 @@ internal class SamsungPayLauncherActivity : AppCompatActivity() {
                 finishWithResult(result)
             }
         }
+
+        viewModel.startPayment(this)
     }
 
     private fun finishWithResult(result: SamsungPayResult) {

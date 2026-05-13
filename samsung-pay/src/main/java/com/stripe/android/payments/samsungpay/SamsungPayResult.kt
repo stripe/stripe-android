@@ -4,7 +4,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 @Parcelize
-internal sealed interface SamsungPayResult : Parcelable {
+sealed interface SamsungPayResult : Parcelable {
     @Parcelize
     data object Success : SamsungPayResult
 

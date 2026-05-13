@@ -38,7 +38,7 @@ class DefaultGetSamsungPayStatus @Inject constructor(
                 }
 
                 override fun onFail(errorCode: Int, bundle: Bundle?) {
-                    logger.error("getSamsungPayStatus.onFail: errorCode=$errorCode")
+                    logger.error("getSamsungPayStatus.onFail: errorCode=$errorCode, bundle=${bundle?.toString()}")
                     continuation.resume(
                         value = GetSamsungPayStatus.Status.Failed(
                             error = Throwable("getSamsungPayStatus.onFail: errorCode=$errorCode")
