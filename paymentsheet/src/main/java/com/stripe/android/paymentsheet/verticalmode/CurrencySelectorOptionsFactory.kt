@@ -44,8 +44,8 @@ internal object CurrencySelectorOptionsFactory {
         }
 
         return CurrencySelectorOptions(
-            first = integrationCurrencyOption,
-            second = localCurrencyOption,
+            first = localCurrencyOption,
+            second = integrationCurrencyOption,
             selectedCode = selectedCode,
             exchangeRateText = exchangeRateText,
         )

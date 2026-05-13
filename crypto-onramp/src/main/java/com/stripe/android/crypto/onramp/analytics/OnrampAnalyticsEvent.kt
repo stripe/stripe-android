@@ -73,6 +73,25 @@ internal sealed class OnrampAnalyticsEvent(
         name = "kyc_info_verification_completed"
     )
 
+    data object MissingIdentifiersRetrieved : OnrampAnalyticsEvent(
+        name = "identifier_requirements_retrieved"
+    )
+
+    class IdentifiersSubmitted(valid: Boolean) : OnrampAnalyticsEvent(
+        name = "identifiers_submitted",
+        params = mapOf(
+            "valid" to valid.toString()
+        )
+    )
+
+    data object CrsCarfDeclarationStarted : OnrampAnalyticsEvent(
+        name = "crs_carf_declaration_started"
+    )
+
+    data object CrsCarfDeclarationCompleted : OnrampAnalyticsEvent(
+        name = "crs_carf_declaration_completed"
+    )
+
     class WalletRegistered(
         network: CryptoNetwork
     ) : OnrampAnalyticsEvent(
@@ -161,7 +180,10 @@ internal sealed class OnrampAnalyticsEvent(
             CreateCryptoPaymentToken("create_crypto_payment_token"),
             PerformCheckout("perform_checkout"),
             LogOut("log_out"),
-            VerifyKyc("verify_kyc_info")
+            VerifyKyc("verify_kyc_info"),
+            RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
+            SubmitIdentifiers("submit_identifiers"),
+            PresentCRSCARFDeclaration("prompt_for_crs_carf_declaration")
         }
     }
 

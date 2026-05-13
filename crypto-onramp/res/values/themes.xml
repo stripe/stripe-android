@@ -12,7 +12,7 @@
         <item name="android:taskCloseExitAnimation">@null</item>
     </style>
 
-    <style name="StripeVerifyKycTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="StripeOnrampTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
         <item name="android:windowAnimationStyle">@style/Stripe.NoWindowAnims</item>

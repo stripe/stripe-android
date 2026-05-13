@@ -1,11 +1,12 @@
 import groovy.json.JsonSlurper
 import groovy.json.JsonException
 
-def path = System.getenv("BITRISE_QUARANTINED_TESTS_JSON")
+def raw = System.getenv("BITRISE_QUARANTINED_TESTS_JSON")
+def quarantinedJson = raw?.trim()
 
 def load
 
-if (!path) {
+if (!quarantinedJson) {
     load = [
         status    : 'ENV_UNSET',
         cases     : [],
@@ -13,10 +14,8 @@ if (!path) {
 
     println "BITRISE_QUARANTINED_TESTS_JSON is not set"
 } else {
-    def jsonFile = new File(path)
-
     try {
-        def data = new JsonSlurper().parseText(jsonFile.text)
+        def data = new JsonSlurper().parseText(quarantinedJson)
 
         def cases = data.collect { testCase ->
             [
@@ -31,9 +30,9 @@ if (!path) {
         ]
 
         if (load.status == 'OK_EMPTY') {
-            println "No quarantined tests from ${jsonFile}"
+            println "No quarantined tests in BITRISE_QUARANTINED_TESTS_JSON"
         } else {
-            println "Loaded ${cases.size()} quarantined test(s) from ${jsonFile}"
+            println "Loaded ${cases.size()} quarantined test(s) from BITRISE_QUARANTINED_TESTS_JSON"
         }
     } catch (JsonException e) {
         load = [
@@ -41,7 +40,7 @@ if (!path) {
             cases     : [],
         ]
 
-        println "Invalid JSON in ${jsonFile}: ${e.message}"
+        println "Invalid JSON in BITRISE_QUARANTINED_TESTS_JSON: ${e.message}"
     }
 }
 

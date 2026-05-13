@@ -21,12 +21,24 @@ tags:
 - tapOn:
     id: "consent_cta"
 # Select Down institution
+- extendedWaitUntil:
+    visible: "Down (Unscheduled)"
+    timeout: 30000
 - tapOn: "Down (Unscheduled)"
 # Selecting another bank resets the flow
+- extendedWaitUntil:
+    visible: "Select another bank"
+    timeout: 30000
 - tapOn: "Select another bank"
 # Assert flow correctly returns to institution picker
+- extendedWaitUntil:
+    visible: "Down (Unscheduled)"
+    timeout: 30000
 - tapOn: "Down (Unscheduled)"
 # Close flow from error page
+- extendedWaitUntil:
+    visible: "Close icon"
+    timeout: 30000
 - tapOn: "Close icon"
 - scrollUntilVisible:
     element:

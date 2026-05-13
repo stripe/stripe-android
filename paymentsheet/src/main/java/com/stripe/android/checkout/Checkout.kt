@@ -17,11 +17,14 @@ import com.stripe.android.checkout.Checkout.Companion.createWithState
 import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,8 +32,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
+
+private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 
 /**
  * Manages a Checkout Session, providing methods to observe and mutate its state.
@@ -62,7 +69,8 @@ class Checkout private constructor(
             checkoutSessionClientSecret: String,
             configuration: Configuration = Configuration(),
         ): Result<Checkout> {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
+            val application = context.applicationContext as Application
+            val component = DaggerCheckoutComponent.factory().create(application)
             val configurationState = configuration.build()
             return component.checkoutSessionRepository.init(
                 sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
@@ -74,7 +82,7 @@ class Checkout private constructor(
                         configuration = configurationState,
                         checkoutSessionResponse = response,
                     ),
-                    component,
+                    component = component,
                 )
             }
         }
@@ -86,7 +94,8 @@ class Checkout private constructor(
             context: Context,
             state: State,
         ): Checkout {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
+            val application = context.applicationContext as Application
+            val component = DaggerCheckoutComponent.factory().create(application)
             return Checkout(
                 internalState = state.internalState,
                 component = component,
@@ -200,16 +209,19 @@ class Checkout private constructor(
     }
 
     /**
-     * Wraps an asynchronous function that communicates with your server to modify the
-     * Checkout Session. After the function completes, the session is re-fetched from the server.
+     * Runs an async function that calls your server to update the Checkout Session,
+     * then automatically refreshes [checkoutSession] with the latest session data.
      *
-     * @param serverUpdate A suspend function responsible for making a server request that updates
+     * A 20-second timeout is enforced. If [serverUpdate] doesn't complete within 20 seconds,
+     * this method returns a [Result.failure] with a timeout exception.
+     *
+     * @param serverUpdate A suspend function that makes a request to your server to update
      * the Checkout Session.
      */
     suspend fun runServerUpdate(
         serverUpdate: suspend () -> Result<Unit>,
     ): Result<Unit> = withInternalState { sessionId ->
-        serverUpdate().fold(
+        withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
             onSuccess = {
                 component.checkoutSessionRepository.init(
                     sessionId = sessionId,
@@ -298,8 +310,16 @@ class Checkout private constructor(
         )
     }
 
-    internal suspend fun updateCurrency(currency: String) = withInternalState { sessionId ->
-        component.checkoutSessionRepository.updateCurrency(sessionId, currency)
+    internal suspend fun updateCurrency(currency: String): Result<Unit> {
+        val result = withInternalState { sessionId ->
+            component.checkoutSessionRepository.updateCurrency(sessionId, currency)
+        }
+        result.onSuccess {
+            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
+        }.onFailure {
+            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
+        }
+        return result
     }
 
     internal fun markIntegrationLaunched() {
@@ -362,6 +382,9 @@ class Checkout private constructor(
         LaunchedEffect(checkoutSession) {
             errorMessage = null
         }
+        LaunchedEffect(Unit) {
+            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencySelectorInit())
+        }
         CurrencySelectorToggle(
             options = currencySelectorOptions,
             onCurrencySelected = { currencyOption ->
@@ -375,5 +398,16 @@ class Checkout private constructor(
             isEnabled = !isLoading,
             errorMessage = errorMessage,
         )
+    }
+
+    private fun fireEvent(event: PaymentSheetEvent) {
+        CoroutineScope(Dispatchers.IO).launch {
+            component.analyticsRequestExecutor.executeAsync(
+                component.paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = event.params,
+                )
+            )
+        }
     }
 }

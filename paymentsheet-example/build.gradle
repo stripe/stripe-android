@@ -36,6 +36,10 @@ def directlyToPlayground() {
     return project.hasProperty("DIRECTLY_TO_PLAYGROUND") && project.DIRECTLY_TO_PLAYGROUND.contains("true")
 }
 
+def getLatencyExperimentIterations() {
+    return findProperty('LATENCY_EXPERIMENT_ITERATIONS') ?: "1"
+}
+
 emerge {
     // Api token is implicitly set to the EMERGE_API_TOKEN env variable
 
@@ -67,6 +71,7 @@ android {
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
         buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
+        buildConfigField "int", "LATENCY_EXPERIMENT_ITERATIONS", "${getLatencyExperimentIterations()}"
         buildConfigField "String", "PROXY_IP_ADDRESS", "\"${getProxyIpAddress()}\""
 
         manifestPlaceholders = [

@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -61,6 +62,8 @@ internal fun SavedPaymentMethodRowButton(
             ) {
                 PaymentMethodIconFromResource(
                     iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
+                        // Link brand doesn't matter in vertical mode, where we only show the icon.
+                        linkBrand = LinkBrand.Link,
                         forVerticalMode = true
                     ),
                     colorFilter = null,

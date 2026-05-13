@@ -46,7 +46,7 @@ jobs:
         - language: actions
           build-mode: none
         - language: java-kotlin
-          build-mode: autobuild
+          build-mode: manual
         - language: javascript-typescript
           build-mode: none
         - language: python
@@ -75,6 +75,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
+        config-file: ./.github/codeql/codeql-config.yml
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
@@ -89,17 +90,56 @@ jobs:
     # ℹ️ Command-line programs to run using the OS shell.
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - name: Run manual build steps
-      if: matrix.build-mode == 'manual'
+      if: matrix.language == 'java-kotlin' && matrix.build-mode == 'manual'
       shell: bash
       run: |
-        echo 'If you are using a "manual" build mode for one or more of the' \
-          'languages you are analyzing, replace this with the commands to build' \
-          'your code, for example:'
-        echo '  make bootstrap'
-        echo '  make release'
+        ./gradlew \
+          --no-daemon \
+          --stacktrace \
+          --no-configuration-cache \
+          -Dorg.gradle.jvmargs="-Xms4g -Xmx8g -XX:+UseParallelGC -XX:MaxMetaspaceSize=2g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8" \
+          :3ds2sdk:assembleRelease \
+          :camera-core:assembleRelease \
+          :connect:assembleRelease \
+          :crypto-onramp:assembleRelease \
+          :financial-connections:assembleRelease \
+          :financial-connections-core:assembleRelease \
+          :financial-connections-lite:assembleRelease \
+          :hcaptcha:assembleRelease \
+          :identity:assembleRelease \
+          :ml-core:base:assembleRelease \
+          :ml-core:default:assembleRelease \
+          :ml-core:googleplay:assembleRelease \
+          :payment-method-messaging:assembleRelease \
+          :payments:assembleRelease \
+          :payments-core:assembleRelease \
+          :payments-model:assembleRelease \
+          :payments-ui-core:assembleRelease \
+          :paymentsheet:assembleRelease \
+          :stripe-attestation:assembleRelease \
+          :stripe-core:assembleRelease \
+          :stripe-ui-core:assembleRelease \
+          :stripecardscan:assembleRelease \
+          :wechatpay:assembleRelease
+
+    - name: Unsupported manual build mode
+      if: matrix.language != 'java-kotlin' && matrix.build-mode == 'manual'
+      shell: bash
+      run: |
+        echo "Manual build mode is only configured for java-kotlin in this workflow."
         exit 1
 
     - name: Perform CodeQL Analysis
+      if: matrix.language != 'java-kotlin'
       uses: github/codeql-action/analyze@v4
+      with:
+        category: "/language:${{matrix.language}}"
+
+    - name: Perform CodeQL Analysis (java-kotlin)
+      if: matrix.language == 'java-kotlin'
+      uses: github/codeql-action/analyze@v4
+      env:
+        CODEQL_RAM: "8192"
+        CODEQL_THREADS: "2"
       with:
         category: "/language:${{matrix.language}}"

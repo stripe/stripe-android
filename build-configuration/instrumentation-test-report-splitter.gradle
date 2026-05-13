@@ -34,10 +34,49 @@ class InstrumentationTestReportSplitter {
             return
         }
 
+        def logcatByTest = buildLogcatIndex(resultRoots)
+
         outDir.mkdirs()
         casesByClass.each { fqcn, rows ->
-            writeReport(new File(outDir, "TEST-${fqcn.replace('.', '_')}.xml"), fqcn, rows)
+            writeReport(
+                    new File(outDir, "TEST-${fqcn.replace('.', '_')}.xml"),
+                    fqcn,
+                    rows,
+                    logcatByTest,
+            )
         }
+    }
+
+    private static Map<String, File> buildLogcatIndex(List<File> roots) {
+        def map = [:]
+        roots.each { root ->
+            root.eachFileRecurse { f ->
+                if (!f.file) {
+                    return
+                }
+                def n = f.name
+                if (!n.startsWith('logcat-') || !n.endsWith('.txt')) {
+                    return
+                }
+                def inner = n.substring('logcat-'.length(), n.length() - '.txt'.length())
+                def sep = inner.lastIndexOf('-')
+                if (sep <= 0) {
+                    return
+                }
+                def testClass = inner.substring(0, sep)
+                def testName = inner.substring(sep + 1)
+                map["${testClass}|${testName}"] = f
+            }
+        }
+        map
+    }
+
+    private static File findLogcatFile(Map<String, File> logcatByTest, String fqcn, String rawName, String strippedName) {
+        def fromStripped = logcatByTest["${fqcn}|${strippedName}"]
+        if (fromStripped) {
+            return fromStripped
+        }
+        return logcatByTest["${fqcn}|${rawName}"]
     }
 
     private static List<File> xmlFilesUnder(List<File> roots) {
@@ -88,7 +127,7 @@ class InstrumentationTestReportSplitter {
         return testName.replaceFirst(/_bstackretry\d+$/, '')
     }
 
-    private static void writeReport(File outFile, String className, List rows) {
+    private static void writeReport(File outFile, String className, List rows, Map<String, File> logcatByTest) {
         outFile.parentFile.mkdirs()
         def writer = new StringWriter()
         writer << '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -103,16 +142,19 @@ class InstrumentationTestReportSplitter {
                 time: String.format(Locale.US, '%.3f', rows.sum { parseTime(it) }),
         ) {
             rows.each { tc ->
-                emitTestCase(mb, tc)
+                emitTestCase(mb, tc, logcatByTest, className)
             }
         }
         outFile.setText(writer.toString(), 'UTF-8')
     }
 
-    private static void emitTestCase(MarkupBuilder mb, def tc) {
+    private static void emitTestCase(MarkupBuilder mb, def tc, Map<String, File> logcatByTest, String bucketFqcn) {
+        def rawName = tc.@name?.toString() ?: ''
+        def strippedName = stripBrowserStackRetrySuffix(rawName)
+        def fqcn = tc.@classname?.toString() ?: bucketFqcn
         mb.testcase(
-                classname: tc.@classname.toString(),
-                name: stripBrowserStackRetrySuffix(tc.@name.toString()),
+                classname: fqcn,
+                name: strippedName,
                 time: tc.@time.toString(),
         ) {
             tc.failure.each { f ->
@@ -136,6 +178,12 @@ class InstrumentationTestReportSplitter {
             tc.'system-err'.each { se ->
                 'system-err' {
                     mkp.yield(se.text().toString())
+                }
+            }
+            def logcatFile = findLogcatFile(logcatByTest, fqcn, rawName, strippedName)
+            if (logcatFile?.file) {
+                'system-out' {
+                    mkp.yield(logcatFile.getText('UTF-8'))
                 }
             }
         }

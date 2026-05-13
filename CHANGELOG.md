@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.8.0 - 2026-05-11
 
 ### PaymentSheet
 * [FIXED][13020](https://github.com/stripe/stripe-android/pull/13020) `CustomerSheet` now correctly filters out unsupported payment method types.
@@ -13,6 +15,8 @@ NEXT_VERSION_BUMP: MINOR
 * [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) Added new birth city, birth country, and nationalities properties to KYCInfo.
 * [ADDED][13019](https://github.com/stripe/stripe-android/pull/13019) New public types for interacting with Compliance regulations and identifiers.
 * [REMOVED][13019](https://github.com/stripe/stripe-android/pull/13019) Removed KycRetrieveResponse from the public API as it was not intended to be accessible.
+* [ADDED][13038](https://github.com/stripe/stripe-android/pull/13038) Added `OnrampCoordinator` APIs for EU support: `retrieveMissingIdentifiers()`, `submitIdentifiers(_:)`, and `presentCRSCARFDeclaration()`, as well as associated result types for those calls.
+* [ADDED][13038](https://github.com/stripe/stripe-android/pull/13038) Added new `OnrampCallbacks` API to support crsCarfDeclaration acceptance.
 
 ## 23.7.0 - 2026-05-04
 
