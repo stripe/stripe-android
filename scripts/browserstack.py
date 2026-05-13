@@ -274,24 +274,24 @@ def executeTests(appUrl, testUrl):
 
     numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
-    numberOfShards = {
+    shardsParams = {
         "shards": {
             "numberOfShards": numberOfShards,
         },
     }
 
-    if bitriseQuarantinedTests is not None and isinstance(bitriseQuarantinedTests, str):
-        instrumentation_options = {
+    if bitriseQuarantinedTests:
+        instrumentationOptionsParams = {
             "instrumentationOptions": {
                 "bitriseQuarantinedTests": bitriseQuarantinedTests.encode("utf-8").hex(),
             }
         }
     else:
-        instrumentation_options = {}
+        instrumentationOptionsParams = {}
 
     addedParams = {
-        **numberOfShards,
-        **instrumentation_options,
+        **shardsParams,
+        **instrumentationOptionsParams,
     }
     return executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParams)
 
