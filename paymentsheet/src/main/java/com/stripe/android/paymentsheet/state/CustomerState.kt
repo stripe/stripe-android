@@ -12,8 +12,6 @@ import kotlinx.coroutines.Deferred
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
-internal typealias PrefetchedPaymentMethods = Deferred<Result<List<PaymentMethod>>>?
-
 @Parcelize
 internal data class CustomerState(
     val paymentMethods: List<PaymentMethod>,
@@ -29,7 +27,7 @@ internal class CreateCustomerState @Inject constructor(
         elementsSession: ElementsSession,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
-        prefetchedPaymentMethods: PrefetchedPaymentMethods = null,
+        prefetchedPaymentMethods: PrefetchedPaymentMethods? = null,
     ): CustomerState? {
         val customerMetadata = metadata.customerMetadata
         val customerState = when (customerMetadata) {
@@ -115,20 +113,17 @@ internal class CreateCustomerState @Inject constructor(
     private suspend fun retrieveCustomerPaymentMethods(
         metadata: PaymentMethodMetadata,
         customerMetadata: CustomerMetadata.LegacyEphemeralKey,
-        prefetchedPaymentMethods: PrefetchedPaymentMethods = null,
+        prefetchedPaymentMethods: PrefetchedPaymentMethods? = null,
     ): List<PaymentMethod> {
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
-        val paymentMethods = if (prefetchedPaymentMethods != null) {
-            prefetchedPaymentMethods.await().getOrThrow()
-        } else {
-            customerRepository.getPaymentMethods(
+        val paymentMethods = prefetchedPaymentMethods?.await()?.getOrThrow()
+            ?: customerRepository.getPaymentMethods(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
                 types = paymentMethodTypes,
                 silentlyFail = metadata.stripeIntent.isLiveMode,
             ).getOrThrow()
-        }
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails() &&
