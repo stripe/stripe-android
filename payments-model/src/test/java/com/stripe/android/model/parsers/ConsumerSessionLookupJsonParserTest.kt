@@ -51,6 +51,12 @@ class ConsumerSessionLookupJsonParserTest {
     }
 
     @Test
+    fun `link_brand is parsed as Onelink`() {
+        val result = ConsumerSessionLookupJsonParser().parse(createLookupJsonWithLinkBrand("onelink"))
+        assertThat(result.linkBrand).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
     fun `unknown link_brand defaults to Link`() {
         val result = ConsumerSessionLookupJsonParser().parse(createLookupJsonWithLinkBrand("some_future_brand"))
         assertThat(result.linkBrand).isEqualTo(LinkBrand.Link)

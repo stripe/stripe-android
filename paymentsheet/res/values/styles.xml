@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <drawable name="stripe_ic_paymentsheet_link_ref">@drawable/stripe_ic_paymentsheet_link_day</drawable>
-    <drawable name="stripe_ic_paymentsheet_notlink_ref">@drawable/stripe_ic_paymentsheet_notlink_day</drawable>
+    <drawable name="stripe_ic_paymentsheet_onelink_ref">@drawable/stripe_ic_paymentsheet_onelink_day</drawable>
     <drawable name="stripe_ic_paymentsheet_sepa_ref">@drawable/stripe_ic_paymentsheet_sepa_day</drawable>
 
     <drawable name="stripe_ic_paymentsheet_card_visa_ref">@drawable/stripe_ic_paymentsheet_card_visa_day</drawable>

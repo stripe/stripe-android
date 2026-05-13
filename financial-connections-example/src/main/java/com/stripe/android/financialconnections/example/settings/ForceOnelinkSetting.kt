@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.example.data.model.PaymentIntentB
 
 data class ForceOnelinkSetting(
     override val selectedOption: Boolean = false,
-    override val key: String = "force_notlink",
+    override val key: String = "force_onelink",
 ) : Saveable<Boolean>, SingleChoiceSetting<Boolean>(
     displayName = "Force Onelink",
     options = listOf(

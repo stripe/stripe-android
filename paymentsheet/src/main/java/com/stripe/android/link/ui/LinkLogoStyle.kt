@@ -20,9 +20,9 @@ internal fun LinkBrand.logoRes(style: LinkLogoStyle): Int = when (this) {
         LinkLogoStyle.TermsKnockoutWhite -> R.drawable.stripe_link_logo_knockout_white
     }
     LinkBrand.Onelink -> when (style) {
-        LinkLogoStyle.Primary -> R.drawable.stripe_notlink_logo
-        LinkLogoStyle.InlineKnockout -> R.drawable.stripe_notlink_logo_knockout
-        LinkLogoStyle.TermsKnockoutBlack -> R.drawable.stripe_notlink_logo_knockout_black
-        LinkLogoStyle.TermsKnockoutWhite -> R.drawable.stripe_notlink_logo_knockout_white
+        LinkLogoStyle.Primary -> R.drawable.stripe_onelink_logo
+        LinkLogoStyle.InlineKnockout -> R.drawable.stripe_onelink_logo_knockout
+        LinkLogoStyle.TermsKnockoutBlack -> R.drawable.stripe_onelink_logo_knockout_black
+        LinkLogoStyle.TermsKnockoutWhite -> R.drawable.stripe_onelink_logo_knockout_white
     }
 }

@@ -139,7 +139,7 @@ class PaymentOptionsScreenshotTest {
     }
 
     @Test
-    fun testNotlink() {
+    fun testOnelink() {
         createSavedPaymentMethodTabLayoutUiScreenshot(
             paymentOptionsItems = listOf(
                 PaymentOptionsItem.AddCard,

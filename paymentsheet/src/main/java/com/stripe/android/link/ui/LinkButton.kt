@@ -102,8 +102,8 @@ private fun LinkButtonTheme.logoRes(linkBrand: LinkBrand): Int = when (linkBrand
         LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_link_logo_bw
     }
     LinkBrand.Onelink -> when (this) {
-        LinkButtonTheme.WHITE -> R.drawable.stripe_notlink_logo_light
-        LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_notlink_logo_bw
+        LinkButtonTheme.WHITE -> R.drawable.stripe_onelink_logo_light
+        LinkButtonTheme.DEFAULT -> com.stripe.android.uicore.R.drawable.stripe_onelink_logo_bw
     }
 }
 

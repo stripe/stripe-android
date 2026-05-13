@@ -37,4 +37,4 @@ internal class DebugConfiguration @Inject constructor(
 }
 
 private const val KEY_OVERRIDE_NATIVE = "financial_connections_override_native"
-private const val KEY_FORCE_ONELINK = "force_notlink"
+private const val KEY_FORCE_ONELINK = "force_onelink"

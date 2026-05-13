@@ -70,7 +70,7 @@ class SavedPaymentMethodIconTest {
     }
 
     @Test
-    fun `on Link payment method with Notlink brand, should return arrow-only icon`() {
+    fun `on Link payment method with Onelink brand, should return arrow-only icon`() {
         assertThat(
             LINK_PAYMENT_METHOD.getSavedPaymentMethodIcon(linkBrand = LinkBrand.Onelink)
         ).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_arrow)

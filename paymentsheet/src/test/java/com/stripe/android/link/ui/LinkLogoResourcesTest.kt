@@ -15,7 +15,7 @@ internal class LinkLogoResourcesTest {
     @Test
     fun `Onelink primary logo maps to Onelink asset`() {
         assertThat(LinkBrand.Onelink.logoRes(LinkLogoStyle.Primary))
-            .isEqualTo(R.drawable.stripe_notlink_logo)
+            .isEqualTo(R.drawable.stripe_onelink_logo)
     }
 
     @Test
@@ -27,7 +27,7 @@ internal class LinkLogoResourcesTest {
     @Test
     fun `Onelink inline logo maps to Onelink knockout asset`() {
         assertThat(LinkBrand.Onelink.logoRes(LinkLogoStyle.InlineKnockout))
-            .isEqualTo(R.drawable.stripe_notlink_logo_knockout)
+            .isEqualTo(R.drawable.stripe_onelink_logo_knockout)
     }
 
     @Test
@@ -39,7 +39,7 @@ internal class LinkLogoResourcesTest {
     @Test
     fun `Onelink terms black logo maps to Onelink black asset`() {
         assertThat(LinkBrand.Onelink.logoRes(LinkLogoStyle.TermsKnockoutBlack))
-            .isEqualTo(R.drawable.stripe_notlink_logo_knockout_black)
+            .isEqualTo(R.drawable.stripe_onelink_logo_knockout_black)
     }
 
     @Test
@@ -51,6 +51,6 @@ internal class LinkLogoResourcesTest {
     @Test
     fun `Onelink terms white logo maps to Onelink white asset`() {
         assertThat(LinkBrand.Onelink.logoRes(LinkLogoStyle.TermsKnockoutWhite))
-            .isEqualTo(R.drawable.stripe_notlink_logo_knockout_white)
+            .isEqualTo(R.drawable.stripe_onelink_logo_knockout_white)
     }
 }
