@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkCardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
@@ -70,6 +71,7 @@ internal data class PaymentMethodMetadata(
     val isGooglePayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
     val linkMode: LinkMode?,
+    val linkBrand: LinkBrand?,
     val linkStateResult: LinkStateResult?,
     val paymentMethodIncentive: PaymentMethodIncentive?,
     val financialConnectionsAvailability: FinancialConnectionsAvailability?,
@@ -394,6 +396,7 @@ internal data class PaymentMethodMetadata(
                 externalPaymentMethodSpecs = externalPaymentMethodSpecs,
                 linkConfiguration = configuration.link,
                 linkMode = linkSettings?.linkMode,
+                linkBrand = linkSettings?.linkBrand,
                 linkStateResult = linkStateResult,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
@@ -461,6 +464,7 @@ internal data class PaymentMethodMetadata(
                 isGooglePayReady = isGooglePayReady,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
+                linkBrand = elementsSession.linkSettings?.linkBrand,
                 linkStateResult = null,
                 paymentMethodIncentive = null,
                 externalPaymentMethodSpecs = emptyList(),

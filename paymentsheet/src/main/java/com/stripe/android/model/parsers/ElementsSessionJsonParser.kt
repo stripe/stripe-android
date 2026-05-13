@@ -208,11 +208,15 @@ internal class ElementsSessionJsonParser(
             LinkMode.entries.firstOrNull { it.value == mode }
         }
 
-        val linkBrand = json?.optString(FIELD_LINK_BRAND)
-            ?.takeIf { it.isNotEmpty() }
-            ?.let { brand ->
-                LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Link
-            }
+        val linkBrand = if (FeatureFlags.forceNotlink.isEnabled) {
+            LinkBrand.Notlink
+        } else {
+            json?.optString(FIELD_LINK_BRAND)
+                ?.takeIf { it.isNotEmpty() }
+                ?.let { brand ->
+                    LinkBrand.entries.firstOrNull { it.value == brand } ?: LinkBrand.Link
+                }
+        }
 
         val linkFlags = json?.let { linkSettingsJson ->
             parseLinkFlags(linkSettingsJson)
