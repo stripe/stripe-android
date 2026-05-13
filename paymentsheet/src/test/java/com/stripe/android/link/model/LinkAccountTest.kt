@@ -93,7 +93,7 @@ class LinkAccountTest {
     @Test
     fun `linkBrand returns Notlink when forceNotlinkConsumer flag is enabled`() {
         forceNotlinkConsumerRule.setEnabled(true)
-        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Link))
+        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Link, isVerified = true))
         assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Notlink)
     }
 
@@ -109,13 +109,19 @@ class LinkAccountTest {
         assertThat(linkAccount.consumerLinkBrand).isNull()
     }
 
-    private fun makeConsumerSession(linkBrand: LinkBrand? = null): ConsumerSession {
+    private fun makeConsumerSession(
+        linkBrand: LinkBrand? = null,
+        isVerified: Boolean = false,
+    ): ConsumerSession {
+        val authLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication.takeIf { isVerified }
         return ConsumerSession(
             clientSecret = "consumer_session_007",
             emailAddress = "test@example.com",
             redactedPhoneNumber = "+1********07",
             redactedFormattedPhoneNumber = "(***) *** **07",
             verificationSessions = emptyList(),
+            currentAuthenticationLevel = authLevel,
+            minimumAuthenticationLevel = authLevel,
             linkBrand = linkBrand,
         )
     }

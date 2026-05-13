@@ -23,7 +23,7 @@ internal data class LinkAccount(
 ) : Parcelable {
 
     val linkBrand: LinkBrand
-        get() = if (FeatureFlags.forceNotlinkConsumer.isEnabled) {
+        get() = if (FeatureFlags.forceNotlinkConsumer.isEnabled && isVerified) {
             LinkBrand.Notlink
         } else {
             consumerSession.linkBrand ?: LinkBrand.Link
