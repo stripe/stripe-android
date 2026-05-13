@@ -19,8 +19,10 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -1041,6 +1043,19 @@ class CheckoutTest {
         assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
         assertThat(result.exceptionOrNull()).hasMessageThat()
             .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+    }
+
+    @Test
+    fun `runServerUpdate returns failure when serverUpdate exceeds timeout`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        val result = checkout.runServerUpdate {
+            delay(21_000)
+            Result.success(Unit)
+        }
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(TimeoutCancellationException::class.java)
     }
 
     @Test

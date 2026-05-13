@@ -3,7 +3,9 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -136,6 +138,39 @@ class PaymentOptionsScreenshotTest {
         )
     }
 
+    @Test
+    fun testNotlink() {
+        createSavedPaymentMethodTabLayoutUiScreenshot(
+            paymentOptionsItems = listOf(
+                PaymentOptionsItem.AddCard,
+                PaymentOptionsItem.Link(LinkBrand.Notlink),
+                PaymentOptionsItem.SavedPaymentMethod(
+                    DisplayableSavedPaymentMethod.create(
+                        displayName = "4242".resolvableString,
+                        paymentMethod = PaymentMethod(
+                            id = "004",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.Link.code,
+                            type = PaymentMethod.Type.Link,
+                            linkPaymentDetails = LinkPaymentDetails.Card(
+                                nickname = null,
+                                expMonth = 1,
+                                expYear = 2030,
+                                last4 = "4242",
+                                brand = CardBrand.Visa,
+                                funding = "CREDIT",
+                            ),
+                        ),
+                    ),
+                )
+            ),
+            selectedPaymentOptionsItem = PaymentOptionsItem.Link(LinkBrand.Notlink),
+            isEditing = false,
+            linkBrand = LinkBrand.Notlink,
+        )
+    }
+
     private val paymentOptionsItemsWithDefaultCard = listOf(
         PaymentOptionsItem.SavedPaymentMethod(
             DisplayableSavedPaymentMethod.create(
@@ -163,13 +198,14 @@ class PaymentOptionsScreenshotTest {
         paymentOptionsItems: List<PaymentOptionsItem>,
         selectedPaymentOptionsItem: PaymentOptionsItem?,
         isEditing: Boolean,
+        linkBrand: LinkBrand = LinkBrand.Link,
         scrollState: LazyListState? = null,
     ) {
         paparazziRule.snapshot {
             SavedPaymentMethodTabLayoutUI(
                 paymentOptionsItems = paymentOptionsItems,
                 selectedPaymentOptionsItem = selectedPaymentOptionsItem,
-                linkBrand = LinkBrand.Link,
+                linkBrand = linkBrand,
                 isEditing = isEditing,
                 isProcessing = false,
                 onAddCardPressed = {},

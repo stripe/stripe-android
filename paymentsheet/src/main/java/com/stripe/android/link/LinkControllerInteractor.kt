@@ -38,7 +38,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBank
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.transformBankIconCodeToBankIcon
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
-import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.paymentsheet.ui.getLinkIconArrow
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -762,7 +762,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
         is ConsumerPaymentDetails.Card ->
             getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding.code, last4), isDarkTheme)
         is ConsumerPaymentDetails.Passthrough ->
-            getLinkIcon(iconOnly = true)
+            getLinkIconArrow()
     }
 }
 
