@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.NavigationManager
 import javax.inject.Inject
 import javax.inject.Named
@@ -148,6 +149,8 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
                 consumerSessionClientSecret = signup.consumerSession.clientSecret,
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                // linkBrand is null when the backend doesn't specify one; Link is the default brand.
+                linkBrand = manifest.linkBrand ?: LinkBrand.Link,
             )
         } else {
             // ** Legacy signup endpoint on unverified flows: 1 request **
@@ -159,6 +162,8 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
                 phoneNumber = state.validPhone!!,
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                // linkBrand is null when the backend doesn't specify one; Link is the default brand.
+                linkBrand = manifest.linkBrand ?: LinkBrand.Link,
             )
         }
         return Pane.SUCCESS

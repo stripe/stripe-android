@@ -40,6 +40,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
 internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constructor(
@@ -150,6 +151,8 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
                 selectedAccounts = accounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                // linkBrand is null when the backend doesn't specify one; Link is the default brand.
+                linkBrand = manifest.linkBrand ?: LinkBrand.Link,
             )
         }
             .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }

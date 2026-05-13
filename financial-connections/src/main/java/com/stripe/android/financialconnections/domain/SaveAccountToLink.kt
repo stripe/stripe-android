@@ -4,6 +4,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PaymentAccountParams.BankAccount
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
@@ -33,8 +34,9 @@ internal class SaveAccountToLink @Inject constructor(
         selectedAccounts: List<CachedPartnerAccount>,
         country: String,
         shouldPollAccountNumbers: Boolean,
+        linkBrand: LinkBrand,
     ): FinancialConnectionsSessionManifest {
-        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
+        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts, linkBrand) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = email,
@@ -51,8 +53,9 @@ internal class SaveAccountToLink @Inject constructor(
         consumerSessionClientSecret: String,
         selectedAccounts: List<CachedPartnerAccount>?,
         shouldPollAccountNumbers: Boolean,
+        linkBrand: LinkBrand,
     ): FinancialConnectionsSessionManifest {
-        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
+        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts, linkBrand) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = null,
@@ -68,6 +71,7 @@ internal class SaveAccountToLink @Inject constructor(
     private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
         partnerAccounts: List<CachedPartnerAccount>?,
+        linkBrand: LinkBrand,
         action: suspend (Set<String>?) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
         val selectedAccountIds = partnerAccounts?.map { it.id }?.toSet() ?: emptySet()
@@ -92,11 +96,11 @@ internal class SaveAccountToLink @Inject constructor(
             action(selectedAccountIds)
         }.onSuccess { manifest ->
             if (!isNetworkingRelinkSession()) {
-                storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+                storeSavedToLinkMessage(manifest, selectedAccountIds.size, linkBrand)
             }
         }.onFailure {
             if (!isNetworkingRelinkSession()) {
-                storeFailedToSaveToLinkMessage(selectedAccountIds.size)
+                storeFailedToSaveToLinkMessage(selectedAccountIds.size, linkBrand)
             }
         }.getOrThrow()
     }
@@ -128,6 +132,7 @@ internal class SaveAccountToLink @Inject constructor(
     private fun storeSavedToLinkMessage(
         manifest: FinancialConnectionsSessionManifest,
         selectedAccounts: Int,
+        linkBrand: LinkBrand,
     ) {
         successContentRepository.set(
             heading = manifest.displayText?.successPane?.caption
@@ -135,24 +140,42 @@ internal class SaveAccountToLink @Inject constructor(
             message = manifest.displayText?.successPane?.subCaption
                 // If backend returns a custom success message, use it
                 ?.let { TextResource.Text(it) }
-                // If not, build a Link success message locally
-                ?: TextResource.PluralId(
-                    singular = R.string.stripe_success_pane_desc_link_success_singular,
-                    plural = R.string.stripe_success_pane_desc_link_success_plural,
-                    // No selected accounts means a manually entered account was already attached.
-                    count = max(1, selectedAccounts),
-                )
+                // If not, build a success message locally with the correct brand
+                ?: if (linkBrand == LinkBrand.Link) {
+                    TextResource.PluralId(
+                        singular = R.string.stripe_success_pane_desc_link_success_singular,
+                        plural = R.string.stripe_success_pane_desc_link_success_plural,
+                        // No selected accounts means a manually entered account was already attached.
+                        count = max(1, selectedAccounts),
+                    )
+                } else {
+                    TextResource.PluralId(
+                        singular = R.string.stripe_success_pane_desc_link_success_singular_with_brand,
+                        plural = R.string.stripe_success_pane_desc_link_success_plural_with_brand,
+                        count = max(1, selectedAccounts),
+                        args = listOf(linkBrand.brandName()),
+                    )
+                }
         )
     }
 
-    private fun storeFailedToSaveToLinkMessage(selectedAccounts: Int) {
+    private fun storeFailedToSaveToLinkMessage(selectedAccounts: Int, linkBrand: LinkBrand) {
         successContentRepository.set(
-            message = TextResource.PluralId(
-                singular = R.string.stripe_success_pane_desc_link_error_singular,
-                plural = R.string.stripe_success_pane_desc_link_error_plural,
-                // No selected accounts means a manually entered account was already attached.
-                count = max(1, selectedAccounts),
-            )
+            message = if (linkBrand == LinkBrand.Link) {
+                TextResource.PluralId(
+                    singular = R.string.stripe_success_pane_desc_link_error_singular,
+                    plural = R.string.stripe_success_pane_desc_link_error_plural,
+                    // No selected accounts means a manually entered account was already attached.
+                    count = max(1, selectedAccounts),
+                )
+            } else {
+                TextResource.PluralId(
+                    singular = R.string.stripe_success_pane_desc_link_error_singular_with_brand,
+                    plural = R.string.stripe_success_pane_desc_link_error_plural_with_brand,
+                    count = max(1, selectedAccounts),
+                    args = listOf(linkBrand.brandName()),
+                )
+            }
         )
     }
 }
