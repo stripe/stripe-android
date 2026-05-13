@@ -36,6 +36,7 @@ class TestRules private constructor(
             val composeTestRule = createEmptyComposeRule()
 
             val chain = RuleChain.emptyRuleChain()
+                .around(QuarantinedTestRule())
                 .around(DetectLeaksAfterTestSuccess())
                 .around(composeTestRule)
                 .let { chain ->
