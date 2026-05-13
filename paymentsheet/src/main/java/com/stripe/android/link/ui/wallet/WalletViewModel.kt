@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkDismissalCoordinator
-import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.LinkScreen
@@ -25,6 +24,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes

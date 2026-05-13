@@ -43,7 +43,7 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                 cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
                 linkBrand = linkAccount?.linkBrand
-                    ?: paymentMethodMetadata.linkState?.configuration?.linkBrand
+                    ?: paymentMethodMetadata.linkBrand
                     ?: LinkBrand.Link,
             )
         }

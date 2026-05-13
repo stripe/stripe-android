@@ -57,7 +57,7 @@ internal class SavedPaymentMethodMutator(
     ) -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
-    accountLinkBrandFlow: StateFlow<LinkBrand?> = MutableStateFlow(null),
+    accountLinkBrandFlow: StateFlow<LinkBrand?>,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = combineAsStateFlow(
         customerStateHolder.customer,
@@ -71,10 +71,11 @@ internal class SavedPaymentMethodMutator(
     }
 
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
-        val configLinkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkState?.configuration?.linkBrand }
-        val effectiveLinkBrand = combineAsStateFlow(accountLinkBrandFlow, configLinkBrand) { accountBrand, configBrand ->
-            accountBrand ?: configBrand
-        }
+        val configLinkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkBrand }
+        val effectiveLinkBrand =
+            combineAsStateFlow(accountLinkBrandFlow, configLinkBrand) { accountBrand, configBrand ->
+                accountBrand ?: configBrand
+            }
         PaymentOptionsItemsMapper(
             customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow { it?.customerMetadata },
             customerState = customerStateHolder.customer,
@@ -380,7 +381,7 @@ internal class SavedPaymentMethodMutator(
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
                             allowedBillingCountries =
-                            viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                                viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
                             removeExecutor = { method ->
                                 performRemove()
                             },
@@ -400,7 +401,7 @@ internal class SavedPaymentMethodMutator(
                             isDefaultPaymentMethod = (
                                 displayableSavedPaymentMethod.isDefaultPaymentMethod(
                                     defaultPaymentMethodId =
-                                    viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
+                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
                             removeMessage = paymentMethodMetadata?.customerMetadata?.removePaymentMethod

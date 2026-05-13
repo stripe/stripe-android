@@ -1,7 +1,10 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.model.LinkAccount
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -70,6 +73,39 @@ internal class PaymentMethodMetadataKtxTest {
         val result = elementsSession.toPaymentSheetSaveConsentBehavior()
 
         assertThat(result).isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns account linkBrand when account is present`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link)
+        val account = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Notlink))
+
+        assertThat(metadata.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns metadata linkBrand when account is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Notlink)
+
+        assertThat(metadata.effectiveLinkBrand(null)).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns null when account is null and metadata linkBrand is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = null)
+
+        assertThat(metadata.effectiveLinkBrand(null)).isNull()
+    }
+
+    private fun makeConsumerSession(linkBrand: LinkBrand?): ConsumerSession {
+        return ConsumerSession(
+            clientSecret = "secret_123",
+            emailAddress = "test@example.com",
+            redactedPhoneNumber = "+1********07",
+            redactedFormattedPhoneNumber = "(***) *** **07",
+            verificationSessions = emptyList(),
+            linkBrand = linkBrand,
+        )
     }
 
     private fun createElementsSession(

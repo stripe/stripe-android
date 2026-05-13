@@ -306,7 +306,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
             // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
-            linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
+            linkBrand = paymentMethodMetadata.linkBrand ?: LinkBrand.Link,
         )
     }
 

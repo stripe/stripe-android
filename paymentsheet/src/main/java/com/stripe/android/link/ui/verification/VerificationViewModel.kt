@@ -9,13 +9,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkLaunchMode
-import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.WebLinkAuthChannel
 import com.stripe.android.link.WebLinkAuthResult
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.ConsentPresentation

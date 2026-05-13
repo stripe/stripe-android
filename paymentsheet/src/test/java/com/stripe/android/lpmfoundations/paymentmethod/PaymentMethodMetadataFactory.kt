@@ -7,6 +7,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.PaymentIntent
@@ -45,6 +46,7 @@ internal object PaymentMethodMetadataFactory {
         isGooglePayReady: Boolean = false,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
+        linkBrand: LinkBrand? = null,
         linkState: LinkStateResult? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
@@ -124,6 +126,7 @@ internal object PaymentMethodMetadataFactory {
             isGooglePayReady = isGooglePayReady,
             linkConfiguration = linkConfiguration,
             linkMode = linkMode,
+            linkBrand = linkBrand,
             linkStateResult = linkState,
             cardBrandFilter = cardBrandFilter,
             cardFundingFilter = cardFundingFilter,

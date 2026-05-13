@@ -38,8 +38,8 @@ import com.stripe.android.payments.financialconnections.FinancialConnectionsAvai
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
-import com.stripe.android.utils.FakeLinkComponent
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeLinkComponent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
