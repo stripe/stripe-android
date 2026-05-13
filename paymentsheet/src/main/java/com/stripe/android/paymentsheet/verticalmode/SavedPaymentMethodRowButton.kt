@@ -33,6 +33,7 @@ import com.stripe.android.uicore.strings.resolve
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    linkBrand: LinkBrand,
     isEnabled: Boolean,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
@@ -45,8 +46,10 @@ internal fun SavedPaymentMethodRowButton(
         .resolve()
         .readNumbersAsIndividualDigits()
     val paymentMethodTitle =
-        displayableSavedPaymentMethod.paymentMethod.getLabel(canShowSublabel = true)
-            ?: displayableSavedPaymentMethod.displayName
+        displayableSavedPaymentMethod.paymentMethod.getLabel(
+            linkBrand = linkBrand,
+            canShowSublabel = true,
+        ) ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
     PaymentMethodRowButton(
@@ -116,11 +119,13 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
         ) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = cardSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = true,
             )
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = cardSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )
@@ -154,11 +159,13 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
         ) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = defaultSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = true,
             )
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = defaultSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )

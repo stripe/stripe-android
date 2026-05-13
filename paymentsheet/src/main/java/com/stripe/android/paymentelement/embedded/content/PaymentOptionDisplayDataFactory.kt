@@ -47,7 +47,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
         }
 
         return EmbeddedPaymentElement.PaymentOptionDisplayData(
-            label = selection.label.resolve(context),
+            label = selection.label(paymentMethodMetadata.linkState?.configuration?.linkBrand).resolve(context),
             imageLoader = {
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,

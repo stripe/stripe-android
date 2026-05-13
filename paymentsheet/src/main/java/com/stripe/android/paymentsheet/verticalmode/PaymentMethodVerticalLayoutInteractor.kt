@@ -8,6 +8,7 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -59,6 +60,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
+        val linkBrand: LinkBrand,
     )
 
     sealed interface Selection {
@@ -303,6 +305,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
+            linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
         )
     }
 
