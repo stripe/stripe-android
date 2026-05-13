@@ -208,7 +208,8 @@ internal data class NetworkingLinkLoginWarmupState(
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val continueAsync: Async<Unit> = Uninitialized,
     val isInstantDebits: Boolean = false,
-    val linkBrand: LinkBrand,
+    // Defaults to Link so tests that don't exercise branding can omit this parameter.
+    val linkBrand: LinkBrand = LinkBrand.Link,
 ) {
 
     val secondaryButtonLabel: Int
