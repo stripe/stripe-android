@@ -376,7 +376,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class AdaptivePricingCurrencyToggledFailed(
         error: String,
     ) : PaymentSheetEvent() {
-        override val eventName: String = "elements.adaptive_pricing.currency_toggled_failed"
+        override val eventName: String = "elements.adaptive_pricing.currency_toggled.failed"
         override val params: Map<String, Any?> = mapOf(
             FIELD_ERROR_MESSAGE to error,
         )

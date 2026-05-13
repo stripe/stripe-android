@@ -82,7 +82,7 @@ internal class CheckoutAnalyticsTest {
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid currency"}}""")
         }
-        validateAnalyticsRequest("elements.adaptive_pricing.currency_toggled_failed")
+        validateAnalyticsRequest("elements.adaptive_pricing.currency_toggled.failed")
 
         val checkout = createCheckout()
 
