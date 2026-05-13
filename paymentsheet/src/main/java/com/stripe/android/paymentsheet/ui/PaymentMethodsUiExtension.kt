@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @DrawableRes
