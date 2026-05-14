@@ -657,7 +657,7 @@ internal class PaymentSheetViewModelTest {
 
         startTurbine.ensureAllEventsConsumed()
 
-        viewModel.checkoutWithLink()
+        viewModel.checkoutWithLink(LinkBrand.Link)
 
         val confirmationArgs = startTurbine.awaitItem()
         assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
@@ -933,7 +933,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentSheetViewState.Reset(null)
             )
 
-            viewModel.checkoutWithLink()
+            viewModel.checkoutWithLink(LinkBrand.Link)
 
             val arguments = startTurbine.awaitItem()
 
@@ -1460,7 +1460,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.contentVisible.test {
             assertThat(awaitItem()).isTrue()
 
-            viewModel.checkoutWithLink()
+            viewModel.checkoutWithLink(LinkBrand.Link)
 
             val arguments = startTurbine.awaitItem()
 
@@ -2601,7 +2601,7 @@ internal class PaymentSheetViewModelTest {
             eventReporter = eventReporter,
         )
 
-        viewModel.checkoutWithLink()
+        viewModel.checkoutWithLink(LinkBrand.Link)
 
         val arguments = startTurbine.awaitItem()
 
@@ -2637,7 +2637,7 @@ internal class PaymentSheetViewModelTest {
             eventReporter = eventReporter,
         )
 
-        viewModel.checkoutWithLink()
+        viewModel.checkoutWithLink(LinkBrand.Link)
 
         val arguments = startTurbine.awaitItem()
 
