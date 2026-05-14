@@ -57,6 +57,7 @@ public final class com/stripe/android/crypto/onramp/exception/PaymentFailedExcep
 
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/lang/Enum {
 	public static final field Aptos Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Arbitrum Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Avalanche Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Base Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Bitcoin Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;

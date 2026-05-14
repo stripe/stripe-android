@@ -9,6 +9,7 @@ import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -26,6 +27,7 @@ internal interface SavedPaymentMethodConfirmInteractor {
 
     data class State(
         val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+        val linkBrand: LinkBrand,
         val form: Form,
     ) {
         data class Form(
@@ -45,6 +47,7 @@ internal interface SavedPaymentMethodConfirmInteractor {
 internal class DefaultSavedPaymentMethodConfirmInteractor(
     val initialSelection: PaymentSelection.Saved,
     val displayName: ResolvableString,
+    val linkBrand: LinkBrand,
     val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
     val processing: StateFlow<Boolean>,
     val updateSelection: (PaymentSelection.Saved) -> Unit,
@@ -58,6 +61,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
     override val state = processing.mapAsStateFlow { isProcessing ->
         SavedPaymentMethodConfirmInteractor.State(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
+            linkBrand = linkBrand,
             form = SavedPaymentMethodConfirmInteractor.State.Form(
                 elements = savedPaymentMethodLinkFormHelper.formElement?.let { listOf(it) } ?: emptyList(),
                 enabled = !isProcessing,
@@ -88,6 +92,8 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
+                // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
+                linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
                 savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
                     linkInlineSignupAvailability = DefaultLinkInlineSignupAvailability(paymentMethodMetadata),
                     linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
@@ -116,6 +122,8 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
+                // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
+                linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
                 processing = processing,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
                 updateSelection = updateSelection,

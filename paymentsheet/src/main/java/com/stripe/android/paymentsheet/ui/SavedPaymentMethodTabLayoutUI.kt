@@ -557,7 +557,12 @@ private fun SavedPaymentMethodTab(
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
-    val labelText = paymentMethod.paymentMethod.getLabel(canShowSublabel = false)?.resolve() ?: return
+    val labelText = paymentMethod.paymentMethod.getLabel(
+        // linkBrand is null only when Link is disabled, in which case the brand-dependent paths
+        // (isLinkPassthroughMode) are unreachable anyway.
+        linkBrand = linkBrand ?: LinkBrand.Link,
+        canShowSublabel = false,
+    )?.resolve() ?: return
 
     Box(
         modifier = Modifier.semantics {

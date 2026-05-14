@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
@@ -36,6 +37,7 @@ internal interface ManageScreenInteractor {
         val currentSelection: DisplayableSavedPaymentMethod?,
         val isEditing: Boolean,
         val canEdit: Boolean,
+        val linkBrand: LinkBrand,
     ) {
         private val containsOnlyCards: Boolean by lazy {
             paymentMethods.isNotEmpty() && paymentMethods.all { it.isCard }
@@ -140,6 +142,8 @@ internal class DefaultManageScreenInteractor(
             currentSelection = currentSelection,
             isEditing = editing,
             canEdit = canEdit,
+            // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
+            linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
         )
     }
 
