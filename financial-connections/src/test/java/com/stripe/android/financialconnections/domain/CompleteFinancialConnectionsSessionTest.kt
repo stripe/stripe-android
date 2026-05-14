@@ -85,7 +85,8 @@ internal class CompleteFinancialConnectionsSessionTest {
 
         val configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            null,
         )
 
         return CompleteFinancialConnectionsSession(

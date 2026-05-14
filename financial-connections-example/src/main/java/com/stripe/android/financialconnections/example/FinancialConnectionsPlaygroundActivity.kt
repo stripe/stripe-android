@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.Experience.FinancialConnections
 import com.stripe.android.financialconnections.example.Experience.InstantDebits
@@ -60,6 +61,7 @@ import com.stripe.android.financialconnections.example.settings.PlaygroundSettin
 import com.stripe.android.financialconnections.example.settings.SettingsUi
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheet
 import com.stripe.android.financialconnections.rememberFinancialConnectionsSheetForToken
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -186,8 +188,17 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 configuration = CollectBankAccountConfiguration.InstantDebits(
                     email = email,
                     elementsSessionContext = elementsSessionContext,
+                    linkBrand = currentLinkBrand(),
                 )
             )
+        }
+    }
+
+    private fun currentLinkBrand(): LinkBrand {
+        return if (FeatureFlags.forceNotlinkConsumer.isEnabled || FeatureFlags.forceNotlink.isEnabled) {
+            LinkBrand.Notlink
+        } else {
+            LinkBrand.Link
         }
     }
 

@@ -17,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FinancialConnectionsSheetForTokenLauncherTest {
 
-    private val configuration = FinancialConnectionsSheetConfiguration("", "")
+    private val configuration = FinancialConnectionsSheetConfiguration("", "", null)
 
     @Test
     fun `create and present should return expected ConnectionsSheetForTokenResult#Completed`() {

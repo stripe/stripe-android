@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import org.junit.Before
@@ -34,7 +35,8 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForData(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                linkBrand = null,
             ),
             elementsSessionContext = null
         )
@@ -66,7 +68,8 @@ class BuildFinancialConnectionsLauncherTest {
         val testArgs = FinancialConnectionsSheetActivityArgs.ForData(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                linkBrand = null,
             ),
             elementsSessionContext = null
         )
@@ -92,13 +95,15 @@ class BuildFinancialConnectionsLauncherTest {
     fun `when InstantDebits availability is lite, returns instant debits launcher pointing to lite activity`() {
         val config = CollectBankAccountConfiguration.InstantDebits(
             email = "email@test.com",
-            elementsSessionContext = null
+            elementsSessionContext = null,
+            linkBrand = LinkBrand.Link,
         )
 
         val testArgs = FinancialConnectionsSheetActivityArgs.ForInstantDebits(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                linkBrand = null,
             ),
             elementsSessionContext = null
         )
@@ -124,13 +129,15 @@ class BuildFinancialConnectionsLauncherTest {
     fun `when InstantDebits and availability is full, returns instant debits launcher pointing to full activity`() {
         val config = CollectBankAccountConfiguration.InstantDebits(
             email = "email@test.com",
-            elementsSessionContext = null
+            elementsSessionContext = null,
+            linkBrand = LinkBrand.Link,
         )
 
         val testArgs = FinancialConnectionsSheetActivityArgs.ForInstantDebits(
             configuration = FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = "test_secret",
-                publishableKey = "test_key"
+                publishableKey = "test_key",
+                linkBrand = null,
             ),
             elementsSessionContext = null
         )

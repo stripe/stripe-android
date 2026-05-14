@@ -19,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -94,6 +95,7 @@ class USBankAccountFormViewModelTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        linkBrand = LinkBrand.Link,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -900,6 +902,7 @@ class USBankAccountFormViewModelTest {
                         incentiveEligibilitySession = null,
                         allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
+                    linkBrand = LinkBrand.Link,
                 )
             ),
             elementsSessionId = any(),
@@ -950,6 +953,7 @@ class USBankAccountFormViewModelTest {
                         incentiveEligibilitySession = null,
                         allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
+                    linkBrand = LinkBrand.Link,
                 )
             ),
             elementsSessionId = any(),
@@ -1124,6 +1128,7 @@ class USBankAccountFormViewModelTest {
                         incentiveEligibilitySession = null,
                         allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
+                    linkBrand = LinkBrand.Link,
                 )
             ),
         )
@@ -1166,6 +1171,7 @@ class USBankAccountFormViewModelTest {
                         incentiveEligibilitySession = null,
                         allowRedisplay = ElementsSessionContext.AllowRedisplay.Unspecified,
                     ),
+                    linkBrand = LinkBrand.Link,
                 )
             ),
         )

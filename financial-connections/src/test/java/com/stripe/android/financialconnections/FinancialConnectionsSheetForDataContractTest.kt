@@ -25,7 +25,8 @@ class FinancialConnectionsSheetForDataContractTest {
     fun `validate() valid args`() {
         val configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         args.validate()
@@ -35,7 +36,8 @@ class FinancialConnectionsSheetForDataContractTest {
     fun `validate() missing session client secret`() {
         val configuration = FinancialConnectionsSheetConfiguration(
             " ",
-            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+            null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         assertFailsWith<InvalidParameterException>(
@@ -49,7 +51,8 @@ class FinancialConnectionsSheetForDataContractTest {
     fun `validate() missing publishable key`() {
         val configuration = FinancialConnectionsSheetConfiguration(
             ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-            " "
+            " ",
+            null,
         )
         val args = FinancialConnectionsSheetActivityArgs.ForData(configuration)
         assertFailsWith<InvalidParameterException>(

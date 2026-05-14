@@ -41,6 +41,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
@@ -892,6 +893,7 @@ internal class CustomerSheetViewModel(
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
             clientAttributionMetadata = clientAttributionMetadata,
+            linkBrand = LinkBrand.Link,
         )
     }
 

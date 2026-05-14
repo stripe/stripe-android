@@ -31,7 +31,8 @@ internal class PollAttachPaymentAccountTest {
     private val attachedPaymentAccountRepository = mock(AttachedPaymentAccountRepository::class.java)
     private val configuration = FinancialConnectionsSheetConfiguration(
         financialConnectionsSessionClientSecret = "client_secret",
-        publishableKey = "publishable_key"
+        publishableKey = "publishable_key",
+        linkBrand = null,
     )
 
     private val pollAttachPaymentAccount = PollAttachPaymentAccount(

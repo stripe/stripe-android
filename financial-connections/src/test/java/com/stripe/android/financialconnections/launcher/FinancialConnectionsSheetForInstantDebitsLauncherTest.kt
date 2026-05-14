@@ -14,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 class FinancialConnectionsSheetForInstantDebitsLauncherTest {
 
-    private val configuration = FinancialConnectionsSheetConfiguration("", "")
+    private val configuration = FinancialConnectionsSheetConfiguration("", "", null)
     private val encodedPaymentMethod = "{\"id\": \"pm_123\"}"
 
     @Test
