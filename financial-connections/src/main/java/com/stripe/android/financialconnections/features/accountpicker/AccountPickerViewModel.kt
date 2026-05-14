@@ -55,7 +55,6 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import com.stripe.android.model.LinkBrand
 import java.util.Date
 
 internal class AccountPickerViewModel @AssistedInject constructor(
@@ -339,8 +338,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = accountsList.data.toCachedPartnerAccounts(),
                     shouldPollAccountNumbers = manifest.isDataFlow,
-                    // linkBrand is null when the backend doesn't specify one; Link is the default brand.
-                    linkBrand = manifest.linkBrand ?: LinkBrand.Link,
+                    linkBrand = manifest.linkBrand,
                 )
             }
 

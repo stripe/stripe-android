@@ -94,8 +94,7 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
         accounts: List<CachedPartnerAccount>,
     ) {
         if (manifest.canSetCustomLinkSuccessMessage && !isNetworkingRelinkSession()) {
-            // linkBrand is null when the backend doesn't specify one; Link is the default brand.
-            val linkBrand = manifest.linkBrand ?: LinkBrand.Link
+            val linkBrand = manifest.linkBrand
             successContentRepository.set(
                 message = if (linkBrand == LinkBrand.Link) {
                     PluralId(
