@@ -18,6 +18,7 @@ object FeatureFlags {
     val forceNotlinkConsumer = FeatureFlag("Link: Force Notlink consumer")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
+    val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
