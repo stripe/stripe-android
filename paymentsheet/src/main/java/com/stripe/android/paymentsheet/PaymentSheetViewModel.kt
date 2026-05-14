@@ -27,9 +27,11 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -200,7 +202,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         buttonsEnabled,
         paymentMethodMetadata,
     ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodMetadata ->
-        val accountLinkBrand = linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
@@ -217,8 +218,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
             cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter,
-            linkBrand = accountLinkBrand
-                ?: paymentMethodMetadata?.linkState?.configuration?.linkBrand
+            linkBrand = paymentMethodMetadata
+                ?.effectiveLinkBrand(linkHandler.linkConfigurationCoordinator.accountFlow.value)
                 ?: LinkBrand.Link,
         )
     }
@@ -437,11 +438,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         // Should always have Link configuration if we're checking out with Link.
         val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
             ?: return
-        val effectiveBrand = linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
-            ?: linkConfiguration.linkBrand
+        val linkBrand =
+            linkConfiguration.effectiveLinkBrand(linkHandler.linkConfigurationCoordinator.accountFlow.value)
         checkout(
             PaymentSelection.Link(
-                brand = effectiveBrand,
+                brand = linkBrand,
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
             CheckoutIdentifier.SheetTopWallet
@@ -452,13 +453,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         // Should always have Link configuration if we're checking out with Link.
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
             ?: return
-        val effectiveBrand = linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
-            ?: linkConfiguration.linkBrand
+        val linkBrand =
+            linkConfiguration.effectiveLinkBrand(linkHandler.linkConfigurationCoordinator.accountFlow.value)
         // We don't want to fall back to web on express mode if attestation
         // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
-                brand = effectiveBrand,
+                brand = linkBrand,
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
             ),
             CheckoutIdentifier.SheetTopWallet

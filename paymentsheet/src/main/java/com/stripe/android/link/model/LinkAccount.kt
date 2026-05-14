@@ -22,11 +22,9 @@ internal data class LinkAccount(
     val viewedWebviewOpenUrl: Boolean = false,
 ) : Parcelable {
 
-    val linkBrand: LinkBrand
-        get() = if (FeatureFlags.forceNotlinkConsumer.isEnabled && isVerified) {
-            LinkBrand.Notlink
-        } else {
-            consumerSession.linkBrand ?: LinkBrand.Link
+    val linkBrand: LinkBrand?
+        get() = consumerSession.linkBrand?.let { consumerLinkBrand ->
+            if (FeatureFlags.forceNotlinkConsumer.isEnabled) LinkBrand.Notlink else consumerLinkBrand
         }
 
     // Raw value from the backend, used to carry forward across session updates.

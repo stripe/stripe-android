@@ -1084,7 +1084,7 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `linkBrand is carried forward when new session has null linkBrand for same user`() = runSuspendTest {
+    fun `linkBrand is null when new session has null linkBrand`() = runSuspendTest {
         val accountManager = accountManager()
 
         // Set initial account with linkBrand = Notlink
@@ -1110,7 +1110,7 @@ class DefaultLinkAccountManagerTest {
         )
 
         val account = accountManager.linkAccountInfo.value.account
-        assertThat(account?.linkBrand).isEqualTo(LinkBrand.Notlink)
+        assertThat(account?.linkBrand).isNull()
     }
 
     @Test
@@ -1143,7 +1143,7 @@ class DefaultLinkAccountManagerTest {
     }
 
     @Test
-    fun `linkBrand is NOT carried forward for different user`() = runSuspendTest {
+    fun `linkBrand is null for different user with null linkBrand`() = runSuspendTest {
         val accountManager = accountManager()
 
         // Set account for user A with linkBrand = Notlink
@@ -1160,7 +1160,7 @@ class DefaultLinkAccountManagerTest {
             linkAuthIntentId = null,
         )
 
-        // Switch to user B with null linkBrand — should NOT carry forward user A's brand
+        // Switch to user B with null linkBrand
         accountManager.setLinkAccountFromLookupResult(
             lookup = ConsumerSessionLookup(
                 exists = true,
@@ -1175,8 +1175,7 @@ class DefaultLinkAccountManagerTest {
         )
 
         val account = accountManager.linkAccountInfo.value.account
-        // Defaults to Link because no brand is set and it's a different user
-        assertThat(account?.linkBrand).isEqualTo(LinkBrand.Link)
+        assertThat(account?.linkBrand).isNull()
     }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {

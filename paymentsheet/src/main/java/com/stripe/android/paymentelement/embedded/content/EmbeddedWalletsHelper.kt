@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -41,7 +42,7 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 walletsAllowedInHeader = emptyList(), // Embedded: all wallets inline, none in header
                 cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                 cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                linkBrand = linkAccount?.linkBrand ?: paymentMethodMetadata.linkBrand,
+                linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
             )
         }
     }

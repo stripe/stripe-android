@@ -162,7 +162,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         val paymentMethodMetadata = args.state.paymentMethodMetadata
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
         val hasLinkWithSelectedPayment = currentSelection is Link && currentSelection.selectedPayment != null
-        val accountLinkBrand = linkAccountInfo.account?.linkBrand
         WalletsState.create(
             isLinkAvailable = isLinkAvailable == true && visibleWallets.contains(WalletType.Link),
             linkEmail = linkEmail,
@@ -179,8 +178,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             },
             onLinkPressed = {
                 if (linkConfiguration != null) {
-                    val brand = linkConfiguration.effectiveLinkBrand(linkAccountInfo.account)
-                    updateSelection(Link(brand))
+                    updateSelection(Link(linkConfiguration.effectiveLinkBrand(linkAccountInfo.account)))
                     onUserSelection()
                 }
             },
@@ -312,13 +310,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // Should always have Link configuration here.
                 val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
                     ?: return
-                val effectiveBrand = linkAccountHolder.linkAccountInfo.value.account?.linkBrand
-                    ?: linkConfiguration.linkBrand
+                val linkBrand =
+                    linkConfiguration.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
                 _paymentOptionsActivityResult.tryEmit(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
-                            brand = effectiveBrand,
+                            brand = linkBrand,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),

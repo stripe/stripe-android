@@ -79,9 +79,9 @@ class LinkAccountTest {
     }
 
     @Test
-    fun `linkBrand defaults to Link when consumerSession has no linkBrand`() {
+    fun `linkBrand is null when consumerSession has no linkBrand`() {
         val linkAccount = LinkAccount(makeConsumerSession())
-        assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Link)
+        assertThat(linkAccount.linkBrand).isNull()
     }
 
     @Test
@@ -93,7 +93,7 @@ class LinkAccountTest {
     @Test
     fun `linkBrand returns Notlink when forceNotlinkConsumer flag is enabled`() {
         forceNotlinkConsumerRule.setEnabled(true)
-        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Link, isVerified = true))
+        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Link))
         assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Notlink)
     }
 

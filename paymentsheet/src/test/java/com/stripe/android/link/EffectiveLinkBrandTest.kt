@@ -24,12 +24,12 @@ class EffectiveLinkBrandTest {
     }
 
     @Test
-    fun `returns account default Link when account session has no linkBrand`() {
+    fun `returns config linkBrand when account session has no linkBrand`() {
         val config = TestFactory.LINK_CONFIGURATION.copy(linkBrand = LinkBrand.Notlink)
         val account = LinkAccount(makeConsumerSession(linkBrand = null))
 
-        // LinkAccount.linkBrand defaults to Link when consumerSession.linkBrand is null
-        assertThat(config.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Link)
+        // LinkAccount.linkBrand is null when consumerSession.linkBrand is null, so config's brand wins
+        assertThat(config.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Notlink)
     }
 
     private fun makeConsumerSession(linkBrand: LinkBrand?): ConsumerSession {

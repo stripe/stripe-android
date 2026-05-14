@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -276,8 +277,9 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                 },
                 onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
                 isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
-                linkBrand = viewModel.linkHandler.linkConfigurationCoordinator.accountFlow.value?.linkBrand
-                    ?: paymentMethodMetadata.linkBrand,
+                linkBrand = paymentMethodMetadata.effectiveLinkBrand(
+                    viewModel.linkHandler.linkConfigurationCoordinator.accountFlow.value
+                ),
             )
         }
     }

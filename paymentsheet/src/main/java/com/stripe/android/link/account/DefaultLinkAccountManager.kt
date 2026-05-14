@@ -327,15 +327,8 @@ internal class DefaultLinkAccountManager @Inject constructor(
         val newLaiInfo = linkAuthIntentInfo
             ?: currentAccount?.linkAuthIntentInfo?.takeIf { isSameUser }
 
-        // Carry forward linkBrand from lookup when verification responses omit it.
-        val resolvedConsumerSession = if (consumerSession.linkBrand == null && isSameUser) {
-            consumerSession.copy(linkBrand = currentAccount?.consumerLinkBrand)
-        } else {
-            consumerSession
-        }
-
         val newAccount = LinkAccount(
-            consumerSession = resolvedConsumerSession,
+            consumerSession = consumerSession,
             consumerPublishableKey = newConsumerPublishableKey,
             displayablePaymentDetails = newPaymentDetails,
             linkAuthIntentInfo = newLaiInfo,
