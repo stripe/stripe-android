@@ -2,7 +2,9 @@ package com.stripe.android.paymentelement.embedded.form
 
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -28,6 +30,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val hasSavedPaymentMethods: Boolean,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
+    private val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
     private val tapToAddHelper: TapToAddHelper,
@@ -50,6 +53,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkConfigurationCoordinator.accountFlow.value),
             setSelection = embeddedSelectionHolder::set,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,

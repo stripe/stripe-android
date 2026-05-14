@@ -8,7 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.bankaccount.domain.BuildFinancialConnectionsLauncher
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
@@ -59,10 +61,12 @@ class CollectBankAccountActivity : AppCompatActivity() {
     }
 
     private fun OpenConnectionsFlow.launch() {
+        val configuration = requireNotNull(starterArgs).configuration
         financialConnectionsLauncher.present(
             FinancialConnectionsSheetConfiguration(
                 financialConnectionsSessionClientSecret = financialConnectionsSessionSecret,
                 publishableKey = publishableKey,
+                linkBrand = configuration.retrieveLinkBrand(),
                 stripeAccountId = stripeAccountId,
             ),
             elementsSessionContext = elementsSessionContext
@@ -77,5 +81,13 @@ class CollectBankAccountActivity : AppCompatActivity() {
             )
         )
         finish()
+    }
+}
+
+private fun CollectBankAccountConfiguration.retrieveLinkBrand(): LinkBrand? {
+    return when (this) {
+        is CollectBankAccountConfiguration.InstantDebits -> linkBrand
+        is CollectBankAccountConfiguration.USBankAccountInternal -> linkBrand
+        is CollectBankAccountConfiguration.USBankAccount -> null
     }
 }

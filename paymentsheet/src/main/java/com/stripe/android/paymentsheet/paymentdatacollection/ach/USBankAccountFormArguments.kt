@@ -4,7 +4,9 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -70,6 +72,7 @@ internal class USBankAccountFormArguments(
     val sellerBusinessName: String?,
     val forceSetupFutureUseBehavior: Boolean,
     val clientAttributionMetadata: ClientAttributionMetadata,
+    val linkBrand: LinkBrand,
 ) {
     companion object {
         fun create(
@@ -121,6 +124,9 @@ internal class USBankAccountFormArguments(
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
                 forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                linkBrand = paymentMethodMetadata.effectiveLinkBrand(
+                    viewModel.linkHandler.linkConfigurationCoordinator.accountFlow.value
+                ),
             )
         }
 
@@ -128,6 +134,7 @@ internal class USBankAccountFormArguments(
             paymentMethodMetadata: PaymentMethodMetadata,
             selectedPaymentMethodCode: String,
             hostedSurface: String,
+            linkBrand: LinkBrand,
             setSelection: (PaymentSelection?) -> Unit,
             hasSavedPaymentMethods: Boolean,
             onMandateTextChanged: (mandate: ResolvableString?, showAbove: Boolean) -> Unit,
@@ -182,6 +189,7 @@ internal class USBankAccountFormArguments(
                 sellerBusinessName = paymentMethodMetadata.sellerBusinessName,
                 forceSetupFutureUseBehavior = paymentMethodMetadata.forceSetupFutureUseBehaviorAndNewMandate,
                 clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                linkBrand = linkBrand,
             )
         }
     }

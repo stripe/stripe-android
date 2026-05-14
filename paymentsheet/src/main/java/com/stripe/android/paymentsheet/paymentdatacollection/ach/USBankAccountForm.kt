@@ -102,6 +102,7 @@ internal fun USBankAccountForm(
                 sellerBusinessName = usBankAccountFormArgs.sellerBusinessName,
                 forceSetupFutureUseBehavior = usBankAccountFormArgs.forceSetupFutureUseBehavior,
                 clientAttributionMetadata = usBankAccountFormArgs.clientAttributionMetadata,
+                linkBrand = usBankAccountFormArgs.linkBrand,
             )
         },
     )

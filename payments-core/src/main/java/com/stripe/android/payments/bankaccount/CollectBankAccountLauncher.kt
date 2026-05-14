@@ -10,6 +10,7 @@ import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
 import com.stripe.android.core.reactnative.registerForReactNativeActivityResult
 import com.stripe.android.financialconnections.ElementsSessionContext
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -174,6 +175,7 @@ sealed interface CollectBankAccountConfiguration : Parcelable {
         val name: String,
         val email: String?,
         val elementsSessionContext: ElementsSessionContext?,
+        val linkBrand: LinkBrand,
     ) : Parcelable, CollectBankAccountConfiguration
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -181,5 +183,6 @@ sealed interface CollectBankAccountConfiguration : Parcelable {
     data class InstantDebits(
         val email: String?,
         val elementsSessionContext: ElementsSessionContext?,
+        val linkBrand: LinkBrand,
     ) : Parcelable, CollectBankAccountConfiguration
 }

@@ -56,6 +56,7 @@ class FinancialConnectionsSheet internal constructor(
         return FinancialConnectionsSheetConfiguration(
             financialConnectionsSessionClientSecret = financialConnectionsSessionClientSecret,
             publishableKey = publishableKey,
+            linkBrand = null,
             stripeAccountId = stripeAccountId
         )
     }

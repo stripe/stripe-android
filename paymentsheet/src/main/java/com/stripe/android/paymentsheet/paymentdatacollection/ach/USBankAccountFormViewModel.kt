@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.IncentiveEligibilitySession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -575,6 +576,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         return CollectBankAccountConfiguration.InstantDebits(
             email = email.value,
             elementsSessionContext = makeElementsSessionContext(),
+            linkBrand = args.linkBrand,
         )
     }
 
@@ -583,6 +585,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             name = name.value,
             email = email.value,
             elementsSessionContext = makeElementsSessionContext(),
+            linkBrand = args.linkBrand,
         )
     }
 
@@ -873,6 +876,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         val sellerBusinessName: String?,
         val forceSetupFutureUseBehavior: Boolean,
         val clientAttributionMetadata: ClientAttributionMetadata,
+        val linkBrand: LinkBrand,
     )
 
     private companion object {

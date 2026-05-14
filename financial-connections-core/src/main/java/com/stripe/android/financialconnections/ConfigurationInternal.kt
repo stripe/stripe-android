@@ -14,8 +14,8 @@ import java.io.Serializable
 data class FinancialConnectionsSheetConfiguration(
     val financialConnectionsSessionClientSecret: String,
     val publishableKey: String,
+    val linkBrand: LinkBrand?,
     val stripeAccountId: String? = null,
-    val linkBrand: LinkBrand? = null,
 ) : Parcelable
 
 /**
