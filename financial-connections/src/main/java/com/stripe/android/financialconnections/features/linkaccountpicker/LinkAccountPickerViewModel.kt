@@ -54,6 +54,7 @@ import com.stripe.android.financialconnections.repository.ConsumerSessionProvide
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import dagger.assisted.Assisted
@@ -119,6 +120,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 title = display.title,
                 defaultCta = display.defaultCta,
                 consumerSessionClientSecret = consumerSession.clientSecret,
+                consumerLinkBrand = consumerSession.linkBrand,
                 singleAccount = manifest.singleAccount,
                 acquireConsentOnPrimaryCtaClick = accountsResponse.acquireConsentOnPrimaryCtaClick ?: false,
                 selectedAccountIds = selectedAccountIds
@@ -462,6 +464,7 @@ internal data class LinkAccountPickerState(
         val selectedAccountIds: List<String>,
         val addNewAccount: AddNewAccount,
         val consumerSessionClientSecret: String,
+        val consumerLinkBrand: LinkBrand?,
         val defaultCta: String,
         val nextPaneOnNewAccount: Pane?,
         val partnerToCoreAuths: Map<String, String>?,

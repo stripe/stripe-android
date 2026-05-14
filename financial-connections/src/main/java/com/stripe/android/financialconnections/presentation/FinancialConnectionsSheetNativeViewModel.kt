@@ -60,6 +60,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_WEB_AUTH_FLOW
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
+import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity.Companion.getArgs
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.ui.toLocalTheme
@@ -71,7 +72,11 @@ import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -94,8 +99,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
+    private val consumerSessionRepository: ConsumerSessionRepository,
     @Named(APPLICATION_ID) private val applicationId: String,
-    initialState: FinancialConnectionsSheetNativeState,
+    private val initialState: FinancialConnectionsSheetNativeState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
     initialState,
     nativeAuthFlowCoordinator
@@ -105,10 +111,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
 
-    private val defaultTopAppBarState: TopAppBarState by lazy {
+    private val defaultTopAppBarState: TopAppBarState get() {
         // The first pane may choose to hide the Stripe logo. Therefore, let's hide it by default
         // on the first pane.
-        initialState.toTopAppBarState(forceHideStripeLogo = true)
+        val consumerLinkBrand = consumerSessionRepository.consumerSessionFlow.value?.linkBrand
+        return initialState.toTopAppBarState(
+            consumerLinkBrand = consumerLinkBrand,
+            forceHideStripeLogo = true
+        )
     }
 
     private val currentPane = MutableStateFlow(initialState.initialPane)
@@ -144,6 +154,21 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                     is Message.UpdateTopAppBar -> {
                         updateTopAppBarState(message.update)
+                    }
+                }
+            }
+        }
+        viewModelScope.launch {
+            val resolvedLinkBrandFlow = combine(
+                consumerSessionRepository.consumerSessionFlow.map { it?.linkBrand },
+                stateFlow.map { it.linkBrand },
+            ) { consumerLinkBrand, stateLinkBrand ->
+                consumerLinkBrand ?: stateLinkBrand
+            }
+            resolvedLinkBrandFlow.distinctUntilChanged().collect { resolvedLinkBrand ->
+                topAppBarStateUpdatesByPane.update { paneToTopAppBarState ->
+                    paneToTopAppBarState.mapValues { (_, topAppBarState) ->
+                        topAppBarState.copy(linkBrand = resolvedLinkBrand)
                     }
                 }
             }
@@ -639,12 +664,13 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
 
 private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
     forceHideStripeLogo: Boolean,
+    consumerLinkBrand: LinkBrand?,
 ): TopAppBarState {
     return TopAppBarState(
         hideStripeLogo = reducedBranding,
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
         theme = theme,
-        linkBrand = linkBrand,
+        linkBrand = consumerLinkBrand ?: linkBrand,
     )
 }

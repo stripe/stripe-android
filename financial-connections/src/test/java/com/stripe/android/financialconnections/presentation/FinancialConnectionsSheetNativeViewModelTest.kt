@@ -37,6 +37,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.LinkBrand
@@ -529,6 +530,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
         navigationManager = TestNavigationManager(),
+        consumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle()),
         savedStateHandle = SavedStateHandle(),
         initialState = initialState,
         createInstantDebitsResult = createInstantDebitsResult,

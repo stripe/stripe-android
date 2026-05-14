@@ -283,6 +283,7 @@ class RealCreateInstantDebitsResultTest {
             phoneNumber = "(***) *** **12",
             isVerified = true,
             publishableKey = "pk_123",
+            linkBrand = null,
         )
     }
 

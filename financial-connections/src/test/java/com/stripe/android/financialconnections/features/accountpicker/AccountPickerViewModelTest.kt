@@ -285,6 +285,7 @@ internal class AccountPickerViewModelTest {
             phoneNumber = "(***) *** **12",
             publishableKey = null,
             isVerified = true,
+            linkBrand = null,
         )
         val accounts = partnerAccountList("id_1", "id2").copy(
             nextPane = Pane.SUCCESS,

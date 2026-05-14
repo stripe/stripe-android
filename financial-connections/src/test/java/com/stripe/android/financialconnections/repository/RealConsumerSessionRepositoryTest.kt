@@ -25,6 +25,7 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_123",
                 publishableKey = "pk_123",
                 isVerified = true,
+                linkBrand = null,
             )
         )
     }
@@ -47,6 +48,7 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_123",
                 publishableKey = "pk_123",
                 isVerified = false,
+                linkBrand = null,
             )
         )
     }
@@ -76,6 +78,7 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_123",
                 publishableKey = "pk_123",
                 isVerified = true,
+                linkBrand = null,
             )
         )
     }
@@ -105,6 +108,7 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_456",
                 publishableKey = "pk_456",
                 isVerified = false,
+                linkBrand = null,
             )
         )
     }
