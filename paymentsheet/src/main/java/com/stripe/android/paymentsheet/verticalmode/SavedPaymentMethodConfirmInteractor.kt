@@ -92,8 +92,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
-                // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
-                linkBrand = paymentMethodMetadata.linkBrand ?: LinkBrand.Link,
+                linkBrand = paymentMethodMetadata.linkBrand,
                 savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
                     linkInlineSignupAvailability = DefaultLinkInlineSignupAvailability(paymentMethodMetadata),
                     linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
@@ -122,8 +121,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
-                // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
-                linkBrand = paymentMethodMetadata.linkBrand ?: LinkBrand.Link,
+                linkBrand = paymentMethodMetadata.linkBrand,
                 processing = processing,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
                 updateSelection = updateSelection,

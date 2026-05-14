@@ -91,10 +91,10 @@ internal class PaymentMethodMetadataKtxTest {
     }
 
     @Test
-    fun `effectiveLinkBrand returns null when account is null and metadata linkBrand is null`() {
-        val metadata = PaymentMethodMetadataFactory.create(linkBrand = null)
+    fun `effectiveLinkBrand returns default Link when account is null and metadata uses default`() {
+        val metadata = PaymentMethodMetadataFactory.create()
 
-        assertThat(metadata.effectiveLinkBrand(null)).isNull()
+        assertThat(metadata.effectiveLinkBrand(null)).isEqualTo(LinkBrand.Link)
     }
 
     private fun makeConsumerSession(linkBrand: LinkBrand?): ConsumerSession {

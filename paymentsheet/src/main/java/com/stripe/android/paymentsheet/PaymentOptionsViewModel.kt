@@ -33,7 +33,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -196,7 +195,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 hasLinkWithSelectedPayment.not(),
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccountInfo.account) ?: LinkBrand.Link,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccountInfo.account),
         )
     }
 

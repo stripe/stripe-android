@@ -46,7 +46,7 @@ internal object PaymentMethodMetadataFactory {
         isGooglePayReady: Boolean = false,
         linkConfiguration: PaymentSheet.LinkConfiguration = PaymentSheet.LinkConfiguration(),
         linkMode: LinkMode? = LinkMode.LinkPaymentMethod,
-        linkBrand: LinkBrand? = null,
+        linkBrand: LinkBrand = LinkBrand.Link,
         linkState: LinkStateResult? = null,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,

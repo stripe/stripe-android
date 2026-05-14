@@ -36,7 +36,7 @@ internal interface SelectSavedPaymentMethodsInteractor {
     data class State(
         val paymentOptionsItems: List<PaymentOptionsItem>,
         val selectedPaymentOptionsItem: PaymentOptionsItem?,
-        val linkBrand: LinkBrand?,
+        val linkBrand: LinkBrand,
         val isEditing: Boolean,
         val isProcessing: Boolean,
         val canEdit: Boolean,
@@ -65,7 +65,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val updateSelection: (selection: PaymentSelection?, isUserInput: Boolean) -> Unit,
     override val isLiveMode: Boolean,
-    private val linkBrand: LinkBrand?,
+    private val linkBrand: LinkBrand,
 ) : SelectSavedPaymentMethodsInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
 

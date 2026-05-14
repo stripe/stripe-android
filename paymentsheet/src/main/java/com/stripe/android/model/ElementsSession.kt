@@ -30,6 +30,10 @@ internal data class ElementsSession(
     val merchantId: String?,
 ) : StripeModel {
 
+    val linkBrand: LinkBrand
+        // Safeguard against the server failing to return brand by defaulting to Link.
+        get() = linkSettings?.linkBrand ?: LinkBrand.Link
+
     val linkPassthroughModeEnabled: Boolean
         get() = linkSettings?.linkPassthroughModeEnabled ?: false
 
@@ -119,7 +123,7 @@ internal data class ElementsSession(
         val linkSignUpOptInFeatureEnabled: Boolean,
         val linkSignUpOptInInitialValue: Boolean,
         val linkSupportedPaymentMethodsOnboardingEnabled: List<String>,
-        val linkBrand: LinkBrand?,
+        val linkBrand: LinkBrand,
     ) : StripeModel
 
     @Parcelize

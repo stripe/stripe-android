@@ -1190,7 +1190,7 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             linkMode = null,
-            linkBrand = null,
+            linkBrand = LinkBrand.Link,
             linkStateResult = LinkState(
                 signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                 configuration = createLinkConfiguration(),
@@ -1346,7 +1346,7 @@ internal class PaymentMethodMetadataTest {
             linkConfiguration = PaymentSheet.LinkConfiguration(),
             financialConnectionsAvailability = FinancialConnectionsAvailability.Full,
             linkMode = null,
-            linkBrand = null,
+            linkBrand = LinkBrand.Link,
             linkStateResult = null,
             cardBrandFilter = PaymentSheetCardBrandFilter(cardBrandAcceptance),
             cardFundingFilter = PaymentSheetCardFundingFilter(ConfigurationDefaults.allowedCardFundingTypes),
