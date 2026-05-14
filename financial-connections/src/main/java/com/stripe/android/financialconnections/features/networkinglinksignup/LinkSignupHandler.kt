@@ -148,6 +148,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
                 consumerSessionClientSecret = signup.consumerSession.clientSecret,
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                linkBrand = manifest.linkBrand,
             )
         } else {
             // ** Legacy signup endpoint on unverified flows: 1 request **
@@ -159,6 +160,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
                 phoneNumber = state.validPhone!!,
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                linkBrand = manifest.linkBrand,
             )
         }
         return Pane.SUCCESS

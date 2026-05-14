@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -103,6 +104,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(listOf(selectedAccount)),
                 eq(true),
+                eq(LinkBrand.Link),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = cachedConsumerSession.clientSecret,
@@ -148,6 +150,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(emptyList()),
                 eq(true),
+                eq(LinkBrand.Link),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = cachedConsumerSession.clientSecret,
@@ -171,7 +174,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             whenever(getOrFetchSync()).thenReturn(syncResponse(sessionManifest()))
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
-            whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException("error"))
+            whenever(saveAccountToLink.existing(any(), any(), any(), any())).thenThrow(RuntimeException("error"))
 
             val viewModel = buildViewModel()
 
@@ -187,6 +190,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(listOf(selectedAccount)),
                 eq(true),
+                eq(LinkBrand.Link),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = cachedConsumerSession.clientSecret,

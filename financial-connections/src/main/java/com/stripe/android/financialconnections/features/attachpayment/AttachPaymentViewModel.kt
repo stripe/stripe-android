@@ -30,6 +30,7 @@ import com.stripe.android.financialconnections.repository.SuccessContentReposito
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -93,12 +94,22 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
         accounts: List<CachedPartnerAccount>,
     ) {
         if (manifest.canSetCustomLinkSuccessMessage && !isNetworkingRelinkSession()) {
+            val linkBrand = manifest.linkBrand
             successContentRepository.set(
-                message = PluralId(
-                    singular = R.string.stripe_success_pane_desc_link_success_singular,
-                    plural = R.string.stripe_success_pane_desc_link_success_plural,
-                    count = accounts.size
-                )
+                message = if (linkBrand == LinkBrand.Link) {
+                    PluralId(
+                        singular = R.string.stripe_success_pane_desc_link_success_singular,
+                        plural = R.string.stripe_success_pane_desc_link_success_plural,
+                        count = accounts.size,
+                    )
+                } else {
+                    PluralId(
+                        singular = R.string.stripe_success_pane_desc_link_success_singular_with_brand,
+                        plural = R.string.stripe_success_pane_desc_link_success_plural_with_brand,
+                        count = accounts.size,
+                        args = listOf(linkBrand.brandName()),
+                    )
+                }
             )
         }
     }

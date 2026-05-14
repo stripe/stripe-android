@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.NavigationManager
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -43,13 +44,29 @@ internal class ExitViewModel @AssistedInject constructor(
             val businessName = manifest?.getBusinessName()
             val isNetworkingSignupPane =
                 manifest?.isNetworkingUserFlow == true && stateFlow.value.referrer == Pane.NETWORKING_LINK_SIGNUP_PANE
+            // Safe default: manifest is null only on fetch failure, and Link is the original brand.
+            val linkBrand = manifest?.linkBrand ?: LinkBrand.Link
             val description = when {
                 isNetworkingSignupPane -> when (businessName) {
-                    null -> TextResource.StringId(R.string.stripe_close_dialog_networking_desc_no_business)
-                    else -> TextResource.StringId(
-                        value = R.string.stripe_close_dialog_networking_desc,
-                        args = listOf(businessName)
-                    )
+                    null -> if (linkBrand == LinkBrand.Link) {
+                        TextResource.StringId(R.string.stripe_close_dialog_networking_desc_no_business)
+                    } else {
+                        TextResource.StringId(
+                            value = R.string.stripe_close_dialog_networking_desc_no_business_with_brand,
+                            args = listOf(linkBrand.brandName())
+                        )
+                    }
+                    else -> if (linkBrand == LinkBrand.Link) {
+                        TextResource.StringId(
+                            value = R.string.stripe_close_dialog_networking_desc,
+                            args = listOf(businessName)
+                        )
+                    } else {
+                        TextResource.StringId(
+                            value = R.string.stripe_close_dialog_networking_desc_with_brand,
+                            args = listOf(businessName, linkBrand.brandName())
+                        )
+                    }
                 }
 
                 else -> when (businessName) {

@@ -338,6 +338,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = accountsList.data.toCachedPartnerAccounts(),
                     shouldPollAccountNumbers = manifest.isDataFlow,
+                    linkBrand = manifest.linkBrand,
                 )
             }
 

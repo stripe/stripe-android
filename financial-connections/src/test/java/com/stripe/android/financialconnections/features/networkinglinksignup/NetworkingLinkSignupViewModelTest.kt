@@ -731,11 +731,11 @@ class NetworkingLinkSignupViewModelTest {
 
         val saveAccountToLink = mock<SaveAccountToLink> {
             if (failOnSignup) {
-                on { new(any(), any(), any(), any(), any()) } doAnswer {
+                on { new(any(), any(), any(), any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
             } else {
-                on { new(any(), any(), any(), any(), any()) } doReturn manifest
+                on { new(any(), any(), any(), any(), any(), any()) } doReturn manifest
             }
         }
 

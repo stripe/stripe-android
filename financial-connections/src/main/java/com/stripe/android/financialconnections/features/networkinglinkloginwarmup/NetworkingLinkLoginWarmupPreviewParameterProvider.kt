@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.model.LinkBrand
 
 internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
     PreviewParameterProvider<NetworkingLinkLoginWarmupState> {
@@ -29,18 +30,21 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         ),
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = false,
+        linkBrand = LinkBrand.Link,
     )
 
     private fun loading() = NetworkingLinkLoginWarmupState(
         payload = Loading(),
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = false,
+        linkBrand = LinkBrand.Link,
     )
 
     private fun payloadError() = NetworkingLinkLoginWarmupState(
         payload = Fail(Exception("Error")),
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = false,
+        linkBrand = LinkBrand.Link,
     )
 
     private fun disablingError() = NetworkingLinkLoginWarmupState(
@@ -55,6 +59,7 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         ),
         disableNetworkingAsync = Fail(Exception("Error")),
         isInstantDebits = false,
+        linkBrand = LinkBrand.Link,
     )
 
     private fun disablingNetworking() = NetworkingLinkLoginWarmupState(
@@ -69,6 +74,7 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         ),
         disableNetworkingAsync = Loading(),
         isInstantDebits = false,
+        linkBrand = LinkBrand.Link,
     )
 
     private fun instantDebits() = NetworkingLinkLoginWarmupState(
@@ -83,5 +89,6 @@ internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
         ),
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = true,
+        linkBrand = LinkBrand.Link,
     )
 }
