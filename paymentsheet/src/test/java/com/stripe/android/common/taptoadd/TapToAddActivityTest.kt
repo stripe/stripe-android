@@ -44,6 +44,8 @@ import com.stripe.android.view.ActivityStarter
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.test.runTest
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
@@ -86,6 +88,16 @@ class TapToAddActivityTest {
     private val confirmationPage = TapToAddConfirmationPage(composeTestRule)
     private val delayPage = TapToAddDelayPage(composeTestRule)
     private val errorPage = TapToAddErrorPage(composeTestRule)
+
+    @Before
+    fun setup() {
+        IsStripeTerminalSdkAvailableOverride.override = true
+    }
+
+    @After
+    fun teardown() {
+        IsStripeTerminalSdkAvailableOverride.override = null
+    }
 
     @Test
     fun successInContinueMode() = runScenario(
