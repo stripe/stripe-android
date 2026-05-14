@@ -9,6 +9,7 @@ import androidx.test.espresso.intent.matcher.IntentMatchers.hasExtra
 import androidx.test.espresso.intent.rule.IntentsRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -27,6 +28,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkSignupModeResult
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -44,8 +46,6 @@ import com.stripe.android.view.ActivityStarter
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Rule
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
@@ -74,6 +74,7 @@ class TapToAddActivityTest {
         .around(terminalWrapperTestRule)
         .around(paymentElementCallbackTestRule)
         .around(imageLoaderTestRule)
+        .around(FeatureFlagTestRule(FeatureFlags.forceTapToAddWithTerminal, isEnabled = true))
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(RetryRule(3))
         .around(intentsRule)
@@ -88,16 +89,6 @@ class TapToAddActivityTest {
     private val confirmationPage = TapToAddConfirmationPage(composeTestRule)
     private val delayPage = TapToAddDelayPage(composeTestRule)
     private val errorPage = TapToAddErrorPage(composeTestRule)
-
-    @Before
-    fun setup() {
-        IsStripeTerminalSdkAvailableOverride.override = true
-    }
-
-    @After
-    fun teardown() {
-        IsStripeTerminalSdkAvailableOverride.override = null
-    }
 
     @Test
     fun successInContinueMode() = runScenario(

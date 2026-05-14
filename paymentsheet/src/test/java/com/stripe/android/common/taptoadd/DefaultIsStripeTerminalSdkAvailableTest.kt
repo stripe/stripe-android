@@ -65,6 +65,14 @@ class DefaultIsStripeTerminalSdkAvailableTest {
         assertThat(validatorCalls.awaitItem()).isEqualTo("5.4.1")
     }
 
+    @Test
+    fun `checking Terminal Core library returns version name from library`() {
+        val coreSdk = DefaultHasStripeTerminalCoreLibrary()
+
+        assertThat(coreSdk.invoke())
+            .isEqualTo(com.stripe.stripeterminal.BuildConfig.SDK_VERSION_NAME)
+    }
+
     private fun runScenario(
         validatorResult: Boolean,
         versionName: String,

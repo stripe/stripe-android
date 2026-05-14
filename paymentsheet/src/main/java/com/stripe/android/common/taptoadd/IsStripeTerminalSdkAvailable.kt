@@ -1,6 +1,6 @@
 package com.stripe.android.common.taptoadd
 
-import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.utils.FeatureFlags.forceTapToAddWithTerminal
 import javax.inject.Inject
 
 internal fun interface IsStripeTerminalSdkAvailable {
@@ -25,24 +25,19 @@ internal class DefaultIsStripeTerminalSdkAvailable @Inject constructor(
     private val hasStripeTerminalTapToPayLibrary: HasStripeTerminalTapToPayLibrary,
 ) : IsStripeTerminalSdkAvailable {
     override fun invoke(): Boolean {
-        return IsStripeTerminalSdkAvailableOverride.override ?: run {
-            try {
-                val versionName = hasStripeTerminalCoreLibrary()
-                hasStripeTerminalTapToPayLibrary()
+        if (forceTapToAddWithTerminal.isEnabled) {
+            return true
+        }
 
-                versionValidator(versionName)
-            } catch (_: Exception) {
-                false
-            }
+        return try {
+            val versionName = hasStripeTerminalCoreLibrary()
+            hasStripeTerminalTapToPayLibrary()
+
+            versionValidator(versionName)
+        } catch (_: Exception) {
+            false
         }
     }
-}
-
-@VisibleForTesting
-internal object IsStripeTerminalSdkAvailableOverride {
-    @VisibleForTesting
-    @Volatile
-    var override: Boolean? = null
 }
 
 internal class DefaultHasStripeTerminalCoreLibrary @Inject constructor() :
