@@ -34,20 +34,20 @@ def run_latency_tests_for_commit(commit, sample_count)
     output = run_android_latency_tests(sample_count)
     print_raw_result_debug_summary(output)
     results = parse_latency_results(output)
-    expected_test_count = extract_expected_test_count(output)
+    measured_test_count = extract_measured_test_count(output)
 
     if valid_invocation_results?(
       results: results,
       sample_count: sample_count,
-      expected_test_count: expected_test_count
+      measured_test_count: measured_test_count
     )
       puts "\nFound #{results.length} test(s) with results"
       return results
     end
 
     puts "\nInvocation did not produce a complete sample set."
-    puts "  Expected tests: #{expected_test_count || 'unknown'}"
-    puts "  Actual tests:   #{results.length}"
+    puts "  Expected measured tests: #{measured_test_count}"
+    puts "  Actual measured tests:   #{results.length}"
     if results.any?
       puts '  Samples per test:'
       results.sort.each do |test_name, durations|
@@ -185,14 +185,17 @@ def print_raw_result_debug_summary(output)
   end
 end
 
-def extract_expected_test_count(output)
-  match = output.match(/Starting (\d+) tests on/)
-  match && match[1].to_i
+def extract_measured_test_count(output)
+  output.each_line.with_object({}) do |line, measured_tests|
+    next unless line =~ /LATENCY_TEST_CASE_STARTED:\s*(.+?)\s*$/
+
+    measured_tests[Regexp.last_match(1).strip] = true
+  end.length
 end
 
-def valid_invocation_results?(results:, sample_count:, expected_test_count:)
-  return false if expected_test_count.nil?
-  return false unless results.length == expected_test_count
+def valid_invocation_results?(results:, sample_count:, measured_test_count:)
+  return false if measured_test_count.zero?
+  return false unless results.length == measured_test_count
 
   results.values.all? { |durations| durations.length == sample_count }
 end

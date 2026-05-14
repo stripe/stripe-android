@@ -33,9 +33,18 @@ internal class TestLatency(
     @Test
     fun testLatency() {
         Assume.assumeFalse(BuildConfig.IS_RUNNING_IN_CI)
-        Log.d(LOG_TAG, "LATENCY_TEST_CASE_STARTED: ${testConfig.name}")
 
-        runTestWithIterations {
+        if (!testConfig.skipMeasurement) {
+            Log.d(LOG_TAG, "LATENCY_TEST_CASE_STARTED: ${testConfig.name}")
+        }
+
+        runTestWithIterations(
+            requiredSuccessfulSamples = if (testConfig.skipMeasurement) {
+                1
+            } else {
+                BuildConfig.LATENCY_EXPERIMENT_ITERATIONS
+            }
+        ) {
             testDriver.loadComplete(
                 testParameters = TestParameters.create(
                     paymentMethodCode = "card",
@@ -45,17 +54,20 @@ internal class TestLatency(
             )
         }
 
-        Log.d(LOG_TAG, "LATENCY_TEST_CASE_FINISHED: ${testConfig.name}")
+        if (!testConfig.skipMeasurement) {
+            Log.d(LOG_TAG, "LATENCY_TEST_CASE_FINISHED: ${testConfig.name}")
+        }
     }
 
     fun runTestWithIterations(
+        requiredSuccessfulSamples: Int = BuildConfig.LATENCY_EXPERIMENT_ITERATIONS,
         block: () -> Unit,
     ) {
         var successfulSamples = 0
         var failedAttempts = 0
         var lastFailure: Throwable? = null
 
-        while (successfulSamples < BuildConfig.LATENCY_EXPERIMENT_ITERATIONS && failedAttempts < MAX_FAILED_ATTEMPTS) {
+        while (successfulSamples < requiredSuccessfulSamples && failedAttempts < MAX_FAILED_ATTEMPTS) {
             runCatching {
                 block()
             }.onSuccess {
@@ -66,9 +78,9 @@ internal class TestLatency(
             }
         }
 
-        if (successfulSamples < BuildConfig.LATENCY_EXPERIMENT_ITERATIONS) {
+        if (successfulSamples < requiredSuccessfulSamples) {
             throw AssertionError(
-                "Collected $successfulSamples/${BuildConfig.LATENCY_EXPERIMENT_ITERATIONS} samples " +
+                "Collected $successfulSamples/$requiredSuccessfulSamples samples " +
                     "for ${testConfig.name} after $failedAttempts failed attempts",
                 lastFailure,
             )
@@ -79,6 +91,7 @@ internal class TestLatency(
         val name: String,
         val isReturningCustomer: Boolean,
         val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
+        val skipMeasurement: Boolean = false,
     ) {
         override fun toString() = name
     }
@@ -91,6 +104,17 @@ internal class TestLatency(
         @Parameterized.Parameters(name = "{0}")
         fun testConfigs(): List<Array<Any>> {
             return listOf(
+                // Warm the process and network stack before collecting measured samples.
+                testConfig(
+                    testName = "warm_up_test_link_off_with_no_customer",
+                    isReturningCustomer = false,
+                    skipMeasurement = true,
+                ) { settings: PlaygroundSettings ->
+                    settings[MerchantSettingsDefinition] = Merchant.US
+                    settings[LinkSettingsDefinition] = false
+                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
+                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                },
                 testConfig(
                     testName = "test_link_off_with_no_customer",
                     isReturningCustomer = false,
@@ -216,6 +240,7 @@ internal class TestLatency(
         private fun testConfig(
             testName: String,
             isReturningCustomer: Boolean,
+            skipMeasurement: Boolean = false,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
         ): Array<Any> {
             return arrayOf(
@@ -226,6 +251,7 @@ internal class TestLatency(
                         settings[DisablePassiveCaptchaWarmupDefinition] = true
                         playgroundSettingsBlock(settings)
                     },
+                    skipMeasurement = skipMeasurement,
                 )
             )
         }
