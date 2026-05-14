@@ -556,7 +556,8 @@ internal data class FinancialConnectionsSheetNativeState(
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
-        linkBrand = args.initialSyncResponse.manifest.linkBrand,
+        linkBrand = args.configuration.linkBrand
+            ?: args.initialSyncResponse.manifest.linkBrand,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
         manualEntryUsesMicrodeposits = args.initialSyncResponse.manifest.manualEntryUsesMicrodeposits,
