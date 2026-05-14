@@ -9,8 +9,8 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheetConfiguration
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 import com.stripe.android.model.LinkBrand
-import com.stripe.android.payments.bankaccount.domain.BuildFinancialConnectionsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.domain.BuildFinancialConnectionsLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult

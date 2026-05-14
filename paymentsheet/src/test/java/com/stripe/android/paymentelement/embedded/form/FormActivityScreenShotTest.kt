@@ -146,6 +146,7 @@ internal class FormActivityScreenShotTest {
             hasSavedPaymentMethods = false,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             sheetActivityStateHolder = stateHolder,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
