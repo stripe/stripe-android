@@ -87,6 +87,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.android.utils.FakeLinkStore
@@ -4667,6 +4668,7 @@ internal class DefaultPaymentElementLoaderTest {
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
+            durationProvider = FakeDurationProvider(),
         )
     }
 
