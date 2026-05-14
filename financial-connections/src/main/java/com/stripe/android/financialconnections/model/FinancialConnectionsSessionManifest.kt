@@ -142,14 +142,14 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName("theme")
     val theme: Theme? = null,
     @SerialName("link_brand")
-    private val _linkBrand: LinkBrand? = null,
+    private val rawLinkBrand: LinkBrand? = null,
 ) : Parcelable {
 
     val consentAcquired: Boolean
         get() = !consentRequired || consentAcquiredAt != null
 
     val linkBrand: LinkBrand
-        get() = _linkBrand ?: LinkBrand.Link
+        get() = rawLinkBrand ?: LinkBrand.Link
 
     /**
      *

@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.ShapedIcon
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -47,6 +46,7 @@ import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.LinkGreen200
 import com.stripe.android.financialconnections.ui.theme.LinkGreen900
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable

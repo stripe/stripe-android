@@ -4,7 +4,6 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetConfigur
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PaymentAccountParams.BankAccount
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
@@ -13,6 +12,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.PollTimingOptions
 import com.stripe.android.financialconnections.utils.retryOnException
 import com.stripe.android.financialconnections.utils.shouldRetry
+import com.stripe.android.model.LinkBrand
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.max
