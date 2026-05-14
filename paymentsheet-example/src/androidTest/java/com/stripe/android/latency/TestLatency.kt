@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DisablePassiveCaptchaWarmupDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePayMode
 import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
@@ -56,7 +57,7 @@ internal class TestLatency(
 
         while (successfulSamples < BuildConfig.LATENCY_EXPERIMENT_ITERATIONS && failedAttempts < MAX_FAILED_ATTEMPTS) {
             runCatching {
-               block()
+                block()
             }.onSuccess {
                 successfulSamples += 1
             }.onFailure { error ->
@@ -221,7 +222,10 @@ internal class TestLatency(
                 TestConfig(
                     name = testName,
                     isReturningCustomer = isReturningCustomer,
-                    playgroundSettingsBlock = playgroundSettingsBlock,
+                    playgroundSettingsBlock = { settings ->
+                        settings[DisablePassiveCaptchaWarmupDefinition] = true
+                        playgroundSettingsBlock(settings)
+                    },
                 )
             )
         }

@@ -600,6 +600,7 @@ internal class PlaygroundSettings private constructor(
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
             CustomEndpointDefinition,
+            DisablePassiveCaptchaWarmupDefinition,
             ShippingAddressSettingsDefinition,
             ConfirmationTokenSettingsDefinition,
         )
