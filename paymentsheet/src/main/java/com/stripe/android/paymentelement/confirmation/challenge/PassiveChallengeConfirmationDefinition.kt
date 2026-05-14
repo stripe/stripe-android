@@ -7,6 +7,7 @@ import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.RadarOptions
@@ -38,6 +39,7 @@ internal class PassiveChallengeConfirmationDefinition @Inject constructor(
     }
 
     override fun bootstrap(paymentMethodMetadata: PaymentMethodMetadata) {
+        if (FeatureFlags.disablePassiveCaptchaWarmup.isEnabled) return
         val passiveCaptchaParams = paymentMethodMetadata.passiveCaptchaParams ?: return
         passiveChallengeWarmer.start(
             passiveCaptchaParams = passiveCaptchaParams,
