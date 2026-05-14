@@ -312,6 +312,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
+            accountLinkBrandFlow = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account?.linkBrand },
         )
     }
 

@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.link.ui.verification.VerificationViewState
 import com.stripe.android.link.verification.LinkInlineInteractor
@@ -201,7 +202,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                             ),
                             theme = arguments.configuration.walletButtons?.buttonThemes?.link
                                 ?: LinkButtonTheme.DEFAULT,
-                            linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link,
+                            linkBrand = linkConfiguration?.effectiveLinkBrand(linkAccountInfo.account)
+                                ?: LinkBrand.Link,
                         ).takeIf {
                             // Only show Link button if the Link verification state is resolved.
                             linkEmbeddedState.verificationState is VerificationState.RenderButton &&
@@ -381,7 +383,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkPaymentLauncher = walletsButtonLinkLauncher,
                 linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
                 analyticsCallbackProvider =
-                flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
+                    flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }

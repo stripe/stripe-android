@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.example.settings.EmailSetting
 import com.stripe.android.financialconnections.example.settings.ExperienceSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
+import com.stripe.android.financialconnections.example.settings.ForceNotlinkConsumerSetting
 import com.stripe.android.financialconnections.example.settings.ForceNotlinkSetting
 import com.stripe.android.financialconnections.example.settings.IntegrationTypeSetting
 import com.stripe.android.financialconnections.example.settings.MerchantSetting
@@ -454,6 +455,9 @@ internal class FinancialConnectionsPlaygroundViewModel(
         // Link surfaces in this app still rely on the global feature flag override.
         FeatureFlags.forceNotlink.setEnabled(
             playgroundSettings.get<ForceNotlinkSetting>().selectedOption
+        )
+        FeatureFlags.forceNotlinkConsumer.setEnabled(
+            playgroundSettings.get<ForceNotlinkConsumerSetting>().selectedOption
         )
     }
 

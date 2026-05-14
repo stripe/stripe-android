@@ -1,10 +1,20 @@
 package com.stripe.android.link.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
+import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Rule
 import org.junit.Test
 
 class LinkAccountTest {
+
+    @get:Rule
+    val forceNotlinkConsumerRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.forceNotlinkConsumer,
+        isEnabled = false,
+    )
 
     @Test
     fun `Returns unredacted E164 phone number if unredacted local number and country are available`() {
@@ -66,6 +76,54 @@ class LinkAccountTest {
         )
         val linkAccount = LinkAccount(consumerSession)
         assertThat(linkAccount.isVerified).isFalse()
+    }
+
+    @Test
+    fun `linkBrand is null when consumerSession has no linkBrand`() {
+        val linkAccount = LinkAccount(makeConsumerSession())
+        assertThat(linkAccount.linkBrand).isNull()
+    }
+
+    @Test
+    fun `linkBrand returns consumer session brand when present`() {
+        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Notlink))
+        assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `linkBrand returns Notlink when forceNotlinkConsumer flag is enabled`() {
+        forceNotlinkConsumerRule.setEnabled(true)
+        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Link))
+        assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `consumerLinkBrand returns raw value from consumer session`() {
+        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Notlink))
+        assertThat(linkAccount.consumerLinkBrand).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `consumerLinkBrand returns null when session has no linkBrand`() {
+        val linkAccount = LinkAccount(makeConsumerSession())
+        assertThat(linkAccount.consumerLinkBrand).isNull()
+    }
+
+    private fun makeConsumerSession(
+        linkBrand: LinkBrand? = null,
+        isVerified: Boolean = false,
+    ): ConsumerSession {
+        val authLevel = ConsumerSession.AuthenticationLevel.OneFactorAuthentication.takeIf { isVerified }
+        return ConsumerSession(
+            clientSecret = "consumer_session_007",
+            emailAddress = "test@example.com",
+            redactedPhoneNumber = "+1********07",
+            redactedFormattedPhoneNumber = "(***) *** **07",
+            verificationSessions = emptyList(),
+            currentAuthenticationLevel = authLevel,
+            minimumAuthenticationLevel = authLevel,
+            linkBrand = linkBrand,
+        )
     }
 
     private fun makeLinkAccount(

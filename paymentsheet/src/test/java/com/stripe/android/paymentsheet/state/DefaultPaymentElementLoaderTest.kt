@@ -1180,7 +1180,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -1225,7 +1225,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -1324,7 +1324,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             ),
             linkStore = FakeLinkStore(hasUsedLink = true),
         )
@@ -1361,7 +1361,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -2125,7 +2125,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             ),
             linkStore = FakeLinkStore(hasUsedLink = false),
         )
@@ -4428,7 +4428,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
-            linkBrand = null,
+            linkBrand = LinkBrand.Link,
         )
     }
 

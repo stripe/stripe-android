@@ -32,12 +32,14 @@ import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
@@ -265,7 +267,10 @@ internal class DefaultFlowController @Inject internal constructor(
 
     override fun getPaymentOption(): PaymentOption? {
         return viewModel.paymentSelection?.let {
-            paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+            val linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.effectiveLinkBrand(
+                linkAccountHolder.linkAccountInfo.value.account
+            )
+            paymentOptionFactory.create(it, linkBrand)
         }
     }
 
@@ -428,14 +433,16 @@ internal class DefaultFlowController @Inject internal constructor(
                 // Should always have Link configuration here.
                 val linkConfiguration = viewModel.state?.linkConfiguration
                     ?: return
+                val effectiveBrand =
+                    linkConfiguration.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
                 val selection = Link(
-                    brand = linkConfiguration.linkBrand,
+                    brand = effectiveBrand,
                     selectedPayment = result.selectedPayment,
                 )
                 viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(selection, linkConfiguration.linkBrand),
+                        paymentOption = paymentOptionFactory.create(selection, effectiveBrand),
                         didCancel = false,
                     )
                 )
@@ -493,7 +500,9 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             viewModel.paymentSelection = newSelection
             val paymentOption = newSelection?.let {
-                paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+                val linkBrand = viewModel.state?.linkConfiguration
+                    ?.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
+                paymentOptionFactory.create(it, linkBrand)
             }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
@@ -633,8 +642,10 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private fun onPaymentSelection(canceled: Boolean) {
         val paymentSelection = viewModel.paymentSelection
+        val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         val paymentOption = paymentSelection?.let {
-            paymentOptionFactory.create(it, viewModel.state?.linkConfiguration?.linkBrand)
+            val linkBrand = viewModel.state?.linkConfiguration?.effectiveLinkBrand(linkAccount)
+            paymentOptionFactory.create(it, linkBrand)
         }
 
         paymentOptionResultCallback.onPaymentOptionResult(

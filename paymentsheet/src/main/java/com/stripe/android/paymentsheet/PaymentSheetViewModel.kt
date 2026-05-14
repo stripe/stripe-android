@@ -27,9 +27,11 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -197,9 +199,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
         linkHandler.linkConfigurationCoordinator.emailFlow,
+        linkHandler.linkConfigurationCoordinator.accountFlow,
         buttonsEnabled,
         paymentMethodMetadata,
-    ) { isLinkAvailable, linkEmail, buttonsEnabled, paymentMethodMetadata ->
+    ) { isLinkAvailable, linkEmail, account, buttonsEnabled, paymentMethodMetadata ->
+        val linkBrand = paymentMethodMetadata?.effectiveLinkBrand(account) ?: LinkBrand.Link
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
@@ -210,13 +214,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = args.googlePayConfig?.buttonType.asGooglePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
-            onLinkPressed = this::checkoutWithLink,
+            onLinkPressed = { checkoutWithLink(linkBrand) },
             onShopPayPressed = this::checkoutWithShopPay,
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
             cardBrandFilter = paymentMethodMetadata?.cardBrandFilter ?: DefaultCardBrandFilter,
-            linkBrand = paymentMethodMetadata?.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
+            linkBrand = linkBrand,
         )
     }
 
@@ -430,13 +434,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkout(PaymentSelection.ShopPay, CheckoutIdentifier.SheetTopWallet)
     }
 
-    fun checkoutWithLink() {
-        // Should always have Link configuration if we're checking out with Link.
-        val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
-            ?: return
+    @VisibleForTesting
+    internal fun checkoutWithLink(linkBrand: LinkBrand) {
         checkout(
             PaymentSelection.Link(
-                brand = linkConfiguration.linkBrand,
+                brand = linkBrand,
                 linkExpressMode = LinkExpressMode.DISABLED
             ),
             CheckoutIdentifier.SheetTopWallet
@@ -444,14 +446,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun checkoutWithLinkExpress(paymentMethodMetadata: PaymentMethodMetadata) {
-        // Should always have Link configuration if we're checking out with Link.
-        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
-            ?: return
+        val linkBrand =
+            paymentMethodMetadata.effectiveLinkBrand(linkHandler.linkConfigurationCoordinator.accountFlow.value)
         // We don't want to fall back to web on express mode if attestation
         // fails on payment sheet given the OTP shows on launch.
         checkout(
             PaymentSelection.Link(
-                brand = linkConfiguration.linkBrand,
+                brand = linkBrand,
                 linkExpressMode = LinkExpressMode.ENABLED_NO_WEB_FALLBACK,
             ),
             CheckoutIdentifier.SheetTopWallet

@@ -190,9 +190,9 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `missing link_brand is parsed as null`() {
+    fun `missing link_brand defaults to Link`() {
         val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand(linkBrand = null))
-        assertThat(elementsSession?.linkSettings?.linkBrand).isNull()
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Link)
     }
 
     @Test

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -56,6 +57,7 @@ internal class SavedPaymentMethodMutator(
     ) -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
+    accountLinkBrandFlow: StateFlow<LinkBrand?>,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = combineAsStateFlow(
         customerStateHolder.customer,
@@ -69,12 +71,17 @@ internal class SavedPaymentMethodMutator(
     }
 
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
+        val configLinkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkBrand }
+        val effectiveLinkBrand =
+            combineAsStateFlow(accountLinkBrandFlow, configLinkBrand) { accountBrand, configBrand ->
+                accountBrand ?: configBrand
+            }
         PaymentOptionsItemsMapper(
             customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow { it?.customerMetadata },
             customerState = customerStateHolder.customer,
             isGooglePayReady = paymentMethodMetadataFlow.mapAsStateFlow { it?.isGooglePayReady == true },
             isLinkEnabled = isLinkEnabled,
-            linkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkState?.configuration?.linkBrand },
+            linkBrand = effectiveLinkBrand,
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = { paymentMethodMetadataFlow.value?.displayNameForCode(it).orEmpty() },
             isCbcEligible = { paymentMethodMetadataFlow.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible },
@@ -374,7 +381,7 @@ internal class SavedPaymentMethodMutator(
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,
                             allowedBillingCountries =
-                            viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
+                                viewModel.config.billingDetailsCollectionConfiguration.allowedBillingCountries,
                             removeExecutor = { method ->
                                 performRemove()
                             },
@@ -394,7 +401,7 @@ internal class SavedPaymentMethodMutator(
                             isDefaultPaymentMethod = (
                                 displayableSavedPaymentMethod.isDefaultPaymentMethod(
                                     defaultPaymentMethodId =
-                                    viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
+                                        viewModel.customerStateHolder.customer.value?.defaultPaymentMethodId
                                 )
                                 ),
                             removeMessage = paymentMethodMetadata?.customerMetadata?.removePaymentMethod
@@ -439,6 +446,8 @@ internal class SavedPaymentMethodMutator(
                 },
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
+                accountLinkBrandFlow = viewModel.linkHandler.linkConfigurationCoordinator.accountFlow
+                    .mapAsStateFlow { it?.linkBrand },
             ).apply {
                 viewModel.viewModelScope.launch {
                     viewModel.navigationHandler.currentScreen.collect { currentScreen ->
