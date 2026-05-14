@@ -11,6 +11,7 @@ from collections import defaultdict
 # These need to be set in environment variables.
 user = os.getenv("BROWSERSTACK_USERNAME")
 authKey = os.getenv("BROWSERSTACK_ACCESS_KEY")
+bitriseQuarantinedTests = os.getenv("BITRISE_QUARANTINED_TESTS_JSON")
 
 PROJECT_NAME = "Mobile Payments"
 
@@ -273,10 +274,24 @@ def executeTests(appUrl, testUrl):
 
     numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
-    addedParams = {
+    shardsParams = {
         "shards": {
             "numberOfShards": numberOfShards,
         },
+    }
+
+    if bitriseQuarantinedTests:
+        instrumentationOptionsParams = {
+            "instrumentationOptions": {
+                "bitriseQuarantinedTests": bitriseQuarantinedTests.encode("utf-8").hex(),
+            }
+        }
+    else:
+        instrumentationOptionsParams = {}
+
+    addedParams = {
+        **shardsParams,
+        **instrumentationOptionsParams,
     }
     return executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParams)
 
