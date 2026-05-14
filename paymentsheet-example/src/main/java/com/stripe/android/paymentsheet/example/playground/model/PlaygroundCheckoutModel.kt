@@ -309,9 +309,7 @@ class CheckoutRequest private constructor(
                 paymentMethodSaveFeature = paymentMethodSaveFeature,
                 paymentMethodRemoveFeature = paymentMethodRemoveFeature,
                 paymentMethodSetAsDefaultFeature = paymentMethodSetAsDefaultFeature,
-                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature.takeIf {
-                    paymentMethodRemoveLastFeature == FeatureState.Enabled
-                },
+                paymentMethodRemoveLastFeature = paymentMethodRemoveLastFeature,
                 paymentMethodRedisplayFeature = paymentMethodRedisplayFeature,
                 paymentMethodRedisplayFilters = paymentMethodRedisplayFilters,
                 paymentMethodOverrideRedisplay = paymentMethodOverrideRedisplay,
