@@ -12,6 +12,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
@@ -237,6 +238,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val createCustomerMetadata: CreateCustomerMetadata,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
+    private val durationProvider: DurationProvider,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -271,10 +273,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         tapToAddConnectionStarter.start(configuration)
 
         val isGooglePaySupportedOnDevice = async {
-            isGooglePaySupportedOnDevice()
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported
+            ) {
+                isGooglePaySupportedOnDevice()
+            }
         }
         val isGooglePaySupportedByConfiguration = async {
-            configuration.isGooglePayReady()
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadIsGooglePayReady
+            ) {
+                configuration.isGooglePayReady()
+            }
         }
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
@@ -316,13 +326,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         val linkState = async {
-            createLinkState(
-                elementsSession = elementsSession,
-                configuration = configuration,
-                initializationMode = initializationMode,
-                customerMetadata = customerMetadata,
-                clientAttributionMetadata = clientAttributionMetadata,
-            )
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState) {
+                createLinkState(
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
         }
 
         val paymentMethodMetadata = async {
@@ -345,22 +357,33 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
 
         val customer = async {
-            createCustomerState(
-                initializationMode = initializationMode,
-                elementsSession = elementsSession,
-                metadata = paymentMethodMetadata.await(),
-                savedSelection = savedSelection,
-            )
+            val paymentMethodMetadata = paymentMethodMetadata.await()
+
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadCreateCustomerState) {
+                createCustomerState(
+                    initializationMode = initializationMode,
+                    elementsSession = elementsSession,
+                    metadata = paymentMethodMetadata,
+                    savedSelection = savedSelection,
+                )
+            }
         }
 
         val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(
-                savedSelection = savedSelection,
-                metadata = paymentMethodMetadata.await(),
-                customer = customer.await(),
-                isGooglePayReady = isGooglePayReady,
-                isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
-            )
+            val paymentMethodMetadata = paymentMethodMetadata.await()
+            val customer = customer.await()
+
+            durationProvider.measureDuration(
+                DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection
+            ) {
+                retrieveInitialPaymentSelection(
+                    savedSelection = savedSelection,
+                    metadata = paymentMethodMetadata,
+                    customer = customer,
+                    isGooglePayReady = isGooglePayReady,
+                    isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
+                )
+            }
         }
 
         val stripeIntent = elementsSession.stripeIntent
@@ -409,14 +432,18 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
     ): ElementsSession {
-        return if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
-            checkoutSessionLoader(initializationMode)
-        } else {
-            elementsSessionLoader(
-                initializationMode = initializationMode,
-                configuration = configuration,
-                savedPaymentMethodSelection = savedPaymentMethodSelection,
-            )
+        return durationProvider.measureDuration(
+            DurationProvider.Key.PaymentSheetLoadSessionLoad
+        ) {
+            if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
+                checkoutSessionLoader(initializationMode)
+            } else {
+                elementsSessionLoader(
+                    initializationMode = initializationMode,
+                    configuration = configuration,
+                    savedPaymentMethodSelection = savedPaymentMethodSelection,
+                )
+            }
         }
     }
 
@@ -678,13 +705,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePayReady: Boolean,
         isLinkAvailable: Boolean,
     ): SavedSelection {
-        val customerConfiguration = configuration.customer
-        val prefsRepository = prefsRepositoryFactory.create(customerConfiguration?.id)
+        return durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection) {
+            val customerConfiguration = configuration.customer
+            val prefsRepository = prefsRepositoryFactory.create(customerConfiguration?.id)
 
-        return prefsRepository.getSavedSelection(
-            isGooglePayAvailable = isGooglePayReady,
-            isLinkAvailable = isLinkAvailable,
-        )
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = isGooglePayReady,
+                isLinkAvailable = isLinkAvailable,
+            )
+        }
     }
 
     private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {
