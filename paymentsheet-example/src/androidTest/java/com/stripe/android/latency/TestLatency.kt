@@ -2,6 +2,7 @@ package com.stripe.android.latency
 
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -15,7 +16,10 @@ import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.utils.TestRules
 import org.junit.Assume
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -28,7 +32,19 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 internal class TestLatency(
     val testConfig: TestConfig,
-) : BasePlaygroundTest() {
+): BasePlaygroundTest() {
+
+    @get:Rule
+    val disablePassiveCaptchaWarmupRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disablePassiveCaptchaWarmup,
+        isEnabled = true,
+    )
+
+    @get:Rule
+    override val rules = TestRules.create(disableAnimations = true) {
+        around(disablePassiveCaptchaWarmupRule)
+    }
+
     @Test
     fun testLatency() {
         Assume.assumeFalse(BuildConfig.IS_RUNNING_IN_CI)

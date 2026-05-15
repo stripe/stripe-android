@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.repository
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.ConsumerSession
+import com.stripe.android.model.LinkBrand
 import org.junit.Test
 
 class RealConsumerSessionRepositoryTest {
@@ -25,6 +26,7 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_123",
                 publishableKey = "pk_123",
                 isVerified = true,
+                linkBrand = null,
             )
         )
     }
@@ -47,6 +49,7 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_123",
                 publishableKey = "pk_123",
                 isVerified = false,
+                linkBrand = null,
             )
         )
     }
@@ -76,6 +79,7 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_123",
                 publishableKey = "pk_123",
                 isVerified = true,
+                linkBrand = null,
             )
         )
     }
@@ -105,13 +109,73 @@ class RealConsumerSessionRepositoryTest {
                 clientSecret = "abc_456",
                 publishableKey = "pk_456",
                 isVerified = false,
+                linkBrand = null,
             )
         )
     }
 
+    @Test
+    fun `storeNewConsumerSession persists linkBrand from ConsumerSession`() {
+        val session = makeConsumerSession(
+            clientSecret = "abc_123",
+            isVerified = true,
+            linkBrand = LinkBrand.Notlink,
+        )
+
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        store.storeNewConsumerSession(session, "pk_123")
+
+        val cachedSession = store.provideConsumerSession()
+        assertThat(cachedSession?.linkBrand).isEqualTo(LinkBrand.Notlink)
+    }
+
+    @Test
+    fun `consumerSessionFlow emits null initially`() {
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+        assertThat(store.consumerSessionFlow.value).isNull()
+    }
+
+    @Test
+    fun `consumerSessionFlow emits updated session when stored`() {
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+
+        val session = makeConsumerSession(
+            clientSecret = "abc_123",
+            isVerified = true,
+            linkBrand = LinkBrand.Link,
+        )
+        store.storeNewConsumerSession(session, "pk_123")
+
+        val emitted = store.consumerSessionFlow.value
+        assertThat(emitted?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `updateConsumerSession updates linkBrand from new session`() {
+        val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
+
+        val session1 = makeConsumerSession(
+            clientSecret = "abc_123",
+            isVerified = true,
+            linkBrand = LinkBrand.Link,
+        )
+        store.storeNewConsumerSession(session1, "pk_123")
+
+        val session2 = makeConsumerSession(
+            clientSecret = "abc_123",
+            isVerified = true,
+            linkBrand = LinkBrand.Notlink,
+        )
+        store.updateConsumerSession(session2)
+
+        val cachedSession = store.provideConsumerSession()
+        assertThat(cachedSession?.linkBrand).isEqualTo(LinkBrand.Notlink)
+    }
+
     private fun makeConsumerSession(
         clientSecret: String,
-        isVerified: Boolean
+        isVerified: Boolean,
+        linkBrand: LinkBrand? = null,
     ): ConsumerSession {
         return ConsumerSession(
             clientSecret = clientSecret,
@@ -130,6 +194,7 @@ class RealConsumerSessionRepositoryTest {
                     },
                 ),
             ),
+            linkBrand = linkBrand,
         )
     }
 }

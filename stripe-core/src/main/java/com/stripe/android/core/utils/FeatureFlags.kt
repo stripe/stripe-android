@@ -18,6 +18,8 @@ object FeatureFlags {
     val forceNotlinkConsumer = FeatureFlag("Link: Force Notlink consumer")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
+    val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
+    val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
