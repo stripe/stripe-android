@@ -621,6 +621,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Link Express is launched when viewmodel is started with logged in link account`() = confirmationTest {
         createViewModel(
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedIn,
@@ -1473,6 +1474,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Does not show processing WalletsProcessingState when using Link Express`() = confirmationTest {
         val viewModel = createViewModel(
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.NeedsVerification,
@@ -2668,6 +2670,7 @@ internal class PaymentSheetViewModelTest {
 
         createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = LINK_CONFIG,
                 loginState = LinkState.LoginState.LoggedIn,
@@ -2709,6 +2712,7 @@ internal class PaymentSheetViewModelTest {
 
         createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = LINK_CONFIG,
                 loginState = LinkState.LoginState.LoggedIn,

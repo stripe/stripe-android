@@ -332,7 +332,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
         withContext(Dispatchers.Main.immediate) {
-            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(state.paymentMethodMetadata.linkState)
+            val shouldLaunchEagerly = linkHandler.setupLinkWithEagerLaunch(
+                state = state.paymentMethodMetadata.linkState,
+                customerPaymentMethods = state.customer?.paymentMethods.orEmpty(),
+            )
             if (shouldLaunchEagerly) {
                 checkoutWithLinkExpress(state.paymentMethodMetadata)
             }
