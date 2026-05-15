@@ -100,24 +100,24 @@ class PaymentSelectionTest {
     @Test
     fun `Link label uses brand name`() {
         val label = PaymentSelection.Link(
-            brand = LinkBrand.Notlink,
-        ).label(linkBrand = LinkBrand.Notlink).resolve(context)
+            brand = LinkBrand.Onelink,
+        ).label(linkBrand = LinkBrand.Onelink).resolve(context)
 
-        assertThat(label).isEqualTo("Notlink")
+        assertThat(label).isEqualTo("Onelink")
     }
 
     @Test
     fun `Saved Link passthrough card label uses linkBrand`() {
         val pm = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true)
-        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Notlink).resolve(context)
+        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Onelink).resolve(context)
 
-        assertThat(label).isEqualTo("Notlink")
+        assertThat(label).isEqualTo("Onelink")
     }
 
     @Test
     fun `Saved Link passthrough card label without sublabel shows card last4`() {
         val pm = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true)
-        val label = pm.getLabel(linkBrand = LinkBrand.Notlink, canShowSublabel = false)?.resolve(context)
+        val label = pm.getLabel(linkBrand = LinkBrand.Onelink, canShowSublabel = false)?.resolve(context)
 
         assertThat(label).isEqualTo("···· 4242")
     }
@@ -125,9 +125,9 @@ class PaymentSelectionTest {
     @Test
     fun `Saved Link passthrough US bank label uses linkBrand`() {
         val pm = PaymentMethodFixtures.US_BANK_ACCOUNT!!.copy(isLinkPassthroughMode = true)
-        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Notlink).resolve(context)
+        val label = PaymentSelection.Saved(pm).label(linkBrand = LinkBrand.Onelink).resolve(context)
 
-        assertThat(label).isEqualTo("Notlink")
+        assertThat(label).isEqualTo("Onelink")
     }
 
     @Test

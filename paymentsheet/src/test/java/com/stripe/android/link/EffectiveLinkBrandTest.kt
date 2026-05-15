@@ -11,25 +11,25 @@ class EffectiveLinkBrandTest {
     @Test
     fun `returns account linkBrand when account is present`() {
         val config = TestFactory.LINK_CONFIGURATION.copy(linkBrand = LinkBrand.Link)
-        val account = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Notlink))
+        val account = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Onelink))
 
-        assertThat(config.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Notlink)
+        assertThat(config.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
     fun `returns config linkBrand when account is null`() {
-        val config = TestFactory.LINK_CONFIGURATION.copy(linkBrand = LinkBrand.Notlink)
+        val config = TestFactory.LINK_CONFIGURATION.copy(linkBrand = LinkBrand.Onelink)
 
-        assertThat(config.effectiveLinkBrand(null)).isEqualTo(LinkBrand.Notlink)
+        assertThat(config.effectiveLinkBrand(null)).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
     fun `returns config linkBrand when account session has no linkBrand`() {
-        val config = TestFactory.LINK_CONFIGURATION.copy(linkBrand = LinkBrand.Notlink)
+        val config = TestFactory.LINK_CONFIGURATION.copy(linkBrand = LinkBrand.Onelink)
         val account = LinkAccount(makeConsumerSession(linkBrand = null))
 
         // LinkAccount.linkBrand is null when consumerSession.linkBrand is null, so config's brand wins
-        assertThat(config.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Notlink)
+        assertThat(config.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Onelink)
     }
 
     private fun makeConsumerSession(linkBrand: LinkBrand?): ConsumerSession {

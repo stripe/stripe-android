@@ -30,8 +30,8 @@ class PaymentOptionsStateFactoryTest {
 
     @Test
     fun `Link payment option conversion requires LinkBrand`() {
-        assertThat(PaymentOptionsItem.Link(linkBrand = LinkBrand.Notlink).toPaymentSelection())
-            .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Notlink))
+        assertThat(PaymentOptionsItem.Link(linkBrand = LinkBrand.Onelink).toPaymentSelection())
+            .isEqualTo(PaymentSelection.Link(brand = LinkBrand.Onelink))
     }
 
     @Test

@@ -3,11 +3,11 @@ package com.stripe.android.financialconnections.example.settings
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
-data class ForceNotlinkConsumerSetting(
+data class ForceOnelinkConsumerSetting(
     override val selectedOption: Boolean = false,
-    override val key: String = "force_notlink_consumer",
+    override val key: String = "force_onelink_consumer",
 ) : Saveable<Boolean>, SingleChoiceSetting<Boolean>(
-    displayName = "Force Notlink Consumer",
+    displayName = "Force Onelink Consumer",
     options = listOf(
         Option("Off", false),
         Option("On", true),

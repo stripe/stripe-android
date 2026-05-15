@@ -208,8 +208,8 @@ internal class ElementsSessionJsonParser(
             LinkMode.entries.firstOrNull { it.value == mode }
         }
 
-        val linkBrand = if (FeatureFlags.forceNotlink.isEnabled) {
-            LinkBrand.Notlink
+        val linkBrand = if (FeatureFlags.forceOnelink.isEnabled) {
+            LinkBrand.Onelink
         } else {
             json?.optString(FIELD_LINK_BRAND)
                 ?.takeIf { it.isNotEmpty() }

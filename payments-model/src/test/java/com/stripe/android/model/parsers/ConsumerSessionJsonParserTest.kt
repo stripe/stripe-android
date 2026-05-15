@@ -95,12 +95,12 @@ class ConsumerSessionJsonParserTest {
     }
 
     @Test
-    fun `Parse consumer with link_brand notlink`() {
+    fun `Parse consumer with link_brand onelink`() {
         val json = JSONObject(
             """
                 {
                   "auth_session_client_secret": null,
-                  "link_brand": "notlink",
+                  "link_brand": "onelink",
                   "consumer_session": {
                     "client_secret": "secret_123",
                     "email_address": "test@stripe.com",
@@ -112,7 +112,7 @@ class ConsumerSessionJsonParserTest {
             """.trimIndent()
         )
         val result = ConsumerSessionJsonParser().parse(json)
-        assertThat(result?.linkBrand).isEqualTo(LinkBrand.Notlink)
+        assertThat(result?.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test

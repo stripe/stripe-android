@@ -78,16 +78,16 @@ internal class PaymentMethodMetadataKtxTest {
     @Test
     fun `effectiveLinkBrand returns account linkBrand when account is present`() {
         val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link)
-        val account = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Notlink))
+        val account = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Onelink))
 
-        assertThat(metadata.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Notlink)
+        assertThat(metadata.effectiveLinkBrand(account)).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
     fun `effectiveLinkBrand returns metadata linkBrand when account is null`() {
-        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Notlink)
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Onelink)
 
-        assertThat(metadata.effectiveLinkBrand(null)).isEqualTo(LinkBrand.Notlink)
+        assertThat(metadata.effectiveLinkBrand(null)).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test

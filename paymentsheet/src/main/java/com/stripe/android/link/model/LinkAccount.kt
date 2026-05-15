@@ -24,7 +24,7 @@ internal data class LinkAccount(
 
     val linkBrand: LinkBrand?
         get() = consumerSession.linkBrand?.let { consumerLinkBrand ->
-            if (FeatureFlags.forceNotlinkConsumer.isEnabled) LinkBrand.Notlink else consumerLinkBrand
+            if (FeatureFlags.forceOnelinkConsumer.isEnabled) LinkBrand.Onelink else consumerLinkBrand
         }
 
     // Raw value from the backend, used to carry forward across session updates.
