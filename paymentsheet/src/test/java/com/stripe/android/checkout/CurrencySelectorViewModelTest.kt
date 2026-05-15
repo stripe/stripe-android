@@ -48,6 +48,8 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `onCurrencySelected calls updateCurrency with correct code`() = runScenario {
+        updateCurrencyResult.add(Result.success(Unit))
+
         viewModel.onCurrencySelected("eur")
 
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
@@ -55,8 +57,7 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `onCurrencySelected sets error message on failure`() = runScenario {
-        updateCurrencyResult = Result.failure(RuntimeException("Something went wrong"))
-
+        updateCurrencyResult.add(Result.failure(RuntimeException("Something went wrong")))
         viewModel.errorMessage.test {
             assertThat(awaitItem()).isNull()
 
@@ -69,7 +70,8 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `errorMessage is cleared when checkout session changes`() = runScenario {
-        updateCurrencyResult = Result.failure(RuntimeException("fail"))
+        updateCurrencyResult.add(Result.failure(RuntimeException("fail")))
+
         viewModel.onCurrencySelected("eur")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
 
@@ -84,6 +86,8 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `onCurrencySelected does not set error on success`() = runScenario {
+        updateCurrencyResult.add(Result.success(Unit))
+
         viewModel.onCurrencySelected("gbp")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("gbp")
 
@@ -92,12 +96,16 @@ internal class CurrencySelectorViewModelTest {
 
     @Test
     fun `multiple currency selections track all calls`() = runScenario {
+        updateCurrencyResult.add(Result.success(Unit))
         viewModel.onCurrencySelected("eur")
-        viewModel.onCurrencySelected("gbp")
-        viewModel.onCurrencySelected("jpy")
-
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("eur")
+
+        updateCurrencyResult.add(Result.success(Unit))
+        viewModel.onCurrencySelected("gbp")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("gbp")
+
+        updateCurrencyResult.add(Result.success(Unit))
+        viewModel.onCurrencySelected("jpy")
         assertThat(updateCurrencyCalls.awaitItem()).isEqualTo("jpy")
     }
 
@@ -111,13 +119,13 @@ internal class CurrencySelectorViewModelTest {
             CheckoutSessionResponseFactory.create().asCheckoutSession()
         )
         val updateCurrencyCalls = Turbine<String>()
-        var updateCurrencyResult: Result<Unit> = Result.success(Unit)
+        val updateCurrencyResult = Turbine<Result<Unit>>()
 
         val viewModel = CurrencySelectorViewModel(
             checkoutSession = checkoutSessionFlow,
             updateCurrency = { code ->
                 updateCurrencyCalls.add(code)
-                updateCurrencyResult
+                updateCurrencyResult.awaitItem()
             },
             analyticsRequestExecutor = fakeAnalyticsRequestExecutor,
             paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -128,25 +136,22 @@ internal class CurrencySelectorViewModelTest {
         )
 
         Scenario(
-            viewModel = viewModel,
             fakeAnalyticsRequestExecutor = fakeAnalyticsRequestExecutor,
             checkoutSessionFlow = checkoutSessionFlow,
             updateCurrencyCalls = updateCurrencyCalls,
-            updateCurrencyResultSetter = { updateCurrencyResult = it },
-        ).apply { block() }
+            updateCurrencyResult = updateCurrencyResult,
+            viewModel = viewModel,
+        ).block()
 
         updateCurrencyCalls.ensureAllEventsConsumed()
+        updateCurrencyResult.ensureAllEventsConsumed()
     }
 
     private class Scenario(
-        val viewModel: CurrencySelectorViewModel,
         val fakeAnalyticsRequestExecutor: FakeAnalyticsRequestExecutor,
         val checkoutSessionFlow: MutableStateFlow<CheckoutSession>,
         val updateCurrencyCalls: Turbine<String>,
-        private val updateCurrencyResultSetter: (Result<Unit>) -> Unit,
-    ) {
-        var updateCurrencyResult: Result<Unit>
-            get() = error("Write-only property")
-            set(value) = updateCurrencyResultSetter(value)
-    }
+        val updateCurrencyResult: Turbine<Result<Unit>>,
+        val viewModel: CurrencySelectorViewModel,
+    )
 }
