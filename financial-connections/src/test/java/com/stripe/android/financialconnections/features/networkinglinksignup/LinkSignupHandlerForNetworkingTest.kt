@@ -118,7 +118,7 @@ class LinkSignupHandlerForNetworkingTest {
     fun `performSignup on verified flows uses consumer session linkBrand when present`() = runTest {
         val signupWithBrand = ConsumerSessionSignup(
             publishableKey = "pk_123",
-            consumerSession = consumerSession().copy(linkBrand = LinkBrand.Notlink),
+            consumerSession = consumerSession().copy(linkBrand = LinkBrand.Onelink),
         )
         setupVerifiedFlow(signup = signupWithBrand)
 
@@ -128,7 +128,7 @@ class LinkSignupHandlerForNetworkingTest {
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
             shouldPollAccountNumbers = any(),
-            linkBrand = eq(LinkBrand.Notlink),
+            linkBrand = eq(LinkBrand.Onelink),
         )
     }
 
