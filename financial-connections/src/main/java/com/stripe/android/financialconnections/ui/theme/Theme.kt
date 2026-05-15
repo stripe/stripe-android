@@ -46,8 +46,8 @@ internal enum class Theme {
     fun icon(linkBrand: LinkBrand): Int = when (this) {
         DefaultLight -> R.drawable.stripe_logo
         LinkLight -> when (linkBrand) {
-            LinkBrand.Notlink -> R.drawable.stripe_notlink_logo
-            LinkBrand.Link -> R.drawable.stripe_link_logo
+            LinkBrand.Notlink -> R.drawable.stripe_fc_notlink_logo
+            LinkBrand.Link -> R.drawable.stripe_fc_link_logo
         }
     }
 
