@@ -1,7 +1,7 @@
 package com.stripe.android.latency
 
-import android.util.Log
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
@@ -48,9 +48,10 @@ internal class TestLatency(
     @Test
     fun testLatency() {
         Assume.assumeFalse(BuildConfig.IS_RUNNING_IN_CI && !BuildConfig.RUN_LATENCY_TESTS_IN_CI)
-        Log.d(LOG_TAG, "LATENCY_TEST_CASE_STARTED: ${testConfig.name}")
+        val logger = Logger.getInstance(enableLogging = !testConfig.skipMeasurement)
+        logger.debug( "LATENCY_TEST_CASE_STARTED: ${testConfig.name}")
 
-        runTestWithIterations {
+        runTestWithIterations(requiredSuccessfulSamples = testConfig.requiredSuccessfulSamples) {
             testDriver.loadComplete(
                 testParameters = TestParameters.create(
                     paymentMethodCode = "card",
@@ -60,17 +61,18 @@ internal class TestLatency(
             )
         }
 
-        Log.d(LOG_TAG, "LATENCY_TEST_CASE_FINISHED: ${testConfig.name}")
+        logger.debug( "LATENCY_TEST_CASE_FINISHED: ${testConfig.name}")
     }
 
     fun runTestWithIterations(
+        requiredSuccessfulSamples: Int,
         block: () -> Unit,
     ) {
         var successfulSamples = 0
         var failedAttempts = 0
         var lastFailure: Throwable? = null
 
-        while (successfulSamples < BuildConfig.LATENCY_EXPERIMENT_ITERATIONS && failedAttempts < MAX_FAILED_ATTEMPTS) {
+        while (successfulSamples < requiredSuccessfulSamples && failedAttempts < MAX_FAILED_ATTEMPTS) {
             runCatching {
                block()
             }.onSuccess {
@@ -81,9 +83,9 @@ internal class TestLatency(
             }
         }
 
-        if (successfulSamples < BuildConfig.LATENCY_EXPERIMENT_ITERATIONS) {
+        if (successfulSamples < requiredSuccessfulSamples) {
             throw AssertionError(
-                "Collected $successfulSamples/${BuildConfig.LATENCY_EXPERIMENT_ITERATIONS} samples " +
+                "Collected $successfulSamples/$requiredSuccessfulSamples samples " +
                     "for ${testConfig.name} after $failedAttempts failed attempts",
                 lastFailure,
             )
@@ -94,18 +96,31 @@ internal class TestLatency(
         val name: String,
         val isReturningCustomer: Boolean,
         val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
+        val skipMeasurement: Boolean,
+        val requiredSuccessfulSamples: Int,
     ) {
         override fun toString() = name
     }
 
     companion object {
-        private const val LOG_TAG = "StripeSdk"
         private const val MAX_FAILED_ATTEMPTS = 3
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
         fun testConfigs(): List<Array<Any>> {
             return listOf(
+                // Warm the process and network stack before collecting measured samples.
+                testConfig(
+                    testName = "warm_up_test_link_off_with_no_customer",
+                    isReturningCustomer = false,
+                    skipMeasurement = true,
+                    requiredSuccessfulSamples = 1,
+                ) { settings: PlaygroundSettings ->
+                    settings[MerchantSettingsDefinition] = Merchant.US
+                    settings[LinkSettingsDefinition] = false
+                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
+                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                },
                 testConfig(
                     testName = "test_link_off_with_no_customer",
                     isReturningCustomer = false,
@@ -231,12 +246,16 @@ internal class TestLatency(
         private fun testConfig(
             testName: String,
             isReturningCustomer: Boolean,
+            skipMeasurement: Boolean = false,
+            requiredSuccessfulSamples: Int = BuildConfig.LATENCY_EXPERIMENT_ITERATIONS,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
         ): Array<Any> {
             return arrayOf(
                 TestConfig(
                     name = testName,
                     isReturningCustomer = isReturningCustomer,
+                    skipMeasurement = skipMeasurement,
+                    requiredSuccessfulSamples = requiredSuccessfulSamples,
                     playgroundSettingsBlock = playgroundSettingsBlock,
                 )
             )
