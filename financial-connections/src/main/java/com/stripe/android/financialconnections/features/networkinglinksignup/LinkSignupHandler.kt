@@ -148,7 +148,7 @@ internal class LinkSignupHandlerForNetworking @Inject constructor(
                 consumerSessionClientSecret = signup.consumerSession.clientSecret,
                 selectedAccounts = selectedAccounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
-                linkBrand = manifest.linkBrand,
+                linkBrand = signup.consumerSession.linkBrand ?: manifest.linkBrand,
             )
         } else {
             // ** Legacy signup endpoint on unverified flows: 1 request **
