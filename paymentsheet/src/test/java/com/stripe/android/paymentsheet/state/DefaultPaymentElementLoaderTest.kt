@@ -4185,11 +4185,51 @@ internal class DefaultPaymentElementLoaderTest {
         val call = cardArtExperimentHandler.logExposureCalls.awaitItem()
         assertThat(call.elementsSession.stripeIntent).isEqualTo(result.paymentMethodMetadata.stripeIntent)
         assertThat(call.paymentMethodMetadata).isNotNull()
+        assertThat(call.savedPaymentMethods).isEmpty()
         assertThat(call.integrationConfiguration).isEqualTo(
             PaymentElementLoader.Configuration.PaymentSheet(paymentSheetConfiguration)
         )
         assertThat(call.defaultPaymentSelection).isEqualTo(result.paymentSelection)
         cardArtExperimentHandler.logExposureCalls.ensureAllEventsConsumed()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `Card art experiment uses customer state payment methods`() = runScenario {
+        val cardArtExperimentHandler = FakeCardArtExperimentHandler()
+        val cards = PaymentMethodFactory.cards(3)
+
+        val loader = createPaymentElementLoader(
+            cardArtExperimentHandler = cardArtExperimentHandler,
+            customer = ElementsSession.Customer(
+                paymentMethods = cards,
+                session = createElementsSessionCustomerSession(
+                    mobilePaymentElementComponent = createEnabledMobilePaymentElement(),
+                ),
+                defaultPaymentMethod = null,
+            ),
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "cuss_1",
+                ),
+            ),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        val call = cardArtExperimentHandler.logExposureCalls.awaitItem()
+        assertThat(call.savedPaymentMethods).isEqualTo(cards)
+        cardArtExperimentHandler.logExposureCalls.ensureAllEventsConsumed()
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
