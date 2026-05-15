@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import kotlinx.parcelize.Parcelize
 
@@ -33,7 +34,9 @@ internal class SamsungPayLauncherContract :
             private const val EXTRA_ARGS = "extra_args"
 
             fun fromIntent(intent: Intent): Args? {
-                return intent.getParcelableExtra(EXTRA_ARGS)
+                return intent.extras?.let {
+                    BundleCompat.getParcelable(it, EXTRA_ARGS, Args::class.java)
+                }
             }
         }
     }
