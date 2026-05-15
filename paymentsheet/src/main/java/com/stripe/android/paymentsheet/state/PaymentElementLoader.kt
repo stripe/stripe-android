@@ -384,7 +384,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         cardArtExperimentHandler.logExposure(
             elementsSession = elementsSession,
             paymentMethodMetadata = pmMetadata,
-            savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
+            savedPaymentMethods = customer.await()?.paymentMethods.orEmpty(),
             integrationConfiguration = integrationConfiguration,
             defaultPaymentSelection = state.paymentSelection,
         )
