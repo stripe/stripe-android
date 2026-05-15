@@ -295,10 +295,17 @@ def executeTests(appUrl, testUrl):
     }
     return executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParams)
 
-# https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
-def get_build_status(buildId):
+# https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds
+def get_espresso_build(buildId):
     url = (
         "https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
+    )
+    return requests.get(url, auth=(user, authKey))
+
+# https://www.browserstack.com/docs/test-reporting-and-analytics/api/get-build-details
+def get_build_status(buildId):
+    url = (
+        "https://api-automation.browserstack.com/ext/v1/builds/" + buildId
     )
     return requests.get(url, auth=(user, authKey))
 
@@ -445,7 +452,7 @@ def classNameToFullyQualifiedClassName(failedTestClassName):
 
 def getSessionIdsForBuild(buildId):
     sessionIds = []
-    buildStatus = get_build_status(buildId)
+    buildStatus = get_espresso_build(buildId)
     devices = buildStatus.json()["devices"]
     for device in devices:
         sessions_on_device = device["sessions"]
@@ -455,7 +462,7 @@ def getSessionIdsForBuild(buildId):
 
 def getSessionIdsAndDeviceForBuild(buildId):
     sessionIds = []
-    buildStatus = get_build_status(buildId)
+    buildStatus = get_espresso_build(buildId)
     devices = buildStatus.json()["devices"]
     for device in devices:
         sessions_on_device = device["sessions"]
