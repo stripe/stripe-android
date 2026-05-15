@@ -36,6 +36,10 @@ def directlyToPlayground() {
     return project.hasProperty("DIRECTLY_TO_PLAYGROUND") && project.DIRECTLY_TO_PLAYGROUND.contains("true")
 }
 
+def runLatencyTestsInCi() {
+    return project.hasProperty("RUN_LATENCY_TESTS_IN_CI") && project.RUN_LATENCY_TESTS_IN_CI.contains("true")
+}
+
 def getLatencyExperimentIterations() {
     return findProperty('LATENCY_EXPERIMENT_ITERATIONS') ?: "1"
 }
@@ -71,6 +75,7 @@ android {
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
         buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
+        buildConfigField "boolean", "RUN_LATENCY_TESTS_IN_CI", "${runLatencyTestsInCi()}"
         buildConfigField "int", "LATENCY_EXPERIMENT_ITERATIONS", "${getLatencyExperimentIterations()}"
         buildConfigField "String", "PROXY_IP_ADDRESS", "\"${getProxyIpAddress()}\""
 
