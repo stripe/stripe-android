@@ -6,7 +6,6 @@ dependencies {
     implementation project(":network-testing")
 
     implementation libs.terminal.core
-    implementation libs.terminal.tapToPay
     implementation testLibs.espresso.intents
     implementation testLibs.androidx.composeUi
     implementation testLibs.mockito.core
