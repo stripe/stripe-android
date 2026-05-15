@@ -122,6 +122,11 @@ internal class DefaultAnalyticsMetadataFactory @Inject constructor(
     ) = buildMap<String, AnalyticsMetadata.Value> {
         put("set_as_default_enabled", SimpleBoolean(customerMetadata?.isPaymentMethodSetAsDefaultEnabled == true))
         put("has_default_payment_method", SimpleBoolean(elementsSession.customer?.defaultPaymentMethod != null))
+        put("customer_present", SimpleBoolean(customerMetadata != null))
+        put(
+            "customer_has_saved_payment_methods",
+            SimpleBoolean(elementsSession.customer?.paymentMethods?.isNotEmpty() == true)
+        )
     }
 
     private fun PaymentElementLoader.Configuration.analyticsMap() = buildMap<String, AnalyticsMetadata.Value> {

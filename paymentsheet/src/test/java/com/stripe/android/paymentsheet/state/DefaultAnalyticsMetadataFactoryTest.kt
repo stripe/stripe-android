@@ -67,6 +67,8 @@ class DefaultAnalyticsMetadataFactoryTest {
 
         assertThat(resultMap["set_as_default_enabled"]).isEqualTo(false)
         assertThat(resultMap["has_default_payment_method"]).isEqualTo(false)
+        assertThat(resultMap["customer_present"]).isEqualTo(false)
+        assertThat(resultMap["customer_has_saved_payment_methods"]).isEqualTo(false)
 
         assertThat(resultMap).containsKey("mpe_config")
         assertThat((resultMap["mpe_config"] as? Map<*, *>)?.get("customer")).isEqualTo(false)
@@ -237,6 +239,57 @@ class DefaultAnalyticsMetadataFactoryTest {
         assertThat(resultMap["set_as_default_enabled"]).isEqualTo(true)
         assertThat(resultMap["has_default_payment_method"]).isEqualTo(true)
     }
+
+    @Test
+    fun `create returns false for customer_present when no customer metadata`() = runScenario {
+        val resultMap = createAnalyticsMetadata(
+            customerMetadata = null,
+        )
+
+        assertThat(resultMap["customer_present"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `create returns true for customer_present when customer metadata is provided`() = runScenario {
+        val resultMap = createAnalyticsMetadata(
+            customerMetadata = createCustomerMetadata(isPaymentMethodSetAsDefaultEnabled = false),
+        )
+
+        assertThat(resultMap["customer_present"]).isEqualTo(true)
+    }
+
+    @Test
+    fun `create returns false for customer_has_saved_payment_methods when no customer in session`() = runScenario {
+        val resultMap = createAnalyticsMetadata(
+            customerMetadata = createCustomerMetadata(isPaymentMethodSetAsDefaultEnabled = false),
+            elementsSession = createElementsSession(customer = null),
+        )
+
+        assertThat(resultMap["customer_has_saved_payment_methods"]).isEqualTo(false)
+    }
+
+    @Test
+    fun `create returns false for customer_has_saved_payment_methods when customer has no saved payment methods`() =
+        runScenario {
+            val customerWithNoPaymentMethods = createElementsSessionCustomer().copy(paymentMethods = emptyList())
+            val resultMap = createAnalyticsMetadata(
+                customerMetadata = createCustomerMetadata(isPaymentMethodSetAsDefaultEnabled = false),
+                elementsSession = createElementsSession(customer = customerWithNoPaymentMethods),
+            )
+
+            assertThat(resultMap["customer_has_saved_payment_methods"]).isEqualTo(false)
+        }
+
+    @Test
+    fun `create returns true for customer_has_saved_payment_methods when customer has saved payment methods`() =
+        runScenario {
+            val resultMap = createAnalyticsMetadata(
+                customerMetadata = createCustomerMetadata(isPaymentMethodSetAsDefaultEnabled = false),
+                elementsSession = createElementsSession(customer = createElementsSessionCustomer()),
+            )
+
+            assertThat(resultMap["customer_has_saved_payment_methods"]).isEqualTo(true)
+        }
 
     @Test
     fun `create returns expected values for default billing details collection configuration`() = runScenario {
