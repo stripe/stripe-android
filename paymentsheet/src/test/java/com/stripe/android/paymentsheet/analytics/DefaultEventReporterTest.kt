@@ -1432,6 +1432,18 @@ class DefaultEventReporterTest {
             return call.duration
         }
 
+        override suspend fun <T> measureDuration(
+            key: DurationProvider.Key,
+            block: suspend () -> T,
+        ): T {
+            start(key)
+            return try {
+                block()
+            } finally {
+                end(key)
+            }
+        }
+
         fun validate() {
             assertThat(startCalls).isEmpty()
             assertThat(endCalls).isEmpty()
