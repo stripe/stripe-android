@@ -157,11 +157,11 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
     }
 
     @Test
-    fun testSavedNotlinkPassthroughCard() {
+    fun testSavedOnelinkPassthroughCard() {
         paparazziRule.snapshot {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = savedLinkPassthroughCard,
-                linkBrand = LinkBrand.Notlink,
+                linkBrand = LinkBrand.Onelink,
                 isEnabled = true,
                 isSelected = false,
             )

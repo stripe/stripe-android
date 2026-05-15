@@ -57,13 +57,13 @@ internal class LinkAppBarScreenshotTest(
                     )
                 ),
                 TestCase(
-                    name = "NotlinkAppBarWithLogoAndCloseButton",
+                    name = "OnelinkAppBarWithLogoAndCloseButton",
                     state = LinkAppBarState(
                         canNavigateBack = false,
                         showHeader = true,
                         title = null,
                         isElevated = false,
-                        linkBrand = LinkBrand.Notlink,
+                        linkBrand = LinkBrand.Onelink,
                     )
                 ),
                 TestCase(

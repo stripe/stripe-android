@@ -508,7 +508,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val repository = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
 
         repository.storeNewConsumerSession(
-            consumerSession = ApiKeyFixtures.verifiedConsumerSession().copy(linkBrand = LinkBrand.Notlink),
+            consumerSession = ApiKeyFixtures.verifiedConsumerSession().copy(linkBrand = LinkBrand.Onelink),
             publishableKey = "pk_123",
         )
 
@@ -518,8 +518,8 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             currentLinkBrand = CurrentLinkBrand(initialState, repository),
         )
 
-        // Consumer session's Notlink should override the state's Link
-        assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Notlink)
+        // Consumer session's Onelink should override the state's Link
+        assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
@@ -531,14 +531,14 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             publishableKey = "pk_123",
         )
 
-        val initialState = stateWithLinkBrand(LinkBrand.Notlink)
+        val initialState = stateWithLinkBrand(LinkBrand.Onelink)
         val viewModel = createViewModel(
             initialState = initialState,
             currentLinkBrand = CurrentLinkBrand(initialState, repository),
         )
 
-        // Should fall back to state's Notlink since consumer session has no linkBrand
-        assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Notlink)
+        // Should fall back to state's Onelink since consumer session has no linkBrand
+        assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
@@ -555,11 +555,11 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
 
             repository.storeNewConsumerSession(
-                consumerSession = ApiKeyFixtures.verifiedConsumerSession().copy(linkBrand = LinkBrand.Notlink),
+                consumerSession = ApiKeyFixtures.verifiedConsumerSession().copy(linkBrand = LinkBrand.Onelink),
                 publishableKey = "pk_123",
             )
 
-            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Notlink)
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Onelink)
         }
     }
 

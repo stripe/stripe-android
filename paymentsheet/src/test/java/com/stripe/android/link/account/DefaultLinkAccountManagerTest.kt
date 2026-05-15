@@ -1087,11 +1087,11 @@ class DefaultLinkAccountManagerTest {
     fun `linkBrand is null when new session has null linkBrand`() = runSuspendTest {
         val accountManager = accountManager()
 
-        // Set initial account with linkBrand = Notlink
+        // Set initial account with linkBrand = Onelink
         accountManager.setLinkAccountFromLookupResult(
             lookup = ConsumerSessionLookup(
                 exists = true,
-                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Notlink),
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
                 publishableKey = TestFactory.PUBLISHABLE_KEY,
             ),
             startSession = true,
@@ -1120,7 +1120,7 @@ class DefaultLinkAccountManagerTest {
         accountManager.setLinkAccountFromLookupResult(
             lookup = ConsumerSessionLookup(
                 exists = true,
-                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Notlink),
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
                 publishableKey = TestFactory.PUBLISHABLE_KEY,
             ),
             startSession = true,
@@ -1146,13 +1146,13 @@ class DefaultLinkAccountManagerTest {
     fun `linkBrand is null for different user with null linkBrand`() = runSuspendTest {
         val accountManager = accountManager()
 
-        // Set account for user A with linkBrand = Notlink
+        // Set account for user A with linkBrand = Onelink
         accountManager.setLinkAccountFromLookupResult(
             lookup = ConsumerSessionLookup(
                 exists = true,
                 consumerSession = TestFactory.CONSUMER_SESSION.copy(
                     emailAddress = "userA@test.com",
-                    linkBrand = LinkBrand.Notlink,
+                    linkBrand = LinkBrand.Onelink,
                 ),
                 publishableKey = TestFactory.PUBLISHABLE_KEY,
             ),

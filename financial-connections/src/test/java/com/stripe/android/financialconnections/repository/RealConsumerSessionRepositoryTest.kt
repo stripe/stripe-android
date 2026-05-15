@@ -119,14 +119,14 @@ class RealConsumerSessionRepositoryTest {
         val session = makeConsumerSession(
             clientSecret = "abc_123",
             isVerified = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
         val store = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
         store.storeNewConsumerSession(session, "pk_123")
 
         val cachedSession = store.provideConsumerSession()
-        assertThat(cachedSession?.linkBrand).isEqualTo(LinkBrand.Notlink)
+        assertThat(cachedSession?.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
@@ -164,12 +164,12 @@ class RealConsumerSessionRepositoryTest {
         val session2 = makeConsumerSession(
             clientSecret = "abc_123",
             isVerified = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
         store.updateConsumerSession(session2)
 
         val cachedSession = store.provideConsumerSession()
-        assertThat(cachedSession?.linkBrand).isEqualTo(LinkBrand.Notlink)
+        assertThat(cachedSession?.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     private fun makeConsumerSession(

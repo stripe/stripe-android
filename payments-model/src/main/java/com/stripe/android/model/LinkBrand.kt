@@ -12,17 +12,17 @@ enum class LinkBrand(val value: String) {
     @SerialName("link")
     Link("link"),
 
-    @SerialName("notlink")
-    Notlink("notlink");
+    @SerialName("onelink")
+    Onelink("onelink");
 
     fun brandName(): String = when (this) {
         Link -> "Link"
-        Notlink -> "Notlink"
+        Onelink -> "Onelink"
     }
 
     fun baseUrl(): String = when (this) {
         Link -> "https://link.com"
-        Notlink -> "https://onelink.com"
+        Onelink -> "https://onelink.com"
     }
 
     fun termsUrl(): String = "${baseUrl()}/terms"

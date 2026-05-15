@@ -176,7 +176,7 @@ internal class SaveAccountToLinkTest {
                 selectedAccounts = partnerAccounts,
                 country = "US",
                 shouldPollAccountNumbers = true,
-                linkBrand = LinkBrand.Notlink,
+                linkBrand = LinkBrand.Onelink,
             )
         }
 
@@ -185,7 +185,7 @@ internal class SaveAccountToLinkTest {
                 singular = R.string.stripe_success_pane_desc_link_error_singular_with_brand,
                 plural = R.string.stripe_success_pane_desc_link_error_plural_with_brand,
                 count = 2,
-                args = listOf(LinkBrand.Notlink.brandName()),
+                args = listOf(LinkBrand.Onelink.brandName()),
             )
         )
     }

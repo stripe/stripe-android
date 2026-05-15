@@ -11,8 +11,8 @@ import org.junit.Test
 class LinkAccountTest {
 
     @get:Rule
-    val forceNotlinkConsumerRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.forceNotlinkConsumer,
+    val forceOnelinkConsumerRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.forceOnelinkConsumer,
         isEnabled = false,
     )
 
@@ -86,21 +86,21 @@ class LinkAccountTest {
 
     @Test
     fun `linkBrand returns consumer session brand when present`() {
-        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Notlink))
-        assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Notlink)
+        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Onelink))
+        assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
-    fun `linkBrand returns Notlink when forceNotlinkConsumer flag is enabled`() {
-        forceNotlinkConsumerRule.setEnabled(true)
+    fun `linkBrand returns Onelink when forceOnelinkConsumer flag is enabled`() {
+        forceOnelinkConsumerRule.setEnabled(true)
         val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Link))
-        assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Notlink)
+        assertThat(linkAccount.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
     fun `consumerLinkBrand returns raw value from consumer session`() {
-        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Notlink))
-        assertThat(linkAccount.consumerLinkBrand).isEqualTo(LinkBrand.Notlink)
+        val linkAccount = LinkAccount(makeConsumerSession(linkBrand = LinkBrand.Onelink))
+        assertThat(linkAccount.consumerLinkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
