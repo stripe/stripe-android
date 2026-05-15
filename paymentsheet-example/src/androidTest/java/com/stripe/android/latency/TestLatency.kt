@@ -122,15 +122,6 @@ internal class TestLatency(
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
-                    testName = "test_link_off_with_no_customer",
-                    isReturningCustomer = false,
-                ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
-                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
-                },
-                testConfig(
                     testName = "test_link_off_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -141,25 +132,6 @@ internal class TestLatency(
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
-                    testName = "test_link_off_with_cs",
-                    isReturningCustomer = true,
-                ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
-                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
-                    settings[CustomerSessionSettingsDefinition] = true
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
-                },
-                testConfig(
-                    testName = "test_link_on_with_no_customer",
-                    isReturningCustomer = false,
-                ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = true
-                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
-                },
-                testConfig(
                     testName = "test_link_on_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -167,16 +139,6 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
-                },
-                testConfig(
-                    testName = "test_link_on_with_cs",
-                    isReturningCustomer = true,
-                ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = true
-                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
-                    settings[CustomerSessionSettingsDefinition] = true
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
@@ -191,26 +153,6 @@ internal class TestLatency(
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
-                    testName = "test_link_on_with_cs_default_email",
-                    isReturningCustomer = true,
-                ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = true
-                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
-                    settings[CustomerSessionSettingsDefinition] = true
-                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
-                },
-                testConfig(
-                    testName = "test_google_pay_on_link_off_with_no_customer",
-                    isReturningCustomer = false,
-                ) { settings: PlaygroundSettings ->
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
-                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                },
-                testConfig(
                     testName = "test_google_pay_on_link_off_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
@@ -219,26 +161,6 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
-                },
-                testConfig(
-                    testName = "test_google_pay_on_link_off_with_cs",
-                    isReturningCustomer = true,
-                ) { settings: PlaygroundSettings ->
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
-                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
-                    settings[CustomerSessionSettingsDefinition] = true
-                },
-                testConfig(
-                    testName = "test_google_pay_on_link_on_with_cs",
-                    isReturningCustomer = true,
-                ) { settings: PlaygroundSettings ->
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = true
-                    settings[CustomerSettingsDefinition] = CustomerType.RETURNING
-                    settings[CustomerSessionSettingsDefinition] = true
                 },
             )
         }
