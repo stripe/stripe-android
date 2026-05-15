@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.attestation.LinkAttestationCheck
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.state.LinkState
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -35,12 +36,21 @@ internal class LinkHandler @Inject constructor(
         linkConfigurationCoordinator.getComponent(state.configuration)
     }
 
-    suspend fun setupLinkWithEagerLaunch(state: LinkState?): Boolean {
+    suspend fun setupLinkWithEagerLaunch(
+        state: LinkState?,
+        customerPaymentMethods: List<PaymentMethod>,
+    ): Boolean {
         setupLink(state)
 
         val configuration = state?.configuration ?: return false
         val linkGate = linkConfigurationCoordinator.linkGate(configuration)
         if (linkGate.suppress2faModal) return false
+
+        if (customerPaymentMethods.isNotEmpty()) {
+            // Allow the user to check out in a single click if they already have
+            // saved payment methods.
+            return false
+        }
 
         return when (state.loginState) {
             LinkState.LoginState.LoggedIn,
