@@ -705,7 +705,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         isGooglePayReady: Boolean,
         isLinkAvailable: Boolean,
     ): SavedSelection {
-        return durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection) {
+        return durationProvider.measureDuration(
+            DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection
+        ) {
             val customerConfiguration = configuration.customer
             val prefsRepository = prefsRepositoryFactory.create(customerConfiguration?.id)
 
