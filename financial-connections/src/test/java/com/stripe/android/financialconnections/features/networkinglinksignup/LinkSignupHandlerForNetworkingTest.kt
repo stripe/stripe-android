@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSessionSignup
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
@@ -16,6 +17,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.model.ConsumerSessionSignup
 import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
@@ -59,7 +61,7 @@ class LinkSignupHandlerForNetworkingTest {
     private val validPayload = NetworkingLinkSignupState.Payload(
         merchantName = "Mock Merchant",
         emailController = mock(),
-        prefilledEmail = "test@networking.com",
+        prefilledEmail = "test@example.com",
         sessionId = "fcsess_5678",
         appVerificationEnabled = true,
         phoneController = mock {
@@ -69,23 +71,21 @@ class LinkSignupHandlerForNetworkingTest {
         content = mock()
     )
 
-    @Test
-    fun `performSignup on verified flows should save account and return success pane on success`() = runTest {
-        val expectedToken = "token"
-        val testState = NetworkingLinkSignupState(
-            validEmail = "test@networking.com",
-            validPhone = "+1987654321",
-            isInstantDebits = false,
-            payload = Async.Success(validPayload)
-        )
+    private val verifiedFlowState = NetworkingLinkSignupState(
+        validEmail = "test@example.com",
+        validPhone = "+1987654321",
+        isInstantDebits = false,
+        payload = Async.Success(validPayload)
+    )
 
-        val expectedPane = Pane.SUCCESS
-
-        whenever(requestIntegrityToken(anyOrNull(), anyOrNull())).thenReturn(expectedToken)
+    private suspend fun setupVerifiedFlow(
+        signup: ConsumerSessionSignup = consumerSessionSignup()
+    ) {
+        whenever(requestIntegrityToken(anyOrNull(), anyOrNull())).thenReturn("token")
         whenever(getOrFetchSync(anyOrNull(), anyOrNull())).thenReturn(
             syncResponse(sessionManifest().copy(appVerificationEnabled = true))
         )
-        whenever(getCachedAccounts()).thenReturn(listOf(mock())) // Mock a list of cached accounts
+        whenever(getCachedAccounts()).thenReturn(listOf(mock()))
         whenever(
             consumerRepository.mobileSignUp(
                 email = any(),
@@ -94,19 +94,56 @@ class LinkSignupHandlerForNetworkingTest {
                 verificationToken = any(),
                 appId = any()
             )
-        ).thenReturn(consumerSessionSignup())
+        ).thenReturn(signup)
+    }
 
-        val result = handler.performSignup(testState)
+    @Test
+    fun `performSignup on verified flows should save account and return success pane on success`() = runTest {
+        setupVerifiedFlow()
+
+        val result = handler.performSignup(verifiedFlowState)
 
         verify(consumerRepository).mobileSignUp(
-            email = eq("test@networking.com"),
+            email = eq("test@example.com"),
             phoneNumber = eq("+1987654321"),
             country = eq("US"),
-            verificationToken = eq(expectedToken),
+            verificationToken = eq("token"),
             appId = eq("applicationId")
         )
         verify(saveAccountToLink).existing(any(), any(), any(), any())
-        assertEquals(expectedPane, result)
+        assertEquals(Pane.SUCCESS, result)
+    }
+
+    @Test
+    fun `performSignup on verified flows uses consumer session linkBrand when present`() = runTest {
+        val signupWithBrand = ConsumerSessionSignup(
+            publishableKey = "pk_123",
+            consumerSession = consumerSession().copy(linkBrand = LinkBrand.Onelink),
+        )
+        setupVerifiedFlow(signup = signupWithBrand)
+
+        handler.performSignup(verifiedFlowState)
+
+        verify(saveAccountToLink).existing(
+            consumerSessionClientSecret = any(),
+            selectedAccounts = any(),
+            shouldPollAccountNumbers = any(),
+            linkBrand = eq(LinkBrand.Onelink),
+        )
+    }
+
+    @Test
+    fun `performSignup on verified flows falls back to manifest linkBrand when consumer linkBrand is null`() = runTest {
+        setupVerifiedFlow()
+
+        handler.performSignup(verifiedFlowState)
+
+        verify(saveAccountToLink).existing(
+            consumerSessionClientSecret = any(),
+            selectedAccounts = any(),
+            shouldPollAccountNumbers = any(),
+            linkBrand = eq(LinkBrand.Link),
+        )
     }
 
     @Test
