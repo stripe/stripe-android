@@ -32,6 +32,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
@@ -60,7 +61,6 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_WEB_AUTH_FLOW
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
-import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity.Companion.getArgs
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.ui.toLocalTheme
@@ -72,9 +72,6 @@ import com.stripe.android.uicore.navigation.NavigationManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -99,7 +96,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
-    private val consumerSessionRepository: ConsumerSessionRepository,
+    private val currentLinkBrand: CurrentLinkBrand,
     @Named(APPLICATION_ID) private val applicationId: String,
     private val initialState: FinancialConnectionsSheetNativeState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
@@ -111,15 +108,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
 
-    private val defaultTopAppBarState: TopAppBarState get() {
+    private val defaultTopAppBarState: TopAppBarState
         // The first pane may choose to hide the Stripe logo. Therefore, let's hide it by default
         // on the first pane.
-        val consumerLinkBrand = consumerSessionRepository.consumerSessionFlow.value?.linkBrand
-        return initialState.toTopAppBarState(
-            consumerLinkBrand = consumerLinkBrand,
+        get() = initialState.toTopAppBarState(
+            linkBrand = currentLinkBrand.stateFlow.value,
             forceHideStripeLogo = true
         )
-    }
 
     private val currentPane = MutableStateFlow(initialState.initialPane)
     private val topAppBarStateUpdatesByPane = MutableStateFlow(
@@ -159,16 +154,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            val resolvedLinkBrandFlow = combine(
-                consumerSessionRepository.consumerSessionFlow.map { it?.linkBrand },
-                stateFlow.map { it.linkBrand },
-            ) { consumerLinkBrand, stateLinkBrand ->
-                consumerLinkBrand ?: stateLinkBrand
-            }
-            resolvedLinkBrandFlow.distinctUntilChanged().collect { resolvedLinkBrand ->
+            currentLinkBrand.stateFlow.collect { linkBrand ->
+                setState { copy(linkBrand = linkBrand) }
                 topAppBarStateUpdatesByPane.update { paneToTopAppBarState ->
                     paneToTopAppBarState.mapValues { (_, topAppBarState) ->
-                        topAppBarState.copy(linkBrand = resolvedLinkBrand)
+                        topAppBarState.copy(linkBrand = linkBrand)
                     }
                 }
             }
@@ -664,13 +654,13 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
 
 private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
     forceHideStripeLogo: Boolean,
-    consumerLinkBrand: LinkBrand?,
+    linkBrand: LinkBrand,
 ): TopAppBarState {
     return TopAppBarState(
         hideStripeLogo = reducedBranding,
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
         theme = theme,
-        linkBrand = consumerLinkBrand ?: linkBrand,
+        linkBrand = linkBrand,
     )
 }

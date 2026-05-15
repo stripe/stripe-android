@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
@@ -36,7 +37,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled.Reason
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
-import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -512,9 +512,10 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             publishableKey = "pk_123",
         )
 
+        val initialState = stateWithLinkBrand(LinkBrand.Link)
         val viewModel = createViewModel(
-            initialState = stateWithLinkBrand(LinkBrand.Link),
-            consumerSessionRepository = repository,
+            initialState = initialState,
+            currentLinkBrand = CurrentLinkBrand(initialState, repository),
         )
 
         // Consumer session's Notlink should override the state's Link
@@ -530,9 +531,10 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             publishableKey = "pk_123",
         )
 
+        val initialState = stateWithLinkBrand(LinkBrand.Notlink)
         val viewModel = createViewModel(
-            initialState = stateWithLinkBrand(LinkBrand.Notlink),
-            consumerSessionRepository = repository,
+            initialState = initialState,
+            currentLinkBrand = CurrentLinkBrand(initialState, repository),
         )
 
         // Should fall back to state's Notlink since consumer session has no linkBrand
@@ -543,9 +545,10 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     fun `topAppBarState updates reactively when consumer session changes`() = runTest {
         val repository = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
 
+        val initialState = stateWithLinkBrand(LinkBrand.Link)
         val viewModel = createViewModel(
-            initialState = stateWithLinkBrand(LinkBrand.Link),
-            consumerSessionRepository = repository,
+            initialState = initialState,
+            currentLinkBrand = CurrentLinkBrand(initialState, repository),
         )
 
         viewModel.topAppBarState.test {
@@ -596,7 +599,8 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         createInstantDebitsResult: CreateInstantDebitsResult = CreateInstantDebitsResult {
             error("Unexpected call to create InstantDebitsResult")
         },
-        consumerSessionRepository: ConsumerSessionRepository = RealConsumerSessionRepository(SavedStateHandle()),
+        currentLinkBrand: CurrentLinkBrand =
+            CurrentLinkBrand(initialState, RealConsumerSessionRepository(SavedStateHandle())),
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = mock(),
         activityRetainedComponent = mock(),
@@ -606,7 +610,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
         navigationManager = TestNavigationManager(),
-        consumerSessionRepository = consumerSessionRepository,
+        currentLinkBrand = currentLinkBrand,
         savedStateHandle = SavedStateHandle(),
         initialState = initialState,
         createInstantDebitsResult = createInstantDebitsResult,
