@@ -194,7 +194,10 @@ private fun LazyListScope.accountPickerContent(
     item("header") {
         if (payload != null) {
             Text(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("loaded_picker_title")
+                    .fillMaxWidth(),
                 text = stringResource(
                     when (payload.selectionMode) {
                         SelectionMode.Single -> R.string.stripe_account_picker_singleselect_account
