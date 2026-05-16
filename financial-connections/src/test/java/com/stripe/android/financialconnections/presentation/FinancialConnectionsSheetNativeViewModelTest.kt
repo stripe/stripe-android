@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
 import com.stripe.android.financialconnections.domain.CurrentLinkBrand
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
@@ -37,7 +38,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails.Cancelled.Reason
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
-import com.stripe.android.financialconnections.repository.RealConsumerSessionRepository
 import com.stripe.android.financialconnections.ui.theme.Theme
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -504,60 +504,40 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     }
 
     @Test
-    fun `topAppBarState uses consumer session linkBrand over state linkBrand`() = runTest {
-        val repository = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
-
-        repository.storeNewConsumerSession(
-            consumerSession = ApiKeyFixtures.verifiedConsumerSession().copy(linkBrand = LinkBrand.Onelink),
-            publishableKey = "pk_123",
-        )
-
+    fun `topAppBarState uses current linkBrand over state linkBrand`() = runTest {
         val initialState = stateWithLinkBrand(LinkBrand.Link)
         val viewModel = createViewModel(
             initialState = initialState,
-            currentLinkBrand = CurrentLinkBrand(initialState, repository),
+            currentLinkBrand = FakeCurrentLinkBrand(LinkBrand.Onelink),
         )
 
-        // Consumer session's Onelink should override the state's Link
         assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
-    fun `topAppBarState falls back to state linkBrand when consumer session has no linkBrand`() = runTest {
-        val repository = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
-
-        repository.storeNewConsumerSession(
-            consumerSession = ApiKeyFixtures.verifiedConsumerSession(),
-            publishableKey = "pk_123",
-        )
-
+    fun `topAppBarState falls back to state linkBrand`() = runTest {
         val initialState = stateWithLinkBrand(LinkBrand.Onelink)
         val viewModel = createViewModel(
             initialState = initialState,
-            currentLinkBrand = CurrentLinkBrand(initialState, repository),
+            currentLinkBrand = FakeCurrentLinkBrand(LinkBrand.Onelink),
         )
 
-        // Should fall back to state's Onelink since consumer session has no linkBrand
         assertThat(viewModel.topAppBarState.value.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
-    fun `topAppBarState updates reactively when consumer session changes`() = runTest {
-        val repository = RealConsumerSessionRepository(savedStateHandle = SavedStateHandle())
-
+    fun `topAppBarState updates reactively when current linkBrand changes`() = runTest {
         val initialState = stateWithLinkBrand(LinkBrand.Link)
+        val currentLinkBrand = FakeCurrentLinkBrand(LinkBrand.Link)
         val viewModel = createViewModel(
             initialState = initialState,
-            currentLinkBrand = CurrentLinkBrand(initialState, repository),
+            currentLinkBrand = currentLinkBrand,
         )
 
         viewModel.topAppBarState.test {
             assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
 
-            repository.storeNewConsumerSession(
-                consumerSession = ApiKeyFixtures.verifiedConsumerSession().copy(linkBrand = LinkBrand.Onelink),
-                publishableKey = "pk_123",
-            )
+            currentLinkBrand.set(LinkBrand.Onelink)
 
             assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Onelink)
         }
@@ -600,7 +580,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
             error("Unexpected call to create InstantDebitsResult")
         },
         currentLinkBrand: CurrentLinkBrand =
-            CurrentLinkBrand(initialState, RealConsumerSessionRepository(SavedStateHandle())),
+            FakeCurrentLinkBrand(initialState.linkBrand),
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = mock(),
         activityRetainedComponent = mock(),

@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.domain
 
-import com.stripe.android.financialconnections.di.ActivityRetainedScope
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.repository.ConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
@@ -10,13 +9,18 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 
-@ActivityRetainedScope
-internal class CurrentLinkBrand @Inject constructor(
+internal interface CurrentLinkBrand {
+    val stateFlow: StateFlow<LinkBrand>
+
+    operator fun invoke(): LinkBrand
+}
+
+internal class RealCurrentLinkBrand @Inject constructor(
     private val initialState: FinancialConnectionsSheetNativeState,
     financialConnectionsManifestRepository: FinancialConnectionsManifestRepository,
     consumerSessionRepository: ConsumerSessionRepository,
-) {
-    val stateFlow: StateFlow<LinkBrand> =
+) : CurrentLinkBrand {
+    override val stateFlow: StateFlow<LinkBrand> =
         combineAsStateFlow(
             consumerSessionRepository.consumerSessionFlow.mapAsStateFlow { it?.linkBrand },
             financialConnectionsManifestRepository.syncFlow.mapAsStateFlow { it?.manifest?.linkBrand }
@@ -24,7 +28,7 @@ internal class CurrentLinkBrand @Inject constructor(
             consumerLinkBrand ?: manifestLinkBrand ?: initialState.linkBrand
         }
 
-    operator fun invoke(): LinkBrand {
+    override fun invoke(): LinkBrand {
         return stateFlow.value
     }
 }

@@ -8,9 +8,15 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import java.util.Date
 
 internal class FakeFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
+
+    private val _syncFlow = MutableStateFlow<SynchronizeSessionResponse?>(null)
+    override val syncFlow: StateFlow<SynchronizeSessionResponse?> = _syncFlow.asStateFlow()
 
     var getSynchronizeSessionResponseProvider: () -> SynchronizeSessionResponse =
         { ApiKeyFixtures.syncResponse() }
@@ -105,7 +111,14 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
 
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
-    ) = Unit
+    ) {
+        val currentSync = syncFlow.value ?: return
+        _syncFlow.value = currentSync.copy(manifest = block(currentSync.manifest))
+    }
+
+    fun setSyncResponse(syncResponse: SynchronizeSessionResponse?) {
+        _syncFlow.value = syncResponse
+    }
 
     override suspend fun selectInstitution(
         clientSecret: String,
