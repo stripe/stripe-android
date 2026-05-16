@@ -295,16 +295,6 @@ class Checkout private constructor(
         }
     }
 
-    /**
-     * Re-fetches the checkout session from the server, replacing the local state.
-     */
-    suspend fun refresh(): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.init(
-            sessionId = sessionId,
-            adaptivePricingAllowed = configuration.adaptivePricingAllowed
-        )
-    }
-
     internal suspend fun updateCurrency(currency: String): Result<Unit> {
         val result = withInternalState { sessionId ->
             component.checkoutSessionRepository.updateCurrency(sessionId, currency)
