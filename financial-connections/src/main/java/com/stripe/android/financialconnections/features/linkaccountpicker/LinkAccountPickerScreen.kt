@@ -208,6 +208,9 @@ private fun LazyListScope.loadedContent(
 ) {
     item {
         AnnotatedText(
+            modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("loaded_picker_title"),
             text = TextResource.Text(payload.title),
             defaultStyle = typography.headingXLarge.copy(
                 color = colors.textDefault,
