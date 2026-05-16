@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -62,6 +63,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val consumerSessionProvider: ConsumerSessionProvider,
+    private val currentLinkBrand: CurrentLinkBrand,
     private val saveAccountToLink: SaveAccountToLink,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
@@ -338,7 +340,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = accountsList.data.toCachedPartnerAccounts(),
                     shouldPollAccountNumbers = manifest.isDataFlow,
-                    linkBrand = manifest.linkBrand,
+                    linkBrand = currentLinkBrand(),
                 )
             }
 

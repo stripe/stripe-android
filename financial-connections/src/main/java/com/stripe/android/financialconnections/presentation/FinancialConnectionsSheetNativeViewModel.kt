@@ -112,7 +112,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         // The first pane may choose to hide the Stripe logo. Therefore, let's hide it by default
         // on the first pane.
         get() = initialState.toTopAppBarState(
-            linkBrand = currentLinkBrand.stateFlow.value,
+            linkBrand = currentLinkBrand(),
             forceHideStripeLogo = true
         )
 

@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.IsNetworkingRelinkSession
@@ -45,6 +46,7 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
     private val getCachedAccounts: GetCachedAccounts,
     private val navigationManager: NavigationManager,
     private val getOrFetchSync: GetOrFetchSync,
+    private val currentLinkBrand: CurrentLinkBrand,
     private val logger: Logger,
     private val isNetworkingRelinkSession: IsNetworkingRelinkSession,
 ) : FinancialConnectionsViewModel<AttachPaymentState>(initialState, nativeAuthFlowCoordinator) {
@@ -94,7 +96,7 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
         accounts: List<CachedPartnerAccount>,
     ) {
         if (manifest.canSetCustomLinkSuccessMessage && !isNetworkingRelinkSession()) {
-            val linkBrand = manifest.linkBrand
+            val linkBrand = currentLinkBrand()
             successContentRepository.set(
                 message = if (linkBrand == LinkBrand.Link) {
                     PluralId(
