@@ -180,7 +180,8 @@ private fun LoadedContent(
                 modifier = Modifier
                     .semantics { testTagsAsResourceId = true }
                     .testTag("loaded_picker_title")
-                    .padding(horizontal = 8.dp))
+                    .padding(horizontal = 8.dp)
+            )
         }
         item { Spacer(modifier = Modifier.height(24.dp)) }
         stickyHeader(key = "searchRow") {
