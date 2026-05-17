@@ -9,6 +9,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
@@ -1640,8 +1642,9 @@ internal class PlaygroundTestDriver(
         }
 
         clickButtonWithTag("consent_cta")
+        waitUntilTag("loaded_picker_title")
         // TODO: Replace with institution ID tag when available
-        clickButton("Test (Non-OAuth)")
+        scrollToAndClick("Test (Non-OAuth)")
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.
@@ -1667,8 +1670,9 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("existing_email-button")
         clickButtonWithTag("test_mode_fill_button")
 
+        waitUntilTag("loaded_picker_title")
         // TODO: Replace with institution ID tag when available
-        clickButton("Success")
+        scrollToAndClick("Success")
 
         clickButtonWithTag("link_account_picker_cta")
         clickButtonWithTag("done_button")
@@ -1725,15 +1729,20 @@ internal class PlaygroundTestDriver(
         }
     }
 
-    private fun clickButton(text: String, composeCanDetach: Boolean = false) {
+    private fun waitUntilTag(tag: String) {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText(text)
-                .fetchSemanticsNodes(atLeastOneRootRequired = !composeCanDetach)
+                .onAllNodesWithTag(tag)
+                .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+    }
 
-        composeTestRule.onNodeWithText(text).performClick()
+    private fun scrollToAndClick(text: String) {
+        composeTestRule.onNode(hasScrollToNodeAction())
+            .performScrollToNode(hasText(text))
+        composeTestRule.onNodeWithText(text)
+            .performClick()
     }
 
     private fun clickButtonWithTag(tag: String, composeCanDetach: Boolean = false) {

@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -747,6 +748,7 @@ class NetworkingLinkSignupViewModelTest {
             eventTracker = eventTracker,
             navigationManager = navigationManager,
             requestIntegrityToken = mock(),
+            currentLinkBrand = FakeCurrentLinkBrand(),
             applicationId = "test",
             logger = Logger.noop(),
         )

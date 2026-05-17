@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.RequestIntegrityToken
@@ -53,6 +54,7 @@ class LinkSignupHandlerForNetworkingTest {
             saveAccountToLink,
             eventTracker,
             navigationManager,
+            FakeCurrentLinkBrand(),
             "applicationId",
             logger
         )

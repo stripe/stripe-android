@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -64,6 +65,7 @@ internal class AccountPickerViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         saveAccountToLink = saveAccountToLink,
         consumerSessionProvider = { cachedConsumerSession() },
+        currentLinkBrand = FakeCurrentLinkBrand(),
         presentSheet = mock(),
     )
 

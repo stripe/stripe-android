@@ -20,6 +20,9 @@ import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
 import com.stripe.android.financialconnections.repository.api.ProvideApiRequestOptions
 import com.stripe.android.financialconnections.utils.filterNotNullValues
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.Date
@@ -30,6 +33,8 @@ import java.util.Locale
  * of the current flow.
  */
 internal interface FinancialConnectionsManifestRepository {
+
+    val syncFlow: StateFlow<SynchronizeSessionResponse?>
 
     /**
      * Retrieves the current cached [SynchronizeSessionResponse] instance, or fetches
@@ -210,7 +215,17 @@ private class FinancialConnectionsManifestRepositoryImpl(
      * current writes are running.
      */
     val mutex = Mutex()
-    private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse? = initialSync
+
+    private val cachedSynchronizeSessionResponseFlow = MutableStateFlow(initialSync)
+
+    private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse?
+        get() = cachedSynchronizeSessionResponseFlow.value
+        set(value) {
+            cachedSynchronizeSessionResponseFlow.value = value
+        }
+
+    override val syncFlow: StateFlow<SynchronizeSessionResponse?> =
+        cachedSynchronizeSessionResponseFlow.asStateFlow()
 
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,

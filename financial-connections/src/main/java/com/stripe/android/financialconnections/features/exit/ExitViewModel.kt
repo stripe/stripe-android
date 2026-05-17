@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
@@ -34,6 +35,7 @@ internal class ExitViewModel @AssistedInject constructor(
     private val coordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
+    private val currentLinkBrand: CurrentLinkBrand,
     private val logger: Logger
 ) : FinancialConnectionsViewModel<ExitState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -45,7 +47,7 @@ internal class ExitViewModel @AssistedInject constructor(
             val isNetworkingSignupPane =
                 manifest?.isNetworkingUserFlow == true && stateFlow.value.referrer == Pane.NETWORKING_LINK_SIGNUP_PANE
             // Safe default: manifest is null only on fetch failure, and Link is the original brand.
-            val linkBrand = manifest?.linkBrand ?: LinkBrand.Link
+            val linkBrand = currentLinkBrand()
             val description = when {
                 isNetworkingSignupPane -> when (businessName) {
                     null -> if (linkBrand == LinkBrand.Link) {
