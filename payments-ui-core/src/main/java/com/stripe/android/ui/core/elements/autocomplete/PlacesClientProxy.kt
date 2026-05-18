@@ -48,7 +48,7 @@ interface PlacesClientProxy {
             googlePlacesApiKey: String,
             isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
-            initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
+            initializer: () -> Unit = { Places.initializeWithNewPlacesApiEnabled(context, googlePlacesApiKey) },
             errorReporter: ErrorReporter
         ): PlacesClientProxy {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isPlacesAvailable()) {
@@ -104,7 +104,7 @@ internal class DefaultPlacesClientProxy(
                     .setSessionToken(token)
                     .setQuery(query)
                     .setCountries(listOf(country))
-                    .setTypesFilter(listOf(PlaceTypes.ADDRESS))
+                    .setTypesFilter(listOf(PlaceTypes.STREET_ADDRESS))
                     .build()
             ).await()
             errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
