@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">На данный момент не удалось получить доступ к номеру вашего счета</string>
   <string name="stripe_close_dialog_networking_desc">Если вы сейчас выберете отмену, ваш счет будет привязан к поставщику %1$s, но не сохранен в Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Если вы сейчас выберете отмену, ваш счет будет привязан к этому поставщику, но не сохранен в Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">После отмены ваш счет будет привязан к этому бизнесу, но не сохранен в %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">После отмены ваш счет будет привязан к %1$s, но не сохранен в %2$s.</string>
   <string name="stripe_error_cta_close">Закрыть</string>
   <string name="stripe_error_cta_manual_entry">Введите банковские реквизиты вручную</string>
   <string name="stripe_error_cta_retry">Попробуйте еще раз</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Введите банковские реквизиты</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Отмена</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Продолжить с Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Продолжить с %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Не сейчас</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Используйте данные, ранее сохраненные в вашей учетной записи Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Используйте данные, ранее сохраненные в счете %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Продолжить с Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Продолжить с %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Не сейчас</string>
   <string name="stripe_networking_save_to_link_verification_title">Подтвердите, что это вы</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Выберите другой банк</string>
   <string name="stripe_search">Поиск</string>
   <string name="stripe_success_pane_desc_link_error_plural">Ваши счета были подключены, но их не удалось сохранить в Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Ваши счета подключены, но их не удалось сохранить в %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Ваш счет был подключен, но его не удалось сохранить в Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Ваш счет удалось подключить, но не удалось сохранить в %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Ваши счета были подключены и сохранены в Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Ваши счета подключены и сохранены в %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Ваш счет был подключен и сохранен в Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Ваш счет удалось подключить и сохранить в %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">В течение 1-2 дней мы переведем две небольшие суммы на банковский счет с номером, оканчивающимся на ••••%1$s, и пришлем электронное письмо с дальнейшими указаниями.</string>
   <string name="stripe_success_pane_desc_plural">Ваши счета были подключены</string>
   <string name="stripe_success_pane_desc_singular">Ваш счет был подключен</string>
