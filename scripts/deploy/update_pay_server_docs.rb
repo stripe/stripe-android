@@ -18,10 +18,12 @@ def update_pay_server_docs()
         execute_or_fail("cd .. && pay get mint")
     end
 
-    puts 'Ensuring mint repo is up-to-date.'
+    mint_base_ref = "origin/green-pay-server"
+
+    puts 'Fetching latest pay-server...'
     begin
-        execute_or_fail("git -C #{mint_repo} checkout master")
-        execute_or_fail("git -C #{mint_repo} pull")
+        execute_or_fail("git -C #{mint_repo} fetch --depth=1 origin green-pay-server")
+        execute_or_fail("git -C #{mint_repo} checkout #{mint_base_ref}")
 
         puts '> Updating android SDK version in pay-server for latest release.'
         replace_in_file("#{mint_repo}/#{constants_file}",
@@ -29,7 +31,7 @@ def update_pay_server_docs()
           "sdk-version: #{@version}",
         )
         execute_or_fail("git -C #{mint_repo} add #{constants_file}")
-        switch_to_new_branch(pay_server_branch, "master", repo: mint_repo)
+        switch_to_new_branch(pay_server_branch, mint_base_ref, repo: mint_repo)
         execute_or_fail("git -C #{mint_repo} add #{constants_file}")
         execute_or_fail("git -C #{mint_repo} commit -m \"Update Android Payments SDK version to #{@version}\"")
     rescue
@@ -55,7 +57,7 @@ def update_pay_server_docs()
 end
 
 def delete_pay_server_branch
-    delete_git_branch(pay_server_branch, "master", repo: "../mint")
+    delete_git_branch(pay_server_branch, "origin/green-pay-server", repo: "../mint")
 end
 
 private def pay_server_branch
