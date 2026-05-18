@@ -5,23 +5,21 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.checkout.Checkout.Companion.configure
 import com.stripe.android.checkout.Checkout.Companion.createWithState
 import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
-import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -66,7 +64,8 @@ class Checkout private constructor(
             checkoutSessionClientSecret: String,
             configuration: Configuration = Configuration(),
         ): Result<Checkout> {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
+            val application = context.applicationContext as Application
+            val component = DaggerCheckoutComponent.factory().create(application)
             val configurationState = configuration.build()
             return component.checkoutSessionRepository.init(
                 sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
@@ -78,7 +77,7 @@ class Checkout private constructor(
                         configuration = configurationState,
                         checkoutSessionResponse = response,
                     ),
-                    component,
+                    component = component,
                 )
             }
         }
@@ -90,7 +89,8 @@ class Checkout private constructor(
             context: Context,
             state: State,
         ): Checkout {
-            val component = DaggerCheckoutComponent.factory().create(context.applicationContext as Application)
+            val application = context.applicationContext as Application
+            val component = DaggerCheckoutComponent.factory().create(application)
             return Checkout(
                 internalState = state.internalState,
                 component = component,
@@ -295,18 +295,16 @@ class Checkout private constructor(
         }
     }
 
-    /**
-     * Re-fetches the checkout session from the server, replacing the local state.
-     */
-    suspend fun refresh(): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.init(
-            sessionId = sessionId,
-            adaptivePricingAllowed = configuration.adaptivePricingAllowed
-        )
-    }
-
-    internal suspend fun updateCurrency(currency: String) = withInternalState { sessionId ->
-        component.checkoutSessionRepository.updateCurrency(sessionId, currency)
+    internal suspend fun updateCurrency(currency: String): Result<Unit> {
+        val result = withInternalState { sessionId ->
+            component.checkoutSessionRepository.updateCurrency(sessionId, currency)
+        }
+        result.onSuccess {
+            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
+        }.onFailure {
+            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
+        }
+        return result
     }
 
     internal fun markIntegrationLaunched() {
@@ -360,27 +358,36 @@ class Checkout private constructor(
      */
     @Composable
     fun CurrencySelectorContent() {
-        val context = LocalContext.current
-        val scope = rememberCoroutineScope()
+        val viewModel: CurrencySelectorViewModel = viewModel(
+            factory = CurrencySelectorViewModel.Factory(
+                checkoutSession = checkoutSession,
+                updateCurrency = ::updateCurrency,
+                analyticsRequestExecutor = component.analyticsRequestExecutor,
+                paymentAnalyticsRequestFactory = component.paymentAnalyticsRequestFactory,
+            )
+        )
         val isLoading by isLoading.collectAsState()
         val checkoutSession by checkoutSession.collectAsState()
         val currencySelectorOptions = checkoutSession.currencySelectorOptions ?: return
-        var errorMessage by rememberSaveable { mutableStateOf<String?>(null) }
-        LaunchedEffect(checkoutSession) {
-            errorMessage = null
-        }
+        val errorMessage by viewModel.errorMessage.collectAsState()
         CurrencySelectorToggle(
             options = currencySelectorOptions,
             onCurrencySelected = { currencyOption ->
-                scope.launch(Dispatchers.Main.immediate) {
-                    updateCurrency(currencyOption.code)
-                        .onFailure { throwable ->
-                            errorMessage = throwable.stripeErrorMessage(context)
-                        }
-                }
+                viewModel.onCurrencySelected(currencyOption.code)
             },
             isEnabled = !isLoading,
-            errorMessage = errorMessage,
+            errorMessage = errorMessage?.resolve(),
         )
+    }
+
+    private fun fireEvent(event: PaymentSheetEvent) {
+        CoroutineScope(Dispatchers.IO).launch {
+            component.analyticsRequestExecutor.executeAsync(
+                component.paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = event.params,
+                )
+            )
+        }
     }
 }

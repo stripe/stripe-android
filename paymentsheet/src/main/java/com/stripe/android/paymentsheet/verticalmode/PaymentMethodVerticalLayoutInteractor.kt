@@ -8,6 +8,7 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -59,6 +60,7 @@ internal interface PaymentMethodVerticalLayoutInteractor {
         val displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
         val availableSavedPaymentMethodAction: SavedPaymentMethodAction,
         val mandate: ResolvableString?,
+        val linkBrand: LinkBrand,
     )
 
     sealed interface Selection {
@@ -303,6 +305,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
+            linkBrand = paymentMethodMetadata.linkBrand,
         )
     }
 
@@ -348,6 +351,20 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
                     updateSelection(verticalModeScreenSelection.value, false)
+                }
+            }
+        }
+
+        coroutineScope.launch(mainDispatcher) {
+            walletsState.collect { currentWalletsState ->
+                val currentSelection = verticalModeScreenSelection.value
+                if (currentSelection is PaymentSelection.Link) {
+                    val newLinkBrand = currentWalletsState?.link(WalletLocation.INLINE)?.linkBrand
+                    if (newLinkBrand != null && newLinkBrand != currentSelection.brand) {
+                        val updatedSelection = currentSelection.copy(brand = newLinkBrand)
+                        _verticalModeScreenSelection.value = updatedSelection
+                        updateSelection(updatedSelection, false)
+                    }
                 }
             }
         }

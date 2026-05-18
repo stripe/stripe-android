@@ -11,7 +11,7 @@ import org.junit.Rule
 
 internal open class BasePlaygroundTest(disableAnimations: Boolean = true) {
     @get:Rule
-    val rules = TestRules.create(disableAnimations = disableAnimations)
+    open val rules = TestRules.create(disableAnimations = disableAnimations)
 
     lateinit var device: UiDevice
     lateinit var testDriver: PlaygroundTestDriver

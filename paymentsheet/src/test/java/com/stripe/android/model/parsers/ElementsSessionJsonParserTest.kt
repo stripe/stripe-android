@@ -178,9 +178,9 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `link_brand is parsed as Notlink`() {
-        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("notlink"))
-        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Notlink)
+    fun `link_brand is parsed as Onelink`() {
+        val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand("onelink"))
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Onelink)
     }
 
     @Test
@@ -190,9 +190,9 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
-    fun `missing link_brand is parsed as null`() {
+    fun `missing link_brand defaults to Link`() {
         val elementsSession = parseElementsSession(createElementsSessionWithLinkBrand(linkBrand = null))
-        assertThat(elementsSession?.linkSettings?.linkBrand).isNull()
+        assertThat(elementsSession?.linkSettings?.linkBrand).isEqualTo(LinkBrand.Link)
     }
 
     @Test

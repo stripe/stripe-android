@@ -2,6 +2,8 @@ package com.stripe.android.core.utils
 
 import android.os.SystemClock
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.BuildConfig
+import com.stripe.android.core.Logger
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
@@ -33,6 +35,7 @@ interface DurationProvider {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DefaultDurationProvider private constructor() : DurationProvider {
+    private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
     private val store = mutableMapOf<DurationProvider.Key, Long>()
 
@@ -40,6 +43,7 @@ class DefaultDurationProvider private constructor() : DurationProvider {
         if (reset || key !in store) {
             val startTime = SystemClock.uptimeMillis()
             store[key] = startTime
+            logger.debug("DURATION_STARTED: ${key.name}: $startTime")
         }
     }
 
@@ -50,7 +54,9 @@ class DefaultDurationProvider private constructor() : DurationProvider {
 
     override fun end(key: DurationProvider.Key): Duration? {
         val startTime = store.remove(key) ?: return null
-        return (SystemClock.uptimeMillis() - startTime).milliseconds
+        val endTime = SystemClock.uptimeMillis()
+        logger.debug("DURATION_ENDED: ${key.name}: $endTime")
+        return (endTime - startTime).milliseconds
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

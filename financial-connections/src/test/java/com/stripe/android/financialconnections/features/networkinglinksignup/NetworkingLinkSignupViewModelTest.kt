@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.ElementsSessionContext
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -731,11 +732,11 @@ class NetworkingLinkSignupViewModelTest {
 
         val saveAccountToLink = mock<SaveAccountToLink> {
             if (failOnSignup) {
-                on { new(any(), any(), any(), any(), any()) } doAnswer {
+                on { new(any(), any(), any(), any(), any(), any()) } doAnswer {
                     throw APIConnectionException()
                 }
             } else {
-                on { new(any(), any(), any(), any(), any()) } doReturn manifest
+                on { new(any(), any(), any(), any(), any(), any()) } doReturn manifest
             }
         }
 
@@ -747,6 +748,7 @@ class NetworkingLinkSignupViewModelTest {
             eventTracker = eventTracker,
             navigationManager = navigationManager,
             requestIntegrityToken = mock(),
+            currentLinkBrand = FakeCurrentLinkBrand(),
             applicationId = "test",
             logger = Logger.noop(),
         )

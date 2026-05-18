@@ -381,13 +381,15 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
-        cardArtExperimentHandler.logExposure(
-            elementsSession = elementsSession,
-            paymentMethodMetadata = pmMetadata,
-            savedPaymentMethods = elementsSession.customer?.paymentMethods.orEmpty(),
-            integrationConfiguration = integrationConfiguration,
-            defaultPaymentSelection = state.paymentSelection,
-        )
+        if (elementsSession.customer != null) {
+            cardArtExperimentHandler.logExposure(
+                elementsSession = elementsSession,
+                paymentMethodMetadata = pmMetadata,
+                savedPaymentMethods = elementsSession.customer.paymentMethods,
+                integrationConfiguration = integrationConfiguration,
+                defaultPaymentSelection = state.paymentSelection,
+            )
+        }
 
         logLinkExperimentExposures(
             elementsSession = elementsSession,

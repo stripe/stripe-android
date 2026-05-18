@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsAc
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -52,6 +53,7 @@ internal class SaveAccountToLinkTest {
             selectedAccounts = partnerAccounts,
             country = "US",
             shouldPollAccountNumbers = true,
+            linkBrand = LinkBrand.Link,
         )
 
         assertThat(polledClientSecret).isEqualTo(ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET)
@@ -78,6 +80,7 @@ internal class SaveAccountToLinkTest {
             selectedAccounts = partnerAccounts,
             country = "US",
             shouldPollAccountNumbers = false,
+            linkBrand = LinkBrand.Link,
         )
 
         assertThat(polledAccountIds).isEmpty()
@@ -109,6 +112,7 @@ internal class SaveAccountToLinkTest {
                 selectedAccounts = partnerAccounts,
                 country = "US",
                 shouldPollAccountNumbers = true,
+                linkBrand = LinkBrand.Link,
             )
         }
 
@@ -137,6 +141,7 @@ internal class SaveAccountToLinkTest {
                 selectedAccounts = partnerAccounts,
                 country = "US",
                 shouldPollAccountNumbers = true,
+                linkBrand = LinkBrand.Link,
             )
         }
 
@@ -145,6 +150,42 @@ internal class SaveAccountToLinkTest {
                 singular = R.string.stripe_success_pane_desc_link_error_singular,
                 plural = R.string.stripe_success_pane_desc_link_error_plural,
                 count = 2,
+            )
+        )
+    }
+
+    @Test
+    fun `Sets branded error message if polling account numbers fails with non-Link brand`() = runTest(testDispatcher) {
+        val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
+
+        val accountsRepository = mockAccountsRepository(
+            onPollAccountNumbers = { _, _ -> error("This is failing") },
+        )
+
+        val successRepository = SuccessContentRepository(SavedStateHandle())
+
+        val saveAccountToLink = makeSaveAccountToLink(
+            accountsRepository = accountsRepository,
+            successRepository = successRepository,
+        )
+
+        assertFails {
+            saveAccountToLink.new(
+                email = "email@email.com",
+                phoneNumber = "+15555555555",
+                selectedAccounts = partnerAccounts,
+                country = "US",
+                shouldPollAccountNumbers = true,
+                linkBrand = LinkBrand.Onelink,
+            )
+        }
+
+        assertThat(successRepository.get()?.message).isEqualTo(
+            TextResource.PluralId(
+                singular = R.string.stripe_success_pane_desc_link_error_singular_with_brand,
+                plural = R.string.stripe_success_pane_desc_link_error_plural_with_brand,
+                count = 2,
+                args = listOf(LinkBrand.Onelink.brandName()),
             )
         )
     }
@@ -177,6 +218,7 @@ internal class SaveAccountToLinkTest {
                 selectedAccounts = emptyList(),
                 country = "US",
                 shouldPollAccountNumbers = true,
+                linkBrand = LinkBrand.Link,
             )
 
             assertThat(successRepository.get()?.message).isEqualTo(
@@ -214,6 +256,7 @@ internal class SaveAccountToLinkTest {
             consumerSessionClientSecret = "cscs_123",
             selectedAccounts = emptyList(),
             shouldPollAccountNumbers = true,
+            linkBrand = LinkBrand.Link,
         )
 
         assertThat(successRepository.get()).isNull()

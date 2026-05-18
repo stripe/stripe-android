@@ -118,7 +118,6 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
                     )
                     billingAddressLauncher.present(publishableKey, configuration)
                 },
-                refresh = viewModel::refresh,
             )
         }
     }
@@ -147,7 +146,6 @@ private fun CheckoutScreen(
     lastBillingAddressDetails: StateFlow<AddressDetails?>,
     clearBillingAddress: () -> Unit,
     updateBillingAddress: () -> Unit,
-    refresh: () -> Unit,
 ) {
     val checkoutSession by checkout.checkoutSession.collectAsState()
     val loading by checkout.isLoading.collectAsState()
@@ -183,11 +181,6 @@ private fun CheckoutScreen(
                 TaxIdSection(updateTaxId = updateTaxId)
                 ShippingOptionsSection(checkoutSession, selectShippingRate)
                 PromotionCodeInput(promotionCode, { promotionCode = it }, applyPromotionCode)
-                Button(
-                    onClick = refresh,
-                ) {
-                    Text("Refresh")
-                }
             },
             bottomBarContent = {
                 TotalSummary(checkoutSession, removePromotionCode)

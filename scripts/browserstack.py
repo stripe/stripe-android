@@ -11,6 +11,7 @@ from collections import defaultdict
 # These need to be set in environment variables.
 user = os.getenv("BROWSERSTACK_USERNAME")
 authKey = os.getenv("BROWSERSTACK_ACCESS_KEY")
+bitriseQuarantinedTests = os.getenv("BITRISE_QUARANTINED_TESTS_JSON")
 
 PROJECT_NAME = "Mobile Payments"
 
@@ -273,17 +274,38 @@ def executeTests(appUrl, testUrl):
 
     numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
-    addedParams = {
+    shardsParams = {
         "shards": {
             "numberOfShards": numberOfShards,
         },
     }
+
+    if bitriseQuarantinedTests:
+        instrumentationOptionsParams = {
+            "instrumentationOptions": {
+                "bitriseQuarantinedTests": bitriseQuarantinedTests.encode("utf-8").hex(),
+            }
+        }
+    else:
+        instrumentationOptionsParams = {}
+
+    addedParams = {
+        **shardsParams,
+        **instrumentationOptionsParams,
+    }
     return executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParams)
 
-# https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
-def get_build_status(buildId):
+# https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds
+def get_espresso_build(buildId):
     url = (
         "https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
+    )
+    return requests.get(url, auth=(user, authKey))
+
+# https://www.browserstack.com/docs/test-reporting-and-analytics/api/get-build-details
+def get_build_status(buildId):
+    url = (
+        "https://api-automation.browserstack.com/ext/v1/builds/" + buildId
     )
     return requests.get(url, auth=(user, authKey))
 
@@ -430,7 +452,7 @@ def classNameToFullyQualifiedClassName(failedTestClassName):
 
 def getSessionIdsForBuild(buildId):
     sessionIds = []
-    buildStatus = get_build_status(buildId)
+    buildStatus = get_espresso_build(buildId)
     devices = buildStatus.json()["devices"]
     for device in devices:
         sessions_on_device = device["sessions"]
@@ -440,7 +462,7 @@ def getSessionIdsForBuild(buildId):
 
 def getSessionIdsAndDeviceForBuild(buildId):
     sessionIds = []
-    buildStatus = get_build_status(buildId)
+    buildStatus = get_espresso_build(buildId)
     devices = buildStatus.json()["devices"]
     for device in devices:
         sessions_on_device = device["sessions"]

@@ -621,6 +621,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Link Express is launched when viewmodel is started with logged in link account`() = confirmationTest {
         createViewModel(
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.LoggedIn,
@@ -657,7 +658,7 @@ internal class PaymentSheetViewModelTest {
 
         startTurbine.ensureAllEventsConsumed()
 
-        viewModel.checkoutWithLink()
+        viewModel.checkoutWithLink(LinkBrand.Link)
 
         val confirmationArgs = startTurbine.awaitItem()
         assertThat(confirmationArgs.confirmationOption).isInstanceOf<LinkConfirmationOption>()
@@ -933,7 +934,7 @@ internal class PaymentSheetViewModelTest {
                 PaymentSheetViewState.Reset(null)
             )
 
-            viewModel.checkoutWithLink()
+            viewModel.checkoutWithLink(LinkBrand.Link)
 
             val arguments = startTurbine.awaitItem()
 
@@ -1460,7 +1461,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.contentVisible.test {
             assertThat(awaitItem()).isTrue()
 
-            viewModel.checkoutWithLink()
+            viewModel.checkoutWithLink(LinkBrand.Link)
 
             val arguments = startTurbine.awaitItem()
 
@@ -1473,6 +1474,7 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Does not show processing WalletsProcessingState when using Link Express`() = confirmationTest {
         val viewModel = createViewModel(
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION,
                 loginState = LinkState.LoginState.NeedsVerification,
@@ -2601,7 +2603,7 @@ internal class PaymentSheetViewModelTest {
             eventReporter = eventReporter,
         )
 
-        viewModel.checkoutWithLink()
+        viewModel.checkoutWithLink(LinkBrand.Link)
 
         val arguments = startTurbine.awaitItem()
 
@@ -2637,7 +2639,7 @@ internal class PaymentSheetViewModelTest {
             eventReporter = eventReporter,
         )
 
-        viewModel.checkoutWithLink()
+        viewModel.checkoutWithLink(LinkBrand.Link)
 
         val arguments = startTurbine.awaitItem()
 
@@ -2668,6 +2670,7 @@ internal class PaymentSheetViewModelTest {
 
         createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = LINK_CONFIG,
                 loginState = LinkState.LoginState.LoggedIn,
@@ -2709,6 +2712,7 @@ internal class PaymentSheetViewModelTest {
 
         createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
+            customer = EMPTY_CUSTOMER_STATE,
             linkState = LinkState(
                 configuration = LINK_CONFIG,
                 loginState = LinkState.LoginState.LoggedIn,

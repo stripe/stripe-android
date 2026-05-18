@@ -4,6 +4,7 @@ import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethod
@@ -20,6 +21,7 @@ import javax.inject.Singleton
 @Singleton
 internal interface LinkConfigurationCoordinator {
     val emailFlow: StateFlow<String?>
+    val accountFlow: StateFlow<LinkAccount?>
 
     fun getComponent(configuration: LinkConfiguration): LinkComponent
 
@@ -56,7 +58,7 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
 ) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
-    override val emailFlow: StateFlow<String?> = componentFlow
+    override val accountFlow: StateFlow<LinkAccount?> = componentFlow
         .flatMapLatestAsStateFlow { component ->
             if (component?.linkAccountManager?.linkAccountInfo != null) {
                 component.linkAccountManager.linkAccountInfo.mapAsStateFlow { it.account }
@@ -64,7 +66,8 @@ internal class RealLinkConfigurationCoordinator @Inject internal constructor(
                 stateFlowOf(null)
             }
         }
-        .mapAsStateFlow { it?.email }
+
+    override val emailFlow: StateFlow<String?> = accountFlow.mapAsStateFlow { it?.email }
 
     /**
      * Fetch the dependency injector Component for all injectable classes in Link while in an embedded

@@ -3,6 +3,7 @@ package com.stripe.android.link
 import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.LinkBrand
@@ -74,4 +75,11 @@ internal data class LinkConfiguration(
         val eligible: Boolean,
         val preferredNetworks: List<String>,
     ) : Parcelable
+}
+
+/**
+ * Returns the consumer's LinkBrand if logged in, otherwise falls back to the configuration's brand.
+ */
+internal fun LinkConfiguration.effectiveLinkBrand(account: LinkAccount?): LinkBrand {
+    return account?.linkBrand ?: linkBrand
 }

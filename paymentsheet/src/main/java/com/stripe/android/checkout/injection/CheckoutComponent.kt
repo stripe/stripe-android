@@ -8,7 +8,9 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.StripeNetworkClientModule
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
@@ -34,6 +36,8 @@ import javax.inject.Provider
 )
 internal interface CheckoutComponent {
     val checkoutSessionRepository: CheckoutSessionRepository
+    val analyticsRequestExecutor: AnalyticsRequestExecutor
+    val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 
     @Component.Factory
     interface Factory {

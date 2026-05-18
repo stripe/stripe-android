@@ -24,6 +24,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.account.linkAccountUpdate
 import com.stripe.android.link.confirmation.CompleteLinkFlow
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.injection.NativeLinkComponent
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.supportedPaymentMethodTypes
@@ -51,6 +52,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
@@ -95,7 +97,7 @@ internal class WalletViewModel(
             paymentSelectionHint = paymentSelectionHint,
             signupToggleEnabled = configuration.linkSignUpOptInFeatureEnabled,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-            linkBrand = configuration.linkBrand,
+            linkBrand = configuration.effectiveLinkBrand(linkAccount),
         )
     )
 
@@ -125,7 +127,6 @@ internal class WalletViewModel(
     val uiState: StateFlow<WalletUiState> = _uiState.asStateFlow()
 
     val allowLogOut: Boolean = configuration.allowLogOut
-    val linkBrand = configuration.linkBrand
 
     val expiryDateController = SimpleTextFieldController(
         textFieldConfig = DateConfig()
@@ -143,6 +144,13 @@ internal class WalletViewModel(
 
         viewModelScope.launch {
             loadPaymentDetails(selectedItemId = linkLaunchMode.selectedItemId)
+        }
+
+        viewModelScope.launch {
+            linkAccountManager.linkAccountInfo.collect { accountUpdate ->
+                val linkBrand = configuration.effectiveLinkBrand(accountUpdate.account)
+                _uiState.update { it.copy(linkBrand = linkBrand) }
+            }
         }
 
         viewModelScope.launch {

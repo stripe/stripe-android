@@ -425,8 +425,8 @@ internal val PaymentSelection.darkThemeIconUrl: String?
         is PaymentSelection.ShopPay -> null
     }
 
-internal val PaymentSelection.label: ResolvableString
-    get() = when (this) {
+internal fun PaymentSelection.label(linkBrand: LinkBrand?): ResolvableString =
+    when (this) {
         is PaymentSelection.ExternalPaymentMethod -> label
         is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
@@ -434,12 +434,17 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.USBankAccount -> label.resolvableString
-        is PaymentSelection.Saved -> getSavedLabel(this).orEmpty()
+        is PaymentSelection.Saved -> getSavedLabel(this, linkBrand).orEmpty()
         is PaymentSelection.ShopPay -> StripeR.string.stripe_shop_pay.resolvableString
     }
 
-private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
-    return selection.paymentMethod.getLabel(canShowSublabel = true)
+private fun getSavedLabel(selection: PaymentSelection.Saved, linkBrand: LinkBrand?): ResolvableString? {
+    return selection.paymentMethod.getLabel(
+        // Fallback is safe: Link passthrough PMs only exist when Link is enabled, so linkBrand is always non-null
+        // in practice. The null case guards against construction sites that don't have Link state available.
+        linkBrand = linkBrand ?: LinkBrand.Link,
+        canShowSublabel = true,
+    )
 }
 
 internal val PaymentSelection.paymentMethodType: String

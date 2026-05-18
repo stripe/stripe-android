@@ -149,15 +149,15 @@ internal class LinkInlineSignupViewTest {
     }
 
     @Test
-    fun checkbox_label_uses_notlink_brand_name_for_default_opt_in() {
+    fun checkbox_label_uses_onelink_brand_name_for_default_opt_in() {
         setContent(
             expanded = false,
             allowsDefaultOptIn = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
         composeTestRule
-            .onNodeWithText("Save my info for faster checkout with Notlink")
+            .onNodeWithText("Save my info for faster checkout with Onelink")
             .assertExists()
     }
 
@@ -165,10 +165,10 @@ internal class LinkInlineSignupViewTest {
     fun inline_logo_content_description_uses_dynamic_brand_name() {
         setContent(
             expanded = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
-        onInlineLinkLogo().assertContentDescriptionContains("Notlink")
+        onInlineLinkLogo().assertContentDescriptionContains("Onelink")
     }
 
     @Test
@@ -176,11 +176,11 @@ internal class LinkInlineSignupViewTest {
         setContent(
             expanded = false,
             linkSignUpOptInFeatureEnabled = true,
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
         )
 
         composeTestRule
-            .onNodeWithContentDescription("Notlink", useUnmergedTree = true)
+            .onNodeWithContentDescription("Onelink", useUnmergedTree = true)
             .assertExists()
     }
 
