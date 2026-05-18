@@ -24,6 +24,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.atMost
@@ -42,7 +43,12 @@ import org.robolectric.RobolectricTestRunner
 internal class PaymentIntentFlowResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val mockStripeRepository: StripeRepository = mock()
+    private lateinit var mockStripeRepository: StripeRepository
+
+    @Before
+    fun setUp() {
+        mockStripeRepository = mock()
+    }
 
     @Test
     fun `processPaymentIntent() when shouldCancelSource=true should return canceled PaymentIntent`() =
