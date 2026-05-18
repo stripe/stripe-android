@@ -5,8 +5,6 @@ NEXT_VERSION_BUMP: PATCH
 
 ## 23.9.0 - 2026-05-18
 
-## 23.8.1 - 2026-05-18
-
 Added support for [Onelink](https://support.stripe.com/questions/what-is-onelink).
 
 ## 23.8.0 - 2026-05-11
