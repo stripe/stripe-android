@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">ไม่สามารถเข้าถึงหมายเลขบัญชีของคุณได้ในตอนนี้</string>
   <string name="stripe_close_dialog_networking_desc">หากยกเลิกตอนนี้ บัญชีของคุณจะเชื่อมโยงกับ %1$s แต่จะไม่ได้บันทึกไปที่ Link</string>
   <string name="stripe_close_dialog_networking_desc_no_business">หากยกเลิกตอนนี้ บัญชีของคุณจะเชื่อมโยงกับธุรกิจ แต่จะไม่ได้บันทึกไปที่ Link</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">หากยกเลิกตอนนี้ บัญชีของคุณจะเชื่อมโยงกับธุรกิจนี้ แต่จะไม่ได้บันทึกไปที่ %1$s</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">หากยกเลิกตอนนี้ บัญชีของคุณจะเชื่อมโยงกับ %1$s แต่จะไม่ได้บันทึกไปที่ %2$s</string>
   <string name="stripe_error_cta_close">ปิด</string>
   <string name="stripe_error_cta_manual_entry">ป้อนรายละเอียดของธนาคารด้วยตนเอง</string>
   <string name="stripe_error_cta_retry">ลองอีกครั้ง</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">ป้อนรายละเอียดของธนาคาร</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">ยกเลิก</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">ดำเนินการต่อด้วย Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">ดำเนินการต่อกับ %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">ไว้ทีหลัง</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">ใช้ข้อมูลที่บันทึกไว้ก่อนหน้านี้ด้วยบัญชี Link</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">ใช้ข้อมูลที่บันทึกไว้ก่อนหน้านี้ด้วยบัญชี %1$s</string>
   <string name="stripe_networking_link_login_warmup_title">ดำเนินการต่อด้วย Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">ดำเนินการต่อกับ %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">ไว้ทีหลัง</string>
   <string name="stripe_networking_save_to_link_verification_title">ยืนยันว่าเป็นคุณจริงๆ</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">เลือกธนาคารอื่น</string>
   <string name="stripe_search">ค้นหา</string>
   <string name="stripe_success_pane_desc_link_error_plural">บัญชีของคุณเชื่อมโยงแล้วแต่ไม่สามารถบันทึกด้วย Link ได้</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">บัญชีของคุณเชื่อมโยงอยู่ แต่ไม่สามารถบันทึกในระบบ %1$s ได้</string>
   <string name="stripe_success_pane_desc_link_error_singular">บัญชีของคุณเชื่อมโยงแล้วแต่ไม่สามารถบันทึกด้วย Link ได้</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">บัญชีของคุณเชื่อมโยงอยู่ แต่ไม่สามารถบันทึกในระบบ %1$s ได้</string>
   <string name="stripe_success_pane_desc_link_success_plural">เชื่อมโยงบัญชีและบันทึกด้วย Link แล้ว</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">บัญชีของคุณได้รับการเชื่อมโยงและบันทึกด้วย %1$s</string>
   <string name="stripe_success_pane_desc_link_success_singular">เชื่อมโยงบัญชีและบันทึกด้วย Link แล้ว</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">บัญชีของคุณเชื่อมโยงอยู่และบันทึกด้วย %1$s</string>
   <string name="stripe_success_pane_desc_microdeposits">คุณจะได้รับเงินฝากจำนวนเล็กน้อยในบัญชี ••••%1$s ภายใน 1-2 วัน และอีเมลพร้อมคำแนะนำเพิ่มเติม</string>
   <string name="stripe_success_pane_desc_plural">เชื่อมโยงบัญชีแล้ว</string>
   <string name="stripe_success_pane_desc_singular">เชื่อมโยงบัญชีแล้ว</string>

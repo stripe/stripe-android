@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Šiuo metu jūsų sąskaitos numerio negalima pasiekti</string>
   <string name="stripe_close_dialog_networking_desc">Jei atšauksite dabar, jūsų sąskaita bus susieta su „%1$s“, bet nebus išsaugota „Link“.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Jei atšauksite dabar, jūsų sąskaita bus susieta su šia įmone, bet nebus išsaugota „Link“.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Jei atšauksite dabar, jūsų paskyra bus susieta su šia įmone, bet nebus įrašyta į %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Jei atšauksite dabar, jūsų paskyra bus susieta su %1$s, bet nebus įrašyta į %2$s.</string>
   <string name="stripe_error_cta_close">Uždaryti</string>
   <string name="stripe_error_cta_manual_entry">Įvesti banko duomenis rankiniu būdu</string>
   <string name="stripe_error_cta_retry">Bandyti dar kartą</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Įvesti banko duomenis</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Atšaukti</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Tęsti naudojant „Link“</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Tęsti su %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ne dabar</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Naudokite anksčiau savo „Link“ sąskaitoje išsaugotą informaciją.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Naudokite informaciją, kurią anksčiau įrašėte su %1$s paskyra.</string>
   <string name="stripe_networking_link_login_warmup_title">Tęsti naudojant „Link“</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Tęsti su %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ne dabar</string>
   <string name="stripe_networking_save_to_link_verification_title">Patvirtinkite, kad tai jūs</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Pasirinkti kitą banką</string>
   <string name="stripe_search">Ieškoti</string>
   <string name="stripe_success_pane_desc_link_error_plural">Jūsų sąskaitos buvo susietos, tačiau nepavyko išsaugoti „Link“.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Jūsų paskyros buvo susietos, bet jų nepavyko įrašyti naudojant %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Jūsų sąskaita buvo susieta, tačiau nepavyko išsaugoti „Link“.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Paskyra susieta, bet jos nepavyko įrašyti naudojant %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Jūsų sąskaitos buvo susietos ir išsaugotos „Link“.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Jūsų paskyros susietos ir įrašytos naudojant %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Jūsų sąskaita buvo susieta ir išsaugota „Link“.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Jūsų paskyra susieta ir įrašyta naudojant %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Laukite mikroindėlių į sąskaitą ••••%1$s per 1–2 dienas ir el. laiško su papildomomis instrukcijomis.</string>
   <string name="stripe_success_pane_desc_plural">Jūsų sąskaitos buvo susietos</string>
   <string name="stripe_success_pane_desc_singular">Jūsų sąskaita buvo susieta</string>

@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Hesap numaranıza şu anda erişilemedi</string>
   <string name="stripe_close_dialog_networking_desc">Şimdi iptal ederseniz hesabınız %1$s ile ilişkilendirilecek ancak Link\'e kaydedilmeyecek.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Şimdi iptal ederseniz hesabınız bu işletme ile ilişkilendirilecek ancak Link\'e kaydedilmeyecek.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Şimdi iptal ederseniz, hesabınız bu işletmeye bağlanacak ancak %1$s\'ye kaydedilmeyecektir.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Şimdi iptal ederseniz, hesabınız %1$s\'ye bağlanacak ancak %2$s\'ye kaydedilmeyecektir.</string>
   <string name="stripe_error_cta_close">Kapat</string>
   <string name="stripe_error_cta_manual_entry">Banka bilgilerini manuel olarak girin</string>
   <string name="stripe_error_cta_retry">Tekrar deneyin</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Banka ayrıntılarını girin</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">İptal</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Link ile Devam Et</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">%1$s ile devam edin</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Şimdi değil</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Daha önce Link hesabınıza kaydettiğiniz bilgileri kullanın.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">%1$s hesabınıza daha önce kaydettiğiniz bilgileri kullanın.</string>
   <string name="stripe_networking_link_login_warmup_title">Link ile Devam Et</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">%1$s ile devam edin</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Şimdi değil</string>
   <string name="stripe_networking_save_to_link_verification_title">Siz olduğunuzu teyit edin</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Farklı bir banka seçin</string>
   <string name="stripe_search">Ara</string>
   <string name="stripe_success_pane_desc_link_error_plural">Hesaplarınız bağlandı, ancak Link ile kaydedilemedi.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Hesaplarınız bağlandı ancak %1$s ile kaydedilemedi.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Hesabınız bağlandı, ancak Link ile kaydedilemedi.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Hesabınız bağlandı ancak %1$s ile kaydedilemedi.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Hesabınız Link ile bağlandı ve kaydedildi.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Hesaplarınız bağlandı ve %1$s ile kaydedildi.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Hesabınız Link ile bağlandı ve kaydedildi.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Hesabınız bağlandı ve %1$s ile kaydedildi.</string>
   <string name="stripe_success_pane_desc_microdeposits">1-2 gün içinde ••••%1$s ile biten hesaba mikro ödeme ve daha detaylı talimatları içeren bir e-posta gelebilir.</string>
   <string name="stripe_success_pane_desc_plural">Hesaplarınız bağlandı</string>
   <string name="stripe_success_pane_desc_singular">Hesabınız bağlandı</string>

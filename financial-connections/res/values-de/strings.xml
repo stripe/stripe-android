@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Derzeit ist kein Zugriff auf Ihre Kontonummer möglich</string>
   <string name="stripe_close_dialog_networking_desc">Wenn Sie jetzt abbrechen, wird Ihr Konto mit %1$s verbunden, aber nicht bei Link gespeichert.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Wenn Sie jetzt abbrechen, wird Ihr Konto mit diesem Unternehmen verbunden, aber nicht bei Link gespeichert.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Wenn Sie jetzt abbrechen, wird Ihr Konto mit diesem Unternehmen verknüpft, jedoch nicht bei %1$s gespeichert.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Wenn Sie jetzt abbrechen, wird Ihr Konto mit %1$s verknüpft, aber nicht bei %2$s gespeichert.</string>
   <string name="stripe_error_cta_close">Schließen</string>
   <string name="stripe_error_cta_manual_entry">Bankdaten manuell eingeben</string>
   <string name="stripe_error_cta_retry">Erneut versuchen</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Bankdaten eingeben</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Abbrechen</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Mit Link fortfahren</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Mit %1$s fortfahren</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Nicht jetzt</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Informationen verwenden, die Sie zu einem früheren Zeitpunkt in Ihrem Link-Konto gespeichert haben.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Verwenden Sie die Daten, die Sie zuvor in Ihrem %1$s-Konto gespeichert haben.</string>
   <string name="stripe_networking_link_login_warmup_title">Mit Link fortfahren</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Mit %1$s fortfahren</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Nicht jetzt</string>
   <string name="stripe_networking_save_to_link_verification_title">Bestätigen Sie, dass Sie es sind</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Andere Bank auswählen</string>
   <string name="stripe_search">Suchen</string>
   <string name="stripe_success_pane_desc_link_error_plural">Ihre Konten wurden verbunden, konnten aber nicht bei Link gespeichert werden.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Ihre Konten wurden verbunden, konnten jedoch nicht bei %1$s gespeichert werden.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Ihr Konto wurde verbunden, konnte aber nicht bei Link gespeichert werden.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Ihre Konten wurden verbunden, konnten jedoch nicht bei %1$s gespeichert werden.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Ihre Konten wurden mit Link verbunden und dort gespeichert.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Ihr Konto wurde verbunden, konnte jedoch nicht bei %1$s gespeichert werden.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Ihr Konto wurde mit Link verbunden und dort gespeichert.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Ihr Konto wurde verbunden und bei %1$s gespeichert.</string>
   <string name="stripe_success_pane_desc_microdeposits">In 1–2 Tagen werden kleinere Beträge auf das Konto ••••%1$s überwiesen und Sie erhalten eine E-Mail mit weiteren Anweisungen.</string>
   <string name="stripe_success_pane_desc_plural">Ihre Konten wurden verbunden</string>
   <string name="stripe_success_pane_desc_singular">Ihr Konto wurde verbunden</string>
