@@ -21,7 +21,8 @@ internal class FakePaymentMethodMessagePromotionsHelper(
 
     override fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
+        metadata: PaymentMethodMetadata,
+        isPromotionProvider: Boolean
     ): PaymentMethodMessagePromotion? {
         return promotions?.find {
             it.paymentMethodType.lowercase() == code
@@ -30,6 +31,13 @@ internal class FakePaymentMethodMessagePromotionsHelper(
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
         return promotions
+    }
+
+    override fun getPromotionProvider(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): (() -> PaymentMethodMessagePromotion?)? {
+        return { getPromotionIfAvailableForCode(code, metadata, true) }
     }
 
     fun validate() {

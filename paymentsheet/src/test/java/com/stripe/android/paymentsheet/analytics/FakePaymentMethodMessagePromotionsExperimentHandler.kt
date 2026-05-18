@@ -15,13 +15,15 @@ internal class FakePaymentMethodMessagePromotionsExperimentHandler : PaymentMeth
     override fun logExposure(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
-        promotion: PaymentMethodMessagePromotion?
+        promotion: PaymentMethodMessagePromotion?,
+        isPromotionProvider: Boolean?
     ) {
         _logExposureCalls.add(
             Call(
                 code = code,
                 metadata = metadata,
-                promotion = promotion
+                promotion = promotion,
+                isPromotionProvider = isPromotionProvider
             )
         )
     }
@@ -30,5 +32,6 @@ internal class FakePaymentMethodMessagePromotionsExperimentHandler : PaymentMeth
         val code: PaymentMethodCode,
         val metadata: PaymentMethodMetadata,
         val promotion: PaymentMethodMessagePromotion?,
+        val isPromotionProvider: Boolean?
     )
 }

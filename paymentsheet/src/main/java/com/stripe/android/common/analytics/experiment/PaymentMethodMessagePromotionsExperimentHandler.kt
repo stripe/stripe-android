@@ -17,7 +17,8 @@ internal interface PaymentMethodMessagePromotionsExperimentHandler {
     fun logExposure(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
-        promotion: PaymentMethodMessagePromotion?
+        promotion: PaymentMethodMessagePromotion?,
+        isPromotionProvider: Boolean?
     )
 }
 
@@ -30,13 +31,14 @@ internal class DefaultPaymentMethodMessagePromotionsExperimentHandler @Inject co
     override fun logExposure(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
-        promotion: PaymentMethodMessagePromotion?
+        promotion: PaymentMethodMessagePromotion?,
+        isPromotionProvider: Boolean?
     ) {
         val variant = metadata.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
         ] ?: return
 
-        val promotionDisplayedSuccessfully = if (variant == "treatment") {
+        val promotionDisplayedSuccessfully = if (variant == "treatment" && isPromotionProvider == false) {
             promotion != null
         } else {
             null
@@ -53,7 +55,8 @@ internal class DefaultPaymentMethodMessagePromotionsExperimentHandler @Inject co
             mode = mode,
             selectedPaymentMethodType = code,
             promotionDisplayedSuccessfully = promotionDisplayedSuccessfully,
-            layout = metadata.paymentMethodOrientation().toLayout()
+            layout = metadata.paymentMethodOrientation().toLayout(),
+            isPromotionProvider = isPromotionProvider
         )
 
         if (!loggedExposures.contains(exposure)) {

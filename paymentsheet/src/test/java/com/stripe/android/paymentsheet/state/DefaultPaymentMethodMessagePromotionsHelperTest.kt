@@ -61,6 +61,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         assertThat(exposure.promotion).isEqualTo(AFTERPAY_PROMOTION)
         assertThat(exposure.code).isEqualTo("afterpay_clearpay")
         assertThat(exposure.metadata).isEqualTo(metadata)
+        assertThat(exposure.isPromotionProvider).isEqualTo(false)
     }
 
     @Test
@@ -75,6 +76,33 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         assertThat(exposure.promotion).isNull()
         assertThat(exposure.code).isEqualTo("afterpay_clearpay")
         assertThat(exposure.metadata).isEqualTo(metadata)
+        assertThat(exposure.isPromotionProvider).isEqualTo(false)
+    }
+
+    @Test
+    fun `getPromotionProvider returns null for control`() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("control")
+        assertThat(helper.getPromotionProvider("afterpay_clearpay", metadata)).isNull()
+        val exposure = experimentHandler.logExposureCalls.awaitItem()
+        assertThat(exposure.promotion).isNull()
+        assertThat(exposure.code).isEqualTo("afterpay_clearpay")
+        assertThat(exposure.metadata).isEqualTo(metadata)
+        assertThat(exposure.isPromotionProvider).isEqualTo(true)
+    }
+
+    @Test
+    fun `getPromotionProvider returns null for unsupported PMs`() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("control")
+        assertThat(helper.getPromotionProvider("card", metadata)).isNull()
+        experimentHandler.logExposureCalls.expectNoEvents()
     }
 
     private fun runScenario(

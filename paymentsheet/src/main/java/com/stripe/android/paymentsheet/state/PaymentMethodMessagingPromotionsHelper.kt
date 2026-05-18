@@ -32,10 +32,16 @@ internal interface PaymentMethodMessagePromotionsHelper {
 
     fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
+        metadata: PaymentMethodMetadata,
+        isPromotionProvider: Boolean = false
     ): PaymentMethodMessagePromotion?
 
     fun getPromotions(): List<PaymentMethodMessagePromotion>?
+
+    fun getPromotionProvider(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): (() -> PaymentMethodMessagePromotion?)?
 }
 
 @Singleton
@@ -69,7 +75,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
 
     override fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
+        metadata: PaymentMethodMetadata,
+        isPromotionProvider: Boolean
     ): PaymentMethodMessagePromotion? {
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
             val variant = metadata.experimentsData?.experimentAssignments[
@@ -82,7 +89,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
             } else {
                 null
             }
-            paymentMethodMessagePromotionsExperimentHandler.logExposure(code, metadata, promotion)
+            paymentMethodMessagePromotionsExperimentHandler.logExposure(code, metadata, promotion, isPromotionProvider)
             promotion
         } else {
             null
@@ -100,6 +107,17 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
             null
         }
     }
+
+    override fun getPromotionProvider(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): (() -> PaymentMethodMessagePromotion?)? {
+        return getPromotionProviderAndLogExposure(
+            code = code,
+            metadata = metadata,
+            experimentHandler = paymentMethodMessagePromotionsExperimentHandler,
+        )
+    }
 }
 
 internal class PrefetchedPaymentMethodMessagePromotionsHelper(
@@ -112,7 +130,8 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
 
     override fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
+        metadata: PaymentMethodMetadata,
+        isPromotionProvider: Boolean
     ): PaymentMethodMessagePromotion? {
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
             val variant = metadata.experimentsData?.experimentAssignments[
@@ -127,7 +146,7 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
                 null
             }
 
-            paymentMethodMessagePromotionsExperimentHandler.logExposure(code, metadata, promotion)
+            paymentMethodMessagePromotionsExperimentHandler.logExposure(code, metadata, promotion, isPromotionProvider)
             promotion
         } else {
             null
@@ -141,6 +160,17 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
             null
         }
     }
+
+    override fun getPromotionProvider(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): (() -> PaymentMethodMessagePromotion?)? {
+        return getPromotionProviderAndLogExposure(
+            code = code,
+            metadata = metadata,
+            experimentHandler = paymentMethodMessagePromotionsExperimentHandler,
+        )
+    }
 }
 
 internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
@@ -150,12 +180,20 @@ internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessage
 
     override fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
+        metadata: PaymentMethodMetadata,
+        isPromotionProvider: Boolean
     ): PaymentMethodMessagePromotion? {
         return null
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
+        return null
+    }
+
+    override fun getPromotionProvider(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): (() -> PaymentMethodMessagePromotion?)? {
         return null
     }
 }
@@ -166,6 +204,31 @@ internal object PromotionSupportedPaymentMethods {
         PaymentMethod.Type.Affirm.code,
         PaymentMethod.Type.AfterpayClearpay.code
     )
+}
+
+private fun PaymentMethodMessagePromotionsHelper.getPromotionProviderAndLogExposure(
+    code: PaymentMethodCode,
+    metadata: PaymentMethodMetadata,
+    experimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
+): (() -> PaymentMethodMessagePromotion?)? {
+    if (!PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)) return null
+
+    val variant = metadata.experimentsData?.experimentAssignments[
+        ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+    ]
+
+    experimentHandler.logExposure(
+        code = code,
+        metadata = metadata,
+        promotion = null,
+        isPromotionProvider = true
+    )
+
+    return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled && variant == "treatment") {
+        { getPromotionIfAvailableForCode(code, metadata, true) }
+    } else {
+        null
+    }
 }
 
 @Module
