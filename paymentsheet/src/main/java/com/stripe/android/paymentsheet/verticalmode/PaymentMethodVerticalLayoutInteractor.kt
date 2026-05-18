@@ -354,6 +354,20 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 }
             }
         }
+
+        coroutineScope.launch(mainDispatcher) {
+            walletsState.collect { currentWalletsState ->
+                val currentSelection = verticalModeScreenSelection.value
+                if (currentSelection is PaymentSelection.Link) {
+                    val newLinkBrand = currentWalletsState?.link(WalletLocation.INLINE)?.linkBrand
+                    if (newLinkBrand != null && newLinkBrand != currentSelection.brand) {
+                        val updatedSelection = currentSelection.copy(brand = newLinkBrand)
+                        _verticalModeScreenSelection.value = updatedSelection
+                        updateSelection(updatedSelection, false)
+                    }
+                }
+            }
+        }
     }
 
     private fun getDisplayablePaymentMethods(
