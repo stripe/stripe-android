@@ -371,6 +371,7 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     override fun onDestroy() {
+        lifecycleResourceState = lifecycleResourceState.onDestroy()
         lifecycleResourceView?.release()
         lifecycleResourceView = null
         super.onDestroy()

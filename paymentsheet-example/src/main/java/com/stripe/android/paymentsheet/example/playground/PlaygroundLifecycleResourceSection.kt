@@ -29,6 +29,7 @@ import kotlin.math.sin
 
 internal data class PlaygroundLifecycleResourceUiState(
     val isRunning: Boolean = false,
+    val isDestroyed: Boolean = false,
     val startCount: Int = 0,
     val stopCount: Int = 0,
     val frameCount: Int = 0,
@@ -37,6 +38,7 @@ internal data class PlaygroundLifecycleResourceUiState(
     fun onStart(): PlaygroundLifecycleResourceUiState {
         return copy(
             isRunning = true,
+            isDestroyed = false,
             startCount = startCount + 1,
             frameCount = 0,
             sessionId = sessionId + 1,
@@ -47,6 +49,13 @@ internal data class PlaygroundLifecycleResourceUiState(
         return copy(
             isRunning = false,
             stopCount = stopCount + 1,
+        )
+    }
+
+    fun onDestroy(): PlaygroundLifecycleResourceUiState {
+        return copy(
+            isRunning = false,
+            isDestroyed = true,
         )
     }
 }
@@ -74,25 +83,29 @@ internal fun PlaygroundLifecycleResourceSection(
                 style = MaterialTheme.typography.h6,
             )
             Text(
-                text = if (state.isRunning) "ACTIVE MEDIA SURFACE" else "SURFACE STOPPED",
+                text = when {
+                    state.isDestroyed -> "SURFACE DESTROYED"
+                    state.isRunning -> "ACTIVE MEDIA SURFACE"
+                    else -> "SURFACE STOPPED"
+                },
                 color = ComposeColor.White,
                 modifier = Modifier
                     .background(
-                        color = if (state.isRunning) {
-                            ComposeColor(0xFF1B5E20)
-                        } else {
-                            ComposeColor(0xFF8E2430)
+                        color = when {
+                            state.isDestroyed -> ComposeColor(0xFF424242)
+                            state.isRunning -> ComposeColor(0xFF1B5E20)
+                            else -> ComposeColor(0xFF8E2430)
                         },
                         shape = MaterialTheme.shapes.small,
                     )
                     .padding(horizontal = 12.dp, vertical = 6.dp),
             )
             Text(
-                text = "Starts ${state.startCount} | Stops ${state.stopCount} | Frames ${state.frameCount}",
+                text = "Starts ${state.startCount} | Stops ${state.stopCount} | Frames ${state.frameCount} | Destroyed ${state.isDestroyed}",
                 style = MaterialTheme.typography.body2,
             )
             Text(
-                text = "This activity-owned surface starts in onStart() and tears down in onStop().",
+                text = "This activity-owned surface starts in onStart(), tears down in onStop(), and is released in onDestroy().",
                 style = MaterialTheme.typography.body2,
             )
             AndroidView(
