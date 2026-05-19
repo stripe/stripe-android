@@ -57,6 +57,33 @@ class PaymentFlowFailureMessageFactoryTest {
     }
 
     @Test
+    fun `create() with 3DS2 PaymentIntent that declined after auth returns localized message`() {
+        val intent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+            status = StripeIntent.Status.RequiresPaymentMethod,
+            lastPaymentError = PaymentIntent.Error(
+                charge = "ch_123",
+                code = "card_declined",
+                declineCode = "insufficient_funds",
+                docUrl = null,
+                message = "Your card was declined.",
+                param = null,
+                paymentMethod = PaymentIntentFixtures.PI_VISA_3DS2.paymentMethod,
+                type = PaymentIntent.Error.Type.CardError,
+            )
+        )
+
+        assertThat(
+            factory.create(
+                intent = intent,
+                requestId = null,
+                outcome = StripeIntentResult.Outcome.FAILED
+            )
+        ).isEqualTo(
+            "Your card has insufficient funds."
+        )
+    }
+
+    @Test
     fun `create() with SetupIntent with lastPaymentError`() {
         assertThat(
             factory.create(

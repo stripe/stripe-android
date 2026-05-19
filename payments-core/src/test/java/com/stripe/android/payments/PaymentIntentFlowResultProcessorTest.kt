@@ -115,6 +115,73 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
+    fun `successful auth outcome is overridden when final card intent requires payment method`() =
+        runTest(testDispatcher) {
+            val paymentIntentWithCardDeclinedAfter3ds = declinedCardPaymentIntent()
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(paymentIntentWithCardDeclinedAfter3ds)
+            )
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = requireNotNull(paymentIntentWithCardDeclinedAfter3ds.clientSecret),
+                    flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+                )
+            ).getOrThrow()
+
+            assertThat(result).isEqualTo(
+                PaymentIntentResult(
+                    intent = paymentIntentWithCardDeclinedAfter3ds,
+                    outcomeFromFlow = StripeIntentResult.Outcome.FAILED,
+                    failureMessage = "Your card has insufficient funds.",
+                )
+            )
+        }
+
+    @Test
+    fun `unknown card auth outcome polls until decline details are available`() = runTest(testDispatcher) {
+        val initialIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+            status = StripeIntent.Status.RequiresAction,
+        )
+        val declinedIntent = declinedCardPaymentIntent(initialIntent)
+        val clientSecret = requireNotNull(initialIntent.clientSecret)
+        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+
+        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            Result.success(initialIntent),
+            Result.success(declinedIntent),
+        )
+        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            AssertionError("No expected to call refresh in this test")
+        )
+
+        val result = createProcessor().processResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = clientSecret,
+                flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+            )
+        ).getOrThrow()
+
+        verify(mockStripeRepository, times(2)).retrievePaymentIntent(
+            eq(clientSecret),
+            eq(requestOptions),
+            eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+        )
+
+        assertThat(result).isEqualTo(
+            PaymentIntentResult(
+                intent = declinedIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.FAILED,
+                failureMessage = "Your card has insufficient funds.",
+            )
+        )
+    }
+
+    @Test
     fun `when 3DS2 data contains intentId and publishableKey then they are used on source cancel`() =
         runTest(testDispatcher) {
             whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any()))
@@ -910,6 +977,24 @@ internal class PaymentIntentFlowResultProcessorTest {
         ): Result<PaymentIntent> {
             return refreshPaymentIntent()
         }
+    }
+
+    private fun declinedCardPaymentIntent(
+        baseIntent: PaymentIntent = PaymentIntentFixtures.PI_VISA_3DS2
+    ): PaymentIntent {
+        return baseIntent.copy(
+            status = StripeIntent.Status.RequiresPaymentMethod,
+            lastPaymentError = PaymentIntent.Error(
+                charge = "ch_123",
+                code = "card_declined",
+                declineCode = "insufficient_funds",
+                docUrl = null,
+                message = "Your card was declined.",
+                param = null,
+                paymentMethod = baseIntent.paymentMethod,
+                type = PaymentIntent.Error.Type.CardError,
+            ),
+        )
     }
 
     internal companion object {

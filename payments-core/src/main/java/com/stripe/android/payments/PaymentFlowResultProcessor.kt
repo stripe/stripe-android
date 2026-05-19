@@ -92,13 +92,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         ).getOrThrow()
                     }
 
-                    val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
+                    val flowOutcome = resolvedFlowOutcome(intent, result)
                     createLoggedStripeIntentResult(
                         stripeIntent = intent,
                         requestId = requestId,
                         originalFlowOutcome = result.flowOutcome,
                         resolvedFlowOutcome = flowOutcome,
-                        failureMessageOutcome = result.flowOutcome,
+                        failureMessageOutcome = flowOutcome,
                         source = "refresh_or_poll",
                     )
                 }
@@ -121,22 +121,24 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         sourceId = sourceId
                     ).getOrThrow()
 
+                    val flowOutcome = resolvedFlowOutcome(intent, result)
                     createLoggedStripeIntentResult(
                         stripeIntent = intent,
                         requestId = requestId,
                         originalFlowOutcome = result.flowOutcome,
-                        resolvedFlowOutcome = result.flowOutcome,
-                        failureMessageOutcome = result.flowOutcome,
+                        resolvedFlowOutcome = flowOutcome,
+                        failureMessageOutcome = flowOutcome,
                         source = "cancel_source",
                     )
                 }
                 else -> {
+                    val flowOutcome = resolvedFlowOutcome(stripeIntent, result)
                     createLoggedStripeIntentResult(
                         stripeIntent = stripeIntent,
                         requestId = requestId,
                         originalFlowOutcome = result.flowOutcome,
-                        resolvedFlowOutcome = result.flowOutcome,
-                        failureMessageOutcome = result.flowOutcome,
+                        resolvedFlowOutcome = flowOutcome,
+                        failureMessageOutcome = flowOutcome,
                         source = "final_retrieve",
                     )
                 }
@@ -186,18 +188,58 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
             stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
 
+        // Browser-based auth flows return UNKNOWN when the browser hands control back to the app.
+        // A card payment can still be racing from `requires_action` / `processing` into its final
+        // state at that point, so keep polling until we see the terminal intent status.
+        val unknownCardAuthMaybeRefresh = flowOutcome == UNKNOWN &&
+            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
+            (
+                stripeIntent.status == StripeIntent.Status.Processing ||
+                    (
+                        stripeIntent.status == StripeIntent.Status.RequiresAction &&
+                            (
+                                stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk ||
+                                    stripeIntent.nextActionType == StripeIntent.NextActionType.RedirectToUrl
+                                )
+                        )
+                )
+
         // For some payment method types, the intent status can still be `requires_action` by the time the user
         // gets back to the merchant app. We poll until it's succeeded.
         val shouldRefresh = stripeIntent.requiresAction() &&
             stripeIntent.paymentMethod?.type?.afterRedirectAction?.shouldRefreshOrRetrieve == true
 
-        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh || shouldRefresh
+        return succeededMaybeRefresh ||
+            cancelledMaybeRefresh ||
+            actionNotProcessedMaybeRefresh ||
+            unknownCardAuthMaybeRefresh ||
+            shouldRefresh
+    }
+
+    private fun resolvedFlowOutcome(
+        intent: StripeIntent,
+        result: PaymentFlowResult.Validated
+    ): Int {
+        return if (isOrchestrationPayment(intent, result)) {
+            SUCCEEDED
+        } else {
+            determineFlowOutcome(intent, result.flowOutcome)
+        }
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
         return when (intent.status) {
             StripeIntent.Status.Succeeded,
             StripeIntent.Status.RequiresCapture -> SUCCEEDED
+            StripeIntent.Status.RequiresPaymentMethod -> {
+                when (originalFlowOutcome) {
+                    CANCELED,
+                    FAILED,
+                    TIMEDOUT -> originalFlowOutcome
+                    else -> FAILED
+                }
+            }
+            StripeIntent.Status.Canceled -> CANCELED
             else -> originalFlowOutcome
         }
     }

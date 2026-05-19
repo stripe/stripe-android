@@ -20,7 +20,7 @@ internal class PaymentFlowFailureMessageFactory(
         outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
             context.resources.getString(R.string.stripe_failure_reason_timed_out)
         }
-        intent.is3DS2() -> {
+        intent.status == StripeIntent.Status.RequiresAction && intent.is3DS2() -> {
             null
         }
         (intent.status == StripeIntent.Status.RequiresPaymentMethod) ||
