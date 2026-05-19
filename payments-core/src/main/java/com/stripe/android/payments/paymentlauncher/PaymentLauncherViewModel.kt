@@ -11,13 +11,19 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.LocalStripeException
+import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.exception.CardException
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -307,10 +313,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     InternalPaymentResult.Completed(stripeIntentResult.intent)
                 StripeIntentResult.Outcome.FAILED ->
                     InternalPaymentResult.Failed(
-                        LocalStripeException(
-                            displayMessage = stripeIntentResult.failureMessage,
-                            analyticsValue = "failedIntentOutcomeError",
-                        )
+                        stripeIntentResult.toFailureThrowable()
                     )
                 StripeIntentResult.Outcome.CANCELED ->
                     InternalPaymentResult.Canceled
@@ -380,6 +383,66 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     additionalParams = analyticsParams + intentParams + errorParams + durationParams,
                 )
             )
+        }
+    }
+
+    private fun StripeIntentResult<StripeIntent>.toFailureThrowable(): Throwable {
+        return intent.toStripeException(displayMessage = failureMessage)
+            ?: LocalStripeException(
+                displayMessage = failureMessage,
+                analyticsValue = "failedIntentOutcomeError",
+            )
+    }
+
+    private fun StripeIntent.toStripeException(displayMessage: String?): Throwable? {
+        return when (this) {
+            is PaymentIntent -> lastPaymentError?.toStripeException(displayMessage)
+            is com.stripe.android.model.SetupIntent -> lastSetupError?.toStripeException(displayMessage)
+        }
+    }
+
+    private fun PaymentIntent.Error.toStripeException(displayMessage: String?): Throwable {
+        return toStripeError(displayMessage).toStripeException(type?.code)
+    }
+
+    private fun com.stripe.android.model.SetupIntent.Error.toStripeException(
+        displayMessage: String?
+    ): Throwable {
+        return toStripeError(displayMessage).toStripeException(type?.code)
+    }
+
+    private fun PaymentIntent.Error.toStripeError(displayMessage: String?): StripeError {
+        return StripeError(
+            type = type?.code,
+            message = displayMessage ?: message,
+            code = code,
+            param = param,
+            declineCode = declineCode,
+            charge = charge,
+            docUrl = docUrl,
+        )
+    }
+
+    private fun com.stripe.android.model.SetupIntent.Error.toStripeError(
+        displayMessage: String?
+    ): StripeError {
+        return StripeError(
+            type = type?.code,
+            message = displayMessage ?: message,
+            code = code,
+            param = param,
+            declineCode = declineCode,
+            docUrl = docUrl,
+        )
+    }
+
+    private fun StripeError.toStripeException(typeCode: String?): Throwable {
+        return when (typeCode) {
+            PaymentIntent.Error.Type.CardError.code -> CardException(this)
+            PaymentIntent.Error.Type.AuthenticationError.code -> AuthenticationException(this)
+            PaymentIntent.Error.Type.InvalidRequestError.code -> InvalidRequestException(this)
+            PaymentIntent.Error.Type.RateLimitError.code -> RateLimitException(this)
+            else -> APIException(this)
         }
     }
 

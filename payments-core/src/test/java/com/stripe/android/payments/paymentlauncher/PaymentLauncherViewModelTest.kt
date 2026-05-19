@@ -17,6 +17,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
 import com.stripe.android.analytics.FakeDurationProvider
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.exception.CardException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -486,6 +487,43 @@ class PaymentLauncherViewModelTest {
 
             assertThat(viewModel.internalPaymentResult.value)
                 .isInstanceOf(InternalPaymentResult.Failed::class.java)
+        }
+
+    @Test
+    fun `verify failed paymentIntentFlowResult preserves stripe error details`() =
+        runTest {
+            val declinedPaymentIntent = PaymentIntentFixtures.PI_VISA_3DS2.copy(
+                status = StripeIntent.Status.RequiresPaymentMethod,
+                lastPaymentError = PaymentIntent.Error(
+                    charge = "ch_123",
+                    code = "card_declined",
+                    declineCode = "insufficient_funds",
+                    docUrl = null,
+                    message = "Your card was declined.",
+                    param = null,
+                    paymentMethod = PaymentIntentFixtures.PI_VISA_3DS2.paymentMethod,
+                    type = PaymentIntent.Error.Type.CardError,
+                ),
+            )
+            val failedPaymentResult = PaymentIntentResult(
+                declinedPaymentIntent,
+                StripeIntentResult.Outcome.FAILED,
+                "Your card has insufficient funds.",
+            )
+            val viewModel = createViewModel()
+            val paymentFlowResult = mock<PaymentFlowResult.Unvalidated>()
+            whenever(paymentIntentFlowResultProcessor.processResult(eq(paymentFlowResult)))
+                .thenReturn(Result.success(failedPaymentResult))
+
+            viewModel.onPaymentFlowResult(paymentFlowResult)
+
+            val result = viewModel.internalPaymentResult.value as InternalPaymentResult.Failed
+            assertThat(result.throwable).isInstanceOf(CardException::class.java)
+
+            val error = result.throwable as CardException
+            assertThat(error.code).isEqualTo("card_declined")
+            assertThat(error.declineCode).isEqualTo("insufficient_funds")
+            assertThat(error.message).isEqualTo("Your card has insufficient funds.")
         }
 
     @Test
