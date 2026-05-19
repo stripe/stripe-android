@@ -5,10 +5,13 @@ A minimal `AutofillService` for debug builds that provides hardcoded test data f
 ## Setup
 
 1. Install the debug build on a device or emulator
-2. Open autofill settings:
-   ```
-   adb shell am start -a android.settings.REQUEST_SET_AUTOFILL_SERVICE
-   ```
+2. Open autofill settings via one of:
+   - **Pixel/Stock Android**: Settings > Passwords & accounts > Autofill service
+   - **Older versions (API 26-29)**: Settings > System > Languages & input > Advanced > Autofill service
+   - **adb shortcut**:
+     ```
+     adb shell am start -a android.settings.REQUEST_SET_AUTOFILL_SERVICE
+     ```
 3. Select **PaymentSheet Example** as the autofill provider
 
 ## Usage
