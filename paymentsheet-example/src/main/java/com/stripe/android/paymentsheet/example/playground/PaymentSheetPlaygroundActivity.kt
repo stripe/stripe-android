@@ -121,6 +121,8 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     private lateinit var embeddedPaymentElement: EmbeddedPaymentElement
+    private var lifecycleResourceState by mutableStateOf(PlaygroundLifecycleResourceUiState())
+    private var lifecycleResourceView: PlaygroundLifecycleSurfaceView? = null
 
     private val sharedPaymentTokenPlaygroundLauncher = registerForActivityResult(
         SharedPaymentTokenPlaygroundContract()
@@ -294,6 +296,12 @@ internal class PaymentSheetPlaygroundActivity :
                         )
                     }
 
+                    PlaygroundLifecycleResourceSection(
+                        state = lifecycleResourceState,
+                        onViewReady = ::attachLifecycleResourceView,
+                        modifier = Modifier.padding(bottom = 16.dp),
+                    )
+
                     SettingsUi(
                         searchQuery = settingsSearchQuery,
                         playgroundSettings = localPlaygroundSettings,
@@ -346,6 +354,36 @@ internal class PaymentSheetPlaygroundActivity :
                     Toast.makeText(context, status?.message, Toast.LENGTH_LONG).show()
                 }
                 viewModel.status.value = status?.copy(hasBeenDisplayed = true)
+            }
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        lifecycleResourceState = lifecycleResourceState.onStart()
+        lifecycleResourceView?.startRendering()
+    }
+
+    override fun onStop() {
+        lifecycleResourceView?.stopRendering()
+        lifecycleResourceState = lifecycleResourceState.onStop()
+        super.onStop()
+    }
+
+    override fun onDestroy() {
+        lifecycleResourceView?.release()
+        lifecycleResourceView = null
+        super.onDestroy()
+    }
+
+    private fun attachLifecycleResourceView(view: PlaygroundLifecycleSurfaceView) {
+        lifecycleResourceView = view
+        view.onFrameRendered = { sessionId, frameCount ->
+            if (
+                lifecycleResourceState.isRunning &&
+                lifecycleResourceState.sessionId == sessionId
+            ) {
+                lifecycleResourceState = lifecycleResourceState.copy(frameCount = frameCount)
             }
         }
     }
