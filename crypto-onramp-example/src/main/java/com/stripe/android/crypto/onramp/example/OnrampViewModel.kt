@@ -30,15 +30,24 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
+import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierAlternativeGroup
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirement
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirements
+import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierType
+import com.stripe.android.crypto.onramp.model.compliance.SubmitIdentifiersResult
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
@@ -69,6 +78,7 @@ internal class OnrampViewModel(
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
+        .crsCarfDeclarationCallback(callback = ::onCrsCarfDeclarationResult)
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator
@@ -338,6 +348,20 @@ internal class OnrampViewModel(
         }
     }
 
+    fun onCrsCarfDeclarationResult(result: OnrampCrsCarfDeclarationResult) {
+        when (result) {
+            is OnrampCrsCarfDeclarationResult.Confirmed -> {
+                _message.value = "CRS CARF Declaration Confirmed"
+            }
+            is OnrampCrsCarfDeclarationResult.Failed -> {
+                _message.value = "CRS CARF Declaration failed: ${result.error.message}"
+            }
+            is OnrampCrsCarfDeclarationResult.Cancelled -> {
+                _message.value = "CRS CARF Declaration cancelled, please try again"
+            }
+        }
+    }
+
     fun onVerifyKycResult(result: OnrampVerifyKycInfoResult) {
         when (result) {
             is OnrampVerifyKycInfoResult.Confirmed -> {
@@ -370,6 +394,12 @@ internal class OnrampViewModel(
                         selectedPaymentData = result.displayData,
                         kycFirstName = result.kycInfo?.firstName ?: it.kycFirstName,
                         kycLastName = result.kycInfo?.lastName ?: it.kycLastName,
+                        kycBirthCountry = result.kycInfo?.birthCountry?.value ?: it.kycBirthCountry,
+                        kycBirthCity = result.kycInfo?.birthCity ?: it.kycBirthCity,
+                        kycNationalities = result.kycInfo?.nationalities
+                            ?.takeIf { nationalities -> nationalities.isNotEmpty() }
+                            ?.joinToString(", ") { nationality -> nationality.value }
+                            ?: it.kycNationalities,
                         kycAddress = result.kycInfo?.address ?: it.kycAddress
                     )
                 }
@@ -528,6 +558,78 @@ internal class OnrampViewModel(
                 is OnrampAttachKycInfoResult.Failed -> handleError(result.error) {
                     _message.value = "KYC Collection failed: ${result.error.message}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
+                }
+            }
+        }
+    }
+
+    fun retrieveMissingIdentifiers() {
+        _uiState.update {
+            it.copy(
+                screen = Screen.Loading,
+                loadingMessage = "Retrieving missing identifiers..."
+            )
+        }
+
+        viewModelScope.launch {
+            val result = onrampCoordinator.retrieveMissingIdentifiers()
+
+            when (result) {
+                is OnrampRetrieveMissingIdentifiersResult.Completed -> {
+                    _message.value = "Missing identifiers retrieved"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null,
+                            missingIdentifiersSummary = formatIdentifierRequirements(result.requirements)
+                        )
+                    }
+                }
+                is OnrampRetrieveMissingIdentifiersResult.Failed -> handleError(result.error) {
+                    _message.value = "Failed to retrieve missing identifiers: ${result.error.message}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun submitIdentifiers() {
+        val identifiers = buildIdentifiersRequest(_uiState.value) ?: return
+
+        _uiState.update {
+            it.copy(
+                screen = Screen.Loading,
+                loadingMessage = "Submitting identifiers..."
+            )
+        }
+
+        viewModelScope.launch {
+            val result = onrampCoordinator.submitIdentifiers(identifiers)
+
+            when (result) {
+                is OnrampSubmitIdentifiersResult.Completed -> {
+                    _message.value = "Identifiers submitted"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null,
+                            submitIdentifiersSummary = formatSubmitIdentifiersResult(result.result)
+                        )
+                    }
+                }
+                is OnrampSubmitIdentifiersResult.Failed -> handleError(result.error) {
+                    _message.value = "Submit identifiers failed: ${result.error.message}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null
+                        )
+                    }
                 }
             }
         }
@@ -698,8 +800,52 @@ internal class OnrampViewModel(
         _uiState.update { it.copy(kycLastName = value) }
     }
 
+    fun updateKycBirthCountry(value: String) {
+        _uiState.update { it.copy(kycBirthCountry = value) }
+    }
+
+    fun updateKycBirthCity(value: String) {
+        _uiState.update { it.copy(kycBirthCity = value) }
+    }
+
+    fun updateKycNationalities(value: String) {
+        _uiState.update { it.copy(kycNationalities = value) }
+    }
+
     fun updateKycAddress(address: PaymentSheet.Address) {
         _uiState.update { it.copy(kycAddress = address) }
+    }
+
+    fun updateIdentifierValue(index: Int, value: String) {
+        _uiState.update { state ->
+            state.copy(
+                identifierInputs = state.identifierInputs.replaceAt(index) { entry ->
+                    entry.copy(value = value)
+                }
+            )
+        }
+    }
+
+    fun updateIdentifierType(index: Int, value: String) {
+        _uiState.update { state ->
+            state.copy(
+                identifierInputs = state.identifierInputs.replaceAt(index) { entry ->
+                    entry.copy(type = value)
+                }
+            )
+        }
+    }
+
+    fun addIdentifierInput() {
+        _uiState.update { state ->
+            state.copy(identifierInputs = state.identifierInputs + IdentifierInputEntry())
+        }
+    }
+
+    fun removeIdentifierInput(index: Int) {
+        _uiState.update { state ->
+            state.copy(identifierInputs = state.identifierInputs.removeAt(index))
+        }
     }
 
     fun clearCheckoutEvent() {
@@ -790,6 +936,95 @@ internal class OnrampViewModel(
         getPrefs().edit { remove(userDataKey) }
     }
 
+    private fun buildIdentifiersRequest(state: OnrampUiState): List<ComplianceIdentifier>? {
+        val identifiers = mutableListOf<ComplianceIdentifier>()
+
+        state.identifierInputs.forEachIndexed { index, entry ->
+            val (identifier, error) = buildIdentifier(
+                label = "Identifier ${index + 1}",
+                value = entry.value,
+                type = entry.type
+            )
+            if (error != null) {
+                _message.value = error
+                return null
+            }
+            identifier?.let(identifiers::add)
+        }
+
+        if (identifiers.isEmpty()) {
+            _message.value = "Enter at least one identifier"
+            return null
+        }
+
+        return identifiers
+    }
+
+    private fun buildIdentifier(
+        label: String,
+        value: String,
+        type: String
+    ): Pair<ComplianceIdentifier?, String?> {
+        val trimmedValue = value.trim()
+        val trimmedType = type.trim()
+
+        if (trimmedValue.isEmpty() && trimmedType.isEmpty()) {
+            return null to null
+        }
+
+        if (trimmedType.isEmpty() || trimmedValue.isEmpty()) {
+            return null to "$label requires both type and value"
+        }
+
+        val identifierType = ComplianceIdentifierType.fromValue(trimmedType)
+
+        val identifier = ComplianceIdentifier()
+            .type(identifierType)
+            .value(trimmedValue)
+
+        return identifier to null
+    }
+
+    private fun formatIdentifierRequirements(requirements: ComplianceIdentifierRequirements): String {
+        return buildString {
+            append("Identifiers: ")
+            append(formatIdentifierRequirements(requirements.identifiers))
+            append("\nAlternatives: ")
+            append(formatAlternativeGroups(requirements.alternatives))
+        }
+    }
+
+    private fun formatSubmitIdentifiersResult(result: SubmitIdentifiersResult): String {
+        return buildString {
+            append("Valid: ${result.valid}")
+            append("\nIdentifiers: ")
+            append(formatIdentifierRequirements(result.identifiers))
+            append("\nAlternatives: ")
+            append(formatAlternativeGroups(result.alternatives))
+            append("\nInvalid identifiers: ")
+            append(result.invalidIdentifiers.map { it.value }.joinToStringOrNone())
+        }
+    }
+
+    private fun formatIdentifierRequirements(identifierRequirements: List<ComplianceIdentifierRequirement>): String {
+        return identifierRequirements
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = "\n") { identifierRequirement ->
+                "${identifierRequirement.regulation.value}: ${identifierRequirement.type.value}"
+            }
+            ?: "None"
+    }
+
+    private fun formatAlternativeGroups(alternativeGroups: List<ComplianceIdentifierAlternativeGroup>): String {
+        return alternativeGroups
+            .takeIf { it.isNotEmpty() }
+            ?.joinToString(separator = "\n") { alternativeGroup ->
+                "${alternativeGroup.originalMissingIdentifiers.joinToValueString()} -> " +
+                    alternativeGroup.alternativeMissingIdentifiers.joinToValueString()
+            }
+            ?: "None"
+    }
+
     private fun getPrefs(): SharedPreferences {
         return application.applicationContext.getSharedPreferences(ONRAMP_PREFS_NAME, Context.MODE_PRIVATE)
     }
@@ -825,7 +1060,19 @@ data class OnrampUiState(
     val googlePayIsReady: Boolean = false,
     val kycFirstName: String = "",
     val kycLastName: String = "",
+    val kycBirthCountry: String = "",
+    val kycBirthCity: String = "",
+    val kycNationalities: String = "",
     val kycAddress: PaymentSheet.Address = PaymentSheet.Address(),
+    val identifierInputs: List<IdentifierInputEntry> = listOf(IdentifierInputEntry()),
+    val missingIdentifiersSummary: String? = null,
+    val submitIdentifiersSummary: String? = null,
+) : Parcelable
+
+@Parcelize
+data class IdentifierInputEntry(
+    val type: String = "",
+    val value: String = "",
 ) : Parcelable
 
 enum class Screen {
@@ -863,4 +1110,31 @@ private object NullPaymentMethodDisplayDataParceler : Parceler<PaymentMethodDisp
 private object NullOnrampSessionResponseParceler : Parceler<OnrampSessionResponse?> {
     override fun create(parcel: Parcel): OnrampSessionResponse? = null
     override fun OnrampSessionResponse?.write(parcel: Parcel, flags: Int) { /* no-op */ }
+}
+
+private fun List<String>.joinToStringOrNone(): String {
+    return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"
+}
+
+private fun List<ComplianceIdentifierType>.joinToValueString(): String {
+    return map { it.value }.joinToStringOrNone()
+}
+
+private fun List<IdentifierInputEntry>.replaceAt(
+    index: Int,
+    transform: (IdentifierInputEntry) -> IdentifierInputEntry
+): List<IdentifierInputEntry> {
+    if (index !in indices) return this
+    return mapIndexed { currentIndex, entry ->
+        if (currentIndex == index) {
+            transform(entry)
+        } else {
+            entry
+        }
+    }
+}
+
+private fun List<IdentifierInputEntry>.removeAt(index: Int): List<IdentifierInputEntry> {
+    if (index !in indices) return this
+    return filterIndexed { currentIndex, _ -> currentIndex != index }
 }
