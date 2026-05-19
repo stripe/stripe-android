@@ -6,7 +6,10 @@ import com.stripe.android.PaymentIntentResult
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
+import com.stripe.android.StripeIntentResult.Outcome.Companion.FAILED
 import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
+import com.stripe.android.StripeIntentResult.Outcome.Companion.TIMEDOUT
+import com.stripe.android.StripeIntentResult.Outcome.Companion.UNKNOWN
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -63,14 +66,14 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 stripeIntent.status == StripeIntent.Status.Succeeded ||
                     stripeIntent.status == StripeIntent.Status.RequiresCapture ||
                     isOrchestrationPayment(stripeIntent, result) -> {
-                    createStripeIntentResult(
-                        stripeIntent,
-                        SUCCEEDED,
-                        failureMessageFactory.create(
-                            intent = stripeIntent,
-                            requestId = requestId,
-                            outcome = result.flowOutcome
-                        )
+                    val flowOutcome = SUCCEEDED
+                    createLoggedStripeIntentResult(
+                        stripeIntent = stripeIntent,
+                        requestId = requestId,
+                        originalFlowOutcome = result.flowOutcome,
+                        resolvedFlowOutcome = flowOutcome,
+                        failureMessageOutcome = result.flowOutcome,
+                        source = "initial_retrieve",
                     )
                 }
                 shouldRefreshOrPollIntent(stripeIntent, result.flowOutcome) -> {
@@ -90,14 +93,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                     }
 
                     val flowOutcome = determineFlowOutcome(intent, result.flowOutcome)
-                    createStripeIntentResult(
-                        intent,
-                        flowOutcome,
-                        failureMessageFactory.create(
-                            intent = intent,
-                            requestId = requestId,
-                            outcome = result.flowOutcome
-                        )
+                    createLoggedStripeIntentResult(
+                        stripeIntent = intent,
+                        requestId = requestId,
+                        originalFlowOutcome = result.flowOutcome,
+                        resolvedFlowOutcome = flowOutcome,
+                        failureMessageOutcome = result.flowOutcome,
+                        source = "refresh_or_poll",
                     )
                 }
                 shouldCancelIntentSource(stripeIntent, result.canCancelSource) -> {
@@ -119,25 +121,23 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                         sourceId = sourceId
                     ).getOrThrow()
 
-                    createStripeIntentResult(
-                        intent,
-                        result.flowOutcome,
-                        failureMessageFactory.create(
-                            intent = intent,
-                            requestId = requestId,
-                            outcome = result.flowOutcome
-                        )
+                    createLoggedStripeIntentResult(
+                        stripeIntent = intent,
+                        requestId = requestId,
+                        originalFlowOutcome = result.flowOutcome,
+                        resolvedFlowOutcome = result.flowOutcome,
+                        failureMessageOutcome = result.flowOutcome,
+                        source = "cancel_source",
                     )
                 }
                 else -> {
-                    createStripeIntentResult(
-                        stripeIntent,
-                        result.flowOutcome,
-                        failureMessageFactory.create(
-                            intent = stripeIntent,
-                            requestId = requestId,
-                            outcome = result.flowOutcome
-                        )
+                    createLoggedStripeIntentResult(
+                        stripeIntent = stripeIntent,
+                        requestId = requestId,
+                        originalFlowOutcome = result.flowOutcome,
+                        resolvedFlowOutcome = result.flowOutcome,
+                        failureMessageOutcome = result.flowOutcome,
+                        source = "final_retrieve",
                     )
                 }
             }
@@ -199,6 +199,76 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             StripeIntent.Status.Succeeded,
             StripeIntent.Status.RequiresCapture -> SUCCEEDED
             else -> originalFlowOutcome
+        }
+    }
+
+    private fun createLoggedStripeIntentResult(
+        stripeIntent: T,
+        requestId: String?,
+        @StripeIntentResult.Outcome originalFlowOutcome: Int,
+        @StripeIntentResult.Outcome resolvedFlowOutcome: Int,
+        @StripeIntentResult.Outcome failureMessageOutcome: Int,
+        source: String,
+    ): S {
+        val failureMessage = failureMessageFactory.create(
+            intent = stripeIntent,
+            requestId = requestId,
+            outcome = failureMessageOutcome
+        )
+
+        logger.info(
+            listOfNotNull(
+                "PaymentFlowResultProcessor result",
+                "source=$source",
+                "intentId=${stripeIntent.id}",
+                "status=${stripeIntent.status}",
+                "initialFlowOutcome=${originalFlowOutcome.toOutcomeString()}",
+                "resolvedFlowOutcome=${resolvedFlowOutcome.toOutcomeString()}",
+                "nextActionType=${stripeIntent.nextActionType}",
+                "paymentMethodType=${stripeIntent.paymentMethod?.type?.code}",
+                stripeIntent.lastErrorTypeCode()?.let { "errorType=$it" },
+                stripeIntent.lastErrorCode()?.let { "errorCode=$it" },
+                stripeIntent.lastDeclineCode()?.let { "declineCode=$it" },
+                failureMessage?.let { "failureMessage=$it" },
+            ).joinToString(", ")
+        )
+
+        return createStripeIntentResult(
+            stripeIntent = stripeIntent,
+            outcomeFromFlow = resolvedFlowOutcome,
+            failureMessage = failureMessage,
+        )
+    }
+
+    private fun StripeIntent.lastErrorTypeCode(): String? {
+        return when (this) {
+            is PaymentIntent -> lastPaymentError?.type?.code
+            is SetupIntent -> lastSetupError?.type?.code
+        }
+    }
+
+    private fun StripeIntent.lastErrorCode(): String? {
+        return when (this) {
+            is PaymentIntent -> lastPaymentError?.code
+            is SetupIntent -> lastSetupError?.code
+        }
+    }
+
+    private fun StripeIntent.lastDeclineCode(): String? {
+        return when (this) {
+            is PaymentIntent -> lastPaymentError?.declineCode
+            is SetupIntent -> lastSetupError?.declineCode
+        }
+    }
+
+    private fun Int.toOutcomeString(): String {
+        return when (this) {
+            SUCCEEDED -> "succeeded"
+            FAILED -> "failed"
+            CANCELED -> "canceled"
+            TIMEDOUT -> "timed_out"
+            UNKNOWN -> "unknown"
+            else -> "unrecognized($this)"
         }
     }
 
