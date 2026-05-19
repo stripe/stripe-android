@@ -17,6 +17,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.result.Result
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
+import com.stripe.android.crypto.onramp.exception.CryptoOnrampException
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
@@ -104,6 +105,16 @@ internal class OnrampViewModel(
     val updateAddressEvent: StateFlow<Boolean?> = _updateAddressEvent.asStateFlow()
 
     private val minPasswordLength = 8
+
+    private fun Throwable.displayMessage(): String {
+        val onrampError = this as? CryptoOnrampException
+
+        return onrampError?.userMessageResId
+            ?.let(application::getString)
+            ?: onrampError?.userMessage?.takeIf { it.isNotBlank() }
+            ?: message
+            ?: "Unknown error"
+    }
 
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
         if (error.isLinkAuthorizationError()) {
@@ -212,7 +223,7 @@ internal class OnrampViewModel(
                 }
             }
             is Result.Failure -> {
-                _message.value = "Sign up failed: ${result.error.message}"
+                _message.value = "Sign up failed: ${result.error.displayMessage()}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
             }
         }
@@ -247,7 +258,7 @@ internal class OnrampViewModel(
                 }
             }
             is Result.Failure -> {
-                _message.value = "Log in failed: ${result.error.message}"
+                _message.value = "Log in failed: ${result.error.displayMessage()}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup, loadingMessage = null) }
             }
         }
@@ -268,14 +279,14 @@ internal class OnrampViewModel(
                         }
                         is OnrampTokenAuthenticationResult.Failed -> {
                             clearUserData()
-                            _message.value = "Seamless sign-in failed: ${authenticateResult.error.message}"
+                            _message.value = "Seamless sign-in failed: ${authenticateResult.error.displayMessage()}"
                             _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
                         }
                     }
                 }
                 is Result.Failure -> {
                     clearUserData()
-                    _message.value = "Seamless sign-in failed: ${result.error.message}"
+                    _message.value = "Seamless sign-in failed: ${result.error.displayMessage()}"
                     _uiState.update { state -> state.copy(screen = Screen.LoginSignup) }
                 }
             }
@@ -307,7 +318,7 @@ internal class OnrampViewModel(
                 }
             }
             is OnrampHasLinkAccountResult.Failed -> {
-                _message.value = "Lookup failed: ${result.error.message}"
+                _message.value = "Lookup failed: ${result.error.displayMessage()}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
@@ -342,7 +353,7 @@ internal class OnrampViewModel(
                 _message.value = "Identity Verification cancelled, please try again"
             }
             is OnrampVerifyIdentityResult.Failed -> {
-                _message.value = "Identity Verification failed: ${result.error.message}"
+                _message.value = "Identity Verification failed: ${result.error.displayMessage()}"
                 _uiState.update { it.copy(screen = Screen.LoginSignup) }
             }
         }
@@ -354,7 +365,7 @@ internal class OnrampViewModel(
                 _message.value = "CRS CARF Declaration Confirmed"
             }
             is OnrampCrsCarfDeclarationResult.Failed -> {
-                _message.value = "CRS CARF Declaration failed: ${result.error.message}"
+                _message.value = "CRS CARF Declaration failed: ${result.error.displayMessage()}"
             }
             is OnrampCrsCarfDeclarationResult.Cancelled -> {
                 _message.value = "CRS CARF Declaration cancelled, please try again"
@@ -375,7 +386,7 @@ internal class OnrampViewModel(
                 _message.value = "KYC Verification Cancelled"
             }
             is OnrampVerifyKycInfoResult.Failed -> {
-                _message.value = "KYC Verification Failed: ${result.error.message}"
+                _message.value = "KYC Verification Failed: ${result.error.displayMessage()}"
             }
         }
     }
@@ -408,7 +419,7 @@ internal class OnrampViewModel(
                 _message.value = "Payment selection cancelled, please try again"
             }
             is OnrampCollectPaymentMethodResult.Failed -> {
-                _message.value = "Payment selection failed: ${result.error.message}"
+                _message.value = "Payment selection failed: ${result.error.displayMessage()}"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
             }
         }
@@ -445,7 +456,7 @@ internal class OnrampViewModel(
                 _message.value = "Authorization cancelled by user."
             }
             is OnrampAuthorizeResult.Failed -> {
-                _message.value = "Authorization failed: ${result.error.message}"
+                _message.value = "Authorization failed: ${result.error.displayMessage()}"
             }
         }
     }
@@ -462,7 +473,7 @@ internal class OnrampViewModel(
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
             }
             is OnrampCheckoutResult.Failed -> {
-                _message.value = "Checkout failed: ${result.error.message}"
+                _message.value = "Checkout failed: ${result.error.displayMessage()}"
                 _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
             }
         }
@@ -490,7 +501,7 @@ internal class OnrampViewModel(
                 checkoutResponse.clientSecret
             }
             is Result.Failure -> {
-                throw IllegalStateException("Backend checkout failed: ${result.error.message}")
+                throw IllegalStateException("Backend checkout failed: ${result.error.displayMessage()}")
             }
         }
     }
@@ -509,7 +520,7 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampRegisterLinkUserResult.Failed -> {
-                    _message.value = "Registration failed: ${result.error.message}"
+                    _message.value = "Registration failed: ${result.error.displayMessage()}"
                     _uiState.update { it.copy(screen = Screen.LoginSignup) }
                 }
             }
@@ -537,7 +548,7 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampRegisterWalletAddressResult.Failed -> handleError(result.error) {
-                    _message.value = "Failed to register wallet address: ${result.error.message}"
+                    _message.value = "Failed to register wallet address: ${result.error.displayMessage()}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
             }
@@ -556,7 +567,7 @@ internal class OnrampViewModel(
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
                 is OnrampAttachKycInfoResult.Failed -> handleError(result.error) {
-                    _message.value = "KYC Collection failed: ${result.error.message}"
+                    _message.value = "KYC Collection failed: ${result.error.displayMessage()}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
             }
@@ -586,7 +597,7 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampRetrieveMissingIdentifiersResult.Failed -> handleError(result.error) {
-                    _message.value = "Failed to retrieve missing identifiers: ${result.error.message}"
+                    _message.value = "Failed to retrieve missing identifiers: ${result.error.displayMessage()}"
                     _uiState.update {
                         it.copy(
                             screen = Screen.AuthenticatedOperations,
@@ -623,7 +634,7 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampSubmitIdentifiersResult.Failed -> handleError(result.error) {
-                    _message.value = "Submit identifiers failed: ${result.error.message}"
+                    _message.value = "Submit identifiers failed: ${result.error.displayMessage()}"
                     _uiState.update {
                         it.copy(
                             screen = Screen.AuthenticatedOperations,
@@ -652,7 +663,7 @@ internal class OnrampViewModel(
                     _uiState.update { it.copy(screen = currentScreen) }
                 }
                 is OnrampUpdatePhoneNumberResult.Failed -> handleError(result.error) {
-                    _message.value = "Failed to update phone number: ${result.error.message}"
+                    _message.value = "Failed to update phone number: ${result.error.displayMessage()}"
                     _uiState.update { it.copy(screen = currentScreen) }
                 }
             }
@@ -676,7 +687,7 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampCreateCryptoPaymentTokenResult.Failed -> handleError(result.error) {
-                    _message.value = "Failed to create crypto payment token: ${result.error.message}"
+                    _message.value = "Failed to create crypto payment token: ${result.error.displayMessage()}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations) }
                 }
             }
@@ -735,7 +746,7 @@ internal class OnrampViewModel(
                     }
                 }
                 is Result.Failure -> {
-                    _message.value = "Failed to create onramp session: ${result.error.message}"
+                    _message.value = "Failed to create onramp session: ${result.error.displayMessage()}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
                 }
             }
@@ -882,7 +893,7 @@ internal class OnrampViewModel(
                 return response.authIntentId
             }
             is Result.Failure -> {
-                _message.value = "Failed to create auth intent: ${result.error.message}"
+                _message.value = "Failed to create auth intent: ${result.error.displayMessage()}"
                 return null
             }
         }
@@ -905,7 +916,7 @@ internal class OnrampViewModel(
                     }
                 }
                 is OnrampLogOutResult.Failed -> {
-                    _message.value = "Logout failed: ${result.error.message}"
+                    _message.value = "Logout failed: ${result.error.displayMessage()}"
                     _uiState.update { it.copy(screen = Screen.AuthenticatedOperations, loadingMessage = null) }
                 }
             }

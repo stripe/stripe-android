@@ -4,8 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.AppAttestationException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
@@ -178,6 +181,95 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.WalletRegistered(CryptoNetwork.Ethereum)
         )
+    }
+
+    @Test
+    fun testRegisterWalletAddressMapsBackendAttestationError() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(cryptoApiRepository.setWalletAddress(any(), any(), any())).thenReturn(
+            Result.failure(
+                APIException(
+                    stripeError = StripeError(
+                        code = "link_failed_to_attest_request",
+                        message = "App attestation failed",
+                        type = "cannot_proceed",
+                        extraFields = mapOf(
+                            "reason" to "app_not_play_recognized",
+                            "user_message" to "This app couldn't be verified. Install it from Google Play and try again."
+                        )
+                    ),
+                    requestId = "req_123",
+                    statusCode = 400,
+                )
+            )
+        )
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.registerWalletAddress(
+            walletAddress = "0x1234567890abcdef",
+            network = CryptoNetwork.Ethereum
+        )
+
+        assertThat(result).isInstanceOf(OnrampRegisterWalletAddressResult.Failed::class.java)
+
+        val error = (result as OnrampRegisterWalletAddressResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertThat(attestationError.userMessageResId)
+            .isEqualTo(R.string.stripe_onramp_app_attestation_play_user_message)
+        assertThat(attestationError.userMessage)
+            .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+        assertThat(attestationError.reason).isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.mode).isEqualTo("test")
+        assertThat(attestationError.message)
+            .contains("App attestation failed: this app is not recognized by Google Play.")
+        assertThat(attestationError.message)
+            .contains("package: ${RuntimeEnvironment.getApplication().packageName}")
+        assertThat(attestationError.message).contains("operation: register_wallet_address")
+        assertThat(attestationError.message).contains("request_id: req_123")
+        assertThat(attestationError.message)
+            .contains("Docs: https://stripe.com/docs/crypto/onramp/app-attestation")
+    }
+
+    @Test
+    fun appAttestationExceptionMapsKnownReasonsToLocalizedUserMessages() {
+        val cause = IllegalStateException("boom")
+
+        listOf(
+            "attestation_not_enabled" to
+                R.string.stripe_onramp_app_attestation_not_enabled_user_message,
+            "app_not_registered" to
+                R.string.stripe_onramp_app_attestation_not_registered_user_message,
+            "attestation_data_missing" to
+                R.string.stripe_onramp_app_attestation_data_missing_user_message,
+            "app_not_play_recognized" to
+                R.string.stripe_onramp_app_attestation_play_user_message,
+            "android_package_name_mismatch" to
+                R.string.stripe_onramp_app_attestation_package_name_mismatch_user_message,
+            "android_environment_mismatch" to
+                R.string.stripe_onramp_app_attestation_environment_mismatch_user_message,
+            "android_verdict_validation_failed" to
+                R.string.stripe_onramp_app_attestation_verdict_validation_failed_user_message,
+        ).forEach { (reason, expectedResId) ->
+            val error = AppAttestationException(
+                reason = reason,
+                operation = "register_wallet_address",
+                appPackageName = "com.example.app",
+                mode = "test",
+                sdkVersion = "1.0.0",
+                apiErrorCode = "link_failed_to_attest_request",
+                apiErrorMessage = "App attestation failed",
+                apiUserMessage = null,
+                docUrl = null,
+                cause = cause,
+            )
+
+            assertThat(error.userMessageResId).isEqualTo(expectedResId)
+        }
     }
 
     @Test
