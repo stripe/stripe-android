@@ -5,6 +5,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.*
 
 internal data class PaymentOptionsState(
     val items: List<PaymentOptionsItem> = emptyList(),
@@ -83,6 +84,7 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
     return firstOrNull { item ->
         when (paymentSelection) {
             is PaymentSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
+            is PaymentSelection.SamsungPay -> item is PaymentOptionsItem.SamsungPay
             is PaymentSelection.Link -> item is PaymentOptionsItem.Link
             is PaymentSelection.Saved -> {
                 when (item) {
@@ -105,6 +107,7 @@ internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
         is PaymentOptionsItem.AddCard -> null
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
         is PaymentOptionsItem.Link -> PaymentSelection.Link(linkBrand)
-        is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
+        is PaymentOptionsItem.SavedPaymentMethod -> Saved(paymentMethod)
+        PaymentOptionsItem.SamsungPay -> PaymentSelection.SamsungPay
     }
 }

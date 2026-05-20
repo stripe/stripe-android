@@ -20,11 +20,13 @@ internal class DefaultPrefsRepository(
 
     override suspend fun getSavedSelection(
         isGooglePayAvailable: Boolean,
-        isLinkAvailable: Boolean
+        isLinkAvailable: Boolean,
+        isSamsungPayAvailable: Boolean
     ) = withContext(workContext) {
         val prefData = prefs.getString(getKey(), null).orEmpty().split(":")
         when (prefData.firstOrNull()) {
             "google_pay" -> SavedSelection.GooglePay.takeIf { isGooglePayAvailable }
+            "samsung_pay" -> SavedSelection.SamsungPay.takeIf { isSamsungPayAvailable }
             "link" -> SavedSelection.Link.takeIf { isLinkAvailable }
             "payment_method" -> prefData.getOrNull(1)?.let {
                 val isLinkOrigin = prefData.getOrNull(2)?.toBoolean() == true

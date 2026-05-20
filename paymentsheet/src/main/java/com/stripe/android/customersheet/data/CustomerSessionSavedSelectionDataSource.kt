@@ -61,6 +61,7 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
                  */
                 isGooglePayAvailable = true,
                 isLinkAvailable = false,
+                isSamsungPayAvailable = false,
             )
         }
     }

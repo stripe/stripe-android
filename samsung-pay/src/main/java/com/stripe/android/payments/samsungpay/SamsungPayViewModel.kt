@@ -6,6 +6,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import com.samsung.android.sdk.samsungpay.v2.SpaySdk
 import com.samsung.android.sdk.samsungpay.v2.payment.CardInfo
 import com.samsung.android.sdk.samsungpay.v2.payment.CustomSheetPaymentInfo
@@ -16,6 +17,7 @@ import com.samsung.android.sdk.samsungpay.v2.payment.sheet.CustomSheet
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.launch
 
 private const val TAG = "SamsungPayViewModel"
 
@@ -26,7 +28,7 @@ internal class SamsungPayViewModel : ViewModel() {
 
     fun startPayment(context: Context) {
         val paymentManager = PaymentManager(
-            context.applicationContext, 
+            context.applicationContext,
             SamsungFactory.buildPartnerInfo()
         )
 
@@ -64,16 +66,21 @@ internal class SamsungPayViewModel : ViewModel() {
                     Log.d(TAG, "  paymentCredential=$paymentCredential")
                     logBundleContents("onSuccess.extraPaymentInfo", response.extraPaymentInfo)
                     logBundleContents("onSuccess.extraPaymentData", extraPaymentData)
-                    Toast.makeText(context.applicationContext, "onSuccess() ", Toast.LENGTH_SHORT).show()
+                    viewModelScope.launch {
+                        _samsungPayResult.emit(SamsungPayResult.Success)
+                    }
                 }
 
                 override fun onFailure(errorCode: Int, errorData: Bundle?) {
                     Log.e(TAG, "transactionInfoListener.onFailure: errorCode=$errorCode")
                     logBundleContents("onFailure.errorData", errorData)
-                    Toast.makeText(context.applicationContext, "onFailure() ", Toast.LENGTH_SHORT).show()
+                    viewModelScope.launch {
+                        _samsungPayResult.emit(SamsungPayResult.Failure(Throwable("samsung pay failed")))
+                    }
                 }
             }
-        val sheetPaymentInfo = makeTransactionDetailsWithSheet() ?: return
+
+        val sheetPaymentInfo = makeTransactionDetailsWithSheet()
 
         paymentManager.startInAppPayWithCustomSheet(
             sheetPaymentInfo,
@@ -116,12 +123,12 @@ internal class SamsungPayViewModel : ViewModel() {
 //        val amountBoxControl = AmountBoxControl(AMOUNT_CONTROL_ID, "USD")
         val amountBoxControl = AmountBoxControl("amount_control_id", "USD")
 //        amountBoxControl.addItem(PRODUCT_ITEM_ID, "Item", 1199.00, "")
-        amountBoxControl.addItem("product_item_id", "Item", 1199.00, "")
+        amountBoxControl.addItem("product_item_id", "Item", .20, "")
 //        amountBoxControl.addItem(PRODUCT_TAX_ID, "Tax", 5.0, "")
-        amountBoxControl.addItem("product_tax_id", "Tax", 5.0, "")
+        amountBoxControl.addItem("product_tax_id", "Tax", .30, "")
 //        amountBoxControl.addItem(PRODUCT_SHIPPING_ID, "Shipping", 1.0, "")
-        amountBoxControl.addItem("product_shipping_id", "Shipping", 1.0, "")
-        amountBoxControl.setAmountTotal(1205.00, AmountConstants.FORMAT_TOTAL_PRICE_ONLY)
+        amountBoxControl.addItem("product_shipping_id", "Shipping", .10, "")
+        amountBoxControl.setAmountTotal(.60, AmountConstants.FORMAT_TOTAL_PRICE_ONLY)
         return amountBoxControl
     }
 
@@ -155,7 +162,7 @@ internal class SamsungPayViewModel : ViewModel() {
             return brandList
         }
 
-    internal class Factory: ViewModelProvider.Factory {
+    internal class Factory : ViewModelProvider.Factory {
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return SamsungPayViewModel() as T
         }

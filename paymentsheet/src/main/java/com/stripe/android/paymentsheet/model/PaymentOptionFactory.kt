@@ -41,6 +41,7 @@ internal val PaymentSelection.shippingDetails: AddressDetails?
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod,
         is PaymentSelection.GooglePay,
+        is PaymentSelection.SamsungPay,
         is PaymentSelection.New.Card,
         is PaymentSelection.New.GenericPaymentMethod,
         is PaymentSelection.New.USBankAccount,

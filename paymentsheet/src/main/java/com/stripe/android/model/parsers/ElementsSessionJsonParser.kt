@@ -109,7 +109,7 @@ internal class ElementsSessionJsonParser(
                 customPaymentMethods = customPaymentMethods,
                 flags = flags,
                 experimentsData = experimentsData,
-                orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
+                orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets + "samsung_pay",
                 elementsSessionId = elementsSessionId.takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
                 passiveCaptcha = passiveCaptcha,
                 elementsSessionConfigId = elementsSessionConfigId,

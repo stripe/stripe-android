@@ -69,6 +69,7 @@ internal data class PaymentMethodMetadata(
     val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val customerMetadata: CustomerMetadata?,
     val isGooglePayReady: Boolean,
+    val isSamsungPayReady: Boolean,
     val linkConfiguration: PaymentSheet.LinkConfiguration,
     val linkMode: LinkMode?,
     val linkBrand: LinkBrand,
@@ -358,6 +359,7 @@ internal data class PaymentMethodMetadata(
             sharedDataSpecs: List<SharedDataSpec>,
             externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
             isGooglePayReady: Boolean,
+            isSamsungPayReady: Boolean,
             linkStateResult: LinkStateResult?,
             customerMetadata: CustomerMetadata?,
             initializationMode: PaymentElementLoader.InitializationMode,
@@ -380,7 +382,8 @@ internal data class PaymentMethodMetadata(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkStateResult as? LinkState,
-                    isShopPayAvailable = configuration.shopPayConfiguration != null
+                    isShopPayAvailable = configuration.shopPayConfiguration != null,
+                    isSamsungPayReady = isSamsungPayReady
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
@@ -400,6 +403,7 @@ internal data class PaymentMethodMetadata(
                 linkStateResult = linkStateResult,
                 paymentMethodIncentive = linkSettings?.linkConsumerIncentive?.toPaymentMethodIncentive(),
                 isGooglePayReady = isGooglePayReady,
+                isSamsungPayReady = isSamsungPayReady,
                 displayableCustomPaymentMethods = elementsSession.toDisplayableCustomPaymentMethods(configuration),
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 cardFundingFilter = PaymentSheetCardFundingFilter(
@@ -436,6 +440,7 @@ internal data class PaymentMethodMetadata(
             configuration: CustomerSheet.Configuration,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
+            isSamsungPayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
@@ -448,6 +453,7 @@ internal data class PaymentMethodMetadata(
                 availableWallets = WalletType.listFrom(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
+                    isSamsungPayReady = isSamsungPayReady,
                     linkState = null,
                     isShopPayAvailable = false
                 ),
@@ -463,6 +469,7 @@ internal data class PaymentMethodMetadata(
                 customerMetadata = customerMetadata,
                 sharedDataSpecs = sharedDataSpecs,
                 isGooglePayReady = isGooglePayReady,
+                isSamsungPayReady = isSamsungPayReady,
                 linkConfiguration = PaymentSheet.LinkConfiguration(),
                 linkMode = elementsSession.linkSettings?.linkMode,
                 linkBrand = elementsSession.linkBrand,

@@ -275,7 +275,7 @@ internal data class ElementsSession(
                 externalPaymentMethodData = null,
                 flags = emptyMap(),
                 stripeIntent = stripeIntent,
-                orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
+                orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes + "samsung_pay",
                 experimentsData = null,
                 customer = null,
                 customPaymentMethods = listOf(),

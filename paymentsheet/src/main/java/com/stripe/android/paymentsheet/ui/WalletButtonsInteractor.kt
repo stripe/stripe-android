@@ -44,6 +44,7 @@ import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnR
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCodeNotificationSent
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnShown
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.WalletButton
+import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.WalletButton.*
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -179,7 +180,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         val walletButtons = arguments?.run {
             arguments.paymentMethodMetadata.availableWallets.mapNotNull { wallet ->
                 when (wallet) {
-                    WalletType.GooglePay -> WalletButton.GooglePay(
+                    WalletType.GooglePay -> GooglePay(
                         allowCreditCards = true,
                         buttonType = configuration.googlePay?.buttonType,
                         cardBrandFilter = PaymentSheetCardBrandFilter(
@@ -194,7 +195,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                     }
                     WalletType.Link -> {
                         val linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration
-                        WalletButton.Link(
+                        Link(
                             state = LinkButtonState.create(
                                 enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
                                 linkEmail = arguments.linkEmail,
@@ -215,6 +216,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                             walletsAllowedByMerchant.contains(WalletType.ShopPay)
                         }
                     }
+                    WalletType.SamsungPay -> TODO()
                 }
             }
         } ?: emptyList()

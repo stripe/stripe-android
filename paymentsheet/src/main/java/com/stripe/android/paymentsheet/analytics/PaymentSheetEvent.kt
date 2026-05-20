@@ -609,6 +609,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }
             null -> "unknown"
             is PaymentSelection.ShopPay -> "shop_pay"
+            PaymentSelection.SamsungPay -> "samsung_pay"
         }
 
         private fun formatEventName(mode: EventReporter.Mode, eventName: String): String {
@@ -659,6 +660,7 @@ internal fun PaymentSelection.code(): String {
         is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
         is PaymentSelection.ExternalPaymentMethod -> type
         is PaymentSelection.CustomPaymentMethod -> id
+        PaymentSelection.SamsungPay -> "samsung_pay"
     }
 }
 
@@ -682,6 +684,7 @@ internal fun PaymentSelection.linkContext(): String? {
             }
         }
         is PaymentSelection.GooglePay,
+        is PaymentSelection.SamsungPay,
         is PaymentSelection.New,
         is PaymentSelection.Saved,
         is PaymentSelection.CustomPaymentMethod,

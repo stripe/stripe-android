@@ -209,6 +209,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
             isShopPayAvailable = paymentMethodMetadata?.availableWallets?.contains(WalletType.ShopPay) == true,
+            isSamsungPayReady = paymentMethodMetadata?.isSamsungPayReady == true,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
@@ -216,6 +217,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = { checkoutWithLink(linkBrand) },
             onShopPayPressed = this::checkoutWithShopPay,
+            onSamsungPayPressed = this::checkoutWithSamsungPay,
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
@@ -435,6 +437,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun checkoutWithShopPay() {
         checkout(PaymentSelection.ShopPay, CheckoutIdentifier.SheetTopWallet)
+    }
+
+    fun checkoutWithSamsungPay() {
+        checkout(PaymentSelection.SamsungPay, CheckoutIdentifier.SheetTopWallet)
     }
 
     @VisibleForTesting

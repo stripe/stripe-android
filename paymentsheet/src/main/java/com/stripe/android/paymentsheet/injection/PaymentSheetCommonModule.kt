@@ -34,6 +34,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
+import com.stripe.android.payments.samsungpay.SamsungPayModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -85,6 +86,7 @@ import javax.inject.Singleton
         PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
+        SamsungPayModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {

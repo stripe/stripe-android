@@ -6,12 +6,14 @@ import com.stripe.android.paymentsheet.state.LinkState
 internal enum class WalletType(val code: String) {
     GooglePay(code = "google_pay"),
     Link(code = "link"),
-    ShopPay(code = "shop_pay");
+    ShopPay(code = "shop_pay"),
+    SamsungPay(code = "samsung_pay");
 
     companion object {
         fun listFrom(
             elementsSession: ElementsSession,
             isGooglePayReady: Boolean,
+            isSamsungPayReady: Boolean,
             linkState: LinkState?,
             isShopPayAvailable: Boolean
         ): List<WalletType> {
@@ -24,6 +26,9 @@ internal enum class WalletType(val code: String) {
                     Link -> linkState != null
                     ShopPay -> {
                         isShopPayAvailable && isInOrderedPaymentMethods
+                    }
+                    WalletType.SamsungPay -> {
+                        isSamsungPayReady && isInOrderedPaymentMethods
                     }
                 }
             }

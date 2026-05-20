@@ -34,6 +34,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.samsungpay.GetSamsungPayStatus
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.IntentConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.PaymentMethodLayout
@@ -41,6 +42,7 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.PaymentSelection.*
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
@@ -239,6 +241,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
+    private val getSamsungPayStatus: GetSamsungPayStatus
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -286,6 +289,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 configuration.isGooglePayReady()
             }
         }
+        val isSamsungPaySupported = async {
+            getSamsungPayStatus() is GetSamsungPayStatus.Status.Ready
+        }
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
@@ -309,6 +315,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             retrieveSavedSelection(
                 configuration = configuration,
                 isGooglePayReady = isGooglePayReady,
+                isSamsungPayReady = isSamsungPaySupported.await(),
                 elementsSession = elementsSession
             )
         }
@@ -350,6 +357,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 linkStateResult = linkStateResult,
                 isGooglePayReady = isGooglePayReady,
                 isGooglePaySupported = isGooglePaySupported,
+                isSamsungPayReady = isSamsungPaySupported.await(),
                 initializationMode = initializationMode,
                 customerMetadata = customerMetadata,
                 clientAttributionMetadata = clientAttributionMetadata,
@@ -381,6 +389,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     metadata = paymentMethodMetadata,
                     customer = customer,
                     isGooglePayReady = isGooglePayReady,
+                    isSamsungPayReady = isSamsungPaySupported.await(),
                     isUsingWalletButtons = configuration.walletButtons?.willDisplayExternally ?: false
                 )
             }
@@ -479,6 +488,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         linkStateResult: LinkStateResult,
         isGooglePayReady: Boolean,
+        isSamsungPayReady: Boolean,
         isGooglePaySupported: Boolean,
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
@@ -532,6 +542,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             isGooglePayReady = isGooglePayReady,
+            isSamsungPayReady = isSamsungPayReady,
             linkStateResult = linkStateResult,
             customerMetadata = customerMetadata,
             initializationMode = initializationMode,
@@ -626,6 +637,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentMethodMetadata,
         customer: CustomerState?,
         isGooglePayReady: Boolean,
+        isSamsungPayReady: Boolean,
         isUsingWalletButtons: Boolean,
     ): PaymentSelection? {
         val isDefaultPaymentMethodEnabled = metadata.customerMetadata?.isPaymentMethodSetAsDefaultEnabled ?: false
@@ -638,9 +650,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay.takeIf {
                     !isUsingWalletButtons && isGooglePayReady
                 }
+                SavedSelection.SamsungPay -> {
+                    PaymentSelection.SamsungPay.takeIf {
+                        !isUsingWalletButtons && isSamsungPayReady
+                    }
+                }
                 is SavedSelection.Link ->
                     metadata.linkState?.configuration?.linkBrand
-                        ?.let { PaymentSelection.Link(brand = it) }
+                        ?.let { Link(brand = it) }
                         ?.takeIf { !isUsingWalletButtons }
                 is SavedSelection.PaymentMethod -> {
                     val customerPaymentMethod = customer?.paymentMethods?.find { it.id == selection.id }
@@ -650,7 +667,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         // The payment method wasn't attached to the customer, but is of Link origin. Offer
                         // Link as the initial payment selection.
                         metadata.linkState?.configuration?.linkBrand
-                            ?.let { PaymentSelection.Link(brand = it) }
+                            ?.let { Link(brand = it) }
                             ?.takeIf { !isUsingWalletButtons }
                     } else {
                         null
@@ -670,12 +687,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun retrieveSavedSelection(
         configuration: CommonConfiguration,
         isGooglePayReady: Boolean,
+        isSamsungPayReady: Boolean,
         elementsSession: ElementsSession
     ): SavedSelection {
         return retrieveSavedSelection(
             configuration = configuration,
             isGooglePayReady = isGooglePayReady,
             isLinkAvailable = elementsSession.isLinkEnabled,
+            isSamsungPayAvailable = isSamsungPayReady
         )
     }
 
@@ -695,6 +714,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     configuration = configuration,
                     isGooglePayReady = false,
                     isLinkAvailable = false,
+                    isSamsungPayAvailable = false
                 ) as? SavedSelection.PaymentMethod
             }
             is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey,
@@ -706,6 +726,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         configuration: CommonConfiguration,
         isGooglePayReady: Boolean,
         isLinkAvailable: Boolean,
+        isSamsungPayAvailable: Boolean,
     ): SavedSelection {
         return durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection
@@ -716,6 +737,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             prefsRepository.getSavedSelection(
                 isGooglePayAvailable = isGooglePayReady,
                 isLinkAvailable = isLinkAvailable,
+                isSamsungPayAvailable = isSamsungPayAvailable
             )
         }
     }

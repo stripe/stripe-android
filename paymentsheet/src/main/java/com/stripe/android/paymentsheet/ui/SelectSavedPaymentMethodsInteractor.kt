@@ -198,6 +198,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             is PaymentSelection.Saved,
             is PaymentSelection.Link,
             is PaymentSelection.GooglePay,
+            is PaymentSelection.SamsungPay,
             is PaymentSelection.ShopPay -> selection
             is PaymentSelection.New,
             is PaymentSelection.ExternalPaymentMethod,

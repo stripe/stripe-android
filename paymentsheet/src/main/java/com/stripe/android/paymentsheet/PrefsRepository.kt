@@ -5,7 +5,8 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 internal interface PrefsRepository {
     suspend fun getSavedSelection(
         isGooglePayAvailable: Boolean,
-        isLinkAvailable: Boolean
+        isLinkAvailable: Boolean,
+        isSamsungPayAvailable: Boolean
     ): SavedSelection
 
     fun setSavedSelection(savedSelection: SavedSelection?): Boolean

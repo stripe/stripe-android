@@ -6,7 +6,7 @@ import com.samsung.android.sdk.samsungpay.v2.PartnerInfo
 import com.samsung.android.sdk.samsungpay.v2.SpaySdk
 
 private const val TAG = "SamsungPayViewModel"
-private const val SERVICE_ID = "0915499788d6493aa3a038"
+private const val SERVICE_ID = "716e0e5ea6c64b47b467fe"
 
 internal object SamsungFactory {
     fun buildPartnerInfo(): PartnerInfo {

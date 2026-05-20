@@ -73,6 +73,20 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     @Parcelize
+    data object SamsungPay : PaymentSelection() {
+
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(
+            merchantName: String,
+            isSetupFlow: Boolean,
+        ): ResolvableString? {
+            return null
+        }
+    }
+
+    @Parcelize
     data class Link(
         val brand: LinkBrand,
         val linkExpressMode: LinkExpressMode = LinkExpressMode.DISABLED,
@@ -353,6 +367,7 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.CustomPaymentMethod,
         is PaymentSelection.ExternalPaymentMethod -> false
         is PaymentSelection.ShopPay -> false
+        PaymentSelection.SamsungPay -> false
     }
 
 internal val PaymentSelection.isSaved: Boolean
@@ -372,6 +387,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
         is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo
+        PaymentSelection.SamsungPay -> R.drawable.stripe_google_pay_mark
     }
 
 internal val PaymentSelection.drawableResourceIdNight: Int
@@ -385,6 +401,7 @@ internal val PaymentSelection.drawableResourceIdNight: Int
         is PaymentSelection.New.USBankAccount -> iconResource
         is PaymentSelection.Saved -> getSavedIcon(this)
         is PaymentSelection.ShopPay -> R.drawable.stripe_shop_pay_logo_white
+        PaymentSelection.SamsungPay -> R.drawable.stripe_shop_pay_logo_white
     }
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
@@ -410,6 +427,7 @@ internal val PaymentSelection.lightThemeIconUrl: String?
         is PaymentSelection.New.USBankAccount -> null
         is PaymentSelection.Saved -> null
         is PaymentSelection.ShopPay -> null
+        PaymentSelection.SamsungPay -> null
     }
 
 internal val PaymentSelection.darkThemeIconUrl: String?
@@ -423,6 +441,7 @@ internal val PaymentSelection.darkThemeIconUrl: String?
         is PaymentSelection.New.USBankAccount -> null
         is PaymentSelection.Saved -> null
         is PaymentSelection.ShopPay -> null
+        PaymentSelection.SamsungPay -> null
     }
 
 internal fun PaymentSelection.label(linkBrand: LinkBrand?): ResolvableString =
@@ -436,6 +455,7 @@ internal fun PaymentSelection.label(linkBrand: LinkBrand?): ResolvableString =
         is PaymentSelection.New.USBankAccount -> label.resolvableString
         is PaymentSelection.Saved -> getSavedLabel(this, linkBrand).orEmpty()
         is PaymentSelection.ShopPay -> StripeR.string.stripe_shop_pay.resolvableString
+        PaymentSelection.SamsungPay -> "Samsung Pay".resolvableString
     }
 
 private fun getSavedLabel(selection: PaymentSelection.Saved, linkBrand: LinkBrand?): ResolvableString? {
@@ -456,6 +476,7 @@ internal val PaymentSelection.paymentMethodType: String
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code ?: "card"
         is PaymentSelection.ShopPay -> "shop_pay"
+        PaymentSelection.SamsungPay -> "samsung_pay"
     }
 
 internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
@@ -467,6 +488,7 @@ internal val PaymentSelection.billingDetails: PaymentMethod.BillingDetails?
         is PaymentSelection.New -> paymentMethodCreateParams.billingDetails
         is PaymentSelection.Saved -> paymentMethod.billingDetails
         is PaymentSelection.ShopPay -> null
+        PaymentSelection.SamsungPay -> null
     }
 
 internal fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails {
