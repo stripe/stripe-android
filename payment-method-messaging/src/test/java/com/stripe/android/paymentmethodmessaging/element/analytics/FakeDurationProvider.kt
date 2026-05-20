@@ -26,6 +26,11 @@ internal class FakeDurationProvider(
         return duration
     }
 
+    override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
+        _callsTurbine.add(Call.Measure(key))
+        return block()
+    }
+
     fun validate() {
         _callsTurbine.ensureAllEventsConsumed()
     }
@@ -38,5 +43,7 @@ internal class FakeDurationProvider(
         data class Elapsed(override val key: DurationProvider.Key) : Call
 
         data class End(override val key: DurationProvider.Key) : Call
+
+        data class Measure(override val key: DurationProvider.Key) : Call
     }
 }

@@ -69,6 +69,7 @@ module LatencyTestUtils
       '--no-configuration-cache',
       gradle_task,
       "-Pandroid.testInstrumentationRunnerArguments.class=#{latency_test_class}",
+      '-PRUN_LATENCY_TESTS_IN_CI=true',
       "-PLATENCY_EXPERIMENT_ITERATIONS=#{sample_count}"
     ]
 

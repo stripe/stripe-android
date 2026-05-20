@@ -26,8 +26,8 @@ import org.junit.runners.Parameterized
 
 /**
  * This test is special -- it's intended to be used to measure loading latency of PaymentSheet. As such, it doesn't
- * run in CI, but can be run locally (to test changes) and via the latency benchmarking script:
- * scripts/measure_latency_difference.rb.
+ * run in regular CI, but can be run locally (to test changes) and via the latency benchmarking scripts:
+ * scripts/measure_latency_difference.rb and scripts/report_latency_synthetics.rb.
  * */
 @RunWith(Parameterized::class)
 internal class TestLatency(
@@ -47,7 +47,7 @@ internal class TestLatency(
 
     @Test
     fun testLatency() {
-        Assume.assumeFalse(BuildConfig.IS_RUNNING_IN_CI)
+        Assume.assumeFalse(BuildConfig.IS_RUNNING_IN_CI && !BuildConfig.RUN_LATENCY_TESTS_IN_CI)
         val logger = Logger.getInstance(enableLogging = !testConfig.skipMeasurement)
         logger.debug( "LATENCY_TEST_CASE_STARTED: ${testConfig.name}")
 
