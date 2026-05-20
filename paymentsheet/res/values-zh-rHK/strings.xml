@@ -29,11 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">保存我的資訊，用 Link 更快結賬</string>
-  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">儲存資訊，以便透過 %s 更快結賬</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">使用 Link 建立帳戶，以便在網站上更快結帳</string>
-  <string name="stripe_inline_sign_up_toggle_with_brand">透過 %s 建立賬戶，網上各處享受更快捷的結賬體驗</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -48,12 +46,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">是，更新</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">登入或註冊</string>
-  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_accept_button_text">接受</string>
-  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">取消</string>
-  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
-  <string name="stripe_link_onramp_carf_declaration_screen_title">聲明</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">地址</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -76,8 +68,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">用 Link 儲存您的支付資訊，並在支援 Link 的網站上一鍵安全結賬。</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">在接受 Link 的任何地方可以更快速支付。</string>
-  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_link_sign_up_message_v2_with_brand">在任何接受 %s 的地方享受更快捷的付款體驗。</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[繼續即表示您同意<terms>條款</terms>和<privacy>私隱權政策</privacy>。]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -94,18 +84,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">更新銀行卡</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">退出 Link</string>
-  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_log_out_with_brand">登出 %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">出錯了，檢查您的連接並重試。</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">或手動輸入</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">用 Link 支付</string>
-  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_format">使用 %s 付款</string>
-  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_with_brand">使用 %s 付款</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[繼續操作即表示您同意按照<terms>這些條款</terms>授權付款。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -154,8 +138,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來透過 %s 和 <link>Link</link> 進行購物（請參閱<terms>條款</terms>與<privacy>隱私政策</privacy>）。]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來根據 <link>Link</link> <terms>條款</terms>與<privacy>私隱政策</privacy> 透過 %s 和 Link 購物]]></string>
-  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[繼續操作即表示您同意按照 %2$s 的 <terms>條款</terms> 和 <privacy>隱私政策</privacy>，為供未來在 %1$s 和 <link>%2$s</link> 購物時使用而儲存您的資訊。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，請重試。</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -269,18 +251,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[加入 Link 即表示您同意<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[提供您的電郵地址，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 賬戶並將您的支付資訊儲存到 Link。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[提供您的電郵地址即表示您同意建立 %1$s 帳戶，並按照 <terms>%1$s 條款</terms>和<privacy>隱私政策</privacy>將您的支付資訊儲存至 %1$s。]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[提供您的手機號碼，即表示您同意按照 <terms>Link 條款</terms>和<privacy>私隱政策</privacy>建立 Link 賬戶並將您的支付資訊儲存到 Link。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[提供您的電話號碼即表示您同意建立 %1$s 帳戶，並按照 <terms>%1$s 條款</terms>和<privacy>隱私政策</privacy>將您的支付資訊儲存至 %1$s。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account. -->
-  <string name="stripe_sign_up_terms_branded"><![CDATA[加入 %1$s 即表示您同意<terms>條款</terms>和<privacy>隱私政策</privacy>。]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[提供您的手機號碼和電子郵件地址，即表示您同意按照 Link <terms>條款</terms>和<privacy>私隱權政策</privacy>建立 Link 賬戶。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[提供電話號碼和電郵地址即表示您同意建立受 %1$s <terms>條款</terms>和<privacy>隱私政策</privacy>約束的 %1$s 帳戶。]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">您的賬戶已被禁用</string>
   <!-- Generic failure message -->
@@ -291,32 +265,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">已新增銀行卡</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">輕按以新增銀行卡</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
-  <string name="stripe_tap_to_add_card_declined_error_title">已拒絕銀行卡</string>
-  <!-- Error message shown to the user to try tapping their card again as their next action. -->
-  <string name="stripe_tap_to_add_card_default_error_action">嘗試再次感應您的銀行卡</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
-  <string name="stripe_tap_to_add_card_not_supported_error_title">不支援銀行卡</string>
-  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
-  <string name="stripe_tap_to_add_developer_options_error_action">關閉開發人員選項，然後重試</string>
-  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
-  <string name="stripe_tap_to_add_network_error_action">嘗試另一個卡組織，然後再次感應</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">已支付 %s</string>
-  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
-  <string name="stripe_tap_to_add_timed_out_error_action">返回並再次感應您的銀行卡</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">您的裝置不支援新增輕觸功能</string>
-  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_action">嘗試另一個裝置</string>
-  <!-- Error message shown when Tap to Add is not supported by the current device. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_title">不支援裝置</string>
-  <!-- Error message shown to the user to try tapping their different card as their next action. -->
-  <string name="stripe_tap_to_add_unusable_error_action">嘗試另一張銀行卡</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">取消並用另一方式支付</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">批准付款</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">請在 %s 內打開您的 UPI 應用程式來批准付款</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">請返回並選擇另一種支付方式</string>
   <!-- Text on a screen that indicates a payment has failed -->

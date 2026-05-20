@@ -167,6 +167,9 @@ constructor(
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
+            is StripeIntent.NextActionData.UpiAwaitNotification -> {
+                StripeIntent.NextActionType.UpiAwaitNotification
+            }
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 StripeIntent.NextActionType.CashAppRedirect
             }

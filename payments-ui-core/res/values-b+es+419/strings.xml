@@ -28,8 +28,6 @@
   <string name="stripe_blik_code">Código BLIK</string>
   <!-- Label for Boleto Payment method Tax ID -->
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
-  <!-- Accessibility content description for card brand icons shown in the card number field. %1$s is a comma-separated list of brand names (e.g. "Visa, Mastercard, American Express, Discover"). -->
-  <string name="stripe_card_brand_icons_content_description">Tarjetas admitidas: %1$s</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. \"Visa (not accepted)\" -->
   <string name="stripe_card_brand_not_accepted">(no se acepta)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
@@ -87,6 +85,8 @@
   <string name="stripe_paymentsheet_add_payment_method_card_information">Información de la tarjeta</string>
   <!-- Title shown above a view allowing the customer to save a US bank account. -->
   <string name="stripe_paymentsheet_add_us_bank_account">Agrega una cuenta bancaria de EE. UU.</string>
+  <!-- Header text shown above a UPI ID text field -->
+  <string name="stripe_paymentsheet_buy_using_upi_id">Comprar con un ID de UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Débito directo BECS (Australia)</string>
   <!-- Payment Method type brand name -->

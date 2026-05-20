@@ -133,6 +133,7 @@ constructor(
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
+            is StripeIntent.NextActionData.UpiAwaitNotification,
             is StripeIntent.NextActionData.SwishRedirect,
             is StripeIntent.NextActionData.DisplayPayNowDetails,
             is StripeIntent.NextActionData.DisplayPromptPayDetails,

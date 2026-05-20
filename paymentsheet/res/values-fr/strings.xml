@@ -29,11 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Enregistrer mes informations pour régler plus rapidement avec Link</string>
-  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Sauvegardez mes informations pour que je profite d’un processus de paiement plus rapide avec %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Créez un compte avec Link pour un paiement plus rapide sur le Web</string>
-  <string name="stripe_inline_sign_up_toggle_with_brand">Créer un compte avec %s pour profiter d’un processus de paiement plus rapide sur internet</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Carte de crédit %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -48,12 +46,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Oui, mettre à jour</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Se connecter ou s\'inscrire</string>
-  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Accepter</string>
-  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Annuler</string>
-  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
-  <string name="stripe_link_onramp_carf_declaration_screen_title">Attestations</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Adresse</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -76,8 +68,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Enregistrez vos informations de paiement avec Link et payez en un clic et en toute sécurité sur les sites compatibles.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Réglez plus rapidement vos achats partout où Link est accepté.</string>
-  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_link_sign_up_message_v2_with_brand">Réglez vos achats plus rapidement, partout où %s est accepté.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[En continuant, vous acceptez les <terms>Conditions</terms> et la <privacy>Politique de confidentialité</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -94,18 +84,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Modifier la carte bancaire</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Se déconnecter de Link</string>
-  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_log_out_with_brand">Se déconnecter de %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Une erreur s\'est produite. Vérifiez votre connexion et réessayez.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">ou saisissez manuellement</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Payer avec Link</string>
-  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_format">Payer avec %s</string>
-  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_with_brand">Payer avec %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[En continuant, vous autorisez les paiements conformément à <terms>ces conditions</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -154,8 +138,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[En continuant, vous acceptez d\'enregistrer vos informations pour de futurs achats avec %s et <link>Link</link> (voir <terms>Conditions</terms> et <privacy>Politique de confidentialité</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[En continuant, vous acceptez d\'enregistrer vos informations pour de futurs achats avec %s et <link>Link</link> conformément aux <terms>conditions</terms> et à la <privacy>confidentialité</privacy> de Link.]]></string>
-  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[En continuant, vous acceptez de sauvegarder vos informations pour de futurs achats auprès de %1$s et <link>%2$s</link>, conformément aux <terms>Conditions</terms> et à la <privacy>Politique de confidentialité</privacy> de %2$s.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">La carte n\'a pas été modifiée. Veuillez réessayer.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -269,18 +251,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[En rejoignant Link, vous acceptez les <terms>Conditions</terms> et la <privacy>Politique de confidentialité</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[En indiquant votre adresse e-mail, vous acceptez de créer un compte Link et d\'enregistrer vos informations de paiement sur Link, conformément aux <terms>Conditions de Link</terms> et à sa <privacy>Politique de confidentialité</privacy>.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[En fournissant votre adresse e-mail, vous acceptez de créer un compte %1$s et de sauvegarder vos informations de paiement dans %1$s, conformément aux <terms>Conditions</terms> et à la <privacy>Politique de confidentialité</privacy> de %1$s.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[En indiquant votre numéro de téléphone, vous acceptez de créer un compte Link et d\'enregistrer vos informations de paiement sur Link, conformément aux <terms>Conditions de Link</terms> et à sa <privacy>Politique de confidentialité</privacy>.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[En fournissant votre numéro de téléphone, vous acceptez de créer un compte %1$s et de sauvegarder vos informations de paiement dans %1$s, conformément aux <terms>Conditions</terms> et à la <privacy>Politique de confidentialité</privacy> de %1$s.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account. -->
-  <string name="stripe_sign_up_terms_branded"><![CDATA[En vous inscrivant à %1$s, vous acceptez les <terms>Conditions</terms> et la <privacy>Politique de confidentialité</privacy> afférentes.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[En indiquant votre numéro de téléphone et votre adresse e-mail, vous acceptez de créer un compte Link, conformément aux <terms>Conditions d\'utilisation</terms> et à la <privacy>Politique de confidentialité</privacy> de Link.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[En fournissant votre numéro de téléphone et votre adresse e-mail, vous acceptez de créer un compte %1$s conformément aux <terms>Conditions</terms> et à la <privacy>Politique de confidentialité</privacy> de %1$s.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Votre compte a été désactivé</string>
   <!-- Generic failure message -->
@@ -291,32 +265,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">Carte ajoutée</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Appuyez pour ajouter une carte bancaire</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
-  <string name="stripe_tap_to_add_card_declined_error_title">Carte refusée</string>
-  <!-- Error message shown to the user to try tapping their card again as their next action. -->
-  <string name="stripe_tap_to_add_card_default_error_action">Essayez de rapprocher à nouveau votre carte bancaire</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
-  <string name="stripe_tap_to_add_card_not_supported_error_title">Carte non prise en charge</string>
-  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
-  <string name="stripe_tap_to_add_developer_options_error_action">Désactivez les options développeur et réessayez</string>
-  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
-  <string name="stripe_tap_to_add_network_error_action">Essayez un autre réseau et appuyez à nouveau</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Payé %s</string>
-  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
-  <string name="stripe_tap_to_add_timed_out_error_action">Revenez en arrière et rapprochez votre carte bancaire</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">Tap to add n\'est pas pris en charge par votre appareil</string>
-  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_action">Essayez un autre appareil</string>
-  <!-- Error message shown when Tap to Add is not supported by the current device. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_title">Appareil non pris en charge</string>
-  <!-- Error message shown to the user to try tapping their different card as their next action. -->
-  <string name="stripe_tap_to_add_unusable_error_action">Utiliser une autre carte bancaire</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Annuler et utiliser un autre moyen de paiement</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Autoriser le paiement</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">Lancez votre application d\'UPI pour autoriser votre paiement dans %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Veuillez sélectionner un autre moyen de paiement en revenant à l\'étape correspondante</string>
   <!-- Text on a screen that indicates a payment has failed -->

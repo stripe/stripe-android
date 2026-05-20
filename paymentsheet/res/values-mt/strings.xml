@@ -29,11 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Erfgħu l-informazzjoni tiegħi biex inkun nista\' nħallas iktar malajr b\'Link</string>
-  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Issejvja l-informazzjoni tiegħi għal checkout aktar malajr ma’ %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Oħloq kont ma’ Link għal pagament aktar mgħaġġel fuq il-web</string>
-  <string name="stripe_inline_sign_up_toggle_with_brand">Oħloq kont ma’ %s għal checkout aktar malajr fuq il-web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -48,12 +46,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Iva, aġġorna</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Idħol jew irreġistra</string>
-  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Aċċetta</string>
-  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Ikkanċella</string>
-  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
-  <string name="stripe_link_onramp_carf_declaration_screen_title">Dikjarazzjonijiet</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Indirizz</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -76,8 +68,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Erfa\' l-informazzjoni dwar il-pagament tiegħek permezz ta\' Link u ħallas b\'mod sigur b\'mossa waħda fuq siti tal-internet li jaċċettaw Link.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Ħallas aktar malajr kullimkien fejn Link huwa aċċettat.</string>
-  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_link_sign_up_message_v2_with_brand">Ħlas aktar malajr kullimkien fejn %s huwa aċċettat.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Meta tkompli tkun qed taqbel mar-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -94,18 +84,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Ibdel il-karta</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Oħroġ minn Link</string>
-  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_log_out_with_brand">Oħroġ minn %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Seħħ żball. Iċċekkja l-konnessjoni tiegħek u erġa\' pprova.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">jew daħħal manwalment</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Ħallas b\'Link</string>
-  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_format">Ħallas b\'%s</string>
-  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_with_brand">Ħallas b’%s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Meta tkompli tkun qed taqbel li tawtorizza l-pagamenti skont <terms>dar-regoli</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -154,8 +138,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' %s u <link>Ħolqa</link> (ara t-<terms>Termini</terms> u l-<privacy>Privatezza</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Billi tkompli, int taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma\' %s u <link>Ħolqa</link> skont il-Ħolqa <terms>termini</terms> u <privacy>privatezza</privacy>.]]></string>
-  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Billi tkompli, qed taqbel li tissejvja l-informazzjoni tiegħek għal xirjiet futuri ma’ %1$s u <link>%2$s</link> skont <terms>it-termini</terms> u <privacy>l-privatezza</privacy> ta’ %2$s.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Il-karta ma nbidlitx. Jekk jogħġbok erġa\' pprova.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -271,18 +253,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Meta tingħaqad ma\' Link tkun qed taqbel mar-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Meta tagħti l-indirizz tal-email tiegħek, tkun qed taqbel li toħloq kont Link u li terfa\' l-informazzjoni tal-pagament tiegħek ma\' Link, skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Billi tipprovdi l-email tiegħek, qed taqbel li toħloq kont ta’ %1$s u tissejvja l-informazzjoni tal-ħlas tiegħek fuq %1$s, skont it-<terms>Termini</terms> u <privacy>d-Dikjarazzjoni ta’ Privatezza</privacy> ta’ %1$s.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Meta tagħti n-numru tal-mowbajl tiegħek, tkun qed taqbel li toħloq kont Link u li terfa\' l-informazzjoni tal-pagament tiegħek ma\' Link, skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Billi tipprovdi n-numru telefoniku tiegħek, qed taqbel li toħloq kont ta’ %1$s u tissejvja l-informazzjoni tal-ħlas tiegħek għal %1$s, skont <terms>it-Termini %1$s</terms> u <privacy>d-Dikjarazzjoni ta’ Privatezza</privacy>]]></string>
-  <!-- Legal text shown when creating a non-Link branded account. -->
-  <string name="stripe_sign_up_terms_branded"><![CDATA[Billi tingħaqad ma’ %1$s, qed taqbel mat-<terms>Termini</terms> u <privacy>d-Dikjarazzjoni ta’ Privatezza</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Meta tagħtina n-numru tal-mowbajl u l-indirizz tal-email, tkun qed taqbel li toħloq kont Link skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Billi tipprovdi numru telefoniku u email, qed taqbel li toħloq kont ta’ %1$s suġġett għat-<terms>Termini</terms> u <privacy>d-Dikjarazzjoni ta’ Privatezza</privacy> ta’ %1$s.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Il-kont tiegħek mitfi</string>
   <!-- Generic failure message -->
@@ -293,32 +267,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">Karta miżjuda</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Agħfas biex iżżid il-karta</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
-  <string name="stripe_tap_to_add_card_declined_error_title">Kard miċħuda</string>
-  <!-- Error message shown to the user to try tapping their card again as their next action. -->
-  <string name="stripe_tap_to_add_card_default_error_action">Ipprova erġa’ żerżaq il-kard tiegħek</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
-  <string name="stripe_tap_to_add_card_not_supported_error_title">Kard mhux appoġġjata</string>
-  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
-  <string name="stripe_tap_to_add_developer_options_error_action">Itfi l-għażliet tal-iżviluppatur u erġa’ pprova</string>
-  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
-  <string name="stripe_tap_to_add_network_error_action">Ipprova network ieħor u erġa’ żerżaq il-kard</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">Imħallas %s</string>
-  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
-  <string name="stripe_tap_to_add_timed_out_error_action">Erġa’ lura u żerżaq il-kard tiegħek mill-ġdid</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">Tap to add mhijiex appoġġjata mill-apparat tiegħek</string>
-  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_action">Ipprova apparat ieħor</string>
-  <!-- Error message shown when Tap to Add is not supported by the current device. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_title">Apparat mhux appoġġjat</string>
-  <!-- Error message shown to the user to try tapping their different card as their next action. -->
-  <string name="stripe_tap_to_add_unusable_error_action">Ipprova kard oħra</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Ikkanċella u ħallas mod ieħor</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">Approva l-pagament</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">Iftaħ l-app ta\' UPI biex tapprova l-pagamenti tiegħek fi żmien %s</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">Jekk jogħġbok mur lura u agħżel metodu tal-pagament ieħor</string>
   <!-- Text on a screen that indicates a payment has failed -->

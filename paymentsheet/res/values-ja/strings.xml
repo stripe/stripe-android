@@ -29,11 +29,9 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Link で支払い情報を保存して決済をスピードアップ</string>
-  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">%s でより迅速に決済できるよう情報を保存</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Link でアカウントを作成すると、ウェブ上で決済を迅速化できます</string>
-  <string name="stripe_inline_sign_up_toggle_with_brand">%s でアカウントを作成して、ウェブ全体でより迅速に決済</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s クレジット</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -48,12 +46,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">はい、更新します</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">ログイン / 登録</string>
-  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_accept_button_text">同意する</string>
-  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
-  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">キャンセル</string>
-  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
-  <string name="stripe_link_onramp_carf_declaration_screen_title">表明事項</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">住所</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -76,8 +68,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">支払い情報を Link に保存すると、Link に対応したサイトで安全にワンクリックで決済することができます。</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Link に対応している店舗でスピーディーに支払うことができます。</string>
-  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_link_sign_up_message_v2_with_brand">%s に対応しているすべての場所で、より迅速に支払い</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[続行すると、<terms>規約</terms>と<privacy>プライバシーポリシー</privacy>に同意したことになります。]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -94,18 +84,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">カードを更新する</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link からログアウト</string>
-  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_log_out_with_brand">%s からログアウト</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">エラーが発生しました。接続を確認して、もう一度お試しください。</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">または手動で入力</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
   <string name="stripe_pay_with_link">Link で支払う</string>
-  <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_format">%s で支払う</string>
-  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_pay_with_link_with_brand">%s で支払い</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[続行すると、<terms>これらの規約</terms>に従って支払いをオーソリすることに同意したものとみなされます。]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -154,8 +138,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[続行することで、今後の購入のために情報を保存することに同意したことになります <link>Link</link> (<terms>利用規約</terms>および<privacy>プライバシー</privacy>を参照)。]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[続行することで、今後の購入のために情報を保存することに同意したことになります <link>Link</link> リンク<terms>規約</terms>および<privacy>プライバシー</privacy>に従うことになります。]]></string>
-  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[続行すると、%2$s の<terms>規約</terms>および<privacy>プライバシー</privacy>に従い、今後 %1$s と <link>%2$s</link> で購入できるよう、お客様の情報が保存されることに同意したものとみなされます。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">カードは更新されていません。もう一度お試しください。</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -271,18 +253,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link に登録することで、お客様は<terms>利用規約</terms>および<privacy>プライバシーポリシー</privacy>に同意したことになります。]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[メールアドレスを入力することにより、お客様は <terms>Link の規約</terms>と<privacy>プライバシーポリシー</privacy>に従って Link アカウントを作成し、お支払い情報を Link に保存することに同意したとみなされます。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[メールアドレスを提供すると、<terms>%1$s 規約</terms>および<privacy>プライバシーポリシー</privacy>に従って、%1$s アカウントが作成され、決済情報が %1$s に保存されることに同意したものとみなされます。]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[電話番号を入力することにより、お客様は <terms>Link の規約</terms>と<privacy>プライバシーポリシー</privacy>に従って Link アカウントを作成し、お支払い情報を Link に保存することに同意したとみなされます。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[電話番号を提供すると、<terms>%1$s 規約</terms>および<privacy>プライバシーポリシー</privacy>に従って、%1$s アカウントが作成され、決済情報が %1$s に保存されることに同意したものとみなされます。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account. -->
-  <string name="stripe_sign_up_terms_branded"><![CDATA[%1$s に参加すると、<terms>規約</terms>および<privacy>プライバシーポリシー</privacy>に同意したものとみなされます。]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[電話番号とメールアドレスを入力することにより、Link の<terms>利用規約</terms>および<privacy>プライバシーポリシー</privacy>に従って Link アカウントを作成することに同意したとみなされます。]]></string>
-  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[電話番号とメールアドレスを提供すると、%1$s の<terms>規約</terms>および<privacy>プライバシーポリシー</privacy>に従って、%1$s アカウントが作成されることに同意したものとみなされます。]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">アカウントが無効化されています</string>
   <!-- Generic failure message -->
@@ -293,32 +267,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">カードが追加されました</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">タップしてクレジットカードを追加</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
-  <string name="stripe_tap_to_add_card_declined_error_title">カードが拒否されました</string>
-  <!-- Error message shown to the user to try tapping their card again as their next action. -->
-  <string name="stripe_tap_to_add_card_default_error_action">カードをもう一度タップしてください</string>
-  <!-- Error message shown in Tap to Add when the card the user tapped is not supported by Tap to Add or by the merchant. -->
-  <string name="stripe_tap_to_add_card_not_supported_error_title">カードがサポート対象外です</string>
-  <!-- Error message shown to the user when Android developer options are enabled and need to be turned off as a next action. -->
-  <string name="stripe_tap_to_add_developer_options_error_action">開発者オプションを無効にして、もう一度お試しください</string>
-  <!-- Error message shown to the user when a network error occurs to switch networks and try again as a next action. -->
-  <string name="stripe_tap_to_add_network_error_action">別のネットワークを試してもう一度タップ</string>
   <!-- Title for screen indicating to the user that they have completed a payment of a specified amount -->
   <string name="stripe_tap_to_add_paid_label">支払い済み %s</string>
-  <!-- Error message shown to the user after the tap flow has timed out to try again as a next action. -->
-  <string name="stripe_tap_to_add_timed_out_error_action">戻ってカードを再度タップ</string>
   <!-- Error message shown when Tap to Add is not supported by the current device. -->
   <string name="stripe_tap_to_add_unsupported_device_error">タップして追加はお使いの端末に対応していません</string>
-  <!-- Error message shown to the user to try using a different device in order to use Tap to Add. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_action">別のデバイスをお試しください</string>
-  <!-- Error message shown when Tap to Add is not supported by the current device. -->
-  <string name="stripe_tap_to_add_unsupported_device_error_title">デバイスがサポートされていません</string>
-  <!-- Error message shown to the user to try tapping their different card as their next action. -->
-  <string name="stripe_tap_to_add_unusable_error_action">別のカードをお試しください</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">キャンセルして別の方法で支払う</string>
   <!-- Text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_header">支払いを承認する</string>
+  <!-- Countdown timer text on a screen asking the user to approve a payment -->
+  <string name="stripe_upi_polling_message">UPI アプリを開いて %s 以内に支払いを承認してください</string>
   <!-- Text on a screen that indicates a payment has failed informing the user we are asking the user to try a different payment method -->
   <string name="stripe_upi_polling_payment_failed_message">前に戻って別の決済手段を選択してください</string>
   <!-- Text on a screen that indicates a payment has failed -->

@@ -32,6 +32,7 @@ constructor(
     private val sepaDebit: SepaDebit? = null,
     private val auBecsDebit: AuBecsDebit? = null,
     private val bacsDebit: BacsDebit? = null,
+    private val upi: Upi? = null,
     private val netbanking: Netbanking? = null,
     private val usBankAccount: USBankAccount? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val link: Link? = null,
@@ -67,6 +68,7 @@ constructor(
         sepaDebit: SepaDebit? = this.sepaDebit,
         auBecsDebit: AuBecsDebit? = this.auBecsDebit,
         bacsDebit: BacsDebit? = this.bacsDebit,
+        upi: Upi? = this.upi,
         netbanking: Netbanking? = this.netbanking,
         usBankAccount: USBankAccount? = this.usBankAccount,
         link: Link? = this.link,
@@ -90,6 +92,7 @@ constructor(
             sepaDebit = sepaDebit,
             auBecsDebit = auBecsDebit,
             bacsDebit = bacsDebit,
+            upi = upi,
             netbanking = netbanking,
             usBankAccount = usBankAccount,
             link = link,
@@ -114,6 +117,7 @@ constructor(
         sepaDebit: SepaDebit? = null,
         auBecsDebit: AuBecsDebit? = null,
         bacsDebit: BacsDebit? = null,
+        upi: Upi? = null,
         netbanking: Netbanking? = null,
         usBankAccount: USBankAccount? = null,
         link: Link? = null,
@@ -136,6 +140,7 @@ constructor(
         sepaDebit,
         auBecsDebit,
         bacsDebit,
+        upi,
         netbanking,
         usBankAccount,
         link,
@@ -239,6 +244,19 @@ constructor(
     ) : this(
         type = PaymentMethod.Type.BacsDebit,
         bacsDebit = bacsDebit,
+        allowRedisplay = allowRedisplay,
+        billingDetails = billingDetails,
+        metadata = metadata
+    )
+
+    private constructor(
+        upi: Upi,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?
+    ) : this(
+        type = PaymentMethod.Type.Upi,
+        upi = upi,
         allowRedisplay = allowRedisplay,
         billingDetails = billingDetails,
         metadata = metadata
@@ -352,6 +370,7 @@ constructor(
                 PaymentMethod.Type.SepaDebit.code -> sepaDebit?.toParamMap()
                 PaymentMethod.Type.AuBecsDebit.code -> auBecsDebit?.toParamMap()
                 PaymentMethod.Type.BacsDebit.code -> bacsDebit?.toParamMap()
+                PaymentMethod.Type.Upi.code -> upi?.toParamMap()
                 PaymentMethod.Type.Netbanking.code -> netbanking?.toParamMap()
                 PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
                 PaymentMethod.Type.Link.code -> link?.toParamMap()
@@ -513,6 +532,22 @@ constructor(
 
         private companion object {
             private const val PARAM_BANK: String = "bank"
+        }
+    }
+
+    @Parcelize
+    @Poko
+    class Upi(
+        private val vpa: String?
+    ) : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> {
+            return vpa?.let {
+                mapOf(PARAM_VPA to it)
+            }.orEmpty()
+        }
+
+        private companion object {
+            private const val PARAM_VPA: String = "vpa"
         }
     }
 
@@ -875,6 +910,17 @@ constructor(
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(bacsDebit, allowRedisplay, billingDetails, metadata)
+        }
+
+        @JvmStatic
+        @JvmOverloads
+        fun create(
+            upi: Upi,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null,
+            allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(upi, allowRedisplay, billingDetails, metadata)
         }
 
         @JvmStatic

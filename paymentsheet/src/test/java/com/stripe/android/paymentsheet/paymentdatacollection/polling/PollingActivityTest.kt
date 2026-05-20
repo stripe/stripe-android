@@ -311,7 +311,7 @@ internal class PollingActivityTest {
             statusBarColor = null,
             timeLimitInSeconds = 60,
             initialDelayInSeconds = 0,
-            ctaText = R.string.stripe_blik_confirm_payment,
+            ctaText = R.string.stripe_upi_polling_message,
             stripeAccountId = null,
             qrCodeUrl = null,
         )

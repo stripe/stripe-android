@@ -82,6 +82,13 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS
     )
 
+    internal val UPI = PaymentMethodCreateParams.create(
+        upi = PaymentMethodCreateParams.Upi(
+            vpa = "vpa@hdfcbank"
+        ),
+        billingDetails = BILLING_DETAILS
+    )
+
     internal val NETBANKING = PaymentMethodCreateParams.create(
         netbanking = PaymentMethodCreateParams.Netbanking(
             bank = "hdfc"
