@@ -25,7 +25,7 @@ class TestAutofillService : AutofillService() {
             return
         }
 
-        val fields = mutableMapOf<String, AutofillId>()
+        val fields = mutableListOf<Pair<String, AutofillId>>()
         parseStructure(structure, fields)
 
         if (fields.isEmpty()) {
@@ -33,15 +33,9 @@ class TestAutofillService : AutofillService() {
             return
         }
 
-        val matchedFields = fields.filter { (hint, _) -> hint in TEST_DATA }
-        if (matchedFields.isEmpty()) {
-            callback.onSuccess(null)
-            return
-        }
-
         val dataset = Dataset.Builder()
-        for ((hint, autofillId) in matchedFields) {
-            val value = TEST_DATA.getValue(hint)
+        for ((hint, autofillId) in fields) {
+            val value = TEST_DATA[hint] ?: continue
             val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
                 setTextViewText(android.R.id.text1, "Test: $value")
             }
@@ -61,7 +55,7 @@ class TestAutofillService : AutofillService() {
 
     private fun parseStructure(
         structure: AssistStructure,
-        fields: MutableMap<String, AutofillId>
+        fields: MutableList<Pair<String, AutofillId>>
     ) {
         for (i in 0 until structure.windowNodeCount) {
             parseNode(structure.getWindowNodeAt(i).rootViewNode, fields)
@@ -70,7 +64,7 @@ class TestAutofillService : AutofillService() {
 
     private fun parseNode(
         node: AssistStructure.ViewNode,
-        fields: MutableMap<String, AutofillId>
+        fields: MutableList<Pair<String, AutofillId>>
     ) {
         val hints = node.autofillHints
         val autofillId = node.autofillId
@@ -78,7 +72,7 @@ class TestAutofillService : AutofillService() {
         if (hints != null && autofillId != null) {
             for (hint in hints) {
                 if (hint in TEST_DATA) {
-                    fields[hint] = autofillId
+                    fields.add(hint to autofillId)
                 }
             }
         }
