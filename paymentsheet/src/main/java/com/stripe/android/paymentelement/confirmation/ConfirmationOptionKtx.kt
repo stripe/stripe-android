@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
@@ -19,7 +20,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
-    cardFundingFilter: CardFundingFilter
+    cardFundingFilter: CardFundingFilter,
+    googlePayDisplayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -30,7 +32,8 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> toConfirmationOption()
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
-            cardFundingFilter
+            cardFundingFilter,
+            googlePayDisplayItems,
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
@@ -122,7 +125,8 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
-    cardFundingFilter: CardFundingFilter
+    cardFundingFilter: CardFundingFilter,
+    displayItems: List<GooglePayJsonFactory.DisplayItem>,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -136,7 +140,8 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 additionalEnabledNetworks = googlePay.additionalEnabledNetworks,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = cardFundingFilter
+                cardFundingFilter = cardFundingFilter,
+                displayItems = displayItems,
             ),
         )
     }

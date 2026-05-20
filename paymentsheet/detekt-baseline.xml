@@ -18,6 +18,7 @@
     <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt:PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
     <ID>LargeClass:CardDefinitionTest.kt:CardDefinitionTest</ID>
     <ID>LargeClass:CheckoutTest.kt:CheckoutTest</ID>
+    <ID>LargeClass:ConfirmationHandlerOptionKtxTest.kt:ConfirmationHandlerOptionKtxTest</ID>
     <ID>LargeClass:CustomerAdapterTest.kt:CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt:CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt:CustomerSheetViewModelTest</ID>

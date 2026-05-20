@@ -81,14 +81,18 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     internal fun createTransactionInfo(
         args: GooglePayPaymentMethodLauncherContractV2.Args
     ): GooglePayJsonFactory.TransactionInfo {
+        // Google Pay requires totalPriceLabel when displayItems are present.
+        val label = args.label ?: if (args.displayItems.isNotEmpty()) "Total" else null
         return if (shouldHidePrice(args)) {
             GooglePayJsonFactory.TransactionInfo(
                 currencyCode = args.currencyCode,
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
                 countryCode = args.config.merchantCountryCode,
                 transactionId = args.transactionId,
-                totalPriceLabel = args.label,
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                totalPrice = null,
+                totalPriceLabel = label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
+                displayItems = args.displayItems,
             )
         } else {
             GooglePayJsonFactory.TransactionInfo(
@@ -97,8 +101,9 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 countryCode = args.config.merchantCountryCode,
                 transactionId = args.transactionId,
                 totalPrice = args.amount,
-                totalPriceLabel = args.label,
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                totalPriceLabel = label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
+                displayItems = args.displayItems,
             )
         }
     }
