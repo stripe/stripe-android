@@ -41,7 +41,7 @@ internal class LinkInline2FASectionTest {
                     defaultPayment = null,
                     isDialog = false,
                     allowLogout = true,
-                    linkBrand = LinkBrand.Notlink,
+                    linkBrand = LinkBrand.Onelink,
                 ),
                 otpElement = OTPElement(
                     identifier = IdentifierSpec.Generic("otp"),
@@ -53,6 +53,6 @@ internal class LinkInline2FASectionTest {
 
         composeRule
             .onNodeWithTag(VERIFICATION_HEADER_IMAGE_TAG)
-            .assertContentDescriptionContains("Notlink")
+            .assertContentDescriptionContains("Onelink")
     }
 }

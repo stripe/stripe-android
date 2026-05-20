@@ -24,6 +24,16 @@ internal interface TapToAddConnectionModule {
     ): StripeTerminalVersionValidator
 
     @Binds
+    fun bindsHasStripeTerminalCoreLibrary(
+        hasStripeTerminalCoreLibrary: DefaultHasStripeTerminalCoreLibrary
+    ): HasStripeTerminalCoreLibrary
+
+    @Binds
+    fun bindsHasStripeTerminalTapToPayLibrary(
+        hasStripeTerminalTapToPayLibrary: DefaultHasStripeTerminalTapToPayLibrary
+    ): HasStripeTerminalTapToPayLibrary
+
+    @Binds
     fun bindsIsSimulatedProvider(
         isSimulatedProvider: DefaultTapToAddIsSimulatedProvider
     ): TapToAddIsSimulatedProvider

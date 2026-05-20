@@ -29,9 +29,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Išsaugoti mano informaciją greitesniam atsiskaitymui su „Link“</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Įrašyti informaciją, kad būtų galima greičiau atsiskaityti su %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Sukurkite paskyrą naudodami „Link”, kad galėtumėte greičiau atsiskaityti žiniatinklyje</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Sukurkite %s paskyrą, kad galėtumėte greičiau atlikti užsakymą visame tinkle</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">„%1$s“ kredito</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +48,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Taip, atnaujinti</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Prisijungti arba prisiregistruoti</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Sutikti</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Atšaukti</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Deklaracijos</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Adresas</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -68,6 +76,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Išsaugokite savo mokėjimų informaciją naudodami \"Link\" ir saugiai atsiskaitykite vienu spustelėjimu \"Link\" palaikomose svetainėse.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Mokėkite greičiau visur, kur priimama „Link“.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Mokėti greičiau visur, kur priimama %s.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Tęsdami sutinkate su <terms>sąlygomis</terms> ir <privacy>privatumo politika</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,6 +94,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Atnaujinti kortelę</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Atsijungti nuo \"Link\"</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Atsijungti nuo %s?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Įvyko klaida. Patikrinkite ryšį ir bandykite dar kartą.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -92,6 +104,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pay_with_link">Mokėti naudojant \"Link\"</string>
   <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_pay_with_link_format">Mokėti naudojant %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Mokėti naudojant %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Tęsdami sutinkate autorizuoti mokėjimus pagal šias <terms>sąlygas</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -140,6 +154,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkimams naudojant %s ir <link>„Link“</link> (žr. <terms>Sąlygos</terms> ir <privacy>Privatumo politika</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkimams naudojant %s ir <link>„Link“</link> pagal „Link“ <terms>Sąlygas</terms> ir <privacy>Privatumo politiką</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Tęsdami sutinkate, kad laikantis %2$s <terms>sąlygų</terms> ir <privacy>privatumo politikos</privacy> jūsų duomenys būtų išsaugoti būsimų pirkimų su %1$s ir <link>%2$s</link> svetainėse tikslais.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortelė neatnaujinta. Bandykite dar kartą.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -255,10 +271,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Jungdamiesi prie Link sutinkate su <terms>Sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Pateikdami savo el. pašto adresą sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Pateikdami savo el. pašto adresą, sutinkate pagal %1$s <terms>Sąlygas</terms> ir <privacy>Privatumo politiką</privacy> sukurti %1$s paskyrą ir įrašyti mokėjimo informaciją į %1$s.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Pateikdami savo telefono numerį sutinkate susikurti \"Link\" paskyrą bei įrašyti savo mokėjimo informaciją į \"Link\" pagal <terms>\"Link\" sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Nurodydami savo telefono numerį, sutinkate pagal %1$s <terms>Sąlygas</terms> ir <privacy>Privatumo politiką</privacy> sukurti %1$s paskyrą ir įrašyti mokėjimo informaciją į %1$s.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Prisijungdami prie %1s sutinkate su <terms>Sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Pateikdami telefono numerį ir el. pašto adresą sutinkate susikurti „Link“ paskyrą pagal „Link“ <terms>sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Nurodydami telefono numerį ir el. pašto adresą, sutinkate sukurti %1$s paskyrą, kuriai taikomos %1$s <terms>Sąlygos</terms> ir <privacy>Privatumo politika</privacy>.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Jūsų paskyra išjungta</string>
   <!-- Generic failure message -->

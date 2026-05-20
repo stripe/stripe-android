@@ -79,6 +79,7 @@ contains_tag() {
     awk '/tags:/,/---/' "$file" | grep -q "$tag"
 }
 
+SCRIPT_DIR=$(cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 TEST_DIR_PATH=maestro/$MODULE
 TEST_RESULTS_PATH=/tmp/test_results
 RETRY_COUNT=0
@@ -93,12 +94,16 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
   if contains_tag "$TEST_FILE_PATH" "$MAESTRO_TAGS"; then
     # Just run the test if it's tagged as edge, if on an edge environment
     if [ "$test_environment" != "edge" ] || contains_tag "$TEST_FILE_PATH" "edge"; then
-      FLOW_STEM=$(basename "$TEST_FILE_PATH" .yaml)
+      TEST_NAME=$(basename "$TEST_FILE_PATH" .yaml)
+      if python3 "${SCRIPT_DIR}/is_maestro_flow_quarantined.py" "$TEST_NAME"; then
+        echo "Skipping quarantined Maestro flow: $TEST_NAME"
+        continue
+      fi
       ATTEMPT=0
       # Execute Maestro test flow and retry if failed (each try writes a distinct JUnit file).
       while [ "$ATTEMPT" -lt "$MAX_RETRIES" ]; do
         ATTEMPT=$((ATTEMPT + 1))
-        OUT_XML="$TEST_RESULTS_PATH/${FLOW_STEM}-try${ATTEMPT}.xml"
+        OUT_XML="$TEST_RESULTS_PATH/${TEST_NAME}-try${ATTEMPT}.xml"
         if maestro test -e APP_ID=$TEST_APP_ID --format junit --output "$OUT_XML" "$TEST_FILE_PATH"; then
           break
         fi

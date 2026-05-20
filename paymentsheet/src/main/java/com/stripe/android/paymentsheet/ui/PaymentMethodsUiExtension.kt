@@ -8,28 +8,31 @@ import com.stripe.android.link.ui.wallet.label
 import com.stripe.android.link.ui.wallet.sublabel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardBrand.Unknown
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 import com.stripe.android.uicore.IconStyle
 import com.stripe.android.uicore.LocalIconStyle
-import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @DrawableRes
 internal fun PaymentMethod.getSavedPaymentMethodIcon(
+    linkBrand: LinkBrand,
     forVerticalMode: Boolean = false,
     forPaymentOption: Boolean = false,
     showNightIcon: Boolean? = null,
 ): Int {
+    val linkIconOnly = forVerticalMode || forPaymentOption || linkBrand != LinkBrand.Link
     return when (type) {
         PaymentMethod.Type.Card -> {
             if (isLinkPaymentMethod || isLinkPassthroughMode) {
                 // Link card brand or passthrough mode
                 getLinkIcon(
+                    brand = linkBrand,
                     showNightIcon = showNightIcon,
-                    iconOnly = forVerticalMode || forPaymentOption,
+                    iconOnly = linkIconOnly,
                 )
             } else {
                 card?.getSavedPaymentMethodIcon(
@@ -43,15 +46,20 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(
             if (isLinkPassthroughMode) {
                 // Link passthrough mode for US bank account
                 getLinkIcon(
+                    brand = linkBrand,
                     showNightIcon = showNightIcon,
-                    iconOnly = forVerticalMode || forPaymentOption,
+                    iconOnly = linkIconOnly,
                 )
             } else {
                 TransformToBankIcon(usBankAccount?.bankName)
             }
         }
         PaymentMethod.Type.Link -> {
-            getLinkIcon(showNightIcon = showNightIcon, iconOnly = forVerticalMode || forPaymentOption)
+            getLinkIcon(
+                brand = linkBrand,
+                showNightIcon = showNightIcon,
+                iconOnly = linkIconOnly
+            )
         }
         else -> null
     } ?: R.drawable.stripe_ic_paymentsheet_card_unknown_ref
@@ -181,19 +189,36 @@ internal fun CardBrand.getDayIcon(): Int {
 }
 
 @DrawableRes
+internal fun getLinkIconArrow(): Int = R.drawable.stripe_ic_paymentsheet_link_arrow
+
+@DrawableRes
 internal fun getLinkIcon(
+    brand: LinkBrand,
     showNightIcon: Boolean? = null,
     iconOnly: Boolean = false,
 ): Int {
     if (iconOnly) {
-        return R.drawable.stripe_ic_paymentsheet_link_arrow
+        return getLinkIconArrow()
+    }
+
+    val nightIcon = when (brand) {
+        LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_night
+        LinkBrand.Onelink -> R.drawable.stripe_ic_paymentsheet_onelink_night
+    }
+    val dayIcon = when (brand) {
+        LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_day
+        LinkBrand.Onelink -> R.drawable.stripe_ic_paymentsheet_onelink_day
+    }
+    val systemThemeAwareIconRef = when (brand) {
+        LinkBrand.Link -> R.drawable.stripe_ic_paymentsheet_link_ref
+        LinkBrand.Onelink -> R.drawable.stripe_ic_paymentsheet_onelink_ref
     }
 
     return getOverridableIcon(
         showNightIcon = showNightIcon,
-        systemThemeAwareIconRef = R.drawable.stripe_ic_paymentsheet_link_ref,
-        nightIcon = R.drawable.stripe_ic_paymentsheet_link_night,
-        dayIcon = R.drawable.stripe_ic_paymentsheet_link_day
+        systemThemeAwareIconRef = systemThemeAwareIconRef,
+        nightIcon = nightIcon,
+        dayIcon = dayIcon
     )
 }
 
@@ -224,13 +249,14 @@ private fun getOverridableIcon(
     }
 }
 
-internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): ResolvableString? = when (type) {
+internal fun PaymentMethod.getLabel(
+    linkBrand: LinkBrand,
+    canShowSublabel: Boolean = false,
+): ResolvableString? = when (type) {
     PaymentMethod.Type.Card -> if (isLinkPassthroughMode) {
         if (canShowSublabel) {
-            // For Link passthrough mode, show "Link" as main label
-            StripeR.string.stripe_link.resolvableString
+            linkBrand.brandName().resolvableString
         } else {
-            // Show original card label as sublabel
             createCardLabel(card?.last4)
         }
     } else if (isLinkPaymentMethod) {
@@ -247,10 +273,8 @@ internal fun PaymentMethod.getLabel(canShowSublabel: Boolean = false): Resolvabl
         sepaDebit?.last4
     )
     PaymentMethod.Type.USBankAccount -> if (isLinkPassthroughMode && canShowSublabel) {
-        // For Link passthrough mode, show "Link" as main label
-        StripeR.string.stripe_link.resolvableString
+        linkBrand.brandName().resolvableString
     } else {
-        // Show original bank account label
         resolvableString(
             R.string.stripe_paymentsheet_payment_method_item_card_number,
             usBankAccount?.last4

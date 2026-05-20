@@ -14,9 +14,12 @@ object FeatureFlags {
     val showInlineOtpInWalletButtons = FeatureFlag("Show Inline Signup in Wallet Buttons")
     val forceEnableLinkPaymentSelectionHint = FeatureFlag("Link: Force enable payment selection hint")
     val forceLinkWebAuth = FeatureFlag("Link: Force web auth")
-    val forceNotlink = FeatureFlag("Link: Force Notlink brand")
+    val forceOnelink = FeatureFlag("Link: Force Onelink brand")
+    val forceOnelinkConsumer = FeatureFlag("Link: Force Onelink consumer")
     val enableKlarnaFormRemoval = FeatureFlag("Remove forms from Klarna")
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
+    val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
+    val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

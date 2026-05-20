@@ -29,9 +29,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Uložiť moje údaje pre rýchlejšiu platbu so službou Link</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Uloženie mojich informácií pre rýchlejšiu platbu pomocou %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Vytvorte si účet pomocou služby Link pre rýchlejšiu platbu na internete</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Vytvorte si účet pomocou %s na rýchlejšiu platbu na internete</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Kreditná karta %1$s</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +48,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Áno, aktualizovať</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Prihlásiť sa alebo zaregistrovať</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Prijať</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Zrušiť</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Vyhlásenia</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Adresa</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -68,6 +76,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Uložte si svoje platobné údaje pomocou služby Link a bezpečne plaťte jedným kliknutím na stránkach podporovaných službou Link.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Plaťte rýchlejšie všade tam, kde je akceptovaná služba Link.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Plaťte rýchlejšie všade tam, kde je akceptovaná služba %s.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Pokračovaním súhlasíte s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,6 +94,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Aktualizovať kartu</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odhlásiť sa zo služby Link</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Odhlásiť sa z %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Vyskytla sa chyba. Skontrolujte svoje pripojenie a skúste to znova.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -92,6 +104,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pay_with_link">Zaplatiť pomocou služby Link</string>
   <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_pay_with_link_format">Zaplaťte pomocou %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Zaplaťte pomocou %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Pokračovaním súhlasíte s autorizáciou platieb podľa <terms>týchto podmienok</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -140,6 +154,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Pokračovaním súhlasíte s uložením svojich údajov pre budúce nákupy v spoločnosti %s a <link>službe Link</link> (pozrite si <terms>podmienky</terms> a <privacy>zásady ochrany osobných údajov</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Pokračovaním súhlasíte s uložením svojich údajov pre budúce nákupy v spoločnosti %s a <link>službe Link</link> podľa <terms>podmienok</terms> a <privacy>zásad ochrany osobných údajov</privacy> služby Link.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Pokračovaním súhlasíte s uložením svojich informácií pre budúce nákupy v spoločnosti %1$s a <link>%2$s</link> podľa <terms>podmienok</terms> a <privacy>zásad ochrany osobných údajov</privacy> spoločnosti %2$s.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Karta nebola aktualizovaná. Skúste to znova.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -255,10 +271,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Pripojením k službe Link súhlasíte s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Poskytnutím svojho e-mailu súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Poskytnutím e-mailu súhlasíte s vytvorením účtu %1$s a s uložením platobných údajov na %1$s v súlade s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy> %1$s.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Poskytnutím svojho telefónneho čísla súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Poskytnutím telefónneho čísla súhlasíte s vytvorením účtu %1$s a s uložením platobných informácií na %1$s v súlade s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy> %1$s.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Pripojením sa k spoločnosti %1$s súhlasíte s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Poskytnutím telefónneho čísla a e-mailu súhlasíte s vytvorením účtu Link, ktoré podlieha <terms>podmienkam</terms> a <privacy>zásadám ochrany osobných údajov</privacy> služby Link.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Poskytnutím telefónneho čísla a e-mailu súhlasíte s vytvorením účtu %1$s, ktorý podlieha <terms>podmienkam</terms> a <privacy>zásadám ochrany osobných údajov</privacy> spoločnosti %1$s.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Váš účet bol deaktivovaný</string>
   <!-- Generic failure message -->

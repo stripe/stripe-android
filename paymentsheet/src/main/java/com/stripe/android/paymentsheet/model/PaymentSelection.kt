@@ -37,7 +37,7 @@ import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.paymentsheet.ui.getLinkIcon
+import com.stripe.android.paymentsheet.ui.getLinkIconArrow
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -366,7 +366,7 @@ internal val PaymentSelection.drawableResourceId: Int
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
+        is PaymentSelection.Link -> getLinkIconArrow()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResource
         is PaymentSelection.New.USBankAccount -> iconResource
@@ -379,7 +379,7 @@ internal val PaymentSelection.drawableResourceIdNight: Int
         is PaymentSelection.ExternalPaymentMethod -> iconResource
         is PaymentSelection.CustomPaymentMethod -> 0
         PaymentSelection.GooglePay -> R.drawable.stripe_google_pay_mark
-        is PaymentSelection.Link -> getLinkIcon(iconOnly = true)
+        is PaymentSelection.Link -> getLinkIconArrow()
         is PaymentSelection.New.Card -> brand.getCardBrandIcon()
         is PaymentSelection.New.GenericPaymentMethod -> iconResourceNight ?: iconResource
         is PaymentSelection.New.USBankAccount -> iconResource
@@ -389,10 +389,14 @@ internal val PaymentSelection.drawableResourceIdNight: Int
 
 private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
     if (selection.paymentMethod.isLinkCardBrand) {
-        return R.drawable.stripe_ic_paymentsheet_link_arrow
+        return getLinkIconArrow()
     }
 
-    return selection.paymentMethod.getSavedPaymentMethodIcon(forPaymentOption = true)
+    return selection.paymentMethod.getSavedPaymentMethodIcon(
+        // Any brand is fine if `forPaymentOption` is true, only showing the icon (no text).
+        linkBrand = LinkBrand.Link,
+        forPaymentOption = true,
+    )
 }
 
 internal val PaymentSelection.lightThemeIconUrl: String?
@@ -421,8 +425,8 @@ internal val PaymentSelection.darkThemeIconUrl: String?
         is PaymentSelection.ShopPay -> null
     }
 
-internal val PaymentSelection.label: ResolvableString
-    get() = when (this) {
+internal fun PaymentSelection.label(linkBrand: LinkBrand?): ResolvableString =
+    when (this) {
         is PaymentSelection.ExternalPaymentMethod -> label
         is PaymentSelection.CustomPaymentMethod -> label
         PaymentSelection.GooglePay -> StripeR.string.stripe_google_pay.resolvableString
@@ -430,12 +434,17 @@ internal val PaymentSelection.label: ResolvableString
         is PaymentSelection.New.Card -> createCardLabel(last4).orEmpty()
         is PaymentSelection.New.GenericPaymentMethod -> label
         is PaymentSelection.New.USBankAccount -> label.resolvableString
-        is PaymentSelection.Saved -> getSavedLabel(this).orEmpty()
+        is PaymentSelection.Saved -> getSavedLabel(this, linkBrand).orEmpty()
         is PaymentSelection.ShopPay -> StripeR.string.stripe_shop_pay.resolvableString
     }
 
-private fun getSavedLabel(selection: PaymentSelection.Saved): ResolvableString? {
-    return selection.paymentMethod.getLabel(canShowSublabel = true)
+private fun getSavedLabel(selection: PaymentSelection.Saved, linkBrand: LinkBrand?): ResolvableString? {
+    return selection.paymentMethod.getLabel(
+        // Fallback is safe: Link passthrough PMs only exist when Link is enabled, so linkBrand is always non-null
+        // in practice. The null case guards against construction sites that don't have Link state available.
+        linkBrand = linkBrand ?: LinkBrand.Link,
+        canShowSublabel = true,
+    )
 }
 
 internal val PaymentSelection.paymentMethodType: String

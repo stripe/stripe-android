@@ -19,6 +19,7 @@ class OnrampCallbacks {
     private var collectPaymentCallback: OnrampCollectPaymentMethodCallback? = null
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
+    private var crsCarfDeclarationCallback: OnrampCrsCarfDeclarationCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
     private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
 
@@ -58,6 +59,13 @@ class OnrampCallbacks {
     }
 
     /**
+     * Callback invoked when CRS/CARF declaration presentation completes.
+     */
+    fun crsCarfDeclarationCallback(callback: OnrampCrsCarfDeclarationCallback) = apply {
+        this.crsCarfDeclarationCallback = callback
+    }
+
+    /**
      * An async closure that calls your backend to perform a checkout.
      *     Your backend should call Stripe's `/v1/crypto/onramp_sessions/:id/checkout` endpoint with the session ID.
      *     The closure should return the onramp session client secret on success, or throw an Error on failure.
@@ -85,6 +93,7 @@ class OnrampCallbacks {
         val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
+        val crsCarfDeclarationCallback: OnrampCrsCarfDeclarationCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
         val googlePayIsReadyCallback: ((Boolean) -> Unit)?
     )
@@ -106,6 +115,7 @@ class OnrampCallbacks {
             checkoutCallback = requireNotNull(checkoutCallback) {
                 "checkoutCallback must not be null"
             },
+            crsCarfDeclarationCallback = crsCarfDeclarationCallback,
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {
                 "onrampSessionClientSecretProvider must be not null"
             },

@@ -29,6 +29,7 @@ import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.LinkAccountSession
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -1080,6 +1081,101 @@ class DefaultLinkAccountManagerTest {
         // where the logout state can be properly simulated
         assertThat(accountManagerWithEditsAllowed).isNotNull()
         assertThat(accountManagerWithEditsDisabled).isNotNull()
+    }
+
+    @Test
+    fun `linkBrand is null when new session has null linkBrand`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        // Set initial account with linkBrand = Onelink
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        // Update with same email but null linkBrand (simulates verification response)
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = null),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val account = accountManager.linkAccountInfo.value.account
+        assertThat(account?.linkBrand).isNull()
+    }
+
+    @Test
+    fun `linkBrand is NOT carried forward when new session has non-null linkBrand`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        // Update with explicit LinkBrand.Link — should NOT carry forward old value
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Link),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val account = accountManager.linkAccountInfo.value.account
+        assertThat(account?.linkBrand).isEqualTo(LinkBrand.Link)
+    }
+
+    @Test
+    fun `linkBrand is null for different user with null linkBrand`() = runSuspendTest {
+        val accountManager = accountManager()
+
+        // Set account for user A with linkBrand = Onelink
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = "userA@test.com",
+                    linkBrand = LinkBrand.Onelink,
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        // Switch to user B with null linkBrand
+        accountManager.setLinkAccountFromLookupResult(
+            lookup = ConsumerSessionLookup(
+                exists = true,
+                consumerSession = TestFactory.CONSUMER_SESSION.copy(
+                    emailAddress = "userB@test.com",
+                    linkBrand = null,
+                ),
+                publishableKey = TestFactory.PUBLISHABLE_KEY,
+            ),
+            startSession = true,
+            linkAuthIntentId = null,
+        )
+
+        val account = accountManager.linkAccountInfo.value.account
+        assertThat(account?.linkBrand).isNull()
     }
 
     private fun runSuspendTest(testBody: suspend TestScope.() -> Unit) = runTest(dispatcher) {

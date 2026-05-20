@@ -7,9 +7,13 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import java.util.Date
 
 internal abstract class AbsFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
+
+    override val syncFlow: StateFlow<SynchronizeSessionResponse?> = MutableStateFlow(null)
 
     override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")

@@ -184,5 +184,6 @@ internal object ApiKeyFixtures {
         phoneNumber = "(***) *** **12",
         publishableKey = null,
         isVerified = true,
+        linkBrand = null,
     )
 }

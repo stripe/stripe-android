@@ -9,6 +9,7 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.verification.VerificationViewState
@@ -149,7 +150,7 @@ internal class DefaultLinkInlineInteractor @Inject constructor(
                 linkConfiguration.enableDisplayableDefaultValuesInEce
             ),
             allowLogout = true,
-            linkBrand = linkConfiguration.linkBrand,
+            linkBrand = linkConfiguration.effectiveLinkBrand(this@initial2FAState),
         )
     )
 

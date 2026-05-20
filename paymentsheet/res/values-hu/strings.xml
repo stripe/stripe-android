@@ -29,9 +29,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Adataim mentése a gyorsabb fizetéshez a Linkkel</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Adataim mentése a gyorsabb fizetéshez a következővel: %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Hozzon létre egy fiókot a Link segítségével a gyorsabb fizetéshez az interneten</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Hozzon létre egy számlát a következővel: %s a gyorsabb fizetéshez az interneten</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$sHitel</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +48,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Igen, frissítés</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Bejelentkezés vagy regisztrálás</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Elfogadás</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Mégse</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Nyilatkozatok</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Cím</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -68,6 +76,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Mentse fizetési adatait a Linkbe, hogy biztonságosan fizessen egy kattintással a Link által támogatott oldalakon.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Gyorsabban fizethet mindenhol, ahol a Linket elfogadják.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Gyorsabban fizethet mindenhol, ahol a(z) %s elfogadott.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[A folytatással elfogadja a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,6 +94,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Kártya módosítása</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Kijelentkezés a Link</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Kijelentkezik a következőről: %s?</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Hiba történt, ellenőrizze az internetkapcsolatát és próbálja újra.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -92,6 +104,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pay_with_link">Fizetés Linkkel</string>
   <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_pay_with_link_format">Fizetés %s használatával</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Fizetés %s használatával</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[A folytatással elfogadja, hogy engedélyezi a kifizetéseket ezen <terms>feltételek</terms> szerint.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -140,6 +154,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>a Linknél</link> (lásd a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>a Linknél</link> a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Ha folytatja, azzal hozzájárul az adatainak mentéséhez a jövőbeni vásárlásokhoz itt: %1$s és <link>%2$s</link> a %2$s <terms>feltételeknek</terms> és az <privacy>adatvédelmi szabályzatnak</privacy> megfelelően.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">A kártya frissítése nem sikerült, próbálja újra.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -253,10 +269,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[A Linkhez történő csatlakozással Őn elfogadja a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Az e-mail-címe megadásával hozzájárul egy Link fiók létrehozásához és a fizetési adatai mentéséhez a Linkbe, a <terms>Link feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Az e-mail-címének megadásával Ön hozzájárul egy %1$s számla létrehozásához és a fizetési adatok mentéséhez %1$s helyre a %1$s <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[A telefonszáma megadásával hozzájárul egy Link fiók létrehozásához és a fizetési adatai mentéséhez a Linkbe, a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Telefonszáma megadásával Ön hozzájárul egy %1$s számla létrehozásához és a fizetési adatok mentéséhez %1$s helyre a %1$s <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Azzal, hogy csatlakozik (%1$s), elfogadja a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Telefonszáma és e-mail-címe megadásával hozzájárul a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> által szabályozott Link-számla létrehozásához.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[A telefonszám és az e-mail megadásával Ön hozzájárul egy %1$s számla létrehozásához, amelyre a %1$s <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> vonatkoznak.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">A számláját deaktiváltuk.</string>
   <!-- Generic failure message -->

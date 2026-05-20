@@ -19,7 +19,7 @@ internal class PaymentOptionFactory @Inject constructor(
 
         return PaymentOption(
             drawableResourceId = drawableResourceId,
-            label = selection.label.resolve(context),
+            label = selection.label(linkBrand).resolve(context),
             paymentMethodType = selection.paymentMethodType,
             _labels = PaymentOptionLabelsFactory.create(context, selection, linkBrand),
             billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),

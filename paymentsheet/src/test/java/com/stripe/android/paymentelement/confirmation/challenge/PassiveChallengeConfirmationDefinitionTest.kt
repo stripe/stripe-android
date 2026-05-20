@@ -5,6 +5,7 @@ import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.AndroidVerificationObject
@@ -27,12 +28,19 @@ import com.stripe.android.paymentelement.confirmation.asNextStep
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 internal class PassiveChallengeConfirmationDefinitionTest {
+    @get:Rule
+    val disablePassiveCaptchaWarmupRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.disablePassiveCaptchaWarmup,
+        isEnabled = false
+    )
 
     @Test
     fun `'key' should be 'ChallengePassive'`() {
@@ -450,6 +458,24 @@ internal class PassiveChallengeConfirmationDefinitionTest {
 
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             passiveCaptchaParams = null
+        )
+
+        definition.bootstrap(paymentMethodMetadata)
+
+        fakePassiveChallengeWarmer.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `'bootstrap' should not start warmer if passive captcha warm-up is disabled`() {
+        disablePassiveCaptchaWarmupRule.setEnabled(true)
+
+        val fakePassiveChallengeWarmer = FakePassiveChallengeWarmer()
+        val definition = createPassiveChallengeConfirmationDefinition(
+            passiveChallengeWarmer = fakePassiveChallengeWarmer
+        )
+
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            passiveCaptchaParams = PASSIVE_CAPTCHA_PARAMS
         )
 
         definition.bootstrap(paymentMethodMetadata)

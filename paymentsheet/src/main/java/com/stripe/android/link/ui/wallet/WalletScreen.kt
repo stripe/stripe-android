@@ -119,7 +119,7 @@ internal fun WalletScreen(
 
     WalletBody(
         state = state,
-        linkBrand = viewModel.linkBrand,
+        linkBrand = state.linkBrand,
         expiryDateController = viewModel.expiryDateController,
         cvcController = viewModel.cvcController,
         onItemSelected = viewModel::onItemSelected,

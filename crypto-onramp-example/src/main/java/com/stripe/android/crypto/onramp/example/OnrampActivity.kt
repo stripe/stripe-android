@@ -76,9 +76,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -217,6 +217,9 @@ internal class OnrampActivity : ComponentActivity() {
                             },
                             onVerifyKyc = {
                                 onrampPresenter.verifyKycInfo()
+                            },
+                            onShowCRSCARFDeclaration = {
+                                onrampPresenter.presentCrsCarfDeclaration()
                             }
                         )
                     }
@@ -428,6 +431,7 @@ internal fun OnrampScreen(
     onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onVerifyKyc: () -> Unit,
+    onShowCRSCARFDeclaration: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -488,23 +492,25 @@ internal fun OnrampScreen(
             }
             Screen.AuthenticatedOperations -> {
                 AuthenticatedOperationsScreen(
-                    email = uiState.email,
-                    consentedLinkAuthIntentIds = uiState.consentedLinkAuthIntentIds,
-                    onrampSessionResponse = uiState.onrampSession,
-                    selectedSettlementSpeed = uiState.settlementSpeed,
-                    selectedPaymentData = uiState.selectedPaymentData,
-                    googlePayIsReady = uiState.googlePayIsReady,
-                    kycFirstName = uiState.kycFirstName,
+                    state = uiState,
                     onKycFirstNameChange = viewModel::updateKycFirstName,
-                    kycLastName = uiState.kycLastName,
                     onKycLastNameChange = viewModel::updateKycLastName,
-                    kycAddress = uiState.kycAddress,
+                    onKycBirthCountryChange = viewModel::updateKycBirthCountry,
+                    onKycBirthCityChange = viewModel::updateKycBirthCity,
+                    onKycNationalitiesChange = viewModel::updateKycNationalities,
                     onKycAddressChange = viewModel::updateKycAddress,
+                    onIdentifierValueChange = viewModel::updateIdentifierValue,
+                    onIdentifierTypeChange = viewModel::updateIdentifierType,
+                    onAddIdentifier = viewModel::addIdentifierInput,
+                    onRemoveIdentifier = viewModel::removeIdentifierInput,
                     onAuthenticate = onAuthenticateUser,
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onCollectKYC = { kycInfo -> viewModel.collectKycInfo(kycInfo) },
+                    onRetrieveMissingIdentifiers = viewModel::retrieveMissingIdentifiers,
+                    onSubmitIdentifiers = viewModel::submitIdentifiers,
                     onVerifyKyc = onVerifyKyc,
                     onStartVerification = onStartVerification,
+                    onShowCRSCARFDeclaration = onShowCRSCARFDeclaration,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = onCreatePaymentToken,
                     onCreateSession = { viewModel.createSession() },
@@ -719,23 +725,25 @@ fun AuthenticateSection(
 @Composable
 @Suppress("LongMethod")
 private fun AuthenticatedOperationsScreen(
-    email: String,
-    consentedLinkAuthIntentIds: List<String>,
-    onrampSessionResponse: OnrampSessionResponse?,
-    selectedPaymentData: PaymentMethodDisplayData?,
-    selectedSettlementSpeed: SettlementSpeed?,
-    googlePayIsReady: Boolean,
-    kycFirstName: String,
+    state: OnrampUiState,
     onKycFirstNameChange: (String) -> Unit,
-    kycLastName: String,
     onKycLastNameChange: (String) -> Unit,
-    kycAddress: PaymentSheet.Address,
+    onKycBirthCountryChange: (String) -> Unit,
+    onKycBirthCityChange: (String) -> Unit,
+    onKycNationalitiesChange: (String) -> Unit,
     onKycAddressChange: (PaymentSheet.Address) -> Unit,
+    onIdentifierValueChange: (Int, String) -> Unit,
+    onIdentifierTypeChange: (Int, String) -> Unit,
+    onAddIdentifier: () -> Unit,
+    onRemoveIdentifier: (Int) -> Unit,
     onAuthenticate: (oauthScopes: String) -> Unit,
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onCollectKYC: (KycInfo) -> Unit,
+    onRetrieveMissingIdentifiers: () -> Unit,
+    onSubmitIdentifiers: () -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
+    onShowCRSCARFDeclaration: () -> Unit,
     onCollectPayment: (type: PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
@@ -764,16 +772,16 @@ private fun AuthenticatedOperationsScreen(
         )
 
         Text(
-            text = "Email: $email",
+            text = "Email: ${state.email}",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
         Text(
-            text = "Consented LAIs:\n${consentedLinkAuthIntentIds.joinToString("\n")}",
+            text = "Consented LAIs:\n${state.consentedLinkAuthIntentIds.joinToString("\n")}",
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        onrampSessionResponse?.let { response ->
+        state.onrampSession?.let { response ->
             Text(
                 text = "Onramp Session ID: ${response.id}",
                 modifier = Modifier.padding(bottom = 24.dp)
@@ -813,7 +821,7 @@ private fun AuthenticatedOperationsScreen(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        selectedPaymentData?.let {
+        state.selectedPaymentData?.let {
             when (it.type) {
                 PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay -> { }
                 PaymentMethodDisplayData.Type.BankAccount -> {
@@ -828,7 +836,7 @@ private fun AuthenticatedOperationsScreen(
                         modifier = Modifier.padding(bottom = 16.dp)
                     ) {
                         SettlementSpeed.entries.forEach { speed ->
-                            val isSelected = selectedSettlementSpeed == speed
+                            val isSelected = state.settlementSpeed == speed
                             Box(
                                 modifier = Modifier
                                     .background(if (isSelected) MaterialTheme.colors.primary else Color.LightGray)
@@ -846,20 +854,20 @@ private fun AuthenticatedOperationsScreen(
             }
 
             Image(
-                painter = selectedPaymentData.iconPainter,
-                contentDescription = selectedPaymentData.label,
+                painter = it.iconPainter,
+                contentDescription = it.label,
                 modifier = Modifier
                     .height(24.dp)
                     .padding(end = 8.dp)
             )
 
             Text(
-                text = "Selected Payment Type: ${selectedPaymentData.label}",
+                text = "Selected Payment Type: ${it.label}",
                 modifier = Modifier.padding(bottom = 24.dp)
             )
 
             Text(
-                text = "Selected Payment Value: ${selectedPaymentData.sublabel}",
+                text = "Selected Payment Value: ${it.sublabel}",
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
@@ -954,11 +962,17 @@ private fun AuthenticatedOperationsScreen(
         AnimatedVisibility(visible = kycExpanded) {
             Column {
                 KYCScreen(
-                    firstName = kycFirstName,
+                    firstName = state.kycFirstName,
                     onFirstNameChange = onKycFirstNameChange,
-                    lastName = kycLastName,
+                    lastName = state.kycLastName,
                     onLastNameChange = onKycLastNameChange,
-                    address = kycAddress,
+                    birthCountry = state.kycBirthCountry,
+                    onBirthCountryChange = onKycBirthCountryChange,
+                    birthCity = state.kycBirthCity,
+                    onBirthCityChange = onKycBirthCityChange,
+                    nationalities = state.kycNationalities,
+                    onNationalitiesChange = onKycNationalitiesChange,
+                    address = state.kycAddress,
                     onAddressChange = onKycAddressChange,
                     onCollectKYC = onCollectKYC,
                 )
@@ -974,9 +988,45 @@ private fun AuthenticatedOperationsScreen(
             }
         }
 
-        StartVerificationScreen {
-            onStartVerification()
+        var identifiersExpanded by remember { mutableStateOf(false) }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { identifiersExpanded = !identifiersExpanded }
+                .padding(vertical = 20.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Identifier Info",
+                fontWeight = FontWeight.Bold,
+            )
+            Text(text = if (identifiersExpanded) "▲" else "▼")
         }
+
+        AnimatedVisibility(visible = identifiersExpanded) {
+            IdentifierInfoScreen(
+                identifierInputs = state.identifierInputs,
+                onIdentifierValueChange = onIdentifierValueChange,
+                onIdentifierTypeChange = onIdentifierTypeChange,
+                onAddIdentifier = onAddIdentifier,
+                onRemoveIdentifier = onRemoveIdentifier,
+                missingIdentifiersSummary = state.missingIdentifiersSummary,
+                submitIdentifiersSummary = state.submitIdentifiersSummary,
+                onRetrieveMissingIdentifiers = onRetrieveMissingIdentifiers,
+                onSubmitIdentifiers = onSubmitIdentifiers,
+            )
+        }
+
+        StartVerificationScreen(
+            startVerification = {
+                onStartVerification()
+            },
+            showCRSCARFDeclaration = {
+                onShowCRSCARFDeclaration()
+            }
+        )
 
         Text(
             text = "Payment",
@@ -1013,7 +1063,7 @@ private fun AuthenticatedOperationsScreen(
         }
 
         GooglePayButton(
-            enabled = googlePayIsReady,
+            enabled = state.googlePayIsReady,
             modifier = Modifier
                 .fillMaxWidth()
                 .height(48.dp)
@@ -1051,14 +1101,14 @@ private fun AuthenticatedOperationsScreen(
 
         Button(
             onClick = onPerformCheckout,
-            enabled = onrampSessionResponse != null,
+            enabled = state.onrampSession != null,
             modifier = Modifier
                 .testTag(CHECKOUT_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
             Text(
-                if (onrampSessionResponse != null) {
+                if (state.onrampSession != null) {
                     "🚀 Checkout"
                 } else {
                     "🚀 Checkout (Create session first)"
@@ -1087,11 +1137,121 @@ private fun AuthenticatedOperationsScreen(
 }
 
 @Composable
+@Suppress("LongMethod")
+private fun IdentifierInfoScreen(
+    identifierInputs: List<IdentifierInputEntry>,
+    onIdentifierValueChange: (Int, String) -> Unit,
+    onIdentifierTypeChange: (Int, String) -> Unit,
+    onAddIdentifier: () -> Unit,
+    onRemoveIdentifier: (Int) -> Unit,
+    missingIdentifiersSummary: String?,
+    submitIdentifiersSummary: String?,
+    onRetrieveMissingIdentifiers: () -> Unit,
+    onSubmitIdentifiers: () -> Unit,
+) {
+    Column {
+        Text(
+            text = "Missing Identifiers",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Fetch missing identifier requirements for the current Link user.",
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        Button(
+            onClick = onRetrieveMissingIdentifiers,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Text("Retrieve Missing Identifiers")
+        }
+
+        missingIdentifiersSummary?.let { summary ->
+            Text(
+                text = "Latest response:\n$summary",
+                modifier = Modifier.padding(bottom = 20.dp)
+            )
+        }
+
+        Text(
+            text = "Submit Identifiers",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
+
+        Text(
+            text = "Add as many identifiers as needed and submit them as a list.",
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+
+        identifierInputs.forEachIndexed { index, identifierInput ->
+            Text(
+                text = "Identifier ${index + 1}",
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+            KYCTextField(
+                identifierInput.type,
+                "Identifier Type (e.g. mt_nic)",
+                onChange = { onIdentifierTypeChange(index, it) }
+            )
+            KYCTextField(
+                identifierInput.value,
+                "Identifier Value",
+                onChange = { onIdentifierValueChange(index, it) }
+            )
+            TextButton(
+                onClick = { onRemoveIdentifier(index) },
+                modifier = Modifier.padding(bottom = 12.dp)
+            ) {
+                Text("Remove Identifier")
+            }
+        }
+
+        Button(
+            onClick = onAddIdentifier,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Text("Add Identifier")
+        }
+
+        Button(
+            onClick = onSubmitIdentifiers,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 12.dp)
+        ) {
+            Text("Submit Identifiers")
+        }
+
+        submitIdentifiersSummary?.let { summary ->
+            Text(
+                text = "Latest submission result:\n$summary",
+                modifier = Modifier.padding(bottom = 24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
 private fun KYCScreen(
     firstName: String,
     onFirstNameChange: (String) -> Unit,
     lastName: String,
     onLastNameChange: (String) -> Unit,
+    birthCountry: String,
+    onBirthCountryChange: (String) -> Unit,
+    birthCity: String,
+    onBirthCityChange: (String) -> Unit,
+    nationalities: String,
+    onNationalitiesChange: (String) -> Unit,
     address: PaymentSheet.Address,
     onAddressChange: (PaymentSheet.Address) -> Unit,
     onCollectKYC: (KycInfo) -> Unit
@@ -1116,6 +1276,18 @@ private fun KYCScreen(
             KYCTextField(dobMonth, "Month", Modifier.weight(1f), KeyboardType.Number) { dobMonth = it }
             KYCTextField(dobDay, "Day", Modifier.weight(1f), KeyboardType.Number) { dobDay = it }
             KYCTextField(dobYear, "Year", Modifier.weight(2f), KeyboardType.Number) { dobYear = it }
+        }
+
+        Text(
+            text = "Birth Details",
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(bottom = 8.dp, top = 8.dp)
+        )
+
+        KYCTextField(birthCountry, "Birth Country (ISO)") { onBirthCountryChange(it) }
+        KYCTextField(birthCity, "Birth City") { onBirthCityChange(it) }
+        KYCTextField(nationalities, "Nationalities (ISO, comma-separated)") {
+            onNationalitiesChange(it)
         }
 
         Text(
@@ -1149,7 +1321,10 @@ private fun KYCScreen(
                         lastName = lastName,
                         idNumber = ssn,
                         dateOfBirth = dateOfBirth,
-                        address = address
+                        address = address,
+                        birthCountry = birthCountry.toCountryCodeOrNull(),
+                        birthCity = birthCity.trim().takeIf { it.isNotEmpty() },
+                        nationalities = nationalities.toCountryCodesOrNull()
                     )
                 )
             },
@@ -1181,9 +1356,22 @@ private fun KYCTextField(
     )
 }
 
+private fun String.toCountryCodeOrNull(): CountryCode? {
+    return trim()
+        .takeIf { it.isNotEmpty() }
+        ?.let(CountryCode::create)
+}
+
+private fun String.toCountryCodesOrNull(): List<CountryCode>? {
+    return split(",")
+        .mapNotNull { it.toCountryCodeOrNull() }
+        .takeIf { it.isNotEmpty() }
+}
+
 @Composable
 private fun StartVerificationScreen(
-    startVerification: () -> Unit
+    startVerification: () -> Unit,
+    showCRSCARFDeclaration: () -> Unit
 ) {
     Column {
         Text(
@@ -1201,6 +1389,17 @@ private fun StartVerificationScreen(
                 .padding(bottom = 24.dp)
         ) {
             Text("Start Identity Verification")
+        }
+
+        Button(
+            onClick = {
+                showCRSCARFDeclaration()
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 24.dp)
+        ) {
+            Text("CRS CARF Declaration")
         }
     }
 }

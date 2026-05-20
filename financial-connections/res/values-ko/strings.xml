@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">현재 귀하의 계좌 번호에 액세스할 수 없습니다</string>
   <string name="stripe_close_dialog_networking_desc">지금 취소하면 계좌가 %1$s에 연결되지만 Link에는 저장되지 않습니다.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">지금 취소하면 계좌가 이 비즈니스에 연결되지만 Link에는 저장되지 않습니다.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">지금 취소하시면 귀하의 계정이 이 비즈니스와 연결되지만 %1$s에는 저장되지 않습니다.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">지금 취소하시면 귀하의 계정이 %1$s와 연결되지만 %2$s에는 저장되지 않습니다.</string>
   <string name="stripe_error_cta_close">닫기</string>
   <string name="stripe_error_cta_manual_entry">은행 세부사항을 직접 입력</string>
   <string name="stripe_error_cta_retry">다시 시도</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">은행 세부사항 입력</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">취소</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Link에서 계속</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">%1$s(으)로 계속</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">나중에 확인</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">이전에 Link 계정에 저장한 정보를 사용하십시오.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">이전에 %1$s 계정에 저장한 정보를 사용합니다.</string>
   <string name="stripe_networking_link_login_warmup_title">Link에서 계속</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">%1$s(으)로 계속</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">나중에 확인</string>
   <string name="stripe_networking_save_to_link_verification_title">본인 확인</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">다른 은행 선택</string>
   <string name="stripe_search">검색</string>
   <string name="stripe_success_pane_desc_link_error_plural">귀하의 계정이 연결되었지만 Link를 사용하여 저장할 수 없습니다.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">귀하의 계정이 연결되었지만 %1$s에 저장할 수 없습니다.</string>
   <string name="stripe_success_pane_desc_link_error_singular">귀하의 계정이 연결되었지만 Link를 사용하여 저장할 수 없습니다.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">귀하의 계정이 연결되었지만 %1$s에 저장할 수 없습니다.</string>
   <string name="stripe_success_pane_desc_link_success_plural">귀하의 계정이 연결되었고 Link를 사용하여 저장되었습니다.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">귀하의 계정이 연결되고 %1$s에 저장되었습니다.</string>
   <string name="stripe_success_pane_desc_link_success_singular">귀하의 계정이 연결되었고 Link를 사용하여 저장되었습니다.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">귀하의 계정이 연결되고 %1$s에 저장되었습니다.</string>
   <string name="stripe_success_pane_desc_microdeposits">영업일 기준 1-2일 후에 끝자리가 ••••%1$s인 계좌로 소액 입금과 추가 지침이 포함된 이메일이 전송될 예정입니다.</string>
   <string name="stripe_success_pane_desc_plural">귀하의 계정이 연결되었습니다</string>
   <string name="stripe_success_pane_desc_singular">귀하의 계정이 연결되었습니다</string>

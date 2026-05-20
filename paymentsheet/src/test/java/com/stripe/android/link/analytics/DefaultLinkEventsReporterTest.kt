@@ -91,5 +91,17 @@ class DefaultLinkEventsReporterTest {
         override fun end(key: DurationProvider.Key): Duration? {
             return Duration.ZERO
         }
+
+        override suspend fun <T> measureDuration(
+            key: DurationProvider.Key,
+            block: suspend () -> T,
+        ): T {
+            start(key)
+            return try {
+                block()
+            } finally {
+                end(key)
+            }
+        }
     }
 }

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasScrollToNodeAction
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -20,6 +21,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.lifecycleScope
 import androidx.test.core.app.ActivityScenario
@@ -58,6 +60,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.RequireCvcRec
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_NEW_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
@@ -426,6 +429,30 @@ internal class PlaygroundTestDriver(
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+    }
+
+    fun loadComplete(
+        testParameters: TestParameters,
+        isReturningCustomer: Boolean,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        if (isReturningCustomer) {
+            waitForSavedPaymentMethodScreen()
+        } else {
+            selectors.formElement.waitFor()
+        }
+
+        teardown()
+    }
+
+    private fun waitForSavedPaymentMethodScreen() {
+        selectors.composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
+            selectors.composeTestRule.onAllNodes(
+                hasTestTag(SAVED_PAYMENT_OPTION_TAB_LAYOUT_TEST_TAG)
+            ).fetchSemanticsNodes(atLeastOneRootRequired = false).isNotEmpty()
+        }
     }
 
     /**
@@ -1615,8 +1642,9 @@ internal class PlaygroundTestDriver(
         }
 
         clickButtonWithTag("consent_cta")
+        waitUntilTag("loaded_picker_title")
         // TODO: Replace with institution ID tag when available
-        clickButton("Test (Non-OAuth)")
+        scrollToAndClick("Test (Non-OAuth)")
 
         // Verifies bank in web view so Compose hierarchy can detach. Button should be available
         // after web view verification.
@@ -1642,8 +1670,9 @@ internal class PlaygroundTestDriver(
         clickButtonWithTag("existing_email-button")
         clickButtonWithTag("test_mode_fill_button")
 
+        waitUntilTag("loaded_picker_title")
         // TODO: Replace with institution ID tag when available
-        clickButton("Success")
+        scrollToAndClick("Success")
 
         clickButtonWithTag("link_account_picker_cta")
         clickButtonWithTag("done_button")
@@ -1700,15 +1729,20 @@ internal class PlaygroundTestDriver(
         }
     }
 
-    private fun clickButton(text: String, composeCanDetach: Boolean = false) {
+    private fun waitUntilTag(tag: String) {
         composeTestRule.waitUntil(DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
-                .onAllNodesWithText(text)
-                .fetchSemanticsNodes(atLeastOneRootRequired = !composeCanDetach)
+                .onAllNodesWithTag(tag)
+                .fetchSemanticsNodes()
                 .isNotEmpty()
         }
+    }
 
-        composeTestRule.onNodeWithText(text).performClick()
+    private fun scrollToAndClick(text: String) {
+        composeTestRule.onNode(hasScrollToNodeAction())
+            .performScrollToNode(hasText(text))
+        composeTestRule.onNodeWithText(text)
+            .performClick()
     }
 
     private fun clickButtonWithTag(tag: String, composeCanDetach: Boolean = false) {

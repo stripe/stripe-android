@@ -112,6 +112,7 @@ internal class PollAttachPaymentAccountTest {
         emailAddress = "test@test.com",
         isVerified = true,
         phoneNumber = "+1********12",
-        publishableKey = null
+        publishableKey = null,
+        linkBrand = null,
     )
 }

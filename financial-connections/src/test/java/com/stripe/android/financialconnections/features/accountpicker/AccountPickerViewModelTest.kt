@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
+import com.stripe.android.financialconnections.domain.FakeCurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -24,6 +25,7 @@ import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.model.LinkBrand
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -63,6 +65,7 @@ internal class AccountPickerViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         saveAccountToLink = saveAccountToLink,
         consumerSessionProvider = { cachedConsumerSession() },
+        currentLinkBrand = FakeCurrentLinkBrand(),
         presentSheet = mock(),
     )
 
@@ -233,6 +236,7 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
             shouldPollAccountNumbers = any(),
+            linkBrand = any(),
         )
 
         navigationManager.assertNavigatedTo(
@@ -265,6 +269,7 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
             shouldPollAccountNumbers = any(),
+            linkBrand = any(),
         )
 
         navigationManager.assertNavigatedTo(
@@ -282,6 +287,7 @@ internal class AccountPickerViewModelTest {
             phoneNumber = "(***) *** **12",
             publishableKey = null,
             isVerified = true,
+            linkBrand = null,
         )
         val accounts = partnerAccountList("id_1", "id2").copy(
             nextPane = Pane.SUCCESS,
@@ -306,6 +312,7 @@ internal class AccountPickerViewModelTest {
             consumerSessionClientSecret = consumerSession.clientSecret,
             selectedAccounts = accounts.data.map { CachedPartnerAccount(it.id, it.linkedAccountId) },
             shouldPollAccountNumbers = true,
+            linkBrand = LinkBrand.Link,
         )
 
         navigationManager.assertNavigatedTo(

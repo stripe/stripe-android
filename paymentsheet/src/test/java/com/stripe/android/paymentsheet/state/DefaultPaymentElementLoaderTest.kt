@@ -87,6 +87,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
 import com.stripe.android.utils.FakeLinkStore
@@ -1180,7 +1181,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -1225,7 +1226,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -1324,7 +1325,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             ),
             linkStore = FakeLinkStore(hasUsedLink = true),
         )
@@ -1361,7 +1362,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             )
         )
 
@@ -2125,7 +2126,7 @@ internal class DefaultPaymentElementLoaderTest {
                 linkSignUpOptInFeatureEnabled = false,
                 linkSignUpOptInInitialValue = false,
                 linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD"),
-                linkBrand = null,
+                linkBrand = LinkBrand.Link,
             ),
             linkStore = FakeLinkStore(hasUsedLink = false),
         )
@@ -4166,12 +4167,47 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `Card art experiment exposure is logged when loading`() = runScenario {
+    fun `Card art experiment exposure is not logged when no customer`() = runScenario {
         val cardArtExperimentHandler = FakeCardArtExperimentHandler()
-        val paymentSheetConfiguration = PaymentSheet.Configuration("Some Name")
 
         val loader = createPaymentElementLoader(
             cardArtExperimentHandler = cardArtExperimentHandler,
+        )
+
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        cardArtExperimentHandler.logExposureCalls.ensureAllEventsConsumed()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `Card art experiment exposure is logged with customer payment methods`() = runScenario {
+        val cardArtExperimentHandler = FakeCardArtExperimentHandler()
+        val cards = PaymentMethodFactory.cards(3)
+        val paymentSheetConfiguration = mockConfiguration(
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "cuss_1",
+            ),
+        )
+
+        val loader = createPaymentElementLoader(
+            cardArtExperimentHandler = cardArtExperimentHandler,
+            customer = ElementsSession.Customer(
+                paymentMethods = cards,
+                session = createElementsSessionCustomerSession(
+                    mobilePaymentElementComponent = createEnabledMobilePaymentElement(),
+                ),
+                defaultPaymentMethod = null,
+            ),
         )
 
         val result = loader.load(
@@ -4185,11 +4221,14 @@ internal class DefaultPaymentElementLoaderTest {
         val call = cardArtExperimentHandler.logExposureCalls.awaitItem()
         assertThat(call.elementsSession.stripeIntent).isEqualTo(result.paymentMethodMetadata.stripeIntent)
         assertThat(call.paymentMethodMetadata).isNotNull()
+        assertThat(call.savedPaymentMethods).isEqualTo(cards)
         assertThat(call.integrationConfiguration).isEqualTo(
             PaymentElementLoader.Configuration.PaymentSheet(paymentSheetConfiguration)
         )
         assertThat(call.defaultPaymentSelection).isEqualTo(result.paymentSelection)
         cardArtExperimentHandler.logExposureCalls.ensureAllEventsConsumed()
+
+        consumeLoadingEvents()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -4428,7 +4467,7 @@ internal class DefaultPaymentElementLoaderTest {
             linkSignUpOptInFeatureEnabled = linkSignUpOptInFeatureEnabled,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = listOf("CARD", "INSTANT_DEBITS"),
-            linkBrand = null,
+            linkBrand = LinkBrand.Link,
         )
     }
 
@@ -4667,6 +4706,7 @@ internal class DefaultPaymentElementLoaderTest {
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
+            durationProvider = FakeDurationProvider(),
         )
     }
 

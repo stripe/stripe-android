@@ -10,6 +10,7 @@ import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -77,6 +78,9 @@ internal class FakeLinkConfigurationCoordinator(
     private val email: String? = null,
     private val component: LinkComponent = mock()
 ) : LinkConfigurationCoordinator {
+
+    override val accountFlow: StateFlow<LinkAccount?>
+        get() = stateFlowOf(null)
 
     override val emailFlow: StateFlow<String?>
         get() = stateFlowOf(email)

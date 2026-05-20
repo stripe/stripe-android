@@ -4,13 +4,13 @@ GEM
     addressable (2.9.0)
       public_suffix (>= 2.0.2, < 8.0)
     colorize (1.1.0)
-    faraday (2.14.1)
+    faraday (2.14.2)
       faraday-net_http (>= 2.0, < 3.5)
       json
       logger
     faraday-net_http (3.4.2)
       net-http (~> 0.5)
-    json (2.19.2)
+    json (2.19.5)
     logger (1.7.0)
     mini_portile2 (2.8.9)
     net-http (0.9.1)

@@ -38,10 +38,18 @@ tags:
     text: "Submit"
     retryTapIfNoChange: false
 # SKIP NETWORKING
+- extendedWaitUntil:
+    visible:
+      id: "skip_cta"
+    timeout: 30000
 - tapOn:
     id: "skip_cta"
     optional: true # Networking might not be enabled
 # CONFIRM AND COMPLETE
+- extendedWaitUntil:
+    visible:
+      id: "done_button"
+    timeout: 30000
 - tapOn:
     id: "done_button"
 - scrollUntilVisible:

@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Impossible d\'accéder à votre numéro de compte actuellement</string>
   <string name="stripe_close_dialog_networking_desc">Si vous annulez maintenant, votre compte sera associé à %1$s, mais ne sera pas enregistré dans Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Si vous annulez maintenant, votre compte sera associé à cette entreprise, mais ne sera pas enregistré dans Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Si vous annulez maintenant, votre compte sera lié à cette entreprise, mais il ne sera pas enregistré dans %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Si vous annulez maintenant, votre compte sera associé à %1$s mais il ne sera pas enregistré à %2$s.</string>
   <string name="stripe_error_cta_close">Fermer</string>
   <string name="stripe_error_cta_manual_entry">Saisir les coordonnées bancaires manuellement</string>
   <string name="stripe_error_cta_retry">Réessayer</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Saisissez vos coordonnées bancaires</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Annuler</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Continuer avec Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Continuez avec %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Pas maintenant</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Utilisez les informations précédemment enregistrées dans votre compte Link.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Utilisez les informations que vous avez précédemment enregistrées avec votre compte %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Continuer avec Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Continuez avec %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Pas maintenant</string>
   <string name="stripe_networking_save_to_link_verification_title">Confirmez votre identité</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Choisir une autre institution financière</string>
   <string name="stripe_search">Rechercher</string>
   <string name="stripe_success_pane_desc_link_error_plural">Vos comptes ont été associés, mais n\'ont pas pu être enregistrés dans Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Vos comptes étaient associés mais ne pouvaient pas être sauvegardés avec %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Votre compte a été associé, mais n\'a pas pu être enregistré dans Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Votre compte était associé mais n’a pas pu être sauvegardé avec %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Vos comptes ont été associés et enregistrés dans Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Vos comptes étaient associés et sauvegardés avec %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Votre compte a été associé et enregistré dans Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Votre compte était associé et sauvegardé avec %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Attendez-vous à recevoir des microversements sur le compte ••••%1$s d\'ici 1 à 2 jours. Vous recevrez un courriel contenant des instructions supplémentaires.</string>
   <string name="stripe_success_pane_desc_plural">Vos comptes ont été associés</string>
   <string name="stripe_success_pane_desc_singular">Votre compte a été associé</string>

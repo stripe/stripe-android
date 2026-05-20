@@ -15,6 +15,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -32,6 +33,7 @@ import com.stripe.android.uicore.strings.resolve
 @Composable
 internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
+    linkBrand: LinkBrand,
     isEnabled: Boolean,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
@@ -44,8 +46,10 @@ internal fun SavedPaymentMethodRowButton(
         .resolve()
         .readNumbersAsIndividualDigits()
     val paymentMethodTitle =
-        displayableSavedPaymentMethod.paymentMethod.getLabel(canShowSublabel = true)
-            ?: displayableSavedPaymentMethod.displayName
+        displayableSavedPaymentMethod.paymentMethod.getLabel(
+            linkBrand = linkBrand,
+            canShowSublabel = true,
+        ) ?: displayableSavedPaymentMethod.displayName
 
     val paymentMethodId = displayableSavedPaymentMethod.paymentMethod.id
     PaymentMethodRowButton(
@@ -61,6 +65,8 @@ internal fun SavedPaymentMethodRowButton(
             ) {
                 PaymentMethodIconFromResource(
                     iconRes = displayableSavedPaymentMethod.paymentMethod.getSavedPaymentMethodIcon(
+                        // Link brand doesn't matter in vertical mode, where we only show the icon.
+                        linkBrand = LinkBrand.Link,
                         forVerticalMode = true
                     ),
                     colorFilter = null,
@@ -113,11 +119,13 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
         ) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = cardSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = true,
             )
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = cardSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )
@@ -151,11 +159,13 @@ internal fun PreviewCardDefaultSavedPaymentMethodRowButton() {
         ) {
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = defaultSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = true,
                 isSelected = true,
             )
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = defaultSavedPaymentMethod,
+                linkBrand = LinkBrand.Link,
                 isEnabled = false,
                 isSelected = false,
             )

@@ -18,10 +18,16 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation testLibs.junit
+    implementation testLibs.androidx.core
     implementation testLibs.kotlin.coroutines
     implementation testLibs.mockito.kotlin
     implementation testLibs.turbine
     implementation testLibs.leakCanaryInstrumentation
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
+
+    testImplementation testLibs.json
+    testImplementation testLibs.junit
+    testImplementation testLibs.robolectric
+    testImplementation testLibs.truth
 }

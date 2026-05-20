@@ -29,9 +29,11 @@
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in">Gem mine oplysninger for hurtigere betaling med Link</string>
+  <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Gem mine oplysninger, så jeg kan betale hurtigere med %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_toggle">Opret en konto med Link for gøre betaling hurtigere på hele internettet</string>
+  <string name="stripe_inline_sign_up_toggle_with_brand">Opret en konto med %s, så du kan betale hurtigere på internettet</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kredit</string>
   <!-- Label a debit funding source. E.g. 'Visa Debit' -->
@@ -46,6 +48,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Ja, opdater</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Log på, eller tilmeld dig</string>
+  <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_accept_button_text">Acceptér</string>
+  <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
+  <string name="stripe_link_onramp_carf_declaration_cancel_button_text">Annuller</string>
+  <!-- Title of the screen responsible for accepting CRS CARF declarations -->
+  <string name="stripe_link_onramp_carf_declaration_screen_title">Erklæringer</string>
   <!-- Title for the address field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_address_field_title">Adresse</string>
   <!-- Text displayed in a confirmation button when gathering kyc information -->
@@ -68,6 +76,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_sign_up_message">Gem dine betalingsoplysninger med Link, og betal sikkert med et enkelt klik på sider, der understøtter Link.</string>
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">Betal hurtigere alle steder, hvor Link accepteres.</string>
+  <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_link_sign_up_message_v2_with_brand">Betal hurtigere alle steder, hvor %s accepteres.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[Ved at tilmelde dig Link accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -84,6 +94,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_wallet_menu_action_update_card">Opdater kort</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log ud af Link</string>
+  <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_log_out_with_brand">Log ud af %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Der opstod en fejl. Kontrollér din forbindelse, og prøv igen.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -92,6 +104,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pay_with_link">Betal med Link</string>
   <!-- Accessibility label for the 'Pay with Link' button. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_pay_with_link_format">Betal med %s</string>
+  <!-- Text for the branded pay button. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_pay_with_link_with_brand">Betal med %s</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Ved at fortsætte accepterer du at godkende betalinger i henhold til <terms>disse vilkår</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -140,6 +154,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb med %s og <link>Link</link> (Se <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til senere køb hos %s og <link>Link</link> ifølge Links <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>.]]></string>
+  <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Ved at fortsætte accepterer du at gemme dine oplysninger til fremtidige køb med %1$s og <link>%2$s</link> i henhold til %2$s <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Kortet blev ikke opdateret. Prøv igen.</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -253,10 +269,18 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_sign_up_terms"><![CDATA[Ved at tilmelde dig Link accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[Når du angiver din e-mail, accepterer du at oprette en Link-konto og gemme dine betalingsoplysninger på Link i henhold til <terms>Links Vilkår</terms> og <privacy>Privatlivspolitik</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[Ved at angive din e-mail accepterer du at oprette en %1$s-konto og gemme dine betalingsoplysninger på %1$s i henhold til %1$s <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Når du angiver dit telefonnummer, accepterer du at oprette en Link-konto og gemme dine betalingsoplysninger på Link i henhold til <terms>Links Vilkår</terms> og <privacy>Privatlivspolitik</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[Ved at angive dit telefonnummer accepterer du at oprette en %1$s-konto og gemme dine betalingsoplysninger på %1$s i henhold til %1$s <terms>vilkår</terms> og <privacy>privatlivspolitik</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account. -->
+  <string name="stripe_sign_up_terms_branded"><![CDATA[Ved at tilmelde dig %1$s accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_default_opt_in"><![CDATA[Ved at angive dit telefonnummer og din e-mailadresse accepterer du at oprette en Link-konto underlagt Links <terms>Vilkår</terms> og <privacy>Privatlivspolitik</privacy>.]]></string>
+  <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_default_opt_in_branded"><![CDATA[Ved at angive telefonnummer og e-mail accepterer du at oprette en %1$s-konto, som er underlagt <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy> for %1$s.]]></string>
   <!-- Message for a deactivated account in the signup flow. -->
   <string name="stripe_signup_deactivated_account_message">Din konto er blevet deaktiveret</string>
   <!-- Generic failure message -->

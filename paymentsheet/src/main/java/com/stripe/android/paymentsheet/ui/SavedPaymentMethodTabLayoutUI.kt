@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -123,7 +124,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 internal fun SavedPaymentMethodTabLayoutUI(
     paymentOptionsItems: List<PaymentOptionsItem>,
     selectedPaymentOptionsItem: PaymentOptionsItem?,
-    linkBrand: LinkBrand?,
+    linkBrand: LinkBrand,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -231,6 +232,121 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
     ),
 )
 
+private val PREVIEW_PAYMENT_OPTION_ITEMS_2 = listOf(
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "4242".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "004",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Link.code,
+                type = PaymentMethod.Type.Link,
+                linkPaymentDetails = LinkPaymentDetails.Card(
+                    nickname = null,
+                    expMonth = 1,
+                    expYear = 2030,
+                    last4 = "4242",
+                    brand = CardBrand.Visa,
+                    funding = "CREDIT",
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "6789".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "005",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.USBankAccount.code,
+                type = PaymentMethod.Type.USBankAccount,
+                usBankAccount = PaymentMethod.USBankAccount(
+                    accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                    accountType = PaymentMethod.USBankAccount.USBankAccountType.CHECKING,
+                    bankName = "Chase",
+                    fingerprint = null,
+                    last4 = "6789",
+                    financialConnectionsAccount = null,
+                    networks = null,
+                    routingNumber = null,
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "3456".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "006",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.Discover,
+                    last4 = "3456",
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "5678".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "007",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.AmericanExpress,
+                    last4 = "5678",
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "9012".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "008",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.USBankAccount.code,
+                type = PaymentMethod.Type.USBankAccount,
+                usBankAccount = PaymentMethod.USBankAccount(
+                    accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.INDIVIDUAL,
+                    accountType = PaymentMethod.USBankAccount.USBankAccountType.SAVINGS,
+                    bankName = "Bank of America",
+                    fingerprint = null,
+                    last4 = "9012",
+                    financialConnectionsAccount = null,
+                    networks = null,
+                    routingNumber = null,
+                ),
+            ),
+        ),
+    ),
+    PaymentOptionsItem.SavedPaymentMethod(
+        DisplayableSavedPaymentMethod.create(
+            displayName = "7890".resolvableString,
+            paymentMethod = PaymentMethod(
+                id = "009",
+                created = null,
+                liveMode = false,
+                code = PaymentMethod.Type.Card.code,
+                type = PaymentMethod.Type.Card,
+                card = PaymentMethod.Card(
+                    brand = CardBrand.UnionPay,
+                    last4 = "7890",
+                ),
+            ),
+        ),
+    ),
+)
+
 @Preview(widthDp = 700)
 @Composable
 private fun SavedPaymentMethodsTabLayoutPreview() {
@@ -239,6 +355,23 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS,
             selectedPaymentOptionsItem = PaymentOptionsItem.AddCard,
             linkBrand = LinkBrand.Link,
+            isEditing = false,
+            isProcessing = false,
+            onAddCardPressed = { },
+            onItemSelected = { },
+            onModifyItem = { },
+        )
+    }
+}
+
+@Preview(widthDp = 700)
+@Composable
+private fun SavedPaymentMethodsTabLayout2Preview() {
+    DefaultStripeTheme {
+        SavedPaymentMethodTabLayoutUI(
+            paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS_2,
+            selectedPaymentOptionsItem = PREVIEW_PAYMENT_OPTION_ITEMS_2.first(),
+            linkBrand = LinkBrand.Onelink,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -281,7 +414,7 @@ private fun SavedPaymentMethodTab(
     isEnabled: Boolean,
     isEditing: Boolean,
     isSelected: Boolean,
-    linkBrand: LinkBrand?,
+    linkBrand: LinkBrand,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
@@ -318,6 +451,7 @@ private fun SavedPaymentMethodTab(
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethodTab(
                 paymentMethod = item,
+                linkBrand = linkBrand,
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
@@ -396,7 +530,11 @@ private fun LinkTab(
         shouldShowDefaultBadge = false,
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = getLinkIcon(showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()),
+        iconRes = getLinkIcon(
+            brand = linkBrand,
+            showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor(),
+            iconOnly = linkBrand != LinkBrand.Link,
+        ),
         iconTint = null,
         labelText = linkBrand.brandName(),
         description = linkBrand.brandName(),
@@ -409,6 +547,7 @@ private fun LinkTab(
 @Composable
 private fun SavedPaymentMethodTab(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
+    linkBrand: LinkBrand,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -418,7 +557,10 @@ private fun SavedPaymentMethodTab(
     modifier: Modifier = Modifier,
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
-    val labelText = paymentMethod.paymentMethod.getLabel(canShowSublabel = false)?.resolve() ?: return
+    val labelText = paymentMethod.paymentMethod.getLabel(
+        linkBrand = linkBrand,
+        canShowSublabel = false,
+    )?.resolve() ?: return
 
     Box(
         modifier = Modifier.semantics {
@@ -439,7 +581,8 @@ private fun SavedPaymentMethodTab(
             isEnabled = isEnabled,
             isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
-                showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()
+                linkBrand = linkBrand,
+                showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor(),
             ),
             cardArtUrl = paymentMethod.paymentMethod.card?.cardArt?.artImage?.url,
             labelIcon = labelIcon,
@@ -499,7 +642,9 @@ internal fun CvcRecollectionField(
         }
     ) {
         Column(
-            Modifier.padding(top = 20.dp).padding(StripeTheme.getOuterFormInsets())
+            Modifier
+                .padding(top = 20.dp)
+                .padding(StripeTheme.getOuterFormInsets())
         ) {
             Text(
                 text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),

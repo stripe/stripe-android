@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
@@ -64,6 +65,7 @@ internal fun PaymentMethodVerticalLayoutUI(
         displayedSavedPaymentMethod = state.displayedSavedPaymentMethod,
         savedPaymentMethodAction = state.availableSavedPaymentMethodAction,
         selection = state.selection,
+        linkBrand = state.linkBrand,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
             interactor.handleViewAction(
@@ -107,6 +109,7 @@ internal fun PaymentMethodVerticalLayoutUI(
     displayedSavedPaymentMethod: DisplayableSavedPaymentMethod?,
     savedPaymentMethodAction: PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction,
     selection: PaymentMethodVerticalLayoutInteractor.Selection?,
+    linkBrand: LinkBrand,
     isEnabled: Boolean,
     onViewMorePaymentMethods: () -> Unit,
     onManageOneSavedPaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
@@ -147,6 +150,7 @@ internal fun PaymentMethodVerticalLayoutUI(
                     updatePaymentMethodVisibility.invoke("saved", coordinates)
                 },
                 displayableSavedPaymentMethod = displayedSavedPaymentMethod,
+                linkBrand = linkBrand,
                 isEnabled = isEnabled,
                 isSelected = selection?.isSaved == true,
                 onClick = { onSelectSavedPaymentMethod(displayedSavedPaymentMethod) },

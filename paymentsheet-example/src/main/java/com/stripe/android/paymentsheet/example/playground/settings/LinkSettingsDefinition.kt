@@ -14,14 +14,7 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
-        if (!configurationData.integrationType.isPaymentFlow()) {
-            return false
-        }
-
-        return (settings[MerchantSettingsDefinition] as? Merchant) in listOf(
-            Merchant.US,
-            Merchant.StripeShop,
-        )
+        return configurationData.integrationType.isPaymentFlow()
     }
 
     override fun configure(

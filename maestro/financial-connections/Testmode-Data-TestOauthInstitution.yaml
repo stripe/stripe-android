@@ -21,8 +21,16 @@ tags:
 # Common: web AuthFlow - connect OAuth institution
 - tapOn: "Agree and continue"
 # SELECT OAUTH INSTITUTION
+- extendedWaitUntil:
+    visible:
+      id: "bcinst_LLQZzmKZMjl0j0"
+    timeout: 30000
 - tapOn:
     id: "bcinst_LLQZzmKZMjl0j0"
+- extendedWaitUntil:
+    visible:
+      id: "prepane_cta"
+    timeout: 30000
 - tapOn:
     id: "prepane_cta"
 ####### Bypass Chrome on-boarding screen #######
@@ -35,9 +43,16 @@ tags:
     timeout: 60000
 - tapOn: "Connect accounts" # select all accounts
 # SKIP NETWORKING
+- extendedWaitUntil:
+    visible:
+      id: "skip_cta"
+    timeout: 30000
 - tapOn:
     id: "skip_cta"
 # CONFIRM AND COMPLETE
+- extendedWaitUntil:
+    visible: "Your accounts were connected"
+    timeout: 30000
 - assertVisible: "Your accounts were connected"
 - tapOn:
     id: "done_button"

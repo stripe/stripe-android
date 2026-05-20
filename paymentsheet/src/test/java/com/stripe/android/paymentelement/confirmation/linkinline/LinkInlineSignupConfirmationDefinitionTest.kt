@@ -17,6 +17,7 @@ import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -918,6 +919,9 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
         private val attachExistingCardToAccountCalls = Turbine<AttachExistingCardToAccountCall>()
 
         private val accountStatusFlow = MutableStateFlow(initialAccountStatus)
+
+        override val accountFlow: StateFlow<LinkAccount?>
+            get() = MutableStateFlow(null)
 
         override val emailFlow: StateFlow<String?>
             get() {
