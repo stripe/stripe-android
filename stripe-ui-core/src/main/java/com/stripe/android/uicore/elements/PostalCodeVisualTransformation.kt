@@ -19,6 +19,7 @@ class PostalCodeVisualTransformation(
         }
     }
 
+    @Suppress("MagicNumber")
     private fun postalForGB(text: AnnotatedString): TransformedText {
         val raw = text.text
         // UK postcodes have a space before the last 3 characters (the inward code)
