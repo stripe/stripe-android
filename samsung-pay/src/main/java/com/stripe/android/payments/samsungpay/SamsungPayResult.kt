@@ -6,11 +6,11 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 sealed interface SamsungPayResult : Parcelable {
     @Parcelize
-    data object Success : SamsungPayResult
+    data object Completed : SamsungPayResult
 
     @Parcelize
-    data object Cancel : SamsungPayResult
+    data object Canceled : SamsungPayResult
 
     @Parcelize
-    data class Failure(val error: Throwable) : SamsungPayResult
+    data class Failed(val error: Throwable) : SamsungPayResult
 }

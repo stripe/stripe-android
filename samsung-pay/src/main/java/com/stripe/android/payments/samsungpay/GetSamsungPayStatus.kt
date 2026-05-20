@@ -28,7 +28,16 @@ class DefaultGetSamsungPayStatus @Inject constructor(
     private val logger: Logger
 ) : GetSamsungPayStatus {
     override suspend fun invoke(): GetSamsungPayStatus.Status {
-        val partnerInfo = SamsungFactory.buildPartnerInfo()
+        return checkStatus(SamsungFactory.buildPartnerInfo(DEFAULT_SERVICE_ID))
+    }
+
+    internal suspend fun invoke(serviceId: String): GetSamsungPayStatus.Status {
+        return checkStatus(SamsungFactory.buildPartnerInfo(serviceId))
+    }
+
+    private suspend fun checkStatus(
+        partnerInfo: com.samsung.android.sdk.samsungpay.v2.PartnerInfo
+    ): GetSamsungPayStatus.Status {
         val samsungPay = SamsungPay(context, partnerInfo)
 
         return suspendCancellableCoroutine { continuation ->
@@ -56,25 +65,8 @@ class DefaultGetSamsungPayStatus @Inject constructor(
             }
 
             SpaySdk.SPAY_NOT_READY -> {
-                logger.warning("handleStatusSuccess: SPAY_NOT_READY — Samsung Pay is supported but not fully ready")
+                logger.warning("handleStatusSuccess: SPAY_NOT_READY")
 
-                val errorReason = bundle?.getInt(SpaySdk.EXTRA_ERROR_REASON, -1) ?: -1
-                logger.warning("handleStatusSuccess: SPAY_NOT_READY errorReason=$errorReason")
-
-                val message = when (errorReason) {
-                    SpaySdk.ERROR_SPAY_APP_NEED_TO_UPDATE ->
-                        "Samsung Pay app needs to be updated."
-
-                    SpaySdk.ERROR_SPAY_SETUP_NOT_COMPLETED ->
-                        "Samsung Pay setup is not completed. Please set up Samsung Pay."
-
-                    else ->
-                        "Samsung Pay is not ready. Error reason: $errorReason"
-                }
-                logger.warning("handleStatusSuccess: SPAY_NOT_READY resolved message=\"$message\"")
-
-                // If EXTRA_ERROR_REASON is ERROR_SPAY_SETUP_NOT_COMPLETED,
-                // Call activateSamsungPay().
                 val extraError = bundle?.getInt(SamsungPay.EXTRA_ERROR_REASON) ?: -1
                 if (extraError == SamsungPay.ERROR_SPAY_SETUP_NOT_COMPLETED) {
                     GetSamsungPayStatus.Status.NeedsUserSetup
@@ -84,32 +76,12 @@ class DefaultGetSamsungPayStatus @Inject constructor(
             }
 
             SpaySdk.SPAY_NOT_ALLOWED_TEMPORALLY -> {
-                logger.warning(
-                    "handleStatusSuccess: SPAY_NOT_ALLOWED_TEMPORALLY — Samsung Pay temporarily not allowed"
-                )
-
-                val errorReason = bundle?.getInt(SpaySdk.EXTRA_ERROR_REASON, -1) ?: -1
-                logger.warning(
-                    "handleStatusSuccess: SPAY_NOT_ALLOWED_TEMPORALLY errorReason=$errorReason"
-                )
-
-                val message = when (errorReason) {
-                    SpaySdk.ERROR_SPAY_CONNECTED_WITH_EXTERNAL_DISPLAY ->
-                        "Samsung Pay is unavailable while connected to an external display. Please disconnect it."
-
-                    else ->
-                        "Samsung Pay is temporarily unavailable. Error reason: $errorReason"
-                }
-                logger.warning(
-                    "handleStatusSuccess: SPAY_NOT_ALLOWED_TEMPORALLY resolved message=\"$message\""
-                )
+                logger.warning("handleStatusSuccess: SPAY_NOT_ALLOWED_TEMPORALLY")
                 GetSamsungPayStatus.Status.Disabled
             }
 
             SpaySdk.SPAY_NOT_SUPPORTED -> {
-                logger.error(
-                    "handleStatusSuccess: SPAY_NOT_SUPPORTED — Samsung Pay is not supported on this device"
-                )
+                logger.error("handleStatusSuccess: SPAY_NOT_SUPPORTED")
                 GetSamsungPayStatus.Status.Disabled
             }
 
@@ -120,5 +92,8 @@ class DefaultGetSamsungPayStatus @Inject constructor(
         }
     }
 
-
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        const val DEFAULT_SERVICE_ID = "716e0e5ea6c64b47b467fe"
+    }
 }

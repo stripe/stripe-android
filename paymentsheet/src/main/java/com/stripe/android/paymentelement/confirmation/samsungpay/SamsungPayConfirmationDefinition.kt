@@ -7,17 +7,19 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
-import com.stripe.android.payments.samsungpay.Config
-import com.stripe.android.payments.samsungpay.SamsungPayLauncherContract
-import com.stripe.android.payments.samsungpay.SamsungPayResult
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.payments.samsungpay.DefaultGetSamsungPayStatus
+import com.stripe.android.payments.samsungpay.SamsungPayPaymentMethodLauncher
+import com.stripe.android.payments.samsungpay.SamsungPayPaymentMethodLauncherContract
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
+import com.stripe.android.payments.samsungpay.Config as SamsungPayConfig
 
 internal class SamsungPayConfirmationDefinition @Inject constructor() : ConfirmationDefinition<
     SamsungPayConfirmationOption,
-    ActivityResultLauncher<SamsungPayLauncherContract.Args>,
+    ActivityResultLauncher<SamsungPayPaymentMethodLauncherContract.Args>,
     EmptyConfirmationLauncherArgs,
-    SamsungPayResult,
+    SamsungPayPaymentMethodLauncher.Result,
     > {
     override val key: String = "SamsungPay"
 
@@ -37,27 +39,34 @@ internal class SamsungPayConfirmationDefinition @Inject constructor() : Confirma
 
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
-        onResult: (SamsungPayResult) -> Unit,
-    ): ActivityResultLauncher<SamsungPayLauncherContract.Args> {
+        onResult: (SamsungPayPaymentMethodLauncher.Result) -> Unit,
+    ): ActivityResultLauncher<SamsungPayPaymentMethodLauncherContract.Args> {
         return activityResultCaller.registerForActivityResult(
-            SamsungPayLauncherContract(),
+            SamsungPayPaymentMethodLauncherContract(),
             onResult,
         )
     }
 
     override fun launch(
-        launcher: ActivityResultLauncher<SamsungPayLauncherContract.Args>,
+        launcher: ActivityResultLauncher<SamsungPayPaymentMethodLauncherContract.Args>,
         arguments: EmptyConfirmationLauncherArgs,
         confirmationOption: SamsungPayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
         val intent = confirmationArgs.intent
         val amount = (intent as? PaymentIntent)?.amount ?: 0L
+        val currencyCode = (intent as? PaymentIntent)?.currency ?: "USD"
 
         launcher.launch(
-            SamsungPayLauncherContract.Args(
-                clientSecret = intent.clientSecret.orEmpty(),
-                config = Config(amount = amount),
+            SamsungPayPaymentMethodLauncherContract.Args(
+                config = SamsungPayConfig(
+                    serviceId = DefaultGetSamsungPayStatus.DEFAULT_SERVICE_ID,
+                    merchantId = confirmationArgs.paymentMethodMetadata.merchantName,
+                    merchantName = confirmationArgs.paymentMethodMetadata.merchantName,
+                ),
+                currencyCode = currencyCode,
+                amount = amount,
+                orderNumber = intent.id.orEmpty(),
             )
         )
     }
@@ -66,20 +75,25 @@ internal class SamsungPayConfirmationDefinition @Inject constructor() : Confirma
         confirmationOption: SamsungPayConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
         launcherArgs: EmptyConfirmationLauncherArgs,
-        result: SamsungPayResult,
+        result: SamsungPayPaymentMethodLauncher.Result,
     ): ConfirmationDefinition.Result {
         return when (result) {
-            is SamsungPayResult.Success -> {
-                ConfirmationDefinition.Result.Succeeded(
-                    intent = confirmationArgs.intent,
+            is SamsungPayPaymentMethodLauncher.Result.Completed -> {
+                ConfirmationDefinition.Result.NextStep(
+                    confirmationOption = PaymentMethodConfirmationOption.Saved(
+                        paymentMethod = result.paymentMethod,
+                        optionsParams = null,
+                        originatedFromWallet = true,
+                    ),
+                    arguments = confirmationArgs,
                 )
             }
-            is SamsungPayResult.Cancel -> {
+            is SamsungPayPaymentMethodLauncher.Result.Canceled -> {
                 ConfirmationDefinition.Result.Canceled(
                     action = ConfirmationHandler.Result.Canceled.Action.InformCancellation,
                 )
             }
-            is SamsungPayResult.Failure -> {
+            is SamsungPayPaymentMethodLauncher.Result.Failed -> {
                 ConfirmationDefinition.Result.Failed(
                     cause = result.error,
                     message = R.string.stripe_something_went_wrong.resolvableString,

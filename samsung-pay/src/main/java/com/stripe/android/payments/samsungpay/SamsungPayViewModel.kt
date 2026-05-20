@@ -29,7 +29,7 @@ internal class SamsungPayViewModel : ViewModel() {
     fun startPayment(context: Context) {
         val paymentManager = PaymentManager(
             context.applicationContext,
-            SamsungFactory.buildPartnerInfo()
+            SamsungFactory.buildPartnerInfo(DefaultGetSamsungPayStatus.DEFAULT_SERVICE_ID)
         )
 
         val transactionInfoListener: PaymentManager.CustomSheetTransactionInfoListener =
@@ -67,7 +67,7 @@ internal class SamsungPayViewModel : ViewModel() {
                     logBundleContents("onSuccess.extraPaymentInfo", response.extraPaymentInfo)
                     logBundleContents("onSuccess.extraPaymentData", extraPaymentData)
                     viewModelScope.launch {
-                        _samsungPayResult.emit(SamsungPayResult.Success)
+                        _samsungPayResult.emit(SamsungPayResult.Completed)
                     }
                 }
 
@@ -75,7 +75,7 @@ internal class SamsungPayViewModel : ViewModel() {
                     Log.e(TAG, "transactionInfoListener.onFailure: errorCode=$errorCode")
                     logBundleContents("onFailure.errorData", errorData)
                     viewModelScope.launch {
-                        _samsungPayResult.emit(SamsungPayResult.Failure(Throwable("samsung pay failed")))
+                        _samsungPayResult.emit(SamsungPayResult.Failed(Throwable("samsung pay failed")))
                     }
                 }
             }
