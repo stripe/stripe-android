@@ -33,21 +33,19 @@ class TestAutofillService : AutofillService() {
             return
         }
 
-        val dataset = Dataset.Builder()
-        var hasField = false
+        val matchedFields = fields.filter { (hint, _) -> hint in TEST_DATA }
+        if (matchedFields.isEmpty()) {
+            callback.onSuccess(null)
+            return
+        }
 
-        for ((hint, autofillId) in fields) {
-            val value = TEST_DATA[hint] ?: continue
+        val dataset = Dataset.Builder()
+        for ((hint, autofillId) in matchedFields) {
+            val value = TEST_DATA.getValue(hint)
             val presentation = RemoteViews(packageName, android.R.layout.simple_list_item_1).apply {
                 setTextViewText(android.R.id.text1, "Test: $value")
             }
             dataset.setValue(autofillId, AutofillValue.forText(value), presentation)
-            hasField = true
-        }
-
-        if (!hasField) {
-            callback.onSuccess(null)
-            return
         }
 
         val response = FillResponse.Builder()
