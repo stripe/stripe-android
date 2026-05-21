@@ -17,7 +17,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.github.kittinunf.result.Result
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.crypto.onramp.OnrampCoordinator
-import com.stripe.android.crypto.onramp.exception.CryptoOnrampException
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
@@ -107,13 +106,7 @@ internal class OnrampViewModel(
     private val minPasswordLength = 8
 
     private fun Throwable.displayMessage(): String {
-        val onrampError = this as? CryptoOnrampException
-
-        return onrampError?.userMessageResId
-            ?.let(application::getString)
-            ?: onrampError?.userMessage?.takeIf { it.isNotBlank() }
-            ?: message
-            ?: "Unknown error"
+        return message ?: "Unknown error"
     }
 
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {

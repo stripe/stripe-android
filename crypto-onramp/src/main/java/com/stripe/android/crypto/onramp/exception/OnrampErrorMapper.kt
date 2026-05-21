@@ -4,6 +4,7 @@ import android.content.Context
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 
 internal fun Throwable.toCryptoOnrampError(
@@ -16,21 +17,40 @@ internal fun Throwable.toCryptoOnrampError(
     val stripeException = this as? StripeException ?: return this
     val stripeError = stripeException.stripeError ?: return this
 
+    val reason = stripeError.extraFields?.get(FIELD_REASON)
+    val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
+
     return if (stripeError.isAppAttestationError()) {
         AppAttestationException(
-            reason = stripeError.extraFields?.get(FIELD_REASON),
+            reason = reason,
             operation = operation.value,
             appPackageName = context.packageName,
             mode = publishableKey.toMode(),
             sdkVersion = StripeSdkVersion.VERSION,
             apiErrorCode = stripeError.code,
             apiErrorMessage = stripeError.message,
-            apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE),
+            apiUserMessage = apiUserMessage,
             docUrl = stripeError.docUrl ?: APP_ATTESTATION_DOC_URL,
+            fallbackUserMessage = apiUserMessage
+                ?: reason.appAttestationUserMessageResId?.let(context::getString)
+                ?: context.getString(R.string.stripe_onramp_app_attestation_default_user_message),
             cause = stripeException,
         )
     } else {
-        this
+        UncategorizedApiErrorException(
+            rawReason = reason,
+            operation = operation.value,
+            appPackageName = context.packageName,
+            mode = publishableKey.toMode(),
+            sdkVersion = StripeSdkVersion.VERSION,
+            apiErrorCode = stripeError.code,
+            apiErrorMessage = stripeError.message,
+            apiUserMessage = apiUserMessage,
+            docUrl = stripeError.docUrl,
+            fallbackUserMessage = apiUserMessage
+                ?: context.getString(R.string.stripe_onramp_default_api_error_user_message),
+            cause = stripeException,
+        )
     }
 }
 

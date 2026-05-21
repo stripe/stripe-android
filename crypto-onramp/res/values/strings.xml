@@ -8,6 +8,8 @@
   <string name="stripe_onramp_app_attestation_data_missing_user_message">This app couldn\'t be verified. Install the latest version and try again.</string>
   <!-- Fallback app-user message for Crypto Onramp app attestation failures. -->
   <string name="stripe_onramp_app_attestation_default_user_message">This app couldn\'t be verified. Please try again later.</string>
+  <!-- Fallback app-user message for uncategorized Crypto Onramp API failures. -->
+  <string name="stripe_onramp_default_api_error_user_message">Something went wrong. Please try again later.</string>
   <!-- App-user message for Crypto Onramp app attestation failures caused by non-Google Play distribution. -->
   <string name="stripe_onramp_app_attestation_play_user_message">This app couldn\'t be verified. Install it from Google Play and try again.</string>
   <!-- App-user message for Crypto Onramp app attestation failures when the installed app variant is incorrect. -->

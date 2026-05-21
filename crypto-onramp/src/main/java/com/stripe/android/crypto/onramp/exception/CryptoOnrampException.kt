@@ -8,10 +8,13 @@ import com.stripe.android.crypto.onramp.R
 
 /**
  * Base exception type for Crypto Onramp failures that expose SDK-owned recovery guidance.
+ *
+ * `message` is safe to display directly to app users. Use [developerMessage] for richer diagnostics.
  */
 @ExperimentalCryptoOnramp
 abstract class CryptoOnrampException internal constructor(
     message: String,
+    val developerMessage: String,
     cause: Throwable,
 ) : StripeException(
     stripeError = (cause as? StripeException)?.stripeError,
@@ -27,7 +30,7 @@ abstract class CryptoOnrampException internal constructor(
     abstract val userMessageResId: Int?
 
     /**
-     * A raw end-user-facing message from the backend, when available.
+     * An end-user-facing message, when available.
      */
     abstract val userMessage: String
 
@@ -83,9 +86,11 @@ class AppAttestationException internal constructor(
      * A documentation URL for recovery guidance, when available.
      */
     val docUrl: String?,
+    fallbackUserMessage: String,
     cause: Throwable,
 ) : CryptoOnrampException(
-    message = buildDeveloperMessage(
+    message = apiUserMessage.orFallbackTo(fallbackUserMessage),
+    developerMessage = buildAppAttestationDeveloperMessage(
         operation = operation,
         appPackageName = appPackageName,
         mode = mode,
@@ -102,7 +107,70 @@ class AppAttestationException internal constructor(
         reason.appAttestationUserMessageResId
             ?: R.string.stripe_onramp_app_attestation_default_user_message
 
-    override val userMessage: String = apiUserMessage.orEmpty()
+    override val userMessage: String = apiUserMessage.orFallbackTo(fallbackUserMessage)
+}
+
+/**
+ * Indicates that a Stripe API request failed without a more specific Crypto Onramp category.
+ */
+@ExperimentalCryptoOnramp
+class UncategorizedApiErrorException internal constructor(
+    /**
+     * The raw backend reason, when present.
+     */
+    val rawReason: String?,
+    /**
+     * The Crypto Onramp operation that failed.
+     */
+    val operation: String,
+    /**
+     * The Android application package name used for the request.
+     */
+    val appPackageName: String,
+    /**
+     * The Stripe mode inferred from the publishable key, when available.
+     */
+    val mode: String?,
+    /**
+     * The SDK version that produced the request.
+     */
+    val sdkVersion: String,
+    /**
+     * The raw backend error code, when present.
+     */
+    val apiErrorCode: String?,
+    /**
+     * The raw backend developer-facing message, when present.
+     */
+    val apiErrorMessage: String?,
+    /**
+     * The raw backend end-user-facing message, when present.
+     */
+    val apiUserMessage: String?,
+    /**
+     * A documentation URL for recovery guidance, when available.
+     */
+    val docUrl: String?,
+    fallbackUserMessage: String,
+    cause: Throwable,
+) : CryptoOnrampException(
+    message = apiUserMessage.orFallbackTo(fallbackUserMessage),
+    developerMessage = buildGenericDeveloperMessage(
+        operation = operation,
+        appPackageName = appPackageName,
+        mode = mode,
+        sdkVersion = sdkVersion,
+        rawReason = rawReason,
+        requestId = (cause as? StripeException)?.requestId,
+        apiErrorCode = apiErrorCode,
+        apiErrorMessage = apiErrorMessage,
+        apiUserMessage = apiUserMessage,
+        docUrl = docUrl,
+    ),
+    cause = cause,
+) {
+    override val userMessageResId: Int? = null
+    override val userMessage: String = apiUserMessage.orFallbackTo(fallbackUserMessage)
 }
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"
@@ -193,7 +261,7 @@ private fun attestationSummary(description: String): String {
     return "App attestation failed: $description."
 }
 
-private fun buildDeveloperMessage(
+private fun buildAppAttestationDeveloperMessage(
     operation: String,
     appPackageName: String,
     mode: String?,
@@ -204,30 +272,82 @@ private fun buildDeveloperMessage(
     apiErrorMessage: String?,
     docUrl: String?,
 ): String {
+    return buildDeveloperMessage(
+        summary = appAttestationSummary(reason) ?: (apiErrorMessage ?: "App attestation failed."),
+        operation = operation,
+        appPackageName = appPackageName,
+        mode = mode,
+        rawReason = reason,
+        requestId = requestId,
+        apiErrorCode = apiErrorCode,
+        nextStep = appAttestationNextStep(reason)
+            ?: (apiErrorMessage
+                ?: "Inspect the preserved Stripe API error for details and retry after correcting the app attestation configuration."),
+        docUrl = docUrl,
+        sdkVersion = sdkVersion,
+    )
+}
+
+private fun buildGenericDeveloperMessage(
+    operation: String,
+    appPackageName: String,
+    mode: String?,
+    sdkVersion: String,
+    rawReason: String?,
+    requestId: String?,
+    apiErrorCode: String?,
+    apiErrorMessage: String?,
+    apiUserMessage: String?,
+    docUrl: String?,
+): String {
+    return buildDeveloperMessage(
+        summary = apiErrorMessage ?: "Stripe API request failed.",
+        operation = operation,
+        appPackageName = appPackageName,
+        mode = mode,
+        rawReason = rawReason,
+        requestId = requestId,
+        apiErrorCode = apiErrorCode,
+        nextStep = apiUserMessage.orFallbackTo(
+            "Inspect the preserved Stripe API error for details and retry after correcting the request."
+        ),
+        docUrl = docUrl,
+        sdkVersion = sdkVersion,
+    )
+}
+
+private fun String?.orFallbackTo(fallback: String): String {
+    return this?.takeIf { it.isNotBlank() } ?: fallback
+}
+
+private fun buildDeveloperMessage(
+    summary: String,
+    operation: String,
+    appPackageName: String,
+    mode: String?,
+    rawReason: String?,
+    requestId: String?,
+    apiErrorCode: String?,
+    nextStep: String,
+    docUrl: String?,
+    sdkVersion: String,
+): String {
     val context = listOfNotNull(
         "package: $appPackageName",
         mode?.let { "mode: $it" },
         "operation: $operation",
-        reason?.let { "reason: $it" },
+        rawReason?.let { "reason: $it" },
         requestId?.let { "request_id: $it" },
         apiErrorCode?.let { "code: $it" },
     )
-    val summary = appAttestationSummary(reason)
-    val nextStep = appAttestationNextStep(reason)
 
     return buildList {
-        add(summary ?: (apiErrorMessage ?: "App attestation failed."))
+        add(summary)
         add("")
         add("Context:")
         addAll(context)
         add("")
-        add(
-            "Next step: ${
-                nextStep
-                    ?: (apiErrorMessage
-                        ?: "Inspect the preserved Stripe API error for details and retry after correcting the app attestation configuration.")
-            }"
-        )
+        add("Next step: $nextStep")
         docUrl?.let { add("Docs: $it") }
         add("SDK: stripe-android@$sdkVersion")
     }.joinToString(separator = "\n")
