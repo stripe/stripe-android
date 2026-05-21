@@ -2,7 +2,7 @@ package com.stripe.android.crypto.onramp.exception
 
 import android.content.Context
 import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 
@@ -11,8 +11,10 @@ internal fun Throwable.toCryptoOnrampError(
     operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
     publishableKey: String?,
 ): Throwable {
-    val apiException = this as? APIException ?: return this
-    val stripeError = apiException.stripeError ?: return this
+    if (this is CryptoOnrampException) return this
+
+    val stripeException = this as? StripeException ?: return this
+    val stripeError = stripeException.stripeError ?: return this
 
     return if (stripeError.isAppAttestationError()) {
         AppAttestationException(
@@ -25,7 +27,7 @@ internal fun Throwable.toCryptoOnrampError(
             apiErrorMessage = stripeError.message,
             apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE),
             docUrl = stripeError.docUrl ?: APP_ATTESTATION_DOC_URL,
-            cause = apiException,
+            cause = stripeException,
         )
     } else {
         this

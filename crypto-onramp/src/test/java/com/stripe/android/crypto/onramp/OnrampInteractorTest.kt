@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.AppAttestationException
@@ -233,6 +234,43 @@ class OnrampInteractorTest {
         assertThat(attestationError.message).contains("request_id: req_123")
         assertThat(attestationError.message)
             .contains("Docs: https://stripe.com/docs/crypto/onramp/app-attestation")
+    }
+
+    @Test
+    fun testHasLinkAccountMapsAttestationInvalidRequestError() = runTest {
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    code = "link_failed_to_attest_request",
+                    message = "App attestation failed",
+                    type = "cannot_proceed",
+                    extraFields = mapOf(
+                        "reason" to "app_not_play_recognized",
+                        "user_message" to "This app couldn't be verified. Install it from Google Play and try again."
+                    )
+                ),
+                requestId = "req_456",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertThat(attestationError.reason).isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.mode).isEqualTo("test")
+        assertThat(attestationError.message).contains("operation: has_link_account")
+        assertThat(attestationError.message).contains("request_id: req_456")
     }
 
     @Test
