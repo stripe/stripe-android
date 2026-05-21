@@ -17,6 +17,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripePaymentController.Companion.EXPAND_PAYMENT_METHOD
 import com.stripe.android.analytics.FakeDurationProvider
 import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -484,8 +485,11 @@ class PaymentLauncherViewModelTest {
 
             viewModel.onPaymentFlowResult(paymentFlowResult)
 
-            assertThat(viewModel.internalPaymentResult.value)
-                .isInstanceOf(InternalPaymentResult.Failed::class.java)
+            val internalResult = viewModel.internalPaymentResult.value
+
+            assertThat(internalResult).isInstanceOf(InternalPaymentResult.Failed::class.java)
+            assertThat((internalResult as InternalPaymentResult.Failed).throwable)
+                .isInstanceOf(StripeException::class.java)
         }
 
     @Test
