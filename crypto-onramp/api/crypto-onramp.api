@@ -86,7 +86,7 @@ public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiEr
 	public final fun getDocUrl ()Ljava/lang/String;
 	public final fun getMode ()Ljava/lang/String;
 	public final fun getOperation ()Ljava/lang/String;
-	public final fun getRawReason ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
 	public final fun getSdkVersion ()Ljava/lang/String;
 	public fun getUserMessage ()Ljava/lang/String;
 }

@@ -78,10 +78,10 @@ class AppAttestationException internal constructor(
      * A documentation URL for recovery guidance, when available.
      */
     val docUrl: String?,
-    fallbackUserMessage: String,
+    fallbackUserMessage: Lazy<String>,
     cause: Throwable,
 ) : CryptoOnrampException(
-    message = apiUserMessage.orFallbackTo(fallbackUserMessage),
+    message = apiUserMessage ?: fallbackUserMessage.value,
     developerMessage = buildAppAttestationDeveloperMessage(
         operation = operation,
         appPackageName = appPackageName,
@@ -95,7 +95,7 @@ class AppAttestationException internal constructor(
     ),
     cause = cause,
 ) {
-    override val userMessage: String = apiUserMessage.orFallbackTo(fallbackUserMessage)
+    override val userMessage: String = apiUserMessage ?: fallbackUserMessage.value
 }
 
 /**
@@ -106,7 +106,7 @@ class UncategorizedApiErrorException internal constructor(
     /**
      * The raw backend reason, when present.
      */
-    val rawReason: String?,
+    val reason: String?,
     /**
      * The Crypto Onramp operation that failed.
      */
@@ -139,16 +139,16 @@ class UncategorizedApiErrorException internal constructor(
      * A documentation URL for recovery guidance, when available.
      */
     val docUrl: String?,
-    fallbackUserMessage: String,
+    fallbackUserMessage: Lazy<String>,
     cause: Throwable,
 ) : CryptoOnrampException(
-    message = apiUserMessage.orFallbackTo(fallbackUserMessage),
+    message = apiUserMessage ?: fallbackUserMessage.value,
     developerMessage = buildGenericDeveloperMessage(
         operation = operation,
         appPackageName = appPackageName,
         mode = mode,
         sdkVersion = sdkVersion,
-        rawReason = rawReason,
+        reason = reason,
         requestId = (cause as? StripeException)?.requestId,
         apiErrorCode = apiErrorCode,
         apiErrorMessage = apiErrorMessage,
@@ -157,7 +157,7 @@ class UncategorizedApiErrorException internal constructor(
     ),
     cause = cause,
 ) {
-    override val userMessage: String = apiUserMessage.orFallbackTo(fallbackUserMessage)
+    override val userMessage: String = apiUserMessage ?: fallbackUserMessage.value
 }
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"
@@ -248,7 +248,7 @@ private fun buildAppAttestationDeveloperMessage(
         operation = operation,
         appPackageName = appPackageName,
         mode = mode,
-        rawReason = reason,
+        reason = reason,
         requestId = requestId,
         apiErrorCode = apiErrorCode,
         nextStep = appAttestationNextStep(reason)
@@ -264,7 +264,7 @@ private fun buildGenericDeveloperMessage(
     appPackageName: String,
     mode: String?,
     sdkVersion: String,
-    rawReason: String?,
+    reason: String?,
     requestId: String?,
     apiErrorCode: String?,
     apiErrorMessage: String?,
@@ -276,7 +276,7 @@ private fun buildGenericDeveloperMessage(
         operation = operation,
         appPackageName = appPackageName,
         mode = mode,
-        rawReason = rawReason,
+        reason = reason,
         requestId = requestId,
         apiErrorCode = apiErrorCode,
         nextStep = apiUserMessage.orFallbackTo(
@@ -296,7 +296,7 @@ private fun buildDeveloperMessage(
     operation: String,
     appPackageName: String,
     mode: String?,
-    rawReason: String?,
+    reason: String?,
     requestId: String?,
     apiErrorCode: String?,
     nextStep: String,
@@ -307,7 +307,7 @@ private fun buildDeveloperMessage(
         "package: $appPackageName",
         mode?.let { "mode: $it" },
         "operation: $operation",
-        rawReason?.let { "reason: $it" },
+        reason?.let { "reason: $it" },
         requestId?.let { "request_id: $it" },
         apiErrorCode?.let { "code: $it" },
     )

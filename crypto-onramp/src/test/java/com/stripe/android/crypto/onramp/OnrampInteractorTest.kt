@@ -304,7 +304,7 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
 
         val apiError = error as UncategorizedApiErrorException
-        assertThat(apiError.rawReason).isEqualTo("email_blocked")
+        assertThat(apiError.reason).isEqualTo("email_blocked")
         assertThat(apiError.userMessage).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.message).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.developerMessage).contains("This email address can't be used.")

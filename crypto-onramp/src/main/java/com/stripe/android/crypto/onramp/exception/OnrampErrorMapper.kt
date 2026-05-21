@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
+import kotlin.LazyThreadSafetyMode
 
 internal fun Throwable.toCryptoOnrampError(
     context: Context,
@@ -31,12 +32,14 @@ internal fun Throwable.toCryptoOnrampError(
             apiErrorMessage = stripeError.message,
             apiUserMessage = apiUserMessage,
             docUrl = stripeError.docUrl,
-            fallbackUserMessage = context.getString(R.string.stripe_onramp_app_attestation_default_user_message),
+            fallbackUserMessage = lazy(LazyThreadSafetyMode.NONE) {
+                context.getString(R.string.stripe_onramp_app_attestation_default_user_message)
+            },
             cause = stripeException,
         )
     } else {
         UncategorizedApiErrorException(
-            rawReason = reason,
+            reason = reason,
             operation = operation.value,
             appPackageName = context.packageName,
             mode = publishableKey.toMode(),
@@ -45,8 +48,9 @@ internal fun Throwable.toCryptoOnrampError(
             apiErrorMessage = stripeError.message,
             apiUserMessage = apiUserMessage,
             docUrl = stripeError.docUrl,
-            fallbackUserMessage = apiUserMessage
-                ?: context.getString(R.string.stripe_onramp_default_api_error_user_message),
+            fallbackUserMessage = lazy(LazyThreadSafetyMode.NONE) {
+                context.getString(R.string.stripe_onramp_default_api_error_user_message)
+            },
             cause = stripeException,
         )
     }
