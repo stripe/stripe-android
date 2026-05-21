@@ -233,8 +233,6 @@ class OnrampInteractorTest {
             .contains("package: ${RuntimeEnvironment.getApplication().packageName}")
         assertThat(attestationError.developerMessage).contains("operation: register_wallet_address")
         assertThat(attestationError.developerMessage).contains("request_id: req_123")
-        assertThat(attestationError.developerMessage)
-            .contains("Docs: https://stripe.com/docs/crypto/onramp/app-attestation")
     }
 
     @Test

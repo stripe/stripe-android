@@ -30,7 +30,7 @@ internal fun Throwable.toCryptoOnrampError(
             apiErrorCode = stripeError.code,
             apiErrorMessage = stripeError.message,
             apiUserMessage = apiUserMessage,
-            docUrl = stripeError.docUrl ?: APP_ATTESTATION_DOC_URL,
+            docUrl = stripeError.docUrl,
             fallbackUserMessage = apiUserMessage
                 ?: reason.appAttestationUserMessageResId?.let(context::getString)
                 ?: context.getString(R.string.stripe_onramp_app_attestation_default_user_message),
@@ -67,7 +67,6 @@ private fun String?.toMode(): String? {
     }
 }
 
-private const val APP_ATTESTATION_DOC_URL = "https://stripe.com/docs/crypto/onramp/app-attestation"
 private const val ERROR_CODE_APP_ATTESTATION_FAILED = "link_failed_to_attest_request"
 private const val FIELD_REASON = "reason"
 private const val FIELD_USER_MESSAGE = "user_message"
