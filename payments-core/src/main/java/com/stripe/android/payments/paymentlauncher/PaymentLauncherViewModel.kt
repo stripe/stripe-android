@@ -22,6 +22,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.paymentMethodCode
 import com.stripe.android.networking.PaymentAnalyticsEvent
@@ -307,7 +308,13 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     InternalPaymentResult.Completed(stripeIntentResult.intent)
                 StripeIntentResult.Outcome.FAILED ->
                     InternalPaymentResult.Failed(
-                        stripeIntentResult.toFailureThrowable()
+                        LocalStripeException(
+                            displayMessage = stripeIntentResult.failureMessage,
+                            analyticsValue = "failedIntentOutcomeError",
+                            errorCode = stripeIntentResult.errorCode(),
+                            declineCode = stripeIntentResult.declineCode(),
+                            type = stripeIntentResult.type(),
+                        )
                     )
                 StripeIntentResult.Outcome.CANCELED ->
                     InternalPaymentResult.Canceled
@@ -450,6 +457,27 @@ internal class PaymentLauncherViewModel @Inject constructor(
         internal const val KEY_HAS_STARTED = "key_has_started"
 
         private const val KEY_CONFIRM_ACTION_REQUESTED = "confirm_action_requested"
+    }
+}
+
+private fun StripeIntentResult<StripeIntent>.errorCode(): String? {
+    return when (val intent = this.intent) {
+        is PaymentIntent -> intent.lastPaymentError?.code
+        is SetupIntent -> intent.lastSetupError?.code
+    }
+}
+
+private fun StripeIntentResult<StripeIntent>.declineCode(): String? {
+    return when (val intent = this.intent) {
+        is PaymentIntent -> intent.lastPaymentError?.declineCode
+        is SetupIntent -> intent.lastSetupError?.declineCode
+    }
+}
+
+private fun StripeIntentResult<StripeIntent>.type(): String? {
+    return when (val intent = this.intent) {
+        is PaymentIntent -> intent.lastPaymentError?.type?.code
+        is SetupIntent -> intent.lastSetupError?.type?.code
     }
 }
 
