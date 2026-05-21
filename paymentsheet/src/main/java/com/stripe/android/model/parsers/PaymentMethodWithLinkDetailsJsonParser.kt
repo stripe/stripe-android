@@ -1,9 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.StripeJsonUtils.optBoolean
-import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
-import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -11,7 +9,7 @@ import org.json.JSONObject
 
 internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<PaymentMethod> {
 
-    override fun parse(json: JSONObject): PaymentMethod? {
+    override fun parse(json: JSONObject): PaymentMethod {
         val paymentMethod = PaymentMethodJsonParser().parse(json.getJSONObject("payment_method"))
         val linkPaymentDetailsJson = json.optJSONObject("link_payment_details")
         val isLinkOrigin = optBoolean(json, "is_link_origin")

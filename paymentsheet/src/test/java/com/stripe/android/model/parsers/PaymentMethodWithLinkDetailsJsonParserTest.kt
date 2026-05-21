@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.LinkPaymentDetails
 import org.json.JSONObject
 import org.junit.Test
 
@@ -14,7 +15,7 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
         assertThat(paymentMethod).isNotNull()
-        assertThat(paymentMethod?.linkPaymentDetails).isNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNull()
     }
 
     @Test
@@ -28,7 +29,7 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
         assertThat(paymentMethod).isNotNull()
-        assertThat(paymentMethod?.linkPaymentDetails).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNotNull()
     }
 
     @Test
@@ -42,13 +43,23 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
         assertThat(paymentMethod).isNotNull()
-        assertThat(paymentMethod?.linkPaymentDetails).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNotNull()
     }
 
     @Test
-    fun `Does not support method that has Link payment details of unsupported type`() {
+    fun `Supports payment method that has Link payment details of unknown type`() {
         val linkPaymentDetails = JSONObject().apply {
-            put("type", "KLARNA")
+            put("id", "UNKNOWN123")
+            put("type", "Crypto")
+            put("is_default", false)
+            put("next_action_types", org.json.JSONArray())
+            put(
+                "display",
+                JSONObject().apply {
+                    put("label", "Klarna")
+                    put("last4", "1234")
+                }
+            )
         }
         val json = JSONObject().apply {
             put("payment_method", PAYMENT_METHOD_JSON)
@@ -56,7 +67,25 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         }
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
-        assertThat(paymentMethod).isNull()
+        assertThat(paymentMethod).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isInstanceOf(LinkPaymentDetails.Unknown::class.java as Class<*>)
+    }
+
+    @Test
+    fun `Does not support method that has Link payment details of unsupported type`() {
+        val linkPaymentDetails = JSONObject().apply {
+            put("id", "UNKNOWN123")
+            put("type", "KLARNA")
+            put("is_default", false)
+        }
+        val json = JSONObject().apply {
+            put("payment_method", PAYMENT_METHOD_JSON)
+            put("link_payment_details", linkPaymentDetails)
+        }
+        val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
+
+        assertThat(paymentMethod).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNull()
     }
 
     private companion object {
