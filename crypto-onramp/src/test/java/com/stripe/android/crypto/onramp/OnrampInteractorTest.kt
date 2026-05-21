@@ -221,7 +221,6 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(AppAttestationException::class.java)
 
         val attestationError = error as AppAttestationException
-        assertThat(attestationError.userMessageResId).isNotNull()
         assertThat(attestationError.userMessage)
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
         assertThat(attestationError.message)
@@ -356,7 +355,6 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
 
         val apiError = error as UncategorizedApiErrorException
-        assertThat(apiError.userMessageResId).isNull()
         assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.developerMessage).contains("Developer-facing message")
@@ -365,7 +363,7 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun appAttestationExceptionMapsKnownReasonsToLocalizedUserMessages() {
+    fun appAttestationExceptionUsesProvidedFallbackUserMessage() {
         val cause = IllegalStateException("boom")
 
         listOf(
@@ -391,7 +389,6 @@ class OnrampInteractorTest {
                 cause = cause,
             )
 
-            assertThat(error.userMessageResId).isNotNull()
             assertThat(error.userMessage).isEqualTo("Fallback attestation message")
             assertThat(error.message).isEqualTo("Fallback attestation message")
         }

@@ -24,12 +24,6 @@ abstract class CryptoOnrampException internal constructor(
     message = message,
 ) {
     /**
-     * A localized SDK-owned end-user-facing message resource, when available.
-     */
-    @get:StringRes
-    abstract val userMessageResId: Int?
-
-    /**
      * An end-user-facing message, when available.
      */
     abstract val userMessage: String
@@ -103,10 +97,6 @@ class AppAttestationException internal constructor(
     ),
     cause = cause,
 ) {
-    override val userMessageResId: Int =
-        reason.appAttestationUserMessageResId
-            ?: R.string.stripe_onramp_app_attestation_default_user_message
-
     override val userMessage: String = apiUserMessage.orFallbackTo(fallbackUserMessage)
 }
 
@@ -169,7 +159,6 @@ class UncategorizedApiErrorException internal constructor(
     ),
     cause = cause,
 ) {
-    override val userMessageResId: Int? = null
     override val userMessage: String = apiUserMessage.orFallbackTo(fallbackUserMessage)
 }
 
