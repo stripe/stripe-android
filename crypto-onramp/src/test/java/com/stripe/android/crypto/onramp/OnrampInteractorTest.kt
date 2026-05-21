@@ -361,35 +361,55 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun appAttestationExceptionUsesProvidedFallbackUserMessage() {
-        val cause = IllegalStateException("boom")
-
-        listOf(
-            "attestation_not_enabled",
-            "app_not_registered",
-            "attestation_data_missing",
-            "app_not_play_recognized",
-            "android_package_name_mismatch",
-            "android_environment_mismatch",
-            "android_verdict_validation_failed",
-        ).forEach { reason ->
-            val error = AppAttestationException(
-                reason = reason,
-                operation = "register_wallet_address",
-                appPackageName = "com.example.app",
-                mode = "test",
-                sdkVersion = "1.0.0",
-                apiErrorCode = "link_failed_to_attest_request",
-                apiErrorMessage = "App attestation failed",
-                apiUserMessage = null,
-                docUrl = null,
-                fallbackUserMessage = "Fallback attestation message",
-                cause = cause,
-            )
-
-            assertThat(error.userMessage).isEqualTo("Fallback attestation message")
-            assertThat(error.message).isEqualTo("Fallback attestation message")
+    fun appAttestationExceptionUsesSingleLocalizedFallbackUserMessage() = runTest {
+        val application = mock<Application> {
+            on { packageName } doReturn "com.example.app"
+            on { getString(any()) } doReturn
+                "This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists."
         }
+        val interactor = OnrampInteractor(
+            application = application,
+            linkController = linkController,
+            cryptoApiRepository = cryptoApiRepository,
+            analyticsServiceFactory = analyticsServiceFactory,
+            checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+            savedStateHandle = SavedStateHandle()
+        )
+
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    code = "link_failed_to_attest_request",
+                    message = "App attestation failed",
+                    extraFields = mapOf(
+                        "reason" to "android_environment_mismatch"
+                    )
+                ),
+                requestId = "req_attestation_fallback",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertThat(attestationError.reason).isEqualTo("android_environment_mismatch")
+        assertThat(attestationError.userMessage)
+            .isEqualTo("This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists.")
+        assertThat(attestationError.message)
+            .isEqualTo("This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists.")
+        assertThat(attestationError.developerMessage)
+            .contains("the Play Integrity distribution channel does not match this Stripe mode")
     }
 
     @Test

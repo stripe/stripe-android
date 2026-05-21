@@ -1,10 +1,8 @@
 package com.stripe.android.crypto.onramp.exception
 
-import androidx.annotation.StringRes
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
-import com.stripe.android.crypto.onramp.R
 
 /**
  * Base exception type for Crypto Onramp failures that expose SDK-owned recovery guidance.
@@ -229,22 +227,6 @@ private fun appAttestationNextStep(reason: String?): String? {
         else -> null
     }
 }
-
-@get:StringRes
-internal val String?.appAttestationUserMessageResId: Int?
-    get() = when (this) {
-        ATTESTATION_NOT_ENABLED_REASON -> R.string.stripe_onramp_app_attestation_not_enabled_user_message
-        APP_NOT_REGISTERED_REASON -> R.string.stripe_onramp_app_attestation_not_registered_user_message
-        ATTESTATION_DATA_MISSING_REASON -> R.string.stripe_onramp_app_attestation_data_missing_user_message
-        APP_NOT_PLAY_RECOGNIZED_REASON -> R.string.stripe_onramp_app_attestation_play_user_message
-        ANDROID_PACKAGE_NAME_MISMATCH_REASON ->
-            R.string.stripe_onramp_app_attestation_package_name_mismatch_user_message
-        ANDROID_ENVIRONMENT_MISMATCH_REASON ->
-            R.string.stripe_onramp_app_attestation_environment_mismatch_user_message
-        ANDROID_VERDICT_VALIDATION_FAILED_REASON ->
-            R.string.stripe_onramp_app_attestation_verdict_validation_failed_user_message
-        else -> null
-    }
 
 private fun attestationSummary(description: String): String {
     return "App attestation failed: $description."

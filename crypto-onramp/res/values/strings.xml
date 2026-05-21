@@ -1,21 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <!-- App-user message for Crypto Onramp app attestation failures when app attestation is not enabled yet. -->
-  <string name="stripe_onramp_app_attestation_not_enabled_user_message">Onramp isn\'t available in this app right now. Please try again later.</string>
-  <!-- App-user message for Crypto Onramp app attestation failures when the app is not registered as trusted. -->
-  <string name="stripe_onramp_app_attestation_not_registered_user_message">This app couldn\'t be verified. Install the latest version and try again.</string>
-  <!-- App-user message for Crypto Onramp app attestation failures when attestation data is missing. -->
-  <string name="stripe_onramp_app_attestation_data_missing_user_message">This app couldn\'t be verified. Install the latest version and try again.</string>
   <!-- Fallback app-user message for Crypto Onramp app attestation failures. -->
-  <string name="stripe_onramp_app_attestation_default_user_message">This app couldn\'t be verified. Please try again later.</string>
+  <string name="stripe_onramp_app_attestation_default_user_message">This app couldn\'t be verified due to an attestation error. Please try again later or contact the developer if the issue persists.</string>
   <!-- Fallback app-user message for uncategorized Crypto Onramp API failures. -->
   <string name="stripe_onramp_default_api_error_user_message">Something went wrong. Please try again later.</string>
-  <!-- App-user message for Crypto Onramp app attestation failures caused by non-Google Play distribution. -->
-  <string name="stripe_onramp_app_attestation_play_user_message">This app couldn\'t be verified. Install it from Google Play and try again.</string>
-  <!-- App-user message for Crypto Onramp app attestation failures when the installed app variant is incorrect. -->
-  <string name="stripe_onramp_app_attestation_package_name_mismatch_user_message">This app couldn\'t be verified. Install the official version and try again.</string>
-  <!-- App-user message for Crypto Onramp app attestation failures when the installed Google Play variant does not match the environment. -->
-  <string name="stripe_onramp_app_attestation_environment_mismatch_user_message">This app couldn\'t be verified. Install the correct Google Play version and try again.</string>
-  <!-- App-user message for Crypto Onramp app attestation failures when the Play Integrity verdict could not be validated. -->
-  <string name="stripe_onramp_app_attestation_verdict_validation_failed_user_message">This app couldn\'t be verified. Try again.</string>
 </resources>

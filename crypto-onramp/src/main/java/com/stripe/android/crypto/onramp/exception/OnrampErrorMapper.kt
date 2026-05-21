@@ -31,9 +31,7 @@ internal fun Throwable.toCryptoOnrampError(
             apiErrorMessage = stripeError.message,
             apiUserMessage = apiUserMessage,
             docUrl = stripeError.docUrl,
-            fallbackUserMessage = apiUserMessage
-                ?: reason.appAttestationUserMessageResId?.let(context::getString)
-                ?: context.getString(R.string.stripe_onramp_app_attestation_default_user_message),
+            fallbackUserMessage = context.getString(R.string.stripe_onramp_app_attestation_default_user_message),
             cause = stripeException,
         )
     } else {
