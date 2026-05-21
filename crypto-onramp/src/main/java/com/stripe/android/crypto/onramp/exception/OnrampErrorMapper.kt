@@ -35,11 +35,7 @@ internal fun Throwable.toCryptoOnrampError(
 }
 
 private fun StripeError.isAppAttestationError(): Boolean {
-    return when {
-        type == ERROR_TYPE_CANNOT_PROCEED -> code == ERROR_CODE_APP_ATTESTATION_FAILED
-        code == ERROR_CODE_APP_ATTESTATION_FAILED -> true
-        else -> false
-    }
+    return code == ERROR_CODE_APP_ATTESTATION_FAILED
 }
 
 private fun String?.toMode(): String? {
@@ -53,6 +49,5 @@ private fun String?.toMode(): String? {
 
 private const val APP_ATTESTATION_DOC_URL = "https://stripe.com/docs/crypto/onramp/app-attestation"
 private const val ERROR_CODE_APP_ATTESTATION_FAILED = "link_failed_to_attest_request"
-private const val ERROR_TYPE_CANNOT_PROCEED = "cannot_proceed"
 private const val FIELD_REASON = "reason"
 private const val FIELD_USER_MESSAGE = "user_message"

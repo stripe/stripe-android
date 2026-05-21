@@ -791,7 +791,6 @@ class CryptoApiRepositoryTest {
                         "error": {
                             "code": "link_failed_to_attest_request",
                             "message": "App attestation failed",
-                            "type": "cannot_proceed",
                             "reason": "app_not_play_recognized",
                             "user_message": "This app couldn't be verified. Install it from Google Play and try again.",
                             "ignored_top_level_field": "ignored_value",
@@ -819,7 +818,6 @@ class CryptoApiRepositoryTest {
 
             val stripeError = (error as APIException).stripeError
             assertThat(stripeError?.code).isEqualTo("link_failed_to_attest_request")
-            assertThat(stripeError?.type).isEqualTo("cannot_proceed")
             assertThat(stripeError?.extraFields?.get("legacy_reason")).isEqualTo("legacy_value")
             assertThat(stripeError?.extraFields?.get("reason")).isEqualTo("app_not_play_recognized")
             assertThat(stripeError?.extraFields?.get("user_message"))

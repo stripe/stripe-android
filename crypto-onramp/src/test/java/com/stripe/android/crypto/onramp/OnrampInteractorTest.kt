@@ -194,7 +194,6 @@ class OnrampInteractorTest {
                     stripeError = StripeError(
                         code = "link_failed_to_attest_request",
                         message = "App attestation failed",
-                        type = "cannot_proceed",
                         extraFields = mapOf(
                             "reason" to "app_not_play_recognized",
                             "user_message" to "This app couldn't be verified. Install it from Google Play and try again."
@@ -245,7 +244,6 @@ class OnrampInteractorTest {
                 stripeError = StripeError(
                     code = "link_failed_to_attest_request",
                     message = "App attestation failed",
-                    type = "cannot_proceed",
                     extraFields = mapOf(
                         "reason" to "app_not_play_recognized",
                         "user_message" to "This app couldn't be verified. Install it from Google Play and try again."
