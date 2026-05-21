@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now return a full StripeException including relevant error codes. 
+
 ## 23.9.0 - 2026-05-18
 
 Added support for [Onelink](https://support.stripe.com/questions/what-is-onelink).
