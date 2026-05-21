@@ -307,10 +307,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     InternalPaymentResult.Completed(stripeIntentResult.intent)
                 StripeIntentResult.Outcome.FAILED ->
                     InternalPaymentResult.Failed(
-                        LocalStripeException(
-                            displayMessage = stripeIntentResult.failureMessage,
-                            analyticsValue = "failedIntentOutcomeError",
-                        )
+                        stripeIntentResult.toFailureThrowable()
                     )
                 StripeIntentResult.Outcome.CANCELED ->
                     InternalPaymentResult.Canceled
