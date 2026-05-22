@@ -69,6 +69,7 @@ internal fun LinkControllerUi(
     playgroundState: LinkControllerPlaygroundState,
     onPaymentMethodButtonClick: (email: String, filter: LinkController.PaymentMethodType?) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
+    onPresentClick: (email: String, phoneNumber: String?, filter: LinkController.PaymentMethodType?) -> Unit,
     onLookupClick: (email: String) -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
     onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
@@ -78,6 +79,7 @@ internal fun LinkControllerUi(
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
+    var phoneNumber by rememberSaveable { mutableStateOf("") }
     var linkAuthIntentId by rememberSaveable { mutableStateOf("") }
     var existingOnly by rememberSaveable { mutableStateOf(false) }
     var showRegistrationForm by rememberSaveable { mutableStateOf(false) }
@@ -112,6 +114,13 @@ internal fun LinkControllerUi(
             value = email,
             label = { Text(text = "Consumer email") },
             onValueChange = { email = it }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = phoneNumber,
+            label = { Text(text = "Phone number (optional, E.164)") },
+            onValueChange = { phoneNumber = it }
         )
 
         // Registration Form Section
@@ -253,8 +262,21 @@ internal fun LinkControllerUi(
         )
         Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
+        PresentButton(
+            modifier = Modifier.fillMaxWidth(),
+            email = email,
+            onClick = {
+                onPresentClick(
+                    email.trim(),
+                    phoneNumber.trim().takeIf { it.isNotEmpty() },
+                    paymentMethodFilter,
+                )
+            },
+        )
+        Spacer(Modifier.height(8.dp))
+
         PaymentMethodButton(
-            preview = controllerState.selectedPaymentMethodPreview,
+            preview = playgroundState.selectedPaymentMethodPreview,
             onClick = { onPaymentMethodButtonClick(email, paymentMethodFilter) },
         )
         Spacer(Modifier.height(16.dp))
@@ -297,6 +319,7 @@ private fun StatusBox(
         add("Consumer lookup" to lookupText)
         add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
+        add("Present result" to (playgroundState.presentResult?.toStatusString() ?: ""))
         add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
         add("Authorize result" to (playgroundState.authorizeResult?.toString() ?: ""))
         add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
@@ -343,12 +366,19 @@ private fun StatusBox(
 private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = listOf(
     (configureResult as? LinkController.ConfigureResult.Failed)?.error,
     (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)?.error,
+    (presentResult as? LinkController.PresentResult.Failed)?.error,
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
     (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
     (authorizeResult as? LinkController.AuthorizeResult.Failed)?.error,
     (logOutResult as? LinkController.LogOutResult.Failed)?.error,
 ).firstOrNull { it != null }
+
+private fun LinkController.PresentResult.toStatusString(): String = when (this) {
+    is LinkController.PresentResult.Completed -> "Completed: ${paymentMethod.id}"
+    LinkController.PresentResult.Canceled -> "Canceled"
+    is LinkController.PresentResult.Failed -> "Failed: ${error.message}"
+}
 
 @Composable
 @Preview(showBackground = true, heightDp = 1_200)
@@ -360,6 +390,7 @@ private fun LinkControllerUiPreview() {
             playgroundState = LinkControllerPlaygroundState(),
             onPaymentMethodButtonClick = { _, _ -> },
             onCreatePaymentMethodClick = {},
+            onPresentClick = { _, _, _ -> },
             onLookupClick = {},
             onAuthenticationClick = { _, _ -> },
             onAuthorizeClick = {},
@@ -680,5 +711,24 @@ private fun PaymentMethodTypeSelector(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PresentButton(
+    email: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        enabled = email.isNotBlank(),
+        modifier = modifier,
+    ) {
+        Text(
+            text = "Present",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
