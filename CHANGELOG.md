@@ -4,7 +4,7 @@ NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
 ### Payments
-* [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now return a full StripeException including relevant error codes. 
+* [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now include error code, decline code, and error type in the exception thrown.
 
 ## 23.9.0 - 2026-05-18
 
