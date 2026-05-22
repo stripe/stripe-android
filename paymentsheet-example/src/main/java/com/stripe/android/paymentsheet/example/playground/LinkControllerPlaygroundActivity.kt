@@ -7,7 +7,9 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,13 +43,14 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                 ?: return@setContent
 
             PaymentSheetExampleTheme {
-                Scaffold { paddingValues ->
+                Scaffold(contentWindowInsets = WindowInsets.systemBars) { paddingValues ->
                     LinkControllerUi(
                         modifier = Modifier.padding(paddingValues),
                         controllerState = linkControllerState,
                         playgroundState = linkControllerPlaygroundState,
                         onPaymentMethodButtonClick = viewModel::onPaymentMethodClick,
                         onCreatePaymentMethodClick = viewModel::onCreatePaymentMethodClick,
+                        onPresentClick = viewModel::onPresentClick,
                         onLookupClick = viewModel::onLookupClick,
                         onAuthenticationClick = viewModel::onAuthenticateClick,
                         onAuthorizeClick = viewModel::onAuthorizeClick,
