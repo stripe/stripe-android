@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [FIXED][13146](https://github.com/stripe/stripe-android/pull/13146) Native 3ds2 no longer stops its host activity
+
 ## 23.9.0 - 2026-05-18
 
 Added support for [Onelink](https://support.stripe.com/questions/what-is-onelink).
