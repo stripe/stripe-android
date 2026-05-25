@@ -851,7 +851,7 @@ class LinkController @Inject internal constructor(
     /**
      * Preview information for a Link payment method.
      *
-     * @param iconRes An image representing a payment method; e.g. the VISA logo.
+     * @param imageLoader A suspending function that loads an image representing a payment method; e.g. the VISA logo.
      * @param label The main label text (e.g., "Link").
      * @param sublabel Additional descriptive text (e.g., "Visa •••• 4242").
      */
