@@ -304,7 +304,7 @@ internal fun PaymentMethod.getLabelIcon(): Int? {
             when (linkPaymentDetails) {
                 is LinkPaymentDetails.BankAccount -> bankIcon
                 is LinkPaymentDetails.Card, null -> null
-                is LinkPaymentDetails.Unknown -> bankIcon
+                is LinkPaymentDetails.Generic -> bankIcon
             }
         }
         PaymentMethod.Type.USBankAccount -> bankIcon
@@ -312,7 +312,7 @@ internal fun PaymentMethod.getLabelIcon(): Int? {
             when (linkPaymentDetails) {
                 is LinkPaymentDetails.BankAccount -> bankIcon
                 is LinkPaymentDetails.Card, null -> null
-                is LinkPaymentDetails.Unknown -> bankIcon
+                is LinkPaymentDetails.Generic -> bankIcon
             }
         }
         else -> null

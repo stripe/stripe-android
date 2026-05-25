@@ -21,7 +21,7 @@ data class ConsumerPaymentDetails(
         open val nickname: String?,
         open val billingAddress: BillingAddress?,
         open val billingEmailAddress: String?,
-        open val display: DisplayMetadata? = null
+        open val display: Display? = null
     ) : Parcelable {
 
         abstract val last4: String
@@ -135,7 +135,7 @@ data class ConsumerPaymentDetails(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Unknown(
+    data class Generic(
         override val id: String,
         override val last4: String,
         override val isDefault: Boolean,
@@ -143,9 +143,9 @@ data class ConsumerPaymentDetails(
         override val billingAddress: BillingAddress?,
         override val billingEmailAddress: String?,
         val rawType: String,
-        override val display: DisplayMetadata?,
+        override val display: Display,
         val nextActionTypes: List<String>,
-        ) : PaymentDetails(
+    ) : PaymentDetails(
         id = id,
         type = rawType,
         isDefault = isDefault,
@@ -168,9 +168,13 @@ data class ConsumerPaymentDetails(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class DisplayMetadata(
+    data class Display(
         val label: String,
         val sublabel: String?,
-        val icon: ConsentUi.Icon?
-    ) : Parcelable
+        val icon: Icon?
+    ) : Parcelable {
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class Icon(val defaultUrl: String) : Parcelable
+    }
 }

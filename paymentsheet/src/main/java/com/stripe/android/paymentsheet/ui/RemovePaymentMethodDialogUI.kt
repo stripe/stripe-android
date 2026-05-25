@@ -49,7 +49,7 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogTitle() = when (payment
             is LinkPaymentDetails.Card -> {
                 resolvableString(R.string.stripe_paymentsheet_remove_card_title)
             }
-            is LinkPaymentDetails.Unknown -> {
+            is LinkPaymentDetails.Generic -> {
                 resolvableString(R.string.stripe_paymentsheet_remove_pm, displayName)
             }
             null -> resolvableString("")
@@ -96,7 +96,7 @@ private fun DisplayableSavedPaymentMethod.getRemoveDialogDescription() = when (p
                 this.brandDisplayName(),
                 linkDetails.last4
             )
-            is LinkPaymentDetails.Unknown -> {
+            is LinkPaymentDetails.Generic -> {
                 displayName
             }
             null -> resolvableString("")

@@ -388,7 +388,7 @@ class LinkBillingDetailsUtilsTest {
 
     @Test
     fun `ConsumerPaymentDetails Unknown supports when address is complete`() {
-        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN.copy(
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC.copy(
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = "John Doe",
                 line1 = "123 Main St",
@@ -410,7 +410,7 @@ class LinkBillingDetailsUtilsTest {
 
     @Test
     fun `ConsumerPaymentDetails Unknown does not support when address is incomplete`() {
-        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN.copy(
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC.copy(
             billingAddress = ConsumerPaymentDetails.BillingAddress(
                 name = "John Doe",
                 line1 = null,
@@ -432,7 +432,7 @@ class LinkBillingDetailsUtilsTest {
 
     @Test
     fun `ConsumerPaymentDetails Unknown does not support when phone required but missing from Link account`() {
-        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC
         val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
             phone = CollectionMode.Always
         )
@@ -454,7 +454,7 @@ class LinkBillingDetailsUtilsTest {
 
     @Test
     fun `withEffectiveBillingDetails returns same Unknown when linkAccount is null`() {
-        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC
         val configuration = TestFactory.LINK_CONFIGURATION
 
         val result = unknown.withEffectiveBillingDetails(configuration, null)

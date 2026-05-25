@@ -2,7 +2,6 @@ package com.stripe.android.model.parsers
 
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerFixtures
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
@@ -228,7 +227,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         assertEquals(
             ConsumerPaymentDetails(
                 listOf(
-                    ConsumerPaymentDetails.Unknown(
+                    ConsumerPaymentDetails.Generic(
                         id = "csmrpd_126",
                         last4 = "0x••••22Dd",
                         isDefault = false,
@@ -236,12 +235,14 @@ class ConsumerPaymentDetailsJsonParserTest {
                         billingAddress = null,
                         billingEmailAddress = null,
                         rawType = "CRYPTO",
-                        display = ConsumerPaymentDetails.DisplayMetadata(
+                        display = ConsumerPaymentDetails.Display(
                             label = "Crypto",
                             sublabel = "0x••••22Dd",
-                            icon = ConsentUi.Icon(default = "https://example.com/crypto-icon.png")
+                            icon = ConsumerPaymentDetails.Display.Icon(
+                                defaultUrl = "https://example.com/crypto-icon.png"
+                            )
                         ),
-                        nextActionTypes = listOf("STRIPE_REDIRECT")
+                        nextActionTypes = listOf("redirect_to_url")
                     )
                 )
             ),
@@ -255,7 +256,7 @@ class ConsumerPaymentDetailsJsonParserTest {
         assertEquals(
             ConsumerPaymentDetails(
                 listOf(
-                    ConsumerPaymentDetails.Unknown(
+                    ConsumerPaymentDetails.Generic(
                         id = "csmrpd_126",
                         last4 = "",
                         isDefault = false,
@@ -263,7 +264,7 @@ class ConsumerPaymentDetailsJsonParserTest {
                         billingAddress = null,
                         billingEmailAddress = null,
                         rawType = "CRYPTO",
-                        display = ConsumerPaymentDetails.DisplayMetadata(
+                        display = ConsumerPaymentDetails.Display(
                             label = "Crypto",
                             sublabel = null,
                             icon = null

@@ -47,10 +47,11 @@ import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.ErrorTextStyle
 import com.stripe.android.link.ui.LinkSpinner
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
+import com.stripe.android.model.ConsumerPaymentDetails.Display
+import com.stripe.android.model.ConsumerPaymentDetails.Generic
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
@@ -205,7 +206,7 @@ private fun PaymentDetailsListItemPreview() {
         billingAddress = null,
         billingEmailAddress = null
     )
-    val unknown = ConsumerPaymentDetails.Unknown(
+    val generic = Generic(
         id = "unknown_id",
         last4 = "4444",
         isDefault = false,
@@ -213,10 +214,10 @@ private fun PaymentDetailsListItemPreview() {
         billingAddress = null,
         billingEmailAddress = null,
         rawType = "CRYPTO",
-        display = ConsumerPaymentDetails.DisplayMetadata(
+        display = Display(
             label = "Crypto",
             sublabel = "0x••••22Dd",
-            icon = ConsentUi.Icon(default = "")
+            icon = null
         ),
         nextActionTypes = emptyList()
     )
@@ -263,7 +264,7 @@ private fun PaymentDetailsListItemPreview() {
                 onMenuButtonClick = {}
             )
             PaymentDetailsListItem(
-                paymentDetails = unknown,
+                paymentDetails = generic,
                 isClickable = true,
                 isMenuButtonClickable = true,
                 isSelected = true,
@@ -360,12 +361,12 @@ internal fun RowScope.PaymentDetails(
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
             )
         }
-        is ConsumerPaymentDetails.Unknown -> {
+        is Generic -> {
             PaymentMethodInfo(
                 modifier = modifier,
                 title = paymentDetails.displayName.resolve(),
-                subtitle = paymentDetails.display?.sublabel,
-                icon = { UnknownIcon(iconUrl = paymentDetails.display?.icon?.default?.takeIf { it.isNotBlank() }) }
+                subtitle = paymentDetails.display.sublabel,
+                icon = { Icon(iconUrl = paymentDetails.display.icon?.defaultUrl, errorContent = { BankIcon(null) }) }
             )
         }
     }

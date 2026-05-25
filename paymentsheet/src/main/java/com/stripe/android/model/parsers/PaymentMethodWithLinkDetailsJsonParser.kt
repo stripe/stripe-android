@@ -35,12 +35,12 @@ internal object PaymentMethodWithLinkDetailsJsonParser : ModelJsonParser<Payment
                     last4 = consumerPaymentDetails.last4,
                 )
             }
-            is ConsumerPaymentDetails.Unknown -> {
-                LinkPaymentDetails.Unknown(
+            is ConsumerPaymentDetails.Generic -> {
+                LinkPaymentDetails.Generic(
                     nickname = consumerPaymentDetails.nickname,
-                    label = consumerPaymentDetails.display?.label,
-                    sublabel = consumerPaymentDetails.display?.sublabel,
-                    icon = consumerPaymentDetails.display?.icon,
+                    label = consumerPaymentDetails.display.label,
+                    sublabel = consumerPaymentDetails.display.sublabel,
+                    icon = consumerPaymentDetails.display.icon,
                     last4 = consumerPaymentDetails.last4
                 )
             }

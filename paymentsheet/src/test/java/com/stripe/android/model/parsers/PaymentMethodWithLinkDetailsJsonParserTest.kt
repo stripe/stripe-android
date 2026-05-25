@@ -68,7 +68,7 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
         assertThat(paymentMethod).isNotNull()
-        assertThat(paymentMethod.linkPaymentDetails).isInstanceOf(LinkPaymentDetails.Unknown::class.java as Class<*>)
+        assertThat(paymentMethod.linkPaymentDetails).isInstanceOf(LinkPaymentDetails.Generic::class.java as Class<*>)
     }
 
     @Test

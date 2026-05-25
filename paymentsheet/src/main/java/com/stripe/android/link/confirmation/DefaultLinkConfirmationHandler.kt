@@ -278,7 +278,7 @@ internal fun computeExpectedPaymentMethodType(
         is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType(configuration)
         is ConsumerPaymentDetails.Card,
         is ConsumerPaymentDetails.Passthrough,
-        is ConsumerPaymentDetails.Unknown -> ConsumerPaymentDetails.Card.TYPE
+        is ConsumerPaymentDetails.Generic -> ConsumerPaymentDetails.Card.TYPE
     }
 }
 

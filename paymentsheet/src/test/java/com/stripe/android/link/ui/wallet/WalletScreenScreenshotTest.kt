@@ -174,7 +174,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
-                    it is ConsumerPaymentDetails.Unknown
+                    it is ConsumerPaymentDetails.Generic
                 },
                 userSetIsExpanded = false,
             )
@@ -186,7 +186,7 @@ internal class WalletScreenScreenshotTest {
         snapshot(
             state = walletUiState(
                 selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
-                    it is ConsumerPaymentDetails.Unknown
+                    it is ConsumerPaymentDetails.Generic
                 },
                 userSetIsExpanded = true,
             )

@@ -6,7 +6,6 @@ import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import org.json.JSONObject
@@ -47,7 +46,7 @@ private const val FIELD_DISPLAY = "display"
 private const val FIELD_LABEL = "label"
 private const val FIELD_SUBLABEL = "sublabel"
 private const val FIELD_ICON = "icon"
-private const val FIELD_DEFAULT = "default"
+private const val FIELD_DEFAULT_ICON = "default"
 private const val FIELD_NEXT_ACTION_TYPES = "next_action_types"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -110,7 +109,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                 else -> {
                     val display = json.optJSONObject(FIELD_DISPLAY)
                     display?.let {
-                        ConsumerPaymentDetails.Unknown(
+                        ConsumerPaymentDetails.Generic(
                             id = id,
                             last4 = display.optString(FIELD_UNKNOWN_LAST_4),
                             isDefault = isDefault,
@@ -126,11 +125,11 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
             }
         }
 
-    private fun parseDisplay(display: JSONObject) = ConsumerPaymentDetails.DisplayMetadata(
+    private fun parseDisplay(display: JSONObject) = ConsumerPaymentDetails.Display(
         label = display.getString(FIELD_LABEL),
         sublabel = display.optString(FIELD_SUBLABEL).takeIf { it.isNotBlank() },
         icon = display.optJSONObject(FIELD_ICON)
-            ?.let { ConsentUi.Icon(default = it.getString(FIELD_DEFAULT)) }
+            ?.let { ConsumerPaymentDetails.Display.Icon(defaultUrl = it.getString(FIELD_DEFAULT_ICON)) }
     )
 
     private fun parseBillingAddress(json: JSONObject) =

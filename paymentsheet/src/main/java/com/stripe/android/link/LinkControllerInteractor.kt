@@ -734,7 +734,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         is ConsumerPaymentDetails.BankAccount -> {
             LinkController.PaymentMethodType.BankAccount
         }
-        is ConsumerPaymentDetails.Unknown -> {
+        is ConsumerPaymentDetails.Generic -> {
             LinkController.PaymentMethodType.Card
         }
     }
@@ -766,7 +766,7 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
             getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding.code, last4), isDarkTheme)
         is ConsumerPaymentDetails.Passthrough ->
             getLinkIconArrow()
-        is ConsumerPaymentDetails.Unknown ->
+        is ConsumerPaymentDetails.Generic ->
             getLinkIconArrow()
     }
 }

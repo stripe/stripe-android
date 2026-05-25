@@ -124,7 +124,7 @@ class WalletUiStateTest {
     @Test
     fun testShowNoTermsForSelectedUnknownPaymentMethod() {
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN,
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC,
         )
 
         assertThat(state.mandate).isNull()
@@ -133,7 +133,7 @@ class WalletUiStateTest {
     @Test
     fun testShowNoTermsForSelectedUnknownPaymentMethodWhenSettingUp() {
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN,
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC,
             isSettingUp = true,
         )
 
@@ -143,7 +143,7 @@ class WalletUiStateTest {
     @Test
     fun testEnabledButtonStateForUnknown() {
         val state = walletUiState(
-            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN,
+            selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC,
         )
 
         assertThat(state.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
@@ -328,7 +328,7 @@ class WalletUiStateTest {
         )
         val bankAccount = TestFactory.CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT
         val passthrough = TestFactory.CONSUMER_PAYMENT_DETAILS_PASSTHROUGH
-        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_UNKNOWN
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC
         val state = walletUiState(
             paymentDetailsList = listOf(
                 creditCard,

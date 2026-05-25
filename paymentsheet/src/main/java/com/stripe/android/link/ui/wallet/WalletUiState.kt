@@ -119,7 +119,7 @@ internal data class WalletUiState(
         return when (item) {
             is ConsumerPaymentDetails.BankAccount,
             is ConsumerPaymentDetails.Passthrough,
-            is ConsumerPaymentDetails.Unknown -> true
+            is ConsumerPaymentDetails.Generic -> true
             is ConsumerPaymentDetails.Card -> {
                 cardFundingFilter.isAccepted(item.funding.cardFunding)
             }
@@ -176,6 +176,6 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
             )
             else -> null
         }
-        is ConsumerPaymentDetails.Unknown -> null
+        is ConsumerPaymentDetails.Generic -> null
     }
 }

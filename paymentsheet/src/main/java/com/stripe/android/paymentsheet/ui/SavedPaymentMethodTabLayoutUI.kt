@@ -187,7 +187,6 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
     PaymentOptionsItem.Link(LinkBrand.Link),
     PaymentOptionsItem.GooglePay,
     PaymentOptionsItem.SavedPaymentMethod(
-
         DisplayableSavedPaymentMethod.create(
             displayName = "4242".resolvableString,
             paymentMethod = PaymentMethod(
@@ -196,24 +195,6 @@ private val PREVIEW_PAYMENT_OPTION_ITEMS = listOf(
                 liveMode = false,
                 code = PaymentMethod.Type.Card.code,
                 type = PaymentMethod.Type.Card,
-                card = PaymentMethod.Card(
-                    brand = CardBrand.Visa,
-                    last4 = "4242",
-                )
-            ),
-            shouldShowDefaultBadge = true,
-        ),
-    ),
-    PaymentOptionsItem.SavedPaymentMethod(
-
-        DisplayableSavedPaymentMethod.create(
-            displayName = "4242".resolvableString,
-            paymentMethod = PaymentMethod(
-                id = "006",
-                created = null,
-                liveMode = false,
-                code = PaymentMethod.Type.Card.code,
-                type = PaymentMethod.Type.Link,
                 card = PaymentMethod.Card(
                     brand = CardBrand.Visa,
                     last4 = "4242",

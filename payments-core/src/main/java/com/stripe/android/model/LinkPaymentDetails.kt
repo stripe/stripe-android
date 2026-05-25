@@ -29,11 +29,11 @@ sealed interface LinkPaymentDetails : Parcelable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
-    data class Unknown(
+    data class Generic(
         val nickname: String?,
-        val label: String?,
+        val label: String,
         val sublabel: String?,
-        val icon: ConsentUi.Icon?,
+        val icon: ConsumerPaymentDetails.Display.Icon?,
         override val last4: String
     ) : LinkPaymentDetails
 }

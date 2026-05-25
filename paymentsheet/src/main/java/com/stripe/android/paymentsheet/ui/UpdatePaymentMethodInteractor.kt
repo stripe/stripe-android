@@ -82,7 +82,7 @@ internal interface UpdatePaymentMethodInteractor {
                         is LinkPaymentDetails.Card -> {
                             R.string.stripe_paymentsheet_manage_card
                         }
-                        is LinkPaymentDetails.Unknown -> {
+                        is LinkPaymentDetails.Generic -> {
                             R.string.stripe_paymentsheet_manage_payment_method
                         }
                         null -> null

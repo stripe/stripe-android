@@ -160,7 +160,7 @@ internal object TestFactory {
         paymentMethodId = "pm_123"
     )
 
-    val CONSUMER_PAYMENT_DETAILS_UNKNOWN = ConsumerPaymentDetails.Unknown(
+    val CONSUMER_PAYMENT_DETAILS_GENERIC = ConsumerPaymentDetails.Generic(
         id = "csmrpd_126",
         last4 = "0x••••22Dd",
         isDefault = false,
@@ -168,10 +168,10 @@ internal object TestFactory {
         billingAddress = null,
         billingEmailAddress = null,
         rawType = "CRYPTO",
-        display = ConsumerPaymentDetails.DisplayMetadata(
+        display = ConsumerPaymentDetails.Display(
             label = "Crypto",
             sublabel = "0x••••22Dd",
-            icon = ConsentUi.Icon(default = "")
+            icon = null
         ),
         nextActionTypes = emptyList()
     )
@@ -230,7 +230,7 @@ internal object TestFactory {
             CONSUMER_PAYMENT_DETAILS_CARD,
             CONSUMER_PAYMENT_DETAILS_BANK_ACCOUNT,
             CONSUMER_PAYMENT_DETAILS_PASSTHROUGH,
-            CONSUMER_PAYMENT_DETAILS_UNKNOWN
+            CONSUMER_PAYMENT_DETAILS_GENERIC
         )
     )
 

@@ -52,7 +52,6 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
@@ -435,7 +434,7 @@ internal class WalletViewModel(
                                             details.copy(isDefault = item.id == details.id)
                                         }
                                         is ConsumerPaymentDetails.Passthrough -> details
-                                        is ConsumerPaymentDetails.Unknown -> details
+                                        is ConsumerPaymentDetails.Generic -> details
                                     }
                                 },
                                 cardBeingUpdated = null

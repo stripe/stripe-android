@@ -7,7 +7,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.screenshottesting.FontSize
@@ -256,7 +255,7 @@ internal class PaymentDetailsListItemScreenShotTest {
     fun testUnknownWithSublabelEnabled() {
         snapshot(
             state = State(
-                details = ConsumerPaymentDetails.Unknown(
+                details = ConsumerPaymentDetails.Generic(
                     id = "csmrpd_126",
                     last4 = "0x••••22Dd",
                     isDefault = false,
@@ -264,10 +263,10 @@ internal class PaymentDetailsListItemScreenShotTest {
                     billingAddress = null,
                     billingEmailAddress = null,
                     rawType = "CRYPTO",
-                    display = ConsumerPaymentDetails.DisplayMetadata(
+                    display = ConsumerPaymentDetails.Display(
                         label = "Crypto",
                         sublabel = "0x••••22Dd",
-                        icon = ConsentUi.Icon(default = "")
+                        icon = null
                     ),
                     nextActionTypes = emptyList()
                 ),
@@ -283,7 +282,7 @@ internal class PaymentDetailsListItemScreenShotTest {
     fun testUnknownWithoutSublabelEnabled() {
         snapshot(
             state = State(
-                details = ConsumerPaymentDetails.Unknown(
+                details = ConsumerPaymentDetails.Generic(
                     id = "csmrpd_126",
                     last4 = "0x••••22Dd",
                     isDefault = false,
@@ -291,10 +290,10 @@ internal class PaymentDetailsListItemScreenShotTest {
                     billingAddress = null,
                     billingEmailAddress = null,
                     rawType = "CRYPTO",
-                    display = ConsumerPaymentDetails.DisplayMetadata(
+                    display = ConsumerPaymentDetails.Display(
                         label = "Crypto",
                         sublabel = null,
-                        icon = ConsentUi.Icon(default = "")
+                        icon = null
                     ),
                     nextActionTypes = emptyList()
                 ),
