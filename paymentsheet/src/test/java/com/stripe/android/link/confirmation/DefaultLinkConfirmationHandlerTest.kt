@@ -396,7 +396,7 @@ internal class DefaultLinkConfirmationHandlerTest {
 
             val option = args.confirmationOption as LinkPassthroughConfirmationOption
             assertThat(option.paymentDetailsId).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC.id)
-            assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+            assertThat(option.expectedPaymentMethodType).isNull()
         }
 
     @Test

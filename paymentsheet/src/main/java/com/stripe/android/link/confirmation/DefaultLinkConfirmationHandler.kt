@@ -185,9 +185,9 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         )
     }
 
-    private fun allowRedisplay(paymentMethodType: String): PaymentMethod.AllowRedisplay? {
+    private fun allowRedisplay(paymentMethodType: String?): PaymentMethod.AllowRedisplay? {
         val isSettingUp = when (val intent = configuration.stripeIntent) {
-            is PaymentIntent -> intent.isSetupFutureUsageSet(paymentMethodType)
+            is PaymentIntent -> paymentMethodType != null && intent.isSetupFutureUsageSet(paymentMethodType)
             is SetupIntent -> true
         }
 
@@ -273,12 +273,12 @@ internal fun createPaymentMethodCreateParams(
 internal fun computeExpectedPaymentMethodType(
     configuration: LinkConfiguration,
     paymentDetails: ConsumerPaymentDetails.PaymentDetails
-): String {
+): String? {
     return when (paymentDetails) {
         is ConsumerPaymentDetails.BankAccount -> computeBankAccountExpectedPaymentMethodType(configuration)
         is ConsumerPaymentDetails.Card,
-        is ConsumerPaymentDetails.Passthrough,
-        is ConsumerPaymentDetails.Generic -> ConsumerPaymentDetails.Card.TYPE
+        is ConsumerPaymentDetails.Passthrough -> ConsumerPaymentDetails.Card.TYPE
+        is ConsumerPaymentDetails.Generic -> null
     }
 }
 

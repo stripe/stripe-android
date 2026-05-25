@@ -191,7 +191,7 @@ internal open class FakeConsumersApiService : ConsumersApiService {
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,

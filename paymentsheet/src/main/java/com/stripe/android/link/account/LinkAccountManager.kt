@@ -131,7 +131,7 @@ internal interface LinkAccountManager {
 
     suspend fun sharePaymentDetails(
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String? = null,
