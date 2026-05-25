@@ -313,12 +313,13 @@ internal class LinkControllerInteractor @Inject constructor(
 
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
+        val presentationType = _state.value.presentationType
         updateState { it.copy(currentLaunchMode = null, presentationType = null) }
         updateLinkAccountOnLinkResult(result)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
-                handlePaymentMethodSelectionResult(result)
+                handlePaymentMethodSelectionResult(result, presentationType)
             is LinkLaunchMode.Authentication ->
                 handleAuthenticationResult(result)
             is LinkLaunchMode.Authorization ->
@@ -385,9 +386,7 @@ internal class LinkControllerInteractor @Inject constructor(
         _presentResultFlow.tryEmit(result)
     }
 
-    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult) {
-        val presentationType = _state.value.presentationType
-
+    private fun handlePaymentMethodSelectionResult(result: LinkActivityResult, presentationType: PresentationType?) {
         when (presentationType) {
             PresentationType.Full -> when (result) {
                 is LinkActivityResult.Canceled -> {

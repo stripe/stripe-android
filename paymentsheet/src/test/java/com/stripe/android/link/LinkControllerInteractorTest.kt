@@ -1346,7 +1346,7 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `presentFull() resets isPresentFlowActive after activity result`() = runTest {
+    fun `presentFull() allows a new call after activity result`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
 
@@ -1369,6 +1369,38 @@ class LinkControllerInteractorTest {
             )
             assertThat(awaitItem()).isEqualTo(LinkController.PresentPaymentMethodsResult.Canceled)
         }
+    }
+
+    @Test
+    fun `presentPaymentMethods() ignores repeated calls while presentation is active`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val firstLauncher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentPaymentMethods(firstLauncher, "test@example.com", null)
+        firstLauncher.calls.awaitItem()
+
+        // Second call while first is still active — should be ignored.
+        val secondLauncher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentPaymentMethods(secondLauncher, "test@example.com", null)
+
+        secondLauncher.calls.expectNoEvents()
+    }
+
+    @Test
+    fun `presentFull() ignores repeated calls while presentation is active`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val firstLauncher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentFull(firstLauncher, "test@example.com", null, null)
+        firstLauncher.calls.awaitItem()
+
+        // Second call while first is still active — should be ignored.
+        val secondLauncher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentFull(secondLauncher, "test@example.com", null, null)
+
+        secondLauncher.calls.expectNoEvents()
     }
 
     private data class ConsumerRegistrationParams(
