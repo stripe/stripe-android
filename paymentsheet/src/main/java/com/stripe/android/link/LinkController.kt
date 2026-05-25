@@ -39,7 +39,7 @@ class LinkController @Inject internal constructor(
     /**
      * A preview of the currently selected Link payment method, or null if none is selected.
      */
-    val selectedPaymentMethodPreview: StateFlow<PaymentMethodPreview?> =
+    val paymentMethodPreview: StateFlow<PaymentMethodPreview?> =
         interactor.selectedPaymentMethodPreview
 
     /**
@@ -342,20 +342,10 @@ class LinkController @Inject internal constructor(
     class State
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val elementsSessionId: String? = null,
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val internalLinkAccount: LinkAccount? = null,
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val merchantLogoUrl: String? = null,
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val createdPaymentMethod: PaymentMethod? = null,
     ) {
         /**
