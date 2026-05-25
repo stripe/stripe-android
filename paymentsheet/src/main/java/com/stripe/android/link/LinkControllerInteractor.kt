@@ -109,19 +109,21 @@ internal class LinkControllerInteractor @Inject constructor(
     private val _presentSelectionSucceededFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
     val presentSelectionSucceededFlow = _presentSelectionSucceededFlow.asSharedFlow()
 
-    private var isPresentFlowActive = false
+    internal enum class PresentationType { PaymentMethods, Full }
 
     private fun iconLoader(context: Context = application): PaymentSelection.IconLoader {
         val imageLoader = DefaultStripeImageLoader(context)
         return PaymentSelection.IconLoader(context.resources, imageLoader)
     }
 
+    private val cachedIconLoader by lazy { iconLoader(application) }
+
     val paymentMethodMetadata: PaymentMethodMetadata?
         get() = _state.value.paymentMethodMetadata
 
     val selectedPaymentMethodPreview: StateFlow<LinkController.PaymentMethodPreview?> =
         _state.mapAsStateFlow { state ->
-            state.selectedPaymentMethod?.details?.toPreview(application, iconLoader(application))
+            state.selectedPaymentMethod?.details?.toPreview(application, cachedIconLoader)
         }
 
     fun state(context: Context): StateFlow<LinkController.State> {
@@ -172,11 +174,14 @@ internal class LinkControllerInteractor @Inject constructor(
         email: String?,
         paymentMethodType: LinkController.PaymentMethodType?,
     ) {
+        if (_state.value.presentationType != null) return
+        updateState { it.copy(presentationType = PresentationType.PaymentMethods) }
         present(
             launcher = launcher,
             email = email,
             paymentMethodType = paymentMethodType,
             onConfigurationError = { error ->
+                updateState { it.copy(presentationType = null) }
                 _presentPaymentMethodsResultFlow.tryEmit(
                     LinkController.PresentPaymentMethodsResult.Failed(error)
                 )
@@ -198,14 +203,15 @@ internal class LinkControllerInteractor @Inject constructor(
         phoneNumber: String?,
         paymentMethodType: LinkController.PaymentMethodType?,
     ) {
-        isPresentFlowActive = true
+        if (_state.value.presentationType != null) return
+        updateState { it.copy(presentationType = PresentationType.Full) }
         present(
             launcher = launcher,
             email = email,
             phoneNumber = phoneNumber,
             paymentMethodType = paymentMethodType,
             onConfigurationError = { error ->
-                isPresentFlowActive = false
+                updateState { it.copy(presentationType = null) }
                 _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(error))
             },
             getLaunchMode = { _, state ->
@@ -307,7 +313,7 @@ internal class LinkControllerInteractor @Inject constructor(
 
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
-        updateState { it.copy(currentLaunchMode = null) }
+        updateState { it.copy(currentLaunchMode = null, presentationType = null) }
         updateLinkAccountOnLinkResult(result)
 
         when (currentLaunchMode) {
@@ -380,11 +386,10 @@ internal class LinkControllerInteractor @Inject constructor(
     }
 
     private fun handlePaymentMethodSelectionResult(result: LinkActivityResult) {
-        val isPresent = isPresentFlowActive
-        isPresentFlowActive = false
+        val presentationType = _state.value.presentationType
 
-        if (isPresent) {
-            when (result) {
+        when (presentationType) {
+            PresentationType.Full -> when (result) {
                 is LinkActivityResult.Canceled -> {
                     logger.debug("$tag: present canceled")
                     _presentResultFlow.tryEmit(LinkController.PresentResult.Canceled)
@@ -402,8 +407,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     logger.warning("$tag: present unexpected result: $result")
                 }
             }
-        } else {
-            when (result) {
+            PresentationType.PaymentMethods, null -> when (result) {
                 is LinkActivityResult.Canceled -> {
                     logger.debug("$tag: presentPaymentMethods canceled")
                     _presentPaymentMethodsResultFlow.tryEmit(
@@ -723,6 +727,7 @@ internal class LinkControllerInteractor @Inject constructor(
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
         val currentLaunchMode: LinkLaunchMode? = null,
+        val presentationType: PresentationType? = null,
     ) {
         val linkConfiguration: LinkConfiguration?
             get() = linkComponent?.configuration
