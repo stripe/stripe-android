@@ -38,7 +38,7 @@ internal class LinkControllerPlaygroundViewModel(
             }
         }
         viewModelScope.launch {
-            linkController.selectedPaymentMethodPreview.collect { preview ->
+            linkController.paymentMethodPreview.collect { preview ->
                 state.update { it.copy(selectedPaymentMethodPreview = preview) }
             }
         }
