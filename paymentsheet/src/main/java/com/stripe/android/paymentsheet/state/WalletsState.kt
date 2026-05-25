@@ -78,8 +78,8 @@ internal data class WalletsState(
 
     fun samsungPay(location: WalletLocation): SamsungPay? {
         return when (location) {
-            WalletLocation.HEADER -> samsungPay
-            WalletLocation.INLINE -> null
+            WalletLocation.HEADER -> null
+            WalletLocation.INLINE -> samsungPay
         }
     }
 

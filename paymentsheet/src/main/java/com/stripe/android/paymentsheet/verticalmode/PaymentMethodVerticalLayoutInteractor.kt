@@ -466,9 +466,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun createSamsungPayDisplayablePaymentMethod(): DisplayablePaymentMethod {
         return DisplayablePaymentMethod(
             code = "samsung_pay",
-            displayName = PaymentsCoreR.string.stripe_shop_pay.resolvableString,
-            iconResource = R.drawable.stripe_shop_pay_logo,
-            iconResourceNight = R.drawable.stripe_shop_pay_logo_white,
+            displayName = PaymentsCoreR.string.stripe_samsung_pay.resolvableString,
+            iconResource = R.drawable.stripe_ic_samsung_pay_compact,
+            iconResourceNight = R.drawable.stripe_ic_samsung_pay_compact,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             iconRequiresTinting = false,
