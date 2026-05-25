@@ -536,7 +536,6 @@ internal class ElementsSessionJsonParser(
         }
     }
 
-
     internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
