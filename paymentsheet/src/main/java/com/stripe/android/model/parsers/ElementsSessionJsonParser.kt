@@ -63,7 +63,6 @@ internal class ElementsSessionJsonParser(
         val customer = parseCustomer(
             json = json.optJSONObject(FIELD_CUSTOMER),
             enableLinkInSpm = flags[ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM] == true,
-            isCardArtEnabled = isCardArtEnabled(experimentsData),
         )
 
         val linkSettings = json.optJSONObject(FIELD_LINK_SETTINGS)
@@ -268,7 +267,6 @@ internal class ElementsSessionJsonParser(
     private fun parseCustomer(
         json: JSONObject?,
         enableLinkInSpm: Boolean,
-        isCardArtEnabled: Boolean,
     ): ElementsSession.Customer? {
         if (json == null) {
             return null
@@ -280,16 +278,8 @@ internal class ElementsSessionJsonParser(
             parsePaymentMethods(json)
         }
 
-        // Card art is a paid feature gated at the API resource level. The backend returns it as a
-        // separate top-level array (keyed by PM ID) to bypass those gates for Elements sessions.
-        // We merge it into each PaymentMethod.Card here so the rest of the SDK sees card art
-        // where it belongs — on the card object — rather than leaking this elements session backend workaround.
-        val mergedPaymentMethods = if (isCardArtEnabled) {
-            val cardArtMap = buildCardArtLookup(json)
-            mergeCardArt(paymentMethods, cardArtMap)
-        } else {
-            paymentMethods
-        }
+        val cardArtMap = buildCardArtLookup(json)
+        val mergedPaymentMethods = mergeCardArt(paymentMethods, cardArtMap)
 
         val customerSession = parseCustomerSession(json.optJSONObject(FIELD_CUSTOMER_SESSION))
             ?: return null
@@ -546,13 +536,8 @@ internal class ElementsSessionJsonParser(
         }
     }
 
-    private fun isCardArtEnabled(experimentsData: ElementsSession.ExperimentsData?): Boolean {
-        val variant = experimentsData?.experimentAssignments?.get(ExperimentAssignment.OCS_MOBILE_CARD_ART)
-        return variant == TREATMENT
-    }
 
     internal companion object {
-        private const val TREATMENT = "treatment"
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_ELEMENTS_SESSION_CONFIG_ID = "config_id"
