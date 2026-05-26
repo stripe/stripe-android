@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [FIXED][13146](https://github.com/stripe/stripe-android/pull/13146) Native 3ds2 no longer stops its host activity
+
 ### CryptoOnramp
 * [FIXED][13074](https://github.com/stripe/stripe-android/pull/13074) Fixed an issue with 3DS and Out of Band checks during checkout that caused a hang.
 
