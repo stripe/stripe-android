@@ -120,6 +120,7 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.GUEST
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_link_off_with_no_customer",
@@ -129,6 +130,7 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.GUEST
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_link_off_with_ek",
@@ -139,6 +141,7 @@ internal class TestLatency(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_link_off_with_cs",
@@ -149,6 +152,7 @@ internal class TestLatency(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_no_customer",
@@ -158,6 +162,7 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.GUEST
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_ek",
@@ -168,6 +173,7 @@ internal class TestLatency(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_cs",
@@ -178,6 +184,7 @@ internal class TestLatency(
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_ek_default_email",
@@ -209,6 +216,7 @@ internal class TestLatency(
                     settings[MerchantSettingsDefinition] = Merchant.US
                     settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.GUEST
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_google_pay_on_link_off_with_ek",
@@ -219,6 +227,7 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_google_pay_on_link_off_with_cs",
@@ -229,6 +238,7 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
                 testConfig(
                     testName = "test_google_pay_on_link_on_with_cs",
@@ -239,6 +249,7 @@ internal class TestLatency(
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
+                    settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 },
             )
         }

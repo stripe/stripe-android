@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.state
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
 import com.stripe.android.link.model.AccountStatus
@@ -17,6 +18,7 @@ import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.test.runTest
@@ -60,6 +62,81 @@ internal class DefaultCreateLinkStateTest {
             ),
             isLinkInlineSignupAvailableForSavedPaymentMethods = true,
         )
+
+    @Test
+    fun `invoke measures create link state substeps`() = runTest {
+        val durationProvider = FakeDurationProvider()
+        val createLinkState = createLinkStateFactory(durationProvider = durationProvider)
+
+        createLinkState(
+            elementsSession = createElementsSession(),
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateGetLinkDisabledReasons,
+                    reset = true,
+                )
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.End(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateGetLinkDisabledReasons,
+                )
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateCreateLinkConfiguration,
+                    reset = true,
+                )
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.End(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateCreateLinkConfiguration,
+                )
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateGetLinkAccountStatus,
+                    reset = true,
+                )
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.End(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateGetLinkAccountStatus,
+                )
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateRetrieveCustomerEmail,
+                    reset = true,
+                )
+            )
+        ).isTrue()
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.End(
+                    key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateRetrieveCustomerEmail,
+                )
+            )
+        ).isTrue()
+    }
 
     private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
         flags: Map<ElementsSession.Flag, Boolean>,
@@ -119,13 +196,15 @@ internal class DefaultCreateLinkStateTest {
 
     private fun createLinkStateFactory(
         cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory = FakeCardFundingFilterFactory(),
+        durationProvider: DurationProvider = FakeDurationProvider(),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },
             retrieveCustomerEmail = DefaultRetrieveCustomerEmail(FakeCustomerRepository()),
             linkStore = FakeLinkStore(),
             linkGateFactory = FakeLinkGate.Factory(FakeLinkGate()),
-            cardFundingFilterFactory = cardFundingFilterFactory
+            cardFundingFilterFactory = cardFundingFilterFactory,
+            durationProvider = durationProvider,
         )
     }
 

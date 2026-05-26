@@ -4590,12 +4590,14 @@ internal class DefaultPaymentElementLoaderTest {
             FakePaymentMethodMessagePromotionsHelper()
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
+        val durationProvider = FakeDurationProvider()
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,
             linkStore = linkStore,
             linkGateFactory = FakeLinkGate.Factory(linkGate),
-            cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory()
+            cardFundingFilterFactory = PaymentSheetCardFundingFilter.Factory(),
+            durationProvider = durationProvider,
         )
 
         return DefaultPaymentElementLoader(
@@ -4634,7 +4636,7 @@ internal class DefaultPaymentElementLoaderTest {
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
-            durationProvider = FakeDurationProvider(),
+            durationProvider = durationProvider,
         )
     }
 

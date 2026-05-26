@@ -4,6 +4,7 @@ import android.os.Parcelable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.gate.LinkGate
@@ -70,7 +71,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
     private val linkStore: LinkStore,
     private val linkGateFactory: LinkGate.Factory,
-    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory
+    private val cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory,
+    private val durationProvider: DurationProvider,
 ) : CreateLinkState {
 
     override suspend fun invoke(
@@ -80,25 +82,39 @@ internal class DefaultCreateLinkState @Inject constructor(
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
     ): LinkStateResult {
-        val linkDisabledReasons = getLinkDisabledReasons(
-            elementsSession = elementsSession,
-            configuration = configuration
-        )
+        val linkDisabledState = durationProvider.measureDuration(
+            key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateGetLinkDisabledReasons,
+        ) {
+            val linkDisabledReasons = getLinkDisabledReasons(
+                elementsSession = elementsSession,
+                configuration = configuration,
+            )
 
-        val isLinkDisabled = linkDisabledReasons.isNotEmpty()
-        if (isLinkDisabled) {
-            return LinkDisabledState(linkDisabledReasons)
+            LinkDisabledState(linkDisabledReasons).takeIf { linkDisabledReasons.isNotEmpty() }
+        }
+        if (linkDisabledState != null) {
+            return linkDisabledState
         }
 
-        val linkConfiguration = createLinkConfigurationWithoutValidation(
-            configuration = configuration,
-            elementsSession = elementsSession,
-            initializationMode = initializationMode,
-            customerMetadata = customerMetadata,
-            clientAttributionMetadata = clientAttributionMetadata,
-        )
-        val accountStatus = accountStatusProvider(linkConfiguration)
-        val loginState = accountStatus.toLoginState()
+        val linkConfiguration = durationProvider.measureDuration(
+            key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateCreateLinkConfiguration,
+        ) {
+            createLinkConfigurationWithoutValidation(
+                configuration = configuration,
+                elementsSession = elementsSession,
+                initializationMode = initializationMode,
+                customerMetadata = customerMetadata,
+                clientAttributionMetadata = clientAttributionMetadata,
+            )
+        }
+
+        val (accountStatus, loginState) = durationProvider.measureDuration(
+            key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateGetLinkAccountStatus,
+        ) {
+            val accountStatus = accountStatusProvider(linkConfiguration)
+            accountStatus to accountStatus.toLoginState()
+        }
+
         return LinkState(
             configuration = linkConfiguration,
             loginState = loginState,
@@ -222,7 +238,11 @@ internal class DefaultCreateLinkState @Inject constructor(
         val shippingDetails = configuration.shippingDetails
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
 
-        val resolvedEmail = retrieveCustomerEmail(configuration, customerMetadata)
+        val resolvedEmail = durationProvider.measureDuration(
+            key = DurationProvider.Key.PaymentSheetLoadCreateLinkStateRetrieveCustomerEmail,
+        ) {
+            retrieveCustomerEmail(configuration, customerMetadata)
+        }
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
             email = resolvedEmail,
