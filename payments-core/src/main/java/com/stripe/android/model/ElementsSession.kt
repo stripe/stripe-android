@@ -60,6 +60,7 @@ data class ElementsSession(
         val paymentMethods: List<PaymentMethod>,
         val defaultPaymentMethod: String?,
         val session: Session,
+        val email: String? = null,
     ) : StripeModel {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize

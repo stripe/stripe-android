@@ -431,14 +431,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             null
         }
 
-        val customerEmail = configuration.defaultBillingDetails?.email ?: customer?.let {
-            customerRepository.retrieveCustomer(
-                CustomerRepository.CustomerInfo(
-                    id = it.id,
-                    ephemeralKeySecret = it.ephemeralKeySecret
+        val customerEmail = configuration.defaultBillingDetails?.email
+            ?: (customer as? CustomerInfo.CustomerSession)?.elementsSessionCustomer?.email
+            ?: customer?.let {
+                customerRepository.retrieveCustomer(
+                    CustomerRepository.CustomerInfo(
+                        id = it.id,
+                        ephemeralKeySecret = it.ephemeralKeySecret
+                    )
                 )
-            )
-        }?.email
+            }?.email
 
         val merchantName = configuration.merchantDisplayName
 

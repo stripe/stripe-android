@@ -570,6 +570,40 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSession parses customer email when present in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(customerEmail = "customer@example.com")
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer?.email).isEqualTo("customer@example.com")
+    }
+
+    @Test
+    fun `ElementsSession returns null customer email when not present in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession()
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer?.email).isNull()
+    }
+
+    @Test
     fun `ElementsSession has 'unspecified' allow redisplay override`() {
         allowRedisplayTest(
             rawAllowRedisplayValue = "unspecified",

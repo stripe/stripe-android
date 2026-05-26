@@ -167,7 +167,8 @@ internal object ElementsSessionFixtures {
     )
 
     fun createPaymentIntentWithCustomerSession(
-        allowRedisplay: String? = "limited"
+        allowRedisplay: String? = "limited",
+        customerEmail: String? = null,
     ): JSONObject {
         return JSONObject(
             """
@@ -294,6 +295,7 @@ internal object ElementsSessionFixtures {
                   }
                 ],
                 "payment_methods_with_link_details": []
+                ${customerEmail?.let { ""","email": "$it"""" } ?: ""}
               }
             }
             """.trimIndent()

@@ -1739,7 +1739,49 @@ internal class DefaultPaymentElementLoaderTest {
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
+    fun `When using 'CustomerSession' & email present in elements session, use it for Link config without API call`() =
+        runTest {
+            val customerRepository = spy(FakeCustomerRepository())
+
+            val loader = createPaymentElementLoader(
+                customerRepo = customerRepository,
+                customer = ElementsSession.Customer(
+                    paymentMethods = PaymentMethodFactory.cards(1),
+                    session = ElementsSession.Customer.Session(
+                        id = "cuss_1",
+                        customerId = "cus_1",
+                        liveMode = false,
+                        apiKey = "ek_123",
+                        apiKeyExpiry = 555555555,
+                        components = ElementsSession.Customer.Components(
+                            mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+                            customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+                        ),
+                    ),
+                    defaultPaymentMethod = null,
+                    email = "customer@example.com",
+                )
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "id",
+                        clientSecret = "cuss_1",
+                    ),
+                    defaultBillingDetails = null,
+                ),
+                initializedViaCompose = false,
+            ).getOrThrow()
+
+            assertThat(result.linkState?.configuration?.customerInfo?.email)
+                .isEqualTo("customer@example.com")
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When using 'CustomerSession' & no email in elements session, customer email for Link config is fetched via API`() =
         runTest {
             val customerRepository = spy(
                 FakeCustomerRepository(
