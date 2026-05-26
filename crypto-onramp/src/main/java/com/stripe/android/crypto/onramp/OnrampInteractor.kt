@@ -605,7 +605,12 @@ internal class OnrampInteractor @Inject constructor(
                         kycInfo = null
                 )
             } ?: run {
-                OnrampCollectPaymentMethodResult.Failed(MissingPaymentMethodException())
+                val error = mapError(
+                    operation = Operation.CollectPaymentMethod,
+                    error = MissingPaymentMethodException(),
+                )
+                trackError(Operation.CollectPaymentMethod, error)
+                OnrampCollectPaymentMethodResult.Failed(error)
             }
         }
         is LinkController.PresentPaymentMethodsResult.Failed -> {
@@ -839,7 +844,7 @@ internal class OnrampInteractor @Inject constructor(
             _state.update {
                 it.copy(
                     checkoutState = CheckoutState(
-                        Status.Completed(OnrampCheckoutResult.Failed(PaymentFailedException()))
+                        Status.Completed(createAndTrackPaymentFailedCheckoutResult())
                     )
                 )
             }
@@ -988,13 +993,22 @@ internal class OnrampInteractor @Inject constructor(
                 if (paymentMethod?.type == PaymentMethod.Type.USBankAccount) {
                     OnrampCheckoutResult.Completed()
                 } else {
-                    OnrampCheckoutResult.Failed(PaymentFailedException())
+                    createAndTrackPaymentFailedCheckoutResult()
                 }
             }
-            StripeIntent.Status.RequiresPaymentMethod -> OnrampCheckoutResult.Failed(PaymentFailedException())
+            StripeIntent.Status.RequiresPaymentMethod -> createAndTrackPaymentFailedCheckoutResult()
             StripeIntent.Status.RequiresAction -> null // More handling needed
-            else -> OnrampCheckoutResult.Failed(PaymentFailedException())
+            else -> createAndTrackPaymentFailedCheckoutResult()
         }
+    }
+
+    private fun createAndTrackPaymentFailedCheckoutResult(): OnrampCheckoutResult.Failed {
+        val error = mapError(
+            operation = Operation.PerformCheckout,
+            error = PaymentFailedException(),
+        )
+        trackError(Operation.PerformCheckout, error)
+        return OnrampCheckoutResult.Failed(error)
     }
 
     private fun Status.RequiresNextAction.nextActionLaunchDeduplicationKey(): String {
