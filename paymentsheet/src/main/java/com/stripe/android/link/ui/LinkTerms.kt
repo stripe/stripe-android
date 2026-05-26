@@ -7,6 +7,7 @@ import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -15,7 +16,6 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.EmbeddableImage
 
@@ -41,15 +41,12 @@ internal fun LinkTerms(
             put(
                 "link_logo",
                 EmbeddableImage.Drawable(
-                    id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutBlack)
-                    } else {
-                        linkBrand.logoRes(LinkLogoStyle.TermsKnockoutWhite)
-                    },
+                    id = linkBrand.logoRes(LinkLogoStyle.InlineKnockout),
                     contentDescription = when (linkBrand) {
                         LinkBrand.Link -> com.stripe.android.R.string.stripe_link
                         LinkBrand.Onelink -> com.stripe.android.R.string.stripe_onelink
                     },
+                    colorFilter = ColorFilter.tint(MaterialTheme.stripeColors.subtitle),
                 )
             )
         }

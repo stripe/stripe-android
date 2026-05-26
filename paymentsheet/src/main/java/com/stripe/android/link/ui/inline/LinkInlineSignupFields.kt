@@ -136,8 +136,6 @@ internal fun LinkInlineSignupFields(
                         enabled = enabled,
                         controller = phoneNumberController,
                         moveToNextFieldOnceComplete = requiresNameCollection,
-                        // Don't steal focus when the phone field expands if default opt-in is on,
-                        // since the user hasn't explicitly interacted with the signup form yet.
                         requestFocusWhenShown = !allowsDefaultOptIn &&
                             phoneNumberController.initialPhoneNumber.isEmpty(),
                         imeAction = if (requiresNameCollection) {
