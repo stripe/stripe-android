@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentMethodFilter
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
@@ -131,22 +130,19 @@ internal class CreateCustomerStateTest {
     }
 
     @Test
-    fun `Legacy ephemeral key calls repository and sets null default`() = runScenario(
-        customerRepository = FakeCustomerRepository(
-            paymentMethods = PaymentMethodFactory.cards(3),
-        ),
-    ) {
+    fun `Legacy ephemeral key uses prefetched payment methods and sets null default`() = runScenario {
+        val prefetchedPaymentMethods = CompletableDeferred(
+            Result.success(PaymentMethodFactory.cards(3))
+        )
+
         val result = createCustomerState(
             customerMetadata = LEGACY_EK_METADATA,
+            prefetchedPaymentMethods = prefetchedPaymentMethods,
         )
 
         assertThat(result).isNotNull()
         assertThat(result!!.paymentMethods).hasSize(3)
         assertThat(result.defaultPaymentMethodId).isNull()
-
-        val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-        assertThat(request.customerId).isEqualTo("cus_1")
-        assertThat(request.ephemeralKeySecret).isEqualTo("ek_123")
     }
 
     @Test
@@ -163,7 +159,6 @@ internal class CreateCustomerStateTest {
 
         FakePaymentMethodFilter.test(filteredPaymentMethods = filteredCards) {
             val createCustomerState = CreateCustomerState(
-                customerRepository = customerRepository,
                 paymentMethodFilter = paymentMethodFilter,
             )
 
@@ -186,20 +181,15 @@ internal class CreateCustomerStateTest {
     }
 
     private fun runScenario(
-        customerRepository: FakeCustomerRepository = FakeCustomerRepository(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        Scenario(customerRepository = customerRepository).apply {
+        Scenario().apply {
             block()
-            customerRepository.ensureAllEventsConsumed()
         }
     }
 
-    private inner class Scenario(
-        val customerRepository: FakeCustomerRepository,
-    ) {
+    private class Scenario {
         private val createCustomerStateImpl = CreateCustomerState(
-            customerRepository = customerRepository,
             paymentMethodFilter = FakePaymentMethodFilter.noOp(),
         )
 
@@ -211,6 +201,7 @@ internal class CreateCustomerStateTest {
             metadata: com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata =
                 PaymentMethodMetadataFactory.create().copy(customerMetadata = customerMetadata),
             savedSelection: CompletableDeferred<SavedSelection> = CompletableDeferred(SavedSelection.None),
+            prefetchedPaymentMethods: PrefetchedPaymentMethods? = null,
         ): CustomerState? {
             val session = if (elementsSessionCustomer != elementsSession.customer) {
                 elementsSession.copy(customer = elementsSessionCustomer)
@@ -223,6 +214,7 @@ internal class CreateCustomerStateTest {
                 elementsSession = session,
                 metadata = metadata,
                 savedSelection = savedSelection,
+                prefetchedPaymentMethods = prefetchedPaymentMethods,
             )
         }
     }

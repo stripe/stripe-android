@@ -4624,9 +4624,9 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             createCustomerState = CreateCustomerState(
-                customerRepository = customerRepo,
                 paymentMethodFilter = paymentMethodFilter,
             ),
+            customerRepository = customerRepo,
             checkoutSessionLoader = CheckoutSessionLoader(),
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,

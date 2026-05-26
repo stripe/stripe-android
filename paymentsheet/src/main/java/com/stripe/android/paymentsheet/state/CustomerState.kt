@@ -7,7 +7,6 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -19,7 +18,6 @@ internal data class CustomerState(
 ) : Parcelable
 
 internal class CreateCustomerState @Inject constructor(
-    private val customerRepository: CustomerRepository,
     private val paymentMethodFilter: PaymentMethodFilter,
 ) {
     suspend operator fun invoke(
@@ -27,7 +25,7 @@ internal class CreateCustomerState @Inject constructor(
         elementsSession: ElementsSession,
         metadata: PaymentMethodMetadata,
         savedSelection: Deferred<SavedSelection>,
-        prefetchedPaymentMethods: PrefetchedPaymentMethods? = null,
+        prefetchedPaymentMethods: PrefetchedPaymentMethods?,
     ): CustomerState? {
         val customerMetadata = metadata.customerMetadata
         val customerState = when (customerMetadata) {
@@ -49,10 +47,9 @@ internal class CreateCustomerState @Inject constructor(
                 }
             }
             is CustomerMetadata.LegacyEphemeralKey -> {
-                createForLegacyEphemeralKey(
+               createForLegacyEphemeralKey(
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
-                        customerMetadata = customerMetadata,
                         prefetchedPaymentMethods = prefetchedPaymentMethods,
                     )
                 )
@@ -112,18 +109,16 @@ internal class CreateCustomerState @Inject constructor(
 
     private suspend fun retrieveCustomerPaymentMethods(
         metadata: PaymentMethodMetadata,
-        customerMetadata: CustomerMetadata.LegacyEphemeralKey,
-        prefetchedPaymentMethods: PrefetchedPaymentMethods? = null,
+        prefetchedPaymentMethods: PrefetchedPaymentMethods?,
     ): List<PaymentMethod> {
+        if (prefetchedPaymentMethods == null) {
+            // TODO: unexpected error.
+            return emptyList()
+        }
+
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
-        val paymentMethods = prefetchedPaymentMethods?.await()?.getOrThrow()
-            ?: customerRepository.getPaymentMethods(
-                customerId = customerMetadata.id,
-                ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                types = paymentMethodTypes,
-                silentlyFail = metadata.stripeIntent.isLiveMode,
-            ).getOrThrow()
+        val paymentMethods = prefetchedPaymentMethods.await().getOrThrow()
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails() &&

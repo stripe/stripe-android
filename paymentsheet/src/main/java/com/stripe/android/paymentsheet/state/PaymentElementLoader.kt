@@ -425,7 +425,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
         configuration: CommonConfiguration,
-    ): Deferred<Result<List<PaymentMethod>>>? {
+    ): PrefetchedPaymentMethods? {
         val customer = configuration.customer ?: return null
         val accessType = customer.accessType
         if (accessType !is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey) return null
