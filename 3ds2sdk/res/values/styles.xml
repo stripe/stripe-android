@@ -40,6 +40,7 @@
         <item name="android:editTextColor">@color/stripe_3ds2_text_edit</item>
         <item name="editTextColor">@color/stripe_3ds2_text_edit</item>
         <item name="textInputStyle">@style/Stripe3DS2TextInputLayout</item>
+        <item name="android:windowIsTranslucent">true</item>
     </style>
 
     <style name="Stripe3DS2Theme" parent="BaseStripe3DS2Theme" />

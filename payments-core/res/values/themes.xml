@@ -13,6 +13,10 @@
 
     <style name="StripeDefaultTheme" parent="StripeBaseTheme" />
 
+    <style name="Stripe3dsTransactionTheme" parent="StripeBaseTheme">
+        <item name="android:windowIsTranslucent">true</item>
+    </style>
+
     <!-- Theme used by Activities that do not show any UI, so the activity underneath them is still fully visible -->
     <style name="StripeTransparentTheme" parent="@style/Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:windowSoftInputMode">adjustResize</item>
