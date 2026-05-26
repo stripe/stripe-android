@@ -25,6 +25,8 @@ internal object CustomerSettingsDefinition :
             if (!configurationData.integrationType.isSptFlow()) {
                 add(option("Returning", CustomerType.RETURNING))
             }
+
+            add(option("Custom", CustomerType.CUSTOM))
         }
     }
 
@@ -32,14 +34,18 @@ internal object CustomerSettingsDefinition :
         value: CustomerType,
         checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
-        checkoutRequestBuilder.customer(value.backendParamValue)
+        if (value != CustomerType.CUSTOM) {
+            checkoutRequestBuilder.customer(value.backendParamValue)
+        }
     }
 
     override fun configure(
         value: CustomerType,
         customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
     ) {
-        customerEphemeralKeyRequestBuilder.customerType(value.backendParamValue)
+        if (value != CustomerType.CUSTOM) {
+            customerEphemeralKeyRequestBuilder.customerType(value.backendParamValue)
+        }
     }
 
     override fun configure(
@@ -82,6 +88,7 @@ internal object CustomerSettingsDefinition :
             CustomerType.GUEST.value to CustomerType.GUEST,
             CustomerType.NEW.value to CustomerType.NEW,
             CustomerType.RETURNING.value to CustomerType.RETURNING,
+            CustomerType.CUSTOM.value to CustomerType.CUSTOM,
         )
         return if (value.startsWith("cus_")) {
             CustomerType.Existing(value)
@@ -103,6 +110,8 @@ sealed class CustomerType(val value: String) {
     object NEW : CustomerType("new")
 
     object RETURNING : CustomerType("returning")
+
+    object CUSTOM : CustomerType("custom")
 
     class Existing(val customerId: String) : CustomerType(customerId) {
         override fun toString(): String {

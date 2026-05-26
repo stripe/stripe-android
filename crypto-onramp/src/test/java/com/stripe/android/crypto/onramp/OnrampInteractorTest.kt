@@ -12,12 +12,14 @@ import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
+import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
 import com.stripe.android.crypto.onramp.model.GetPlatformSettingsResponse
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
 import com.stripe.android.crypto.onramp.model.OnrampAttachKycInfoResult
 import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
+import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
@@ -53,7 +55,9 @@ import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowRes
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.DateOfBirth
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -70,6 +74,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class OnrampInteractorTest {
     private val linkController: LinkController = mock()
     private val cryptoApiRepository: CryptoApiRepository = mock()
@@ -77,14 +82,11 @@ class OnrampInteractorTest {
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory = mock {
         on { create(any()) } doReturn testAnalyticsService
     }
+    private val savedStateHandle = SavedStateHandle()
 
-    private val interactor: OnrampInteractor = OnrampInteractor(
-        application = RuntimeEnvironment.getApplication(),
-        linkController = linkController,
+    private val interactor: OnrampInteractor = createInteractor(
         cryptoApiRepository = cryptoApiRepository,
-        analyticsServiceFactory = analyticsServiceFactory,
-        checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
-        savedStateHandle = SavedStateHandle()
+        savedStateHandle = savedStateHandle
     )
 
     @Test
@@ -488,6 +490,9 @@ class OnrampInteractorTest {
     fun testOnHandleNextActionError() = runTest {
         val error = RuntimeException("Payment failed")
         interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+
+        interactor.startCheckout("cos_test_session_id")
 
         interactor.onHandleNextActionError(error)
 
@@ -496,6 +501,160 @@ class OnrampInteractorTest {
                 operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
                 error = error
             )
+        )
+
+        val completedStatus = interactor.state.value.checkoutState?.status
+        assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (completedStatus as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        assertThat((result as OnrampCheckoutResult.Failed).error).isSameInstanceAs(error)
+
+        interactor.startCheckout("cos_retry_session_id")
+
+        verify(cryptoApiRepository).getOnrampSession(
+            sessionId = "cos_retry_session_id",
+            sessionClientSecret = "test_secret"
+        )
+    }
+
+    @Test
+    fun testOnHandleNextActionCanceled() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        stubCheckoutRequiresNextAction()
+
+        interactor.startCheckout("cos_test_session_id")
+
+        interactor.onHandleNextActionCanceled()
+
+        val completedStatus = interactor.state.value.checkoutState?.status
+        assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (completedStatus as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Canceled::class.java)
+
+        interactor.startCheckout("cos_retry_session_id")
+
+        verify(cryptoApiRepository).getOnrampSession(
+            sessionId = "cos_retry_session_id",
+            sessionClientSecret = "test_secret"
+        )
+    }
+
+    @Test
+    fun markNextActionLaunched_returnsFalseForDuplicateRequiresNextAction() {
+        val status = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+        assertThat(interactor.markNextActionLaunched(status)).isFalse()
+
+        interactor.onHandleNextActionCanceled()
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+    }
+
+    @Test
+    fun markNextActionLaunched_returnsFalseAfterInteractorRecreation() {
+        val status = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+
+        val recreatedInteractor = createInteractor(
+            cryptoApiRepository = cryptoApiRepository,
+            savedStateHandle = savedStateHandle
+        )
+
+        assertThat(recreatedInteractor.markNextActionLaunched(status)).isFalse()
+    }
+
+    @Test
+    fun markNextActionLaunched_returnsTrueForDifferentNextActionPayloadSameType() {
+        val firstStatus = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(transactionId = "txn_123"),
+            platformKey = "pk_platform_123"
+        )
+        val secondStatus = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(transactionId = "txn_456"),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(firstStatus)).isTrue()
+        assertThat(interactor.markNextActionLaunched(secondStatus)).isTrue()
+    }
+
+    @Test
+    fun startCheckout_clearsPreviouslyLaunchedNextActionForSameSession() = runTest {
+        val status = CheckoutState.Status.RequiresNextAction(
+            onrampSessionId = "cos_test_session_id",
+            paymentIntent = paymentIntentRequiringCard3ds(),
+            platformKey = "pk_platform_123"
+        )
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+
+        stubCheckoutRequiresNextAction()
+        interactor.startCheckout("cos_test_session_id")
+
+        assertThat(interactor.markNextActionLaunched(status)).isTrue()
+    }
+
+    @Test
+    fun continueCheckout_recoversPendingCheckoutAfterInteractorRecreation() = runTest {
+        stubCheckoutRequiresNextAction()
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+        interactor.startCheckout("cos_test_session_id")
+
+        val recoveredRepository: CryptoApiRepository = mock()
+        val recreatedInteractor = createInteractor(
+            cryptoApiRepository = recoveredRepository,
+            savedStateHandle = savedStateHandle
+        )
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            recoveredRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+        whenever(
+            recoveredRepository.getOnrampSession(
+                sessionId = "cos_test_session_id",
+                sessionClientSecret = "test_secret"
+            )
+        ).thenReturn(
+            Result.success(
+                GetOnrampSessionResponse(
+                    id = "cos_test_session_id",
+                    clientSecret = "test_secret",
+                    paymentIntentClientSecret = "pi_test_secret"
+                )
+            )
+        )
+        whenever(
+            recoveredRepository.retrievePaymentIntent(
+                clientSecret = "pi_test_secret",
+                publishableKey = "pk_platform_123"
+            )
+        ).thenReturn(Result.success(paymentIntentRequiringCard3ds()))
+
+        recreatedInteractor.continueCheckout()
+
+        assertThat(recreatedInteractor.state.value.cryptoCustomerId).isEqualTo("cpt_123")
+        val checkoutStatus = recreatedInteractor.state.value.checkoutState?.status
+        assertThat(checkoutStatus).isInstanceOf(CheckoutState.Status.RequiresNextAction::class.java)
+        verify(recoveredRepository).getOnrampSession(
+            sessionId = "cos_test_session_id",
+            sessionClientSecret = "test_secret"
         )
     }
 
@@ -748,4 +907,77 @@ class OnrampInteractorTest {
             .appearance(mock())
             .cryptoCustomerId(cryptoCustomerId)
             .build()
+
+    private fun createInteractor(
+        cryptoApiRepository: CryptoApiRepository,
+        savedStateHandle: SavedStateHandle,
+    ): OnrampInteractor {
+        return OnrampInteractor(
+            application = RuntimeEnvironment.getApplication(),
+            linkController = linkController,
+            cryptoApiRepository = cryptoApiRepository,
+            analyticsServiceFactory = analyticsServiceFactory,
+            checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+            savedStateHandle = savedStateHandle
+        )
+    }
+
+    private suspend fun stubCheckoutRequiresNextAction() {
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+
+        whenever(
+            cryptoApiRepository.getOnrampSession(
+                sessionId = any(),
+                sessionClientSecret = any()
+            )
+        ).thenReturn(
+            Result.success(
+                GetOnrampSessionResponse(
+                    id = "cos_test_session_id",
+                    clientSecret = "test_secret",
+                    paymentIntentClientSecret = "pi_test_secret"
+                )
+            )
+        )
+
+        whenever(
+            cryptoApiRepository.retrievePaymentIntent(
+                clientSecret = "pi_test_secret",
+                publishableKey = "pk_platform_123"
+            )
+        ).thenReturn(
+            Result.success(paymentIntentRequiringCard3ds())
+        )
+    }
+
+    private fun paymentIntentRequiringCard3ds(
+        transactionId: String = "txn_123"
+    ): PaymentIntent {
+        return paymentIntent(
+            status = StripeIntent.Status.RequiresAction,
+            nextActionData = StripeIntent.NextActionData.SdkData.Use3DS2(
+                source = "src_123",
+                serverName = "server_name",
+                transactionId = transactionId,
+                serverEncryption = StripeIntent.NextActionData.SdkData.Use3DS2.DirectoryServerEncryption(
+                    directoryServerId = "dir_server_123",
+                    dsCertificateData = "cert_data",
+                    rootCertsData = listOf("root_cert"),
+                    keyId = "key_123"
+                ),
+                threeDS2IntentId = null,
+                publishableKey = "pk_platform_123"
+            )
+        )
+    }
 }

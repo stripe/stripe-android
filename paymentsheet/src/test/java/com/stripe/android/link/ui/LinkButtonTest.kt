@@ -43,20 +43,20 @@ class LinkButtonTest {
     }
 
     @Test
-    fun signedInButton_hasUsefulContentDescription_forNotlink() {
+    fun signedInButton_hasUsefulContentDescription_forOnelink() {
         composeRule.setContent {
             LinkButton(
                 state = LinkButtonState.Email("email@email.com"),
                 enabled = true,
                 onClick = {},
-                linkBrand = LinkBrand.Notlink,
+                linkBrand = LinkBrand.Onelink,
             )
         }
 
         composeRule.onNodeWithTag(
             LinkButtonTestTag
         ).onChildren().assertAny(
-            hasContentDescription("Pay with Notlink")
+            hasContentDescription("Pay with Onelink")
         )
     }
 
@@ -77,18 +77,18 @@ class LinkButtonTest {
     }
 
     @Test
-    fun signedOutButton_hasUsefulContentDescription_forNotlink() {
+    fun signedOutButton_hasUsefulContentDescription_forOnelink() {
         composeRule.setContent {
             LinkButton(
                 state = LinkButtonState.Default,
                 enabled = true,
                 onClick = {},
-                linkBrand = LinkBrand.Notlink,
+                linkBrand = LinkBrand.Onelink,
             )
         }
 
         composeRule.onNodeWithTag(
             LinkButtonTestTag
-        ).assertContentDescriptionContains("Pay with Notlink")
+        ).assertContentDescriptionContains("Pay with Onelink")
     }
 }

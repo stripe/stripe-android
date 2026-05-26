@@ -69,6 +69,7 @@ module LatencyTestUtils
       '--no-configuration-cache',
       gradle_task,
       "-Pandroid.testInstrumentationRunnerArguments.class=#{latency_test_class}",
+      '-PRUN_LATENCY_TESTS_IN_CI=true',
       "-PLATENCY_EXPERIMENT_ITERATIONS=#{sample_count}"
     ]
 
@@ -189,7 +190,8 @@ module LatencyTestUtils
 
   def extract_expected_test_count(output)
     match = output.match(/Starting (\d+) tests on/)
-    match && match[1].to_i
+    # Subtract 1 to ignore the warm up test case
+    (match && match[1].to_i) - 1
   end
 
   def valid_invocation_results?(results:, sample_count:, expected_test_count:)

@@ -23,6 +23,18 @@ internal class FakeDurationProvider(
         return duration
     }
 
+    override suspend fun <T> measureDuration(
+        key: DurationProvider.Key,
+        block: suspend () -> T,
+    ): T {
+        start(key)
+        return try {
+            block()
+        } finally {
+            end(key)
+        }
+    }
+
     fun has(call: Call): Boolean = calls.contains(call)
 
     sealed interface Call {

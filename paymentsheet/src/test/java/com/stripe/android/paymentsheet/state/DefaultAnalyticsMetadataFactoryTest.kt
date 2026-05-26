@@ -891,7 +891,7 @@ class DefaultAnalyticsMetadataFactoryTest {
             linkSignUpOptInFeatureEnabled = false,
             linkSignUpOptInInitialValue = false,
             linkSupportedPaymentMethodsOnboardingEnabled = emptyList(),
-            linkBrand = null,
+            linkBrand = LinkBrand.Link,
         )
     }
 

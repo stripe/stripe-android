@@ -124,7 +124,7 @@ internal fun SavedPaymentMethodTabLayoutUI(
 internal fun SavedPaymentMethodTabLayoutUI(
     paymentOptionsItems: List<PaymentOptionsItem>,
     selectedPaymentOptionsItem: PaymentOptionsItem?,
-    linkBrand: LinkBrand?,
+    linkBrand: LinkBrand,
     isEditing: Boolean,
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
@@ -371,7 +371,7 @@ private fun SavedPaymentMethodsTabLayout2Preview() {
         SavedPaymentMethodTabLayoutUI(
             paymentOptionsItems = PREVIEW_PAYMENT_OPTION_ITEMS_2,
             selectedPaymentOptionsItem = PREVIEW_PAYMENT_OPTION_ITEMS_2.first(),
-            linkBrand = LinkBrand.Notlink,
+            linkBrand = LinkBrand.Onelink,
             isEditing = false,
             isProcessing = false,
             onAddCardPressed = { },
@@ -414,7 +414,7 @@ private fun SavedPaymentMethodTab(
     isEnabled: Boolean,
     isEditing: Boolean,
     isSelected: Boolean,
-    linkBrand: LinkBrand?,
+    linkBrand: LinkBrand,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
     onModifyItem: (DisplayableSavedPaymentMethod) -> Unit,
@@ -547,7 +547,7 @@ private fun LinkTab(
 @Composable
 private fun SavedPaymentMethodTab(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
-    linkBrand: LinkBrand?,
+    linkBrand: LinkBrand,
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
@@ -558,9 +558,7 @@ private fun SavedPaymentMethodTab(
 ) {
     val labelIcon = paymentMethod.paymentMethod.getLabelIcon()
     val labelText = paymentMethod.paymentMethod.getLabel(
-        // linkBrand is null only when Link is disabled, in which case the brand-dependent paths
-        // (isLinkPassthroughMode) are unreachable anyway.
-        linkBrand = linkBrand ?: LinkBrand.Link,
+        linkBrand = linkBrand,
         canShowSublabel = false,
     )?.resolve() ?: return
 
@@ -583,10 +581,7 @@ private fun SavedPaymentMethodTab(
             isEnabled = isEnabled,
             isClickable = !isEditing,
             iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(
-                // Link brand should never be null here when it actually matters, i.e. when Link is supported
-                // and the payment method is a Link payment method. In other cases, it will be ignored by
-                // getSavedPaymentMethodIcon.
-                linkBrand = linkBrand ?: LinkBrand.Link,
+                linkBrand = linkBrand,
                 showNightIcon = !MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor(),
             ),
             cardArtUrl = paymentMethod.paymentMethod.card?.cardArt?.artImage?.url,

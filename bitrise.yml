@@ -366,6 +366,33 @@ workflows:
           title: Export PaymentSheet E2E test results
           inputs:
             - test_title: PaymentSheet E2E tests
+  run-paymentsheet-latency-synthetics:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Install Ruby via asdf
+          inputs:
+            - content: asdf install ruby 3.2.4
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Report PaymentSheet latency synthetics
+          timeout: 2400
+          inputs:
+            - content: ruby scripts/report_latency_synthetics.rb
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet latency test results
+          inputs:
+            - test_title: PaymentSheet latency synthetics
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.x-large
   run-crypto-onramp-example-e2e-tests:
     before_run:
       - start_emulator

@@ -32,6 +32,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.di.FinancialConnectionsSingletonSharedComponentHolder
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.CreateInstantDebitsResult
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
@@ -72,6 +73,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -94,8 +96,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
+    private val currentLinkBrand: CurrentLinkBrand,
     @Named(APPLICATION_ID) private val applicationId: String,
-    initialState: FinancialConnectionsSheetNativeState,
+    private val initialState: FinancialConnectionsSheetNativeState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
     initialState,
     nativeAuthFlowCoordinator
@@ -105,11 +108,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
 
-    private val defaultTopAppBarState: TopAppBarState by lazy {
+    private val defaultTopAppBarState: TopAppBarState
         // The first pane may choose to hide the Stripe logo. Therefore, let's hide it by default
         // on the first pane.
-        initialState.toTopAppBarState(forceHideStripeLogo = true)
-    }
+        get() = initialState.toTopAppBarState(
+            linkBrand = currentLinkBrand(),
+            forceHideStripeLogo = true
+        )
 
     private val currentPane = MutableStateFlow(initialState.initialPane)
     private val topAppBarStateUpdatesByPane = MutableStateFlow(
@@ -144,6 +149,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                     is Message.UpdateTopAppBar -> {
                         updateTopAppBarState(message.update)
+                    }
+                }
+            }
+        }
+        viewModelScope.launch {
+            currentLinkBrand.stateFlow.collect { linkBrand ->
+                setState { copy(linkBrand = linkBrand) }
+                topAppBarStateUpdatesByPane.update { paneToTopAppBarState ->
+                    paneToTopAppBarState.mapValues { (_, topAppBarState) ->
+                        topAppBarState.copy(linkBrand = linkBrand)
                     }
                 }
             }
@@ -556,7 +571,7 @@ internal data class FinancialConnectionsSheetNativeState(
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         theme = args.initialSyncResponse.manifest.theme?.toLocalTheme() ?: Theme.default,
-        linkBrand = args.initialSyncResponse.manifest.linkBrand ?: LinkBrand.Link,
+        linkBrand = args.initialSyncResponse.manifest.linkBrand,
         viewEffect = null,
         isLinkWithStripe = args.initialSyncResponse.manifest.isLinkWithStripe ?: false,
         manualEntryUsesMicrodeposits = args.initialSyncResponse.manifest.manualEntryUsesMicrodeposits,
@@ -639,6 +654,7 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
 
 private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
     forceHideStripeLogo: Boolean,
+    linkBrand: LinkBrand,
 ): TopAppBarState {
     return TopAppBarState(
         hideStripeLogo = reducedBranding,

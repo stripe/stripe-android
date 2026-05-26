@@ -19,7 +19,6 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.CardArtExperimentModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.injection.PaymentSheetCommonModule
@@ -50,7 +49,6 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
-        CardArtExperimentModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class
     ]

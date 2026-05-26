@@ -26,12 +26,13 @@ import com.stripe.android.link.LinkLaunchMode
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.updateLinkAccount
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.link.gate.LinkGate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.model.LinkBrand
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -176,8 +177,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 onUserSelection()
             },
             onLinkPressed = {
-                if (linkConfiguration?.linkBrand != null) {
-                    updateSelection(Link(linkConfiguration.linkBrand))
+                if (linkConfiguration != null) {
+                    updateSelection(Link(linkConfiguration.effectiveLinkBrand(linkAccountInfo.account)))
                     onUserSelection()
                 }
             },
@@ -192,7 +193,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 hasLinkWithSelectedPayment.not(),
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
-            linkBrand = linkConfiguration?.linkBrand ?: LinkBrand.Link,
+            linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccountInfo.account),
         )
     }
 
@@ -309,11 +310,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 // Should always have Link configuration here.
                 val linkConfiguration = paymentMethodMetadata.value?.linkState?.configuration
                     ?: return
+                val linkBrand =
+                    linkConfiguration.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
                 _paymentOptionsActivityResult.tryEmit(
                     PaymentOptionsActivityResult.Succeeded(
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         paymentSelection = Link(
-                            brand = linkConfiguration.linkBrand,
+                            brand = linkBrand,
                             selectedPayment = result.selectedPayment,
                             shippingAddress = result.shippingAddress,
                         ),

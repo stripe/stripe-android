@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -82,8 +83,19 @@ internal class LinkActivityViewModel @Inject constructor(
     val confirmationHandler = confirmationHandlerFactory.create(viewModelScope)
     val linkConfirmationHandler = linkConfirmationHandlerFactory.create(confirmationHandler)
 
-    private val _linkAppBarState = MutableStateFlow(LinkAppBarState.initial(linkConfiguration.linkBrand))
+    private val _linkAppBarState = MutableStateFlow(
+        LinkAppBarState.initial(linkConfiguration.effectiveLinkBrand(linkAccount))
+    )
     val linkAppBarState: StateFlow<LinkAppBarState> = _linkAppBarState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            linkAccountManager.linkAccountInfo.collect { accountUpdate ->
+                val linkBrand = linkConfiguration.effectiveLinkBrand(accountUpdate.account)
+                _linkAppBarState.update { it.copy(linkBrand = linkBrand) }
+            }
+        }
+    }
 
     // Enable replay because the result can be emitted during `onCreate` while observation occurs
     // in the Compose UI, which is invoked after `onCreate`.
@@ -175,7 +187,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 currentEntry = currentEntry,
                 previousEntryRoute = previousEntry,
                 consumerIsSigningUp = linkAccount?.completedSignup == true,
-                linkBrand = linkConfiguration.linkBrand,
+                linkBrand = linkConfiguration.effectiveLinkBrand(linkAccount),
             )
         }
     }

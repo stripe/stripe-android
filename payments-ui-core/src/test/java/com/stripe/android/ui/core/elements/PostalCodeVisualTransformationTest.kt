@@ -43,4 +43,31 @@ internal class PostalCodeVisualTransformationTest {
         Truth.assertThat(transform.filter(AnnotatedString("a0a0a0")).text.text)
             .isEqualTo("A0A 0A0")
     }
+
+    @Test
+    fun `verify GB postal`() {
+        val transform = PostalCodeVisualTransformation(
+            PostalCodeConfig.CountryPostalFormat.GB
+        )
+        Truth.assertThat(transform.filter(AnnotatedString("SW1X7XL")).text.text)
+            .isEqualTo("SW1X 7XL")
+    }
+
+    @Test
+    fun `verify GB postal short code`() {
+        val transform = PostalCodeVisualTransformation(
+            PostalCodeConfig.CountryPostalFormat.GB
+        )
+        Truth.assertThat(transform.filter(AnnotatedString("M11AA")).text.text)
+            .isEqualTo("M1 1AA")
+    }
+
+    @Test
+    fun `verify GB postal with 3 or fewer characters`() {
+        val transform = PostalCodeVisualTransformation(
+            PostalCodeConfig.CountryPostalFormat.GB
+        )
+        Truth.assertThat(transform.filter(AnnotatedString("SW1")).text.text)
+            .isEqualTo("SW1")
+    }
 }

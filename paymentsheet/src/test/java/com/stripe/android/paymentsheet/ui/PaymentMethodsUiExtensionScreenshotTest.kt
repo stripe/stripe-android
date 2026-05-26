@@ -141,7 +141,7 @@ class PaymentMethodsUiExtensionScreenshotTest {
         }.plus(
             getLinkIcon(brand = LinkBrand.Link, showNightIcon = showNightIcon)
         ).plus(
-            getLinkIcon(brand = LinkBrand.Notlink, showNightIcon = showNightIcon)
+            getLinkIcon(brand = LinkBrand.Onelink, showNightIcon = showNightIcon)
         ).plus(
             getSepaIcon(showNightIcon = showNightIcon)
         )

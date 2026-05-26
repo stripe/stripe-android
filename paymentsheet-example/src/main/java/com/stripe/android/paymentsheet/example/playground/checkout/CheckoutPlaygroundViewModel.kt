@@ -104,10 +104,6 @@ internal class CheckoutPlaygroundViewModel(
         checkout.updateTaxId(type, value)
     }
 
-    fun refresh() = performWhileLoading {
-        checkout.refresh()
-    }
-
     private fun performWhileLoading(block: suspend () -> Result<Unit>) {
         viewModelScope.launch {
             block().onSuccess {

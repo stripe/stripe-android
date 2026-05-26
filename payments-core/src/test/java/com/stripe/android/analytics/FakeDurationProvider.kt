@@ -23,6 +23,11 @@ internal class FakeDurationProvider(
         return duration
     }
 
+    override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
+        calls.add(Call.Measure(key))
+        return block()
+    }
+
     fun has(call: Call): Boolean = calls.contains(call)
 
     sealed interface Call {
@@ -33,5 +38,7 @@ internal class FakeDurationProvider(
         data class Elapsed(override val key: DurationProvider.Key) : Call
 
         data class End(override val key: DurationProvider.Key) : Call
+
+        data class Measure(override val key: DurationProvider.Key) : Call
     }
 }

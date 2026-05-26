@@ -63,6 +63,47 @@ class OnrampPresenterCoordinatorTest {
             .isInstanceOf(OnrampCheckoutResult.Completed::class.java)
     }
 
+    @Test
+    fun checkoutStateCompletedCanceled_callsCallbackWithCanceled() = runTest {
+        val onrampStateFlow = MutableStateFlow(OnrampState())
+        createCoordinator(onrampStateFlow)
+
+        onrampStateFlow.value = OnrampState(
+            checkoutState = CheckoutState(
+                status = Status.Completed(OnrampCheckoutResult.Canceled())
+            )
+        )
+        testScope.testScheduler.advanceUntilIdle()
+
+        val callbackCaptor = argumentCaptor<OnrampCheckoutResult>()
+        verify(checkoutCallback).onResult(callbackCaptor.capture())
+
+        assertThat(callbackCaptor.firstValue)
+            .isInstanceOf(OnrampCheckoutResult.Canceled::class.java)
+    }
+
+    @Test
+    fun checkoutStateCompletedFailed_callsCallbackWithFailed() = runTest {
+        val error = RuntimeException("Payment failed")
+        val onrampStateFlow = MutableStateFlow(OnrampState())
+        createCoordinator(onrampStateFlow)
+
+        onrampStateFlow.value = OnrampState(
+            checkoutState = CheckoutState(
+                status = Status.Completed(OnrampCheckoutResult.Failed(error))
+            )
+        )
+        testScope.testScheduler.advanceUntilIdle()
+
+        val callbackCaptor = argumentCaptor<OnrampCheckoutResult>()
+        verify(checkoutCallback).onResult(callbackCaptor.capture())
+
+        assertThat(callbackCaptor.firstValue)
+            .isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        assertThat((callbackCaptor.firstValue as OnrampCheckoutResult.Failed).error)
+            .isSameInstanceAs(error)
+    }
+
     private fun createCoordinator(
         onrampStateFlow: MutableStateFlow<OnrampState> = MutableStateFlow(OnrampState())
     ): OnrampPresenterCoordinator {

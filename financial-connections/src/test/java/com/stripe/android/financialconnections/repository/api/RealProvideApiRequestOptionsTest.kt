@@ -111,6 +111,7 @@ class RealProvideApiRequestOptionsTest {
             phoneNumber = "(***) *** **12",
             isVerified = isVerified,
             publishableKey = publishableKey,
+            linkBrand = null,
         )
     }
 }

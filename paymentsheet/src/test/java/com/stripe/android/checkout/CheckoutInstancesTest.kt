@@ -3,7 +3,6 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -104,7 +103,7 @@ class CheckoutInstancesTest {
         val requestArrived = CountDownLatch(1)
         val holdResponse = CountDownLatch(1)
 
-        networkRule.checkoutInit { response ->
+        networkRule.checkoutUpdate { response ->
             requestArrived.countDown()
             holdResponse.await()
             response.setBody("{}")
@@ -112,7 +111,7 @@ class CheckoutInstancesTest {
 
         runBlocking {
             val job = launch(Dispatchers.IO) {
-                checkout.refresh()
+                checkout.removePromotionCode()
             }
 
             assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()

@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Nomor rekening Anda tidak dapat diakses untuk saat ini</string>
   <string name="stripe_close_dialog_networking_desc">Jika Anda membatalkan sekarang, rekening akan ditautkan ke %1$s tetapi tidak akan disimpan ke Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Jika Anda membatalkan sekarang, rekening akan ditautkan ke bisnis ini tetapi tidak akan disimpan ke Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Jika membatalkan sekarang, akun Anda akan ditautkan ke bisnis ini tetapi tidak akan disimpan ke %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Jika membatalkan sekarang, akun Anda akan ditautkan ke %1$s tetapi tidak akan disimpan ke %2$s.</string>
   <string name="stripe_error_cta_close">Tutup</string>
   <string name="stripe_error_cta_manual_entry">Masukkan detail bank secara manual</string>
   <string name="stripe_error_cta_retry">Coba lagi</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Masukkan detail bank</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Batalkan</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Lanjutkan dengan Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Lanjutkan dengan %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Tidak sekarang</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Gunakan informasi yang sebelumnya disimpan pada akun Link Anda.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Gunakan informasi yang sebelumnya Anda simpan dengan akun %1$s.</string>
   <string name="stripe_networking_link_login_warmup_title">Lanjutkan dengan Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Lanjutkan dengan %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Tidak sekarang</string>
   <string name="stripe_networking_save_to_link_verification_title">Konfirmasikan diri Anda</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Pilih bank yang berbeda</string>
   <string name="stripe_search">Cari</string>
   <string name="stripe_success_pane_desc_link_error_plural">Rekening Anda telah terhubung tetapi tidak dapat disimpan pada Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Akun Anda terhubung tetapi tidak dapat disimpan dengan %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Rekening Anda telah terhubung tetapi tidak dapat disimpan pada Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Akun Anda terhubung tetapi tidak dapat disimpan dengan %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Rekening Anda telah terhubung dan disimpan pada Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Akun Anda terhubung dan disimpan dengan %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Rekening Anda telah terhubung dan disimpan pada Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Akun Anda terhubung dan disimpan dengan %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Kami akan mengirimkan deposit mikro ke rekening ••••%1$s dalam waktu 1–2 hari dan email dengan instruksi lebih lanjut.</string>
   <string name="stripe_success_pane_desc_plural">Rekening Anda telah terhubung</string>
   <string name="stripe_success_pane_desc_singular">Rekening Anda telah terhubung</string>

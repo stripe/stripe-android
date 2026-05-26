@@ -607,6 +607,71 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun linkSelection_brandUpdates_whenWalletsStateLinkBrandChanges() {
+        runScenario(paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes) {
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList()
+            )
+            interactor.state.value.displayablePaymentMethods.first { it.code == "link" }.onClick()
+            assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                link = WalletsState.Link(
+                    state = LinkButtonState.Email("email@email.com"),
+                    linkBrand = LinkBrand.Onelink,
+                ),
+                walletsAllowedInHeader = emptyList(),
+            )
+
+            assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Onelink))
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+        }
+    }
+
+    @Test
+    fun linkSelection_brandNotUpdated_whenWalletsStateBrandUnchanged() {
+        runScenario(paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes) {
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList()
+            )
+            interactor.state.value.displayablePaymentMethods.first { it.code == "link" }.onClick()
+            assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList(),
+            )
+
+            // Brand unchanged — no new selection event.
+            assertThat(selection.value).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+        }
+    }
+
+    @Test
+    fun nonLinkSelection_notAffected_whenWalletsStateLinkBrandChanges() {
+        runScenario(paymentMethodMetadata = metadataWithOnlyPaymentMethodTypes) {
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                walletsAllowedInHeader = emptyList()
+            )
+            interactor.state.value.displayablePaymentMethods.first { it.code == "google_pay" }.onClick()
+            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(updateSelectionTurbine.awaitItem()).isFalse()
+
+            walletsState.value = linkAndGooglePayWalletState.copy(
+                link = WalletsState.Link(
+                    state = LinkButtonState.Email("email@email.com"),
+                    linkBrand = LinkBrand.Onelink,
+                ),
+                walletsAllowedInHeader = emptyList(),
+            )
+
+            // Google Pay selection is unaffected.
+            assertThat(selection.value).isEqualTo(PaymentSelection.GooglePay)
+        }
+    }
+
+    @Test
     fun walletDisplayablePaymentMethodsLink_invokesRowSelectionCallback() {
         var rowSelectionCallbackInvoked = false
         runScenario(

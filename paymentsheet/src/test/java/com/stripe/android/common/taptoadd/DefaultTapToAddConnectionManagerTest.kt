@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.isInstanceOf
+import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.testing.FakeErrorReporter
@@ -56,28 +57,6 @@ class DefaultTapToAddConnectionManagerTest {
         TapToAddConnectionManager.ConnectionConfig(merchantDisplayName = "Test Merchant")
 
     @Test
-    fun `init initializes terminal when not already initialized`() = test(
-        isInitialized = false,
-        autoCheckIsInitializedCall = false,
-    ) {
-        assertThat(wrapperScenario.isInitializedCalls.awaitItem()).isNotNull()
-
-        val initTerminalCall = wrapperScenario.initTerminalCalls.awaitItem()
-
-        assertThat(initTerminalCall.context).isEqualTo(context)
-        assertThat(initTerminalCall.listener).isEqualTo(manager)
-    }
-
-    @Test
-    fun `init does not initialize terminal when already initialized`() = test(
-        isInitialized = true,
-        autoCheckIsInitializedCall = false,
-    ) {
-        assertThat(wrapperScenario.isInitializedCalls.awaitItem()).isNotNull()
-        wrapperScenario.initTerminalCalls.expectNoEvents()
-    }
-
-    @Test
     fun `isSupported returns true when terminal supports tap to add`() = test(
         terminalInstance = mock {
             mockSupportedReaderResult(ReaderSupportResult.Supported)
@@ -123,6 +102,19 @@ class DefaultTapToAddConnectionManagerTest {
         }
     ) {
         assertThat(manager.isSupported).isFalse()
+    }
+
+    @Test
+    fun `isSupported returns false when callbackRetriever has no callback`() = test(
+        hasCallback = false,
+        autoCheckIsInitializedCall = false,
+        terminalInstance = mock {
+            mockSupportedReaderResult(ReaderSupportResult.Supported)
+        }
+    ) {
+        assertThat(manager.isSupported).isFalse()
+
+        wrapperScenario.isInitializedCalls.expectNoEvents()
     }
 
     @Test
@@ -692,10 +684,14 @@ class DefaultTapToAddConnectionManagerTest {
         terminalInstance: Terminal = mock(),
         autoCheckIsInitializedCall: Boolean = true,
         isSimulated: Boolean = true,
+        hasCallback: Boolean = true,
         block: suspend Scenario.() -> Unit
     ) = runTest(UnconfinedTestDispatcher()) {
         val errorReporter = FakeErrorReporter()
         val logger = FakeLogger()
+        val callbackRetriever = FakeCreateCardPresentSetupIntentCallbackRetriever(
+            hasCallback = hasCallback,
+        )
 
         TestTerminalWrapper.test(
             isInitialized = isInitialized,
@@ -712,7 +708,8 @@ class DefaultTapToAddConnectionManagerTest {
                         isSimulatedProvider = object : TapToAddIsSimulatedProvider {
                             override fun get(): Boolean = isSimulated
                         },
-                        paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") }
+                        paymentConfiguration = { PaymentConfiguration(publishableKey = "pk_test") },
+                        callbackRetriever = callbackRetriever,
                     ),
                     terminalInstance = terminalInstance,
                     errorReporter = errorReporter,
@@ -740,4 +737,14 @@ class DefaultTapToAddConnectionManagerTest {
         val errorReporter: FakeErrorReporter,
         val wrapperScenario: TestTerminalWrapper.Scenario
     )
+
+    private class FakeCreateCardPresentSetupIntentCallbackRetriever(
+        private val hasCallback: Boolean,
+    ) : CreateCardPresentSetupIntentCallbackRetriever {
+        override fun hasCallback(): Boolean = hasCallback
+
+        override suspend fun waitForCallback(): CreateCardPresentSetupIntentCallback {
+            error("Not expected to be called in connection manager tests")
+        }
+    }
 }

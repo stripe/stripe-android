@@ -153,36 +153,6 @@ class CheckoutTest {
     }
 
     @Test
-    fun `refresh updates checkoutSession on success`() = runCreateWithStateScenario {
-        networkRule.checkoutInit { response ->
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-
-        assertThat(checkoutSessionTurbine.awaitItem().totalSummary).isNull()
-
-        val result = checkout.refresh()
-
-        val updated = checkoutSessionTurbine.awaitItem()
-        result.getOrThrow()
-        assertThat(updated.totalSummary).isNotNull()
-    }
-
-    @Test
-    fun `refresh returns failure on error response`() = runCreateWithStateScenario {
-        networkRule.checkoutInit { response ->
-            response.setResponseCode(500)
-            response.setBody("""{"error": {"message": "Internal server error"}}""")
-        }
-
-        val initial = checkoutSessionTurbine.awaitItem()
-
-        val result = checkout.refresh()
-        assertThat(result.isFailure).isTrue()
-
-        assertThat(checkout.checkoutSession.value).isEqualTo(initial)
-    }
-
-    @Test
     fun `updateLineItemQuantity updates checkoutSession on success`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("updated_line_item_quantity[line_item_id]", "li_1"),

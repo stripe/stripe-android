@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.ConsumerSessionProvider
 import com.stripe.android.model.EmailSource
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import dagger.assisted.Assisted
@@ -207,6 +208,8 @@ internal data class NetworkingLinkLoginWarmupState(
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val continueAsync: Async<Unit> = Uninitialized,
     val isInstantDebits: Boolean = false,
+    // Defaults to Link so tests that don't exercise branding can omit this parameter.
+    val linkBrand: LinkBrand = LinkBrand.Link,
 ) {
 
     val secondaryButtonLabel: Int
@@ -225,6 +228,7 @@ internal data class NetworkingLinkLoginWarmupState(
         payload = Uninitialized,
         disableNetworkingAsync = Uninitialized,
         isInstantDebits = state.isLinkWithStripe,
+        linkBrand = state.linkBrand,
     )
 
     data class Payload(

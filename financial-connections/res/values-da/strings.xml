@@ -19,6 +19,8 @@
   <string name="stripe_attachlinkedpaymentaccount_error_title">Der kunne ikke opnås adgang til dit kontonummer på nuværende tidspunkt</string>
   <string name="stripe_close_dialog_networking_desc">Hvis du annullerer nu, vil din konto blive linket til %1$s, men den vil ikke blive gemt i Link.</string>
   <string name="stripe_close_dialog_networking_desc_no_business">Hvis du annullerer nu, vil din konto blive linket til denne virksomhed, men den vil ikke blive gemt i Link.</string>
+  <string name="stripe_close_dialog_networking_desc_no_business_with_brand">Hvis du annullerer nu, vil din konto blive knyttet til denne virksomhed, men den vil ikke blive gemt til %1$s.</string>
+  <string name="stripe_close_dialog_networking_desc_with_brand">Hvis du annullerer nu, vil din konto blive knyttet til %1$s, men den vil ikke blive gemt til %2$s.</string>
   <string name="stripe_error_cta_close">Luk</string>
   <string name="stripe_error_cta_manual_entry">Indtast bankoplysninger manuelt</string>
   <string name="stripe_error_cta_retry">Prøv igen</string>
@@ -60,10 +62,13 @@
   <string name="stripe_manualentry_title">Angiv bankoplysninger</string>
   <string name="stripe_networking_link_login_warmup_cta_cancel">Annuller</string>
   <string name="stripe_networking_link_login_warmup_cta_continue">Fortsæt med Link</string>
+  <string name="stripe_networking_link_login_warmup_cta_continue_with_brand">Fortsæt med %1$s</string>
   <string name="stripe_networking_link_login_warmup_cta_skip">Ikke nu</string>
   <!-- Networking warmup -->
   <string name="stripe_networking_link_login_warmup_description">Brug oplysninger, du tidligere har gemt på din Link-konto.</string>
+  <string name="stripe_networking_link_login_warmup_description_with_brand">Brug oplysninger, du tidligere har gemt med din %1$s-konto.</string>
   <string name="stripe_networking_link_login_warmup_title">Fortsæt med Link</string>
+  <string name="stripe_networking_link_login_warmup_title_with_brand">Fortsæt med %1$s</string>
   <string name="stripe_networking_save_to_link_verification_cta_negative">Ikke nu</string>
   <string name="stripe_networking_save_to_link_verification_title">Bekræft, at det er dig</string>
   <!-- Networking signup -->
@@ -76,9 +81,13 @@
   <string name="stripe_prepane_choose_different_bank_cta">Vælg en anden bank</string>
   <string name="stripe_search">Søg</string>
   <string name="stripe_success_pane_desc_link_error_plural">Dine konti blev tilsluttet, men de kunne ikke gemmes med Link.</string>
+  <string name="stripe_success_pane_desc_link_error_plural_with_brand">Dine konti var tilknyttet, men kunne ikke gemmes med %1$s.</string>
   <string name="stripe_success_pane_desc_link_error_singular">Din konto blev tilsluttet, men den kunne ikke gemmes med Link.</string>
+  <string name="stripe_success_pane_desc_link_error_singular_with_brand">Din konto var tilknyttet, men kunne ikke gemmes med %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_plural">Dine konti blev tilsluttet og gemt med Link.</string>
+  <string name="stripe_success_pane_desc_link_success_plural_with_brand">Dine konti blev tilknyttet og gemt med %1$s.</string>
   <string name="stripe_success_pane_desc_link_success_singular">Din konto blev tilsluttet og gemt med Link.</string>
+  <string name="stripe_success_pane_desc_link_success_singular_with_brand">Din konto blev tilknyttet og gemt med %1$s.</string>
   <string name="stripe_success_pane_desc_microdeposits">Du kan forvente mikroindskud på kontoen ••••%1$s inden for 1-2 dage og en e-mail med yderligere instruktioner.</string>
   <string name="stripe_success_pane_desc_plural">Dine konti blev tilsluttet</string>
   <string name="stripe_success_pane_desc_singular">Din konto blev tilsluttet</string>

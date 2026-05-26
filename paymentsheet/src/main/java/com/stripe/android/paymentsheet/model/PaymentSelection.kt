@@ -441,7 +441,7 @@ internal fun PaymentSelection.label(linkBrand: LinkBrand?): ResolvableString =
 private fun getSavedLabel(selection: PaymentSelection.Saved, linkBrand: LinkBrand?): ResolvableString? {
     return selection.paymentMethod.getLabel(
         // Fallback is safe: Link passthrough PMs only exist when Link is enabled, so linkBrand is always non-null
-        // in practice. The null case guards against construction sites that don't have link state available.
+        // in practice. The null case guards against construction sites that don't have Link state available.
         linkBrand = linkBrand ?: LinkBrand.Link,
         canShowSublabel = true,
     )

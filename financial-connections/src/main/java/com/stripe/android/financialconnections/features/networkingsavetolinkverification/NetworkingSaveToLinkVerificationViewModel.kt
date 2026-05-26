@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
+import com.stripe.android.financialconnections.domain.CurrentLinkBrand
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
@@ -55,6 +56,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
     private val getCachedAccounts: GetCachedAccounts,
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
+    private val currentLinkBrand: CurrentLinkBrand,
     private val logger: Logger
 ) : FinancialConnectionsViewModel<NetworkingSaveToLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -150,6 +152,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
                 selectedAccounts = accounts,
                 shouldPollAccountNumbers = manifest.isDataFlow,
+                linkBrand = currentLinkBrand(),
             )
         }
             .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }

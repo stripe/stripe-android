@@ -305,8 +305,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
-            // linkState is null when Link is disabled; Link passthrough PMs won't exist in that case.
-            linkBrand = paymentMethodMetadata.linkState?.configuration?.linkBrand ?: LinkBrand.Link,
+            linkBrand = paymentMethodMetadata.linkBrand,
         )
     }
 
@@ -352,6 +351,20 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             isCurrentScreen.collect { isCurrentScreen ->
                 if (isCurrentScreen) {
                     updateSelection(verticalModeScreenSelection.value, false)
+                }
+            }
+        }
+
+        coroutineScope.launch(mainDispatcher) {
+            walletsState.collect { currentWalletsState ->
+                val currentSelection = verticalModeScreenSelection.value
+                if (currentSelection is PaymentSelection.Link) {
+                    val newLinkBrand = currentWalletsState?.link(WalletLocation.INLINE)?.linkBrand
+                    if (newLinkBrand != null && newLinkBrand != currentSelection.brand) {
+                        val updatedSelection = currentSelection.copy(brand = newLinkBrand)
+                        _verticalModeScreenSelection.value = updatedSelection
+                        updateSelection(updatedSelection, false)
+                    }
                 }
             }
         }

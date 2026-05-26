@@ -175,7 +175,14 @@ private fun LoadedContent(
         lazyListState = listState,
         bodyPadding = PaddingValues(horizontal = 16.dp),
     ) {
-        item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
+        item {
+            SearchTitle(
+                modifier = Modifier
+                    .semantics { testTagsAsResourceId = true }
+                    .testTag("loaded_picker_title")
+                    .padding(horizontal = 8.dp)
+            )
+        }
         item { Spacer(modifier = Modifier.height(24.dp)) }
         stickyHeader(key = "searchRow") {
             SearchRow(

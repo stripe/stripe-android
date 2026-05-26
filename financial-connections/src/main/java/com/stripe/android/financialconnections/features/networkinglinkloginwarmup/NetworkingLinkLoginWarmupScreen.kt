@@ -46,6 +46,7 @@ import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.LinkGreen200
 import com.stripe.android.financialconnections.ui.theme.LinkGreen900
 import com.stripe.android.financialconnections.ui.theme.Theme
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -78,7 +79,7 @@ private fun NetworkingLinkLoginWarmupContent(
         verticalArrangement = Arrangement.spacedBy(24.dp),
         lazyListState = lazyListState,
         body = {
-            item { HeaderSection() }
+            item { HeaderSection(linkBrand = state.linkBrand) }
             item { ExistingEmailSection(email = state.payload()?.redactedEmail ?: "") }
         },
         footer = {
@@ -86,6 +87,7 @@ private fun NetworkingLinkLoginWarmupContent(
                 primaryButtonLoading = state.continueAsync is Loading,
                 secondaryButtonLoading = state.disableNetworkingAsync is Loading,
                 secondaryButtonLabel = state.secondaryButtonLabel,
+                linkBrand = state.linkBrand,
                 onContinueClick = onContinueClick,
                 onSkipClicked = onSkipClicked,
             )
@@ -94,21 +96,31 @@ private fun NetworkingLinkLoginWarmupContent(
 }
 
 @Composable
-private fun HeaderSection() {
+private fun HeaderSection(linkBrand: LinkBrand) {
+    val title = if (linkBrand == LinkBrand.Link) {
+        stringResource(R.string.stripe_networking_link_login_warmup_title)
+    } else {
+        stringResource(R.string.stripe_networking_link_login_warmup_title_with_brand, linkBrand.brandName())
+    }
+    val description = if (linkBrand == LinkBrand.Link) {
+        stringResource(R.string.stripe_networking_link_login_warmup_description)
+    } else {
+        stringResource(R.string.stripe_networking_link_login_warmup_description_with_brand, linkBrand.brandName())
+    }
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         ShapedIcon(
             painter = painterResource(id = R.drawable.stripe_ic_person),
-            contentDescription = stringResource(R.string.stripe_networking_link_login_warmup_title)
+            contentDescription = title
         )
         Text(
-            text = stringResource(R.string.stripe_networking_link_login_warmup_title),
+            text = title,
             style = typography.headingLarge,
             color = colors.textDefault,
         )
         Text(
-            text = stringResource(R.string.stripe_networking_link_login_warmup_description),
+            text = description,
             style = typography.bodyMedium,
             color = colors.textDefault,
         )
@@ -121,10 +133,16 @@ private fun Footer(
     primaryButtonLoading: Boolean,
     secondaryButtonLoading: Boolean,
     secondaryButtonLabel: Int,
+    linkBrand: LinkBrand,
     onContinueClick: () -> Unit,
     onSkipClicked: () -> Unit
 ) {
     val enableButtons = !primaryButtonLoading && !secondaryButtonLoading
+    val ctaContinue = if (linkBrand == LinkBrand.Link) {
+        stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue)
+    } else {
+        stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue_with_brand, linkBrand.brandName())
+    }
 
     Column {
         FinancialConnectionsButton(
@@ -137,7 +155,7 @@ private fun Footer(
                 .testTag("existing_email-button")
                 .fillMaxWidth()
         ) {
-            Text(text = stringResource(id = R.string.stripe_networking_link_login_warmup_cta_continue))
+            Text(text = ctaContinue)
         }
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
