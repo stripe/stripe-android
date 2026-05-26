@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import kotlinx.coroutines.Deferred
@@ -19,6 +20,7 @@ internal data class CustomerState(
 
 internal class CreateCustomerState @Inject constructor(
     private val paymentMethodFilter: PaymentMethodFilter,
+    private val errorReporter: ErrorReporter,
 ) {
     suspend operator fun invoke(
         initializationMode: PaymentElementLoader.InitializationMode,
@@ -112,7 +114,7 @@ internal class CreateCustomerState @Inject constructor(
         prefetchedPaymentMethods: PrefetchedPaymentMethods?,
     ): List<PaymentMethod> {
         if (prefetchedPaymentMethods == null) {
-            // TODO: unexpected error.
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.PREFETCHED_PMS_NULL_FOR_EPHEMERAL_KEY)
             return emptyList()
         }
 
