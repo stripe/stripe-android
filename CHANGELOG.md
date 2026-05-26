@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### CryptoOnramp
+* [FIXED][13074](https://github.com/stripe/stripe-android/pull/13074) Fixed an issue with 3DS and Out of Band checks during checkout that caused a hang.
+
 ## 23.9.0 - 2026-05-18
 
 Added support for [Onelink](https://support.stripe.com/questions/what-is-onelink).
