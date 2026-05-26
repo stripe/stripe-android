@@ -24,6 +24,7 @@ import com.stripe.stripeterminal.external.models.TapUseCase
 import com.stripe.stripeterminal.external.models.TerminalErrorCode
 import com.stripe.stripeterminal.external.models.TerminalException
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
@@ -59,6 +60,7 @@ internal interface TapToAddConnectionManager {
             logger: Logger,
             paymentConfiguration: Provider<PaymentConfiguration>,
             workContext: CoroutineContext,
+            callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
         ): TapToAddConnectionManager {
             return if (isStripeTerminalSdkAvailable()) {
@@ -70,6 +72,7 @@ internal interface TapToAddConnectionManager {
                         errorReporter = errorReporter,
                         terminalWrapper = terminalWrapper,
                         logger = logger,
+                        callbackRetriever = callbackRetriever,
                         isSimulatedProvider = isSimulatedProvider,
                     ),
                     fatalErrorChecker = DefaultTapToAddFatalErrorChecker(),
@@ -84,12 +87,13 @@ internal interface TapToAddConnectionManager {
 
 @OptIn(TapToAddPreview::class)
 internal class DefaultTapToAddConnectionManager(
-    applicationContext: Context,
+    private val applicationContext: Context,
     private val workContext: CoroutineContext,
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
+    private val callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
     isSimulatedProvider: TapToAddIsSimulatedProvider,
 ) : TapToAddConnectionManager, TerminalListener, TapToPayReaderListener {
     private var connectionTask: CompletableDeferred<Unit>? = null
@@ -102,51 +106,33 @@ internal class DefaultTapToAddConnectionManager(
 
     override val isSupported: Boolean
         get() {
+            if (!callbackRetriever.hasCallback()) {
+                return false
+            }
+
+            initializeIfNeeded()
+
             return terminal().supportsReadersOfType(
                 deviceType = DeviceType.TAP_TO_PAY_DEVICE,
                 discoveryConfiguration = discoveryConfiguration,
             ).isSupported
         }
 
-    init {
-        if (!terminalWrapper.isInitialized()) {
-            terminalWrapper.initTerminal(
-                context = applicationContext,
-                tokenProvider = object : ConnectionTokenProvider {
-                    override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        callback.onSuccess(paymentConfiguration.get().publishableKey)
-                    }
-                },
-                listener = this,
-            )
-        }
-    }
-
     override suspend fun connect(config: TapToAddConnectionManager.ConnectionConfig) = withContext(workContext) {
         runCatching {
-            if (!isSupported) {
-                throw IllegalStateException("Tap to Add is not supported by this device!")
-            }
-
-            if (terminal().connectedReader != null) {
-                return@withContext
-            }
-
-            val existingTask = connectionTaskLock.withLock {
-                return@withLock connectionTask ?: run {
-                    connectionTask = CompletableDeferred()
-                    null
+            when (val connectSetupResult = setup()) {
+                is ConnectSetupResult.AlreadyConnected -> Unit
+                is ConnectSetupResult.ExistingTask -> connectSetupResult.task.await()
+                is ConnectSetupResult.NotSupported -> {
+                    throw IllegalStateException("Tap to Add is not supported by this device!")
                 }
-            }
+                is ConnectSetupResult.CanStart -> {
+                    val discoverReadersResult = discoverReaders()
 
-            existingTask?.let { task ->
-                return@withContext task.await()
-            }
-
-            val discoverReadersResult = discoverReaders()
-
-            if (discoverReadersResult is DiscoverCallResult.CollectedReaders) {
-                connectReader(discoverReadersResult.readers, config)
+                    if (discoverReadersResult is DiscoverCallResult.CollectedReaders) {
+                        connectReader(discoverReadersResult.readers, config)
+                    }
+                }
             }
         }.fold(
             onSuccess = {
@@ -164,6 +150,26 @@ internal class DefaultTapToAddConnectionManager(
                 throw error
             }
         )
+    }
+
+    private suspend fun setup(): ConnectSetupResult {
+        return connectionTaskLock.withLock {
+            connectionTask?.let {
+                return@withLock ConnectSetupResult.ExistingTask(it)
+            }
+
+            if (!isSupported) {
+                return@withLock ConnectSetupResult.NotSupported
+            }
+
+            if (terminal().connectedReader != null) {
+                return@withLock ConnectSetupResult.AlreadyConnected
+            }
+
+            connectionTask = CompletableDeferred()
+
+            return@withLock ConnectSetupResult.CanStart
+        }
     }
 
     @SuppressLint("MissingPermission")
@@ -284,6 +290,20 @@ internal class DefaultTapToAddConnectionManager(
         )
     }
 
+    private fun initializeIfNeeded() {
+        if (!terminalWrapper.isInitialized()) {
+            terminalWrapper.initTerminal(
+                context = applicationContext,
+                tokenProvider = object : ConnectionTokenProvider {
+                    override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
+                        callback.onSuccess(paymentConfiguration.get().publishableKey)
+                    }
+                },
+                listener = this,
+            )
+        }
+    }
+
     private fun terminal() = terminalWrapper.getInstance()
 
     private fun Throwable.isAlreadyConnectedToReader(): Boolean {
@@ -308,6 +328,13 @@ internal class DefaultTapToAddConnectionManager(
         }
 
         logger.warning("TapToAddConnectionError: $error")
+    }
+
+    private sealed interface ConnectSetupResult {
+        data object CanStart : ConnectSetupResult
+        data object AlreadyConnected : ConnectSetupResult
+        data object NotSupported : ConnectSetupResult
+        class ExistingTask(val task: Deferred<Unit>) : ConnectSetupResult
     }
 
     private sealed interface DiscoverCallResult {
