@@ -184,7 +184,7 @@ internal fun WalletAddressSection(
             label = { Text("Network") },
             trailingIcon = {
                 TextButton(onClick = { onDropdownExpandedChange(true) }) {
-                    Text("v")
+                    Text("▼")
                 }
             },
             modifier = Modifier
