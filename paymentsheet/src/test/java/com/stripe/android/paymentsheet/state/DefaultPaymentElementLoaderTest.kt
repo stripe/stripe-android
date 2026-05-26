@@ -3168,6 +3168,49 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
+    fun `When using 'LegacyEphemeralKey', payment methods should be filtered by supported saved payment methods`() =
+        runScenario {
+            val paymentMethods = PaymentMethodFixtures.createCards(2) +
+                listOf(
+                    PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                    PaymentMethodFixtures.AU_BECS_DEBIT,
+                )
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card")
+                ),
+                customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "id",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                    allowsDelayedPaymentMethods = true,
+                ),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            val expectedPaymentMethods = paymentMethods.filter { paymentMethod ->
+                paymentMethod.type?.code == PaymentMethod.Type.Card.code
+            }
+
+            assertThat(result.customer?.paymentMethods)
+                .containsExactlyElementsIn(expectedPaymentMethods)
+
+            consumeLoadingEvents()
+
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
     fun `When using 'CustomerSession', pass last-used customer payment method to filter`() = runFilterScenario {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
         val lastUsed = paymentMethods[6]
@@ -4625,6 +4668,7 @@ internal class DefaultPaymentElementLoaderTest {
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
+                errorReporter = errorReporter,
             ),
             customerRepository = customerRepo,
             checkoutSessionLoader = CheckoutSessionLoader(),

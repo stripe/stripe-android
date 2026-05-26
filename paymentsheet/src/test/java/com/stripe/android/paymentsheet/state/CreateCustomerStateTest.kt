@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakePaymentMethodFilter
 import kotlinx.coroutines.CompletableDeferred
@@ -146,6 +147,23 @@ internal class CreateCustomerStateTest {
     }
 
     @Test
+    fun `Legacy ephemeral key filters payment methods by supported type`() = runScenario {
+        val cards = PaymentMethodFactory.cards(2)
+        val paymentMethods = cards + listOf(
+            PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            PaymentMethodFixtures.AU_BECS_DEBIT,
+        )
+
+        val result = createCustomerState(
+            customerMetadata = LEGACY_EK_METADATA,
+            prefetchedPaymentMethods = CompletableDeferred(Result.success(paymentMethods)),
+        )
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.paymentMethods).containsExactlyElementsIn(cards)
+    }
+
+    @Test
     fun `Null customerMetadata returns null`() = runScenario {
         val result = createCustomerState(customerMetadata = null)
 
@@ -160,6 +178,7 @@ internal class CreateCustomerStateTest {
         FakePaymentMethodFilter.test(filteredPaymentMethods = filteredCards) {
             val createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
+                errorReporter = FakeErrorReporter(),
             )
 
             val result = createCustomerState(
@@ -191,6 +210,7 @@ internal class CreateCustomerStateTest {
     private class Scenario {
         private val createCustomerStateImpl = CreateCustomerState(
             paymentMethodFilter = FakePaymentMethodFilter.noOp(),
+            errorReporter = FakeErrorReporter(),
         )
 
         suspend fun createCustomerState(
