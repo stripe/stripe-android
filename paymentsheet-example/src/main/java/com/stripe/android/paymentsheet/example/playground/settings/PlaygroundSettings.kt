@@ -518,6 +518,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSessionOverrideRedisplaySettingsDefinition,
             CustomerSessionOnBehalfOfSettingsDefinition,
             CustomerSettingsDefinition,
+            CustomCustomerIdSettingsDefinition,
             CustomerEmailSettingsDefinition,
             CheckoutModeSettingsDefinition,
             UserCountryOverrideSettingsDefinition,

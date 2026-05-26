@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneS
 import com.stripe.android.paymentsheet.example.playground.settings.CollectionModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomCustomerIdSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionOnBehalfOfSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSessionSettingsDefinition
@@ -244,7 +245,11 @@ internal sealed interface PlaygroundState : Parcelable {
     }
 
     fun customerId(): String? {
-        return (snapshot[CustomerSettingsDefinition] as? CustomerType.Existing)?.value
+        return when (val customerType = snapshot[CustomerSettingsDefinition]) {
+            is CustomerType.Existing -> customerType.customerId
+            CustomerType.CUSTOM -> snapshot[CustomCustomerIdSettingsDefinition]
+            else -> null
+        }
     }
 
     companion object {
