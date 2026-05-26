@@ -9,7 +9,7 @@ PROJECT_ROOT = LatencyTestUtils::PROJECT_ROOT
 PRIMARY_DURATION_KEY = LatencyTestUtils::DURATION_KEY
 TRACE_DURATION_KEY_PREFIX = 'PaymentSheetLoad'
 
-TraceSpan = Struct.new(:name, :start_offset_ms, :duration_ms, keyword_init: true)
+TraceSpan = Struct.new(:name, :start_ms, :end_ms, keyword_init: true)
 TraceSession = Struct.new(:test_name, :total_duration_ms, :spans, keyword_init: true)
 
 def inside_clean_worktree?
@@ -53,13 +53,11 @@ end
 def parse_trace_output(output)
   sessions = {}
   current_test_name = nil
-  test_started_at = nil
   active_spans = {}
 
   output.each_line do |line|
     if line =~ /LATENCY_TEST_CASE_STARTED:\s*(.+?)\s*$/
       current_test_name = Regexp.last_match(1).strip
-      test_started_at = nil
       active_spans = {}
       next
     end
@@ -67,7 +65,6 @@ def parse_trace_output(output)
     if line =~ /LATENCY_TEST_CASE_FINISHED:\s*(.+?)\s*$/
       finished_test_name = Regexp.last_match(1).strip
       current_test_name = nil if finished_test_name == current_test_name
-      test_started_at = nil
       active_spans = {}
       next
     end
@@ -77,14 +74,13 @@ def parse_trace_output(output)
       started_at = Regexp.last_match(2).to_i
 
       active_spans[span_name] = started_at
-      test_started_at ||= started_at
       next
     end
 
     next unless line =~ /DURATION_ENDED:\s*(\w+):\s*(\d+)/
     span_name = Regexp.last_match(1)
     ended_at = Regexp.last_match(2).to_i
-    next if current_test_name.nil? || test_started_at.nil?
+    next if current_test_name.nil?
 
     started_at = active_spans.delete(span_name)
     next if started_at.nil?
@@ -96,8 +92,8 @@ def parse_trace_output(output)
     )
     session.spans << TraceSpan.new(
       name: humanize_span_name(span_name),
-      start_offset_ms: started_at - test_started_at,
-      duration_ms: ended_at - started_at,
+      start_ms: started_at,
+      end_ms: ended_at,
     )
     if span_name == PRIMARY_DURATION_KEY
       session.total_duration_ms = ended_at - started_at
@@ -105,7 +101,7 @@ def parse_trace_output(output)
   end
 
   sessions.each_value do |session|
-    session.total_duration_ms ||= session.spans.map { |span| span.start_offset_ms + span.duration_ms }.max
+    session.total_duration_ms ||= session.spans.map { |span| span.end_ms - span.start_ms }.max
   end
 
   raise 'No completed duration traces found in test output' if sessions.empty?
@@ -130,8 +126,8 @@ def gantt_value(value)
   [value.round, 1].max
 end
 
-def gantt_end(start_offset_ms, duration_ms)
-  [gantt_value(start_offset_ms + duration_ms), gantt_value(start_offset_ms) + 1].max
+def gantt_end(start_ms, end_ms)
+  [gantt_value(end_ms), gantt_value(start_ms) + 1].max
 end
 
 def print_mermaid(trace_target, sessions)
@@ -146,10 +142,11 @@ def print_mermaid(trace_target, sessions)
     puts
     puts "    section #{humanize_test_name(session.test_name)} (Latency #{format('%.0f', session.total_duration_ms)}ms)"
 
-    session.spans.sort_by { |span| [span.start_offset_ms, -span.duration_ms, span.name] }.each do |span|
+    session.spans.sort_by { |span| [span.start_ms, -(span.end_ms - span.start_ms), span.name] }.each do |span|
+      duration_ms = span.end_ms - span.start_ms
       puts(
-        "    #{span.name} (#{format('%.0f', span.duration_ms)}ms) " \
-        ":t#{task_index}, #{span.start_offset_ms.round}, #{gantt_end(span.start_offset_ms, span.duration_ms)}"
+        "    #{span.name} (#{format('%.0f', duration_ms)}ms) " \
+        ":t#{task_index}, #{span.start_ms.round}, #{gantt_end(span.start_ms, span.end_ms)}"
       )
       task_index += 1
     end
