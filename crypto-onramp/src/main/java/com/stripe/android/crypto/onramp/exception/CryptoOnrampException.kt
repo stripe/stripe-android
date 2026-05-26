@@ -1,5 +1,6 @@
 package com.stripe.android.crypto.onramp.exception
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
@@ -26,12 +27,7 @@ abstract class CryptoOnrampException internal constructor(
      */
     abstract val userMessage: String
 
-    /**
-     * The original Stripe API error, if one was available.
-     */
-    val rawStripeError: StripeError?
-        get() = stripeError
-
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String {
         return (cause as? StripeException)?.analyticsValue() ?: super.analyticsValue()
     }
