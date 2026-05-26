@@ -3,6 +3,8 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.9.1 - 2026-05-26
+
 ### Payments
 * [FIXED][13146](https://github.com/stripe/stripe-android/pull/13146) Native 3ds2 no longer stops its host activity
 
