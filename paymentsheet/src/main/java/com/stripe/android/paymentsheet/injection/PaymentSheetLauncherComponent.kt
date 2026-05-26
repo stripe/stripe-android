@@ -31,7 +31,6 @@ import javax.inject.Singleton
         ResourceRepositoryModule::class,
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
-        CardArtExperimentModule::class,
         PaymentSheetViewModelModule::class,
         TapToAddConnectionStarterModule::class,
         PaymentElementConfirmationModule::class,
