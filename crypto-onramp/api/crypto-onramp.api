@@ -38,6 +38,7 @@ public final class com/stripe/android/crypto/onramp/exception/AppAttestationExce
 	public static final field $stable I
 	public final fun getApiErrorCode ()Ljava/lang/String;
 	public final fun getApiErrorMessage ()Ljava/lang/String;
+	public final fun getApiErrorType ()Ljava/lang/String;
 	public final fun getApiUserMessage ()Ljava/lang/String;
 	public final fun getAppPackageName ()Ljava/lang/String;
 	public final fun getDocUrl ()Ljava/lang/String;
@@ -81,6 +82,7 @@ public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiEr
 	public static final field $stable I
 	public final fun getApiErrorCode ()Ljava/lang/String;
 	public final fun getApiErrorMessage ()Ljava/lang/String;
+	public final fun getApiErrorType ()Ljava/lang/String;
 	public final fun getApiUserMessage ()Ljava/lang/String;
 	public final fun getAppPackageName ()Ljava/lang/String;
 	public final fun getDocUrl ()Ljava/lang/String;

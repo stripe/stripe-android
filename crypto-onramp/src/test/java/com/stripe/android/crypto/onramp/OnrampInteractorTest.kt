@@ -194,6 +194,7 @@ class OnrampInteractorTest {
             Result.failure(
                 APIException(
                     stripeError = StripeError(
+                        type = "api_error",
                         code = "link_failed_to_attest_request",
                         message = "App attestation failed",
                         extraFields = mapOf(
@@ -227,12 +228,18 @@ class OnrampInteractorTest {
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
         assertThat(attestationError.reason).isEqualTo("app_not_play_recognized")
         assertThat(attestationError.mode).isEqualTo("test")
+        assertThat(attestationError.apiErrorType).isEqualTo("api_error")
+        assertThat(attestationError.developerMessage).contains("Summary")
+        assertThat(attestationError.developerMessage).contains("Context")
+        assertThat(attestationError.developerMessage).contains("Next step")
+        assertThat(attestationError.developerMessage).contains("SDK")
         assertThat(attestationError.developerMessage)
             .contains("App attestation failed: this app is not recognized by Google Play.")
         assertThat(attestationError.developerMessage)
-            .contains("package: ${RuntimeEnvironment.getApplication().packageName}")
+            .contains("app_id: ${RuntimeEnvironment.getApplication().packageName}")
         assertThat(attestationError.developerMessage).contains("operation: register_wallet_address")
         assertThat(attestationError.developerMessage).contains("request_id: req_123")
+        assertThat(attestationError.developerMessage).contains("type: api_error")
     }
 
     @Test
@@ -267,10 +274,14 @@ class OnrampInteractorTest {
         val attestationError = error as AppAttestationException
         assertThat(attestationError.reason).isEqualTo("app_not_play_recognized")
         assertThat(attestationError.mode).isEqualTo("test")
+        assertThat(attestationError.apiErrorType).isNull()
         assertThat(attestationError.message)
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+        assertThat(attestationError.developerMessage).contains("Summary")
+        assertThat(attestationError.developerMessage).contains("Context")
         assertThat(attestationError.developerMessage).contains("operation: has_link_account")
         assertThat(attestationError.developerMessage).contains("request_id: req_456")
+        assertThat(attestationError.developerMessage).doesNotContain("type:")
     }
 
     @Test
@@ -307,11 +318,17 @@ class OnrampInteractorTest {
         assertThat(apiError.reason).isEqualTo("email_blocked")
         assertThat(apiError.userMessage).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.message).isEqualTo("This email can't be used. Try another one.")
+        assertThat(apiError.apiErrorType).isNull()
+        assertThat(apiError.developerMessage).contains("Summary")
+        assertThat(apiError.developerMessage).contains("Context")
+        assertThat(apiError.developerMessage).contains("Next step")
+        assertThat(apiError.developerMessage).contains("Docs")
         assertThat(apiError.developerMessage).contains("This email address can't be used.")
         assertThat(apiError.developerMessage).contains("operation: has_link_account")
         assertThat(apiError.developerMessage).contains("request_id: req_789")
         assertThat(apiError.developerMessage).contains("code: email_blocked")
-        assertThat(apiError.developerMessage).contains("Docs: https://stripe.com/docs/error-codes/email_blocked")
+        assertThat(apiError.developerMessage).doesNotContain("type:")
+        assertThat(apiError.developerMessage).contains("https://stripe.com/docs/error-codes/email_blocked")
     }
 
     @Test
@@ -355,9 +372,11 @@ class OnrampInteractorTest {
         val apiError = error as UncategorizedApiErrorException
         assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
+        assertThat(apiError.apiErrorType).isNull()
         assertThat(apiError.developerMessage).contains("Developer-facing message")
+        assertThat(apiError.developerMessage).contains("Next step")
         assertThat(apiError.developerMessage)
-            .contains("Next step: Inspect the preserved Stripe API error for details and retry after correcting the request.")
+            .contains("Inspect the preserved Stripe API error for details and retry after correcting the request.")
     }
 
     @Test
@@ -404,12 +423,14 @@ class OnrampInteractorTest {
 
         val attestationError = error as AppAttestationException
         assertThat(attestationError.reason).isEqualTo("android_environment_mismatch")
+        assertThat(attestationError.apiErrorType).isNull()
         assertThat(attestationError.userMessage)
             .isEqualTo("This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists.")
         assertThat(attestationError.message)
             .isEqualTo("This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists.")
         assertThat(attestationError.developerMessage)
             .contains("the Play Integrity distribution channel does not match this Stripe mode")
+        assertThat(attestationError.developerMessage).doesNotContain("type:")
     }
 
     @Test

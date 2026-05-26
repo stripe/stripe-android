@@ -19,6 +19,7 @@ internal fun Throwable.toCryptoOnrampError(
     val stripeError = stripeException.stripeError ?: return this
 
     val reason = stripeError.extraFields?.get(FIELD_REASON)
+    val apiErrorType = stripeException.apiErrorType()
     val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
 
     return if (stripeError.isAppAttestationError()) {
@@ -29,6 +30,7 @@ internal fun Throwable.toCryptoOnrampError(
             mode = publishableKey.toMode(),
             sdkVersion = StripeSdkVersion.VERSION,
             apiErrorCode = stripeError.code,
+            apiErrorType = apiErrorType,
             apiErrorMessage = stripeError.message,
             apiUserMessage = apiUserMessage,
             docUrl = stripeError.docUrl,
@@ -45,6 +47,7 @@ internal fun Throwable.toCryptoOnrampError(
             mode = publishableKey.toMode(),
             sdkVersion = StripeSdkVersion.VERSION,
             apiErrorCode = stripeError.code,
+            apiErrorType = apiErrorType,
             apiErrorMessage = stripeError.message,
             apiUserMessage = apiUserMessage,
             docUrl = stripeError.docUrl,
@@ -58,6 +61,10 @@ internal fun Throwable.toCryptoOnrampError(
 
 private fun StripeError.isAppAttestationError(): Boolean {
     return code == ERROR_CODE_APP_ATTESTATION_FAILED
+}
+
+private fun StripeException.apiErrorType(): String? {
+    return stripeError?.type?.takeIf { it.isNotBlank() }
 }
 
 private fun String?.toMode(): String? {

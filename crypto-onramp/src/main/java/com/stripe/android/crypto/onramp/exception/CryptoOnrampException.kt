@@ -67,6 +67,10 @@ class AppAttestationException internal constructor(
      */
     val apiErrorCode: String?,
     /**
+     * The raw backend error type, when present.
+     */
+    val apiErrorType: String?,
+    /**
      * The raw backend developer-facing message, when present.
      */
     val apiErrorMessage: String?,
@@ -90,6 +94,7 @@ class AppAttestationException internal constructor(
         reason = reason,
         requestId = (cause as? StripeException)?.requestId,
         apiErrorCode = apiErrorCode,
+        apiErrorType = apiErrorType,
         apiErrorMessage = apiErrorMessage,
         docUrl = docUrl,
     ),
@@ -128,6 +133,10 @@ class UncategorizedApiErrorException internal constructor(
      */
     val apiErrorCode: String?,
     /**
+     * The raw backend error type, when present.
+     */
+    val apiErrorType: String?,
+    /**
      * The raw backend developer-facing message, when present.
      */
     val apiErrorMessage: String?,
@@ -151,6 +160,7 @@ class UncategorizedApiErrorException internal constructor(
         reason = reason,
         requestId = (cause as? StripeException)?.requestId,
         apiErrorCode = apiErrorCode,
+        apiErrorType = apiErrorType,
         apiErrorMessage = apiErrorMessage,
         apiUserMessage = apiUserMessage,
         docUrl = docUrl,
@@ -240,6 +250,7 @@ private fun buildAppAttestationDeveloperMessage(
     reason: String?,
     requestId: String?,
     apiErrorCode: String?,
+    apiErrorType: String?,
     apiErrorMessage: String?,
     docUrl: String?,
 ): String {
@@ -251,6 +262,7 @@ private fun buildAppAttestationDeveloperMessage(
         reason = reason,
         requestId = requestId,
         apiErrorCode = apiErrorCode,
+        apiErrorType = apiErrorType,
         nextStep = appAttestationNextStep(reason)
             ?: (apiErrorMessage
                 ?: "Inspect the preserved Stripe API error for details and retry after correcting the app attestation configuration."),
@@ -267,6 +279,7 @@ private fun buildGenericDeveloperMessage(
     reason: String?,
     requestId: String?,
     apiErrorCode: String?,
+    apiErrorType: String?,
     apiErrorMessage: String?,
     apiUserMessage: String?,
     docUrl: String?,
@@ -279,6 +292,7 @@ private fun buildGenericDeveloperMessage(
         reason = reason,
         requestId = requestId,
         apiErrorCode = apiErrorCode,
+        apiErrorType = apiErrorType,
         nextStep = apiUserMessage.orFallbackTo(
             "Inspect the preserved Stripe API error for details and retry after correcting the request."
         ),
@@ -299,27 +313,37 @@ private fun buildDeveloperMessage(
     reason: String?,
     requestId: String?,
     apiErrorCode: String?,
+    apiErrorType: String?,
     nextStep: String,
     docUrl: String?,
     sdkVersion: String,
 ): String {
     val context = listOfNotNull(
-        "package: $appPackageName",
-        mode?.let { "mode: $it" },
-        "operation: $operation",
-        reason?.let { "reason: $it" },
-        requestId?.let { "request_id: $it" },
-        apiErrorCode?.let { "code: $it" },
+        "  - operation: $operation",
+        "  - app_id: $appPackageName",
+        mode?.let { "  - mode: $it" },
+        reason?.let { "  - reason: $it" },
+        requestId?.let { "  - request_id: $it" },
+        apiErrorCode?.let { "  - code: $it" },
+        apiErrorType?.let { "  - type: $it" },
     )
 
     return buildList {
-        add(summary)
+        add("Summary")
+        add("  $summary")
         add("")
-        add("Context:")
+        add("Context")
         addAll(context)
         add("")
-        add("Next step: $nextStep")
-        docUrl?.let { add("Docs: $it") }
-        add("SDK: stripe-android@$sdkVersion")
+        add("Next step")
+        add("  $nextStep")
+        docUrl?.let {
+            add("")
+            add("Docs")
+            add("  $it")
+        }
+        add("")
+        add("SDK")
+        add("  stripe-android@$sdkVersion")
     }.joinToString(separator = "\n")
 }
