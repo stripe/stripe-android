@@ -14,7 +14,6 @@ import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
-import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
@@ -257,8 +256,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 // Nothing to do - let the interactor work
             }
             is CheckoutState.Status.RequiresNextAction -> {
-                // Launch PaymentLauncher for next action
-                handleNextAction(status.paymentIntent, status.platformKey)
+                // Launch PaymentLauncher for next action, unless it has already been launched
+                if (interactor.markNextActionLaunched(status)) {
+                    handleNextAction(status.paymentIntent, status.platformKey)
+                }
             }
             is CheckoutState.Status.Completed -> {
                 // Checkout finished - notify callback
@@ -277,7 +278,6 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             // No client secret - notify failure immediately
             val error = PaymentFailedException()
             interactor.onHandleNextActionError(error)
-            onrampCallbacksState.checkoutCallback.onResult(OnrampCheckoutResult.Failed(error))
             return
         }
 
@@ -296,17 +296,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             }
             is InternalPaymentResult.Canceled -> {
                 // User canceled the next action
-                interactor.clearPendingCheckout()
-                onrampCallbacksState.checkoutCallback.onResult(
-                    OnrampCheckoutResult.Canceled()
-                )
+                interactor.onHandleNextActionCanceled()
             }
             is InternalPaymentResult.Failed -> {
                 // Next action failed
-                interactor.clearPendingCheckout()
-                onrampCallbacksState.checkoutCallback.onResult(
-                    OnrampCheckoutResult.Failed(paymentResult.throwable)
-                )
+                interactor.onHandleNextActionError(paymentResult.throwable)
             }
         }
     }

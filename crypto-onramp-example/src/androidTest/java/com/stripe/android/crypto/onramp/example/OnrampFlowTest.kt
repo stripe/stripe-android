@@ -16,6 +16,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.crypto.onramp.example.store.ONRAMP_PREFS_NAME
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.RetryRule
 import org.junit.Rule

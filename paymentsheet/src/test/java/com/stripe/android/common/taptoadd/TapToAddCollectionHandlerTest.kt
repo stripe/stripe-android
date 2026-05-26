@@ -1173,6 +1173,8 @@ class TapToAddCollectionHandlerTest {
     ) : CreateCardPresentSetupIntentCallbackRetriever {
         private val waitForCallbackCalls = Turbine<Unit>()
 
+        override fun hasCallback(): Boolean = callbackResult.isSuccess
+
         override suspend fun waitForCallback(): CreateCardPresentSetupIntentCallback {
             waitForCallbackCalls.add(Unit)
             return callbackResult.getOrThrow()
