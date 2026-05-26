@@ -3,6 +3,10 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### CryptoOnramp
+* [ADDED] Added `CryptoOnrampException`, `AppAttestationException`, and `UncategorizedApiErrorException` to expose richer developer-facing diagnostics and preserved backend API error context for Crypto Onramp failures.
+* [CHANGED] Improved Crypto Onramp API error handling with localized fallback user messaging and more consistent error mapping across attestation, payment collection, and checkout flows.
+
 ## 23.9.1 - 2026-05-26
 
 ### Payments
