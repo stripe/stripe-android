@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.HyperlinkedText
 import com.stripe.android.uicore.elements.EmailConfig
@@ -40,8 +39,6 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
 
-private val LinkLogoModifier = Modifier.padding(end = 16.dp)
-
 @Suppress("LongMethod")
 @Composable
 internal fun LinkInlineSignupFields(
@@ -54,7 +51,6 @@ internal fun LinkInlineSignupFields(
     isShowingPhoneFirst: Boolean,
     requiresNameCollection: Boolean,
     allowsDefaultOptIn: Boolean,
-    linkBrand: LinkBrand,
     errorMessage: String?,
     didShowAllFields: Boolean,
     onShowingAllFields: () -> Unit,
@@ -79,16 +75,6 @@ internal fun LinkInlineSignupFields(
                     ImeAction.Done
                 },
                 focusRequester = phoneFocusRequester,
-                trailingIcon = if (!allowsDefaultOptIn) {
-                    {
-                        LinkLogo(
-                            modifier = LinkLogoModifier,
-                            linkBrand = linkBrand,
-                        )
-                    }
-                } else {
-                    null
-                },
             )
         } else {
             EmailCollection(
@@ -101,16 +87,6 @@ internal fun LinkInlineSignupFields(
                     ImeAction.Done
                 },
                 focusRequester = emailFocusRequester,
-                trailingIcon = if (!allowsDefaultOptIn) {
-                    {
-                        LinkLogo(
-                            modifier = LinkLogoModifier,
-                            linkBrand = linkBrand,
-                        )
-                    }
-                } else {
-                    null
-                },
             )
         }
 
@@ -160,6 +136,8 @@ internal fun LinkInlineSignupFields(
                         enabled = enabled,
                         controller = phoneNumberController,
                         moveToNextFieldOnceComplete = requiresNameCollection,
+                        // Don't steal focus when the phone field expands if default opt-in is on,
+                        // since the user hasn't explicitly interacted with the signup form yet.
                         requestFocusWhenShown = !allowsDefaultOptIn &&
                             phoneNumberController.initialPhoneNumber.isEmpty(),
                         imeAction = if (requiresNameCollection) {
@@ -242,7 +220,6 @@ internal fun PreviewLinkInlineSignupFields() {
         enabled = true,
         isShowingPhoneFirst = false,
         requiresNameCollection = false,
-        linkBrand = LinkBrand.Link,
         errorMessage = "This is a large error!",
         didShowAllFields = false,
         allowsDefaultOptIn = false,

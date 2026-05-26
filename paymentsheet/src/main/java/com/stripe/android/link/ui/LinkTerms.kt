@@ -1,5 +1,7 @@
 package com.stripe.android.link.ui
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -8,6 +10,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
@@ -34,7 +37,7 @@ internal fun LinkTerms(
     val text = linkTermsText(type, linkBrand)
 
     val imageLoader = buildMap {
-        if (type == LinkTermsType.InlineWithDefaultOptIn) {
+        if (type != LinkTermsType.Full) {
             put(
                 "link_logo",
                 EmbeddableImage.Drawable(
@@ -66,25 +69,28 @@ private fun linkTermsText(type: LinkTermsType, linkBrand: LinkBrand): String {
     val brandName = linkBrand.brandName()
     return when (type) {
         LinkTermsType.InlineOptionalWithPhoneFirst -> {
-            if (linkBrand == LinkBrand.Link) {
+            val terms = if (linkBrand == LinkBrand.Link) {
                 stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number)
             } else {
                 stringResource(R.string.stripe_sign_up_terms_alternative_with_phone_number_branded, brandName)
             }
+            terms.withLeadingLogo()
         }
         LinkTermsType.InlineOptional -> {
-            if (linkBrand == LinkBrand.Link) {
+            val terms = if (linkBrand == LinkBrand.Link) {
                 stringResource(R.string.stripe_sign_up_terms_alternative)
             } else {
                 stringResource(R.string.stripe_sign_up_terms_alternative_branded, brandName)
             }
+            terms.withLeadingLogo()
         }
         LinkTermsType.Inline -> {
-            if (linkBrand == LinkBrand.Link) {
+            val terms = if (linkBrand == LinkBrand.Link) {
                 stringResource(R.string.stripe_sign_up_terms)
             } else {
                 stringResource(R.string.stripe_sign_up_terms_branded, brandName)
             }
+            terms.withLeadingLogo()
         }
         LinkTermsType.InlineWithDefaultOptIn -> {
             val terms = if (linkBrand == LinkBrand.Link) {
@@ -92,11 +98,13 @@ private fun linkTermsText(type: LinkTermsType, linkBrand: LinkBrand): String {
             } else {
                 stringResource(R.string.stripe_sign_up_terms_default_opt_in_branded, brandName)
             }
-            "<img src=\"link_logo\"> • $terms"
+            terms.withLeadingLogo()
         }
         LinkTermsType.Full -> stringResource(R.string.stripe_link_sign_up_terms)
     }
 }
+
+private fun String.withLeadingLogo() = "<img src=\"link_logo\"> • $this"
 
 internal fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
     "<terms>",
@@ -109,15 +117,38 @@ internal fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
     "<a href=\"${linkBrand.baseUrl()}\">"
 ).replace("</link>", "</a>")
 
-@Preview
+@Preview(name = "All types - Link")
 @Composable
-private fun LinkTermsPreview() {
+private fun LinkTermsAllTypesLinkPreview() {
     StripeTheme {
         Surface {
-            LinkTerms(
-                type = LinkTermsType.InlineOptional,
-                linkBrand = LinkBrand.Link,
-            )
+            Column(modifier = Modifier.padding(16.dp)) {
+                LinkTermsType.entries.forEach { type ->
+                    LinkTerms(
+                        type = type,
+                        linkBrand = LinkBrand.Link,
+                        modifier = Modifier.padding(bottom = 12.dp),
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Preview(name = "All types - Onelink")
+@Composable
+private fun LinkTermsAllTypesOnelinkPreview() {
+    StripeTheme {
+        Surface {
+            Column(modifier = Modifier.padding(16.dp)) {
+                LinkTermsType.entries.forEach { type ->
+                    LinkTerms(
+                        type = type,
+                        linkBrand = LinkBrand.Onelink,
+                        modifier = Modifier.padding(bottom = 12.dp),
+                    )
+                }
+            }
         }
     }
 }

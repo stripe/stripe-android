@@ -7,12 +7,10 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -26,10 +24,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.input.ImeAction
@@ -37,10 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.ui.LinkLogoStyle
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.LinkTermsType
-import com.stripe.android.link.ui.logoRes
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.ui.core.CircularProgressIndicator
@@ -50,9 +44,7 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
-import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.job
 
@@ -148,7 +140,6 @@ internal fun LinkOptionalInlineSignup(
             isShowingPhoneFirst = isShowingPhoneFirst,
             requiresNameCollection = requiresNameCollection,
             allowsDefaultOptIn = false,
-            linkBrand = linkBrand,
             errorMessage = errorMessage,
             emailFocusRequester = emailFocusRequester,
             phoneFocusRequester = phoneFocusRequester,
@@ -218,27 +209,6 @@ internal fun EmailCollection(
             }
         }
     }
-}
-
-@Composable
-internal fun LinkLogo(
-    modifier: Modifier = Modifier,
-    linkBrand: LinkBrand,
-) {
-    Icon(
-        painter = painterResource(
-            id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                linkBrand.logoRes(LinkLogoStyle.TermsKnockoutBlack)
-            } else {
-                linkBrand.logoRes(LinkLogoStyle.TermsKnockoutWhite)
-            }
-        ),
-        contentDescription = linkBrand.brandName(),
-        modifier = modifier
-            .semantics { testTag = "LinkLogoIcon" }
-            .height(16.dp),
-        tint = Color.Unspecified,
-    )
 }
 
 @Preview
