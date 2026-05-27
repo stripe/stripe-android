@@ -196,6 +196,8 @@
   <string name="stripe_title_bank_account">Bank Account</string>
   <!-- Title for Payment Method screen -->
   <string name="stripe_title_payment_method">Payment Method</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">Payment method</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">Select Shipping Method</string>
   <!-- Title of screen to update a card -->
