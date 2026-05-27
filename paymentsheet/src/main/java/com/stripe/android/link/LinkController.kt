@@ -898,6 +898,31 @@ class LinkController @Inject internal constructor(
         }
     }
 
+    /**
+     * Builder for creating a [LinkController] instance.
+     *
+     * @param application The application context.
+     * @param savedStateHandle The [SavedStateHandle] for persisting state across process death.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Builder(
+        private val application: Application,
+        private val savedStateHandle: SavedStateHandle,
+    ) {
+        /**
+         * Build the [LinkController] instance.
+         *
+         * @return A new [LinkController] configured with the specified settings.
+         */
+        fun build(): LinkController {
+            return create(
+                application = application,
+                savedStateHandle = savedStateHandle,
+                requestSurface = RequestSurface.PaymentElement
+            )
+        }
+    }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
