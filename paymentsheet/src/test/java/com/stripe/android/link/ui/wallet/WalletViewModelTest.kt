@@ -995,7 +995,7 @@ class WalletViewModelTest {
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.Card
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card)
             )
         )
 
@@ -1010,7 +1010,7 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = createPaymentMethodSelectionMode(paymentMethodFilter = null)
+            linkLaunchMode = createPaymentMethodSelectionMode(paymentMethodFilters = null)
         )
 
         advanceUntilIdle()
@@ -1030,7 +1030,7 @@ class WalletViewModelTest {
         createViewModel(
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.Card
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card)
             ),
             navigateAndClearStack = { screen -> navigatedScreen = screen }
         )
@@ -1058,7 +1058,7 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
             ),
             navigateAndClearStack = {}
         )
@@ -1084,7 +1084,7 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
             ),
             dismissWithResult = { result -> dismissResult = result }
         )
@@ -1133,10 +1133,10 @@ class WalletViewModelTest {
 
     private fun createPaymentMethodSelectionMode(
         selectedPayment: ConsumerPaymentDetails.PaymentDetails? = null,
-        paymentMethodFilter: LinkPaymentMethodFilter? = null
+        paymentMethodFilters: List<LinkPaymentMethodFilter>? = null
     ) = LinkLaunchMode.PaymentMethodSelection(
         selectedPayment = selectedPayment,
-        paymentMethodFilter = paymentMethodFilter
+        paymentMethodFilters = paymentMethodFilters
     )
 
     private fun createViewModel(

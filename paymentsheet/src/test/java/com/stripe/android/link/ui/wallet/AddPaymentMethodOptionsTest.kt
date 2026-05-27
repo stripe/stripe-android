@@ -20,9 +20,9 @@ class AddPaymentMethodOptionsTest {
         ),
         financialConnectionsAvailability: FinancialConnectionsAvailability? =
             FinancialConnectionsAvailability.Full,
-        paymentMethodFilter: LinkPaymentMethodFilter? = null,
+        paymentMethodFilters: List<LinkPaymentMethodFilter>? = null,
         linkLaunchMode: LinkLaunchMode =
-            LinkLaunchMode.PaymentMethodSelection(null, paymentMethodFilter)
+            LinkLaunchMode.PaymentMethodSelection(null, paymentMethodFilters)
     ): AddPaymentMethodOptions {
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
@@ -75,7 +75,7 @@ class AddPaymentMethodOptionsTest {
 
     @Test
     fun `values respects payment method filter - card only`() {
-        val options = createOptions(paymentMethodFilter = LinkPaymentMethodFilter.Card)
+        val options = createOptions(paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card))
 
         assertThat(options.values).hasSize(1)
         assertThat(options.values).containsExactly(AddPaymentMethodOption.Card)
@@ -83,7 +83,7 @@ class AddPaymentMethodOptionsTest {
 
     @Test
     fun `values respects payment method filter - bank account only`() {
-        val options = createOptions(paymentMethodFilter = LinkPaymentMethodFilter.BankAccount)
+        val options = createOptions(paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount))
 
         assertThat(options.values).hasSize(1)
         assertThat(options.values).containsExactly(
@@ -141,7 +141,7 @@ class AddPaymentMethodOptionsTest {
     fun `default returns first option when only one available`() {
         val options = createOptions(
             fundingSources = listOf(ConsumerPaymentDetails.BankAccount.TYPE),
-            paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+            paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
         )
 
         assertThat(options.default).isEqualTo(
