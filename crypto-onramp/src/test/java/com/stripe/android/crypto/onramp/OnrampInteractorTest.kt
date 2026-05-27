@@ -1276,17 +1276,35 @@ class OnrampInteractorTest {
             .build()
 
     private fun createInteractor(
+        application: Application = createApplication(),
         cryptoApiRepository: CryptoApiRepository,
         savedStateHandle: SavedStateHandle,
     ): OnrampInteractor {
         return OnrampInteractor(
-            application = RuntimeEnvironment.getApplication(),
+            application = application,
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = savedStateHandle
         )
+    }
+
+    private fun createApplication(
+        defaultApiErrorUserMessage: String = "Something went wrong. Please try again later.",
+        defaultAppAttestationUserMessage: String =
+            "This app couldn't be verified due to an attestation error. Please try again later " +
+                "or contact the developer if the issue persists.",
+    ): Application {
+        val runtimeApplication = RuntimeEnvironment.getApplication()
+
+        return mock {
+            on { packageName } doReturn runtimeApplication.packageName
+            on { getString(R.string.stripe_onramp_default_api_error_user_message) } doReturn
+                defaultApiErrorUserMessage
+            on { getString(R.string.stripe_onramp_app_attestation_default_user_message) } doReturn
+                defaultAppAttestationUserMessage
+        }
     }
 
     private suspend fun stubCheckoutRequiresNextAction() {

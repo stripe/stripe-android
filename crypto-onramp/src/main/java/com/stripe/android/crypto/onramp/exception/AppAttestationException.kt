@@ -8,13 +8,13 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 class AppAttestationException internal constructor(
     val context: APIErrorContext,
-    fallbackUserMessage: Lazy<String>,
+    fallbackUserMessage: String,
 ) : CryptoOnrampException(
-    message = context.apiUserMessage ?: fallbackUserMessage.value,
+    message = context.userMessage(fallbackUserMessage),
     developerMessage = buildAppAttestationDeveloperMessage(context),
     cause = context.underlyingError,
 ) {
-    override val userMessage: String = context.apiUserMessage ?: fallbackUserMessage.value
+    override val userMessage: String = context.userMessage(fallbackUserMessage)
 }
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"

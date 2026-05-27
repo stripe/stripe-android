@@ -8,11 +8,11 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 class UncategorizedApiErrorException internal constructor(
     val context: APIErrorContext,
-    fallbackUserMessage: Lazy<String>,
+    fallbackUserMessage: String,
 ) : CryptoOnrampException(
-    message = context.apiUserMessage ?: fallbackUserMessage.value,
+    message = context.userMessage(fallbackUserMessage),
     developerMessage = buildGenericDeveloperMessage(context),
     cause = context.underlyingError,
 ) {
-    override val userMessage: String = context.apiUserMessage ?: fallbackUserMessage.value
+    override val userMessage: String = context.userMessage(fallbackUserMessage)
 }

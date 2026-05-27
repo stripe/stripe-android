@@ -6,7 +6,6 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
-import kotlin.LazyThreadSafetyMode
 
 internal fun Throwable.toCryptoOnrampError(
     context: Context,
@@ -17,6 +16,7 @@ internal fun Throwable.toCryptoOnrampError(
 
     val stripeException = this as? StripeException ?: return this
     val stripeError = stripeException.stripeError ?: return this
+    val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
 
     val apiErrorContext = APIErrorContext(
         reason = stripeError.extraFields?.get(FIELD_REASON),
@@ -27,7 +27,7 @@ internal fun Throwable.toCryptoOnrampError(
         apiErrorCode = stripeError.code,
         apiErrorType = stripeException.apiErrorType(),
         apiErrorMessage = stripeError.message,
-        apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() },
+        apiUserMessage = apiUserMessage,
         docUrl = stripeError.docUrl,
         underlyingError = stripeException,
     )
@@ -35,16 +35,16 @@ internal fun Throwable.toCryptoOnrampError(
     return if (stripeError.isAppAttestationError()) {
         AppAttestationException(
             context = apiErrorContext,
-            fallbackUserMessage = lazy(LazyThreadSafetyMode.NONE) {
-                context.getString(R.string.stripe_onramp_app_attestation_default_user_message)
-            },
+            fallbackUserMessage = context.getString(
+                R.string.stripe_onramp_app_attestation_default_user_message,
+            ),
         )
     } else {
         UncategorizedApiErrorException(
             context = apiErrorContext,
-            fallbackUserMessage = lazy(LazyThreadSafetyMode.NONE) {
-                context.getString(R.string.stripe_onramp_default_api_error_user_message)
-            },
+            fallbackUserMessage = context.getString(
+                R.string.stripe_onramp_default_api_error_user_message,
+            ),
         )
     }
 }

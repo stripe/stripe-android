@@ -130,6 +130,10 @@ internal fun buildGenericDeveloperMessage(
     )
 }
 
+internal fun APIErrorContext.userMessage(fallbackUserMessage: String): String {
+    return apiUserMessage ?: fallbackUserMessage
+}
+
 private fun String?.orFallbackTo(fallback: String): String {
     return this?.takeIf { it.isNotBlank() } ?: fallback
 }
