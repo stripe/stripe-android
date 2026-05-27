@@ -232,9 +232,9 @@ class OnrampInteractorTest {
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
         assertThat(attestationError.message)
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
-        assertThat(attestationError.reason).isEqualTo("app_not_play_recognized")
-        assertThat(attestationError.mode).isEqualTo("test")
-        assertThat(attestationError.apiErrorType).isEqualTo("api_error")
+        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.context.mode).isEqualTo("test")
+        assertThat(attestationError.context.apiErrorType).isEqualTo("api_error")
         assertThat(attestationError.developerMessage).contains("Summary")
         assertThat(attestationError.developerMessage).contains("Context")
         assertThat(attestationError.developerMessage).contains("Next step")
@@ -278,9 +278,9 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(AppAttestationException::class.java)
 
         val attestationError = error as AppAttestationException
-        assertThat(attestationError.reason).isEqualTo("app_not_play_recognized")
-        assertThat(attestationError.mode).isEqualTo("test")
-        assertThat(attestationError.apiErrorType).isNull()
+        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.context.mode).isEqualTo("test")
+        assertThat(attestationError.context.apiErrorType).isNull()
         assertThat(attestationError.message)
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
         assertThat(attestationError.developerMessage).contains("Summary")
@@ -321,10 +321,10 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
 
         val apiError = error as UncategorizedApiErrorException
-        assertThat(apiError.reason).isEqualTo("email_blocked")
+        assertThat(apiError.context.reason).isEqualTo("email_blocked")
         assertThat(apiError.userMessage).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.message).isEqualTo("This email can't be used. Try another one.")
-        assertThat(apiError.apiErrorType).isNull()
+        assertThat(apiError.context.apiErrorType).isNull()
         assertThat(apiError.developerMessage).contains("Summary")
         assertThat(apiError.developerMessage).contains("Context")
         assertThat(apiError.developerMessage).contains("Next step")
@@ -378,7 +378,7 @@ class OnrampInteractorTest {
         val apiError = error as UncategorizedApiErrorException
         assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
-        assertThat(apiError.apiErrorType).isNull()
+        assertThat(apiError.context.apiErrorType).isNull()
         assertThat(apiError.developerMessage).contains("Developer-facing message")
         assertThat(apiError.developerMessage).contains("Next step")
         assertThat(apiError.developerMessage)
@@ -428,8 +428,8 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(AppAttestationException::class.java)
 
         val attestationError = error as AppAttestationException
-        assertThat(attestationError.reason).isEqualTo("android_environment_mismatch")
-        assertThat(attestationError.apiErrorType).isNull()
+        assertThat(attestationError.context.reason).isEqualTo("android_environment_mismatch")
+        assertThat(attestationError.context.apiErrorType).isNull()
         assertThat(attestationError.userMessage)
             .isEqualTo(
                 "This app couldn't be verified due to an attestation error. Please try " +

@@ -32,77 +32,102 @@ abstract class CryptoOnrampException internal constructor(
     }
 }
 
-internal fun buildGenericDeveloperMessage(
-    operation: String,
-    appPackageName: String,
-    mode: String?,
-    sdkVersion: String,
-    reason: String?,
-    requestId: String?,
-    apiErrorCode: String?,
-    apiErrorType: String?,
-    apiErrorMessage: String?,
-    apiUserMessage: String?,
-    docUrl: String?,
-): String {
-    return buildDeveloperMessage(
-        summary = apiErrorMessage ?: "Stripe API request failed.",
-        operation = operation,
-        appPackageName = appPackageName,
-        mode = mode,
-        reason = reason,
-        requestId = requestId,
-        apiErrorCode = apiErrorCode,
-        apiErrorType = apiErrorType,
-        nextStep = apiUserMessage.orFallbackTo(
-            "Inspect the preserved Stripe API error for details and retry after correcting the request."
-        ),
-        docUrl = docUrl,
-        sdkVersion = sdkVersion,
-    )
+data class APIErrorContext(
+    /**
+     * The raw backend reason, when present.
+     */
+    val reason: String?,
+    /**
+     * The Crypto Onramp operation that failed.
+     */
+    val operation: String,
+    /**
+     * The Android application package name used for the request.
+     */
+    val appPackageName: String,
+    /**
+     * The Stripe mode inferred from the publishable key, when available.
+     */
+    val mode: String?,
+    /**
+     * The SDK version that produced the request.
+     */
+    val sdkVersion: String,
+    /**
+     * The raw backend error code, when present.
+     */
+    val apiErrorCode: String?,
+    /**
+     * The raw backend error type, when present.
+     */
+    val apiErrorType: String?,
+    /**
+     * The raw backend developer-facing message, when present.
+     */
+    val apiErrorMessage: String?,
+    /**
+     * The raw backend end-user-facing message, when present.
+     */
+    val apiUserMessage: String?,
+    /**
+     * A documentation URL for recovery guidance, when available.
+     */
+    val docUrl: String?,
+    /**
+     * The original Stripe exception that was mapped into this context.
+     */
+    val underlyingError: StripeException,
+) {
+    /**
+     * The Stripe API request ID associated with this error, when available.
+     */
+    val requestId: String?
+        get() = underlyingError.requestId
+
+    fun developerMessage(
+        summary: String,
+        nextStep: String,
+    ): String {
+        val context = listOfNotNull(
+            "  - operation: $operation",
+            "  - app_id: $appPackageName",
+            mode?.let { "  - mode: $it" },
+            reason?.let { "  - reason: $it" },
+            requestId?.let { "  - request_id: $it" },
+            apiErrorCode?.let { "  - code: $it" },
+            apiErrorType?.let { "  - type: $it" },
+        )
+
+        return buildList {
+            add("Summary")
+            add("  $summary")
+            add("")
+            add("Context")
+            addAll(context)
+            add("")
+            add("Next step")
+            add("  $nextStep")
+            docUrl?.let {
+                add("")
+                add("Docs")
+                add("  $it")
+            }
+            add("")
+            add("SDK")
+            add("  stripe-android@$sdkVersion")
+        }.joinToString(separator = "\n")
+    }
 }
 
-internal fun buildDeveloperMessage(
-    summary: String,
-    operation: String,
-    appPackageName: String,
-    mode: String?,
-    reason: String?,
-    requestId: String?,
-    apiErrorCode: String?,
-    apiErrorType: String?,
-    nextStep: String,
-    docUrl: String?,
-    sdkVersion: String,
+internal fun buildGenericDeveloperMessage(
+    context: APIErrorContext,
 ): String {
-    val context = listOfNotNull(
-        "  - operation: $operation",
-        "  - app_id: $appPackageName",
-        mode?.let { "  - mode: $it" },
-        reason?.let { "  - reason: $it" },
-        requestId?.let { "  - request_id: $it" },
-        apiErrorCode?.let { "  - code: $it" },
-        apiErrorType?.let { "  - type: $it" },
+    return context.developerMessage(
+        summary = context.apiErrorMessage ?: "Stripe API request failed.",
+        nextStep = context.apiUserMessage.orFallbackTo(
+            "Inspect the preserved Stripe API error for details and retry after correcting the request."
+        ),
     )
-
-    return buildList {
-        add("Summary")
-        add("  $summary")
-        add("")
-        add("Context")
-        addAll(context)
-        add("")
-        add("Next step")
-        add("  $nextStep")
-        docUrl?.let {
-            add("")
-            add("Docs")
-            add("  $it")
-        }
-        add("")
-        add("SDK")
-        add("  stripe-android@$sdkVersion")
-    }.joinToString(separator = "\n")
 }
 
 private fun String?.orFallbackTo(fallback: String): String {
