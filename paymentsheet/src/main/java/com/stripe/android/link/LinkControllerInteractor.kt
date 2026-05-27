@@ -172,14 +172,14 @@ internal class LinkControllerInteractor @Inject constructor(
     fun presentPaymentMethods(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String?,
-        paymentMethodType: LinkController.PaymentMethodType?,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
         if (_state.value.presentationType != null) return
         updateState { it.copy(presentationType = PresentationType.PaymentMethods) }
         present(
             launcher = launcher,
             email = email,
-            paymentMethodType = paymentMethodType,
+            paymentMethodTypes = paymentMethodTypes,
             onConfigurationError = { error ->
                 updateState { it.copy(presentationType = null) }
                 _presentPaymentMethodsResultFlow.tryEmit(
@@ -189,7 +189,7 @@ internal class LinkControllerInteractor @Inject constructor(
             getLaunchMode = { _, state ->
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
-                    paymentMethodFilter = paymentMethodType?.toFilter(),
+                    paymentMethodFilters = paymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
                     shouldShowSecondaryCta = false,
                 )
@@ -201,7 +201,7 @@ internal class LinkControllerInteractor @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String,
         phoneNumber: String?,
-        paymentMethodType: LinkController.PaymentMethodType?,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
         if (_state.value.presentationType != null) return
         updateState { it.copy(presentationType = PresentationType.Full) }
@@ -209,7 +209,7 @@ internal class LinkControllerInteractor @Inject constructor(
             launcher = launcher,
             email = email,
             phoneNumber = phoneNumber,
-            paymentMethodType = paymentMethodType,
+            paymentMethodTypes = paymentMethodTypes,
             onConfigurationError = { error ->
                 updateState { it.copy(presentationType = null) }
                 _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(error))
@@ -217,7 +217,7 @@ internal class LinkControllerInteractor @Inject constructor(
             getLaunchMode = { _, state ->
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
-                    paymentMethodFilter = paymentMethodType?.toFilter(),
+                    paymentMethodFilters = paymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
                     shouldShowSecondaryCta = false,
                 )
@@ -267,14 +267,14 @@ internal class LinkControllerInteractor @Inject constructor(
     private fun withConfiguration(
         email: String?,
         phoneNumber: String? = null,
-        paymentMethodType: LinkController.PaymentMethodType?,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
         onError: (Throwable) -> Unit,
         onSuccess: (LinkConfiguration) -> Unit
     ) {
         val configuration = requireLinkComponent()
             .map { it.configuration }
             .map { config ->
-                if (email == null && phoneNumber == null && paymentMethodType == null) {
+                if (email == null && phoneNumber == null && paymentMethodTypes == null) {
                     // No change needed.
                     config
                 } else {
@@ -284,15 +284,16 @@ internal class LinkControllerInteractor @Inject constructor(
                             phone = phoneNumber ?: config.customerInfo.phone,
                         )
 
-                    val nameCollectionConfig = when (paymentMethodType) {
-                        LinkController.PaymentMethodType.BankAccount, null -> {
+                    val nameCollectionConfig = when {
+                        paymentMethodTypes == null ||
+                            paymentMethodTypes.contains(LinkController.PaymentMethodType.BankAccount) -> {
                             PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                         }
-                        LinkController.PaymentMethodType.Card -> {
-                            config.billingDetailsCollectionConfiguration.name
-                        }
-                        LinkController.PaymentMethodType.Generic -> {
+                        paymentMethodTypes.contains(LinkController.PaymentMethodType.Generic) -> {
                             PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+                        }
+                        else -> {
+                            config.billingDetailsCollectionConfiguration.name
                         }
                     }
 
@@ -621,7 +622,7 @@ internal class LinkControllerInteractor @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String? = null,
         phoneNumber: String? = null,
-        paymentMethodType: LinkController.PaymentMethodType? = null,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>? = null,
         onConfigurationError: (Throwable) -> Unit,
         getLaunchMode: (linkAccount: LinkAccount?, state: State) -> LinkLaunchMode?
     ) {
@@ -630,7 +631,7 @@ internal class LinkControllerInteractor @Inject constructor(
         withConfiguration(
             email = email,
             phoneNumber = phoneNumber,
-            paymentMethodType = paymentMethodType,
+            paymentMethodTypes = paymentMethodTypes,
             onError = onConfigurationError,
             onSuccess = { configuration ->
                 updateStateOnNewEmail(email)
@@ -887,9 +888,11 @@ internal fun getIconDrawableRes(type: PaymentMethodPreviewDetails, isDarkTheme: 
     }
 }
 
-private fun LinkController.PaymentMethodType.toFilter(): LinkPaymentMethodFilter =
-    when (this) {
-        LinkController.PaymentMethodType.Card -> LinkPaymentMethodFilter.Card
-        LinkController.PaymentMethodType.BankAccount -> LinkPaymentMethodFilter.BankAccount
-        LinkController.PaymentMethodType.Generic -> LinkPaymentMethodFilter.Generic
+private fun List<LinkController.PaymentMethodType>.toFilters(): List<LinkPaymentMethodFilter> =
+    map { type ->
+        when (type) {
+            LinkController.PaymentMethodType.Card -> LinkPaymentMethodFilter.Card
+            LinkController.PaymentMethodType.BankAccount -> LinkPaymentMethodFilter.BankAccount
+            LinkController.PaymentMethodType.Generic -> LinkPaymentMethodFilter.Generic
+        }
     }

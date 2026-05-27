@@ -376,19 +376,19 @@ class LinkController @Inject internal constructor(
          *
          * @param email The email address to use for the Link flow.
          * @param phoneNumber Optional phone number to pre-fill during sign-up, in E.164 format.
-         * @param filterPaymentMethodType Optional payment method type to restrict
+         * @param filterPaymentMethodTypes Optional list of payment method type to restrict
          * selection to. If null, all supported types are shown.
          */
         fun present(
             email: String,
             phoneNumber: String? = null,
-            filterPaymentMethodType: PaymentMethodType? = null,
+            filterPaymentMethodTypes: List<PaymentMethodType>? = null,
         ) {
             interactor.presentFull(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
                 phoneNumber = phoneNumber,
-                paymentMethodType = filterPaymentMethodType,
+                paymentMethodTypes = filterPaymentMethodTypes,
             )
         }
 
@@ -412,19 +412,19 @@ class LinkController @Inject internal constructor(
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
-                paymentMethodType = null,
+                paymentMethodTypes = null,
             )
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun presentPaymentMethodsForOnramp(
             email: String?,
-            paymentMethodType: PaymentMethodType?
+            paymentMethodTypes: List<PaymentMethodType>?
         ) {
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
-                paymentMethodType = paymentMethodType,
+                paymentMethodTypes = paymentMethodTypes,
             )
         }
 

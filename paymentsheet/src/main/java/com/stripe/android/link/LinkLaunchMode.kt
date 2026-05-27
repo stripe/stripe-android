@@ -18,9 +18,9 @@ internal sealed interface LinkLaunchMode : Parcelable {
          */
         val selectedPayment: ConsumerPaymentDetails.PaymentDetails?,
         /**
-         * The filter to determine available payment methods.
+         * The filters to determine available payment methods.
          */
-        val paymentMethodFilter: LinkPaymentMethodFilter? = null,
+        val paymentMethodFilters: List<LinkPaymentMethodFilter>? = null,
         /**
          * If true, shares the payment details immediately after creating it in passthrough mode.
          */
