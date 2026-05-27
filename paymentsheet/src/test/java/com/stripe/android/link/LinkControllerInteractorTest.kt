@@ -494,7 +494,7 @@ class LinkControllerInteractorTest {
 
         val newEmail = "new@email.com"
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher = launcher, email = newEmail, paymentMethodType = null)
+        interactor.presentPaymentMethods(launcher = launcher, email = newEmail, paymentMethodTypes = null)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(newEmail)
@@ -512,7 +512,7 @@ class LinkControllerInteractorTest {
         configure(interactor, defaultBillingDetails = Optional.of(billingDetails))
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(launcher = launcher, email = null, paymentMethodType = null)
+        interactor.presentPaymentMethods(launcher = launcher, email = null, paymentMethodTypes = null)
 
         val customerInfo = launcher.calls.awaitItem().input.configuration.customerInfo
         assertThat(customerInfo.email).isEqualTo(TestFactory.CUSTOMER_EMAIL)
@@ -529,7 +529,7 @@ class LinkControllerInteractorTest {
         interactor.presentPaymentMethods(
             launcher = launcher,
             email = null,
-            paymentMethodType = LinkController.PaymentMethodType.BankAccount
+            paymentMethodTypes = listOf(LinkController.PaymentMethodType.BankAccount)
         )
 
         val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
@@ -1229,7 +1229,7 @@ class LinkControllerInteractorTest {
             launcher = launcher,
             email = "test@example.com",
             phoneNumber = "+15551234567",
-            paymentMethodType = null,
+            paymentMethodTypes = null,
         )
 
         val args = launcher.calls.awaitItem().input
@@ -1251,7 +1251,7 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `presentFull() with paymentMethodType passes filter in launch mode`() = runTest {
+    fun `presentFull() with paymentMethodTypes passes filter in launch mode`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
 
@@ -1260,12 +1260,12 @@ class LinkControllerInteractorTest {
             launcher = launcher,
             email = "test@example.com",
             phoneNumber = null,
-            paymentMethodType = LinkController.PaymentMethodType.Card,
+            paymentMethodTypes = listOf(LinkController.PaymentMethodType.Card),
         )
 
         val args = launcher.calls.awaitItem().input
         val launchMode = args.launchMode as LinkLaunchMode.PaymentMethodSelection
-        assertThat(launchMode.paymentMethodFilter).isInstanceOf(LinkPaymentMethodFilter.Card.javaClass)
+        assertThat(launchMode.paymentMethodFilters).contains(LinkPaymentMethodFilter.Card)
     }
 
     @Test
