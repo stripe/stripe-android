@@ -60,10 +60,8 @@ internal class ElementsSessionJsonParser(
                 )
             }
 
-        val customerJson = json.optJSONObject(FIELD_CUSTOMER)
-
         val customer = parseCustomer(
-            json = customerJson,
+            json = json.optJSONObject(FIELD_CUSTOMER),
             enableLinkInSpm = flags[ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM] == true,
         )
 
