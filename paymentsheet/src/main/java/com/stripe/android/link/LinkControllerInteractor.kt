@@ -111,12 +111,9 @@ internal class LinkControllerInteractor @Inject constructor(
 
     internal enum class PresentationType { PaymentMethods, Full }
 
-    private fun iconLoader(context: Context = application): PaymentSelection.IconLoader {
-        val imageLoader = DefaultStripeImageLoader(context)
-        return PaymentSelection.IconLoader(context.resources, imageLoader)
+    private val cachedIconLoader by lazy {
+        PaymentSelection.IconLoader(application.resources, DefaultStripeImageLoader(application))
     }
-
-    private val cachedIconLoader by lazy { iconLoader(application) }
 
     val paymentMethodMetadata: PaymentMethodMetadata?
         get() = _state.value.paymentMethodMetadata
@@ -127,14 +124,13 @@ internal class LinkControllerInteractor @Inject constructor(
         }
 
     fun state(context: Context): StateFlow<LinkController.State> {
-        val contextIconLoader = iconLoader(context)
         return combineAsStateFlow(_internalLinkAccount, _state) { account, state ->
             LinkController.State(
                 elementsSessionId = state.linkComponent?.configuration?.elementsSessionId,
                 internalLinkAccount = account,
                 merchantLogoUrl = state.linkComponent?.configuration?.merchantLogoUrl,
                 selectedPaymentMethodPreview = state.selectedPaymentMethod?.details
-                    ?.toPreview(context, contextIconLoader),
+                    ?.toPreview(context, cachedIconLoader),
                 createdPaymentMethod = state.createdPaymentMethod,
             )
         }
@@ -314,13 +310,13 @@ internal class LinkControllerInteractor @Inject constructor(
 
     fun onLinkActivityResult(result: LinkActivityResult) {
         val currentLaunchMode = _state.value.currentLaunchMode
-        val presentationType = _state.value.presentationType
+        val currentPresentationType = _state.value.presentationType
         updateState { it.copy(currentLaunchMode = null, presentationType = null) }
         updateLinkAccountOnLinkResult(result)
 
         when (currentLaunchMode) {
             is LinkLaunchMode.PaymentMethodSelection ->
-                handlePaymentMethodSelectionResult(result, presentationType)
+                handlePaymentMethodSelectionResult(result, currentPresentationType)
             is LinkLaunchMode.Authentication ->
                 handleAuthenticationResult(result)
             is LinkLaunchMode.Authorization ->
