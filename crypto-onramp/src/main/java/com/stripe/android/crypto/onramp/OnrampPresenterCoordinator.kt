@@ -202,7 +202,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             is PaymentMethodSelection.CardAndBankAccount -> {
                 linkPresenter.presentPaymentMethodsForOnramp(
                     email = clientEmail(),
-                    paymentMethodType = selection.type.toLinkType()
+                    paymentMethodTypes = selection.type.toLinkType()
                 )
             }
             is PaymentMethodSelection.GooglePay -> {
@@ -382,10 +382,10 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     }
 }
 
-private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType? =
+private fun PaymentMethodType.toLinkType(): List<LinkController.PaymentMethodType>? =
     when (this) {
-        PaymentMethodType.Card -> LinkController.PaymentMethodType.Card
-        PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
+        PaymentMethodType.Card -> listOf(LinkController.PaymentMethodType.Card)
+        PaymentMethodType.BankAccount -> listOf(LinkController.PaymentMethodType.BankAccount)
         PaymentMethodType.CardAndBankAccount -> null
         PaymentMethodType.GooglePay -> error("Google Pay is not supported in LinkController")
     }
