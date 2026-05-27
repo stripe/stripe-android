@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.compose.ui.unit.LayoutDirection
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
@@ -118,6 +119,23 @@ internal class CvcControllerTest {
             cvcController.onFocusChange(true)
             cvcController.onValidationStateChanged(false)
             assertThat(awaitItem()).isNull()
+        }
+    }
+
+    @Test
+    fun `contentDescription resolves without error when value contains percent signs`() = runTest {
+        val context = ApplicationProvider.getApplicationContext<android.content.Context>()
+        val controller = createController()
+
+        controller.contentDescription.test {
+            awaitItem() // initial empty value
+
+            controller.onValueChange("%@")
+            val description = awaitItem()
+
+            // Must not throw UnknownFormatConversionException
+            val resolved = description.resolve(context)
+            assertThat(resolved).contains("%")
         }
     }
 
