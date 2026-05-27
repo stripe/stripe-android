@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import com.stripe.paymentelementtestpages.FormPage
 import okhttp3.mockwebserver.SocketPolicy
 import org.json.JSONArray
@@ -458,9 +459,13 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
+
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -594,6 +599,8 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
@@ -657,6 +664,8 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-methods-get-success-us-bank.json")
         }
 
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
+
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
@@ -706,6 +715,8 @@ internal class PaymentSheetTest {
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
+
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         networkRule.enqueue(
             host("api.stripe.com"),
@@ -795,9 +806,13 @@ internal class PaymentSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
+
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -940,6 +955,9 @@ internal class PaymentSheetTest {
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
+
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
