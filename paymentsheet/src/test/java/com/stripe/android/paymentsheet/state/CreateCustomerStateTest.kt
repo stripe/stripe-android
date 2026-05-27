@@ -176,11 +176,6 @@ internal class CreateCustomerStateTest {
         val filteredCards = cards.take(1)
 
         FakePaymentMethodFilter.test(filteredPaymentMethods = filteredCards) {
-            val createCustomerState = CreateCustomerState(
-                paymentMethodFilter = paymentMethodFilter,
-                errorReporter = FakeErrorReporter(),
-            )
-
             val result = createCustomerState(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 elementsSession = DEFAULT_ELEMENTS_SESSION.copy(
@@ -189,6 +184,7 @@ internal class CreateCustomerStateTest {
                 metadata = PaymentMethodMetadataFactory.create()
                     .copy(customerMetadata = CUSTOMER_SESSION_METADATA),
                 savedSelection = CompletableDeferred(SavedSelection.None),
+                paymentMethodFilter = paymentMethodFilter,
             )
 
             assertThat(result).isNotNull()
@@ -208,10 +204,6 @@ internal class CreateCustomerStateTest {
     }
 
     private class Scenario {
-        private val createCustomerStateImpl = CreateCustomerState(
-            paymentMethodFilter = FakePaymentMethodFilter.noOp(),
-            errorReporter = FakeErrorReporter(),
-        )
 
         suspend fun createCustomerState(
             initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
@@ -222,12 +214,18 @@ internal class CreateCustomerStateTest {
                 PaymentMethodMetadataFactory.create().copy(customerMetadata = customerMetadata),
             savedSelection: CompletableDeferred<SavedSelection> = CompletableDeferred(SavedSelection.None),
             prefetchedPaymentMethods: PrefetchedPaymentMethods? = null,
+            paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
         ): CustomerState? {
             val session = if (elementsSessionCustomer != elementsSession.customer) {
                 elementsSession.copy(customer = elementsSessionCustomer)
             } else {
                 elementsSession
             }
+
+            val createCustomerStateImpl = CreateCustomerState(
+                paymentMethodFilter = paymentMethodFilter,
+                errorReporter = FakeErrorReporter(),
+            )
 
             return createCustomerStateImpl(
                 initializationMode = initializationMode,

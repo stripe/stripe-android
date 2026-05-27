@@ -787,7 +787,11 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
+            assertThat(request.types).containsExactly(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.SepaDebit,
+                PaymentMethod.Type.USBankAccount
+            )
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -817,7 +821,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
+            assertThat(request.types).doesNotContain(PaymentMethod.Type.AuBecsDebit)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -953,7 +957,11 @@ internal class DefaultPaymentElementLoaderTest {
                 PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             )
         assertThat(requestPaymentMethodTypes)
-            .containsExactly(PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit)
+            .containsExactly(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.SepaDebit,
+                PaymentMethod.Type.USBankAccount,
+            )
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
