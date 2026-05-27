@@ -162,8 +162,8 @@
   <string name="stripe_last_name">Last</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Loading</string>
-  <!-- Segmented control option for live identity document capture -->
-  <string name="stripe_live">Live</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Auto</string>
   <!-- Segmented control option for manual identity document capture -->
   <string name="stripe_manual">Manual</string>
   <!-- Instructional text when camera is too far from a document -->
