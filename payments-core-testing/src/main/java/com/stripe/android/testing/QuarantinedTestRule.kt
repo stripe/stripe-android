@@ -1,7 +1,9 @@
 package com.stripe.android.testing
 
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.test.platform.app.InstrumentationRegistry
+import kotlinx.parcelize.Parcelize
 import org.junit.Assume
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -38,8 +40,8 @@ class QuarantinedTestRule : TestRule {
 internal class QuarantinedTestMatcher(
     private val arguments: Bundle,
 ) {
-    private val quarantinedCases: List<QuarantinedTestMatch> by lazy {
-        arguments.getParcelableArrayList<QuarantinedTestMatch>(QUARANTINE_ENV_KEY).orEmpty()
+    private val quarantinedCases: List<Match> by lazy {
+        arguments.getParcelableArrayList<Match>(QUARANTINE_ENV_KEY).orEmpty()
     }
 
     fun match(description: Description): Boolean {
@@ -47,6 +49,12 @@ internal class QuarantinedTestMatcher(
         val methodName = description.methodName ?: return false
         return quarantinedCases.any { it.className == className && it.testCaseName == methodName }
     }
+
+    @Parcelize
+    data class Match(
+        val className: String,
+        val testCaseName: String,
+    ) : Parcelable
 
     private companion object {
         private const val QUARANTINE_ENV_KEY = "bitriseQuarantinedTests"
