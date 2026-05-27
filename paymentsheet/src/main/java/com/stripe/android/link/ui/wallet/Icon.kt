@@ -1,6 +1,6 @@
 package com.stripe.android.link.ui.wallet
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
@@ -13,9 +13,9 @@ import com.stripe.android.uicore.image.StripeImage
 fun Icon(
     iconUrl: String?,
     modifier: Modifier = Modifier,
-    errorContent: @Composable (BoxWithConstraintsScope.() -> Unit) = {},
+    errorContent: @Composable BoxWithConstraintsScope.() -> Unit = {},
 ) {
-    Box(modifier = modifier) {
+    BoxWithConstraints(modifier = modifier) {
         iconUrl?.let {
                 StripeImage(
                     url = iconUrl,
@@ -25,6 +25,6 @@ fun Icon(
                     contentScale = ContentScale.Fit,
                     errorContent = errorContent
                 )
-        } ?: errorContent
+        } ?: errorContent()
     }
 }

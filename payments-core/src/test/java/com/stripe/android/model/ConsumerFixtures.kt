@@ -264,7 +264,7 @@ object ConsumerFixtures {
         """.trimIndent()
     )
 
-    val CONSUMER_SINGLE_UNKNOWN_PAYMENT_DETAILS_JSON = JSONObject(
+    val CONSUMER_SINGLE_GENERIC_PAYMENT_DETAILS_JSON = JSONObject(
         """
             {
               "redacted_payment_details": [
@@ -281,14 +281,14 @@ object ConsumerFixtures {
                       "default": "https://example.com/crypto-icon.png"
                     }
                   },
-                  "next_action_types": ["STRIPE_REDIRECT"]
+                  "next_action_types": ["redirect_to_url"]
                 }
               ]
             }
         """.trimIndent()
     )
 
-    val CONSUMER_UNKNOWN_PAYMENT_DETAILS_NO_SUBLABEL_ICON_JSON = JSONObject(
+    val CONSUMER_GENERIC_PAYMENT_DETAILS_NO_SUBLABEL_ICON_JSON = JSONObject(
         """
             {
               "redacted_payment_details": [
@@ -307,7 +307,7 @@ object ConsumerFixtures {
         """.trimIndent()
     )
 
-    val CONSUMER_UNKNOWN_PAYMENT_DETAILS_NO_DISPLAY_JSON = JSONObject(
+    val CONSUMER_GENERIC_PAYMENT_DETAILS_NO_DISPLAY_JSON = JSONObject(
         """
             {
               "redacted_payment_details": [

@@ -59,6 +59,6 @@ private val ConsumerPaymentDetails.PaymentDetails.canBeSetAsDefault
     get() = when (this) {
         is ConsumerPaymentDetails.BankAccount,
         is ConsumerPaymentDetails.Card,
-        is ConsumerPaymentDetails.Passthrough -> isDefault
+        is ConsumerPaymentDetails.Passthrough -> !isDefault
         is ConsumerPaymentDetails.Generic -> false
     }

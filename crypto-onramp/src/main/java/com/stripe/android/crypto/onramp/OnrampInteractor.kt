@@ -1231,5 +1231,8 @@ internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisp
 
         LinkController.PaymentMethodType.BankAccount ->
             PaymentMethodDisplayData.Type.BankAccount
+
+        LinkController.PaymentMethodType.Generic ->
+            PaymentMethodDisplayData.Type.Card
     }
 }
