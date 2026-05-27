@@ -899,6 +899,17 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * The mode for the Link controller, indicating whether the session is for payment, setup,
+     * or both.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Mode {
+        Payment,
+        PaymentAndSetupFutureUse,
+        Setup,
+    }
+
+    /**
      * Builder for creating a [LinkController] instance.
      *
      * @param application The application context.
@@ -909,6 +920,20 @@ class LinkController @Inject internal constructor(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
     ) {
+        private var mode: Mode = Mode.Setup
+
+    /**
+     * Set the mode for the Link session.
+     *
+     * Defaults to [Mode.Setup].
+     *
+     * @param mode The [Mode] indicating whether this is a payment, setup, or combined session.
+     * @return This builder instance for method chaining.
+     */
+    fun mode(mode: Mode) = apply {
+        this.mode = mode
+    }
+
         /**
          * Build the [LinkController] instance.
          *
@@ -918,7 +943,8 @@ class LinkController @Inject internal constructor(
             return create(
                 application = application,
                 savedStateHandle = savedStateHandle,
-                requestSurface = RequestSurface.PaymentElement
+                requestSurface = RequestSurface.PaymentElement,
+                mode = mode,
             )
         }
     }
@@ -947,6 +973,7 @@ class LinkController @Inject internal constructor(
             application: Application,
             savedStateHandle: SavedStateHandle,
             requestSurface: RequestSurface,
+            mode: Mode = Mode.Setup,
         ): LinkController {
             return DaggerLinkControllerComponent.factory()
                 .build(
@@ -954,6 +981,7 @@ class LinkController @Inject internal constructor(
                     savedStateHandle = savedStateHandle,
                     paymentElementCallbackIdentifier = "LinkController",
                     requestSurface = requestSurface,
+                    mode = mode,
                 )
                 .linkController
         }
