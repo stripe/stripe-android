@@ -2668,6 +2668,7 @@ internal class DefaultPaymentElementLoaderTest {
                 customerRepo = repository,
                 customer = ElementsSession.Customer(
                     paymentMethods = cards,
+                    email = null,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
                         customerId = "cus_1",
@@ -2713,6 +2714,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
+                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2764,6 +2766,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
+                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2815,6 +2818,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
+                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2866,6 +2870,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
+                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2917,6 +2922,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(4),
+                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -3228,6 +3234,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = loaderScenario.createPaymentElementLoader(
             customer = ElementsSession.Customer(
                 paymentMethods = paymentMethods,
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_1",
                     customerId = "cus_1",
@@ -3322,6 +3329,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(1),
+                    email = null,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
                         customerId = "cus_1",
@@ -3476,6 +3484,7 @@ internal class DefaultPaymentElementLoaderTest {
             val loader = loaderScenario.createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = paymentMethodsForTestingOrdering,
+                    email = null,
                     session = createElementsSessionCustomerSession(
                         mobilePaymentElementComponent =
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
@@ -4087,6 +4096,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
                 paymentMethods = PaymentMethodFactory.cards(4),
+                email = null,
                 session = createElementsSessionCustomerSession(
                     if (shouldDisableMobilePaymentElement) {
                         ElementsSession.Customer.Components.MobilePaymentElement.Disabled
@@ -4485,6 +4495,7 @@ internal class DefaultPaymentElementLoaderTest {
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_1",
                 customerId = "cus_1",
@@ -4756,6 +4767,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             customer = ElementsSession.Customer(
                 paymentMethods = paymentMethodsForTestingOrdering,
+                email = null,
                 session = createElementsSessionCustomerSession(
                     mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                         isPaymentMethodSetAsDefaultEnabled = true,

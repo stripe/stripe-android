@@ -160,6 +160,7 @@ internal data class ElementsSession(
     data class Customer(
         val paymentMethods: List<PaymentMethod>,
         val defaultPaymentMethod: String?,
+        val email: String?,
         val session: Session,
     ) : StripeModel {
         @Parcelize
