@@ -109,8 +109,8 @@ internal class WalletViewModel(
             is LinkLaunchMode.Authorization -> null
         }
 
-    private val paymentMethodFilter
-        get() = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
+    private val paymentMethodFilters
+        get() = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilters
 
     private val paymentSelectionHint: ResolvableString?
         get() = R.string.stripe_wallet_prefer_debit_card_hint
@@ -155,7 +155,7 @@ internal class WalletViewModel(
         viewModelScope.launch {
             linkAccountManager.consumerState.filterNotNull().collectLatest { paymentDetailsState ->
                 val filteredPaymentDetails = paymentDetailsState.paymentDetails
-                    .filter { paymentMethodFilter?.invoke(it.details) != false }
+                    .filter { paymentMethodFilters?.any { filter -> filter(it.details) } != false }
                     .toList()
                 val currentState = _uiState.updateAndGet {
                     it.updateWithResponse(filteredPaymentDetails)

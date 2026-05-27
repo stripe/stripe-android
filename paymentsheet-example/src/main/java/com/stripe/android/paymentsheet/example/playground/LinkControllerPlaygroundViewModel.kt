@@ -70,12 +70,12 @@ internal class LinkControllerPlaygroundViewModel(
     fun onPresentClick(
         email: String,
         phoneNumber: String?,
-        paymentMethodType: LinkController.PaymentMethodType?,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
         linkControllerPresenter?.present(
             email = email,
             phoneNumber = phoneNumber,
-            filterPaymentMethodType = paymentMethodType,
+            filterPaymentMethodTypes = paymentMethodTypes,
         )
     }
 
@@ -112,10 +112,10 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
-    fun onPaymentMethodClick(email: String, paymentMethodType: LinkController.PaymentMethodType?) {
+    fun onPaymentMethodClick(email: String, paymentMethodTypes: List<LinkController.PaymentMethodType>?) {
         linkControllerPresenter?.presentPaymentMethodsForOnramp(
             email = email.takeIf { it.isNotBlank() },
-            paymentMethodType = paymentMethodType,
+            paymentMethodTypes = paymentMethodTypes,
         )
     }
 
