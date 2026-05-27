@@ -276,8 +276,7 @@ internal fun LinkControllerUi(
             onClick = {
                 onPaymentMethodButtonClick(
                     email,
-                    selectedPaymentMethodTypes.takeIf { it.isNotEmpty() }?.toList()
-                )
+                    selectedPaymentMethodTypes.takeIf { it.isNotEmpty() }?.toList())
             },
         )
         Spacer(Modifier.height(16.dp))
