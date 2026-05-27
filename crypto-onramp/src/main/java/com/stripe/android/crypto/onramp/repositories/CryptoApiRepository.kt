@@ -408,7 +408,9 @@ internal class CryptoApiRepository @Inject constructor(
             stripeError = stripeError,
             requestId = response.requestId?.value,
             statusCode = response.code,
-            message = stripeError?.message ?: "Request failed with status code ${response.code} and non-JSON error body."
+            message = stripeError?.message
+                ?: "Request failed with status code ${response.code} and non-JSON error " +
+                    "body."
         )
     }
 

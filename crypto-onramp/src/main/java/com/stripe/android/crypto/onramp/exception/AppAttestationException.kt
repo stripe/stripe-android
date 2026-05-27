@@ -163,8 +163,11 @@ private fun buildAppAttestationDeveloperMessage(
         apiErrorCode = apiErrorCode,
         apiErrorType = apiErrorType,
         nextStep = appAttestationNextStep(reason)
-            ?: (apiErrorMessage
-                ?: "Inspect the preserved Stripe API error for details and retry after correcting the app attestation configuration."),
+            ?: (
+                apiErrorMessage
+                ?: "Inspect the preserved Stripe API error for details and retry after " +
+                    "correcting the app attestation configuration."
+            ),
         docUrl = docUrl,
         sdkVersion = sdkVersion,
     )

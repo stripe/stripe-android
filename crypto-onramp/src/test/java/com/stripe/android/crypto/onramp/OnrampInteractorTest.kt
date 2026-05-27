@@ -203,7 +203,9 @@ class OnrampInteractorTest {
                         message = "App attestation failed",
                         extraFields = mapOf(
                             "reason" to "app_not_play_recognized",
-                            "user_message" to "This app couldn't be verified. Install it from Google Play and try again."
+                            "user_message" to
+                                "This app couldn't be verified. Install it from Google Play " +
+                                "and try again."
                         )
                     ),
                     requestId = "req_123",
@@ -429,9 +431,15 @@ class OnrampInteractorTest {
         assertThat(attestationError.reason).isEqualTo("android_environment_mismatch")
         assertThat(attestationError.apiErrorType).isNull()
         assertThat(attestationError.userMessage)
-            .isEqualTo("This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists.")
+            .isEqualTo(
+                "This app couldn't be verified due to an attestation error. Please try " +
+                    "again later or contact the developer if the issue persists."
+            )
         assertThat(attestationError.message)
-            .isEqualTo("This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists.")
+            .isEqualTo(
+                "This app couldn't be verified due to an attestation error. Please try " +
+                    "again later or contact the developer if the issue persists."
+            )
         assertThat(attestationError.developerMessage)
             .contains("the Play Integrity distribution channel does not match this Stripe mode")
         assertThat(attestationError.developerMessage).doesNotContain("type:")
