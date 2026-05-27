@@ -1,5 +1,6 @@
 #!/bin/python
 import argparse
+import json
 import os
 import shutil
 import requests
@@ -283,7 +284,7 @@ def executeTests(appUrl, testUrl):
     if bitriseQuarantinedTests:
         instrumentationOptionsParams = {
             "instrumentationOptions": {
-                "bitriseQuarantinedTests": bitriseQuarantinedTests.encode("utf-8").hex(),
+                "bitriseQuarantinedTests": json.loads(bitriseQuarantinedTests),
             }
         }
     else:

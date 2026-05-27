@@ -1,9 +1,9 @@
 package com.stripe.android.testing
 
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.test.platform.app.InstrumentationRegistry
-import org.json.JSONArray
-import org.json.JSONException
+import kotlinx.parcelize.Parcelize
 import org.junit.Assume
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -41,7 +41,7 @@ internal class QuarantinedTestMatcher(
     private val arguments: Bundle,
 ) {
     private val quarantinedCases: List<Match> by lazy {
-        decode()
+        arguments.getParcelableArrayList<Match>(QUARANTINE_ENV_KEY).orEmpty()
     }
 
     fun match(description: Description): Boolean {
@@ -50,44 +50,13 @@ internal class QuarantinedTestMatcher(
         return quarantinedCases.any { it.className == className && it.testCaseName == methodName }
     }
 
-    private fun decode(): List<Match> {
-        val rawHex = arguments.getString(QUARANTINE_ENV_KEY)
-            ?.trim()
-            ?.takeIf { it.isNotEmpty() }
-            ?: return emptyList()
-
-        return try {
-            val rawJson = rawHex.hexToByteArray().decodeToString()
-            val listOfTestsJson = JSONArray(rawJson)
-
-            parseQuarantineCases(listOfTestsJson)
-        } catch (_: IllegalArgumentException) {
-            return emptyList()
-        } catch (_: JSONException) {
-            return emptyList()
-        }
-    }
-
-    private fun parseQuarantineCases(array: JSONArray): List<Match> = buildList {
-        for (i in 0 until array.length()) {
-            val obj = array.optJSONObject(i)
-            val className = obj?.optString("className")?.takeIf { it.isNotEmpty() }
-            val testCaseName = obj?.optString("testCaseName")?.takeIf { it.isNotEmpty() }
-
-            if (className == null || testCaseName == null) {
-                continue
-            }
-
-            add(Match(className = className, testCaseName = testCaseName))
-        }
-    }
-
-    data class Match(
-        val className: String,
-        val testCaseName: String,
-    )
-
     private companion object {
         private const val QUARANTINE_ENV_KEY = "bitriseQuarantinedTests"
     }
 }
+
+@Parcelize
+data class Match(
+    val className: String,
+    val testCaseName: String,
+) : Parcelable
