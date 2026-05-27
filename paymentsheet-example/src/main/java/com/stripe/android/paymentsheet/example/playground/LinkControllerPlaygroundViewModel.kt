@@ -17,7 +17,7 @@ internal class LinkControllerPlaygroundViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    private val linkController = LinkController.create(application, savedStateHandle)
+    private val linkController = LinkController.Builder(application, savedStateHandle).build()
     private var linkControllerPresenter: LinkController.Presenter? = null
 
     val status = MutableStateFlow<StatusMessage?>(null)
