@@ -1,6 +1,7 @@
 package com.stripe.android.testing
 
 import android.os.Bundle
+import android.util.Base64
 import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONArray
 import org.json.JSONException
@@ -8,6 +9,8 @@ import org.junit.Assume
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
+import java.io.ByteArrayInputStream
+import java.util.zip.GZIPInputStream
 
 class QuarantinedTestRule : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
@@ -51,19 +54,24 @@ internal class QuarantinedTestMatcher(
     }
 
     private fun decode(): List<Match> {
-        val rawHex = arguments.getString(QUARANTINE_ENV_KEY)
+        val encoded = arguments.getString(QUARANTINE_ENV_KEY)
             ?.trim()
             ?.takeIf { it.isNotEmpty() }
             ?: return emptyList()
 
         return try {
-            val rawJson = rawHex.hexToByteArray().decodeToString()
+            val compressed = Base64.decode(encoded, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+            val rawJson = GZIPInputStream(ByteArrayInputStream(compressed))
+                .bufferedReader()
+                .use { it.readText() }
             val listOfTestsJson = JSONArray(rawJson)
 
             parseQuarantineCases(listOfTestsJson)
         } catch (_: IllegalArgumentException) {
             return emptyList()
         } catch (_: JSONException) {
+            return emptyList()
+        } catch (_: java.io.IOException) {
             return emptyList()
         }
     }

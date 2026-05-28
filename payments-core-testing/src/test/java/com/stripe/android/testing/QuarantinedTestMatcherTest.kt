@@ -1,11 +1,14 @@
 package com.stripe.android.testing
 
 import android.os.Bundle
+import android.util.Base64
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.Description
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.io.ByteArrayOutputStream
+import java.util.zip.GZIPOutputStream
 
 @RunWith(RobolectricTestRunner::class)
 class QuarantinedTestMatcherTest {
@@ -13,7 +16,7 @@ class QuarantinedTestMatcherTest {
     @Test
     fun `match is true when description matches a quarantined class and method`() {
         val json = """[{"className":"com.example.Foo","testCaseName":"bar"}]"""
-        val matcher = matcherForHexPayload(json)
+        val matcher = matcherForGzipBase64Payload(json)
 
         val description = Description.createTestDescription("com.example.Foo", "bar")
         assertThat(matcher.match(description)).isTrue()
@@ -22,7 +25,7 @@ class QuarantinedTestMatcherTest {
     @Test
     fun `match is false when class does not match`() {
         val json = """[{"className":"com.example.Foo","testCaseName":"bar"}]"""
-        val matcher = matcherForHexPayload(json)
+        val matcher = matcherForGzipBase64Payload(json)
 
         val description = Description.createTestDescription("com.other.Foo", "bar")
         assertThat(matcher.match(description)).isFalse()
@@ -31,7 +34,7 @@ class QuarantinedTestMatcherTest {
     @Test
     fun `match is false when method does not match`() {
         val json = """[{"className":"com.example.Foo","testCaseName":"bar"}]"""
-        val matcher = matcherForHexPayload(json)
+        val matcher = matcherForGzipBase64Payload(json)
 
         val description = Description.createTestDescription("com.example.Foo", "baz")
         assertThat(matcher.match(description)).isFalse()
@@ -55,9 +58,9 @@ class QuarantinedTestMatcherTest {
     }
 
     @Test
-    fun `match is false when payload is not valid hex`() {
+    fun `match is false when payload is not valid gzip base64`() {
         val bundle = Bundle().apply {
-            putString("bitriseQuarantinedTests", "not-hex-json")
+            putString("bitriseQuarantinedTests", "not-valid-data!!!")
         }
         val matcher = QuarantinedTestMatcher(bundle)
 
@@ -67,7 +70,7 @@ class QuarantinedTestMatcherTest {
 
     @Test
     fun `match is false when decoded json is not a valid array`() {
-        val matcher = matcherForHexPayload("""{"className":"com.example.Foo","testCaseName":"bar"}""")
+        val matcher = matcherForGzipBase64Payload("""{"className":"com.example.Foo","testCaseName":"bar"}""")
 
         val description = Description.createTestDescription("com.example.Foo", "bar")
         assertThat(matcher.match(description)).isFalse()
@@ -75,7 +78,7 @@ class QuarantinedTestMatcherTest {
 
     @Test
     fun `match is false when decoded json is invalid`() {
-        val matcher = matcherForHexPayload("not json at all")
+        val matcher = matcherForGzipBase64Payload("not json at all")
 
         val description = Description.createTestDescription("com.example.Foo", "bar")
         assertThat(matcher.match(description)).isFalse()
@@ -90,7 +93,7 @@ class QuarantinedTestMatcherTest {
               {"className":"com.b.Second","testCaseName":"m2"}
             ]
             """.trimIndent()
-        val matcher = matcherForHexPayload(json)
+        val matcher = matcherForGzipBase64Payload(json)
 
         assertThat(matcher.match(Description.createTestDescription("com.a.First", "m1"))).isTrue()
         assertThat(matcher.match(Description.createTestDescription("com.b.Second", "m2"))).isTrue()
@@ -107,15 +110,19 @@ class QuarantinedTestMatcherTest {
               {"className":"com.ok.Cls","testCaseName":"good"}
             ]
             """.trimIndent()
-        val matcher = matcherForHexPayload(json)
+        val matcher = matcherForGzipBase64Payload(json)
 
         assertThat(matcher.match(Description.createTestDescription("com.ok.Cls", "good"))).isTrue()
         assertThat(matcher.match(Description.createTestDescription("com.ok.Cls", "x"))).isFalse()
     }
 
-    private fun matcherForHexPayload(json: String): QuarantinedTestMatcher {
-        val hex = json.encodeToByteArray().toHexString()
-        val bundle = Bundle().apply { putString("bitriseQuarantinedTests", hex) }
+    private fun matcherForGzipBase64Payload(json: String): QuarantinedTestMatcher {
+        val compressed = ByteArrayOutputStream().use { baos ->
+            GZIPOutputStream(baos).use { gzip -> gzip.write(json.encodeToByteArray()) }
+            baos.toByteArray()
+        }
+        val encoded = Base64.encodeToString(compressed, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
+        val bundle = Bundle().apply { putString("bitriseQuarantinedTests", encoded) }
         return QuarantinedTestMatcher(bundle)
     }
 }
