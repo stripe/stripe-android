@@ -18,7 +18,6 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFailsWith
 
@@ -36,14 +35,12 @@ internal class LinkControllerCoordinatorTest {
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
     private val authorizeResultFlow = MutableSharedFlow<LinkController.AuthorizeResult>()
     private val presentResultFlow = MutableSharedFlow<LinkController.PresentResult>()
-    private val presentSelectionSucceededFlow = MutableSharedFlow<Unit>()
 
     private val viewModel: LinkControllerInteractor = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { authenticationResultFlow } doReturn authenticationResultFlow
         on { authorizeResultFlow } doReturn authorizeResultFlow
         on { presentResultFlow } doReturn presentResultFlow
-        on { presentSelectionSucceededFlow } doReturn presentSelectionSucceededFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
@@ -200,35 +197,5 @@ internal class LinkControllerCoordinatorTest {
         presentResultFlow.emit(result)
 
         assertThat(presentResults).containsExactly(result)
-    }
-
-    @Test
-    fun `presentSelectionSucceededFlow triggers createPaymentMethod and emits Completed result`() = runTest {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
-        whenever(viewModel.createPaymentMethod())
-            .thenReturn(LinkController.CreatePaymentMethodResult.Success(paymentMethod))
-
-        lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
-        createCoordinator()
-
-        presentSelectionSucceededFlow.emit(Unit)
-
-        verify(viewModel).createPaymentMethod()
-        verify(viewModel).emitPresentResult(LinkController.PresentResult.Completed(paymentMethod))
-    }
-
-    @Test
-    fun `presentSelectionSucceededFlow on createPaymentMethod failure emits Failed result`() = runTest {
-        val error = Exception("Create PM failed")
-        whenever(viewModel.createPaymentMethod())
-            .thenReturn(LinkController.CreatePaymentMethodResult.Failed(error))
-
-        lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
-        createCoordinator()
-
-        presentSelectionSucceededFlow.emit(Unit)
-
-        verify(viewModel).createPaymentMethod()
-        verify(viewModel).emitPresentResult(LinkController.PresentResult.Failed(error))
     }
 }

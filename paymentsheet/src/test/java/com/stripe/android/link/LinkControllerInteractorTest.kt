@@ -26,6 +26,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakeLinkComponent
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -1001,6 +1002,7 @@ class LinkControllerInteractorTest {
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
             linkComponentFactoryProvider = linkComponentFactoryProvider,
+            coroutineScope = CoroutineScope(dispatcher),
         )
     }
 
@@ -1287,13 +1289,13 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `onLinkActivityResult() with present flow Completed emits to presentSelectionSucceededFlow`() = runTest {
+    fun `onLinkActivityResult() with present flow Completed emits PresentResult Completed`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
 
         interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
 
-        interactor.presentSelectionSucceededFlow.test {
+        interactor.presentResultFlow.test {
             interactor.onLinkActivityResult(
                 LinkActivityResult.Completed(
                     linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
@@ -1301,7 +1303,7 @@ class LinkControllerInteractorTest {
                     shippingAddress = null,
                 )
             )
-            awaitItem()
+            assertThat(awaitItem()).isInstanceOf(LinkController.PresentResult.Completed::class.java)
         }
     }
 

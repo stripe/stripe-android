@@ -5,6 +5,7 @@ import android.content.Context
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.DefaultLinkConfigurationLoader
 import com.stripe.android.link.LinkConfigurationLoader
@@ -24,6 +25,8 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import javax.inject.Singleton
 
@@ -77,6 +80,13 @@ internal interface LinkControllerModule {
         @Singleton
         fun provideStripeImageLoader(context: Context): StripeImageLoader {
             return DefaultStripeImageLoader(context)
+        }
+
+        @Provides
+        @Singleton
+        @ViewModelScope
+        fun provideCoroutineScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
         }
     }
 }
