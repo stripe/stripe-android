@@ -1,5 +1,6 @@
 package com.stripe.android.link.ui
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
@@ -120,7 +121,7 @@ internal fun String.replaceHyperlinks(linkBrand: LinkBrand) = this.replace(
 private fun LinkTermsAllTypesLinkPreview() {
     StripeTheme {
         Surface {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 LinkTermsType.entries.forEach { type ->
                     LinkTerms(
                         type = type,
@@ -138,7 +139,7 @@ private fun LinkTermsAllTypesLinkPreview() {
 private fun LinkTermsAllTypesOnelinkPreview() {
     StripeTheme {
         Surface {
-            Column(modifier = Modifier.padding(16.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 LinkTermsType.entries.forEach { type ->
                     LinkTerms(
                         type = type,
