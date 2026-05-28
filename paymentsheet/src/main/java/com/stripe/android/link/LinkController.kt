@@ -922,17 +922,17 @@ class LinkController @Inject internal constructor(
     ) {
         private var mode: Mode = Mode.Setup
 
-    /**
-     * Set the mode for the Link session.
-     *
-     * Defaults to [Mode.Setup].
-     *
-     * @param mode The [Mode] indicating whether this is a payment, setup, or combined session.
-     * @return This builder instance for method chaining.
-     */
-    fun mode(mode: Mode) = apply {
-        this.mode = mode
-    }
+        /**
+         * Set the mode for the Link session.
+         *
+         * Defaults to [Mode.Setup].
+         *
+         * @param mode The [Mode] indicating whether this is a payment, setup, or combined session.
+         * @return This builder instance for method chaining.
+         */
+        fun mode(mode: Mode) = apply {
+            this.mode = mode
+        }
 
         /**
          * Build the [LinkController] instance.
