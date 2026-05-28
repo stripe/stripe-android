@@ -110,6 +110,7 @@ class ResolvableStringTest {
         assertEquals("%@", "%@".resolvableString.resolve(context))
         assertEquals("%s", "%s".resolvableString.resolve(context))
         assertEquals("%d", "%d".resolvableString.resolve(context))
+        assertEquals("%@ 100 %s", "%@ 100 %s".resolvableString.resolve(context))
         assertEquals("100%", "100%".resolvableString.resolve(context))
         assertEquals("% discount", "% discount".resolvableString.resolve(context))
     }
