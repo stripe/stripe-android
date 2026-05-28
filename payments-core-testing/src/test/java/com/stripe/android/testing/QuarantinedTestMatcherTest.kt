@@ -121,7 +121,7 @@ class QuarantinedTestMatcherTest {
             GZIPOutputStream(baos).use { gzip -> gzip.write(json.encodeToByteArray()) }
             baos.toByteArray()
         }
-        val encoded = Base64.encodeToString(compressed, Base64.URL_SAFE or Base64.NO_WRAP)
+        val encoded = Base64.encodeToString(compressed, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
         val bundle = Bundle().apply { putString("bitriseQuarantinedTests", encoded) }
         return QuarantinedTestMatcher(bundle)
     }

@@ -60,7 +60,7 @@ internal class QuarantinedTestMatcher(
             ?: return emptyList()
 
         return try {
-            val compressed = Base64.decode(encoded, Base64.URL_SAFE or Base64.NO_WRAP)
+            val compressed = Base64.decode(encoded, Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING)
             val rawJson = GZIPInputStream(ByteArrayInputStream(compressed))
                 .bufferedReader()
                 .use { it.readText() }
