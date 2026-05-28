@@ -113,6 +113,7 @@ internal class TestLatency(
             this[LinkSettingsDefinition] = false
             this[CustomerSettingsDefinition] = CustomerType.GUEST
             this[GooglePaySettingsDefinition] = GooglePayMode.Off
+            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
         }
 
         @JvmStatic
