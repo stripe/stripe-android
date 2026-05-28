@@ -959,23 +959,8 @@ internal class FlowControllerTest {
             response.testBodyFromFile("payment-methods-get-success.json")
         }
 
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.USBankAccount.code)
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", PaymentMethod.Type.SepaDebit.code)
-        ) { response ->
-            response.testBodyFromFile("payment-methods-get-success-empty.json")
-        }
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
