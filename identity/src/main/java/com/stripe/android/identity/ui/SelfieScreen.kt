@@ -1,10 +1,14 @@
 package com.stripe.android.identity.ui
 
+import android.graphics.Bitmap
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,41 +18,39 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Checkbox
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathFillType
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -58,15 +60,13 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.camera.scanui.CameraView
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.CameraSource
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.camera.SelfieCameraManager
-import com.stripe.android.identity.navigation.SelfieDestination
-import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.startScanning
@@ -75,9 +75,11 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.launch
+import kotlin.math.cos
+import kotlin.math.sin
+import kotlin.math.sqrt
 
-internal const val SELFIE_VIEW_FINDER_ASPECT_RATIO = 1f
+internal const val SELFIE_VIEW_FINDER_ASPECT_RATIO = 0.75f
 internal const val SELFIE_SCAN_TITLE_TAG = "SelfieScanTitle"
 internal const val SELFIE_SCAN_MESSAGE_TAG = "SelfieScanMessage"
 internal const val SELFIE_SCAN_CONTINUE_BUTTON_TAG = "SelfieScanContinue"
@@ -85,14 +87,22 @@ internal const val SCAN_VIEW_TAG = "SelfieScanViewTag"
 internal const val RESULT_VIEW_TAG = "SelfieResultViewTag"
 internal const val RETAKE_SELFIE_BUTTON_TAG = "RetakeSelfieButtonTag"
 internal const val CONSENT_CHECKBOX_TAG = "ConsentCheckboxTag"
+internal const val SELFIE_SCAN_STATUS_TAG = "SelfieScanStatusTag"
+internal const val SELFIE_HAVING_TROUBLE_TAG = "SelfieHavingTroubleTag"
+internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
 private const val FLASH_MAX_ALPHA = 0.5f
 private const val FLASH_ANIMATION_TIME = 200
+private const val CAPTURE_GUIDE_TICK_COUNT = 77
+private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
+private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
+private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.41f
 
 @Composable
 internal fun SelfieScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
     selfieScanViewModel: SelfieScanViewModel,
+    fallbackUrlLauncher: FallbackUrlLauncher
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -140,24 +150,24 @@ internal fun SelfieScanScreen(
             }
 
             else -> {
-                val successSelfieCapturePage =
-                    remember {
-                        requireNotNull(pageAndModelFiles.page.selfieCapture) {
-                            identityViewModel.errorCause.postValue(
-                                IllegalStateException("VerificationPage.selfieCapture is null")
-                            )
-                            navController.navigateToErrorScreenWithDefaultValues(context)
-                        }
+                remember {
+                    requireNotNull(pageAndModelFiles.page.selfieCapture) {
+                        identityViewModel.errorCause.postValue(
+                            IllegalStateException("VerificationPage.selfieCapture is null")
+                        )
+                        navController.navigateToErrorScreenWithDefaultValues(context)
                     }
+                }
                 SelfieCaptureScreen(
                     selfieScannerState = selfieScannerState,
                     feedback = feedback,
-                    successSelfieCapturePage = successSelfieCapturePage,
+                    fallbackUrl = pageAndModelFiles.page.fallbackUrl,
                     identityViewModel = identityViewModel,
                     identityScanViewModel = selfieScanViewModel,
                     navController = navController,
                     lifecycleOwner = lifecycleOwner,
-                    cameraManager = cameraManager
+                    cameraManager = cameraManager,
+                    fallbackUrlLauncher = fallbackUrlLauncher
                 )
             }
         }
@@ -168,12 +178,13 @@ internal fun SelfieScanScreen(
 private fun SelfieCaptureScreen(
     selfieScannerState: IdentityScanViewModel.State,
     feedback: Int?,
-    successSelfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
+    fallbackUrl: String,
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
     navController: NavController,
     lifecycleOwner: LifecycleOwner,
     cameraManager: SelfieCameraManager,
+    fallbackUrlLauncher: FallbackUrlLauncher
 ) {
     LaunchedEffect(Unit) {
         startScanning(
@@ -182,16 +193,6 @@ private fun SelfieCaptureScreen(
             identityScanViewModel = identityScanViewModel,
             lifecycleOwner = lifecycleOwner
         )
-    }
-
-    val coroutineScope = rememberCoroutineScope()
-
-    var allowImageCollection by remember {
-        mutableStateOf(false)
-    }
-
-    var isSubmittingSelfie by remember {
-        mutableStateOf(false)
     }
 
     var flashed by remember {
@@ -215,6 +216,19 @@ private fun SelfieCaptureScreen(
         },
         label = "flashAnimation"
     )
+
+    val faceDetectorTransitioner =
+        (selfieScannerState as? IdentityScanViewModel.State.Scanned)
+            ?.result?.identityState?.transitioner as? FaceDetectorTransitioner
+
+    LaunchedEffect(faceDetectorTransitioner) {
+        faceDetectorTransitioner?.let {
+            identityViewModel.collectDataForSelfieScreen(
+                navController = navController,
+                faceDetectorTransitioner = it
+            )
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -258,141 +272,34 @@ private fun SelfieCaptureScreen(
                 maxLines = 3
             )
 
-            if (selfieScannerState is IdentityScanViewModel.State.Scanned) {
-                ResultView(
-                    displayState = selfieScannerState.result.identityState,
-                    allowImageCollectionHtml = successSelfieCapturePage.consentText,
-                    isSubmittingSelfie = isSubmittingSelfie,
-                    allowImageCollection = allowImageCollection,
-                    navController = navController
-                ) {
-                    allowImageCollection = it
-                }
-            } else {
-                SelfieCameraViewFinder(imageAlpha, cameraManager, identityViewModel)
-            }
-        }
-        var loadingButtonState by remember(selfieScannerState) {
-            mutableStateOf(
-                if (selfieScannerState is IdentityScanViewModel.State.Scanned) {
-                    LoadingButtonState.Idle
-                } else {
-                    LoadingButtonState.Disabled
-                }
+            val isCheckingImages = faceDetectorTransitioner != null
+            SelfieCameraViewFinder(
+                imageAlpha = imageAlpha,
+                cameraManager = cameraManager,
+                identityViewModel = identityViewModel,
+                status = selfieScannerState.status(),
+                showCaptureGuideShadow = (selfieScannerState as? IdentityScanViewModel.State.Scanning)
+                    ?.scanState is IdentityScanState.Found,
+                showCaptureGuide = !isCheckingImages,
+                capturedSelfie = faceDetectorTransitioner?.lastCapturedSelfie()
             )
-        }
-        LoadingButton(
-            modifier = Modifier
-                .testTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG)
-                .padding(dimensionResource(id = R.dimen.stripe_page_horizontal_margin)),
-            text = stringResource(id = R.string.stripe_kontinue).uppercase(),
-            state = loadingButtonState
-        ) {
-            loadingButtonState = LoadingButtonState.Loading
-            isSubmittingSelfie = true
-            coroutineScope.launch {
-                identityViewModel.collectDataForSelfieScreen(
-                    navController = navController,
-                    faceDetectorTransitioner = requireNotNull(
-                        (selfieScannerState as? IdentityScanViewModel.State.Scanned)
-                            ?.result?.identityState?.transitioner as FaceDetectorTransitioner
-                    ) {
-                        "Failed to retrieve final result for Selfie"
-                    },
-                    allowImageCollection = allowImageCollection
+            if (!isCheckingImages) {
+                Text(
+                    text = stringResource(id = R.string.stripe_having_trouble),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 4.dp)
+                        .testTag(SELFIE_HAVING_TROUBLE_TAG)
+                        .clickable {
+                            identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_SELFIE)
+                            fallbackUrlLauncher.launchFallbackUrl(fallbackUrl)
+                        },
+                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f),
+                    style = MaterialTheme.typography.caption,
+                    textDecoration = TextDecoration.Underline
                 )
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterialApi::class)
-@Suppress("LongMethod")
-@Composable
-private fun ResultView(
-    displayState: IdentityScanState,
-    allowImageCollectionHtml: String,
-    isSubmittingSelfie: Boolean,
-    allowImageCollection: Boolean,
-    navController: NavController,
-    onAllowImageCollectionChanged: (Boolean) -> Unit
-) {
-    LazyRow(
-        modifier = Modifier
-            .padding(
-                horizontal = 5.dp
-            )
-            .testTag(RESULT_VIEW_TAG),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        items(
-            (displayState.transitioner as FaceDetectorTransitioner)
-                .filteredFrames.map { it.first.cameraPreviewImage.image.mirrorHorizontally() }
-        ) { bitmap ->
-            val imageBitmap = remember {
-                bitmap.asImageBitmap()
-            }
-            Image(
-                painter = BitmapPainter(imageBitmap),
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius))),
-                contentScale = ContentScale.Crop,
-                contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
-            )
-        }
-    }
-
-    Row(
-        modifier = Modifier
-            .padding(
-                start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-                end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-                top = 20.dp
-            )
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        TextButton(
-            modifier = Modifier.testTag(RETAKE_SELFIE_BUTTON_TAG),
-            onClick = { navController.navigateTo(SelfieDestination) },
-            enabled = !isSubmittingSelfie
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.stripe_camera_icon),
-                contentDescription = stringResource(id = R.string.stripe_description_camera),
-                modifier = Modifier.padding(end = 5.dp)
-            )
-            Text(text = stringResource(id = R.string.stripe_retake_photos))
-        }
-    }
-
-    Row(
-        modifier = Modifier.padding(
-            start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-            end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-            top = 20.dp
-        )
-    ) {
-        Checkbox(
-            modifier = Modifier.testTag(CONSENT_CHECKBOX_TAG),
-            checked = allowImageCollection,
-            onCheckedChange = { onAllowImageCollectionChanged(!allowImageCollection) },
-            enabled = !isSubmittingSelfie
-        )
-
-        BottomSheetHTML(
-            html = allowImageCollectionHtml,
-            bottomSheets = null,
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.body1,
-            urlSpanStyle = SpanStyle(
-                textDecoration = TextDecoration.Underline,
-                color = MaterialTheme.colors.secondary
-            )
-        )
     }
 }
 
@@ -400,7 +307,11 @@ private fun ResultView(
 private fun SelfieCameraViewFinder(
     imageAlpha: Float,
     cameraManager: IdentityCameraManager,
-    identityViewModel: IdentityViewModel
+    identityViewModel: IdentityViewModel,
+    status: SelfieStatus?,
+    showCaptureGuideShadow: Boolean,
+    showCaptureGuide: Boolean,
+    capturedSelfie: Bitmap?
 ) {
     // Wait for camera adapter to be initialized before accessing lens model
     LaunchedEffect(cameraManager.cameraAdapter) {
@@ -420,23 +331,188 @@ private fun SelfieCameraViewFinder(
             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius)))
             .testTag(SCAN_VIEW_TAG)
     ) {
-        AndroidView(
-            modifier = Modifier.fillMaxSize(),
-            factory = {
-                CameraView(
-                    it,
-                    CameraView.ViewFinderType.Fill
-                )
-            },
-            update = {
-                cameraManager.onCameraViewUpdate(it)
-            }
-        )
+        if (capturedSelfie != null) {
+            Image(
+                bitmap = remember(capturedSelfie) {
+                    capturedSelfie.mirrorHorizontally().asImageBitmap()
+                },
+                modifier = Modifier
+                    .fillMaxSize()
+                    .blur(16.dp),
+                contentScale = ContentScale.Crop,
+                contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.16f))
+            )
+        } else {
+            AndroidView(
+                modifier = Modifier.fillMaxSize(),
+                factory = {
+                    CameraView(
+                        it,
+                        CameraView.ViewFinderType.Fill
+                    )
+                },
+                update = {
+                    cameraManager.onCameraViewUpdate(it)
+                }
+            )
+        }
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .alpha(imageAlpha)
                 .background(colorResource(id = R.color.stripe_flash_mask_color))
         )
+        if (showCaptureGuide) {
+            CaptureGuide(showCaptureGuideShadow)
+        }
+        status?.let {
+            SelfieStatusBadge(
+                status = it,
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(bottom = 40.dp)
+            )
+        }
+    }
+}
+
+private enum class SelfieStatus(
+    @param:StringRes val labelRes: Int,
+    val showsActivityIndicator: Boolean
+) {
+    HoldStill(
+        labelRes = R.string.stripe_hold_still_selfie,
+        showsActivityIndicator = false
+    ),
+    CheckingImages(
+        labelRes = R.string.stripe_selfie_checking_images,
+        showsActivityIndicator = true
+    )
+}
+
+private fun IdentityScanViewModel.State.status(): SelfieStatus? {
+    return when (this) {
+        is IdentityScanViewModel.State.Scanning ->
+            if (scanState is IdentityScanState.Found) {
+                SelfieStatus.HoldStill
+            } else {
+                null
+            }
+        is IdentityScanViewModel.State.Scanned -> SelfieStatus.CheckingImages
+        else -> null
+    }
+}
+
+private fun FaceDetectorTransitioner.lastCapturedSelfie(): Bitmap {
+    return filteredFrames[FaceDetectorTransitioner.INDEX_LAST].first.cameraPreviewImage.image
+}
+
+@Composable
+private fun SelfieStatusBadge(
+    status: SelfieStatus,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .background(
+                color = Color(0x9921252C),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .semantics(mergeDescendants = true) {
+                testTag = SELFIE_SCAN_STATUS_TAG
+            },
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (status.showsActivityIndicator) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(18.dp),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+        }
+        Text(
+            text = stringResource(id = status.labelRes),
+            color = Color.White,
+            style = MaterialTheme.typography.body2
+        )
+    }
+}
+
+@Composable
+private fun CaptureGuide(showCenteredShadow: Boolean) {
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(SELFIE_CAPTURE_GUIDE_TAG)
+    ) {
+        if (size.width <= 0f || size.height <= 0f) {
+            return@Canvas
+        }
+
+        val horizontalRadius = size.width * CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO / 2f
+        val verticalRadius = size.height * CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO / 2f
+        val center = Offset(
+            x = size.width / 2f,
+            y = size.height * CAPTURE_GUIDE_CENTER_Y_RATIO
+        )
+        val guideRect = Rect(
+            left = center.x - horizontalRadius,
+            top = center.y - verticalRadius,
+            right = center.x + horizontalRadius,
+            bottom = center.y + verticalRadius
+        )
+
+        if (showCenteredShadow) {
+            val shadowPath = Path().apply {
+                fillType = PathFillType.EvenOdd
+                addRect(Rect(0f, 0f, size.width, size.height))
+                addOval(guideRect)
+            }
+            drawPath(
+                path = shadowPath,
+                color = Color.Black.copy(alpha = 0.32f)
+            )
+        }
+
+        val tickLength = 10.dp.toPx()
+        val strokeWidth = 2.dp.toPx()
+        repeat(CAPTURE_GUIDE_TICK_COUNT) { index ->
+            val angle = (index.toFloat() / CAPTURE_GUIDE_TICK_COUNT.toFloat()) * Math.PI.toFloat() * 2f
+            val cosAngle = cos(angle)
+            val sinAngle = sin(angle)
+            val tickCenter = Offset(
+                x = center.x + cosAngle * horizontalRadius,
+                y = center.y + sinAngle * verticalRadius
+            )
+            val normalX = cosAngle / horizontalRadius
+            val normalY = sinAngle / verticalRadius
+            val normalLength = sqrt((normalX * normalX) + (normalY * normalY))
+            val unitNormalX = normalX / normalLength
+            val unitNormalY = normalY / normalLength
+            val halfTickLength = tickLength / 2f
+
+            drawLine(
+                color = Color.White.copy(alpha = 0.8f),
+                start = Offset(
+                    x = tickCenter.x - unitNormalX * halfTickLength,
+                    y = tickCenter.y - unitNormalY * halfTickLength
+                ),
+                end = Offset(
+                    x = tickCenter.x + unitNormalX * halfTickLength,
+                    y = tickCenter.y + unitNormalY * halfTickLength
+                ),
+                strokeWidth = strokeWidth,
+                cap = StrokeCap.Butt
+            )
+        }
     }
 }
