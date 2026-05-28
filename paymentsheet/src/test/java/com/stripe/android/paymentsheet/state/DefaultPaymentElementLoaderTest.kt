@@ -3318,18 +3318,13 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
-        runScenario(
-            customerRepo = FakeCustomerRepository(
-                onRetrieveCustomer = {
-                    CustomerFactory.create(email = "email@stripe.com")
-                }
-            ),
-        ) {
+    fun `When using 'CustomerSession' & no default billing details, elements session customer email is used for link state`() =
+        runScenario {
+            val customerEmail = "example@stripe.com"
             val loader = createPaymentElementLoader(
                 customer = ElementsSession.Customer(
                     paymentMethods = PaymentMethodFactory.cards(1),
-                    email = null,
+                    email = customerEmail,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
                         customerId = "cus_1",
@@ -3345,7 +3340,7 @@ internal class DefaultPaymentElementLoaderTest {
                 )
             )
 
-            loader.load(
+            val result = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
@@ -3359,9 +3354,8 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
-            val request = customerRepository.retrieveCustomerRequests.awaitItem()
-            assertThat(request.customerId).isEqualTo("cus_1")
-            assertThat(request.ephemeralKeySecret).isEqualTo("ek_123")
+            val linkState = result.getOrThrow().paymentMethodMetadata.linkState
+            assertThat(linkState?.configuration?.customerInfo?.email).isEqualTo(customerEmail)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
