@@ -81,6 +81,7 @@ public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApi
 public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampException : com/stripe/android/core/exception/StripeException {
 	public static final field $stable I
 	public final fun getDeveloperMessage ()Ljava/lang/String;
+	public final fun getStripeException ()Lcom/stripe/android/core/exception/StripeException;
 	public abstract fun getUserMessage ()Ljava/lang/String;
 }
 

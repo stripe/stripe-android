@@ -13,12 +13,15 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 abstract class CryptoOnrampException internal constructor(
     message: String,
     val developerMessage: String,
-    cause: Throwable,
+    /**
+     * The original Stripe exception that was wrapped by this richer Crypto Onramp error.
+     */
+    val stripeException: StripeException,
 ) : StripeException(
-    stripeError = (cause as? StripeException)?.stripeError,
-    requestId = (cause as? StripeException)?.requestId,
-    statusCode = (cause as? StripeException)?.statusCode ?: DEFAULT_STATUS_CODE,
-    cause = cause,
+    stripeError = stripeException.stripeError,
+    requestId = stripeException.requestId,
+    statusCode = stripeException.statusCode,
+    cause = stripeException,
     message = message,
 ) {
     /**
@@ -28,7 +31,7 @@ abstract class CryptoOnrampException internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String {
-        return (cause as? StripeException)?.analyticsValue() ?: super.analyticsValue()
+        return stripeException.analyticsValue()
     }
 }
 
@@ -45,7 +48,7 @@ abstract class CryptoOnrampApiException internal constructor(
 ) : CryptoOnrampException(
     message = message,
     developerMessage = developerMessage,
-    cause = context.underlyingError,
+    stripeException = context.underlyingError,
 )
 
 data class APIErrorContext(
