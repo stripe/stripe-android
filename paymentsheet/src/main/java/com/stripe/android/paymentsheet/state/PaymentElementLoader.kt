@@ -439,7 +439,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.Card,
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
-                    ),
+                    ), // These are the only payment method types we support as saved payment methods.
                     silentlyFail = paymentConfiguration.get().isLiveMode(),
                 )
             }
