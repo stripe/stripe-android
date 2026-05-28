@@ -8,6 +8,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.flatMapCatching
@@ -43,17 +44,19 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LargeClass")
 @Singleton
 internal class LinkControllerInteractor @Inject constructor(
     private val application: Application,
@@ -61,6 +64,7 @@ internal class LinkControllerInteractor @Inject constructor(
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkComponentFactoryProvider: Provider<LinkComponent.Factory>,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
 ) {
 
     private val tag = "LinkControllerViewInteractor"
@@ -104,10 +108,21 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.PresentResult>(extraBufferCapacity = 1)
     val presentResultFlow = _presentResultFlow.asSharedFlow()
 
-    // Signals the coordinator to call createPaymentMethod() after a successful PM selection
-    // in the full present() flow.
     private val _presentSelectionSucceededFlow = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val presentSelectionSucceededFlow = _presentSelectionSucceededFlow.asSharedFlow()
+
+    init {
+        coroutineScope.launch {
+            _presentSelectionSucceededFlow.collect {
+                val presentResult = when (val createResult = createPaymentMethod()) {
+                    is LinkController.CreatePaymentMethodResult.Success ->
+                        LinkController.PresentResult.Completed(createResult.paymentMethod)
+                    is LinkController.CreatePaymentMethodResult.Failed ->
+                        LinkController.PresentResult.Failed(createResult.error)
+                }
+                emitPresentResult(presentResult)
+            }
+        }
+    }
 
     internal enum class PresentationType { PaymentMethods, Full }
 
