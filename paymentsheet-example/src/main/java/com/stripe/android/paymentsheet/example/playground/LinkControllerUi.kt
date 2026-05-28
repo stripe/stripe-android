@@ -273,7 +273,12 @@ internal fun LinkControllerUi(
 
         PaymentMethodButton(
             preview = playgroundState.selectedPaymentMethodPreview,
-            onClick = { onPaymentMethodButtonClick(email, selectedPaymentMethodTypes.takeIf { it.isNotEmpty() }?.toList()) },
+            onClick = {
+                onPaymentMethodButtonClick(
+                    email,
+                    selectedPaymentMethodTypes.takeIf { it.isNotEmpty() }?.toList()
+                )
+            },
         )
         Spacer(Modifier.height(16.dp))
 
