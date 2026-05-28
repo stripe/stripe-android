@@ -32,6 +32,22 @@ abstract class CryptoOnrampException internal constructor(
     }
 }
 
+/**
+ * Base exception type for Crypto Onramp failures that originate from a Stripe API error payload.
+ *
+ * [context] preserves the original API-facing fields and SDK-local debugging metadata.
+ */
+@ExperimentalCryptoOnramp
+abstract class CryptoOnrampApiException internal constructor(
+    val context: APIErrorContext,
+    message: String,
+    developerMessage: String,
+) : CryptoOnrampException(
+    message = message,
+    developerMessage = developerMessage,
+    cause = context.underlyingError,
+)
+
 data class APIErrorContext(
     /**
      * The raw backend reason, when present.
@@ -124,16 +140,10 @@ internal fun buildGenericDeveloperMessage(
 ): String {
     return context.developerMessage(
         summary = context.apiErrorMessage ?: "Stripe API request failed.",
-        nextStep = context.apiUserMessage.orFallbackTo(
-            "Inspect the preserved Stripe API error for details and retry after correcting the request."
-        ),
+        nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
     )
 }
 
 internal fun APIErrorContext.userMessage(fallbackUserMessage: String): String {
     return apiUserMessage ?: fallbackUserMessage
-}
-
-private fun String?.orFallbackTo(fallback: String): String {
-    return this?.takeIf { it.isNotBlank() } ?: fallback
 }

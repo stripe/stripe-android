@@ -7,12 +7,12 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
  */
 @ExperimentalCryptoOnramp
 class AppAttestationException internal constructor(
-    val context: APIErrorContext,
+    context: APIErrorContext,
     fallbackUserMessage: String,
-) : CryptoOnrampException(
+) : CryptoOnrampApiException(
+    context = context,
     message = context.userMessage(fallbackUserMessage),
     developerMessage = buildAppAttestationDeveloperMessage(context),
-    cause = context.underlyingError,
 ) {
     override val userMessage: String = context.userMessage(fallbackUserMessage)
 }
@@ -54,6 +54,8 @@ private const val ANDROID_ENVIRONMENT_MISMATCH_NEXT_STEP =
     "Install the app from the Google Play track that matches this Stripe mode, then retry the Onramp flow."
 private const val ANDROID_VERDICT_VALIDATION_FAILED_NEXT_STEP =
     "Generate a new Play Integrity verdict and retry the Onramp flow. If the issue persists, check your app attestation configuration."
+private const val DEFAULT_ATTESTATION_NEXT_STEP =
+    "Inspect the preserved Stripe API error for details and retry after correcting the app attestation configuration."
 
 private fun appAttestationSummary(reason: String?): String? {
     return appAttestationDescription(reason)?.let(::attestationSummary)
@@ -72,7 +74,7 @@ private fun appAttestationDescription(reason: String?): String? {
     }
 }
 
-private fun appAttestationNextStep(reason: String?): String? {
+private fun appAttestationNextStep(reason: String?): String {
     return when (reason) {
         ATTESTATION_NOT_ENABLED_REASON -> ATTESTATION_NOT_ENABLED_NEXT_STEP
         APP_NOT_REGISTERED_REASON -> APP_NOT_REGISTERED_NEXT_STEP
@@ -81,7 +83,7 @@ private fun appAttestationNextStep(reason: String?): String? {
         ANDROID_PACKAGE_NAME_MISMATCH_REASON -> ANDROID_PACKAGE_NAME_MISMATCH_NEXT_STEP
         ANDROID_ENVIRONMENT_MISMATCH_REASON -> ANDROID_ENVIRONMENT_MISMATCH_NEXT_STEP
         ANDROID_VERDICT_VALIDATION_FAILED_REASON -> ANDROID_VERDICT_VALIDATION_FAILED_NEXT_STEP
-        else -> null
+        else -> DEFAULT_ATTESTATION_NEXT_STEP
     }
 }
 
@@ -95,11 +97,6 @@ private fun buildAppAttestationDeveloperMessage(
     return context.developerMessage(
         summary = appAttestationSummary(context.reason)
             ?: (context.apiErrorMessage ?: "App attestation failed."),
-        nextStep = appAttestationNextStep(context.reason)
-            ?: (
-                context.apiErrorMessage
-                ?: "Inspect the preserved Stripe API error for details and retry after " +
-                    "correcting the app attestation configuration."
-            ),
+        nextStep = appAttestationNextStep(context.reason),
     )
 }

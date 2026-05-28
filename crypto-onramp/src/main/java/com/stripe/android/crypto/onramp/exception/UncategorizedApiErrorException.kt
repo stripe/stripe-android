@@ -7,12 +7,12 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
  */
 @ExperimentalCryptoOnramp
 class UncategorizedApiErrorException internal constructor(
-    val context: APIErrorContext,
+    context: APIErrorContext,
     fallbackUserMessage: String,
-) : CryptoOnrampException(
+) : CryptoOnrampApiException(
+    context = context,
     message = context.userMessage(fallbackUserMessage),
     developerMessage = buildGenericDeveloperMessage(context),
-    cause = context.underlyingError,
 ) {
     override val userMessage: String = context.userMessage(fallbackUserMessage)
 }

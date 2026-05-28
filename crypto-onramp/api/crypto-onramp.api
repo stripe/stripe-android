@@ -68,10 +68,14 @@ public final class com/stripe/android/crypto/onramp/exception/APIErrorContext {
 	public fun toString ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/exception/AppAttestationException : com/stripe/android/crypto/onramp/exception/CryptoOnrampException {
+public final class com/stripe/android/crypto/onramp/exception/AppAttestationException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getUserMessage ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampException {
 	public static final field $stable I
 	public final fun getContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
-	public fun getUserMessage ()Ljava/lang/String;
 }
 
 public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampException : com/stripe/android/core/exception/StripeException {
@@ -101,9 +105,8 @@ public final class com/stripe/android/crypto/onramp/exception/PaymentFailedExcep
 	public static final field $stable I
 }
 
-public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampException {
+public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
-	public final fun getContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
 	public fun getUserMessage ()Ljava/lang/String;
 }
 
