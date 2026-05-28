@@ -47,6 +47,7 @@ internal fun LinkTerms(
                         LinkBrand.Onelink -> com.stripe.android.R.string.stripe_onelink
                     },
                     colorFilter = ColorFilter.tint(MaterialTheme.stripeColors.subtitle),
+                    verticalOffset = 1.dp,
                 )
             )
         }
