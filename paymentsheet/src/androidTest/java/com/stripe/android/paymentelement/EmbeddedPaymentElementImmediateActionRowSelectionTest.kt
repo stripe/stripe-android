@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement
 import androidx.test.espresso.Espresso
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -447,6 +448,8 @@ internal class EmbeddedPaymentElementImmediateActionRowSelectionTest {
             }
             if (shouldSetupV1PaymentMethodsResponse) {
                 networkRule.setupV1PaymentMethodsResponse(card1, card2)
+                networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+                networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             }
             testBlock(testContext)
         }

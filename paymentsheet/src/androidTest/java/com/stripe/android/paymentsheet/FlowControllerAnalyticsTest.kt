@@ -5,6 +5,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -361,8 +362,14 @@ internal class FlowControllerAnalyticsTest {
         }
 
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "stripe_android.retrieve_payment_methods")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
+        validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "elements.customer_repository.get_saved_payment_methods_success")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_custom_sheet_savedpm_show")
