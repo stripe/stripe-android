@@ -1,8 +1,5 @@
 #!/bin/python
 import argparse
-import base64
-import gzip
-import json
 import os
 import shutil
 import requests
@@ -284,13 +281,9 @@ def executeTests(appUrl, testUrl):
     }
 
     if bitriseQuarantinedTests:
-        # Minify the JSON, GZIP compress, then URL-safe Base64 encode (no padding)
-        minified = json.dumps(json.loads(bitriseQuarantinedTests), separators=(",", ":"))
-        compressed = gzip.compress(minified.encode("utf-8"))
-        encoded = base64.urlsafe_b64encode(compressed).decode("ascii").rstrip("=")
         instrumentationOptionsParams = {
             "instrumentationOptions": {
-                "bitriseQuarantinedTests": encoded,
+                "bitriseQuarantinedTests": bitriseQuarantinedTests.encode("utf-8").hex(),
             }
         }
     else:
