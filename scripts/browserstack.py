@@ -269,7 +269,7 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParam
 
 def executeTests(appUrl, testUrl):
     devices = [
-        "Samsung Galaxy S22-12.0",
+        "Google Pixel 7-13.0",
     ]
 
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
