@@ -17,7 +17,7 @@ import com.stripe.android.ui.core.R as UiCoreR
 internal object AffirmDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Affirm
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
+    val supportedAsSavedPaymentMethod: Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
