@@ -18,7 +18,7 @@ import com.stripe.android.uicore.elements.SectionElement
 internal object WeroDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Wero
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
+    val supportedAsSavedPaymentMethod: Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean

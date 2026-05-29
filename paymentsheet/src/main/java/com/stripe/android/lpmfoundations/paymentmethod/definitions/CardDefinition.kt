@@ -47,8 +47,6 @@ import com.stripe.android.ui.core.R as PaymentsUiCoreR
 internal object CardDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Card
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()

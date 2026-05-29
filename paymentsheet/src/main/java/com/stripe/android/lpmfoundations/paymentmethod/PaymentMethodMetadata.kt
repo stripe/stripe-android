@@ -157,10 +157,10 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
-        val supportedTypes = supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
-            paymentMethodDefinition.supportedAsSavedPaymentMethod
-        }.map {
+        val supportedTypes = supportedPaymentMethodDefinitions().map {
             it.type
+        }.filter { paymentMethodType ->
+            SupportedSavedPaymentMethodTypes.all.contains(paymentMethodType)
         }
 
         return if (allowsLinkInSavedPaymentMethods) {

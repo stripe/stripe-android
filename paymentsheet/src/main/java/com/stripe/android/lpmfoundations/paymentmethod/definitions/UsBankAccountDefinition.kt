@@ -15,8 +15,6 @@ import com.stripe.android.uicore.elements.FormElement
 internal object UsBankAccountDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.USBankAccount
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(
