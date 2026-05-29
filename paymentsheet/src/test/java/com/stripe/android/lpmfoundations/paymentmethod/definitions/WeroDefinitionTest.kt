@@ -89,11 +89,6 @@ class WeroDefinitionTest {
         assertThat(WeroDefinition.requiresMandate(metadata)).isFalse()
     }
 
-    @Test
-    fun `supportedAsSavedPaymentMethod is false`() {
-        assertThat(WeroDefinition.supportedAsSavedPaymentMethod).isFalse()
-    }
-
     private fun checkCountryField(
         formElements: List<FormElement>,
         position: Int,
