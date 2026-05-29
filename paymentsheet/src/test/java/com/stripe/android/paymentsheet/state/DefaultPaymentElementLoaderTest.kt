@@ -2666,9 +2666,8 @@ internal class DefaultPaymentElementLoaderTest {
             val cards = PaymentMethodFactory.cards(4)
             val loader = createPaymentElementLoader(
                 customerRepo = repository,
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = cards,
-                    email = null,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
                         customerId = "cus_1",
@@ -2712,9 +2711,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
-                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2764,9 +2762,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
-                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2816,9 +2813,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
-                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2868,9 +2864,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has partial remove permissions, should enable partial remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
-                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -2920,9 +2915,8 @@ internal class DefaultPaymentElementLoaderTest {
     fun `customer session should have canUpdateFullPaymentMethodDetails permission enabled`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
-                    email = null,
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
                             paymentMethodRemove =
@@ -3232,9 +3226,8 @@ internal class DefaultPaymentElementLoaderTest {
         loaderScenario.prefsRepository.setSavedSelection(SavedSelection.PaymentMethod(lastUsed.id))
 
         val loader = loaderScenario.createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = paymentMethods,
-                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_1",
                     customerId = "cus_1",
@@ -3322,7 +3315,7 @@ internal class DefaultPaymentElementLoaderTest {
         runScenario {
             val customerEmail = "example@stripe.com"
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(1),
                     email = customerEmail,
                     session = ElementsSession.Customer.Session(
@@ -3476,9 +3469,8 @@ internal class DefaultPaymentElementLoaderTest {
 
         runFilterScenario {
             val loader = loaderScenario.createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = paymentMethodsForTestingOrdering,
-                    email = null,
                     session = createElementsSessionCustomerSession(
                         mobilePaymentElementComponent =
                         ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
@@ -4088,9 +4080,8 @@ internal class DefaultPaymentElementLoaderTest {
         test: (CustomerMetadata) -> Unit,
     ) = runScenario {
         val loader = createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = PaymentMethodFactory.cards(4),
-                email = null,
                 session = createElementsSessionCustomerSession(
                     if (shouldDisableMobilePaymentElement) {
                         ElementsSession.Customer.Components.MobilePaymentElement.Disabled
@@ -4474,6 +4465,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createElementsSessionCustomer(
         paymentMethods: List<PaymentMethod> = PaymentMethodFactory.cards(1),
+        email: String? = null,
         isPaymentMethodSaveEnabled: Boolean? = null,
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement =
             isPaymentMethodSaveEnabled?.let {
@@ -4485,23 +4477,25 @@ internal class DefaultPaymentElementLoaderTest {
                     allowRedisplayOverride = null,
                     isPaymentMethodSetAsDefaultEnabled = false,
                 )
-            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
+            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+        session: ElementsSession.Customer.Session = ElementsSession.Customer.Session(
+            id = "cuss_1",
+            customerId = "cus_1",
+            liveMode = false,
+            apiKey = "ek_123",
+            apiKeyExpiry = 555555555,
+            components = ElementsSession.Customer.Components(
+                mobilePaymentElement = mobilePaymentElementComponent,
+                customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+            ),
+        ),
+        defaultPaymentMethod: String? = null,
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
-            email = null,
-            session = ElementsSession.Customer.Session(
-                id = "cuss_1",
-                customerId = "cus_1",
-                liveMode = false,
-                apiKey = "ek_123",
-                apiKeyExpiry = 555555555,
-                components = ElementsSession.Customer.Components(
-                    mobilePaymentElement = mobilePaymentElementComponent,
-                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                ),
-            ),
-            defaultPaymentMethod = null,
+            email = email,
+            session = session,
+            defaultPaymentMethod = defaultPaymentMethod,
         )
     }
 
@@ -4759,9 +4753,8 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
         val loader = createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = paymentMethodsForTestingOrdering,
-                email = null,
                 session = createElementsSessionCustomerSession(
                     mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                         isPaymentMethodSetAsDefaultEnabled = true,
