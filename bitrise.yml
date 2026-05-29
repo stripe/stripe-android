@@ -15,6 +15,9 @@ pipelines:
   main-trigger-pipeline:
     stages:
       - stage-trigger-run-all: { }
+  pipeline-debug-connections-e2e:
+    stages:
+      - stage-debug-connections-e2e: { }
   pipeline-connect-e2e-debug-tests:
     stages:
       - stage-run-connect-e2e-tests: { }
@@ -60,6 +63,12 @@ stages:
       - run-connections-e2e-data-tests: { }
       - run-connections-e2e-token-tests: { }
       - run-connections-e2e-livemode-tests: { }
+  stage-debug-connections-e2e:
+    workflows:
+      - run-connections-e2e-payments-tests-on-push: { }
+      - run-connections-e2e-payments-tests-on-push: { }
+      - run-connections-e2e-payments-tests-on-push: { }
+      - run-connections-e2e-payments-tests-on-push: { }
   stage-notify-connections-e2e-failure:
     should_always_run: true
     workflows:
