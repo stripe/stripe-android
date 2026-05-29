@@ -33,7 +33,6 @@ internal class DefaultCreateLinkStateTest {
     fun `passes customer email from elements session into retrieveCustomerEmail`() = runTest {
         val retrieveCustomerEmail = FakeRetrieveCustomerEmail()
         val createLinkState = createLinkStateFactory(retrieveCustomerEmail = retrieveCustomerEmail)
-        val customerEmail = "customer@example.com"
 
         createLinkState(
             elementsSession = createElementsSession(customer = customerWithEmail),
@@ -43,7 +42,7 @@ internal class DefaultCreateLinkStateTest {
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )
 
-        assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerEmail)
+        assertThat(retrieveCustomerEmail.invokedWith?.customerEmail).isEqualTo(customerWithEmail.email)
     }
 
     @Test
