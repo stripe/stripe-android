@@ -20,6 +20,11 @@ sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = false
     }
 
+    internal object SamsungPay : PaymentOptionsItem() {
+        override val viewType: ViewType = ViewType.GooglePay
+        override val isEnabledDuringEditing: Boolean = false
+    }
+
     internal data class Link(
         val linkBrand: LinkBrand,
     ) : PaymentOptionsItem() {
@@ -51,6 +56,7 @@ sealed class PaymentOptionsItem {
         AddCard,
         GooglePay,
         Link,
+        SamsungPay
     }
 }
 

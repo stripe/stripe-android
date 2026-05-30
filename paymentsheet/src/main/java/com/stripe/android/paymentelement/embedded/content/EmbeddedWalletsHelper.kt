@@ -31,6 +31,7 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 linkEmail = linkEmail,
                 isGooglePayReady = paymentMethodMetadata.isGooglePayReady == true,
                 isShopPayAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.ShopPay),
+                isSamsungPayReady = paymentMethodMetadata.isSamsungPayReady,
                 buttonsEnabled = true,
                 paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
                 googlePayLauncherConfig = null, // This isn't used for embedded.
@@ -38,6 +39,7 @@ internal class DefaultEmbeddedWalletsHelper @Inject constructor(
                 onGooglePayPressed = { throw IllegalStateException("Not possible.") },
                 onLinkPressed = { throw IllegalStateException("Not possible.") },
                 onShopPayPressed = { throw IllegalStateException("Not possible.") },
+                onSamsungPayPressed = { throw IllegalStateException("Not possible.") },
                 isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
                 walletsAllowedInHeader = emptyList(), // Embedded: all wallets inline, none in header
                 cardBrandFilter = paymentMethodMetadata.cardBrandFilter,

@@ -163,6 +163,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
                  */
                 isGooglePayAvailable = true,
                 isLinkAvailable = false,
+                isSamsungPayAvailable = false,
             )
             savedSelection.toPaymentOption()
         }

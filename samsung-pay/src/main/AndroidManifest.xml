@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <queries>
+        <package android:name="com.samsung.android.spay" />
+    </queries>
+
+    <application>
+        <activity
+            android:name="com.stripe.android.payments.samsungpay.SamsungPayLauncherActivity"
+            android:theme="@style/StripeSamsungPayDefaultTheme"
+            android:exported="false" />
+
+        <activity
+            android:name="com.stripe.android.payments.samsungpay.SamsungPayPaymentMethodLauncherActivity"
+            android:theme="@style/StripeSamsungPayDefaultTheme"
+            android:exported="false" />
+
+        <meta-data
+            android:name="spay_sdk_api_level"
+            android:value="2.22" />
+    </application>
+
+</manifest>

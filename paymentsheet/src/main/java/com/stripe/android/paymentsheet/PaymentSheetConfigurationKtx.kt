@@ -126,6 +126,7 @@ internal val WalletType.configType: PaymentSheet.WalletButtonsConfiguration.Wall
         WalletType.Link -> PaymentSheet.WalletButtonsConfiguration.Wallet.Link
         WalletType.GooglePay -> PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay
         WalletType.ShopPay -> PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay
+        WalletType.SamsungPay -> PaymentSheet.WalletButtonsConfiguration.Wallet.SamsungPay
     }
 
 @OptIn(AppearanceAPIAdditionsPreview::class)

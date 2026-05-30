@@ -19,6 +19,7 @@ def getAccountId() {
 dependencies {
     implementation project(':payments')
     implementation project(':financial-connections')
+    implementation project(':samsung-pay')
 
     implementation libs.accompanist.materialThemeAdapter
     implementation libs.alipay

@@ -16,4 +16,5 @@
     <string name="stripe_link" translatable="false">Link</string>
     <string name="stripe_onelink" translatable="false">Onelink</string>
     <string name="stripe_shop_pay" translatable="false">Shop Pay</string>
+    <string name="stripe_samsung_pay" translatable="false">Samsung Pay</string>
 </resources>

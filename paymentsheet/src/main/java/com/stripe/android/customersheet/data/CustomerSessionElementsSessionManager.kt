@@ -72,6 +72,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                 val savedSelection = prefsRepository.getSavedSelection(
                     isGooglePayAvailable = false,
                     isLinkAvailable = false,
+                    isSamsungPayAvailable = false,
                 ) as? SavedSelection.PaymentMethod
 
                 elementsSessionRepository.get(

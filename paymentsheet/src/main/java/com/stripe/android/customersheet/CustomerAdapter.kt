@@ -179,6 +179,7 @@ interface CustomerAdapter {
                     is SavedSelection.Link -> null
                     is SavedSelection.None -> null
                     is SavedSelection.PaymentMethod -> StripeId(id)
+                    SavedSelection.SamsungPay -> null // TODO: should this be null?
                 }
             }
 

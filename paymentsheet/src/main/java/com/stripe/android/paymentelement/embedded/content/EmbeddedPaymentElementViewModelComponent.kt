@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
+import com.stripe.android.payments.samsungpay.SamsungPayModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
@@ -64,6 +65,7 @@ import javax.inject.Singleton
     modules = [
         EmbeddedPaymentElementViewModelModule::class,
         GooglePayLauncherModule::class,
+        SamsungPayModule::class,
         ExtendedPaymentElementConfirmationModule::class,
         TapToAddConnectionStarterModule::class,
         EmbeddedCommonModule::class,

@@ -1069,6 +1069,19 @@ constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createSamsungPay(
+            paymentCredential: String,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Card,
+                card = Card(
+                    token = paymentCredential,
+                    attribution = setOf("samsung_pay"),
+                ),
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun createFromGooglePay(
             googlePayPaymentData: JSONObject,
             clientAttributionMetadata: ClientAttributionMetadata?,

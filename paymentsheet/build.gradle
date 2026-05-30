@@ -13,6 +13,7 @@ dependencies {
     implementation project(':stripe-ui-core')
     compileOnly project(':financial-connections')
     implementation project(":stripe-attestation")
+    implementation project(":samsung-pay")
 
     // Kotlin
     api libs.kotlin.coroutines

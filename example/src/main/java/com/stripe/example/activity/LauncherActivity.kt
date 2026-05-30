@@ -53,6 +53,10 @@ class LauncherActivity : AppCompatActivity() {
                 GooglePayLauncherIntegrationActivity::class.java
             ),
             Item(
+                activity.getString(R.string.samsungpaylauncher_example),
+                SamsungPayLauncherIntegrationActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.googlepaycomposelauncher_example),
                 GooglePayLauncherComposeActivity::class.java
             ),

@@ -68,6 +68,9 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             is PaymentSelection.GooglePay -> {
                 state.paymentMethodMetadata.isGooglePayReady
             }
+            is PaymentSelection.SamsungPay -> {
+                state.paymentMethodMetadata.isSamsungPayReady
+            }
             is PaymentSelection.Link -> {
                 state.paymentMethodMetadata.linkState != null
             }

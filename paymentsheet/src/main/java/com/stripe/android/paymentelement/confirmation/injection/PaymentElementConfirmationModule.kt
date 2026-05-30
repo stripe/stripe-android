@@ -7,6 +7,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmation
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationModule
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationModule
+import com.stripe.android.paymentelement.confirmation.samsungpay.SamsungPayConfirmationModule
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationModule
 import dagger.Module
 
@@ -20,6 +21,7 @@ import dagger.Module
         GooglePayConfirmationModule::class,
         LinkConfirmationModule::class,
         LinkInlineSignupConfirmationModule::class,
+        SamsungPayConfirmationModule::class,
         ShopPayConfirmationModule::class
     ]
 )

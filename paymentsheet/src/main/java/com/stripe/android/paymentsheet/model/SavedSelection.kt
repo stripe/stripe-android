@@ -8,6 +8,9 @@ internal sealed class SavedSelection : Parcelable {
     data object GooglePay : SavedSelection()
 
     @Parcelize
+    data object SamsungPay : SavedSelection()
+
+    @Parcelize
     data object Link : SavedSelection()
 
     @Parcelize

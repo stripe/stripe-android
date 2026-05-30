@@ -461,6 +461,9 @@ private fun SavedPaymentMethodTab(
                 modifier = modifier,
             )
         }
+        PaymentOptionsItem.SamsungPay -> {
+            TODO("implement this ui lol")
+        }
     }
 }
 

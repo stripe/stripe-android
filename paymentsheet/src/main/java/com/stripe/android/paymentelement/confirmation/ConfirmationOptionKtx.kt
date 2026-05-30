@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
+import com.stripe.android.paymentelement.confirmation.samsungpay.SamsungPayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -34,6 +35,7 @@ internal fun PaymentSelection.toConfirmationOption(
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
         is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
+        PaymentSelection.SamsungPay -> SamsungPayConfirmationOption
     }
 }
 
@@ -187,3 +189,4 @@ private fun PaymentSelection.ShopPay.toConfirmationOption(
         )
     }
 }
+

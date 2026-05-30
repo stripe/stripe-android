@@ -170,6 +170,7 @@ internal class DefaultCustomerSheetLoader(
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
+            isSamsungPayReady = false,
             customerMetadata = customerMetadata,
             integrationMetadata = IntegrationMetadata.CustomerSheet(
                 attachmentStyle = if (intentDataSourceProvider.await().canCreateSetupIntents) {
@@ -244,6 +245,7 @@ internal class DefaultCustomerSheetLoader(
             when (selection) {
                 is SavedSelection.GooglePay -> PaymentSelection.GooglePay
                 is SavedSelection.Link -> null
+                is SavedSelection.SamsungPay -> null
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.find { paymentMethod ->
                         paymentMethod.id == selection.id

@@ -28,8 +28,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -76,6 +78,7 @@ import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.samsungpay.SamsungPayButton
 import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
@@ -356,6 +359,7 @@ private fun PaymentSheetContent(
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
                 onShopPayPressed = state.onShopPayPressed,
+                onSamsungPayPressed = state.onSamsungPayPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
@@ -417,6 +421,7 @@ internal fun Wallet(
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
     onShopPayPressed: () -> Unit,
+    onSamsungPayPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter,
@@ -430,6 +435,7 @@ internal fun Wallet(
             onGooglePayPressed = onGooglePayPressed,
             onLinkPressed = onLinkPressed,
             onShopPayPressed = onShopPayPressed,
+            onSamsungPayPressed = onSamsungPayPressed,
             cardBrandFilter = cardBrandFilter,
             cardFundingFilter = cardFundingFilter
         )
@@ -459,6 +465,7 @@ private fun WalletHeader(
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
     onShopPayPressed: () -> Unit,
+    onSamsungPayPressed: () -> Unit,
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter
 ) {
@@ -495,6 +502,11 @@ private fun WalletHeader(
                 }
                 WalletsState.ShopPay -> {
                     ShopPayButton(onClick = onShopPayPressed)
+                }
+                WalletsState.SamsungPay -> {
+                    SamsungPayButton(
+                        onClick = onSamsungPayPressed
+                    )
                 }
             }
         }
