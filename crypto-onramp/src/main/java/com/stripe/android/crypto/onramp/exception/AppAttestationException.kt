@@ -94,7 +94,8 @@ private fun attestationSummary(description: String): String {
 private fun buildAppAttestationDeveloperMessage(
     context: APIErrorContext,
 ): String {
-    return context.developerMessage(
+    return CryptoOnrampErrorRenderer.renderApiDeveloperMessage(
+        context = context,
         summary = appAttestationSummary(context.reason)
             ?: (context.apiErrorMessage ?: "App attestation failed."),
         nextStep = appAttestationNextStep(context.reason),

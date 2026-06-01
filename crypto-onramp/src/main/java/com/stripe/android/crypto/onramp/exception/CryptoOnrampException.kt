@@ -102,49 +102,6 @@ data class APIErrorContext(
      */
     val requestId: String?
         get() = underlyingError.requestId
-
-    fun developerMessage(
-        summary: String,
-        nextStep: String,
-    ): String {
-        val context = listOfNotNull(
-            "  - operation: $operation",
-            "  - app_id: $appPackageName",
-            mode?.let { "  - mode: $it" },
-            reason?.let { "  - reason: $it" },
-            requestId?.let { "  - request_id: $it" },
-            apiErrorCode?.let { "  - code: $it" },
-            apiErrorType?.let { "  - type: $it" },
-        )
-
-        return buildList {
-            add("Summary")
-            add("  $summary")
-            add("")
-            add("Context")
-            addAll(context)
-            add("")
-            add("Next step")
-            add("  $nextStep")
-            docUrl?.let {
-                add("")
-                add("Docs")
-                add("  $it")
-            }
-            add("")
-            add("SDK")
-            add("  stripe-android@$sdkVersion")
-        }.joinToString(separator = "\n")
-    }
-}
-
-internal fun buildGenericDeveloperMessage(
-    context: APIErrorContext,
-): String {
-    return context.developerMessage(
-        summary = context.apiErrorMessage ?: "Stripe API request failed.",
-        nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
-    )
 }
 
 internal fun APIErrorContext.userMessage(fallbackUserMessage: String): String {

@@ -235,17 +235,24 @@ class OnrampInteractorTest {
         assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
         assertThat(attestationError.context.mode).isEqualTo("test")
         assertThat(attestationError.context.apiErrorType).isEqualTo("api_error")
-        assertThat(attestationError.developerMessage).contains("Summary")
-        assertThat(attestationError.developerMessage).contains("Context")
-        assertThat(attestationError.developerMessage).contains("Next step")
-        assertThat(attestationError.developerMessage).contains("SDK")
         assertThat(attestationError.developerMessage)
-            .contains("App attestation failed: this app is not recognized by Google Play.")
-        assertThat(attestationError.developerMessage)
-            .contains("app_id: ${RuntimeEnvironment.getApplication().packageName}")
-        assertThat(attestationError.developerMessage).contains("operation: register_wallet_address")
-        assertThat(attestationError.developerMessage).contains("request_id: req_123")
-        assertThat(attestationError.developerMessage).contains("type: api_error")
+            .isEqualTo(
+                """
+                App attestation failed: this app is not recognized by Google Play.
+
+                Request Context:
+                  operation: register_wallet_address
+                  app_id: ${RuntimeEnvironment.getApplication().packageName}
+                  mode: test
+                  reason: app_not_play_recognized
+                  request_id: req_123
+                  type: api_error
+
+                Code: link_failed_to_attest_request
+                Next step: Install the app from a Google Play testing or production track and retry the Onramp flow. Internal, closed, open testing, and production tracks are supported. Debug builds and sideloaded APKs will not pass this check.
+                SDK: stripe-android@${attestationError.context.sdkVersion}
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -283,8 +290,7 @@ class OnrampInteractorTest {
         assertThat(attestationError.context.apiErrorType).isNull()
         assertThat(attestationError.message)
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
-        assertThat(attestationError.developerMessage).contains("Summary")
-        assertThat(attestationError.developerMessage).contains("Context")
+        assertThat(attestationError.developerMessage).contains("Request Context:")
         assertThat(attestationError.developerMessage).contains("operation: has_link_account")
         assertThat(attestationError.developerMessage).contains("request_id: req_456")
         assertThat(attestationError.developerMessage).doesNotContain("type:")
@@ -325,16 +331,24 @@ class OnrampInteractorTest {
         assertThat(apiError.userMessage).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.message).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.context.apiErrorType).isNull()
-        assertThat(apiError.developerMessage).contains("Summary")
-        assertThat(apiError.developerMessage).contains("Context")
-        assertThat(apiError.developerMessage).contains("Next step")
-        assertThat(apiError.developerMessage).contains("Docs")
-        assertThat(apiError.developerMessage).contains("This email address can't be used.")
-        assertThat(apiError.developerMessage).contains("operation: has_link_account")
-        assertThat(apiError.developerMessage).contains("request_id: req_789")
-        assertThat(apiError.developerMessage).contains("code: email_blocked")
-        assertThat(apiError.developerMessage).doesNotContain("type:")
-        assertThat(apiError.developerMessage).contains("https://stripe.com/docs/error-codes/email_blocked")
+        assertThat(apiError.developerMessage)
+            .isEqualTo(
+                """
+                This email address can't be used.
+
+                Request Context:
+                  operation: has_link_account
+                  app_id: ${RuntimeEnvironment.getApplication().packageName}
+                  mode: test
+                  reason: email_blocked
+                  request_id: req_789
+
+                Code: email_blocked
+                Next step: Inspect the preserved Stripe API error for details and retry after correcting the request.
+                Docs: https://stripe.com/docs/error-codes/email_blocked
+                SDK: stripe-android@${apiError.context.sdkVersion}
+                """.trimIndent()
+            )
     }
 
     @Test
@@ -380,7 +394,7 @@ class OnrampInteractorTest {
         assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.context.apiErrorType).isNull()
         assertThat(apiError.developerMessage).contains("Developer-facing message")
-        assertThat(apiError.developerMessage).contains("Next step")
+        assertThat(apiError.developerMessage).contains("Next step:")
         assertThat(apiError.developerMessage)
             .contains("Inspect the preserved Stripe API error for details and retry after correcting the request.")
     }

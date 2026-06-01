@@ -12,7 +12,7 @@ class UncategorizedApiErrorException internal constructor(
 ) : CryptoOnrampApiException(
     context = context,
     message = context.userMessage(fallbackUserMessage),
-    developerMessage = buildGenericDeveloperMessage(context),
+    developerMessage = CryptoOnrampErrorRenderer.renderGenericApiDeveloperMessage(context),
 ) {
     override val userMessage: String = context.userMessage(fallbackUserMessage)
 }
