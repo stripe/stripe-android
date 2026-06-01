@@ -2,27 +2,27 @@ apply from: new File(gradle.startParameter.currentDir, "build-configuration/quar
 
 def load = gradle.ext.quarantinedTestsLoad
 
-allprojects { project ->
-    if (load.status != 'OK') {
-        return
-    }
+// allprojects { project ->
+//     if (load.status != 'OK') {
+//         return
+//     }
 
-    def excludedInstrumentationTestClasses = load.cases
-        .collect { testCase -> "${testCase.className}#${testCase.testCaseName}" }
-        .join(",")
+//     def excludedInstrumentationTestClasses = load.cases
+//         .collect { testCase -> "${testCase.className}#${testCase.testCaseName}" }
+//         .join(",")
 
-    if (excludedInstrumentationTestClasses.isEmpty()) {
-        return
-    }
+//     if (excludedInstrumentationTestClasses.isEmpty()) {
+//         return
+//     }
 
-    def configureAndroidTestExclusions = {
-        project.android.defaultConfig.testInstrumentationRunnerArguments.put(
-            'notClass',
-            excludedInstrumentationTestClasses
-        )
-    }
+//     def configureAndroidTestExclusions = {
+//         project.android.defaultConfig.testInstrumentationRunnerArguments.put(
+//             'notClass',
+//             excludedInstrumentationTestClasses
+//         )
+//     }
 
-    project.plugins.withId("com.android.application", configureAndroidTestExclusions)
-    project.plugins.withId("com.android.library", configureAndroidTestExclusions)
-    project.plugins.withId("com.android.test", configureAndroidTestExclusions)
-}
+//     project.plugins.withId("com.android.application", configureAndroidTestExclusions)
+//     project.plugins.withId("com.android.library", configureAndroidTestExclusions)
+//     project.plugins.withId("com.android.test", configureAndroidTestExclusions)
+// }
