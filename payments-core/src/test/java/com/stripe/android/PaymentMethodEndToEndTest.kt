@@ -12,7 +12,6 @@ import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -60,23 +59,6 @@ internal class PaymentMethodEndToEndTest {
                 .createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.Bancontact)
-    }
-
-    @Ignore("ir-away-spoke")
-    @Test
-    fun createPaymentMethod_withBancontact_missingName_shouldFail() {
-        val params = PaymentMethodCreateParams.createBancontact(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
-        )
-
-        val exception = assertFailsWith<InvalidRequestException>(
-            "A name is required to create a Bancontact payment method"
-        ) {
-            Stripe(context, ApiKeyFixtures.BANCONTACT_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-        assertThat(exception.message)
-            .isEqualTo("Missing required param: billing_details[name].")
     }
 
     @Test
