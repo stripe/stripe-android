@@ -37,7 +37,7 @@ class SelfieWarmupScreenTest {
     private val mockScreenTracker = mock<ScreenTracker>()
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { screenTracker } doReturn mockScreenTracker
-        on { verificationPage } doReturn MediatorLiveData(Resource.idle())
+        on { verificationPage } doReturn MediatorLiveData(Resource.success(mock<VerificationPage>()))
     }
 
     @Test

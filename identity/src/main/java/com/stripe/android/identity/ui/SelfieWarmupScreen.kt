@@ -37,13 +37,30 @@ import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 
 @Composable
-@OptIn(ExperimentalMaterialApi::class)
-@Suppress("LongMethod")
 internal fun SelfieWarmupScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel
 ) {
-    val trainingConsentText = identityViewModel.verificationPage.value?.data?.selfieCapture?.consentText.orEmpty()
+    CheckVerificationPageAndCompose(
+        identityViewModel = identityViewModel,
+        navController = navController
+    ) { verificationPage ->
+        SelfieWarmupContent(
+            navController = navController,
+            identityViewModel = identityViewModel,
+            trainingConsentText = verificationPage.selfieCapture?.consentText.orEmpty()
+        )
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterialApi::class)
+@Suppress("LongMethod")
+private fun SelfieWarmupContent(
+    navController: NavController,
+    identityViewModel: IdentityViewModel,
+    trainingConsentText: String
+) {
     val shouldShowTrainingConsent = trainingConsentText.isNotBlank()
     var selectedTrainingConsent by remember {
         mutableStateOf<Boolean?>(null)
