@@ -12,6 +12,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.polling.IntentStatusPoller
 import kotlinx.coroutines.Dispatchers
@@ -88,6 +89,7 @@ internal class PollingViewModel @Inject constructor(
     private val poller: IntentStatusPoller,
     private val timeProvider: TimeProvider,
     private val savedStateHandle: SavedStateHandle,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -134,6 +136,13 @@ internal class PollingViewModel @Inject constructor(
                 it.copy(pollingState = PollingState.Success)
             }
         } else {
+            errorReporter.report(
+                errorEvent = ErrorReporter.ExpectedErrorEvent.POLLING_TIMEOUT_CANCELLATION,
+                additionalNonPiiParams = mapOf(
+                    "time_limit_seconds" to args.timeLimit.inWholeSeconds.toString(),
+                    "last_known_status" to (intentStatus?.name ?: "unknown"),
+                ),
+            )
             _uiState.update {
                 it.copy(pollingState = PollingState.Failed)
             }

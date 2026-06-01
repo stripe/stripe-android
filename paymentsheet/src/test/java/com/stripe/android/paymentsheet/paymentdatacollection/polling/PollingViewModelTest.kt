@@ -3,9 +3,11 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -198,6 +200,61 @@ class PollingViewModelTest {
     }
 
     @Test
+    fun `Reports analytics when polling times out`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val errorReporter = FakeErrorReporter()
+
+        createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            errorReporter = errorReporter,
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.RequiresAction)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        val call = errorReporter.awaitCall()
+        assertThat(call.errorEvent)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.POLLING_TIMEOUT_CANCELLATION)
+        assertThat(call.additionalNonPiiParams["time_limit_seconds"]).isEqualTo("10")
+        assertThat(call.additionalNonPiiParams["last_known_status"]).isEqualTo("RequiresAction")
+    }
+
+    @Test
+    fun `Does not report analytics when polling succeeds after timeout`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val errorReporter = FakeErrorReporter()
+
+        val viewModel = createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            errorReporter = errorReporter,
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.Succeeded)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Success)
+        errorReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `QR code shown on start when QR code available`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
@@ -283,6 +340,7 @@ private fun createPollingViewModel(
     timeProvider: TimeProvider = FakeTimeProvider(),
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
     qrCodeUrl: String? = null,
+    errorReporter: FakeErrorReporter = FakeErrorReporter(),
 ): PollingViewModel {
     return PollingViewModel(
         args = PollingViewModel.Args(
@@ -296,5 +354,6 @@ private fun createPollingViewModel(
         poller = poller,
         timeProvider = timeProvider,
         savedStateHandle = savedStateHandle,
+        errorReporter = errorReporter,
     )
 }

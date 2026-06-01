@@ -24,6 +24,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
@@ -278,7 +279,7 @@ internal class PollingActivityTest {
         timeProvider: TimeProvider = TimeProvider { System.currentTimeMillis() },
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): PollingViewModel {
-        return PollingViewModel(args, poller, timeProvider, savedStateHandle)
+        return PollingViewModel(args, poller, timeProvider, savedStateHandle, FakeErrorReporter())
     }
 
     private fun waitForActivityFinish() {
