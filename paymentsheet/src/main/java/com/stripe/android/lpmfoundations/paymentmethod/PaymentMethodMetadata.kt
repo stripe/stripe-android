@@ -157,6 +157,12 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
+        // TODO: The map-then-filter order allocates an intermediate list of all types before
+        //  discarding unsupported ones. Prefer filter-then-map to avoid that allocation:
+        //
+        //      supportedPaymentMethodDefinitions()
+        //          .filter { SupportedSavedPaymentMethodTypes.all.contains(it.type) }
+        //          .map { it.type }
         val supportedTypes = supportedPaymentMethodDefinitions().map {
             it.type
         }.filter { paymentMethodType ->

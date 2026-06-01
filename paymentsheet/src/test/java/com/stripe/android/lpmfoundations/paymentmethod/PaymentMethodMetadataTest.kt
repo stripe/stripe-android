@@ -408,6 +408,11 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `supportedSavedPaymentMethodTypes filters payment_methods not in SupportedSavedPaymentMethodTypes`() {
+        // TODO: This assertion compares a List<PaymentMethod.Type> against a String
+        //  (PaymentMethod.Type.Affirm.code), so it will always pass regardless of the list's
+        //  actual contents — a type mismatch that Truth silently accepts. It should be:
+        //
+        //      assertThat(SupportedSavedPaymentMethodTypes.all).doesNotContain(PaymentMethod.Type.Affirm)
         assertThat(SupportedSavedPaymentMethodTypes.all).doesNotContain(PaymentMethod.Type.Affirm.code)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

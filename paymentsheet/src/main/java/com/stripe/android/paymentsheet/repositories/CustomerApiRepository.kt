@@ -57,6 +57,14 @@ internal class CustomerApiRepository @Inject constructor(
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
+        // TODO: This filter is redundant when callers already pass SupportedSavedPaymentMethodTypes.all
+        //  (e.g. PaymentElementLoader). Having the same allowlist enforced in two places means
+        //  a future update to SupportedSavedPaymentMethodTypes won't break any callers that pass
+        //  a pre-filtered list, but it also silently swallows unexpected types for callers that
+        //  pass something else — which could hide bugs. Consider either:
+        //   (a) Removing this filter and trusting callers to pass valid types, or
+        //   (b) Keeping it but logging/asserting when an unsupported type is requested, so the
+        //       mismatch is surfaced rather than silently dropped.
         val requests = types.filter { paymentMethodType ->
             paymentMethodType in SupportedSavedPaymentMethodTypes.all
         }.map { paymentMethodType ->
