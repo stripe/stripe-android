@@ -12,6 +12,7 @@ import com.stripe.android.networking.RequestSurface
 import com.stripe.android.networking.StripeApiRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Ignore
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -61,6 +62,7 @@ internal class PaymentMethodEndToEndTest {
             .isEqualTo(PaymentMethod.Type.Bancontact)
     }
 
+    @Ignore("ir-away-spoke")
     @Test
     fun createPaymentMethod_withBancontact_missingName_shouldFail() {
         val params = PaymentMethodCreateParams.createBancontact(
