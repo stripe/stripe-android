@@ -126,10 +126,7 @@ internal class PollingViewModel @Inject constructor(
     private suspend fun handleTimeLimitReached() {
         poller.stopPolling()
         delay(3.seconds)
-        performOneOffPoll()
-    }
 
-    private suspend fun performOneOffPoll() {
         val intentStatus = poller.forcePoll()
         if (intentStatus == StripeIntent.Status.Succeeded) {
             _uiState.update {
