@@ -1,7 +1,11 @@
 package com.stripe.android.identity.ui
 
 import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.RadialGradient
+import android.graphics.Shader
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -37,14 +41,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -52,8 +58,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -76,8 +84,12 @@ import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
 import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
+import android.graphics.Path as AndroidPath
 
 internal const val SELFIE_VIEW_FINDER_ASPECT_RATIO = 0.75f
 internal const val SELFIE_SCAN_TITLE_TAG = "SelfieScanTitle"
@@ -90,12 +102,29 @@ internal const val CONSENT_CHECKBOX_TAG = "ConsentCheckboxTag"
 internal const val SELFIE_SCAN_STATUS_TAG = "SelfieScanStatusTag"
 internal const val SELFIE_HAVING_TROUBLE_TAG = "SelfieHavingTroubleTag"
 internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
+internal const val SELFIE_CAPTURE_GUIDE_SHADOW_TAG = "SelfieCaptureGuideShadowTag"
+internal const val SELFIE_SCAN_ACTIVITY_INDICATOR_TAG = "SelfieScanActivityIndicatorTag"
 private const val FLASH_MAX_ALPHA = 0.5f
 private const val FLASH_ANIMATION_TIME = 200
 private const val CAPTURE_GUIDE_TICK_COUNT = 77
 private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
 private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
 private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.41f
+private const val CAPTURE_GUIDE_SHADOW_ANIMATION_TIME = 180
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_DP = 44
+private const val CAPTURE_GUIDE_SHADOW_CLEAR_STOP_MAX = 0.96f
+private const val CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_OFFSET = 0.012f
+private const val CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_MAX = 0.98f
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_STOP_OFFSET = 0.02f
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_STOP_MAX = 0.99f
+private const val CAPTURE_GUIDE_SHADOW_INNER_ALPHA = 0.20f
+private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.24f
+private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.28f
+private const val CAPTURE_GUIDE_TICK_ALPHA = 0.8f
+private const val CAPTURE_GUIDE_TICK_SHADOW_ALPHA = 0.3f
+private const val CAPTURED_SELFIE_OVERLAY_ALPHA = 0.16f
+private const val STATUS_PILL_TEXT_SHADOW_ALPHA = 0.35f
+private const val STATUS_PILL_BACKGROUND_COLOR = 0x9921252C
 
 @Composable
 internal fun SelfieScanScreen(
@@ -288,14 +317,16 @@ private fun SelfieCaptureScreen(
                     text = stringResource(id = R.string.stripe_having_trouble),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .padding(top = 4.dp)
+                        .padding(top = 12.dp)
                         .testTag(SELFIE_HAVING_TROUBLE_TAG)
                         .clickable {
                             identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_SELFIE)
                             fallbackUrlLauncher.launchFallbackUrl(fallbackUrl)
                         },
                     color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f),
-                    style = MaterialTheme.typography.caption,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    textAlign = TextAlign.Center,
                     textDecoration = TextDecoration.Underline
                 )
             }
@@ -321,6 +352,8 @@ private fun SelfieCameraViewFinder(
         }
     }
 
+    AnnounceSelfieStatus(status)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -328,39 +361,13 @@ private fun SelfieCameraViewFinder(
             .padding(
                 horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
             )
-            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius)))
+            .clip(RoundedCornerShape(20.dp))
             .testTag(SCAN_VIEW_TAG)
     ) {
-        if (capturedSelfie != null) {
-            Image(
-                bitmap = remember(capturedSelfie) {
-                    capturedSelfie.mirrorHorizontally().asImageBitmap()
-                },
-                modifier = Modifier
-                    .fillMaxSize()
-                    .blur(16.dp),
-                contentScale = ContentScale.Crop,
-                contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
-            )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.16f))
-            )
-        } else {
-            AndroidView(
-                modifier = Modifier.fillMaxSize(),
-                factory = {
-                    CameraView(
-                        it,
-                        CameraView.ViewFinderType.Fill
-                    )
-                },
-                update = {
-                    cameraManager.onCameraViewUpdate(it)
-                }
-            )
-        }
+        SelfieCameraViewFinderContent(
+            capturedSelfie = capturedSelfie,
+            cameraManager = cameraManager
+        )
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -369,6 +376,13 @@ private fun SelfieCameraViewFinder(
         )
         if (showCaptureGuide) {
             CaptureGuide(showCaptureGuideShadow)
+            if (showCaptureGuideShadow) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG)
+                )
+            }
         }
         status?.let {
             SelfieStatusBadge(
@@ -378,6 +392,56 @@ private fun SelfieCameraViewFinder(
                     .padding(bottom = 40.dp)
             )
         }
+    }
+}
+
+@Composable
+@Suppress("DEPRECATION")
+private fun AnnounceSelfieStatus(status: SelfieStatus?) {
+    val view = LocalView.current
+    val checkingImagesText = stringResource(id = R.string.stripe_selfie_checking_images)
+
+    LaunchedEffect(status) {
+        if (status == SelfieStatus.CheckingImages) {
+            view.announceForAccessibility(checkingImagesText)
+        }
+    }
+}
+
+@Composable
+private fun SelfieCameraViewFinderContent(
+    capturedSelfie: Bitmap?,
+    cameraManager: IdentityCameraManager
+) {
+    if (capturedSelfie != null) {
+        Image(
+            bitmap = remember(capturedSelfie) {
+                capturedSelfie.mirrorHorizontally().asImageBitmap()
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(16.dp),
+            contentScale = ContentScale.Crop,
+            contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = CAPTURED_SELFIE_OVERLAY_ALPHA))
+        )
+    } else {
+        AndroidView(
+            modifier = Modifier.fillMaxSize(),
+            factory = {
+                CameraView(
+                    it,
+                    CameraView.ViewFinderType.Fill
+                )
+            },
+            update = {
+                cameraManager.onCameraViewUpdate(it)
+            }
+        )
     }
 }
 
@@ -397,12 +461,7 @@ private enum class SelfieStatus(
 
 private fun IdentityScanViewModel.State.status(): SelfieStatus? {
     return when (this) {
-        is IdentityScanViewModel.State.Scanning ->
-            if (scanState is IdentityScanState.Found) {
-                SelfieStatus.HoldStill
-            } else {
-                null
-            }
+        is IdentityScanViewModel.State.Scanning -> SelfieStatus.HoldStill
         is IdentityScanViewModel.State.Scanned -> SelfieStatus.CheckingImages
         else -> null
     }
@@ -410,6 +469,72 @@ private fun IdentityScanViewModel.State.status(): SelfieStatus? {
 
 private fun FaceDetectorTransitioner.lastCapturedSelfie(): Bitmap {
     return filteredFrames[FaceDetectorTransitioner.INDEX_LAST].first.cameraPreviewImage.image
+}
+
+private fun DrawScope.drawCenteredGuideShadow(
+    center: Offset,
+    horizontalRadius: Float,
+    verticalRadius: Float,
+    opacity: Float
+) {
+    val scaleX = horizontalRadius / verticalRadius
+    val maxXDistance = max(center.x, size.width - center.x) / scaleX
+    val maxYDistance = max(center.y, size.height - center.y)
+    val outerRadius = hypot(maxXDistance, maxYDistance)
+    val clearRadius = verticalRadius
+    if (outerRadius <= clearRadius) {
+        return
+    }
+
+    val featherRadius = min(verticalRadius + CAPTURE_GUIDE_SHADOW_FEATHER_DP.dp.toPx(), outerRadius)
+    val clearStop = (clearRadius / outerRadius).coerceIn(0f, CAPTURE_GUIDE_SHADOW_CLEAR_STOP_MAX)
+    val firstVisibleStop = min(
+        clearStop + CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_OFFSET,
+        CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_MAX
+    )
+    val featherStop = min(
+        max(featherRadius / outerRadius, firstVisibleStop + CAPTURE_GUIDE_SHADOW_FEATHER_STOP_OFFSET),
+        CAPTURE_GUIDE_SHADOW_FEATHER_STOP_MAX
+    )
+    val shadowOpacity = opacity.coerceIn(0f, 1f)
+
+    drawIntoCanvas { canvas ->
+        val nativeCanvas = canvas.nativeCanvas
+        nativeCanvas.save()
+        nativeCanvas.translate(center.x, center.y)
+        nativeCanvas.scale(scaleX, 1f)
+
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.FILL
+            shader = RadialGradient(
+                0f,
+                0f,
+                outerRadius,
+                intArrayOf(
+                    Color.Transparent.toArgb(),
+                    Color.Transparent.toArgb(),
+                    Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_INNER_ALPHA * shadowOpacity).toArgb(),
+                    Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_MID_ALPHA * shadowOpacity).toArgb(),
+                    Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_OUTER_ALPHA * shadowOpacity).toArgb()
+                ),
+                floatArrayOf(
+                    0f,
+                    clearStop,
+                    firstVisibleStop,
+                    featherStop,
+                    1f
+                ),
+                Shader.TileMode.CLAMP
+            )
+        }
+        val shadowPath = AndroidPath().apply {
+            fillType = AndroidPath.FillType.EVEN_ODD
+            addCircle(0f, 0f, outerRadius, AndroidPath.Direction.CW)
+            addCircle(0f, 0f, clearRadius, AndroidPath.Direction.CW)
+        }
+        nativeCanvas.drawPath(shadowPath, paint)
+        nativeCanvas.restore()
+    }
 }
 
 @Composable
@@ -420,10 +545,10 @@ private fun SelfieStatusBadge(
     Row(
         modifier = modifier
             .background(
-                color = Color(0x9921252C),
+                color = Color(STATUS_PILL_BACKGROUND_COLOR),
                 shape = RoundedCornerShape(8.dp)
             )
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .padding(8.dp)
             .semantics(mergeDescendants = true) {
                 testTag = SELFIE_SCAN_STATUS_TAG
             },
@@ -434,7 +559,8 @@ private fun SelfieStatusBadge(
             CircularProgressIndicator(
                 modifier = Modifier
                     .padding(end = 8.dp)
-                    .size(18.dp),
+                    .size(18.dp)
+                    .testTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG),
                 color = Color.White,
                 strokeWidth = 2.dp
             )
@@ -442,13 +568,29 @@ private fun SelfieStatusBadge(
         Text(
             text = stringResource(id = status.labelRes),
             color = Color.White,
-            style = MaterialTheme.typography.body2
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            style = MaterialTheme.typography.body2.copy(
+                shadow = Shadow(
+                    color = Color.Black.copy(alpha = STATUS_PILL_TEXT_SHADOW_ALPHA),
+                    offset = Offset(x = 0f, y = 1f),
+                    blurRadius = 4f
+                )
+            )
         )
     }
 }
 
 @Composable
 private fun CaptureGuide(showCenteredShadow: Boolean) {
+    val centeredShadowAlpha by animateFloatAsState(
+        targetValue = if (showCenteredShadow) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = CAPTURE_GUIDE_SHADOW_ANIMATION_TIME,
+            easing = FastOutSlowInEasing
+        ),
+        label = "centeredShadowAlpha"
+    )
     Canvas(
         modifier = Modifier
             .fillMaxSize()
@@ -458,61 +600,79 @@ private fun CaptureGuide(showCenteredShadow: Boolean) {
             return@Canvas
         }
 
-        val horizontalRadius = size.width * CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO / 2f
-        val verticalRadius = size.height * CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO / 2f
-        val center = Offset(
-            x = size.width / 2f,
-            y = size.height * CAPTURE_GUIDE_CENTER_Y_RATIO
-        )
-        val guideRect = Rect(
-            left = center.x - horizontalRadius,
-            top = center.y - verticalRadius,
-            right = center.x + horizontalRadius,
-            bottom = center.y + verticalRadius
-        )
-
-        if (showCenteredShadow) {
-            val shadowPath = Path().apply {
-                fillType = PathFillType.EvenOdd
-                addRect(Rect(0f, 0f, size.width, size.height))
-                addOval(guideRect)
-            }
-            drawPath(
-                path = shadowPath,
-                color = Color.Black.copy(alpha = 0.32f)
+        val geometry = captureGuideGeometry()
+        if (centeredShadowAlpha > 0f) {
+            drawCenteredGuideShadow(
+                center = geometry.center,
+                horizontalRadius = geometry.horizontalRadius,
+                verticalRadius = geometry.verticalRadius,
+                opacity = centeredShadowAlpha
             )
         }
 
+        drawCaptureGuideTicks(geometry)
+    }
+}
+
+private data class CaptureGuideGeometry(
+    val center: Offset,
+    val horizontalRadius: Float,
+    val verticalRadius: Float
+)
+
+private fun DrawScope.captureGuideGeometry(): CaptureGuideGeometry {
+    return CaptureGuideGeometry(
+        center = Offset(
+            x = size.width / 2f,
+            y = size.height * CAPTURE_GUIDE_CENTER_Y_RATIO
+        ),
+        horizontalRadius = size.width * CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO / 2f,
+        verticalRadius = size.height * CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO / 2f
+    )
+}
+
+private fun DrawScope.drawCaptureGuideTicks(geometry: CaptureGuideGeometry) {
+    with(geometry) {
         val tickLength = 10.dp.toPx()
         val strokeWidth = 2.dp.toPx()
-        repeat(CAPTURE_GUIDE_TICK_COUNT) { index ->
-            val angle = (index.toFloat() / CAPTURE_GUIDE_TICK_COUNT.toFloat()) * Math.PI.toFloat() * 2f
-            val cosAngle = cos(angle)
-            val sinAngle = sin(angle)
-            val tickCenter = Offset(
-                x = center.x + cosAngle * horizontalRadius,
-                y = center.y + sinAngle * verticalRadius
-            )
-            val normalX = cosAngle / horizontalRadius
-            val normalY = sinAngle / verticalRadius
-            val normalLength = sqrt((normalX * normalX) + (normalY * normalY))
-            val unitNormalX = normalX / normalLength
-            val unitNormalY = normalY / normalLength
-            val halfTickLength = tickLength / 2f
+        val shadowOffsetY = 1.dp.toPx()
+        val shadowBlur = 4.dp.toPx()
+        drawIntoCanvas { canvas ->
+            val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.White.copy(alpha = CAPTURE_GUIDE_TICK_ALPHA).toArgb()
+                style = Paint.Style.STROKE
+                strokeCap = Paint.Cap.BUTT
+                this.strokeWidth = strokeWidth
+                setShadowLayer(
+                    shadowBlur,
+                    0f,
+                    shadowOffsetY,
+                    Color.Black.copy(alpha = CAPTURE_GUIDE_TICK_SHADOW_ALPHA).toArgb()
+                )
+            }
+            repeat(CAPTURE_GUIDE_TICK_COUNT) { index ->
+                val angle = (index.toFloat() / CAPTURE_GUIDE_TICK_COUNT.toFloat()) * Math.PI.toFloat() * 2f
+                val cosAngle = cos(angle)
+                val sinAngle = sin(angle)
+                val tickCenter = Offset(
+                    x = center.x + cosAngle * horizontalRadius,
+                    y = center.y + sinAngle * verticalRadius
+                )
+                val normalX = cosAngle / horizontalRadius
+                val normalY = sinAngle / verticalRadius
+                val normalLength = sqrt((normalX * normalX) + (normalY * normalY))
+                val unitNormalX = normalX / normalLength
+                val unitNormalY = normalY / normalLength
+                val halfTickLength = tickLength / 2f
 
-            drawLine(
-                color = Color.White.copy(alpha = 0.8f),
-                start = Offset(
-                    x = tickCenter.x - unitNormalX * halfTickLength,
-                    y = tickCenter.y - unitNormalY * halfTickLength
-                ),
-                end = Offset(
-                    x = tickCenter.x + unitNormalX * halfTickLength,
-                    y = tickCenter.y + unitNormalY * halfTickLength
-                ),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Butt
-            )
+                canvas.nativeCanvas.drawLine(
+                    tickCenter.x - unitNormalX * halfTickLength,
+                    tickCenter.y - unitNormalY * halfTickLength,
+                    tickCenter.x + unitNormalX * halfTickLength,
+                    tickCenter.y + unitNormalY * halfTickLength,
+                    tickPaint
+                )
+            }
         }
     }
 }
