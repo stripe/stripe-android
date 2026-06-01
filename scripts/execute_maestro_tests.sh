@@ -95,10 +95,10 @@ for TEST_FILE_PATH in "$TEST_DIR_PATH"/*.yaml; do
     # Just run the test if it's tagged as edge, if on an edge environment
     if [ "$test_environment" != "edge" ] || contains_tag "$TEST_FILE_PATH" "edge"; then
       TEST_NAME=$(basename "$TEST_FILE_PATH" .yaml)
-      # if python3 "${SCRIPT_DIR}/is_maestro_flow_quarantined.py" "$TEST_NAME"; then
-      #   echo "Skipping quarantined Maestro flow: $TEST_NAME"
-      #   continue
-      # fi
+      if python3 "${SCRIPT_DIR}/is_maestro_flow_quarantined.py" "$TEST_NAME"; then
+        echo "Skipping quarantined Maestro flow: $TEST_NAME"
+        continue
+      fi
       ATTEMPT=0
       # Execute Maestro test flow and retry if failed (each try writes a distinct JUnit file).
       while [ "$ATTEMPT" -lt "$MAX_RETRIES" ]; do
