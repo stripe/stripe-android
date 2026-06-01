@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathFillType
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -75,9 +76,6 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
-import kotlin.math.cos
-import kotlin.math.sin
-import kotlin.math.sqrt
 
 internal const val SELFIE_VIEW_FINDER_ASPECT_RATIO = 0.75f
 internal const val SELFIE_SCAN_TITLE_TAG = "SelfieScanTitle"
@@ -92,10 +90,11 @@ internal const val SELFIE_HAVING_TROUBLE_TAG = "SelfieHavingTroubleTag"
 internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
 private const val FLASH_MAX_ALPHA = 0.5f
 private const val FLASH_ANIMATION_TIME = 200
-private const val CAPTURE_GUIDE_TICK_COUNT = 77
-private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
-private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
-private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.41f
+private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.66f
+private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.58f
+private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.42f
+private val CAPTURE_GUIDE_ARC_START_ANGLES = listOf(215f, 305f, 35f, 125f)
+private const val CAPTURE_GUIDE_ARC_SWEEP_ANGLE = 40f
 
 @Composable
 internal fun SelfieScanScreen(
@@ -471,6 +470,12 @@ private fun CaptureGuide(showCenteredShadow: Boolean) {
             bottom = center.y + verticalRadius
         )
 
+        val guideStrokeWidth = 3.dp.toPx()
+        val guideShadowStrokeWidth = 5.dp.toPx()
+        val guideFeatherStrokeWidth = 24.dp.toPx()
+        val guideTopLeft = Offset(guideRect.left, guideRect.top)
+        val guideSize = guideRect.size
+
         if (showCenteredShadow) {
             val shadowPath = Path().apply {
                 fillType = PathFillType.EvenOdd
@@ -479,39 +484,34 @@ private fun CaptureGuide(showCenteredShadow: Boolean) {
             }
             drawPath(
                 path = shadowPath,
-                color = Color.Black.copy(alpha = 0.32f)
+                color = Color.Black.copy(alpha = 0.18f)
+            )
+            drawOval(
+                color = Color.Black.copy(alpha = 0.08f),
+                topLeft = guideTopLeft,
+                size = guideSize,
+                style = Stroke(width = guideFeatherStrokeWidth)
             )
         }
 
-        val tickLength = 10.dp.toPx()
-        val strokeWidth = 2.dp.toPx()
-        repeat(CAPTURE_GUIDE_TICK_COUNT) { index ->
-            val angle = (index.toFloat() / CAPTURE_GUIDE_TICK_COUNT.toFloat()) * Math.PI.toFloat() * 2f
-            val cosAngle = cos(angle)
-            val sinAngle = sin(angle)
-            val tickCenter = Offset(
-                x = center.x + cosAngle * horizontalRadius,
-                y = center.y + sinAngle * verticalRadius
+        CAPTURE_GUIDE_ARC_START_ANGLES.forEach { startAngle ->
+            drawArc(
+                color = Color.Black.copy(alpha = 0.18f),
+                startAngle = startAngle,
+                sweepAngle = CAPTURE_GUIDE_ARC_SWEEP_ANGLE,
+                useCenter = false,
+                topLeft = guideTopLeft,
+                size = guideSize,
+                style = Stroke(width = guideShadowStrokeWidth, cap = StrokeCap.Round)
             )
-            val normalX = cosAngle / horizontalRadius
-            val normalY = sinAngle / verticalRadius
-            val normalLength = sqrt((normalX * normalX) + (normalY * normalY))
-            val unitNormalX = normalX / normalLength
-            val unitNormalY = normalY / normalLength
-            val halfTickLength = tickLength / 2f
-
-            drawLine(
-                color = Color.White.copy(alpha = 0.8f),
-                start = Offset(
-                    x = tickCenter.x - unitNormalX * halfTickLength,
-                    y = tickCenter.y - unitNormalY * halfTickLength
-                ),
-                end = Offset(
-                    x = tickCenter.x + unitNormalX * halfTickLength,
-                    y = tickCenter.y + unitNormalY * halfTickLength
-                ),
-                strokeWidth = strokeWidth,
-                cap = StrokeCap.Butt
+            drawArc(
+                color = Color.White.copy(alpha = 0.88f),
+                startAngle = startAngle,
+                sweepAngle = CAPTURE_GUIDE_ARC_SWEEP_ANGLE,
+                useCenter = false,
+                topLeft = guideTopLeft,
+                size = guideSize,
+                style = Stroke(width = guideStrokeWidth, cap = StrokeCap.Round)
             )
         }
     }
