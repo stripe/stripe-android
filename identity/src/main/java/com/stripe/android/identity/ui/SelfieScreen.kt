@@ -5,6 +5,7 @@ import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.Shader
 import androidx.annotation.StringRes
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateFloatAsState
@@ -113,15 +114,15 @@ private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
 // FaceDetectorTransitioner validates centering against the normalized image center.
 private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.5f
 private const val CAPTURE_GUIDE_SHADOW_ANIMATION_TIME = 180
-private const val CAPTURE_GUIDE_SHADOW_FEATHER_DP = 44
-private const val CAPTURE_GUIDE_SHADOW_CLEAR_STOP_MAX = 0.96f
-private const val CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_OFFSET = 0.012f
-private const val CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_MAX = 0.98f
-private const val CAPTURE_GUIDE_SHADOW_FEATHER_STOP_OFFSET = 0.02f
-private const val CAPTURE_GUIDE_SHADOW_FEATHER_STOP_MAX = 0.99f
-private const val CAPTURE_GUIDE_SHADOW_INNER_ALPHA = 0.20f
-private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.24f
-private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.28f
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_DP = 34
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MIN = 0.06f
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MAX = 0.96f
+private const val CAPTURE_GUIDE_SHADOW_INNER_LOCATION_FACTOR = 0.25f
+private const val CAPTURE_GUIDE_SHADOW_MID_LOCATION_FACTOR = 0.6f
+private const val CAPTURE_GUIDE_SHADOW_INNER_ALPHA = 0.14f
+private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.28f
+private const val CAPTURE_GUIDE_SHADOW_RING_ALPHA = 0.36f
+private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.42f
 private const val CAPTURE_GUIDE_TICK_ALPHA = 0.8f
 private const val CAPTURE_GUIDE_TICK_SHADOW_ALPHA = 0.3f
 private const val CAPTURED_SELFIE_OVERLAY_ALPHA = 0.16f
@@ -489,14 +490,10 @@ private fun DrawScope.drawCenteredGuideShadow(
     }
 
     val featherRadius = min(verticalRadius + CAPTURE_GUIDE_SHADOW_FEATHER_DP.dp.toPx(), outerRadius)
-    val clearStop = (clearRadius / outerRadius).coerceIn(0f, CAPTURE_GUIDE_SHADOW_CLEAR_STOP_MAX)
-    val firstVisibleStop = min(
-        clearStop + CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_OFFSET,
-        CAPTURE_GUIDE_SHADOW_FIRST_VISIBLE_STOP_MAX
-    )
-    val featherStop = min(
-        max(featherRadius / outerRadius, firstVisibleStop + CAPTURE_GUIDE_SHADOW_FEATHER_STOP_OFFSET),
-        CAPTURE_GUIDE_SHADOW_FEATHER_STOP_MAX
+    val gradientStops = centeredGuideShadowGradientStops(
+        clearRadius = clearRadius,
+        featherRadius = featherRadius,
+        outerRadius = outerRadius
     )
     val shadowOpacity = opacity.coerceIn(0f, 1f)
 
@@ -506,36 +503,87 @@ private fun DrawScope.drawCenteredGuideShadow(
         nativeCanvas.translate(center.x, center.y)
         nativeCanvas.scale(scaleX, 1f)
 
-        val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.FILL
-            shader = RadialGradient(
-                0f,
-                0f,
-                outerRadius,
-                intArrayOf(
-                    Color.Transparent.toArgb(),
-                    Color.Transparent.toArgb(),
-                    Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_INNER_ALPHA * shadowOpacity).toArgb(),
-                    Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_MID_ALPHA * shadowOpacity).toArgb(),
-                    Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_OUTER_ALPHA * shadowOpacity).toArgb()
-                ),
-                floatArrayOf(
-                    0f,
-                    clearStop,
-                    firstVisibleStop,
-                    featherStop,
-                    1f
-                ),
-                Shader.TileMode.CLAMP
-            )
-        }
-        val shadowPath = AndroidPath().apply {
-            fillType = AndroidPath.FillType.EVEN_ODD
-            addCircle(0f, 0f, outerRadius, AndroidPath.Direction.CW)
-            addCircle(0f, 0f, clearRadius, AndroidPath.Direction.CW)
-        }
-        nativeCanvas.drawPath(shadowPath, paint)
+        nativeCanvas.drawPath(
+            centeredGuideShadowPath(outerRadius, clearRadius),
+            centeredGuideShadowPaint(outerRadius, gradientStops, shadowOpacity)
+        )
         nativeCanvas.restore()
+    }
+}
+
+private data class CenteredGuideShadowGradientStops(
+    val clear: Float,
+    val inner: Float,
+    val mid: Float,
+    val ring: Float
+)
+
+private fun centeredGuideShadowGradientStops(
+    clearRadius: Float,
+    featherRadius: Float,
+    outerRadius: Float
+): CenteredGuideShadowGradientStops {
+    val shadowSpan = outerRadius - clearRadius
+    val featherLocation = min(
+        max(
+            (featherRadius - clearRadius) / shadowSpan,
+            CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MIN
+        ),
+        CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MAX
+    )
+
+    fun absoluteStop(relativeLocation: Float): Float {
+        return (clearRadius + (shadowSpan * relativeLocation)) / outerRadius
+    }
+
+    return CenteredGuideShadowGradientStops(
+        clear = clearRadius / outerRadius,
+        inner = absoluteStop(featherLocation * CAPTURE_GUIDE_SHADOW_INNER_LOCATION_FACTOR),
+        mid = absoluteStop(featherLocation * CAPTURE_GUIDE_SHADOW_MID_LOCATION_FACTOR),
+        ring = absoluteStop(featherLocation)
+    )
+}
+
+private fun centeredGuideShadowPaint(
+    outerRadius: Float,
+    gradientStops: CenteredGuideShadowGradientStops,
+    shadowOpacity: Float
+): Paint {
+    return Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        shader = RadialGradient(
+            0f,
+            0f,
+            outerRadius,
+            intArrayOf(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_INNER_ALPHA * shadowOpacity).toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_MID_ALPHA * shadowOpacity).toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_RING_ALPHA * shadowOpacity).toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_OUTER_ALPHA * shadowOpacity).toArgb()
+            ),
+            floatArrayOf(
+                0f,
+                gradientStops.clear,
+                gradientStops.inner,
+                gradientStops.mid,
+                gradientStops.ring,
+                1f
+            ),
+            Shader.TileMode.CLAMP
+        )
+    }
+}
+
+private fun centeredGuideShadowPath(
+    outerRadius: Float,
+    clearRadius: Float
+): AndroidPath {
+    return AndroidPath().apply {
+        fillType = AndroidPath.FillType.EVEN_ODD
+        addCircle(0f, 0f, outerRadius, AndroidPath.Direction.CW)
+        addCircle(0f, 0f, clearRadius, AndroidPath.Direction.CW)
     }
 }
 
@@ -585,14 +633,18 @@ private fun SelfieStatusBadge(
 
 @Composable
 private fun CaptureGuide(showCenteredShadow: Boolean) {
-    val centeredShadowAlpha by animateFloatAsState(
-        targetValue = if (showCenteredShadow) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = CAPTURE_GUIDE_SHADOW_ANIMATION_TIME,
-            easing = FastOutSlowInEasing
-        ),
-        label = "centeredShadowAlpha"
-    )
+    val centeredShadowAlpha = remember { Animatable(0f) }
+
+    LaunchedEffect(showCenteredShadow) {
+        centeredShadowAlpha.animateTo(
+            targetValue = if (showCenteredShadow) 1f else 0f,
+            animationSpec = tween(
+                durationMillis = CAPTURE_GUIDE_SHADOW_ANIMATION_TIME,
+                easing = FastOutSlowInEasing
+            )
+        )
+    }
+
     Canvas(
         modifier = Modifier
             .fillMaxSize()
@@ -603,12 +655,12 @@ private fun CaptureGuide(showCenteredShadow: Boolean) {
         }
 
         val geometry = captureGuideGeometry()
-        if (centeredShadowAlpha > 0f) {
+        if (centeredShadowAlpha.value > 0f) {
             drawCenteredGuideShadow(
                 center = geometry.center,
                 horizontalRadius = geometry.horizontalRadius,
                 verticalRadius = geometry.verticalRadius,
-                opacity = centeredShadowAlpha
+                opacity = centeredShadowAlpha.value
             )
         }
 
