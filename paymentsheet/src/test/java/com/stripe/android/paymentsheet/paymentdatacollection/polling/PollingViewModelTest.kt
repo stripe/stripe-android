@@ -223,7 +223,7 @@ class PollingViewModelTest {
 
         val call = errorReporter.awaitCall()
         assertThat(call.errorEvent)
-            .isEqualTo(ErrorReporter.ExpectedErrorEvent.POLLING_TIMEOUT_CANCELLATION)
+            .isEqualTo(ErrorReporter.ExpectedErrorEvent.POLLING_TIMED_OUT)
         assertThat(call.additionalNonPiiParams["payment_method_type"]).isEqualTo("blik")
         assertThat(call.additionalNonPiiParams["last_known_status"]).isEqualTo("RequiresAction")
     }

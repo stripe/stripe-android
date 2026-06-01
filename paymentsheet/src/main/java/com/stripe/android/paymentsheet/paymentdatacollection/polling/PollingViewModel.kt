@@ -134,7 +134,7 @@ internal class PollingViewModel @Inject constructor(
             }
         } else {
             errorReporter.report(
-                errorEvent = ErrorReporter.ExpectedErrorEvent.POLLING_TIMEOUT_CANCELLATION,
+                errorEvent = ErrorReporter.ExpectedErrorEvent.POLLING_TIMED_OUT,
                 additionalNonPiiParams = mapOf(
                     "payment_method_type" to args.paymentMethodType,
                     "last_known_status" to (intentStatus?.name ?: "unknown"),

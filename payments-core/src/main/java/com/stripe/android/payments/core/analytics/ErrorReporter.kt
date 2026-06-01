@@ -201,8 +201,8 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         PAYMENT_OPTION_CARD_ART_LOAD_FAILURE(
             eventName = "elements.payment_option.card_art.load_failure"
         ),
-        POLLING_TIMEOUT_CANCELLATION(
-            eventName = "payments.polling.timeout_cancellation"
+        POLLING_TIMED_OUT(
+            eventName = "paymentsheet.polling.timed_out"
         )
     }
 
