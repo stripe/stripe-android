@@ -39,3 +39,5 @@ include ':crypto-onramp'
 include ':crypto-onramp-example'
 include ':payment-method-messaging-example'
 include ':tap-to-add-testing'
+include ':link-mobile-app:composeApp'
+project(':link-mobile-app:composeApp').projectDir = new File(rootDir, 'link-mobile-app/composeApp')
