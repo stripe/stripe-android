@@ -109,7 +109,9 @@ private const val FLASH_ANIMATION_TIME = 200
 private const val CAPTURE_GUIDE_TICK_COUNT = 77
 private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
 private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
-private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.41f
+
+// FaceDetectorTransitioner validates centering against the normalized image center.
+private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.5f
 private const val CAPTURE_GUIDE_SHADOW_ANIMATION_TIME = 180
 private const val CAPTURE_GUIDE_SHADOW_FEATHER_DP = 44
 private const val CAPTURE_GUIDE_SHADOW_CLEAR_STOP_MAX = 0.96f
