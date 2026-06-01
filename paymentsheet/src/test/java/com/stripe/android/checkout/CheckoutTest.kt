@@ -777,6 +777,18 @@ class CheckoutTest {
     }
 
     @Test
+    fun `setting state updates checkoutSession flow`() = runCreateWithStateScenario {
+        val initial = checkoutSessionTurbine.awaitItem()
+        assertThat(initial.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+
+        val updatedResponse = CheckoutSessionResponseFactory.create(id = "cs_test_updated")
+        checkout.state = CheckoutStateFactory.create(checkoutSessionResponse = updatedResponse)
+
+        val updated = checkoutSessionTurbine.awaitItem()
+        assertThat(updated.id).isEqualTo("cs_test_updated")
+    }
+
+    @Test
     fun `mutation returns failure when integrationLaunched is true`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
