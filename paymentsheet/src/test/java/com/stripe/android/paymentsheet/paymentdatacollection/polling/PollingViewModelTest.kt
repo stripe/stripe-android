@@ -224,7 +224,7 @@ class PollingViewModelTest {
         val call = errorReporter.awaitCall()
         assertThat(call.errorEvent)
             .isEqualTo(ErrorReporter.ExpectedErrorEvent.POLLING_TIMEOUT_CANCELLATION)
-        assertThat(call.additionalNonPiiParams["time_limit_seconds"]).isEqualTo("10")
+        assertThat(call.additionalNonPiiParams["payment_method_type"]).isEqualTo("blik")
         assertThat(call.additionalNonPiiParams["last_known_status"]).isEqualTo("RequiresAction")
     }
 
@@ -350,6 +350,7 @@ private fun createPollingViewModel(
             ctaText = R.string.stripe_blik_confirm_payment,
             stripeAccountId = null,
             qrCodeUrl = qrCodeUrl,
+            paymentMethodType = "blik",
         ),
         poller = poller,
         timeProvider = timeProvider,

@@ -136,7 +136,7 @@ internal class PollingViewModel @Inject constructor(
             errorReporter.report(
                 errorEvent = ErrorReporter.ExpectedErrorEvent.POLLING_TIMEOUT_CANCELLATION,
                 additionalNonPiiParams = mapOf(
-                    "time_limit_seconds" to args.timeLimit.inWholeSeconds.toString(),
+                    "payment_method_type" to args.paymentMethodType,
                     "last_known_status" to (intentStatus?.name ?: "unknown"),
                 ),
             )
@@ -256,6 +256,7 @@ internal class PollingViewModel @Inject constructor(
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
         val qrCodeUrl: String?,
+        val paymentMethodType: String,
     )
 }
 

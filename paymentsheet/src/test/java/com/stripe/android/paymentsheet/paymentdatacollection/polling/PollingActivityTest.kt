@@ -250,12 +250,13 @@ internal class PollingActivityTest {
 
         val viewModel = createViewModel(
             args = PollingViewModel.Args(
-                args.clientSecret,
-                args.timeLimitInSeconds.seconds,
-                args.initialDelayInSeconds.seconds,
-                args.ctaText,
-                args.stripeAccountId,
-                args.qrCodeUrl,
+                clientSecret = args.clientSecret,
+                timeLimit = args.timeLimitInSeconds.seconds,
+                initialDelay = args.initialDelayInSeconds.seconds,
+                ctaText = args.ctaText,
+                stripeAccountId = args.stripeAccountId,
+                qrCodeUrl = args.qrCodeUrl,
+                paymentMethodType = args.paymentMethodType,
             ),
             poller = poller,
             timeProvider = timeProvider,
@@ -315,6 +316,7 @@ internal class PollingActivityTest {
             ctaText = R.string.stripe_blik_confirm_payment,
             stripeAccountId = null,
             qrCodeUrl = null,
+            paymentMethodType = "blik",
         )
     }
 }

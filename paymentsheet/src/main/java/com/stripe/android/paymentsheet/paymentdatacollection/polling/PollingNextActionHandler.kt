@@ -61,6 +61,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 ctaText = R.string.stripe_blik_confirm_payment,
                 stripeAccountId = requestOptions.stripeAccount,
                 qrCodeUrl = null,
+                paymentMethodType = PaymentMethod.Type.Blik.code,
             )
         PaymentMethod.Type.PayNow ->
             PollingContract.Args(
@@ -71,6 +72,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
                 stripeAccountId = requestOptions.stripeAccount,
                 qrCodeUrl = getQrCodeForPayNow(actionable),
+                paymentMethodType = PaymentMethod.Type.PayNow.code,
             )
         PaymentMethod.Type.PromptPay ->
             PollingContract.Args(
@@ -81,6 +83,7 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
                 ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
                 stripeAccountId = requestOptions.stripeAccount,
                 qrCodeUrl = getQrCodeForPromptPay(actionable),
+                paymentMethodType = PaymentMethod.Type.PromptPay.code,
             )
         else ->
             error(
