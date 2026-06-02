@@ -12,22 +12,31 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 abstract class CryptoOnrampException internal constructor(
     message: String,
-    val developerMessage: String,
+    final override val developerMessage: String,
+    final override val sdkVersion: String,
     /**
      * The original Stripe exception that was wrapped by this richer Crypto Onramp error.
      */
-    val stripeException: StripeException,
+    private val stripeException: StripeException,
 ) : StripeException(
     stripeError = stripeException.stripeError,
     requestId = stripeException.requestId,
     statusCode = stripeException.statusCode,
     cause = stripeException,
     message = message,
-) {
+),
+StripeCryptoOnrampError {
     /**
      * An end-user-facing message, when available.
      */
-    abstract val userMessage: String
+    abstract override val userMessage: String
+
+    abstract override val code: String?
+
+    abstract override val docUrl: String?
+
+    final override val underlyingError: StripeException
+        get() = stripeException
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String {
@@ -45,11 +54,19 @@ abstract class CryptoOnrampApiException internal constructor(
     val context: APIErrorContext,
     message: String,
     developerMessage: String,
+    sdkVersion: String,
 ) : CryptoOnrampException(
     message = message,
     developerMessage = developerMessage,
+    sdkVersion = sdkVersion,
     stripeException = context.underlyingError,
-)
+) {
+    final override val code: String?
+        get() = context.apiErrorCode
+
+    final override val docUrl: String?
+        get() = context.docUrl
+}
 
 data class APIErrorContext(
     /**
@@ -68,10 +85,6 @@ data class APIErrorContext(
      * The Stripe mode inferred from the publishable key, when available.
      */
     val mode: String?,
-    /**
-     * The SDK version that produced the request.
-     */
-    val sdkVersion: String,
     /**
      * The raw backend error code, when present.
      */

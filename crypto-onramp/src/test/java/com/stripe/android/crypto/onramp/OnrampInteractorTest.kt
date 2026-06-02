@@ -194,24 +194,23 @@ class OnrampInteractorTest {
     fun testRegisterWalletAddressMapsBackendAttestationError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
-        whenever(cryptoApiRepository.setWalletAddress(any(), any(), any())).thenReturn(
-            Result.failure(
-                APIException(
-                    stripeError = StripeError(
-                        type = "api_error",
-                        code = "link_failed_to_attest_request",
-                        message = "App attestation failed",
-                        extraFields = mapOf(
-                            "reason" to "app_not_play_recognized",
-                            "user_message" to
-                                "This app couldn't be verified. Install it from Google Play " +
-                                "and try again."
-                        )
-                    ),
-                    requestId = "req_123",
-                    statusCode = 400,
+        val backendError = APIException(
+            stripeError = StripeError(
+                type = "api_error",
+                code = "link_failed_to_attest_request",
+                message = "App attestation failed",
+                extraFields = mapOf(
+                    "reason" to "app_not_play_recognized",
+                    "user_message" to
+                        "This app couldn't be verified. Install it from Google Play " +
+                            "and try again."
                 )
-            )
+            ),
+            requestId = "req_123",
+            statusCode = 400,
+        )
+        whenever(cryptoApiRepository.setWalletAddress(any(), any(), any())).thenReturn(
+            Result.failure(backendError)
         )
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
@@ -228,31 +227,10 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(AppAttestationException::class.java)
 
         val attestationError = error as AppAttestationException
-        assertThat(attestationError.userMessage)
-            .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
-        assertThat(attestationError.message)
-            .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
-        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
-        assertThat(attestationError.context.mode).isEqualTo("test")
-        assertThat(attestationError.context.apiErrorType).isEqualTo("api_error")
-        assertThat(attestationError.developerMessage)
-            .isEqualTo(
-                """
-                App attestation failed: this app is not recognized by Google Play.
-
-                Request Context:
-                  operation: register_wallet_address
-                  app_id: ${RuntimeEnvironment.getApplication().packageName}
-                  mode: test
-                  reason: app_not_play_recognized
-                  request_id: req_123
-                  type: api_error
-
-                Code: link_failed_to_attest_request
-                Next step: Install the app from a Google Play testing or production track and retry the Onramp flow. Internal, closed, open testing, and production tracks are supported. Debug builds and sideloaded APKs will not pass this check.
-                SDK: stripe-android@${attestationError.context.sdkVersion}
-                """.trimIndent()
-            )
+        assertAppNotPlayRecognizedAttestationError(
+            attestationError = attestationError,
+            backendError = backendError,
+        )
     }
 
     @Test
@@ -331,6 +309,10 @@ class OnrampInteractorTest {
         assertThat(apiError.userMessage).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.message).isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.context.apiErrorType).isNull()
+        assertThat(apiError.code).isEqualTo("email_blocked")
+        assertThat(apiError.docUrl).isEqualTo("https://stripe.com/docs/error-codes/email_blocked")
+        assertThat(apiError.sdkVersion).isNotEmpty()
+        assertThat(apiError.underlyingError).isSameInstanceAs(apiError.context.underlyingError)
         assertThat(apiError.developerMessage)
             .isEqualTo(
                 """
@@ -346,7 +328,7 @@ class OnrampInteractorTest {
                 Code: email_blocked
                 Next step: Inspect the preserved Stripe API error for details and retry after correcting the request.
                 Docs: https://stripe.com/docs/error-codes/email_blocked
-                SDK: stripe-android@${apiError.context.sdkVersion}
+                SDK: stripe-android@${apiError.sdkVersion}
                 """.trimIndent()
             )
     }
@@ -1319,6 +1301,41 @@ class OnrampInteractorTest {
             on { getString(R.string.stripe_onramp_app_attestation_default_user_message) } doReturn
                 defaultAppAttestationUserMessage
         }
+    }
+
+    private fun assertAppNotPlayRecognizedAttestationError(
+        attestationError: AppAttestationException,
+        backendError: APIException,
+    ) {
+        assertThat(attestationError.userMessage)
+            .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+        assertThat(attestationError.message)
+            .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.context.mode).isEqualTo("test")
+        assertThat(attestationError.context.apiErrorType).isEqualTo("api_error")
+        assertThat(attestationError.code).isEqualTo("link_failed_to_attest_request")
+        assertThat(attestationError.docUrl).isNull()
+        assertThat(attestationError.sdkVersion).isNotEmpty()
+        assertThat(attestationError.underlyingError).isSameInstanceAs(backendError)
+        assertThat(attestationError.developerMessage)
+            .isEqualTo(
+                """
+                App attestation failed: this app is not recognized by Google Play.
+
+                Request Context:
+                  operation: register_wallet_address
+                  app_id: ${RuntimeEnvironment.getApplication().packageName}
+                  mode: test
+                  reason: app_not_play_recognized
+                  request_id: req_123
+                  type: api_error
+
+                Code: link_failed_to_attest_request
+                Next step: Install the app from a Google Play testing or production track and retry the Onramp flow. Internal, closed, open testing, and production tracks are supported. Debug builds and sideloaded APKs will not pass this check.
+                SDK: stripe-android@${attestationError.sdkVersion}
+                """.trimIndent()
+            )
     }
 
     private suspend fun stubCheckoutRequiresNextAction() {

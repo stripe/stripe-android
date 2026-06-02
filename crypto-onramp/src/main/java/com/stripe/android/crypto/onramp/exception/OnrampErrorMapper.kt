@@ -17,13 +17,13 @@ internal fun Throwable.toCryptoOnrampError(
     val stripeException = this as? StripeException ?: return this
     val stripeError = stripeException.stripeError ?: return this
     val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
+    val sdkVersion = StripeSdkVersion.VERSION
 
     val apiErrorContext = APIErrorContext(
         reason = stripeError.extraFields?.get(FIELD_REASON),
         operation = operation.value,
         appPackageName = context.packageName,
         mode = publishableKey.toMode(),
-        sdkVersion = StripeSdkVersion.VERSION,
         apiErrorCode = stripeError.code,
         apiErrorType = stripeException.apiErrorType(),
         apiErrorMessage = stripeError.message,
@@ -35,6 +35,7 @@ internal fun Throwable.toCryptoOnrampError(
     return if (stripeError.isAppAttestationError()) {
         AppAttestationException(
             context = apiErrorContext,
+            sdkVersion = sdkVersion,
             fallbackUserMessage = context.getString(
                 R.string.stripe_onramp_app_attestation_default_user_message,
             ),
@@ -42,6 +43,7 @@ internal fun Throwable.toCryptoOnrampError(
     } else {
         UncategorizedApiErrorException(
             context = apiErrorContext,
+            sdkVersion = sdkVersion,
             fallbackUserMessage = context.getString(
                 R.string.stripe_onramp_default_api_error_user_message,
             ),

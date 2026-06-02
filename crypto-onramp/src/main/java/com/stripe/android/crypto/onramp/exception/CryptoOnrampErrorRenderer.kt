@@ -3,11 +3,13 @@ package com.stripe.android.crypto.onramp.exception
 internal object CryptoOnrampErrorRenderer {
     fun renderGenericApiDeveloperMessage(
         context: APIErrorContext,
+        sdkVersion: String,
     ): String {
         return renderApiDeveloperMessage(
             context = context,
             summary = context.apiErrorMessage ?: "Stripe API request failed.",
             nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
+            sdkVersion = sdkVersion,
         )
     }
 
@@ -15,6 +17,7 @@ internal object CryptoOnrampErrorRenderer {
         context: APIErrorContext,
         summary: String,
         nextStep: String,
+        sdkVersion: String,
     ): String {
         return renderDeveloperMessage(
             summary = summary,
@@ -22,7 +25,7 @@ internal object CryptoOnrampErrorRenderer {
             code = context.apiErrorCode,
             nextStep = nextStep,
             docUrl = context.docUrl,
-            sdk = "stripe-android@${context.sdkVersion}",
+            sdk = "stripe-android@$sdkVersion",
         )
     }
 
