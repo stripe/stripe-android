@@ -269,7 +269,7 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParam
 
 def executeTests(appUrl, testUrl):
     devices = [
-        "Samsung Galaxy S22-12.0",
+        "Samsung Galaxy S22-14.0",
     ]
 
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
@@ -283,22 +283,8 @@ def executeTests(appUrl, testUrl):
         },
     }
 
-    if bitriseQuarantinedTests:
-        # Minify the JSON, GZIP compress, then URL-safe Base64 encode (no padding)
-        minified = json.dumps(json.loads(bitriseQuarantinedTests), separators=(",", ":"))
-        compressed = gzip.compress(minified.encode("utf-8"))
-        encoded = base64.urlsafe_b64encode(compressed).decode("ascii").rstrip("=")
-        instrumentationOptionsParams = {
-            "instrumentationOptions": {
-                "bitriseQuarantinedTests": encoded,
-            }
-        }
-    else:
-        instrumentationOptionsParams = {}
-
     addedParams = {
         **shardsParams,
-        **instrumentationOptionsParams,
     }
     return executeTestsWithAddedParams(appUrl, testUrl, devices, numRetries, addedParams)
 
