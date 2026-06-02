@@ -243,8 +243,6 @@ internal class TapToAddTest {
             response.elementsSessionTtaWithLink()
         }
 
-        enqueueRetrieveCustomerRequest()
-
         val info = cardCollectionTestHelper.enqueueSuccessfulTapToCollectFlow()
 
         linkHelper.enqueueLookup()
@@ -274,15 +272,6 @@ internal class TapToAddTest {
 
         if (integrationType !is TapToAddIntegrationType.Complete) {
             confirm()
-        }
-    }
-
-    private fun enqueueRetrieveCustomerRequest() {
-        networkRule.enqueue(
-            method("GET"),
-            path("/v1/customers/cus_123"),
-        ) { response ->
-            response.testBodyFromFile("tta-customer-get-success.json")
         }
     }
 

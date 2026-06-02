@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
+import android.webkit.JsResult
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.widget.FrameLayout
@@ -47,7 +48,8 @@ class StripeConnectWebViewTest {
 
     private lateinit var webView: StripeConnectWebView
 
-    private val activity = Robolectric.buildActivity(ComponentActivity::class.java).setup().get()
+    private val activityController = Robolectric.buildActivity(ComponentActivity::class.java).setup()
+    private val activity = activityController.get()
     private val containerView = FrameLayout(activity)
 
     @Before
@@ -108,6 +110,24 @@ class StripeConnectWebViewTest {
         )
 
         verifyBlocking(mockDelegate) { onChooseFile(activity, filePathCallback, intent) }
+    }
+
+    @Test
+    fun `WebChromeClient onJsAlert cancels result when activity is destroyed`() {
+        val result: JsResult = mock()
+
+        containerView.addView(webView)
+        activityController.destroy()
+
+        assertThat(
+            webView.stripeWebChromeClient.onJsAlert(
+                webView,
+                testUrl,
+                "message",
+                result
+            )
+        ).isTrue()
+        verify(result).cancel()
     }
 
     @Test
