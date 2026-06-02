@@ -31,10 +31,11 @@ internal object GooglePayDisplayItemsFactory {
     }
 
     private fun CheckoutSession.LineItem.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
+        val label = if (quantity > 1) "$name x$quantity" else name
         return GooglePayJsonFactory.DisplayItem(
-            label = name,
+            label = label,
             type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-            price = total,
+            price = unitAmount ?: total,
         )
     }
 

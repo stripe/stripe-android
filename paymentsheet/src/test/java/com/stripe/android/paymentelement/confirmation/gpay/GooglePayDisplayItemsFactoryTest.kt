@@ -82,7 +82,7 @@ class GooglePayDisplayItemsFactoryTest {
 
         assertThat(result).containsExactly(
             displayItem(
-                label = "Widget",
+                label = "Widget x2",
                 type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
                 price = 2000L,
             ),
