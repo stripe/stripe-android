@@ -16,6 +16,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.InlineTextContent
@@ -48,6 +49,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
@@ -69,7 +71,8 @@ sealed class EmbeddableImage {
     data class Drawable(
         @DrawableRes val id: Int,
         @StringRes val contentDescription: Int,
-        val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null
+        val colorFilter: androidx.compose.ui.graphics.ColorFilter? = null,
+        val verticalOffset: Dp = 0.dp,
     ) : EmbeddableImage()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -100,7 +103,9 @@ private fun rememberDrawableImages(
             ),
             children = {
                 Image(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .offset(y = -value.verticalOffset),
                     painter = painter,
                     contentDescription = stringResource(
                         value.contentDescription
