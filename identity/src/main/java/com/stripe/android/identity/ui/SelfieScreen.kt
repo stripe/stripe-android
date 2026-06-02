@@ -173,7 +173,8 @@ internal fun SelfieScanScreen(
             identityViewModel = identityViewModel,
             lifecycleOwner = lifecycleOwner,
             verificationPage = pageAndModelFiles.page,
-            navController = navController
+            navController = navController,
+            cameraManager = cameraManager
         )
 
         when (selfieScannerState) {
@@ -196,7 +197,6 @@ internal fun SelfieScanScreen(
                     fallbackUrl = pageAndModelFiles.page.fallbackUrl,
                     identityViewModel = identityViewModel,
                     identityScanViewModel = selfieScanViewModel,
-                    navController = navController,
                     lifecycleOwner = lifecycleOwner,
                     cameraManager = cameraManager,
                     fallbackUrlLauncher = fallbackUrlLauncher
@@ -213,18 +213,20 @@ private fun SelfieCaptureScreen(
     fallbackUrl: String,
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
-    navController: NavController,
     lifecycleOwner: LifecycleOwner,
     cameraManager: SelfieCameraManager,
     fallbackUrlLauncher: FallbackUrlLauncher
 ) {
-    LaunchedEffect(Unit) {
-        startScanning(
-            IdentityScanState.ScanType.SELFIE,
-            identityViewModel = identityViewModel,
-            identityScanViewModel = identityScanViewModel,
-            lifecycleOwner = lifecycleOwner
-        )
+    if (selfieScannerState is IdentityScanViewModel.State.Scanning) {
+        LaunchedEffect(Unit) {
+            identityViewModel.clearSelfieUploadedState()
+            startScanning(
+                IdentityScanState.ScanType.SELFIE,
+                identityViewModel = identityViewModel,
+                identityScanViewModel = identityScanViewModel,
+                lifecycleOwner = lifecycleOwner
+            )
+        }
     }
 
     var flashed by remember {
@@ -252,15 +254,6 @@ private fun SelfieCaptureScreen(
     val faceDetectorTransitioner =
         (selfieScannerState as? IdentityScanViewModel.State.Scanned)
             ?.result?.identityState?.transitioner as? FaceDetectorTransitioner
-
-    LaunchedEffect(faceDetectorTransitioner) {
-        faceDetectorTransitioner?.let {
-            identityViewModel.collectDataForSelfieScreen(
-                navController = navController,
-                faceDetectorTransitioner = it
-            )
-        }
-    }
 
     Column(
         modifier = Modifier

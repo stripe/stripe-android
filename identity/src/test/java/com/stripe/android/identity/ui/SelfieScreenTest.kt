@@ -39,6 +39,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.same
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -204,6 +205,7 @@ class SelfieScreenTest {
             messageId = R.string.stripe_selfie_capture_complete
         ) {
             verify(mockSelfieScanViewModel).stopScan(any())
+            verify(mockSelfieScanViewModel, never()).startScan(any(), any())
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
 
