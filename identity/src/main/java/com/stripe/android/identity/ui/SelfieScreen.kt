@@ -7,8 +7,6 @@ import android.graphics.Shader
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -33,12 +31,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -53,7 +48,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -105,8 +99,6 @@ internal const val SELFIE_HAVING_TROUBLE_TAG = "SelfieHavingTroubleTag"
 internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
 internal const val SELFIE_CAPTURE_GUIDE_SHADOW_TAG = "SelfieCaptureGuideShadowTag"
 internal const val SELFIE_SCAN_ACTIVITY_INDICATOR_TAG = "SelfieScanActivityIndicatorTag"
-private const val FLASH_MAX_ALPHA = 0.5f
-private const val FLASH_ANIMATION_TIME = 200
 private const val CAPTURE_GUIDE_TICK_COUNT = 77
 private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
 private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
@@ -229,28 +221,6 @@ private fun SelfieCaptureScreen(
         }
     }
 
-    var flashed by remember {
-        mutableStateOf(false)
-    }
-    val imageAlpha: Float by animateFloatAsState(
-        targetValue = if (
-            !flashed && selfieScannerState is IdentityScanViewModel.State.Scanning &&
-            selfieScannerState.scanState is IdentityScanState.Found
-        ) {
-            FLASH_MAX_ALPHA
-        } else {
-            0f
-        },
-        animationSpec = tween(
-            durationMillis = FLASH_ANIMATION_TIME,
-            easing = LinearEasing,
-        ),
-        finishedListener = {
-            flashed = true
-        },
-        label = "flashAnimation"
-    )
-
     val faceDetectorTransitioner =
         (selfieScannerState as? IdentityScanViewModel.State.Scanned)
             ?.result?.identityState?.transitioner as? FaceDetectorTransitioner
@@ -299,7 +269,6 @@ private fun SelfieCaptureScreen(
 
             val isCheckingImages = faceDetectorTransitioner != null
             SelfieCameraViewFinder(
-                imageAlpha = imageAlpha,
                 cameraManager = cameraManager,
                 identityViewModel = identityViewModel,
                 status = selfieScannerState.status(),
@@ -332,7 +301,6 @@ private fun SelfieCaptureScreen(
 
 @Composable
 private fun SelfieCameraViewFinder(
-    imageAlpha: Float,
     cameraManager: IdentityCameraManager,
     identityViewModel: IdentityViewModel,
     status: SelfieStatus?,
@@ -363,12 +331,6 @@ private fun SelfieCameraViewFinder(
         SelfieCameraViewFinderContent(
             capturedSelfie = capturedSelfie,
             cameraManager = cameraManager
-        )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(imageAlpha)
-                .background(colorResource(id = R.color.stripe_flash_mask_color))
         )
         if (showCaptureGuide) {
             CaptureGuide(showCaptureGuideShadow)
