@@ -84,12 +84,12 @@ class GooglePayDisplayItemsFactoryTest {
             displayItem(
                 label = "Widget x2",
                 type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 2000L,
+                price = 1000L,
             ),
             displayItem(
                 label = "Gadget",
                 type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 450L,
+                price = 500L,
             ),
         ).inOrder()
     }
