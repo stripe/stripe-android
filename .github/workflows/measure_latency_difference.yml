@@ -1,0 +1,230 @@
+name: Measure latency difference
+on:
+  pull_request:
+    types: [labeled]
+
+jobs:
+  trigger-latency-measurement:
+    if: github.event.label.name == 'measure-latency-difference'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine commits
+        id: commits
+        run: |
+          COMMIT="${{ github.event.pull_request.head.sha }}"
+          BASE_COMMIT=$(git merge-base HEAD origin/master)
+          echo "commit=$COMMIT" >> "$GITHUB_OUTPUT"
+          echo "base_commit=$BASE_COMMIT" >> "$GITHUB_OUTPUT"
+          echo "Commit: $COMMIT"
+          echo "Base commit: $BASE_COMMIT"
+
+      - name: Trigger Bitrise build
+        id: trigger
+        env:
+          BITRISE_APP_SLUG: ${{ secrets.BITRISE_APP_SLUG }}
+          BITRISE_API_TOKEN: ${{ secrets.BITRISE_API_TOKEN }}
+          COMMIT: ${{ steps.commits.outputs.commit }}
+          BASE_COMMIT: ${{ steps.commits.outputs.base_commit }}
+        run: |
+          RESPONSE=$(curl --silent --fail \
+            --request POST \
+            --url "https://api.bitrise.io/v0.1/apps/${BITRISE_APP_SLUG}/builds" \
+            --header "Authorization: ${BITRISE_API_TOKEN}" \
+            --header "Content-Type: application/json" \
+            --data "$(jq -n \
+              --arg commit "$COMMIT" \
+              --arg base_commit "$BASE_COMMIT" \
+              '{
+                hook_info: { type: "bitrise" },
+                build_params: {
+                  workflow_id: "run-paymentsheet-latency-difference",
+                  commit_hash: $commit,
+                  environments: [
+                    { mapped_to: "COMMIT", value: $commit, is_expand: false },
+                    { mapped_to: "BASE_COMMIT", value: $base_commit, is_expand: false }
+                  ]
+                }
+              }')")
+
+          BUILD_SLUG=$(echo "$RESPONSE" | jq -r '.build_slug')
+          BUILD_URL=$(echo "$RESPONSE" | jq -r '.build_url')
+          echo "build_slug=$BUILD_SLUG" >> "$GITHUB_OUTPUT"
+          echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
+          echo "Triggered Bitrise build: $BUILD_SLUG"
+          echo "Build URL: $BUILD_URL"
+
+      - name: Post pending comment on PR
+        id: pending_comment
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: |
+            ## Latency Difference Measurement
+
+            ⏳ Measuring latency difference between commits...
+
+            - **Commit:** `${{ steps.commits.outputs.commit }}`
+            - **Base commit:** `${{ steps.commits.outputs.base_commit }}`
+            - **Bitrise build:** ${{ steps.trigger.outputs.build_url }}
+
+            This comment will be updated once the measurement is complete.
+
+      - name: Poll Bitrise build until complete
+        id: poll
+        env:
+          BITRISE_APP_SLUG: ${{ secrets.BITRISE_APP_SLUG }}
+          BITRISE_API_TOKEN: ${{ secrets.BITRISE_API_TOKEN }}
+          BUILD_SLUG: ${{ steps.trigger.outputs.build_slug }}
+        run: |
+          echo "Polling build: $BUILD_SLUG"
+          BUILD_STATUS=""
+
+          for i in $(seq 1 120); do
+            sleep 60
+            RESPONSE=$(curl --silent --fail \
+              --request GET \
+              --url "https://api.bitrise.io/v0.1/apps/${BITRISE_APP_SLUG}/builds/${BUILD_SLUG}" \
+              --header "Authorization: ${BITRISE_API_TOKEN}")
+
+            STATUS=$(echo "$RESPONSE" | jq -r '.data.status_text')
+            echo "Attempt $i/120 — build status: $STATUS"
+
+            case "$STATUS" in
+              success|failed|aborted|error)
+                BUILD_STATUS="$STATUS"
+                break
+                ;;
+            esac
+          done
+
+          if [ -z "$BUILD_STATUS" ]; then
+            BUILD_STATUS="timeout"
+          fi
+
+          echo "build_status=$BUILD_STATUS" >> "$GITHUB_OUTPUT"
+
+      - name: Fetch and extract build results
+        id: results
+        if: >
+          steps.poll.outputs.build_status == 'success' ||
+          steps.poll.outputs.build_status == 'failed'
+        env:
+          BITRISE_APP_SLUG: ${{ secrets.BITRISE_APP_SLUG }}
+          BITRISE_API_TOKEN: ${{ secrets.BITRISE_API_TOKEN }}
+          BUILD_SLUG: ${{ steps.trigger.outputs.build_slug }}
+        run: |
+          LOG_RESPONSE=$(curl --silent --fail \
+            --request GET \
+            --url "https://api.bitrise.io/v0.1/apps/${BITRISE_APP_SLUG}/builds/${BUILD_SLUG}/log" \
+            --header "Authorization: ${BITRISE_API_TOKEN}")
+
+          IS_ARCHIVED=$(echo "$LOG_RESPONSE" | jq -r '.is_archived')
+
+          if [ "$IS_ARCHIVED" = "true" ]; then
+            EXPIRING_URL=$(echo "$LOG_RESPONSE" | jq -r '.expiring_raw_log_url')
+            FULL_LOG=$(curl --silent "$EXPIRING_URL")
+          else
+            FULL_LOG=$(echo "$LOG_RESPONSE" | jq -r '[.log_chunks[].chunk] | join("")')
+          fi
+
+          # Extract latency delta report section
+          DELTA_REPORT=$(echo "$FULL_LOG" \
+            | awk '/LATENCY DELTA REPORT/{ found=1 } found{ print } /^$/ && found && NR>1 { exit }' \
+            | head -80)
+
+          # Extract raw measurements section
+          RAW_REPORT=$(echo "$FULL_LOG" \
+            | awk '/RAW LATENCY MEASUREMENTS/{ found=1 } found{ print } /^={3}/ && found && NR>1 { exit }' \
+            | head -80)
+
+          # Extract benchmark duration
+          DURATION=$(echo "$FULL_LOG" | grep 'BENCHMARK_DURATION:' | tail -1)
+
+          # Write extracted sections to files
+          printf '%s\n' "$DELTA_REPORT" > /tmp/delta_report.txt
+          printf '%s\n' "$RAW_REPORT"   > /tmp/raw_report.txt
+          printf '%s\n' "$DURATION"     > /tmp/duration.txt
+
+      - name: Build result comment body
+        id: comment_body
+        env:
+          BUILD_STATUS: ${{ steps.poll.outputs.build_status }}
+          BUILD_URL: ${{ steps.trigger.outputs.build_url }}
+          COMMIT: ${{ steps.commits.outputs.commit }}
+          BASE_COMMIT: ${{ steps.commits.outputs.base_commit }}
+        run: |
+          case "$BUILD_STATUS" in
+            success) ICON="✅" ; STATUS_MSG="Measurement complete" ;;
+            failed)  ICON="❌" ; STATUS_MSG="Measurement failed" ;;
+            timeout) ICON="⏰" ; STATUS_MSG="Measurement timed out (> 2 hours)" ;;
+            *)       ICON="⚠️" ; STATUS_MSG="Measurement ended with status: $BUILD_STATUS" ;;
+          esac
+
+          {
+            echo "## Latency Difference Measurement"
+            echo ""
+            echo "$ICON $STATUS_MSG"
+            echo ""
+            echo "- **Commit:** \`$COMMIT\`"
+            echo "- **Base commit:** \`$BASE_COMMIT\`"
+            echo "- **Bitrise build:** $BUILD_URL"
+          } > /tmp/comment.md
+
+          if [ -s /tmp/delta_report.txt ]; then
+            {
+              echo ""
+              echo "<details>"
+              echo "<summary>Latency Delta Report</summary>"
+              echo ""
+              echo '```'
+              cat /tmp/delta_report.txt
+              echo '```'
+              echo ""
+              echo "</details>"
+            } >> /tmp/comment.md
+          fi
+
+          if [ -s /tmp/raw_report.txt ]; then
+            {
+              echo ""
+              echo "<details>"
+              echo "<summary>Raw Measurements</summary>"
+              echo ""
+              echo '```'
+              cat /tmp/raw_report.txt
+              echo '```'
+              echo ""
+              echo "</details>"
+            } >> /tmp/comment.md
+          fi
+
+          if [ -s /tmp/duration.txt ]; then
+            {
+              echo ""
+              echo "_$(cat /tmp/duration.txt)_"
+            } >> /tmp/comment.md
+          fi
+
+          # Expose as output (multiline)
+          {
+            echo "body<<COMMENT_EOF"
+            cat /tmp/comment.md
+            echo "COMMENT_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Update PR comment with results
+        uses: peter-evans/create-or-update-comment@e8674b075228eee787fea43ef493e45ece1004c9
+        with:
+          comment-id: ${{ steps.pending_comment.outputs.comment-id }}
+          edit-mode: replace
+          issue-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          body: ${{ steps.comment_body.outputs.body }}
