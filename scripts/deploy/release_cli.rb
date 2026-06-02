@@ -64,6 +64,8 @@ def execute_steps(steps, before_resume: nil)
             step.call
             step_index += 1
         end
+    rescue SystemExit, Interrupt
+        raise
     rescue Exception
         command = "./scripts/deploy/#{File.basename($PROGRAM_NAME)}"
         rputs "Restart #{@flow_name} with `#{command} --continue-from #{step_index} --version #{@version}` to re-run from this step."

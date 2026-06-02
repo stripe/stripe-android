@@ -11,6 +11,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dispatcher() {
     private val enqueuedResponses: Queue<Entry> = ConcurrentLinkedQueue()
+    private val enqueuedResponsesLock = Any()
     private val unmatchedRequests: MutableList<UnmatchedRequest> = Collections.synchronizedList(mutableListOf())
 
     fun enqueue(vararg requestMatcher: RequestMatcher, responseFactory: (MockResponse) -> Unit) {
@@ -104,12 +105,9 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
 
     override fun dispatch(request: RecordedRequest): MockResponse {
         val testRequest = TestRecordedRequest(request)
-        val matchedEntry = enqueuedResponses.firstOrNull { entry ->
-            entry.requestMatcher.matches(testRequest)
-        }
+        val matchedEntry = consumeMatchingEntry(testRequest)
 
         matchedEntry?.let { capturedEntry ->
-            enqueuedResponses.remove(capturedEntry)
             return capturedEntry.responseFactory(testRequest)
         }
 
@@ -129,6 +127,17 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         )
 
         return MockResponse().setResponseCode(UNMATCHED_RESPONSE_CODE).setBody("Request not mocked")
+    }
+
+    private fun consumeMatchingEntry(request: TestRecordedRequest): Entry? {
+        synchronized(enqueuedResponsesLock) {
+            val matchedEntry = enqueuedResponses.firstOrNull { entry ->
+                entry.requestMatcher.matches(request)
+            } ?: return null
+
+            enqueuedResponses.remove(matchedEntry)
+            return matchedEntry
+        }
     }
 
     private fun buildNearMissDiagnostics(request: TestRecordedRequest): String {

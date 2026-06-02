@@ -21,6 +21,35 @@ def print_propose_release_handoff
     end
 end
 
+def pause_for_pr_merge
+    if @is_dry_run
+        rputs "Dry run: skipping PR merge wait. Continuing to create release tag."
+        return
+    end
+
+    resume_command = "./scripts/deploy/propose_release.rb --continue-from 8 --version #{@version}"
+    resume_command += " --branch #{@deploy_branch}" if @deploy_branch != 'master'
+    puts ""
+    rputs "Version bump PR has been created. Get it reviewed and merged."
+    puts ""
+    puts "Once the PR is merged, resume the release process by running:"
+    puts ""
+    puts "  #{resume_command}"
+    puts ""
+
+    exit 0
+end
+
+def prepare_propose_release_resume(step_index)
+    # When resuming after the PR merge pause (step 8+), ensure we have a
+    # clean repo and are on the deploy branch with latest changes.
+    return if step_index < 8
+
+    ensure_clean_repo
+    execute_or_fail("git checkout #{@deploy_branch}")
+    execute_or_fail("git pull")
+end
+
 def cleanup_propose_release_dry_run
     delete_release_tag
     delete_git_branch(release_branch, @deploy_branch)
@@ -35,6 +64,7 @@ steps = [
     method(:ensure_clean_repo),
     method(:pull_latest),
     method(:create_version_bump_pr),
+    method(:pause_for_pr_merge),
     method(:create_release_tag),
     method(:print_propose_release_handoff),
 ]
@@ -42,7 +72,7 @@ steps = [
 @propose_release_succeeded = false
 
 begin
-    execute_steps(steps)
+    execute_steps(steps, before_resume: method(:prepare_propose_release_resume))
     @propose_release_succeeded = true
 ensure
     if @is_dry_run && @propose_release_succeeded

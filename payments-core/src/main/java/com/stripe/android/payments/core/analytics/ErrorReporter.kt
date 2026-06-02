@@ -342,6 +342,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CARD_ART_PREFETCH_INVOKED_FOR_CONFIRMATION(
             partialEventName = "card_art_prefetch.invoked_for_confirmation"
+        ),
+        PREFETCHED_PMS_NULL_FOR_EPHEMERAL_KEY(
+            partialEventName = "payment_methods_prefetch.null_for_ephemeral_key"
         );
 
         override val eventName: String

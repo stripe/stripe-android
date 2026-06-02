@@ -222,7 +222,11 @@ internal class DefaultCreateLinkState @Inject constructor(
         val shippingDetails = configuration.shippingDetails
         val customerPhone = getCustomerPhone(shippingDetails, configuration)
 
-        val resolvedEmail = retrieveCustomerEmail(configuration, customerMetadata)
+        val resolvedEmail = retrieveCustomerEmail(
+            configuration,
+            customerMetadata,
+            customerEmail = elementsSession.customer?.email,
+        )
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = configuration.defaultBillingDetails?.name,
             email = resolvedEmail,

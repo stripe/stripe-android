@@ -10,6 +10,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.elementsSession
@@ -95,6 +96,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -122,6 +125,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertIsNotVisible()
@@ -151,6 +156,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse(lpms = listOf("card"))
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -172,6 +179,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -202,6 +211,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
             networkRule.setupPaymentMethodDetachResponse("pm_67890")
         },
@@ -232,6 +243,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodDetachResponse("pm_12345")
         },
     ) {
@@ -256,6 +269,8 @@ internal class VerticalModePaymentSheetActivityTest {
                 card1.copy(addCbcNetworks = true),
                 card2.copy(addCbcNetworks = true)
             )
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
             networkRule.setupPaymentMethodUpdateResponse(paymentMethodDetails = card1, cardBrand = "visa")
         },
     ) {
@@ -288,6 +303,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -314,6 +331,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -348,6 +367,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -363,6 +384,7 @@ internal class VerticalModePaymentSheetActivityTest {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -398,6 +420,7 @@ internal class VerticalModePaymentSheetActivityTest {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1)
             networkRule.setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -413,6 +436,7 @@ internal class VerticalModePaymentSheetActivityTest {
             setupElementsSessionsResponse(lpms = listOf("card", "us_bank_account"))
             networkRule.setupV1PaymentMethodsResponse(usBankAccount1, usBankAccount2)
             networkRule.setupV1PaymentMethodsResponse(type = "card")
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()
@@ -472,6 +496,8 @@ internal class VerticalModePaymentSheetActivityTest {
         networkSetup = {
             setupElementsSessionsResponse()
             networkRule.setupV1PaymentMethodsResponse(card1)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         // Saved Visa card should be filtered out
@@ -493,6 +519,8 @@ internal class VerticalModePaymentSheetActivityTest {
                 card1.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires),
                 card2.copy(addCbcNetworks = true, brand = CardBrand.CartesBancaires)
             )
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         },
     ) {
         verticalModePage.assertHasSavedPaymentMethods()

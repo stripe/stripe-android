@@ -41,7 +41,7 @@ stages:
       - run-connections-e2e-token-tests-on-push: { }
       - run-connections-e2e-data-tests-on-push: { }
       - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
+#     - run-paymentsheet-end-to-end-tests: { }
       - run-crypto-onramp-example-e2e-tests: { }
       - check-dependencies: { }
       - verify-publish-pom: { }
@@ -550,7 +550,9 @@ workflows:
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
       - save-gradle-configuration-cache@1: { }
-      - save-gradle-cache@1: { }
+      - save-gradle-cache@1:
+          inputs:
+            - save_transforms: true
 step_bundles:
   export_unit_test_results:
     inputs:

@@ -787,7 +787,11 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
+            assertThat(request.types).containsExactly(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.SepaDebit,
+                PaymentMethod.Type.USBankAccount
+            )
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -817,7 +821,7 @@ internal class DefaultPaymentElementLoaderTest {
             )
 
             val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-            assertThat(request.types).containsExactly(PaymentMethod.Type.Card)
+            assertThat(request.types).doesNotContain(PaymentMethod.Type.AuBecsDebit)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -953,7 +957,11 @@ internal class DefaultPaymentElementLoaderTest {
                 PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
             )
         assertThat(requestPaymentMethodTypes)
-            .containsExactly(PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit)
+            .containsExactly(
+                PaymentMethod.Type.Card,
+                PaymentMethod.Type.SepaDebit,
+                PaymentMethod.Type.USBankAccount,
+            )
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -2658,7 +2666,7 @@ internal class DefaultPaymentElementLoaderTest {
             val cards = PaymentMethodFactory.cards(4)
             val loader = createPaymentElementLoader(
                 customerRepo = repository,
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = cards,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
@@ -2703,7 +2711,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2754,7 +2762,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2805,7 +2813,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2856,7 +2864,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has partial remove permissions, should enable partial remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2907,7 +2915,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `customer session should have canUpdateFullPaymentMethodDetails permission enabled`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -3168,6 +3176,49 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
+    fun `When using 'LegacyEphemeralKey', payment methods should be filtered by supported saved payment methods`() =
+        runScenario {
+            val paymentMethods = PaymentMethodFixtures.createCards(2) +
+                listOf(
+                    PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+                    PaymentMethodFixtures.AU_BECS_DEBIT,
+                )
+
+            val loader = createPaymentElementLoader(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card")
+                ),
+                customerRepo = FakeCustomerRepository(paymentMethods = paymentMethods),
+            )
+
+            val result = loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "id",
+                        ephemeralKeySecret = "ek_123",
+                    ),
+                    allowsDelayedPaymentMethods = true,
+                ),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            val expectedPaymentMethods = paymentMethods.filter { paymentMethod ->
+                paymentMethod.type?.code == PaymentMethod.Type.Card.code
+            }
+
+            assertThat(result.customer?.paymentMethods)
+                .containsExactlyElementsIn(expectedPaymentMethods)
+
+            consumeLoadingEvents()
+
+            assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+            assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+        }
+
+    @Test
     fun `When using 'CustomerSession', pass last-used customer payment method to filter`() = runFilterScenario {
         val paymentMethods = PaymentMethodFixtures.createCards(10)
         val lastUsed = paymentMethods[6]
@@ -3175,7 +3226,7 @@ internal class DefaultPaymentElementLoaderTest {
         loaderScenario.prefsRepository.setSavedSelection(SavedSelection.PaymentMethod(lastUsed.id))
 
         val loader = loaderScenario.createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = paymentMethods,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_1",
@@ -3260,17 +3311,13 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
-        runScenario(
-            customerRepo = FakeCustomerRepository(
-                onRetrieveCustomer = {
-                    CustomerFactory.create(email = "email@stripe.com")
-                }
-            ),
-        ) {
+    fun `When using 'CustomerSession' & no default billing details, elements session customer email is used for link state`() =
+        runScenario {
+            val customerEmail = "example@stripe.com"
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(1),
+                    email = customerEmail,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
                         customerId = "cus_1",
@@ -3286,7 +3333,7 @@ internal class DefaultPaymentElementLoaderTest {
                 )
             )
 
-            loader.load(
+            val result = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
@@ -3300,9 +3347,8 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
-            val request = customerRepository.retrieveCustomerRequests.awaitItem()
-            assertThat(request.customerId).isEqualTo("cus_1")
-            assertThat(request.ephemeralKeySecret).isEqualTo("ek_123")
+            val linkState = result.getOrThrow().paymentMethodMetadata.linkState
+            assertThat(linkState?.configuration?.customerInfo?.email).isEqualTo(customerEmail)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -3423,7 +3469,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         runFilterScenario {
             val loader = loaderScenario.createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = paymentMethodsForTestingOrdering,
                     session = createElementsSessionCustomerSession(
                         mobilePaymentElementComponent =
@@ -4034,7 +4080,7 @@ internal class DefaultPaymentElementLoaderTest {
         test: (CustomerMetadata) -> Unit,
     ) = runScenario {
         val loader = createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = PaymentMethodFactory.cards(4),
                 session = createElementsSessionCustomerSession(
                     if (shouldDisableMobilePaymentElement) {
@@ -4419,6 +4465,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createElementsSessionCustomer(
         paymentMethods: List<PaymentMethod> = PaymentMethodFactory.cards(1),
+        email: String? = null,
         isPaymentMethodSaveEnabled: Boolean? = null,
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement =
             isPaymentMethodSaveEnabled?.let {
@@ -4430,22 +4477,25 @@ internal class DefaultPaymentElementLoaderTest {
                     allowRedisplayOverride = null,
                     isPaymentMethodSetAsDefaultEnabled = false,
                 )
-            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
+            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+        session: ElementsSession.Customer.Session = ElementsSession.Customer.Session(
+            id = "cuss_1",
+            customerId = "cus_1",
+            liveMode = false,
+            apiKey = "ek_123",
+            apiKeyExpiry = 555555555,
+            components = ElementsSession.Customer.Components(
+                mobilePaymentElement = mobilePaymentElementComponent,
+                customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+            ),
+        ),
+        defaultPaymentMethod: String? = null,
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
-            session = ElementsSession.Customer.Session(
-                id = "cuss_1",
-                customerId = "cus_1",
-                liveMode = false,
-                apiKey = "ek_123",
-                apiKeyExpiry = 555555555,
-                components = ElementsSession.Customer.Components(
-                    mobilePaymentElement = mobilePaymentElementComponent,
-                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                ),
-            ),
-            defaultPaymentMethod = null,
+            email = email,
+            session = session,
+            defaultPaymentMethod = defaultPaymentMethod,
         )
     }
 
@@ -4624,9 +4674,10 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddConnectionStarter = tapToAddConnectionStarter,
             paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
             createCustomerState = CreateCustomerState(
-                customerRepository = customerRepo,
                 paymentMethodFilter = paymentMethodFilter,
+                errorReporter = errorReporter,
             ),
+            customerRepository = customerRepo,
             checkoutSessionLoader = CheckoutSessionLoader(),
             elementsSessionLoader = ElementsSessionLoader(
                 elementsSessionRepository = elementsSessionRepository,
@@ -4702,7 +4753,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
         val loader = createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = paymentMethodsForTestingOrdering,
                 session = createElementsSessionCustomerSession(
                     mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(

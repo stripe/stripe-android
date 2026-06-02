@@ -20,6 +20,7 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.googlepaylauncher.GooglePayAvailabilityClient
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -47,6 +48,7 @@ import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_MANAGE_SCREEN_SAVED
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_VERTICAL_LAYOUT
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_VIEW_MORE
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.After
 import org.junit.Rule
@@ -882,9 +884,13 @@ internal class FlowControllerTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
+
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -948,9 +954,13 @@ internal class FlowControllerTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+            query("type", PaymentMethod.Type.Card.code)
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success.json")
         }
+
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -1087,14 +1097,6 @@ internal class FlowControllerTest {
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
-        }
-
-        networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
         ) { response ->
@@ -1153,14 +1155,6 @@ internal class FlowControllerTest {
 
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
         }
 
         networkRule.enqueue(
