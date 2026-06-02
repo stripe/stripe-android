@@ -97,6 +97,51 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse line item unitAmount from price when total includes tax`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_tax",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 11034, "subtotal": 10198, "total": 11034 },
+                "line_item_group": {
+                    "currency": "usd",
+                    "total": 11034,
+                    "subtotal": 10198,
+                    "due": 11034,
+                    "line_items": [
+                        {
+                            "id": "li_tax_item",
+                            "object": "item",
+                            "name": "Classic T-Shirt",
+                            "quantity": 2,
+                            "subtotal": 10198,
+                            "total": 11034,
+                            "unit_amount_override": null,
+                            "price": {
+                                "unit_amount": 5099
+                            }
+                        }
+                    ]
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(1)
+        assertThat(lineItems[0].id).isEqualTo("li_tax_item")
+        assertThat(lineItems[0].name).isEqualTo("Classic T-Shirt")
+        assertThat(lineItems[0].quantity).isEqualTo(2)
+        assertThat(lineItems[0].unitAmount).isEqualTo(5099L)
+        assertThat(lineItems[0].subtotal).isEqualTo(10198L)
+        assertThat(lineItems[0].total).isEqualTo(11034L)
+    }
+
+    @Test
     fun `parse returns empty line items when no line_item_group`() {
         val json = JSONObject(
             """
