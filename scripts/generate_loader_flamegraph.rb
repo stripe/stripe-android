@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+require 'base64'
 require 'optparse'
 require 'open3'
 require_relative 'latency_test_utils'
@@ -8,6 +9,7 @@ require_relative 'latency_test_utils'
 PROJECT_ROOT = LatencyTestUtils::PROJECT_ROOT
 PRIMARY_DURATION_KEY = LatencyTestUtils::DURATION_KEY
 TRACE_DURATION_KEY_PREFIX = 'PaymentSheetLoad'
+MINGLE_DIAGRAM_URL = 'https://pages.stripe.me/mingle/diagrams?diagram='
 
 TraceSpan = Struct.new(:name, :start_offset_ms, :duration_ms, keyword_init: true)
 TraceSession = Struct.new(:test_name, :total_duration_ms, :spans, keyword_init: true)
@@ -44,9 +46,9 @@ def current_checkout
 end
 
 def restore_checkout(target)
-  puts "\nRestoring original checkout: #{target}"
   Dir.chdir(PROJECT_ROOT) do
-    system('git', '-c', 'core.fsmonitor=false', 'checkout', target)
+    success = system('git', '-c', 'core.fsmonitor=false', 'checkout', target)
+    warn "Failed to restore original checkout: #{target}" unless success
   end
 end
 
@@ -134,25 +136,44 @@ def gantt_end(start_offset_ms, duration_ms)
   [gantt_value(start_offset_ms + duration_ms), gantt_value(start_offset_ms) + 1].max
 end
 
-def print_mermaid(trace_target, sessions)
-  puts
-  puts 'gantt'
-  puts "    title PaymentSheet Duration Trace - #{format_trace_target(trace_target)}"
-  puts '    dateFormat x'
+def build_mermaid_diagram(trace_target, sessions)
+  diagram_lines = []
+  diagram_lines << "%%{init: {'gantt': {'titleTopMargin': 50, 'topPadding': 100, 'leftPadding': 200}}}%%"
+  diagram_lines << 'gantt'
+  diagram_lines << "    title PaymentSheet Duration Trace - #{format_trace_target(trace_target)}"
+  diagram_lines << '    dateFormat x'
 
   task_index = 0
 
   sessions.each do |session|
-    puts
-    puts "    section #{humanize_test_name(session.test_name)} (Latency #{format('%.0f', session.total_duration_ms)}ms)"
+    diagram_lines << ''
+    diagram_lines << "    section #{humanize_test_name(session.test_name)} (Latency #{format('%.0f', session.total_duration_ms)}ms)"
 
     session.spans.sort_by { |span| [span.start_offset_ms, -span.duration_ms, span.name] }.each do |span|
-      puts(
+      diagram_lines << (
         "    #{span.name} (#{format('%.0f', span.duration_ms)}ms) " \
         ":t#{task_index}, #{span.start_offset_ms.round}, #{gantt_end(span.start_offset_ms, span.duration_ms)}"
       )
       task_index += 1
     end
+  end
+
+  diagram_lines.join("\n")
+end
+
+def build_diagram_url(trace_target, sessions)
+  encoded_diagram = Base64.strict_encode64(build_mermaid_diagram(trace_target, sessions))
+  "#{MINGLE_DIAGRAM_URL}#{encoded_diagram}"
+end
+
+def collect_trace_output
+  original_stdout = $stdout
+
+  begin
+    $stdout = $stderr
+    LatencyTestUtils.run_android_latency_tests(1)
+  ensure
+    $stdout = original_stdout
   end
 end
 
@@ -164,11 +185,12 @@ options = {}
 
 OptionParser.new do |opts|
   opts.banner = <<~BANNER
-    Usage: generate_latency_trace_mermaid.rb [--commit COMMIT]
+    Usage: generate_loader_flamegraph.rb [--commit COMMIT]
 
-    Runs TestLatency once and prints Mermaid gantt syntax based on
-    DurationProvider logs. When --commit is provided, the script checks
-    out that commit before running and restores the original checkout afterward.
+    Runs TestLatency once and prints a Mingle diagram URL with the Mermaid
+    gantt chart encoded into the link. When --commit is provided, the script
+    checks out that commit before running and restores the original checkout
+    afterward.
   BANNER
 
   opts.on('--commit COMMIT', 'Commit to trace (defaults to current checkout)') do |commit|
@@ -189,15 +211,10 @@ if options[:commit] && !inside_clean_worktree?
   exit 1
 end
 
-puts 'Configuration:'
-puts "  Trace target: #{trace_target}"
-puts "  Original checkout: #{original_checkout}"
-puts "  Logcat buffer size: #{LatencyTestUtils::LOGCAT_BUFFER_SIZE}"
-
 begin
   checkout_commit(options[:commit]) if options[:commit]
-  sessions = parse_trace_output(LatencyTestUtils.run_android_latency_tests(1))
-  print_mermaid(trace_target, sessions)
+  sessions = parse_trace_output(collect_trace_output)
+  puts build_diagram_url(trace_target, sessions)
 ensure
   restore_checkout(original_checkout) if options[:commit]
 end
