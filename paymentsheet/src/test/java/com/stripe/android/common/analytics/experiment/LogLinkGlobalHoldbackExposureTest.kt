@@ -498,6 +498,7 @@ class LogLinkGlobalHoldbackExposureTest {
     ): ElementsSession.Customer =
         ElementsSession.Customer(
             paymentMethods = listOf(),
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_123",
                 customerId = "cus_123",

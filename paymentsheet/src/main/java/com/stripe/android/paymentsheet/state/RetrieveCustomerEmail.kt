@@ -17,6 +17,7 @@ internal interface RetrieveCustomerEmail {
     suspend operator fun invoke(
         configuration: CommonConfiguration,
         customerMetadata: CustomerMetadata?,
+        customerEmail: String?,
     ): String?
 }
 
@@ -27,14 +28,12 @@ internal class DefaultRetrieveCustomerEmail @Inject constructor(
     override suspend operator fun invoke(
         configuration: CommonConfiguration,
         customerMetadata: CustomerMetadata?,
+        customerEmail: String?,
     ): String? {
         val defaultEmail = configuration.defaultBillingDetails?.email
         return when (customerMetadata) {
             is CustomerMetadata.CustomerSession -> {
-                defaultEmail ?: retrieveEmailFromApi(
-                    customerId = customerMetadata.id,
-                    ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                )
+                defaultEmail ?: customerEmail
             }
             is CustomerMetadata.LegacyEphemeralKey -> {
                 defaultEmail ?: retrieveEmailFromApi(
