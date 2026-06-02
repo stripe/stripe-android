@@ -12,12 +12,10 @@ class AppAttestationException internal constructor(
     fallbackUserMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
-    message = context.userMessage(fallbackUserMessage),
+    userMessage = context.userMessage(fallbackUserMessage),
     developerMessage = buildAppAttestationDeveloperMessage(context, sdkVersion),
     sdkVersion = sdkVersion,
-) {
-    override val userMessage: String = context.userMessage(fallbackUserMessage)
-}
+)
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"
 private const val APP_NOT_REGISTERED_REASON = "app_not_registered"

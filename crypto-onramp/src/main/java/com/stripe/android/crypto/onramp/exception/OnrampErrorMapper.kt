@@ -12,7 +12,7 @@ internal fun Throwable.toCryptoOnrampError(
     operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
     publishableKey: String?,
 ): Throwable {
-    if (this is CryptoOnrampException) return this
+    if (this is StripeCryptoOnrampError) return this
 
     val stripeException = this as? StripeException ?: return this
     val stripeError = stripeException.stripeError ?: return this

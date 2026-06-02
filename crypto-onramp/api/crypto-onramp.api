@@ -67,25 +67,18 @@ public final class com/stripe/android/crypto/onramp/exception/APIErrorContext {
 
 public final class com/stripe/android/crypto/onramp/exception/AppAttestationException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
-	public fun getUserMessage ()Ljava/lang/String;
 }
 
-public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampException {
+public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException : com/stripe/android/core/exception/StripeException, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
 	public static final field $stable I
 	public final fun getCode ()Ljava/lang/String;
 	public final fun getContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
-	public final fun getDocUrl ()Ljava/lang/String;
-}
-
-public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampException : com/stripe/android/core/exception/StripeException, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
-	public static final field $stable I
-	public abstract fun getCode ()Ljava/lang/String;
 	public final fun getDeveloperMessage ()Ljava/lang/String;
-	public abstract fun getDocUrl ()Ljava/lang/String;
+	public final fun getDocUrl ()Ljava/lang/String;
 	public final fun getSdkVersion ()Ljava/lang/String;
 	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;
 	public synthetic fun getUnderlyingError ()Ljava/lang/Throwable;
-	public abstract fun getUserMessage ()Ljava/lang/String;
+	public final fun getUserMessage ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/crypto/onramp/exception/MissingConsumerSecretException : java/lang/IllegalStateException {
@@ -120,7 +113,6 @@ public abstract interface class com/stripe/android/crypto/onramp/exception/Strip
 
 public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
-	public fun getUserMessage ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/lang/Enum {

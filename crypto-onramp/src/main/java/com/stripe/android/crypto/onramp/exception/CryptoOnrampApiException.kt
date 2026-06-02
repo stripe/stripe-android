@@ -5,67 +5,40 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Base exception type for Crypto Onramp failures that expose SDK-owned recovery guidance.
- *
- * `message` is safe to display directly to app users. Use [developerMessage] for richer diagnostics.
- */
-@ExperimentalCryptoOnramp
-abstract class CryptoOnrampException internal constructor(
-    message: String,
-    final override val developerMessage: String,
-    final override val sdkVersion: String,
-    /**
-     * The original Stripe exception that was wrapped by this richer Crypto Onramp error.
-     */
-    private val stripeException: StripeException,
-) : StripeException(
-    stripeError = stripeException.stripeError,
-    requestId = stripeException.requestId,
-    statusCode = stripeException.statusCode,
-    cause = stripeException,
-    message = message,
-),
-StripeCryptoOnrampError {
-    /**
-     * An end-user-facing message, when available.
-     */
-    abstract override val userMessage: String
-
-    abstract override val code: String?
-
-    abstract override val docUrl: String?
-
-    final override val underlyingError: StripeException
-        get() = stripeException
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override fun analyticsValue(): String {
-        return stripeException.analyticsValue()
-    }
-}
-
-/**
  * Base exception type for Crypto Onramp failures that originate from a Stripe API error payload.
  *
  * [context] preserves the original API-facing fields and SDK-local debugging metadata.
+ *
+ * `message` is safe to display directly to app users. Use [developerMessage] for richer
+ * diagnostics.
  */
 @ExperimentalCryptoOnramp
 abstract class CryptoOnrampApiException internal constructor(
     val context: APIErrorContext,
-    message: String,
-    developerMessage: String,
-    sdkVersion: String,
-) : CryptoOnrampException(
-    message = message,
-    developerMessage = developerMessage,
-    sdkVersion = sdkVersion,
-    stripeException = context.underlyingError,
-) {
+    final override val userMessage: String,
+    final override val developerMessage: String,
+    final override val sdkVersion: String,
+) : StripeException(
+    stripeError = context.underlyingError.stripeError,
+    requestId = context.underlyingError.requestId,
+    statusCode = context.underlyingError.statusCode,
+    cause = context.underlyingError,
+    message = userMessage,
+),
+StripeCryptoOnrampError {
     final override val code: String?
         get() = context.apiErrorCode
 
     final override val docUrl: String?
         get() = context.docUrl
+
+    final override val underlyingError: StripeException
+        get() = context.underlyingError
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override fun analyticsValue(): String {
+        return context.underlyingError.analyticsValue()
+    }
 }
 
 data class APIErrorContext(
