@@ -23,6 +23,10 @@ internal class FakeDurationProvider(
         return duration
     }
 
+    override fun completedDuration(key: DurationProvider.Key): Duration? {
+        return null
+    }
+
     override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
         calls.add(Call.Measure(key))
         return block()

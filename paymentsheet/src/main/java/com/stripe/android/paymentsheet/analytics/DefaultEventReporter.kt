@@ -84,7 +84,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
-                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty()
+                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty(),
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -98,9 +99,25 @@ internal class DefaultEventReporter @Inject internal constructor(
             event = PaymentSheetEvent.LoadFailed(
                 duration = duration,
                 error = error,
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
+    }
+
+    private fun buildLoadTimings(): Map<String, Int> {
+        return listOf(
+            DurationProvider.Key.PaymentSheetLoadLogLoadStarted to "logLoadStarted",
+            DurationProvider.Key.PaymentSheetLoadSessionLoad to "fetchElementsSession",
+            DurationProvider.Key.PaymentSheetLoadPrefetchPMs to "fetchSavedPaymentMethods",
+            DurationProvider.Key.PaymentSheetLoadCreateLinkState to "lookUpLinkAccount",
+            DurationProvider.Key.PaymentSheetLoadCreateCustomerState to "retrieveCustomer",
+            DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes to "computePaymentMethodTypes",
+        ).mapNotNull { (key, name) ->
+            durationProvider.completedDuration(key)?.let { duration ->
+                name to duration.inWholeMilliseconds.toInt()
+            }
+        }.toMap()
     }
 
     override fun onElementsSessionLoadFailed(error: Throwable) {

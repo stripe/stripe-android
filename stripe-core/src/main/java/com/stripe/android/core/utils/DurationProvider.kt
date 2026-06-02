@@ -13,6 +13,7 @@ interface DurationProvider {
     fun start(key: Key, reset: Boolean = true)
     fun elapsed(key: Key): Duration?
     fun end(key: Key): Duration?
+    fun completedDuration(key: Key): Duration?
 
     suspend fun <T> measureDuration(
         key: Key,
@@ -25,11 +26,13 @@ interface DurationProvider {
         PaymentSheetLoadIsGooglePaySupported,
         PaymentSheetLoadIsGooglePayReady,
         PaymentSheetLoadRetrieveSavedPaymentMethodSelection,
+        PaymentSheetLoadLogLoadStarted,
         PaymentSheetLoadSessionLoad,
         PaymentSheetLoadPrefetchPMs,
         PaymentSheetLoadCreateLinkState,
         PaymentSheetLoadCreateCustomerState,
         PaymentSheetLoadRetrieveInitialPaymentSelection,
+        PaymentSheetLoadComputePaymentMethodTypes,
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
@@ -51,9 +54,13 @@ class DefaultDurationProvider private constructor() : DurationProvider {
     private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
 
     private val store = mutableMapOf<DurationProvider.Key, Long>()
+    private val completedStore = mutableMapOf<DurationProvider.Key, Duration>()
 
     override fun start(key: DurationProvider.Key, reset: Boolean) {
         if (reset || key !in store) {
+            if (reset) {
+                completedStore.remove(key)
+            }
             val startTime = SystemClock.uptimeMillis()
             store[key] = startTime
             logger.debug("DURATION_STARTED: ${key.name}: $startTime")
@@ -69,11 +76,17 @@ class DefaultDurationProvider private constructor() : DurationProvider {
         val startTime = store.remove(key) ?: return null
         val endTime = SystemClock.uptimeMillis()
         logger.debug("DURATION_ENDED: ${key.name}: $endTime")
-        return (endTime - startTime).milliseconds
+        val duration = (endTime - startTime).milliseconds
+        completedStore[key] = duration
+        return duration
+    }
+
+    override fun completedDuration(key: DurationProvider.Key): Duration? {
+        return completedStore[key]
     }
 
     override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
-        start(key)
+        start(key, reset = true)
         return try {
             block()
         } finally {

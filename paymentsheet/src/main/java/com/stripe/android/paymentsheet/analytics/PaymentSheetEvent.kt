@@ -31,6 +31,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         orderedLpms: List<String>,
         duration: Duration?,
         hasCardArt: Boolean,
+        loadTimings: Map<String, Int>,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val params: Map<String, Any?> = buildMap {
@@ -38,6 +39,9 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             put(FIELD_SELECTED_LPM, paymentSelection.defaultAnalyticsValue)
             put(FIELD_ORDERED_LPMS, orderedLpms.joinToString(","))
             put(FIELD_HAS_CARD_ART, hasCardArt)
+            if (loadTimings.isNotEmpty()) {
+                put(FIELD_LOAD_TIMINGS, loadTimings)
+            }
         }
 
         private val PaymentSelection?.defaultAnalyticsValue: String
@@ -52,12 +56,17 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class LoadFailed(
         duration: Duration?,
         error: Throwable,
+        loadTimings: Map<String, Int>,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_failed"
-        override val params: Map<String, Any?> = mapOf(
-            FIELD_DURATION to duration?.asSeconds,
-            FIELD_ERROR_MESSAGE to error.asPaymentSheetLoadingException.type,
-        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
+        override val params: Map<String, Any?> = buildMap {
+            put(FIELD_DURATION, duration?.asSeconds)
+            put(FIELD_ERROR_MESSAGE, error.asPaymentSheetLoadingException.type)
+            putAll(ErrorReporter.getAdditionalParamsFromError(error))
+            if (loadTimings.isNotEmpty()) {
+                put(FIELD_LOAD_TIMINGS, loadTimings)
+            }
+        }
     }
 
     class ElementsSessionLoadFailed(
@@ -638,6 +647,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FC_SDK_RESULT = "fc_sdk_result"
         const val FIELD_VISIBLE_PAYMENT_METHODS = "visible_payment_methods"
         const val FIELD_HIDDEN_PAYMENT_METHODS = "hidden_payment_methods"
+        const val FIELD_LOAD_TIMINGS = "load_timings"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"

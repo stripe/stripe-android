@@ -4538,6 +4538,81 @@ internal class DefaultPaymentElementLoaderTest {
         ),
     )
 
+    @Test
+    fun `successful load populates expected timing keys`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadLogLoadStarted)).isNotNull()
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadSessionLoad)).isNotNull()
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState)).isNotNull()
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadCreateCustomerState)).isNotNull()
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes)).isNotNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `failed load still reports timings completed before the failure`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            error = APIConnectionException("Connection failed"),
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        // logLoadStarted should be recorded since it runs before the session load
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadLogLoadStarted)).isNotNull()
+        // Session load fails, so it should not have a completed duration
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadSessionLoad)).isNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadFailedTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `prefetchPMs timing key is absent when no legacy ephemeral key customer`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        // No legacy ephemeral key customer, so fetchSavedPaymentMethods should not be timed
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadPrefetchPMs)).isNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
     private fun runFilterScenario(
         filteredPaymentMethods: List<PaymentMethod>? = null,
         block: suspend FilterScenario.() -> Unit
@@ -4637,7 +4712,8 @@ internal class DefaultPaymentElementLoaderTest {
             },
         paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper =
-            FakePaymentMethodMessagePromotionsHelper()
+            FakePaymentMethodMessagePromotionsHelper(),
+        durationProvider: FakeDurationProvider = FakeDurationProvider(),
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
         val createLinkState = DefaultCreateLinkState(
@@ -4685,7 +4761,7 @@ internal class DefaultPaymentElementLoaderTest {
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
-            durationProvider = FakeDurationProvider(),
+            durationProvider = durationProvider,
         )
     }
 

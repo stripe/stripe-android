@@ -164,6 +164,111 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onLoadSucceeded includes load_timings when durations are present`() = runScenario {
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Checkout,
+                reset = true,
+            )
+        )
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 1.seconds,
+            )
+        )
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadLogLoadStarted] = 5.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 100.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadPrefetchPMs] = 50.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateLinkState] = 20.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateCustomerState] = 30.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes] = 10.seconds
+
+        eventReporter.onLoadSucceeded(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_succeeded")
+        @Suppress("UNCHECKED_CAST")
+        val loadTimings = request.params["load_timings"] as Map<String, Int>
+        assertThat(loadTimings["logLoadStarted"]).isEqualTo(5000)
+        assertThat(loadTimings["fetchElementsSession"]).isEqualTo(100000)
+        assertThat(loadTimings["fetchSavedPaymentMethods"]).isEqualTo(50000)
+        assertThat(loadTimings["lookUpLinkAccount"]).isEqualTo(20000)
+        assertThat(loadTimings["retrieveCustomer"]).isEqualTo(30000)
+        assertThat(loadTimings["computePaymentMethodTypes"]).isEqualTo(10000)
+    }
+
+    @Test
+    fun `onLoadSucceeded omits load_timings when no durations are present`() = runScenario {
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Checkout,
+                reset = true,
+            )
+        )
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 1.seconds,
+            )
+        )
+
+        eventReporter.onLoadSucceeded(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_succeeded")
+        assertThat(request.params).doesNotContainKey("load_timings")
+    }
+
+    @Test
+    fun `onLoadFailed includes load_timings with mapped keys and integer millisecond values`() = runScenario {
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 2.seconds,
+            )
+        )
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadLogLoadStarted] = 3.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.seconds
+
+        val error = RuntimeException("Test error")
+        eventReporter.onLoadFailed(error = error)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_failed")
+        @Suppress("UNCHECKED_CAST")
+        val loadTimings = request.params["load_timings"] as Map<String, Int>
+        assertThat(loadTimings["logLoadStarted"]).isEqualTo(3000)
+        assertThat(loadTimings["fetchElementsSession"]).isEqualTo(200000)
+        assertThat(loadTimings).doesNotContainKey("fetchSavedPaymentMethods")
+        assertThat(loadTimings).doesNotContainKey("lookUpLinkAccount")
+        assertThat(loadTimings).doesNotContainKey("retrieveCustomer")
+        assertThat(loadTimings).doesNotContainKey("computePaymentMethodTypes")
+    }
+
+    @Test
+    fun `onLoadFailed omits load_timings when no durations are present`() = runScenario {
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 2.seconds,
+            )
+        )
+        val error = RuntimeException("Test error")
+        eventReporter.onLoadFailed(error = error)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_failed")
+        assertThat(request.params).doesNotContainKey("load_timings")
+    }
+
+    @Test
     fun `onElementsSessionLoadFailed fires event`() = runScenario {
         val error = RuntimeException("Elements session error")
         eventReporter.onElementsSessionLoadFailed(error = error)
@@ -1415,6 +1520,7 @@ class DefaultEventReporterTest {
     private class FakeDurationProvider : DurationProvider {
         val startCalls: Stack<StartCall> = Stack()
         val endCalls: Stack<EndCall> = Stack()
+        val completedDurations: MutableMap<DurationProvider.Key, Duration> = mutableMapOf()
 
         override fun start(key: DurationProvider.Key, reset: Boolean) {
             val call = startCalls.pop()
@@ -1430,6 +1536,10 @@ class DefaultEventReporterTest {
             val call = endCalls.pop()
             assertThat(call.key).isEqualTo(key)
             return call.duration
+        }
+
+        override fun completedDuration(key: DurationProvider.Key): Duration? {
+            return completedDurations[key]
         }
 
         override suspend fun <T> measureDuration(
