@@ -21,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -96,20 +98,10 @@ private fun SelfieWarmupContent(
                 .testTag(SELFIE_WARMUP_CONTENT_TAG),
             verticalArrangement = Arrangement.Center,
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.stripe_selfie_warmup),
-                modifier = Modifier
-                    .size(140.dp)
-                    .align(Alignment.CenterHorizontally),
-                contentDescription = stringResource(id = R.string.stripe_description_exclamation)
-            )
             Text(
                 text = stringResource(id = R.string.stripe_selfie_warmup_title),
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(
-                        top = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
-                    ),
+                    .fillMaxWidth(),
                 style = MaterialTheme.typography.h4,
                 textAlign = TextAlign.Center
             )
@@ -122,6 +114,15 @@ private fun SelfieWarmupContent(
                     ),
                 style = MaterialTheme.typography.subtitle1,
                 textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(64.dp))
+            Image(
+                painter = painterResource(id = R.drawable.stripe_selfie_warmup),
+                modifier = Modifier
+                    .size(144.dp)
+                    .align(Alignment.CenterHorizontally),
+                contentDescription = null,
+                colorFilter = ColorFilter.tint(colorResource(id = R.color.stripe_selfie_warmup_icon_tint))
             )
         }
 
