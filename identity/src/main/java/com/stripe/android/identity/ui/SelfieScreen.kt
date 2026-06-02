@@ -105,16 +105,16 @@ private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
 
 // FaceDetectorTransitioner validates centering against the normalized image center.
 private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.5f
-private const val CAPTURE_GUIDE_SHADOW_ANIMATION_TIME = 180
-private const val CAPTURE_GUIDE_SHADOW_FEATHER_DP = 34
+private const val CAPTURE_GUIDE_SHADOW_ANIMATION_TIME = 600
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_DP = 46
 private const val CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MIN = 0.06f
 private const val CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MAX = 0.96f
-private const val CAPTURE_GUIDE_SHADOW_INNER_LOCATION_FACTOR = 0.25f
-private const val CAPTURE_GUIDE_SHADOW_MID_LOCATION_FACTOR = 0.6f
-private const val CAPTURE_GUIDE_SHADOW_INNER_ALPHA = 0.14f
-private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.28f
-private const val CAPTURE_GUIDE_SHADOW_RING_ALPHA = 0.36f
-private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.42f
+private const val CAPTURE_GUIDE_SHADOW_INNER_LOCATION_FACTOR = 0.18f
+private const val CAPTURE_GUIDE_SHADOW_MID_LOCATION_FACTOR = 0.58f
+private const val CAPTURE_GUIDE_SHADOW_INNER_ALPHA = 0.12f
+private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.22f
+private const val CAPTURE_GUIDE_SHADOW_RING_ALPHA = 0.3f
+private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.36f
 private const val CAPTURE_GUIDE_TICK_ALPHA = 0.8f
 private const val CAPTURE_GUIDE_TICK_SHADOW_ALPHA = 0.3f
 private const val CAPTURED_SELFIE_OVERLAY_ALPHA = 0.16f
