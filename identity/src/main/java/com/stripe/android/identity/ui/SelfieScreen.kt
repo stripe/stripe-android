@@ -343,11 +343,18 @@ private fun SelfieCameraViewFinder(
             }
         }
         status?.let {
+            val statusModifier = when (it) {
+                SelfieStatus.HoldStill ->
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 40.dp)
+                SelfieStatus.CheckingImages ->
+                    Modifier
+                        .align(Alignment.Center)
+            }
             SelfieStatusBadge(
                 status = it,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 40.dp)
+                modifier = statusModifier
             )
         }
     }
