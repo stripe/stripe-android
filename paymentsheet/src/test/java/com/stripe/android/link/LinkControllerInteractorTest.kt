@@ -17,12 +17,12 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.LinkMetadata
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
-import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -30,10 +30,10 @@ import com.stripe.android.utils.FakeLinkComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
-import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -1381,7 +1381,7 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `onLinkActivityResult() with present flow Completed emits PresentResult Failed when CT creation fails`() = runTest {
+    fun `onLinkActivityResult() with present flow Completed emits PresentResult Failed when CT fails`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
 

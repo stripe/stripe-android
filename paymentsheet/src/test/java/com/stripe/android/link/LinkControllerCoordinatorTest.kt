@@ -6,7 +6,6 @@ import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ConfirmationToken
-import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi

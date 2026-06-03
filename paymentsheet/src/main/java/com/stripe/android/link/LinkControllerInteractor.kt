@@ -9,10 +9,8 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.ConfirmationToken
-import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.flatMapCatching
@@ -32,6 +30,8 @@ import com.stripe.android.link.ui.wallet.makeFallbackCardName
 import com.stripe.android.link.utils.isLinkAuthorizationError
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
