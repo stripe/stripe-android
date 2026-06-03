@@ -22,6 +22,7 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -57,6 +58,7 @@ class LinkController @Inject internal constructor(
      * @param configuration The [Configuration] to use for Link operations.
      * @return The result of the configuration.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun configure(configuration: Configuration): ConfigureResult {
         return interactor.configure(configuration)
     }
@@ -379,9 +381,29 @@ class LinkController @Inject internal constructor(
          *
          * @param email The email address to use for the Link flow.
          * @param phoneNumber Optional phone number to pre-fill during sign-up, in E.164 format.
-         * @param filterPaymentMethodTypes Optional list of payment method type to restrict
-         * selection to. If null, all supported types are shown.
          */
+        fun present(
+            email: String,
+            phoneNumber: String? = null,
+        ) {
+            interactor.coroutineScope.launch {
+                val configResult = interactor.configureIfNeeded()
+                if (configResult is ConfigureResult.Failed) {
+                    interactor.emitPresentResult(
+                        PresentResult.Failed(configResult.error)
+                    )
+                    return@launch
+                }
+                interactor.presentFull(
+                    launcher = coordinator.linkActivityResultLauncher,
+                    email = email,
+                    phoneNumber = phoneNumber,
+                    paymentMethodTypes = interactor.configuration.filterPaymentMethodTypes,
+                )
+            }
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun present(
             email: String,
             phoneNumber: String? = null,
