@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeActivityResultLauncher
@@ -32,10 +33,14 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
+import kotlinx.coroutines.runBlocking
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Optional
 import javax.inject.Provider
@@ -53,7 +58,9 @@ class LinkControllerInteractorTest {
     private val application: Application = ApplicationProvider.getApplicationContext()
     private val logger = FakeLogger()
     private val linkConfigurationLoader = FakeLinkConfigurationLoader()
-    private val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+    private val savedStateHandle = SavedStateHandle()
+    private val stripeRepository: com.stripe.android.networking.StripeRepository = mock()
+    private val linkAccountHolder = LinkAccountHolder(savedStateHandle)
     private val linkAccountManager = FakeLinkAccountManager(linkAccountHolder)
     private val linkAttestationCheck = FakeLinkAttestationCheck()
     private val linkComponent =
@@ -63,6 +70,14 @@ class LinkControllerInteractorTest {
         )
     private val linkComponentFactoryProvider: Provider<LinkComponent.Factory> =
         Provider { FakeLinkComponent.Factory(linkComponent) }
+
+    @Before
+    fun setUp() {
+        runBlocking {
+            whenever(stripeRepository.createConfirmationToken(any(), any()))
+                .thenReturn(Result.success(mock()))
+        }
+    }
 
     @Test
     fun `Initial state is correct`() = runTest {
@@ -228,6 +243,32 @@ class LinkControllerInteractorTest {
         assertThat(result).isInstanceOf(LinkController.ConfigureResult.Failed::class.java)
         val failedResult = result as LinkController.ConfigureResult.Failed
         assertThat(failedResult.error).isEqualTo(genericError)
+    }
+
+    @Test
+    fun `configureIfNeeded returns immediately when already configured`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val result = interactor.configureIfNeeded()
+
+        assertThat(result).isEqualTo(LinkController.ConfigureResult.Success)
+    }
+
+    @Test
+    fun `configureIfNeeded saves to SavedStateHandle on success`() = runTest {
+        val interactor = createInteractor()
+        linkConfigurationLoader.shouldUpdateResult = true
+        linkConfigurationLoader.linkConfigurationResult = Result.success(
+            LinkMetadata(
+                linkConfiguration = TestFactory.LINK_CONFIGURATION,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+        )
+
+        interactor.configureIfNeeded()
+
+        assertThat(savedStateHandle.contains(LinkControllerInteractor.LINK_CONFIGURED_KEY)).isTrue()
     }
 
     @Test
@@ -995,7 +1036,9 @@ class LinkControllerInteractorTest {
         }
     }
 
-    private fun createInteractor(): LinkControllerInteractor {
+    private fun createInteractor(
+        configuration: LinkController.Configuration = createControllerConfig(),
+    ): LinkControllerInteractor {
         return LinkControllerInteractor(
             application = application,
             logger = logger,
@@ -1003,6 +1046,9 @@ class LinkControllerInteractorTest {
             linkAccountHolder = linkAccountHolder,
             linkComponentFactoryProvider = linkComponentFactoryProvider,
             coroutineScope = CoroutineScope(dispatcher),
+            configuration = configuration,
+            savedStateHandle = savedStateHandle,
+            stripeRepository = stripeRepository,
         )
     }
 
@@ -1295,6 +1341,10 @@ class LinkControllerInteractorTest {
 
         interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
 
+        val expectedConfirmationToken = mock<ConfirmationToken>()
+        whenever(stripeRepository.createConfirmationToken(any(), any()))
+            .thenReturn(Result.success(expectedConfirmationToken))
+
         interactor.presentResultFlow.test {
             interactor.onLinkActivityResult(
                 LinkActivityResult.Completed(
@@ -1303,7 +1353,10 @@ class LinkControllerInteractorTest {
                     shippingAddress = null,
                 )
             )
-            assertThat(awaitItem()).isInstanceOf(LinkController.PresentResult.Completed::class.java)
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.PresentResult.Completed::class.java)
+            assertThat((result as LinkController.PresentResult.Completed).confirmationToken)
+                .isEqualTo(expectedConfirmationToken)
         }
     }
 
@@ -1324,6 +1377,31 @@ class LinkControllerInteractorTest {
             )
             val result = awaitItem() as LinkController.PresentResult.Failed
             assertThat(result.error).isEqualTo(error)
+        }
+    }
+
+    @Test
+    fun `onLinkActivityResult() with present flow Completed emits PresentResult Failed when CT creation fails`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
+
+        val expectedError = RuntimeException("CT creation failed")
+        whenever(stripeRepository.createConfirmationToken(any(), any()))
+            .thenReturn(Result.failure(expectedError))
+
+        interactor.presentResultFlow.test {
+            interactor.onLinkActivityResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    selectedPayment = createTestPaymentMethod(),
+                    shippingAddress = null,
+                )
+            )
+            val result = awaitItem()
+            assertThat(result).isInstanceOf(LinkController.PresentResult.Failed::class.java)
+            assertThat((result as LinkController.PresentResult.Failed).error).isEqualTo(expectedError)
         }
     }
 

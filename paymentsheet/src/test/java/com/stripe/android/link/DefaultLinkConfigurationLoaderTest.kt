@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.link.exceptions.LinkUnavailableException
@@ -35,13 +36,15 @@ internal class DefaultLinkConfigurationLoaderTest {
 
     private fun createLoader(
         paymentElementLoader: PaymentElementLoader,
-        useNativeLink: Boolean? = null
+        useNativeLink: Boolean? = null,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): DefaultLinkConfigurationLoader {
         useNativeLink?.let { linkGate.setUseNativeLink(it) }
         return DefaultLinkConfigurationLoader(
             logger = logger,
             paymentElementLoader = paymentElementLoader,
             linkGateFactory = linkGateFactory,
+            savedStateHandle = savedStateHandle,
         )
     }
 
