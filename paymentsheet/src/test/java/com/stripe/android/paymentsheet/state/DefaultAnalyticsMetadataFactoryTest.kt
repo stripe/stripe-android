@@ -846,6 +846,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         return ElementsSession.Customer(
             paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
             defaultPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id,
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_123",
                 apiKey = "ek_test_1234",

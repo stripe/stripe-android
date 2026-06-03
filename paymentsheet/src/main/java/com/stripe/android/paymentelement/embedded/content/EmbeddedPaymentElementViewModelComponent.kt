@@ -26,7 +26,6 @@ import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.injection.CardArtExperimentModule
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -72,7 +71,6 @@ import javax.inject.Singleton
         EmbeddedLinkExtrasModule::class,
         PaymentsIntegrityModule::class,
         LinkHoldbackExposureModule::class,
-        CardArtExperimentModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ],

@@ -551,7 +551,6 @@ internal fun LinkFields(
                     emailFocusRequester = emailFocusRequester,
                     requiresNameCollection = requiresNameCollection,
                     allowsDefaultOptIn = allowsDefaultOptIn,
-                    linkBrand = linkBrand,
                     errorMessage = errorMessage,
                     didShowAllFields = didShowAllFields,
                     onShowingAllFields = { didShowAllFields = true },

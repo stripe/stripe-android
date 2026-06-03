@@ -3,7 +3,21 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
-## 23.8.1 - 2026-05-18
+## 23.9.2 - 2026-06-01
+
+### Payments
+* [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now include error code, decline code, and error type in the exception thrown.
+
+## 23.9.1 - 2026-05-26
+
+### Payments
+* [FIXED][13146](https://github.com/stripe/stripe-android/pull/13146) Native 3ds2 no longer stops its host activity
+
+
+### CryptoOnramp
+* [FIXED][13074](https://github.com/stripe/stripe-android/pull/13074) Fixed an issue with 3DS and Out of Band checks during checkout that caused a hang.
+
+## 23.9.0 - 2026-05-18
 
 Added support for [Onelink](https://support.stripe.com/questions/what-is-onelink).
 

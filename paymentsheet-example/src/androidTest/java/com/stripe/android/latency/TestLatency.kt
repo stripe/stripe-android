@@ -26,8 +26,8 @@ import org.junit.runners.Parameterized
 
 /**
  * This test is special -- it's intended to be used to measure loading latency of PaymentSheet. As such, it doesn't
- * run in CI, but can be run locally (to test changes) and via the latency benchmarking script:
- * scripts/measure_latency_difference.rb.
+ * run in regular CI, but can be run locally (to test changes) and via the latency benchmarking scripts:
+ * scripts/measure_latency_difference.rb and scripts/report_latency_synthetics.rb.
  * */
 @RunWith(Parameterized::class)
 internal class TestLatency(
@@ -47,7 +47,7 @@ internal class TestLatency(
 
     @Test
     fun testLatency() {
-        Assume.assumeFalse(BuildConfig.IS_RUNNING_IN_CI)
+        Assume.assumeFalse(BuildConfig.IS_RUNNING_IN_CI && !BuildConfig.RUN_LATENCY_TESTS_IN_CI)
         val logger = Logger.getInstance(enableLogging = !testConfig.skipMeasurement)
         logger.debug( "LATENCY_TEST_CASE_STARTED: ${testConfig.name}")
 
@@ -55,7 +55,10 @@ internal class TestLatency(
             testDriver.loadComplete(
                 testParameters = TestParameters.create(
                     paymentMethodCode = "card",
-                    playgroundSettingsBlock = testConfig.playgroundSettingsBlock,
+                    playgroundSettingsBlock = { settings ->
+                        settings.latencyTestDefaults()
+                        testConfig.updateSettings(settings)
+                    },
                 ),
                 isReturningCustomer = testConfig.isReturningCustomer,
             )
@@ -95,7 +98,7 @@ internal class TestLatency(
     class TestConfig(
         val name: String,
         val isReturningCustomer: Boolean,
-        val playgroundSettingsBlock: (PlaygroundSettings) -> Unit,
+        val updateSettings: (PlaygroundSettings) -> Unit,
         val skipMeasurement: Boolean,
         val requiredSuccessfulSamples: Int,
     ) {
@@ -104,6 +107,14 @@ internal class TestLatency(
 
     companion object {
         private const val MAX_FAILED_ATTEMPTS = 3
+
+        private fun PlaygroundSettings.latencyTestDefaults() {
+            this[MerchantSettingsDefinition] = Merchant.US
+            this[LinkSettingsDefinition] = false
+            this[CustomerSettingsDefinition] = CustomerType.GUEST
+            this[GooglePaySettingsDefinition] = GooglePayMode.Off
+            this[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
+        }
 
         @JvmStatic
         @Parameterized.Parameters(name = "{0}")
@@ -115,108 +126,80 @@ internal class TestLatency(
                     isReturningCustomer = false,
                     skipMeasurement = true,
                     requiredSuccessfulSamples = 1,
-                ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
-                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                ) { _ ->
+                    // No test specific settings.
                 },
                 testConfig(
                     testName = "test_link_off_with_no_customer",
                     isReturningCustomer = false,
-                ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
-                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
+                ) { _ ->
+                    // No test specific settings.
                 },
                 testConfig(
                     testName = "test_link_off_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
                     testName = "test_link_off_with_cs",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_no_customer",
                     isReturningCustomer = false,
                 ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
                     settings[LinkSettingsDefinition] = true
-                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_cs",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_ek_default_email",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                     settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
                     testName = "test_link_on_with_cs_default_email",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
-                    settings[MerchantSettingsDefinition] = Merchant.US
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                     settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
-                    settings[GooglePaySettingsDefinition] = GooglePayMode.Off
                 },
                 testConfig(
                     testName = "test_google_pay_on_link_off_with_no_customer",
                     isReturningCustomer = false,
                 ) { settings: PlaygroundSettings ->
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
-                    settings[CustomerSettingsDefinition] = CustomerType.GUEST
                 },
                 testConfig(
                     testName = "test_google_pay_on_link_off_with_ek",
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = false
                 },
@@ -225,8 +208,6 @@ internal class TestLatency(
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[MerchantSettingsDefinition] = Merchant.US
-                    settings[LinkSettingsDefinition] = false
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
                 },
@@ -235,7 +216,6 @@ internal class TestLatency(
                     isReturningCustomer = true,
                 ) { settings: PlaygroundSettings ->
                     settings[GooglePaySettingsDefinition] = GooglePayMode.Test
-                    settings[MerchantSettingsDefinition] = Merchant.US
                     settings[LinkSettingsDefinition] = true
                     settings[CustomerSettingsDefinition] = CustomerType.RETURNING
                     settings[CustomerSessionSettingsDefinition] = true
@@ -256,7 +236,7 @@ internal class TestLatency(
                     isReturningCustomer = isReturningCustomer,
                     skipMeasurement = skipMeasurement,
                     requiredSuccessfulSamples = requiredSuccessfulSamples,
-                    playgroundSettingsBlock = playgroundSettingsBlock,
+                    updateSettings = playgroundSettingsBlock,
                 )
             )
         }

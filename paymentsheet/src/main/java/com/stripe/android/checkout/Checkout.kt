@@ -150,6 +150,7 @@ class Checkout private constructor(
         set(value) {
             ensureNoMutationInFlight()
             internalState = value.internalState
+            _checkoutSession.value = internalState.checkoutSessionResponse.asCheckoutSession()
         }
 
     private val mutex = Mutex()

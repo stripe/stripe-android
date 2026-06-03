@@ -229,10 +229,7 @@ class ElementsSessionJsonParserTest {
         )!!
 
         assertThat(elementsSession.experimentsData).isNotNull()
-        assertThat(elementsSession.experimentsData?.experimentAssignments).containsEntry(
-            ElementsSession.ExperimentAssignment.OCS_MOBILE_CARD_ART,
-            "control"
-        )
+        assertThat(elementsSession.experimentsData?.arbId).isEqualTo("232dd033-0b45-4456-b834-ecdcb02ab1fb")
     }
 
     @Test
@@ -750,6 +747,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -806,6 +804,27 @@ class ElementsSessionJsonParserTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `ElementsSession has expected customer email in the response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            customerEmail = "customer@example.com",
+        )
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer?.email).isEqualTo("customer@example.com")
     }
 
     @Test
@@ -866,6 +885,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -936,6 +956,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -1211,6 +1232,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -2028,12 +2050,6 @@ class ElementsSessionJsonParserTest {
             """
             {
               "payment_method_preference": $PAYMENT_METHOD_PREFERENCE_JSON,
-              "experiments_data": {
-                "arb_id": "arb_123",
-                "experiment_assignments": {
-                  "ocs_mobile_card_art": "treatment"
-                }
-              },
               "customer": {
                 $cardArtField
                 "customer_session": $CUSTOMER_SESSION_JSON,

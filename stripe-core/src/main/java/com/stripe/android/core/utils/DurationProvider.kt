@@ -14,9 +14,22 @@ interface DurationProvider {
     fun elapsed(key: Key): Duration?
     fun end(key: Key): Duration?
 
+    suspend fun <T> measureDuration(
+        key: Key,
+        block: suspend () -> T,
+    ): T
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Key {
         Loading,
+        PaymentSheetLoadIsGooglePaySupported,
+        PaymentSheetLoadIsGooglePayReady,
+        PaymentSheetLoadRetrieveSavedPaymentMethodSelection,
+        PaymentSheetLoadSessionLoad,
+        PaymentSheetLoadPrefetchPMs,
+        PaymentSheetLoadCreateLinkState,
+        PaymentSheetLoadCreateCustomerState,
+        PaymentSheetLoadRetrieveInitialPaymentSelection,
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
@@ -57,6 +70,15 @@ class DefaultDurationProvider private constructor() : DurationProvider {
         val endTime = SystemClock.uptimeMillis()
         logger.debug("DURATION_ENDED: ${key.name}: $endTime")
         return (endTime - startTime).milliseconds
+    }
+
+    override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
+        start(key)
+        return try {
+            block()
+        } finally {
+            end(key)
+        }
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

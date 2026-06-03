@@ -1132,7 +1132,7 @@ internal class PlaygroundTestDriver(
                     }
                 }
             }
-            is CustomerType.Existing, is CustomerType.RETURNING -> {
+            is CustomerType.Existing, is CustomerType.RETURNING, is CustomerType.CUSTOM -> {
                 composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                     composeTestRule.onAllNodesWithTag("AddCard")
                         .fetchSemanticsNodes()

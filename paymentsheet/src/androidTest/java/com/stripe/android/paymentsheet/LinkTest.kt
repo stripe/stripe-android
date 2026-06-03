@@ -5,6 +5,7 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.link.account.DefaultLinkStore
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.elementsSession
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -15,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
+import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.ResponseReplacement
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ProductIntegrationType
@@ -22,6 +24,7 @@ import com.stripe.android.paymentsheet.utils.ProductIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runProductIntegrationTest
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -143,9 +146,13 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/payment_methods"),
+                query("type", PaymentMethod.Type.Card.code)
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success-empty.json")
             }
+
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
             networkRule.enqueue(
                 method("POST"),
@@ -424,9 +431,13 @@ internal class LinkTest {
                 host("api.stripe.com"),
                 method("GET"),
                 path("/v1/payment_methods"),
+                query("type", PaymentMethod.Type.Card.code)
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success-empty.json")
             }
+
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
             networkRule.enqueue(
                 method("POST"),
@@ -1049,14 +1060,6 @@ internal class LinkTest {
     ) { testContext ->
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
         }
 
         networkRule.enqueue(
