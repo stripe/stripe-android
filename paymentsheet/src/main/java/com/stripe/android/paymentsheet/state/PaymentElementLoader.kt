@@ -6,6 +6,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -26,6 +27,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -240,6 +242,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
+    private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -303,8 +306,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        // Pre-fetch PMM Promotions for BNPLs
-        paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+        fetchPaymentMethodMessaging(elementsSession)
 
         val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
 
@@ -412,6 +414,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state
         )
+
+        logPaymentMethodMessagingExposure(pmMetadata)
 
         reportSuccessfulLoad(
             elementsSession = elementsSession,
@@ -826,6 +830,20 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     "error \"${unavailableCustomPaymentMethod.error}\"!"
             )
         }
+    }
+
+    private fun fetchPaymentMethodMessaging(elementsSession: ElementsSession) {
+        val variant = elementsSession.experimentsData?.experimentAssignments[
+            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+        ] ?: return
+
+        if (variant == "treatment") {
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+        }
+    }
+
+    private fun logPaymentMethodMessagingExposure(metadata: PaymentMethodMetadata) {
+        paymentMethodMessagePromotionsExperimentHandler.logExposure(metadata)
     }
 }
 
