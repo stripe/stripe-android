@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
@@ -45,6 +46,8 @@ import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -64,7 +67,9 @@ internal class LinkControllerInteractor @Inject constructor(
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkComponentFactoryProvider: Provider<LinkComponent.Factory>,
-    @ViewModelScope private val coroutineScope: CoroutineScope,
+    @ViewModelScope internal val coroutineScope: CoroutineScope,
+    internal val configuration: LinkController.Configuration,
+    private val savedStateHandle: SavedStateHandle,
 ) {
 
     private val tag = "LinkControllerViewInteractor"
@@ -178,6 +183,27 @@ internal class LinkControllerInteractor @Inject constructor(
                     LinkController.ConfigureResult.Failed(error)
                 }
             )
+    }
+
+    private var configureJob: Deferred<LinkController.ConfigureResult>? = null
+
+    internal suspend fun configureIfNeeded(): LinkController.ConfigureResult {
+        if (_state.value.linkComponent != null) {
+            return LinkController.ConfigureResult.Success
+        }
+        val existingJob = configureJob
+        if (existingJob != null && existingJob.isActive) {
+            return existingJob.await()
+        }
+        val newJob = coroutineScope.async {
+            configure(configuration).also { result ->
+                if (result is LinkController.ConfigureResult.Success) {
+                    savedStateHandle[LINK_CONFIGURED_KEY] = true
+                }
+            }
+        }
+        configureJob = newJob
+        return newJob.await()
     }
 
     fun presentPaymentMethods(
@@ -742,6 +768,10 @@ internal class LinkControllerInteractor @Inject constructor(
     ) {
         val linkConfiguration: LinkConfiguration?
             get() = linkComponent?.configuration
+    }
+
+    companion object {
+        internal const val LINK_CONFIGURED_KEY = "LinkController_Configured"
     }
 }
 
