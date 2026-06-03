@@ -644,17 +644,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         else -> null
     }
 
-    private fun shouldTransitionToFormScreen(paymentMethodCode: PaymentMethodCode): Boolean {
-        val formType = formTypeForCode(paymentMethodCode)
-        val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
-        return formType == FormType.UserInteractionRequired || displayFormForMandate
-    }
-
-    private fun shouldExpandOnClick(paymentMethodCode: PaymentMethodCode): Boolean {
-        return PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(paymentMethodCode) &&
-            !shouldTransitionToFormScreen(paymentMethodCode)
-    }
-
     private fun getPromotionProvider(code: PaymentMethodCode): (() -> PaymentMethodMessagePromotion?)? {
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled &&
             PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)
@@ -668,5 +657,16 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         } else {
             null
         }
+    }
+
+    private fun shouldTransitionToFormScreen(paymentMethodCode: PaymentMethodCode): Boolean {
+        val formType = formTypeForCode(paymentMethodCode)
+        val displayFormForMandate = displaysMandatesInFormScreen && formType is FormType.MandateOnly
+        return formType == FormType.UserInteractionRequired || displayFormForMandate
+    }
+
+    private fun shouldExpandOnClick(paymentMethodCode: PaymentMethodCode): Boolean {
+        return PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(paymentMethodCode) &&
+            !shouldTransitionToFormScreen(paymentMethodCode)
     }
 }

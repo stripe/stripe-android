@@ -1700,6 +1700,27 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun `Does not pass promotion provider to unsupported PMs`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val paymentMethod = paymentMethods.first { it.code == "card" }
+                assertThat(paymentMethod).isNotNull()
+                assertThat(paymentMethod.promotionProvider).isNull()
+            }
+        }
+    }
+
+    @Test
     fun `shouldExpandOnClick is false when form type is UserInteractionRequired`() {
         FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
@@ -1737,27 +1758,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 val paymentMethods = awaitItem().displayablePaymentMethods
                 val pm = paymentMethods.first { it.code == "affirm" }
                 assertThat(pm.shouldExpandOnClick).isTrue()
-            }
-        }
-    }
-
-    @Test
-    fun `Does not pass promotion provider to unsupported PMs`() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna")
-            )
-        )
-        runScenario(
-            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
-            paymentMethodMetadata = metadata
-        ) {
-            interactor.state.test {
-                val paymentMethods = awaitItem().displayablePaymentMethods
-                val paymentMethod = paymentMethods.first { it.code == "card" }
-                assertThat(paymentMethod).isNotNull()
-                assertThat(paymentMethod.promotionProvider).isNull()
             }
         }
     }
