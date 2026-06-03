@@ -322,11 +322,12 @@ class LinkController @Inject internal constructor(
         }
 
         internal companion object {
-            fun default(context: Context, publishableKey: String): Configuration {
+            fun default(context: Context, publishableKey: String, stripeAccountId: String? = null): Configuration {
                 val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
                 return Builder(
                     merchantDisplayName = appName,
-                    publishableKey = publishableKey
+                    publishableKey = publishableKey,
+                    stripeAccountId = stripeAccountId,
                 ).build()
             }
         }
@@ -910,16 +911,36 @@ class LinkController @Inject internal constructor(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
     ) {
+        private var filterPaymentMethodTypes: List<PaymentMethodType>? = null
+
+        fun filterPaymentMethodTypes(value: List<PaymentMethodType>?) = apply {
+            this.filterPaymentMethodTypes = value
+        }
+
         /**
          * Build the [LinkController] instance.
          *
          * @return A new [LinkController] configured with the specified settings.
          */
         fun build(): LinkController {
+            val paymentConfig = com.stripe.android.PaymentConfiguration.getInstance(application)
+            val appName = application.applicationInfo.loadLabel(application.packageManager).toString()
+            val configuration = Configuration(
+                merchantDisplayName = appName,
+                publishableKey = paymentConfig.publishableKey,
+                stripeAccountId = paymentConfig.stripeAccountId,
+                cardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+                defaultBillingDetails = null,
+                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+                allowUserEmailEdits = true,
+                allowLogOut = true,
+                filterPaymentMethodTypes = filterPaymentMethodTypes,
+            )
             return create(
                 application = application,
                 savedStateHandle = savedStateHandle,
                 requestSurface = RequestSurface.PaymentElement,
+                configuration = configuration,
             )
         }
     }
@@ -932,12 +953,14 @@ class LinkController @Inject internal constructor(
             application: Application,
             savedStateHandle: SavedStateHandle
         ): LinkController {
+            val paymentConfig = com.stripe.android.PaymentConfiguration.getInstance(application)
             return create(
                 application = application,
                 savedStateHandle = savedStateHandle,
                 // Temporarily "android_crypto_onramp" until backend is ready.
                 // Should be "android_link_controller" instead.
                 requestSurface = RequestSurface.CryptoOnramp,
+                configuration = Configuration.default(application, paymentConfig.publishableKey),
             )
         }
 
@@ -948,6 +971,10 @@ class LinkController @Inject internal constructor(
             application: Application,
             savedStateHandle: SavedStateHandle,
             requestSurface: RequestSurface,
+            configuration: Configuration = Configuration.default(
+                application,
+                com.stripe.android.PaymentConfiguration.getInstance(application).publishableKey
+            ),
         ): LinkController {
             return DaggerLinkControllerComponent.factory()
                 .build(
@@ -955,6 +982,7 @@ class LinkController @Inject internal constructor(
                     savedStateHandle = savedStateHandle,
                     paymentElementCallbackIdentifier = "LinkController",
                     requestSurface = requestSurface,
+                    configuration = configuration,
                 )
                 .linkController
         }
