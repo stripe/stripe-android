@@ -7,6 +7,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -28,7 +29,29 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
                 )
             )
 
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
         assertThat(result).isEqualTo(promotion)
+    }
+
+    @Test
+    fun `logs displayed successfully as false if promotion not available and in treatment`() = runScenario(
+        promotions = null
+    ) {
+        val result = helper.getPromotionIfAvailableForCode(
+            PaymentMethod.Type.Affirm.code,
+            PaymentMethodMetadataFactory.create(
+                experimentsData = ElementsSession.ExperimentsData(
+                    arbId = "arb_123",
+                    experimentAssignments = mapOf(
+                        ElementsSession.ExperimentAssignment
+                            .OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
+                    )
+                )
+            )
+        )
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isFalse()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -63,20 +86,27 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
     }
 
     private fun runScenario(
+        promotions: List<PaymentMethodMessagePromotion>? = listOf(promotion),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val eventReporter = FakeEventReporter()
         val helper = PrefetchedPaymentMethodMessagePromotionsHelper(
-            promotions = listOf(promotion),
+            promotions = promotions,
+            eventReporter = eventReporter
         )
 
         Scenario(
-            helper = helper
+            helper = helper,
+            eventReporter = eventReporter
         ).block()
+
+        eventReporter.validate()
     }
 
     private class Scenario(
         val helper: PrefetchedPaymentMethodMessagePromotionsHelper,
+        val eventReporter: FakeEventReporter
     )
 
     private companion object {

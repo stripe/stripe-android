@@ -230,8 +230,10 @@ internal interface EmbeddedActivityModule {
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
             promotion: PaymentMethodMessagePromotion?,
+            eventReporter: EventReporter
         ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionsHelper(
             listOfNotNull(promotion),
+            eventReporter
         )
     }
 }

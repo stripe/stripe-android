@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodMessagePromotionList
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
 import dagger.Binds
@@ -48,12 +49,14 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
+    private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
 
     override fun fetchPromotionsAsync(intent: StripeIntent) {
         if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
 
+        eventReporter.onPaymentMethodMessagePromotionsFetchBegin()
         promotionsDeferred?.cancel()
         promotionsDeferred = null
         promotionsDeferred = viewModelScope.async(workContext) {
@@ -79,19 +82,21 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
             ] ?: return null
 
-            val promotion = if (variant == "treatment") {
-                if (promotionsDeferred?.isCompleted == true) {
+            if (variant == "treatment") {
+                val promotion = if (promotionsDeferred?.isCompleted == true) {
                     promotionsDeferred?.getCompleted()?.getOrNull()?.promotions?.find {
                         it.paymentMethodType.lowercase() == code
                     }
                 } else {
                     null
                 }
+                eventReporter.onPaymentMethodMessagePromotionDisplayed(
+                    displayedSuccessfully = promotion != null
+                )
+                promotion
             } else {
                 null
             }
-
-            promotion
         } else {
             null
         }
@@ -122,6 +127,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
 
 internal class PrefetchedPaymentMethodMessagePromotionsHelper(
     private val promotions: List<PaymentMethodMessagePromotion>?,
+    private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
     override fun fetchPromotionsAsync(intent: StripeIntent) {
         // NO-OP
@@ -134,17 +140,19 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
         return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
             val variant = metadata.experimentsData?.experimentAssignments[
                 ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
-            ]
+            ] ?: return null
 
-            val promotion = if (variant == "treatment") {
-                promotions?.find {
+            if (variant == "treatment") {
+                val promotion = promotions?.find {
                     it.paymentMethodType.lowercase() == code
                 }
+                eventReporter.onPaymentMethodMessagePromotionDisplayed(
+                    displayedSuccessfully = promotion != null
+                )
+                promotion
             } else {
                 null
             }
-
-            promotion
         } else {
             null
         }
