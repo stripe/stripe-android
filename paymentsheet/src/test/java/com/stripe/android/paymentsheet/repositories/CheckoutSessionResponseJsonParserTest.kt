@@ -97,6 +97,51 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse line item unitAmount from unit_amount_override`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_override",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 7000, "subtotal": 7000, "total": 7000 },
+                "line_item_group": {
+                    "currency": "usd",
+                    "total": 7000,
+                    "subtotal": 7000,
+                    "due": 7000,
+                    "line_items": [
+                        {
+                            "id": "li_override_item",
+                            "object": "item",
+                            "name": "Widget",
+                            "quantity": 2,
+                            "subtotal": 7000,
+                            "total": 7000,
+                            "unit_amount_override": 3500,
+                            "price": {
+                                "unit_amount": 2999
+                            }
+                        }
+                    ]
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        val lineItems = result!!.lineItems
+        assertThat(lineItems).hasSize(1)
+        assertThat(lineItems[0].id).isEqualTo("li_override_item")
+        assertThat(lineItems[0].name).isEqualTo("Widget")
+        assertThat(lineItems[0].quantity).isEqualTo(2)
+        assertThat(lineItems[0].unitAmount).isEqualTo(3500L)
+        assertThat(lineItems[0].subtotal).isEqualTo(7000L)
+        assertThat(lineItems[0].total).isEqualTo(7000L)
+    }
+
+    @Test
     fun `parse line item unitAmount from price when total includes tax`() {
         val json = JSONObject(
             """
