@@ -611,7 +611,7 @@ class LinkController @Inject internal constructor(
          * The user canceled the Link flow.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Canceled : PresentResult
+        class Canceled internal constructor() : PresentResult
 
         /**
          * An error occurred during the Link flow.

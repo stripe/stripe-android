@@ -403,7 +403,7 @@ internal class LinkControllerInteractor @Inject constructor(
             PresentationType.Full -> when (result) {
                 is LinkActivityResult.Canceled -> {
                     logger.debug("$tag: present canceled")
-                    _presentResultFlow.tryEmit(LinkController.PresentResult.Canceled)
+                    _presentResultFlow.tryEmit(LinkController.PresentResult.Canceled())
                 }
                 is LinkActivityResult.Completed -> {
                     logger.debug("$tag: present PM selected, creating payment method")

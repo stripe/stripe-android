@@ -1284,7 +1284,7 @@ class LinkControllerInteractorTest {
                     linkAccountUpdate = LinkAccountUpdate.Value(null)
                 )
             )
-            assertThat(awaitItem()).isEqualTo(LinkController.PresentResult.Canceled)
+            assertThat(awaitItem()).isInstanceOf(LinkController.PresentResult.Canceled::class.java)
         }
     }
 
