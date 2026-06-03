@@ -48,7 +48,7 @@ internal object IeAddressSchemaDefinition : AddressSchemaDefinition {
         ),
         CountryAddressSchema(
             type = FieldType.PostalCode,
-            required = false,
+            required = true,
             schema = FieldSchema(
                 nameType = NameType.Eircode,
                 isNumeric = false,
