@@ -68,26 +68,6 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         assertThat(helper.getPromotionIfAvailableForCode("afterpay_clearpay", metadata)).isNull()
     }
 
-    @Test
-    fun `getPromotionProvider returns null for control`() = runScenario(
-        featureFlagEnabled = true
-    ) {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        dispatcher.scheduler.advanceUntilIdle()
-        val metadata = getMetadata("control")
-        assertThat(helper.getPromotionProvider("afterpay_clearpay", metadata)).isNull()
-    }
-
-    @Test
-    fun `getPromotionProvider returns null for unsupported PMs`() = runScenario(
-        featureFlagEnabled = true
-    ) {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        dispatcher.scheduler.advanceUntilIdle()
-        val metadata = getMetadata("control")
-        assertThat(helper.getPromotionProvider("card", metadata)).isNull()
-    }
-
     private fun runScenario(
         featureFlagEnabled: Boolean = false,
         repositoryResult: Result<PaymentMethodMessagePromotionList> = Result.success(

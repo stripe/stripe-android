@@ -1741,6 +1741,27 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         }
     }
 
+    @Test
+    fun `Does not pass promotion provider to unsupported PMs`() {
+        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            )
+        )
+        runScenario(
+            promotionsHelper = FakePaymentMethodMessagePromotionsHelper.Factory.create(),
+            paymentMethodMetadata = metadata
+        ) {
+            interactor.state.test {
+                val paymentMethods = awaitItem().displayablePaymentMethods
+                val paymentMethod = paymentMethods.first { it.code == "card" }
+                assertThat(paymentMethod).isNotNull()
+                assertThat(paymentMethod.promotionProvider).isNull()
+            }
+        }
+    }
+
     private val linkAndGooglePayWalletState = WalletsState(
         link = WalletsState.Link(
             state = LinkButtonState.Email("email@email.com"),

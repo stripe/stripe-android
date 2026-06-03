@@ -35,11 +35,6 @@ internal interface PaymentMethodMessagePromotionsHelper {
     ): PaymentMethodMessagePromotion?
 
     fun getPromotions(): List<PaymentMethodMessagePromotion>?
-
-    fun getPromotionProvider(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ): (() -> PaymentMethodMessagePromotion?)?
 }
 
 @Singleton
@@ -108,16 +103,6 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
             null
         }
     }
-
-    override fun getPromotionProvider(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ): (() -> PaymentMethodMessagePromotion?)? {
-        return getPromotionProviderInternal(
-            code = code,
-            metadata = metadata,
-        )
-    }
 }
 
 internal class PrefetchedPaymentMethodMessagePromotionsHelper(
@@ -157,13 +142,6 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
             null
         }
     }
-
-    override fun getPromotionProvider(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ): (() -> PaymentMethodMessagePromotion?)? {
-        return getPromotionProviderInternal(code, metadata)
-    }
 }
 
 internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
@@ -179,13 +157,6 @@ internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessage
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
-        return null
-    }
-
-    override fun getPromotionProvider(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ): (() -> PaymentMethodMessagePromotion?)? {
         return null
     }
 }
