@@ -13,7 +13,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodMessagePromotionList
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.DefaultPaymentMethodMessagePromotionsHelper
 import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -102,7 +101,6 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
         val fakeRepository = FakePromotionsStripeRepository(repositoryResult)
         val testDispatcher = StandardTestDispatcher(testScheduler)
-        val eventReporter = FakeEventReporter()
 
         val helper = DefaultPaymentMethodMessagePromotionsHelper(
             stripeRepository = fakeRepository,
@@ -111,7 +109,6 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             },
             viewModelScope = this,
             workContext = testDispatcher,
-            eventReporter = eventReporter
         )
 
         Scenario(
