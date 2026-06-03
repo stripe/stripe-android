@@ -31,7 +31,7 @@ internal interface PaymentMethodMessagePromotionsHelper {
 
     fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata,
+        metadata: PaymentMethodMetadata
     ): PaymentMethodMessagePromotion?
 
     fun getPromotions(): List<PaymentMethodMessagePromotion>?
