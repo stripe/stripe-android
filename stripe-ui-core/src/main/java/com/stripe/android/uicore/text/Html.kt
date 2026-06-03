@@ -376,6 +376,7 @@ fun annotatedStringResource(
     return remember(spanned) {
         buildAnnotatedString {
             var currentStart = 0
+            var offset = 0
             spanned.getSpans(0, spanned.length, Any::class.java).forEach { span ->
                 val start = spanned.getSpanStart(span)
                 val end = spanned.getSpanEnd(span)
@@ -385,13 +386,15 @@ fun annotatedStringResource(
                 ) {
                     append(spanned.toString().substring(currentStart, start))
                     currentStart = start
+                    val offsetStart = start + offset
+                    val offsetEnd = end + offset
                     when (span) {
                         is StyleSpan -> when (span.style) {
                             Typeface.BOLD -> {
-                                addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
+                                addStyle(SpanStyle(fontWeight = FontWeight.Bold), offsetStart, offsetEnd)
                             }
                             Typeface.ITALIC -> {
-                                addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
+                                addStyle(SpanStyle(fontStyle = FontStyle.Italic), offsetStart, offsetEnd)
                             }
                             Typeface.BOLD_ITALIC -> {
                                 addStyle(
@@ -399,24 +402,25 @@ fun annotatedStringResource(
                                         fontWeight = FontWeight.Bold,
                                         fontStyle = FontStyle.Italic
                                     ),
-                                    start,
-                                    end
+                                    offsetStart,
+                                    offsetEnd
                                 )
                             }
                         }
                         is UnderlineSpan -> {
                             addStyle(
                                 SpanStyle(textDecoration = TextDecoration.Underline),
-                                start,
-                                end
+                                offsetStart,
+                                offsetEnd
                             )
                         }
                         is BulletSpan -> {
                             // append a bullet and a tab character in front
                             append("\u2022\t")
+                            offset += 2
                         }
                         is ForegroundColorSpan -> {
-                            addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)
+                            addStyle(SpanStyle(color = Color(span.foregroundColor)), offsetStart, offsetEnd)
                         }
                         is ImageSpan -> {
                             currentStart = end
@@ -430,14 +434,14 @@ fun annotatedStringResource(
                         is URLSpan -> {
                             addStyle(
                                 urlSpanStyle,
-                                start,
-                                end
+                                offsetStart,
+                                offsetEnd
                             )
                             addStringAnnotation(
                                 tag = LINK_TAG,
                                 annotation = span.url,
-                                start = start,
-                                end = end
+                                start = offsetStart,
+                                end = offsetEnd
                             )
                         }
                     }
