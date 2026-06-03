@@ -33,28 +33,37 @@ jobs:
           COMMIT: ${{ steps.commits.outputs.commit }}
           BASE_COMMIT: ${{ steps.commits.outputs.base_commit }}
         run: |
-          RESPONSE=$(curl --silent --fail \
+          REQUEST_BODY=$(jq -n \
+            --arg commit "$COMMIT" \
+            --arg base_commit "$BASE_COMMIT" \
+            '{
+              hook_info: { type: "bitrise" },
+              build_params: {
+                workflow_id: "run-paymentsheet-latency-difference",
+                commit_hash: $commit,
+                environments: [
+                  { mapped_to: "COMMIT", value: $commit, is_expand: false },
+                  { mapped_to: "BASE_COMMIT", value: $base_commit, is_expand: false }
+                ]
+              }
+            }')
+
+          RESPONSE=$(curl --silent --fail-with-body \
             --request POST \
             --url "https://api.bitrise.io/v0.1/apps/${BITRISE_APP_SLUG}/builds" \
             --header "Authorization: ${BITRISE_API_TOKEN}" \
             --header "Content-Type: application/json" \
-            --data "$(jq -n \
-              --arg commit "$COMMIT" \
-              --arg base_commit "$BASE_COMMIT" \
-              '{
-                hook_info: { type: "bitrise" },
-                build_params: {
-                  workflow_id: "run-paymentsheet-latency-difference",
-                  commit_hash: $commit,
-                  environments: [
-                    { mapped_to: "COMMIT", value: $commit, is_expand: false },
-                    { mapped_to: "BASE_COMMIT", value: $base_commit, is_expand: false }
-                  ]
-                }
-              }')")
+            --data "$REQUEST_BODY")
 
-          BUILD_SLUG=$(echo "$RESPONSE" | jq -r '.build_slug')
-          BUILD_URL=$(echo "$RESPONSE" | jq -r '.build_url')
+          BUILD_SLUG=$(echo "$RESPONSE" | jq -r '.build_slug // empty')
+          BUILD_URL=$(echo "$RESPONSE" | jq -r '.build_url // empty')
+
+          if [ -z "$BUILD_SLUG" ]; then
+            echo "Failed to get build_slug from Bitrise API. Response:"
+            echo "$RESPONSE"
+            exit 1
+          fi
+
           echo "build_slug=$BUILD_SLUG" >> "$GITHUB_OUTPUT"
           echo "build_url=$BUILD_URL" >> "$GITHUB_OUTPUT"
           echo "Triggered Bitrise build: $BUILD_SLUG"
@@ -89,13 +98,18 @@ jobs:
 
           for i in $(seq 1 120); do
             sleep 60
-            RESPONSE=$(curl --silent --fail \
+
+            # Use || true so a transient network error doesn't crash the loop
+            RESPONSE=$(curl --silent \
               --request GET \
               --url "https://api.bitrise.io/v0.1/apps/${BITRISE_APP_SLUG}/builds/${BUILD_SLUG}" \
-              --header "Authorization: ${BITRISE_API_TOKEN}")
+              --header "Authorization: ${BITRISE_API_TOKEN}") || true
 
-            STATUS=$(echo "$RESPONSE" | jq -r '.data.status_text')
-            echo "Attempt $i/120 — build status: $STATUS"
+            # Use // empty so jq returns "" rather than "null" when the field is missing,
+            # and || STATUS="" so a parse error on a bad response retries instead of crashing
+            STATUS=$(echo "$RESPONSE" | jq -r '.data.status_text // empty' 2>/dev/null) || STATUS=""
+
+            echo "Attempt $i/120 — build status: ${STATUS:-<no status yet>}"
 
             case "$STATUS" in
               success|failed|aborted|error)
