@@ -73,7 +73,6 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
         val experimentHandler = FakePaymentMethodMessagePromotionsExperimentHandler()
         val helper = PrefetchedPaymentMethodMessagePromotionsHelper(
             promotions = listOf(promotion),
-            paymentMethodMessagePromotionsExperimentHandler = experimentHandler
         )
 
         Scenario(

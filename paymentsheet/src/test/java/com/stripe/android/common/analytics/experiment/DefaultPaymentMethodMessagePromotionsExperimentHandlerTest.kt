@@ -6,10 +6,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.model.PaymentMethodMessageLearnMore
-import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -71,39 +67,6 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
         assertThat(experiment.group).isEqualTo("control")
         assertThat(experiment.arbId).isEqualTo("arb_123")
         assertThat(experiment.experiment).isEqualTo(ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS)
-        assertThat(experiment.selectedPaymentMethodType).isEqualTo("affirm")
-    }
-
-    @Test
-    fun `logs promotionDisplayedSuccessfully as false when promotion is null and in treatment`() = runScenario {
-        logExposure(
-            promotion = null
-        )
-
-        val call = eventReporter.experimentExposureCalls.awaitItem()
-        val experiment = call.experiment as LoggableExperiment.OcsMobilePaymentMethodMessagingPromotions
-        assertThat(experiment.promotionDisplayedSuccessfully).isFalse()
-        eventReporter.pmmPromotionsIncomplete.awaitItem()
-    }
-
-    @Test
-    fun `logs promotionDisplayedSuccessfully as null when promotion is null and in control`() = runScenario {
-        logExposure(
-            promotion = null,
-            metadata = defaultMetadata.copy(
-                experimentsData = ElementsSession.ExperimentsData(
-                    arbId = "arb_123",
-                    experimentAssignments = mapOf(
-                        ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "control"
-                    )
-                )
-            )
-        )
-
-        val call = eventReporter.experimentExposureCalls.awaitItem()
-        val experiment = call.experiment as LoggableExperiment.OcsMobilePaymentMethodMessagingPromotions
-        assertThat(experiment.promotionDisplayedSuccessfully).isNull()
-        eventReporter.pmmPromotionsIncomplete.expectNoEvents()
     }
 
     @Test
@@ -132,14 +95,6 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
         assertThat(experiment.layout).isEqualTo("horizontal")
     }
 
-    @Test
-    fun `does not log repeat exposure`() = runScenario {
-        logExposure()
-        eventReporter.experimentExposureCalls.awaitItem()
-        logExposure()
-        eventReporter.experimentExposureCalls.expectNoEvents()
-    }
-
     private fun runScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
@@ -160,17 +115,9 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
         val handler: DefaultPaymentMethodMessagePromotionsExperimentHandler,
         val eventReporter: FakeEventReporter
     ) {
-        fun logExposure(
-            code: PaymentMethodCode = PaymentMethod.Type.Affirm.code,
-            metadata: PaymentMethodMetadata = defaultMetadata,
-            promotion: PaymentMethodMessagePromotion? = defaultPromotion,
-            isPromotionProvider: Boolean = false
-        ) {
+        fun logExposure(metadata: PaymentMethodMetadata = defaultMetadata) {
             handler.logExposure(
-                code = code,
                 metadata = metadata,
-                promotion = promotion,
-                isPromotionProvider = isPromotionProvider
             )
         }
     }
@@ -185,15 +132,6 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
                 experimentAssignments = mapOf(
                     ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
                 )
-            )
-        )
-
-        val defaultPromotion = PaymentMethodMessagePromotion(
-            paymentMethodType = "affirm",
-            message = "This is a message",
-            learnMore = PaymentMethodMessageLearnMore(
-                message = "Click me",
-                url = "https://www.text.com"
             )
         )
     }
