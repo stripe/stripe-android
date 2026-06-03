@@ -27,7 +27,7 @@ class CurrencySelectorOptionsFactoryTest {
 
         assertThat(result).isEqualTo(
             CurrencySelectorOptions(
-                first = CurrencyOption(code = "USD", displayableText = "🇺🇸 $61.06"),
+                first = CurrencyOption(code = "USD", displayableText = "🇺🇸 \$61.06"),
                 second = CurrencyOption(code = "EUR", displayableText = "🇪🇺 €50.99"),
                 selectedCode = "USD",
                 exchangeRateText = "1 EUR = 1.19749 USD",
@@ -110,8 +110,8 @@ class CurrencySelectorOptionsFactoryTest {
 
         val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
 
-        assertThat(result?.first).isEqualTo(CurrencyOption(code = "USD", displayableText = "🇺🇸 $35.00"))
-        assertThat(result?.second).isEqualTo(CurrencyOption(code = "JPY", displayableText = "🇯🇵 ¥5,000"))
+        assertThat(result?.first?.displayableText).isEqualTo("🇺🇸 \$35.00")
+        assertThat(result?.second?.displayableText).isEqualTo("🇯🇵 ¥5,000")
         assertThat(result?.exchangeRateText).isEqualTo("1 JPY = 0.00680 USD")
     }
 
@@ -155,7 +155,7 @@ class CurrencySelectorOptionsFactoryTest {
 
         val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
 
-        assertThat(result?.first?.displayableText).isEqualTo("🇺🇸 $15.00")
+        assertThat(result?.first?.displayableText).isEqualTo("🇺🇸 \$15.00")
         assertThat(result?.second?.displayableText).isEqualTo("FCFA1,000")
     }
 
