@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 internal data class SubmitIdentifiersResponse(
-    val completed: Boolean,
+    val completed: Boolean = true,
     val identifiers: List<ComplianceIdentifierRequirementResponse> = emptyList(),
     val alternatives: List<ComplianceIdentifierAlternativeGroupResponse> = emptyList(),
     @SerialName("invalid_identifiers")
     val invalidIdentifiers: List<String> = emptyList(),
     @SerialName("carf_tin_required")
-    val carfTinRequired: Boolean,
+    val carfTinRequired: Boolean = false,
 ) {
     fun toSubmitIdentifiersResult(): SubmitIdentifiersResult {
         return SubmitIdentifiersResult(

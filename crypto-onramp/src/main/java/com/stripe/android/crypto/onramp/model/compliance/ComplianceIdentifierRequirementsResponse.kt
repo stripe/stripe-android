@@ -8,7 +8,7 @@ internal data class ComplianceIdentifierRequirementsResponse(
     val identifiers: List<ComplianceIdentifierRequirementResponse> = emptyList(),
     val alternatives: List<ComplianceIdentifierAlternativeGroupResponse> = emptyList(),
     @SerialName("carf_tin_required")
-    val carfTinRequired: Boolean,
+    val carfTinRequired: Boolean = false,
 ) {
     fun toComplianceIdentifierRequirements(): ComplianceIdentifierRequirements {
         return ComplianceIdentifierRequirements(

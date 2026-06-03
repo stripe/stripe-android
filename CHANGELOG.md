@@ -1,7 +1,11 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### CryptoOnramp
+* [CHANGED] Updated EU compliance identifier APIs to match the latest backend contract, including CRS/CARF TIN requirements and `SubmitIdentifiersResult.completed`.
+* [ADDED] Added known compliance identifier types for Spain NIF (`es_nif`) and France NIR (`fr_nir`).
 
 ## 23.9.2 - 2026-06-01
 
