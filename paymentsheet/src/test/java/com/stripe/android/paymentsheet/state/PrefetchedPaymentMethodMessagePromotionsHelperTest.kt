@@ -7,7 +7,6 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
-import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -30,7 +29,6 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
             )
 
         assertThat(result).isEqualTo(promotion)
-        experimentHandler.logExposureCalls.awaitItem()
     }
 
     @Test
@@ -48,7 +46,6 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
             )
         )
         assertThat(result).isNull()
-        experimentHandler.logExposureCalls.awaitItem()
     }
 
     @Test
@@ -63,27 +60,23 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
             )
         )
         assertThat(result).isNull()
-        experimentHandler.logExposureCalls.awaitItem()
     }
 
     private fun runScenario(
         block: suspend Scenario.() -> Unit
     ) = runTest {
         FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
-        val experimentHandler = FakePaymentMethodMessagePromotionsExperimentHandler()
         val helper = PrefetchedPaymentMethodMessagePromotionsHelper(
             promotions = listOf(promotion),
         )
 
         Scenario(
-            helper = helper,
-            experimentHandler = experimentHandler
+            helper = helper
         ).block()
     }
 
     private class Scenario(
         val helper: PrefetchedPaymentMethodMessagePromotionsHelper,
-        val experimentHandler: FakePaymentMethodMessagePromotionsExperimentHandler
     )
 
     private companion object {
