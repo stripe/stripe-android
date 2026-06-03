@@ -9,6 +9,9 @@ import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -70,6 +73,7 @@ internal class LinkControllerInteractor @Inject constructor(
     @ViewModelScope internal val coroutineScope: CoroutineScope,
     internal val configuration: LinkController.Configuration,
     private val savedStateHandle: SavedStateHandle,
+    private val stripeRepository: com.stripe.android.networking.StripeRepository,
 ) {
 
     private val tag = "LinkControllerViewInteractor"
@@ -118,12 +122,10 @@ internal class LinkControllerInteractor @Inject constructor(
     init {
         coroutineScope.launch {
             _presentSelectionSucceededFlow.collect {
-                val presentResult = when (val createResult = createPaymentMethod()) {
-                    is LinkController.CreatePaymentMethodResult.Success ->
-                        LinkController.PresentResult.Completed(createResult.paymentMethod)
-                    is LinkController.CreatePaymentMethodResult.Failed ->
-                        LinkController.PresentResult.Failed(createResult.error)
-                }
+                val presentResult = performCreateConfirmationToken().fold(
+                    onSuccess = { ct -> LinkController.PresentResult.Completed(ct) },
+                    onFailure = { error -> LinkController.PresentResult.Failed(error) }
+                )
                 emitPresentResult(presentResult)
             }
         }
@@ -719,6 +721,27 @@ internal class LinkControllerInteractor @Inject constructor(
             component.linkAccountManager.createPaymentMethod(
                 linkPaymentMethod = paymentMethod
             )
+        }
+    }
+
+    private suspend fun performCreateConfirmationToken(): Result<ConfirmationToken> {
+        return when (val createResult = createPaymentMethod()) {
+            is LinkController.CreatePaymentMethodResult.Success -> {
+                val paymentMethodId = createResult.paymentMethod.id
+                    ?: return Result.failure(IllegalStateException("PaymentMethod has no ID"))
+                stripeRepository.createConfirmationToken(
+                    confirmationTokenParams = ConfirmationTokenParams(
+                        paymentMethodId = paymentMethodId,
+                    ),
+                    options = ApiRequest.Options(
+                        apiKey = configuration.publishableKey,
+                        stripeAccount = configuration.stripeAccountId,
+                    )
+                )
+            }
+            is LinkController.CreatePaymentMethodResult.Failed -> {
+                Result.failure(createResult.error)
+            }
         }
     }
 

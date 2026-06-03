@@ -13,6 +13,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.link.injection.DaggerLinkControllerComponent
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -603,11 +604,11 @@ class LinkController @Inject internal constructor(
         /**
          * The user completed the Link flow and a payment method was created.
          *
-         * @param paymentMethod The [PaymentMethod] created from the selected Link payment method.
+         * @param confirmationToken The [ConfirmationToken] created from the selected Link payment method.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
-        class Completed internal constructor(val paymentMethod: PaymentMethod) : PresentResult
+        class Completed internal constructor(val confirmationToken: ConfirmationToken) : PresentResult
 
         /**
          * The user canceled the Link flow.
