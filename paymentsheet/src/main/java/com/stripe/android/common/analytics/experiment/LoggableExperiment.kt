@@ -72,7 +72,8 @@ internal sealed class LoggableExperiment(
         val mode: EventReporter.Mode,
         val selectedPaymentMethodType: String,
         val promotionDisplayedSuccessfully: Boolean?,
-        val layout: String
+        val layout: String,
+        val isPromotionProvider: Boolean?
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS,
@@ -80,7 +81,8 @@ internal sealed class LoggableExperiment(
         dimensions = CommonElementsDimensions.getDimensions(metadata, mode) + mapOf(
             "selected_payment_method_type" to selectedPaymentMethodType,
             "promotion_displayed_successfully" to promotionDisplayedSuccessfully.toString(),
-            "in_app_elements_layout" to layout
+            "in_app_elements_layout" to layout,
+            "is_promotion_provider" to isPromotionProvider.toString()
         ).filterNotNullValues()
     )
 }

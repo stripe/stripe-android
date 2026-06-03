@@ -163,12 +163,14 @@ class DefaultPaymentMethodMessagePromotionsExperimentHandlerTest {
         fun logExposure(
             code: PaymentMethodCode = PaymentMethod.Type.Affirm.code,
             metadata: PaymentMethodMetadata = defaultMetadata,
-            promotion: PaymentMethodMessagePromotion? = defaultPromotion
+            promotion: PaymentMethodMessagePromotion? = defaultPromotion,
+            isPromotionProvider: Boolean = false
         ) {
             handler.logExposure(
                 code = code,
                 metadata = metadata,
-                promotion = promotion
+                promotion = promotion,
+                isPromotionProvider = isPromotionProvider
             )
         }
     }
