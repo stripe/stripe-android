@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.LinkGate
@@ -15,6 +16,7 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
     private val logger: Logger,
     private val paymentElementLoader: PaymentElementLoader,
     private val linkGateFactory: LinkGate.Factory,
+    private val savedStateHandle: SavedStateHandle,
 ) : LinkConfigurationLoader {
     private val tag = "LinkConfigurationLoader"
 
@@ -23,7 +25,9 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
             initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp,
             integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(configuration),
             metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false,
+                isReloadingAfterProcessDeath = savedStateHandle.contains(
+                    LinkControllerInteractor.LINK_CONFIGURED_KEY
+                ),
                 initializedViaCompose = false,
             )
         ).mapCatching { state ->
