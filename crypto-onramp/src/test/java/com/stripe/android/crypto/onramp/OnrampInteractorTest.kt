@@ -211,10 +211,6 @@ class OnrampInteractorTest {
                 ComplianceIdentifierRequirement(
                     type = ComplianceIdentifierType.MT_NIC,
                     regulation = ComplianceRegulation.EuMica
-                ),
-                ComplianceIdentifierRequirement(
-                    type = ComplianceIdentifierType.FR_SPI,
-                    regulation = ComplianceRegulation.EuCarf
                 )
             ),
             alternatives = listOf(
@@ -222,7 +218,8 @@ class OnrampInteractorTest {
                     originalMissingIdentifiers = listOf(ComplianceIdentifierType.MT_NIC),
                     alternativeMissingIdentifiers = listOf(ComplianceIdentifierType.MT_PP)
                 )
-            )
+            ),
+            carfTinRequired = true
         )
         whenever(cryptoApiRepository.retrieveMissingIdentifiers(any()))
             .thenReturn(Result.success(requirements))
@@ -241,16 +238,8 @@ class OnrampInteractorTest {
     fun testSubmitIdentifiersIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val submissionResult = SubmitIdentifiersResult(
-            valid = true,
+            completed = true,
             identifiers = listOf(
-                ComplianceIdentifierRequirement(
-                    type = ComplianceIdentifierType.DE_STN,
-                    regulation = ComplianceRegulation.EuCarf
-                ),
-                ComplianceIdentifierRequirement(
-                    type = ComplianceIdentifierType.MT_NIC,
-                    regulation = ComplianceRegulation.EuCarf
-                ),
                 ComplianceIdentifierRequirement(
                     type = ComplianceIdentifierType.MT_NIC,
                     regulation = ComplianceRegulation.EuMica
@@ -262,7 +251,8 @@ class OnrampInteractorTest {
                     alternativeMissingIdentifiers = listOf(ComplianceIdentifierType.MT_PP)
                 )
             ),
-            invalidIdentifiers = listOf(ComplianceIdentifierType.DE_STN, ComplianceIdentifierType.MT_NIC)
+            invalidIdentifiers = listOf(ComplianceIdentifierType.DE_STN, ComplianceIdentifierType.MT_NIC),
+            carfTinRequired = false
         )
         whenever(cryptoApiRepository.submitIdentifiers(any(), any()))
             .thenReturn(Result.success(submissionResult))
@@ -280,7 +270,7 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampSubmitIdentifiersResult.Completed::class.java)
         val completed = result as OnrampSubmitIdentifiersResult.Completed
         assertThat(completed.result).isEqualTo(submissionResult)
-        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.IdentifiersSubmitted(valid = true))
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.IdentifiersSubmitted(completed = true))
     }
 
     @Test
