@@ -63,7 +63,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `getPromotionIfAvailableForCode returns logs displayed successfully as false if not available`() = runScenario(
+    fun `getPromotionIfAvailableForCode logs displayed successfully as false if not available`() = runScenario(
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)

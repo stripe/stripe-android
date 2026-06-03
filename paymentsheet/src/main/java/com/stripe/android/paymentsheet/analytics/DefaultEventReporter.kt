@@ -544,7 +544,6 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onPaymentMethodMessagePromotionsFetchBegin() {
         durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
-        println("yeet fetching")
         fireEvent(
             PaymentSheetEvent.PaymentMethodMessaging.Fetched()
         )
@@ -552,7 +551,6 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
         val duration = durationProvider.end(DurationProvider.Key.PaymentMethodMessaging)
-        println("yeet displayed $duration $displayedSuccessfully")
         fireEvent(
             PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully)
         )
