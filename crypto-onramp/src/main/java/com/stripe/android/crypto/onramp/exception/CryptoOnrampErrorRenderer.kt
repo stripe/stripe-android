@@ -3,13 +3,13 @@ package com.stripe.android.crypto.onramp.exception
 internal object CryptoOnrampErrorRenderer {
     fun renderGenericApiDeveloperMessage(
         context: APIErrorContext,
-        sdkVersion: String,
+        sdkVersions: List<SDKVersion>,
     ): String {
         return renderApiDeveloperMessage(
             context = context,
             summary = context.apiErrorMessage ?: "Stripe API request failed.",
             nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
-            sdkVersion = sdkVersion,
+            sdkVersions = sdkVersions,
         )
     }
 
@@ -17,7 +17,7 @@ internal object CryptoOnrampErrorRenderer {
         context: APIErrorContext,
         summary: String,
         nextStep: String,
-        sdkVersion: String,
+        sdkVersions: List<SDKVersion>,
     ): String {
         return renderDeveloperMessage(
             summary = summary,
@@ -25,7 +25,7 @@ internal object CryptoOnrampErrorRenderer {
             code = context.apiErrorCode,
             nextStep = nextStep,
             docUrl = context.docUrl,
-            sdk = "stripe-android@$sdkVersion",
+            sdkVersions = sdkVersions,
         )
     }
 
@@ -35,7 +35,7 @@ internal object CryptoOnrampErrorRenderer {
         code: String?,
         nextStep: String,
         docUrl: String?,
-        sdk: String,
+        sdkVersions: List<SDKVersion>,
     ): String {
         val footer = buildList {
             code?.let {
@@ -45,7 +45,7 @@ internal object CryptoOnrampErrorRenderer {
             docUrl?.let {
                 add("Docs: $it")
             }
-            add("SDK: $sdk")
+            add("SDK: ${sdkVersionDescription(sdkVersions)}")
         }
 
         return buildList {
@@ -58,6 +58,11 @@ internal object CryptoOnrampErrorRenderer {
             add("")
             addAll(footer)
         }.joinToString(separator = "\n")
+    }
+
+    private fun sdkVersionDescription(sdkVersions: List<SDKVersion>): String {
+        val normalizedSdkVersions = sdkVersions.ifEmpty { listOf(SDKVersion.stripeAndroid) }
+        return normalizedSdkVersions.joinToString(separator = ", ") { it.debugDescription }
     }
 
     private fun requestContextLines(

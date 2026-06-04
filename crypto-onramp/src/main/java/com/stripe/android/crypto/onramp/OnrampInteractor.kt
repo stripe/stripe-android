@@ -91,6 +91,7 @@ internal class OnrampInteractor @Inject constructor(
             context = application,
             operation = operation,
             publishableKey = state.value.configurationState?.publishableKey,
+            additionalSdkVersions = state.value.configurationState?.additionalSdkVersions.orEmpty(),
         )
     }
 

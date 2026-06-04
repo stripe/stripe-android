@@ -1,6 +1,8 @@
 package com.stripe.android.crypto.onramp.model
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
+import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkAppearance
 
@@ -12,6 +14,7 @@ import com.stripe.android.link.LinkAppearance
  * @property appearance Appearance settings for the PaymentSheet UI.
  * @property cryptoCustomerId The unique customer ID for crypto onramp.
  * @property googlePayConfig The configuration for Google Pay, if Google Pay is supported by the merchant.
+ * @property additionalSdkVersions Additional wrapper SDK versions to include in developer diagnostics.
  */
 @ExperimentalCryptoOnramp
 class OnrampConfiguration {
@@ -20,6 +23,7 @@ class OnrampConfiguration {
     private var appearance: LinkAppearance? = null
     private var cryptoCustomerId: String? = null
     private var googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
+    private var additionalSdkVersions: List<SDKVersion> = emptyList()
 
     /**
      * Sets the display name of the merchant.
@@ -57,12 +61,23 @@ class OnrampConfiguration {
         this.googlePayConfig = googlePayConfig
     }
 
+    /**
+     * Additional wrapper SDK versions to include in developer diagnostics, such as the
+     * Stripe React Native SDK version. Do not include Stripe Android; it is always included
+     * automatically.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun additionalSdkVersions(additionalSdkVersions: List<SDKVersion>) = apply {
+        this.additionalSdkVersions = additionalSdkVersions
+    }
+
     internal class State(
         val merchantDisplayName: String,
         val publishableKey: String,
         val appearance: LinkAppearance,
         val cryptoCustomerId: String? = null,
-        val googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
+        val googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null,
+        val additionalSdkVersions: List<SDKVersion> = emptyList()
     )
 
     internal fun build(): State {
@@ -75,7 +90,8 @@ class OnrampConfiguration {
             },
             appearance = appearance ?: LinkAppearance(),
             cryptoCustomerId = cryptoCustomerId,
-            googlePayConfig = googlePayConfig
+            googlePayConfig = googlePayConfig,
+            additionalSdkVersions = additionalSdkVersions
         )
     }
 }

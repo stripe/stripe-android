@@ -15,6 +15,7 @@ import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
@@ -311,7 +312,9 @@ class OnrampInteractorTest {
         assertThat(apiError.context.apiErrorType).isNull()
         assertThat(apiError.code).isEqualTo("email_blocked")
         assertThat(apiError.docUrl).isEqualTo("https://stripe.com/docs/error-codes/email_blocked")
-        assertThat(apiError.sdkVersion).isNotEmpty()
+        assertThat(apiError.sdkVersions).hasSize(1)
+        assertThat(apiError.sdkVersions.single().name).isEqualTo("stripe-android")
+        assertThat(apiError.sdkVersions.single().version).isNotEmpty()
         assertThat(apiError.underlyingError).isSameInstanceAs(apiError.context.underlyingError)
         assertThat(apiError.developerMessage)
             .isEqualTo(
@@ -328,9 +331,53 @@ class OnrampInteractorTest {
                 Code: email_blocked
                 Next step: Inspect the preserved Stripe API error for details and retry after correcting the request.
                 Docs: https://stripe.com/docs/error-codes/email_blocked
-                SDK: stripe-android@${apiError.sdkVersion}
+                SDK: ${apiError.sdkVersions.single().debugDescription}
                 """.trimIndent()
             )
+    }
+
+    @Test
+    fun testHasLinkAccountIncludesAdditionalSdkVersionsInDeveloperMessage() = runTest {
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    code = "link_failed_to_attest_request",
+                    message = "App attestation failed",
+                    extraFields = mapOf(
+                        "reason" to "app_not_play_recognized",
+                    )
+                ),
+                requestId = "req_456",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(
+            createConfigurationState(
+                additionalSdkVersions = listOf(
+                    SDKVersion(name = "stripe-react-native", version = "1.2.3"),
+                ),
+            ),
+        )
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertThat(attestationError.sdkVersions).containsExactly(
+            SDKVersion(name = "stripe-android", version = attestationError.sdkVersions.first().version),
+            SDKVersion(name = "stripe-react-native", version = "1.2.3"),
+        ).inOrder()
+        assertThat(attestationError.developerMessage).contains(
+            "SDK: stripe-android@${attestationError.sdkVersions.first().version}, stripe-react-native@1.2.3"
+        )
     }
 
     @Test
@@ -1263,12 +1310,16 @@ class OnrampInteractorTest {
         consumerSessionClientSecret = null
     )
 
-    private fun createConfigurationState(cryptoCustomerId: String? = null): OnrampConfiguration.State =
+    private fun createConfigurationState(
+        cryptoCustomerId: String? = null,
+        additionalSdkVersions: List<SDKVersion> = emptyList(),
+    ): OnrampConfiguration.State =
         OnrampConfiguration()
             .merchantDisplayName("merchant-display-name")
             .publishableKey("pk_test_12345")
             .appearance(mock())
             .cryptoCustomerId(cryptoCustomerId)
+            .additionalSdkVersions(additionalSdkVersions)
             .build()
 
     private fun createInteractor(
@@ -1316,7 +1367,9 @@ class OnrampInteractorTest {
         assertThat(attestationError.context.apiErrorType).isEqualTo("api_error")
         assertThat(attestationError.code).isEqualTo("link_failed_to_attest_request")
         assertThat(attestationError.docUrl).isNull()
-        assertThat(attestationError.sdkVersion).isNotEmpty()
+        assertThat(attestationError.sdkVersions).hasSize(1)
+        assertThat(attestationError.sdkVersions.single().name).isEqualTo("stripe-android")
+        assertThat(attestationError.sdkVersions.single().version).isNotEmpty()
         assertThat(attestationError.underlyingError).isSameInstanceAs(backendError)
         assertThat(attestationError.developerMessage)
             .isEqualTo(
@@ -1333,7 +1386,7 @@ class OnrampInteractorTest {
 
                 Code: link_failed_to_attest_request
                 Next step: Install the app from a Google Play testing or production track and retry the Onramp flow. Internal, closed, open testing, and production tracks are supported. Debug builds and sideloaded APKs will not pass this check.
-                SDK: stripe-android@${attestationError.sdkVersion}
+                SDK: ${attestationError.sdkVersions.single().debugDescription}
                 """.trimIndent()
             )
     }

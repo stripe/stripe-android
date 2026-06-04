@@ -8,14 +8,14 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 class UncategorizedApiErrorException internal constructor(
     context: APIErrorContext,
-    sdkVersion: String,
+    sdkVersions: List<SDKVersion>,
     fallbackUserMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
+    sdkVersions = sdkVersions,
     userMessage = context.userMessage(fallbackUserMessage),
     developerMessage = CryptoOnrampErrorRenderer.renderGenericApiDeveloperMessage(
         context = context,
-        sdkVersion = sdkVersion,
+        sdkVersions = sdkVersions,
     ),
-    sdkVersion = sdkVersion,
 )

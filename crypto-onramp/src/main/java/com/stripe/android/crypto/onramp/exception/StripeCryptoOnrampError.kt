@@ -31,9 +31,10 @@ interface StripeCryptoOnrampError {
     val docUrl: String?
 
     /**
-     * The SDK version that produced this error.
+     * SDK versions included in developer diagnostics, including Stripe Android and any
+     * additional wrapper SDK versions.
      */
-    val sdkVersion: String
+    val sdkVersions: List<SDKVersion>
 
     /**
      * The original cause that was mapped into this richer Crypto Onramp error.

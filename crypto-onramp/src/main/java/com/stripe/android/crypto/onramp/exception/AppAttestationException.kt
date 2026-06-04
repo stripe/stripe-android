@@ -8,13 +8,13 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 class AppAttestationException internal constructor(
     context: APIErrorContext,
-    sdkVersion: String,
+    sdkVersions: List<SDKVersion>,
     fallbackUserMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
+    sdkVersions = sdkVersions,
     userMessage = context.userMessage(fallbackUserMessage),
-    developerMessage = buildAppAttestationDeveloperMessage(context, sdkVersion),
-    sdkVersion = sdkVersion,
+    developerMessage = buildAppAttestationDeveloperMessage(context, sdkVersions),
 )
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"
@@ -93,13 +93,13 @@ private fun attestationSummary(description: String): String {
 
 private fun buildAppAttestationDeveloperMessage(
     context: APIErrorContext,
-    sdkVersion: String,
+    sdkVersions: List<SDKVersion>,
 ): String {
     return CryptoOnrampErrorRenderer.renderApiDeveloperMessage(
         context = context,
         summary = appAttestationSummary(context.reason)
             ?: (context.apiErrorMessage ?: "App attestation failed."),
         nextStep = appAttestationNextStep(context.reason),
-        sdkVersion = sdkVersion,
+        sdkVersions = sdkVersions,
     )
 }

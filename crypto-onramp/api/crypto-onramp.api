@@ -75,7 +75,7 @@ public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApi
 	public final fun getContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
 	public final fun getDeveloperMessage ()Ljava/lang/String;
 	public final fun getDocUrl ()Ljava/lang/String;
-	public final fun getSdkVersion ()Ljava/lang/String;
+	public final fun getSdkVersions ()Ljava/util/List;
 	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;
 	public synthetic fun getUnderlyingError ()Ljava/lang/Throwable;
 	public final fun getUserMessage ()Ljava/lang/String;
@@ -102,11 +102,26 @@ public final class com/stripe/android/crypto/onramp/exception/PaymentFailedExcep
 	public static final field $stable I
 }
 
+public final class com/stripe/android/crypto/onramp/exception/SDKVersion {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/exception/SDKVersion;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/exception/SDKVersion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/exception/SDKVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDebugDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
 public abstract interface class com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
 	public abstract fun getCode ()Ljava/lang/String;
 	public abstract fun getDeveloperMessage ()Ljava/lang/String;
 	public abstract fun getDocUrl ()Ljava/lang/String;
-	public abstract fun getSdkVersion ()Ljava/lang/String;
+	public abstract fun getSdkVersions ()Ljava/util/List;
 	public abstract fun getUnderlyingError ()Ljava/lang/Throwable;
 	public abstract fun getUserMessage ()Ljava/lang/String;
 }
@@ -269,6 +284,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMe
 public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration {
 	public static final field $stable I
 	public fun <init> ()V
+	public final fun additionalSdkVersions (Ljava/util/List;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun appearance (Lcom/stripe/android/link/LinkAppearance;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun cryptoCustomerId (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun googlePayConfig (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;

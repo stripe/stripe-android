@@ -9,7 +9,7 @@ NEXT_VERSION_BUMP: PATCH
 * [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now include error code, decline code, and error type in the exception thrown.
 
 ### CryptoOnramp
-* [ADDED][13156](https://github.com/stripe/stripe-android/pull/13156) Added `StripeCryptoOnrampError`, `CryptoOnrampApiException`, `AppAttestationException`, and `UncategorizedApiErrorException` to expose richer developer-facing diagnostics and preserved backend API error context for Crypto Onramp failures.
+* [ADDED][13156](https://github.com/stripe/stripe-android/pull/13156) Added `SDKVersion`, `StripeCryptoOnrampError`, `CryptoOnrampApiException`, `AppAttestationException`, and `UncategorizedApiErrorException` to expose richer developer-facing diagnostics and preserved backend API error context for Crypto Onramp failures.
 * [CHANGED][13156](https://github.com/stripe/stripe-android/pull/13156) Improved Crypto Onramp API error handling with localized fallback user messaging and more consistent error mapping across attestation, payment collection, and checkout flows.
 
 
