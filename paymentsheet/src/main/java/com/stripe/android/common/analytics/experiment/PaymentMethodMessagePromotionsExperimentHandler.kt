@@ -19,7 +19,11 @@ internal class DefaultPaymentMethodMessagePromotionsExperimentHandler @Inject co
     override fun logExposure(metadata: PaymentMethodMetadata) {
         val variant = metadata.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
-        ] ?: return
+        ]
+
+        println("PMM Experiment assignment: $variant")
+
+        variant ?: return
 
         val exposure = LoggableExperiment.OcsMobilePaymentMethodMessagingPromotions(
             experimentsData = metadata.experimentsData,
