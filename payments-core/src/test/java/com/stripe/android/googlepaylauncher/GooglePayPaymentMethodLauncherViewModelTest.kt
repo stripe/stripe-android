@@ -63,6 +63,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     private val viewModel = GooglePayPaymentMethodLauncherViewModel(
+        ApplicationProvider.getApplicationContext(),
         paymentsClient,
         REQUEST_OPTIONS,
         ARGS,
@@ -191,6 +192,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     @Test
     fun `createPaymentDataRequest() with isElements=true should set 'stripe-elements' software id`() {
         val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
             ARGS.copy(isElements = true),
@@ -212,6 +214,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     @Test
     fun `createPaymentDataRequest() with isElements=false should set 'stripe-launcher' software id`() {
         val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
             ARGS.copy(isElements = false),
