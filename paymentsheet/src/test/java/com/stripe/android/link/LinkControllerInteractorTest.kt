@@ -33,6 +33,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
 import org.junit.Before
@@ -270,6 +271,63 @@ class LinkControllerInteractorTest {
         interactor.configureIfNeeded()
 
         assertThat(savedStateHandle.contains(LinkControllerInteractor.LINK_CONFIGURED_KEY)).isTrue()
+    }
+
+    @Test
+    fun `configureIfNeeded() retries and succeeds when previous attempt failed`() = runTest {
+        val error = Exception("Load failed")
+        linkConfigurationLoader.linkConfigurationResult = Result.failure(error)
+        val interactor = createInteractor()
+
+        val firstResult = interactor.configureIfNeeded()
+
+        assertThat(firstResult).isEqualTo(LinkController.ConfigureResult.Failed(error))
+        assertThat(linkConfigurationLoader.loadCallCount).isEqualTo(1)
+
+        linkConfigurationLoader.linkConfigurationResult = Result.success(
+            LinkMetadata(
+                linkConfiguration = TestFactory.LINK_CONFIGURATION,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            )
+        )
+
+        val secondResult = interactor.configureIfNeeded()
+
+        assertThat(secondResult).isEqualTo(LinkController.ConfigureResult.Success)
+        assertThat(linkConfigurationLoader.loadCallCount).isEqualTo(2)
+    }
+
+    @Test
+    fun `presentFull() delivers PresentResult Failed when configureIfNeeded fails`() = runTest {
+        val error = Exception("Configure failed")
+        linkConfigurationLoader.linkConfigurationResult = Result.failure(error)
+        val interactor = createInteractor()
+
+        interactor.presentResultFlow.test {
+            interactor.presentFull(
+                launcher = mock(),
+                email = "test@example.com",
+                phoneNumber = null,
+            )
+            val result = awaitItem()
+            assertThat(result).isEqualTo(LinkController.PresentResult.Failed(error))
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `presentFull() joins in-flight configureIfNeeded and does not start a second job`() = runTest {
+        val interactor = createInteractor()
+        interactor.configureIfNeeded() // populates configureJob
+
+        interactor.presentFull(
+            launcher = mock(),
+            email = "test@example.com",
+            phoneNumber = null,
+        )
+        advanceUntilIdle()
+
+        assertThat(linkConfigurationLoader.loadCallCount).isEqualTo(1)
     }
 
     @Test
