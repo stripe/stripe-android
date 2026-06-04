@@ -11,6 +11,7 @@ import android.graphics.Bitmap
 import android.graphics.Rect
 import android.net.Uri
 import android.view.ViewTreeObserver
+import android.view.WindowManager
 import android.webkit.JavascriptInterface
 import android.webkit.JsResult
 import android.webkit.PermissionRequest
@@ -423,8 +424,13 @@ internal class StripeConnectWebView private constructor(
                 }
             }
 
-            // Hook into the Activity lifecycle
             val activity = (view.findActivity() as? ComponentActivity)
+            if (activity == null || activity.isFinishing || activity.isDestroyed) {
+                result.cancel()
+                return true
+            }
+
+            // Hook into the Activity lifecycle
             val activityLifecycleObserver =
                 object : DefaultLifecycleObserver {
                     override fun onDestroy(owner: LifecycleOwner) {
@@ -433,7 +439,7 @@ internal class StripeConnectWebView private constructor(
                         returnResult()
                     }
                 }
-            activity?.lifecycle?.addObserver(activityLifecycleObserver)
+            activity.lifecycle.addObserver(activityLifecycleObserver)
 
             val okText = alert.buttons?.ok
                 ?: view.context.getString(android.R.string.ok)
@@ -444,30 +450,36 @@ internal class StripeConnectWebView private constructor(
             // Use the two-arg Builder to enforce an AppCompat theme. On some devices/OEM WebView
             // implementations, view.context may not carry AppCompat theme attributes, which causes
             // AppCompatDelegateImpl.createSubDecor to throw an IllegalStateException.
-            AlertDialog.Builder(view.context, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
-                .setCancelable(true)
-                .setOnCancelListener {
-                    didConfirm = false
-                }
-                .setOnDismissListener {
-                    // Invoked on dialog dismissals but not configuration changes.
-                    returnResult()
-                    // Clean up the observer.
-                    activity?.lifecycle?.removeObserver(activityLifecycleObserver)
-                }
-                .setMessage(alert.message)
-                .setPositiveButton(okText) { _, _ ->
-                    didConfirm = true
-                }
-                .apply {
-                    alert.title?.let { setTitle(it) }
-                    cancelText?.let {
-                        setNegativeButton(it) { _, _ ->
-                            didConfirm = false
+            try {
+                AlertDialog.Builder(view.context, androidx.appcompat.R.style.Theme_AppCompat_Light_Dialog_Alert)
+                    .setCancelable(true)
+                    .setOnCancelListener {
+                        didConfirm = false
+                    }
+                    .setOnDismissListener {
+                        // Invoked on dialog dismissals but not configuration changes.
+                        returnResult()
+                        // Clean up the observer.
+                        activity.lifecycle.removeObserver(activityLifecycleObserver)
+                    }
+                    .setMessage(alert.message)
+                    .setPositiveButton(okText) { _, _ ->
+                        didConfirm = true
+                    }
+                    .apply {
+                        alert.title?.let { setTitle(it) }
+                        cancelText?.let {
+                            setNegativeButton(it) { _, _ ->
+                                didConfirm = false
+                            }
                         }
                     }
-                }
-                .show()
+                    .show()
+            } catch (e: WindowManager.BadTokenException) {
+                logger.error("($loggerTag) Error showing alert dialog", e)
+                activity.lifecycle.removeObserver(activityLifecycleObserver)
+                result.cancel()
+            }
             return true
         }
 

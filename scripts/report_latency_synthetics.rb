@@ -60,7 +60,7 @@ def device_info
   }
 end
 
-def analytics_params(test_name:, duration_ms:, session_id:, publishable_key:, device_info:, app_name:)
+def analytics_params(test_name:, duration_seconds:, session_id:, publishable_key:, device_info:, app_name:)
   {
     'analytics_ua' => ANALYTICS_UA,
     'os_name' => device_info.fetch(:os_name),
@@ -74,7 +74,7 @@ def analytics_params(test_name:, duration_ms:, session_id:, publishable_key:, de
     'app_name' => app_name,
     'event' => 'mpe.synthetic_latency',
     'test' => test_name,
-    'duration' => duration_ms
+    'duration' => duration_seconds
   }.tap do |params|
     params['publishable_key'] = publishable_key if publishable_key && !publishable_key.empty?
   end
@@ -94,10 +94,9 @@ def emit_synthetics_events(results:, publishable_key:, dry_run:)
 
   results.sort.each do |test_name, durations|
     durations.each_with_index do |duration_seconds, index|
-      duration_ms = (duration_seconds * 1000).round
       params = analytics_params(
         test_name: test_name,
-        duration_ms: duration_ms,
+        duration_seconds: duration_seconds,
         session_id: session_id,
         publishable_key: publishable_key,
         device_info: device,
@@ -123,7 +122,7 @@ def emit_synthetics_events(results:, publishable_key:, dry_run:)
         raise "Failed to send analytics for #{test_name} sample #{index + 1}: #{response.code} #{response.message}"
       end
 
-      puts "Sent analytics event #{test_name} sample #{index + 1} (#{duration_ms}ms)"
+      puts "Sent analytics event #{test_name} sample #{index + 1} (#{duration_seconds}s)"
     end
   end
 end

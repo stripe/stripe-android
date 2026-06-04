@@ -29,7 +29,10 @@ internal object CheckoutSessionFixtures {
                 "name": "Llama Figure",
                 "quantity": 1,
                 "subtotal": 999,
-                "total": 999
+                "total": 999,
+                "price": {
+                  "unit_amount": 999
+                }
               }
             ]
           },
@@ -578,7 +581,10 @@ internal object CheckoutSessionFixtures {
                         "name": "Llama Figure",
                         "quantity": 2,
                         "subtotal": 1998,
-                        "total": 1998
+                        "total": 1998,
+                        "price": {
+                            "unit_amount": 999
+                        }
                     },
                     {
                         "id": "li_item2",
@@ -586,7 +592,10 @@ internal object CheckoutSessionFixtures {
                         "name": "Alpaca Plushie",
                         "quantity": 1,
                         "subtotal": 2499,
-                        "total": 2499
+                        "total": 2499,
+                        "price": {
+                            "unit_amount": 2499
+                        }
                     }
                 ]
             },

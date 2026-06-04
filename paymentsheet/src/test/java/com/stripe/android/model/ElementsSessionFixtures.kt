@@ -512,6 +512,7 @@ internal object ElementsSessionFixtures {
         paymentMethodsWithLinkDetails: String = "",
         passMobilePaymentElement: Boolean = true,
         passCustomerSheet: Boolean = true,
+        customerEmail: String? = null,
     ): JSONObject {
         return JSONObject(
             """
@@ -633,6 +634,7 @@ internal object ElementsSessionFixtures {
                   "livemode": false
                 },
                 "default_payment_method": "pm_123",
+                "email": ${customerEmail?.let { "\"$it\"" } ?: "null"},
                 "payment_methods": [
                   {
                     "id": "pm_123",

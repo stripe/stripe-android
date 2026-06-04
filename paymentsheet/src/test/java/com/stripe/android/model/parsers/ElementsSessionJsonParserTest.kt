@@ -747,6 +747,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -803,6 +804,27 @@ class ElementsSessionJsonParserTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `ElementsSession has expected customer email in the response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            customerEmail = "customer@example.com",
+        )
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer?.email).isEqualTo("customer@example.com")
     }
 
     @Test
@@ -863,6 +885,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -933,6 +956,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -1208,6 +1232,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",

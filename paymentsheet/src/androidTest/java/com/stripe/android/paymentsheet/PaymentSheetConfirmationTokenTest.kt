@@ -1,9 +1,11 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
@@ -16,6 +18,7 @@ import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.paymentelementnetwork.setupV1PaymentMethodsResponse
 import org.junit.Rule
 import org.junit.Test
 
@@ -131,6 +134,9 @@ internal class PaymentSheetConfirmationTokenTest {
             ) { response ->
                 response.testBodyFromFile("payment-methods-get-success.json")
             }
+
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
         }
 
         testContext.presentPaymentSheet {

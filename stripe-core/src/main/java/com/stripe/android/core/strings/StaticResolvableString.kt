@@ -11,6 +11,11 @@ internal data class StaticResolvableString(
 ) : ResolvableString {
     @Suppress("SpreadOperator")
     override fun resolve(context: Context): String {
-        return value.format(*resolveArgs(context, args))
+        val resolved = resolveArgs(context, args)
+        // Avoid running String.format when there are no args: the value may be raw user input
+        // containing percent signs (e.g. "%@", "50%"), which would cause a
+        // java.util.UnknownFormatConversionException if passed through String.format as a
+        // format string.
+        return if (resolved.isEmpty()) value else value.format(*resolved)
     }
 }

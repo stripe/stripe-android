@@ -550,7 +550,9 @@ workflows:
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
       - save-gradle-configuration-cache@1: { }
-      - save-gradle-cache@1: { }
+      - save-gradle-cache@1:
+          inputs:
+            - save_transforms: true
 step_bundles:
   export_unit_test_results:
     inputs:

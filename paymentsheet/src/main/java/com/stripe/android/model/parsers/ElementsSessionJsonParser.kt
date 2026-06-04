@@ -288,8 +288,13 @@ internal class ElementsSessionJsonParser(
             it.isNotBlank()
         }
 
+        val email = json.optString(FIELD_CUSTOMER_EMAIL).takeIf {
+            it.isNotBlank()
+        }
+
         return ElementsSession.Customer(
             paymentMethods = mergedPaymentMethods,
+            email = email,
             session = customerSession,
             defaultPaymentMethod = defaultPaymentMethod
         )
@@ -581,6 +586,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_CUSTOMER_API_KEY = "api_key"
         private const val FIELD_CUSTOMER_API_KEY_EXPIRY = "api_key_expiry"
         private const val FIELD_CUSTOMER_NAME = "customer"
+        private const val FIELD_CUSTOMER_EMAIL = "email"
         private const val FIELD_COMPONENTS = "components"
         private const val FIELD_MOBILE_PAYMENT_ELEMENT = "mobile_payment_element"
         private const val FIELD_CUSTOMER_SHEET = "customer_sheet"

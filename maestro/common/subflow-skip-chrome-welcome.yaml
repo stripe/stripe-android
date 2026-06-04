@@ -17,4 +17,9 @@ appId: ${APP_ID}
     id: "com.android.chrome:id/negative_button"
     optional: true
 - waitForAnimationToEnd
+# DISMISS "Chrome keeps stopping" crash dialog if present
+- tapOn:
+    text: "Close app"
+    optional: true
+- waitForAnimationToEnd
 ###############################################
