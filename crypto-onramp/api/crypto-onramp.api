@@ -284,7 +284,6 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCollectPaymentMe
 public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration {
 	public static final field $stable I
 	public fun <init> ()V
-	public final fun additionalSdkVersions (Ljava/util/List;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun appearance (Lcom/stripe/android/link/LinkAppearance;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun cryptoCustomerId (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun googlePayConfig (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
