@@ -98,9 +98,9 @@ internal class FakeEventReporter : EventReporter {
     val pmmPromotionsFetched: ReceiveTurbine<Unit> =
         _pmmPromotionsFetched
 
-    private val _pmmPromotionsIncomplete = Turbine<Unit>()
-    val pmmPromotionsIncomplete: ReceiveTurbine<Unit> =
-        _pmmPromotionsIncomplete
+    private val _pmmPromotionsDisplayed = Turbine<Boolean>()
+    val pmmPromotionsDisplayed: ReceiveTurbine<Boolean> =
+        _pmmPromotionsDisplayed
 
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
@@ -128,7 +128,7 @@ internal class FakeEventReporter : EventReporter {
         _failedToAddCardWithTapToAddCalls.ensureAllEventsConsumed()
         _tapToAddAttemptWithUnsupportedDeviceCalls.ensureAllEventsConsumed()
         _pmmPromotionsFetched.ensureAllEventsConsumed()
-        _pmmPromotionsIncomplete.ensureAllEventsConsumed()
+        _pmmPromotionsDisplayed.ensureAllEventsConsumed()
     }
 
     override fun onInit() {
@@ -281,12 +281,12 @@ internal class FakeEventReporter : EventReporter {
     override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
     }
 
-    override fun onPaymentMethodMessagePromotionsFetched() {
+    override fun onPaymentMethodMessagePromotionsFetchBegin() {
         _pmmPromotionsFetched.add(Unit)
     }
 
-    override fun onPaymentMethodMessagePromotionsIncomplete() {
-        _pmmPromotionsIncomplete.add(Unit)
+    override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
+        _pmmPromotionsDisplayed.add(displayedSuccessfully)
     }
 
     override fun onCardScanStarted(implementation: String) {

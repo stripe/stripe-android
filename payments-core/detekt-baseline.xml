@@ -17,6 +17,7 @@
     <ID>LargeClass:CardMultilineWidget.kt:CardMultilineWidget : LinearLayoutCardWidget</ID>
     <ID>LargeClass:CardMultilineWidgetTest.kt:CardMultilineWidgetTest</ID>
     <ID>LargeClass:CardNumberEditTextTest.kt:CardNumberEditTextTest</ID>
+    <ID>LargeClass:GooglePayJsonFactoryTest.kt:GooglePayJsonFactoryTest</ID>
     <ID>LargeClass:PaymentIntentFixtures.kt:PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentIntentFlowResultProcessorTest.kt:PaymentIntentFlowResultProcessorTest</ID>
     <ID>LargeClass:SetupIntentFixtures.kt:SetupIntentFixtures</ID>

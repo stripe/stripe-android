@@ -10,6 +10,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
@@ -56,7 +57,8 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
         internal val clientAttributionMetadata: ClientAttributionMetadata? = null,
         internal val isElements: Boolean = false,
-        internal val publishableKey: String? = null
+        internal val publishableKey: String? = null,
+        internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormResult
@@ -64,7 +65,8 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
         val confirmationOption = selectionHolder.selection.value?.toConfirmationOption(
             configuration = configuration.asCommonConfiguration(),
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = paymentMethodMetadata.cardFundingFilter
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
         ) ?: return null
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,

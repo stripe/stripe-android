@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
@@ -231,10 +230,10 @@ internal interface EmbeddedActivityModule {
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
             promotion: PaymentMethodMessagePromotion?,
-            experimentHandler: PaymentMethodMessagePromotionsExperimentHandler
+            eventReporter: EventReporter
         ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionsHelper(
             listOfNotNull(promotion),
-            experimentHandler
+            eventReporter
         )
     }
 }

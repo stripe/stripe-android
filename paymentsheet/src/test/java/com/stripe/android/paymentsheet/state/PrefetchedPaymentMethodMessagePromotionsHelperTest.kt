@@ -7,7 +7,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
-import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -29,8 +29,29 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
                 )
             )
 
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
         assertThat(result).isEqualTo(promotion)
-        experimentHandler.logExposureCalls.awaitItem()
+    }
+
+    @Test
+    fun `logs displayed successfully as false if promotion not available and in treatment`() = runScenario(
+        promotions = null
+    ) {
+        val result = helper.getPromotionIfAvailableForCode(
+            PaymentMethod.Type.Affirm.code,
+            PaymentMethodMetadataFactory.create(
+                experimentsData = ElementsSession.ExperimentsData(
+                    arbId = "arb_123",
+                    experimentAssignments = mapOf(
+                        ElementsSession.ExperimentAssignment
+                            .OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
+                    )
+                )
+            )
+        )
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isFalse()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -48,7 +69,6 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
             )
         )
         assertThat(result).isNull()
-        experimentHandler.logExposureCalls.awaitItem()
     }
 
     @Test
@@ -63,28 +83,30 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
             )
         )
         assertThat(result).isNull()
-        experimentHandler.logExposureCalls.awaitItem()
     }
 
     private fun runScenario(
+        promotions: List<PaymentMethodMessagePromotion>? = listOf(promotion),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
-        val experimentHandler = FakePaymentMethodMessagePromotionsExperimentHandler()
+        val eventReporter = FakeEventReporter()
         val helper = PrefetchedPaymentMethodMessagePromotionsHelper(
-            promotions = listOf(promotion),
-            paymentMethodMessagePromotionsExperimentHandler = experimentHandler
+            promotions = promotions,
+            eventReporter = eventReporter
         )
 
         Scenario(
             helper = helper,
-            experimentHandler = experimentHandler
+            eventReporter = eventReporter
         ).block()
+
+        eventReporter.validate()
     }
 
     private class Scenario(
         val helper: PrefetchedPaymentMethodMessagePromotionsHelper,
-        val experimentHandler: FakePaymentMethodMessagePromotionsExperimentHandler
+        val eventReporter: FakeEventReporter
     )
 
     private companion object {

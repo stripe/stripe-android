@@ -585,12 +585,14 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     sealed class PaymentMethodMessaging : PaymentSheetEvent() {
 
         class Fetched : PaymentMethodMessaging() {
-            override val eventName: String = "payment_method_messaging_fetched"
+            override val eventName: String = "payment_method_messaging_fetch_begin"
         }
 
-        class Incomplete(val duration: Duration?) : PaymentMethodMessaging() {
+        class Displayed(val duration: Duration?, displayedSuccessfully: Boolean) : PaymentMethodMessaging() {
             override val eventName: String = "payment_method_messaging_incomplete"
-            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds()
+            override val params: Map<String, Any?> = duration.mapOfDurationInSeconds() + mapOf(
+                "displayed_successfully" to displayedSuccessfully
+            )
         }
     }
 

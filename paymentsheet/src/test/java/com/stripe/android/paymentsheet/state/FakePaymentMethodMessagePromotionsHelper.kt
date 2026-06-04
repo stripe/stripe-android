@@ -32,6 +32,13 @@ internal class FakePaymentMethodMessagePromotionsHelper(
         return promotions
     }
 
+    override fun getPromotionProvider(
+        code: PaymentMethodCode,
+        metadata: PaymentMethodMetadata
+    ): (() -> PaymentMethodMessagePromotion?)? {
+        return { getPromotionIfAvailableForCode(code, metadata) }
+    }
+
     fun validate() {
         calls.ensureAllEventsConsumed()
     }

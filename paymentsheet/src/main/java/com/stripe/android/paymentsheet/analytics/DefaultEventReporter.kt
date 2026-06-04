@@ -559,17 +559,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    override fun onPaymentMethodMessagePromotionsFetched() {
+    override fun onPaymentMethodMessagePromotionsFetchBegin() {
         durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
         fireEvent(
             PaymentSheetEvent.PaymentMethodMessaging.Fetched()
         )
     }
 
-    override fun onPaymentMethodMessagePromotionsIncomplete() {
+    override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
         val duration = durationProvider.end(DurationProvider.Key.PaymentMethodMessaging)
         fireEvent(
-            PaymentSheetEvent.PaymentMethodMessaging.Incomplete(duration)
+            PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully)
         )
     }
 
