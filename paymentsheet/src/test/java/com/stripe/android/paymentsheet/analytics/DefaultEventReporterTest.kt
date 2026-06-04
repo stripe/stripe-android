@@ -189,12 +189,12 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_succeeded")
-        @Suppress("UNCHECKED_CAST")
-        val loadTimings = request.params["load_timings"] as Map<String, Int>
-        assertThat(loadTimings["fetchElementsSession"]).isEqualTo(100000)
-        assertThat(loadTimings["fetchSavedPaymentMethods"]).isEqualTo(50000)
-        assertThat(loadTimings["lookUpLinkAccount"]).isEqualTo(20000)
-        assertThat(loadTimings["retrieveCustomer"]).isEqualTo(30000)
+
+        val loadTimings = request.params["load_timings"] as Map<*, *>
+        assertThat(loadTimings).containsEntry("fetchElementsSession", 100000)
+        assertThat(loadTimings).containsEntry("fetchSavedPaymentMethods", 50000)
+        assertThat(loadTimings).containsEntry("lookUpLinkAccount", 20000)
+        assertThat(loadTimings).containsEntry("retrieveCustomer", 30000)
     }
 
     @Test
@@ -237,9 +237,9 @@ class DefaultEventReporterTest {
 
         val request = analyticsRequestExecutor.requestTurbine.awaitItem()
         assertThat(request.params).containsEntry("event", "mc_load_failed")
-        @Suppress("UNCHECKED_CAST")
-        val loadTimings = request.params["load_timings"] as Map<String, Int>
-        assertThat(loadTimings["fetchElementsSession"]).isEqualTo(200000)
+
+        val loadTimings = request.params["load_timings"] as Map<*, *>
+        assertThat(loadTimings).containsEntry("fetchElementsSession", 200000)
         assertThat(loadTimings).doesNotContainKey("fetchSavedPaymentMethods")
         assertThat(loadTimings).doesNotContainKey("lookUpLinkAccount")
         assertThat(loadTimings).doesNotContainKey("retrieveCustomer")
