@@ -3,6 +3,7 @@ import groovy.xml.XmlSlurper
 
 class InstrumentationTestReportSplitter {
     private static final XmlSlurper SLURPER = new XmlSlurper(false, false)
+    private static final String INSTRUMENTATION_TEST_RETRY_LOG_TAG = 'STRIPE_INSTRUMENTATION_TEST_RETRY_MARKER'
 
     static void split(File moduleDir, File outDir) {
         def resultRoots = [
@@ -127,31 +128,92 @@ class InstrumentationTestReportSplitter {
         return testName.replaceFirst(/_bstackretry\d+$/, '')
     }
 
+    private static List<Map> buildExpandedRows(String bucketFqcn, List rows, Map<String, File> logcatByTest) {
+        def expanded = []
+        rows.each { tc ->
+            def rawName = tc.@name?.toString() ?: ''
+            def strippedName = stripBrowserStackRetrySuffix(rawName)
+            def fqcn = tc.@classname?.toString() ?: bucketFqcn
+            def logcatFile = findLogcatFile(logcatByTest, fqcn, rawName, strippedName)
+            def markerLines = []
+            if (logcatFile?.file) {
+                logcatFile.eachLine('UTF-8') { line ->
+                    if (line.contains(INSTRUMENTATION_TEST_RETRY_LOG_TAG)) {
+                        markerLines << line
+                    }
+                }
+            }
+            markerLines.each { line ->
+                expanded << [
+                        kind    : 'synthetic_retry',
+                        fqcn    : fqcn,
+                        baseName: strippedName,
+                        logLine : line,
+                ]
+            }
+            expanded << [
+                    kind         : 'original',
+                    tc           : tc,
+                    fqcn         : fqcn,
+                    strippedName : strippedName,
+                    rawName      : rawName,
+            ]
+        }
+        expanded
+    }
+
     private static void writeReport(File outFile, String className, List rows, Map<String, File> logcatByTest) {
         outFile.parentFile.mkdirs()
+        def expanded = buildExpandedRows(className, rows, logcatByTest)
         def writer = new StringWriter()
         writer << '<?xml version="1.0" encoding="UTF-8"?>\n'
         def mb = new MarkupBuilder(writer)
         mb.setDoubleQuotes(true)
         mb.testsuite(
                 name: className,
-                tests: rows.size(),
-                failures: rows.count { it.failure.size() > 0 },
-                errors: rows.count { it.error.size() > 0 },
-                skipped: rows.count { it.skipped.size() > 0 },
-                time: String.format(Locale.US, '%.3f', rows.sum { parseTime(it) }),
+                tests: expanded.size(),
+                failures: expanded.count { row ->
+                    row.kind == 'synthetic_retry' ||
+                            (row.kind == 'original' && row.tc.failure.size() > 0)
+                },
+                errors: expanded.count { row ->
+                    row.kind == 'original' && row.tc.error.size() > 0
+                },
+                skipped: expanded.count { row ->
+                    row.kind == 'original' && row.tc.skipped.size() > 0
+                },
+                time: String.format(Locale.US, '%.3f', expanded.sum { row ->
+                    row.kind == 'original' ? parseTime(row.tc) : 0d
+                }),
         ) {
-            rows.each { tc ->
-                emitTestCase(mb, tc, logcatByTest, className)
+            expanded.each { row ->
+                if (row.kind == 'synthetic_retry') {
+                    emitSyntheticRetryTestCase(mb, row)
+                } else {
+                    emitOriginalTestCase(mb, row, logcatByTest)
+                }
             }
         }
         outFile.setText(writer.toString(), 'UTF-8')
     }
 
-    private static void emitTestCase(MarkupBuilder mb, def tc, Map<String, File> logcatByTest, String bucketFqcn) {
-        def rawName = tc.@name?.toString() ?: ''
-        def strippedName = stripBrowserStackRetrySuffix(rawName)
-        def fqcn = tc.@classname?.toString() ?: bucketFqcn
+    private static void emitSyntheticRetryTestCase(MarkupBuilder mb, Map row) {
+        mb.testcase(
+                classname: row.fqcn,
+                name: row.baseName.toString(),
+                time: '0',
+        ) {
+            failure(type: 'com.stripe.android.testing.RetryRule') {
+                mkp.yield(row.logLine.toString())
+            }
+        }
+    }
+
+    private static void emitOriginalTestCase(MarkupBuilder mb, Map row, Map<String, File> logcatByTest) {
+        def tc = row.tc
+        def fqcn = row.fqcn
+        def strippedName = row.strippedName
+        def rawName = row.rawName
         mb.testcase(
                 classname: fqcn,
                 name: strippedName,
