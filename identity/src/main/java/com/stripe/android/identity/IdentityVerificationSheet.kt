@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.ColorInt
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -18,13 +19,18 @@ interface IdentityVerificationSheet {
     /**
      * Data to configure the verification flow.
      */
-    data class Configuration(
+    data class Configuration @JvmOverloads constructor(
         /**
          * Brand logo to display on the consent page of verification flow.
          * The Uri could be a local drawable resource file or a web image.
          * The logo will be displayed in a 32x32 dp ImageView.
          */
-        val brandLogo: Uri
+        val brandLogo: Uri,
+
+        /**
+         * Optional color to use for the native flow's primary action buttons.
+         */
+        @param:ColorInt val brandColor: Int? = null
     )
 
     /**

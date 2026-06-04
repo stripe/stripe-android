@@ -168,6 +168,9 @@ internal class IdentityViewModel(
     )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
 
+    internal val selfieTrainingConsent: Boolean
+        get() = savedStateHandle[SELFIE_TRAINING_CONSENT] ?: false
+
     /**
      * StateFlow to track analytics status.
      */
@@ -1584,6 +1587,10 @@ internal class IdentityViewModel(
         }
     }
 
+    fun setSelfieTrainingConsent(trainingConsent: Boolean) {
+        savedStateHandle[SELFIE_TRAINING_CONSENT] = trainingConsent
+    }
+
     // Reset document upload, selfie upload(if applicable)
     fun resetAllUploadState() {
         clearDocumentUploadedState()
@@ -1943,7 +1950,7 @@ internal class IdentityViewModel(
     suspend fun collectDataForSelfieScreen(
         navController: NavController,
         faceDetectorTransitioner: FaceDetectorTransitioner,
-        allowImageCollection: Boolean
+        trainingConsent: Boolean = selfieTrainingConsent
     ) {
         selfieUploadState.collectLatest {
             when {
@@ -1965,7 +1972,7 @@ internal class IdentityViewModel(
                                 lastLowResResult = requireNotNull(it.lastLowResResult.data),
                                 bestHighResResult = requireNotNull(it.bestHighResResult.data),
                                 bestLowResResult = requireNotNull(it.bestLowResResult.data),
-                                trainingConsent = allowImageCollection,
+                                trainingConsent = trainingConsent,
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                 numFrames = faceDetectorTransitioner.numFrames,
@@ -2211,6 +2218,7 @@ internal class IdentityViewModel(
         private const val DOCUMENT_FRONT_UPLOAD_STATE = "document_front_upload_state"
         private const val DOCUMENT_BACK_UPLOAD_STATE = "document_back_upload_state"
         private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
+        private const val SELFIE_TRAINING_CONSENT = "selfie_training_consent"
         private const val ANALYTICS_STATE = "analytics_upload_state"
         private const val COLLECTED_DATA = "collected_data"
         private const val MISSING_REQUIREMENTS = "missing_requirements"

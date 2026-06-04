@@ -1,10 +1,17 @@
 package com.stripe.android.identity.ui
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateFloatAsState
+import android.graphics.Bitmap
+import android.graphics.Paint
+import android.graphics.RadialGradient
+import android.graphics.Shader
+import androidx.annotation.StringRes
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -14,59 +21,55 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Checkbox
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTag
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.navigation.NavController
 import com.stripe.android.camera.framework.image.mirrorHorizontally
 import com.stripe.android.camera.scanui.CameraView
+import com.stripe.android.identity.FallbackUrlLauncher
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.CameraSource
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.SCREEN_NAME_SELFIE
 import com.stripe.android.identity.camera.IdentityCameraManager
 import com.stripe.android.identity.camera.SelfieCameraManager
-import com.stripe.android.identity.navigation.SelfieDestination
-import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
-import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.startScanning
@@ -75,9 +78,15 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
-import kotlinx.coroutines.launch
+import kotlin.math.cos
+import kotlin.math.hypot
+import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.sin
+import kotlin.math.sqrt
+import android.graphics.Path as AndroidPath
 
-internal const val SELFIE_VIEW_FINDER_ASPECT_RATIO = 1f
+internal const val SELFIE_VIEW_FINDER_ASPECT_RATIO = 0.75f
 internal const val SELFIE_SCAN_TITLE_TAG = "SelfieScanTitle"
 internal const val SELFIE_SCAN_MESSAGE_TAG = "SelfieScanMessage"
 internal const val SELFIE_SCAN_CONTINUE_BUTTON_TAG = "SelfieScanContinue"
@@ -85,14 +94,39 @@ internal const val SCAN_VIEW_TAG = "SelfieScanViewTag"
 internal const val RESULT_VIEW_TAG = "SelfieResultViewTag"
 internal const val RETAKE_SELFIE_BUTTON_TAG = "RetakeSelfieButtonTag"
 internal const val CONSENT_CHECKBOX_TAG = "ConsentCheckboxTag"
-private const val FLASH_MAX_ALPHA = 0.5f
-private const val FLASH_ANIMATION_TIME = 200
+internal const val SELFIE_SCAN_STATUS_TAG = "SelfieScanStatusTag"
+internal const val SELFIE_HAVING_TROUBLE_TAG = "SelfieHavingTroubleTag"
+internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
+internal const val SELFIE_CAPTURE_GUIDE_SHADOW_TAG = "SelfieCaptureGuideShadowTag"
+internal const val SELFIE_SCAN_ACTIVITY_INDICATOR_TAG = "SelfieScanActivityIndicatorTag"
+private const val CAPTURE_GUIDE_TICK_COUNT = 77
+private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
+private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
+
+// FaceDetectorTransitioner validates centering against the normalized image center.
+private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.5f
+private const val CAPTURE_GUIDE_SHADOW_ANIMATION_TIME = 600
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_DP = 46
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MIN = 0.06f
+private const val CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MAX = 0.96f
+private const val CAPTURE_GUIDE_SHADOW_INNER_LOCATION_FACTOR = 0.18f
+private const val CAPTURE_GUIDE_SHADOW_MID_LOCATION_FACTOR = 0.58f
+private const val CAPTURE_GUIDE_SHADOW_INNER_ALPHA = 0.12f
+private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.22f
+private const val CAPTURE_GUIDE_SHADOW_RING_ALPHA = 0.3f
+private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.36f
+private const val CAPTURE_GUIDE_TICK_ALPHA = 0.8f
+private const val CAPTURE_GUIDE_TICK_SHADOW_ALPHA = 0.3f
+private const val CAPTURED_SELFIE_OVERLAY_ALPHA = 0.16f
+private const val STATUS_PILL_TEXT_SHADOW_ALPHA = 0.35f
+private const val STATUS_PILL_BACKGROUND_COLOR = 0x9921252C
 
 @Composable
 internal fun SelfieScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
     selfieScanViewModel: SelfieScanViewModel,
+    fallbackUrlLauncher: FallbackUrlLauncher
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -131,7 +165,8 @@ internal fun SelfieScanScreen(
             identityViewModel = identityViewModel,
             lifecycleOwner = lifecycleOwner,
             verificationPage = pageAndModelFiles.page,
-            navController = navController
+            navController = navController,
+            cameraManager = cameraManager
         )
 
         when (selfieScannerState) {
@@ -140,24 +175,23 @@ internal fun SelfieScanScreen(
             }
 
             else -> {
-                val successSelfieCapturePage =
-                    remember {
-                        requireNotNull(pageAndModelFiles.page.selfieCapture) {
-                            identityViewModel.errorCause.postValue(
-                                IllegalStateException("VerificationPage.selfieCapture is null")
-                            )
-                            navController.navigateToErrorScreenWithDefaultValues(context)
-                        }
+                remember {
+                    requireNotNull(pageAndModelFiles.page.selfieCapture) {
+                        identityViewModel.errorCause.postValue(
+                            IllegalStateException("VerificationPage.selfieCapture is null")
+                        )
+                        navController.navigateToErrorScreenWithDefaultValues(context)
                     }
+                }
                 SelfieCaptureScreen(
                     selfieScannerState = selfieScannerState,
                     feedback = feedback,
-                    successSelfieCapturePage = successSelfieCapturePage,
+                    fallbackUrl = pageAndModelFiles.page.fallbackUrl,
                     identityViewModel = identityViewModel,
                     identityScanViewModel = selfieScanViewModel,
-                    navController = navController,
                     lifecycleOwner = lifecycleOwner,
-                    cameraManager = cameraManager
+                    cameraManager = cameraManager,
+                    fallbackUrlLauncher = fallbackUrlLauncher
                 )
             }
         }
@@ -168,53 +202,28 @@ internal fun SelfieScanScreen(
 private fun SelfieCaptureScreen(
     selfieScannerState: IdentityScanViewModel.State,
     feedback: Int?,
-    successSelfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
+    fallbackUrl: String,
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
-    navController: NavController,
     lifecycleOwner: LifecycleOwner,
     cameraManager: SelfieCameraManager,
+    fallbackUrlLauncher: FallbackUrlLauncher
 ) {
-    LaunchedEffect(Unit) {
-        startScanning(
-            IdentityScanState.ScanType.SELFIE,
-            identityViewModel = identityViewModel,
-            identityScanViewModel = identityScanViewModel,
-            lifecycleOwner = lifecycleOwner
-        )
+    if (selfieScannerState is IdentityScanViewModel.State.Scanning) {
+        LaunchedEffect(Unit) {
+            identityViewModel.clearSelfieUploadedState()
+            startScanning(
+                IdentityScanState.ScanType.SELFIE,
+                identityViewModel = identityViewModel,
+                identityScanViewModel = identityScanViewModel,
+                lifecycleOwner = lifecycleOwner
+            )
+        }
     }
 
-    val coroutineScope = rememberCoroutineScope()
-
-    var allowImageCollection by remember {
-        mutableStateOf(false)
-    }
-
-    var isSubmittingSelfie by remember {
-        mutableStateOf(false)
-    }
-
-    var flashed by remember {
-        mutableStateOf(false)
-    }
-    val imageAlpha: Float by animateFloatAsState(
-        targetValue = if (
-            !flashed && selfieScannerState is IdentityScanViewModel.State.Scanning &&
-            selfieScannerState.scanState is IdentityScanState.Found
-        ) {
-            FLASH_MAX_ALPHA
-        } else {
-            0f
-        },
-        animationSpec = tween(
-            durationMillis = FLASH_ANIMATION_TIME,
-            easing = LinearEasing,
-        ),
-        finishedListener = {
-            flashed = true
-        },
-        label = "flashAnimation"
-    )
+    val faceDetectorTransitioner =
+        (selfieScannerState as? IdentityScanViewModel.State.Scanned)
+            ?.result?.identityState?.transitioner as? FaceDetectorTransitioner
 
     Column(
         modifier = Modifier
@@ -258,149 +267,46 @@ private fun SelfieCaptureScreen(
                 maxLines = 3
             )
 
-            if (selfieScannerState is IdentityScanViewModel.State.Scanned) {
-                ResultView(
-                    displayState = selfieScannerState.result.identityState,
-                    allowImageCollectionHtml = successSelfieCapturePage.consentText,
-                    isSubmittingSelfie = isSubmittingSelfie,
-                    allowImageCollection = allowImageCollection,
-                    navController = navController
-                ) {
-                    allowImageCollection = it
-                }
-            } else {
-                SelfieCameraViewFinder(imageAlpha, cameraManager, identityViewModel)
-            }
-        }
-        var loadingButtonState by remember(selfieScannerState) {
-            mutableStateOf(
-                if (selfieScannerState is IdentityScanViewModel.State.Scanned) {
-                    LoadingButtonState.Idle
-                } else {
-                    LoadingButtonState.Disabled
-                }
+            val isCheckingImages = faceDetectorTransitioner != null
+            SelfieCameraViewFinder(
+                cameraManager = cameraManager,
+                identityViewModel = identityViewModel,
+                status = selfieScannerState.status(),
+                showCaptureGuideShadow = (selfieScannerState as? IdentityScanViewModel.State.Scanning)
+                    ?.scanState is IdentityScanState.Found,
+                showCaptureGuide = !isCheckingImages,
+                capturedSelfie = faceDetectorTransitioner?.lastCapturedSelfie()
             )
-        }
-        LoadingButton(
-            modifier = Modifier
-                .testTag(SELFIE_SCAN_CONTINUE_BUTTON_TAG)
-                .padding(dimensionResource(id = R.dimen.stripe_page_horizontal_margin)),
-            text = stringResource(id = R.string.stripe_kontinue).uppercase(),
-            state = loadingButtonState
-        ) {
-            loadingButtonState = LoadingButtonState.Loading
-            isSubmittingSelfie = true
-            coroutineScope.launch {
-                identityViewModel.collectDataForSelfieScreen(
-                    navController = navController,
-                    faceDetectorTransitioner = requireNotNull(
-                        (selfieScannerState as? IdentityScanViewModel.State.Scanned)
-                            ?.result?.identityState?.transitioner as FaceDetectorTransitioner
-                    ) {
-                        "Failed to retrieve final result for Selfie"
-                    },
-                    allowImageCollection = allowImageCollection
+            if (!isCheckingImages) {
+                Text(
+                    text = stringResource(id = R.string.stripe_having_trouble),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(top = 12.dp)
+                        .testTag(SELFIE_HAVING_TROUBLE_TAG)
+                        .clickable {
+                            identityViewModel.screenTracker.screenTransitionStart(SCREEN_NAME_SELFIE)
+                            fallbackUrlLauncher.launchFallbackUrl(fallbackUrl)
+                        },
+                    color = MaterialTheme.colors.onBackground.copy(alpha = 0.7f),
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    textAlign = TextAlign.Center,
+                    textDecoration = TextDecoration.Underline
                 )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
-@Suppress("LongMethod")
-@Composable
-private fun ResultView(
-    displayState: IdentityScanState,
-    allowImageCollectionHtml: String,
-    isSubmittingSelfie: Boolean,
-    allowImageCollection: Boolean,
-    navController: NavController,
-    onAllowImageCollectionChanged: (Boolean) -> Unit
-) {
-    LazyRow(
-        modifier = Modifier
-            .padding(
-                horizontal = 5.dp
-            )
-            .testTag(RESULT_VIEW_TAG),
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        items(
-            (displayState.transitioner as FaceDetectorTransitioner)
-                .filteredFrames.map { it.first.cameraPreviewImage.image.mirrorHorizontally() }
-        ) { bitmap ->
-            val imageBitmap = remember {
-                bitmap.asImageBitmap()
-            }
-            Image(
-                painter = BitmapPainter(imageBitmap),
-                modifier = Modifier
-                    .width(200.dp)
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius))),
-                contentScale = ContentScale.Crop,
-                contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
-            )
-        }
-    }
-
-    Row(
-        modifier = Modifier
-            .padding(
-                start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-                end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-                top = 20.dp
-            )
-            .fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        TextButton(
-            modifier = Modifier.testTag(RETAKE_SELFIE_BUTTON_TAG),
-            onClick = { navController.navigateTo(SelfieDestination) },
-            enabled = !isSubmittingSelfie
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.stripe_camera_icon),
-                contentDescription = stringResource(id = R.string.stripe_description_camera),
-                modifier = Modifier.padding(end = 5.dp)
-            )
-            Text(text = stringResource(id = R.string.stripe_retake_photos))
-        }
-    }
-
-    Row(
-        modifier = Modifier.padding(
-            start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-            end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-            top = 20.dp
-        )
-    ) {
-        Checkbox(
-            modifier = Modifier.testTag(CONSENT_CHECKBOX_TAG),
-            checked = allowImageCollection,
-            onCheckedChange = { onAllowImageCollectionChanged(!allowImageCollection) },
-            enabled = !isSubmittingSelfie
-        )
-
-        BottomSheetHTML(
-            html = allowImageCollectionHtml,
-            bottomSheets = null,
-            color = MaterialTheme.colors.onBackground,
-            style = MaterialTheme.typography.body1,
-            urlSpanStyle = SpanStyle(
-                textDecoration = TextDecoration.Underline,
-                color = MaterialTheme.colors.secondary
-            )
-        )
-    }
-}
-
 @Composable
 private fun SelfieCameraViewFinder(
-    imageAlpha: Float,
     cameraManager: IdentityCameraManager,
-    identityViewModel: IdentityViewModel
+    identityViewModel: IdentityViewModel,
+    status: SelfieStatus?,
+    showCaptureGuideShadow: Boolean,
+    showCaptureGuide: Boolean,
+    capturedSelfie: Bitmap?
 ) {
     // Wait for camera adapter to be initialized before accessing lens model
     LaunchedEffect(cameraManager.cameraAdapter) {
@@ -410,6 +316,8 @@ private fun SelfieCameraViewFinder(
         }
     }
 
+    AnnounceSelfieStatus(status)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -417,9 +325,76 @@ private fun SelfieCameraViewFinder(
             .padding(
                 horizontal = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
             )
-            .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius)))
+            .clip(RoundedCornerShape(20.dp))
             .testTag(SCAN_VIEW_TAG)
     ) {
+        SelfieCameraViewFinderContent(
+            capturedSelfie = capturedSelfie,
+            cameraManager = cameraManager
+        )
+        if (showCaptureGuide) {
+            CaptureGuide(showCaptureGuideShadow)
+            if (showCaptureGuideShadow) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .testTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG)
+                )
+            }
+        }
+        status?.let {
+            val statusModifier = when (it) {
+                SelfieStatus.HoldStill ->
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 40.dp)
+                SelfieStatus.CheckingImages ->
+                    Modifier
+                        .align(Alignment.Center)
+            }
+            SelfieStatusBadge(
+                status = it,
+                modifier = statusModifier
+            )
+        }
+    }
+}
+
+@Composable
+@Suppress("DEPRECATION")
+private fun AnnounceSelfieStatus(status: SelfieStatus?) {
+    val view = LocalView.current
+    val checkingImagesText = stringResource(id = R.string.stripe_selfie_checking_images)
+
+    LaunchedEffect(status) {
+        if (status == SelfieStatus.CheckingImages) {
+            view.announceForAccessibility(checkingImagesText)
+        }
+    }
+}
+
+@Composable
+private fun SelfieCameraViewFinderContent(
+    capturedSelfie: Bitmap?,
+    cameraManager: IdentityCameraManager
+) {
+    if (capturedSelfie != null) {
+        Image(
+            bitmap = remember(capturedSelfie) {
+                capturedSelfie.mirrorHorizontally().asImageBitmap()
+            },
+            modifier = Modifier
+                .fillMaxSize()
+                .blur(16.dp),
+            contentScale = ContentScale.Crop,
+            contentDescription = stringResource(id = R.string.stripe_selfie_item_description)
+        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = CAPTURED_SELFIE_OVERLAY_ALPHA))
+        )
+    } else {
         AndroidView(
             modifier = Modifier.fillMaxSize(),
             factory = {
@@ -432,11 +407,288 @@ private fun SelfieCameraViewFinder(
                 cameraManager.onCameraViewUpdate(it)
             }
         )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .alpha(imageAlpha)
-                .background(colorResource(id = R.color.stripe_flash_mask_color))
+    }
+}
+
+private enum class SelfieStatus(
+    @param:StringRes val labelRes: Int,
+    val showsActivityIndicator: Boolean
+) {
+    HoldStill(
+        labelRes = R.string.stripe_hold_still_selfie,
+        showsActivityIndicator = false
+    ),
+    CheckingImages(
+        labelRes = R.string.stripe_selfie_checking_images,
+        showsActivityIndicator = true
+    )
+}
+
+private fun IdentityScanViewModel.State.status(): SelfieStatus? {
+    return when (this) {
+        is IdentityScanViewModel.State.Scanning -> SelfieStatus.HoldStill
+        is IdentityScanViewModel.State.Scanned -> SelfieStatus.CheckingImages
+        else -> null
+    }
+}
+
+private fun FaceDetectorTransitioner.lastCapturedSelfie(): Bitmap {
+    return filteredFrames[FaceDetectorTransitioner.INDEX_LAST].first.cameraPreviewImage.image
+}
+
+private fun DrawScope.drawCenteredGuideShadow(
+    center: Offset,
+    horizontalRadius: Float,
+    verticalRadius: Float,
+    opacity: Float
+) {
+    val scaleX = horizontalRadius / verticalRadius
+    val maxXDistance = max(center.x, size.width - center.x) / scaleX
+    val maxYDistance = max(center.y, size.height - center.y)
+    val outerRadius = hypot(maxXDistance, maxYDistance)
+    val clearRadius = verticalRadius
+    if (outerRadius <= clearRadius) {
+        return
+    }
+
+    val featherRadius = min(verticalRadius + CAPTURE_GUIDE_SHADOW_FEATHER_DP.dp.toPx(), outerRadius)
+    val gradientStops = centeredGuideShadowGradientStops(
+        clearRadius = clearRadius,
+        featherRadius = featherRadius,
+        outerRadius = outerRadius
+    )
+    val shadowOpacity = opacity.coerceIn(0f, 1f)
+
+    drawIntoCanvas { canvas ->
+        val nativeCanvas = canvas.nativeCanvas
+        nativeCanvas.save()
+        nativeCanvas.translate(center.x, center.y)
+        nativeCanvas.scale(scaleX, 1f)
+
+        nativeCanvas.drawPath(
+            centeredGuideShadowPath(outerRadius, clearRadius),
+            centeredGuideShadowPaint(outerRadius, gradientStops, shadowOpacity)
         )
+        nativeCanvas.restore()
+    }
+}
+
+private data class CenteredGuideShadowGradientStops(
+    val clear: Float,
+    val inner: Float,
+    val mid: Float,
+    val ring: Float
+)
+
+private fun centeredGuideShadowGradientStops(
+    clearRadius: Float,
+    featherRadius: Float,
+    outerRadius: Float
+): CenteredGuideShadowGradientStops {
+    val shadowSpan = outerRadius - clearRadius
+    val featherLocation = min(
+        max(
+            (featherRadius - clearRadius) / shadowSpan,
+            CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MIN
+        ),
+        CAPTURE_GUIDE_SHADOW_FEATHER_LOCATION_MAX
+    )
+
+    fun absoluteStop(relativeLocation: Float): Float {
+        return (clearRadius + (shadowSpan * relativeLocation)) / outerRadius
+    }
+
+    return CenteredGuideShadowGradientStops(
+        clear = clearRadius / outerRadius,
+        inner = absoluteStop(featherLocation * CAPTURE_GUIDE_SHADOW_INNER_LOCATION_FACTOR),
+        mid = absoluteStop(featherLocation * CAPTURE_GUIDE_SHADOW_MID_LOCATION_FACTOR),
+        ring = absoluteStop(featherLocation)
+    )
+}
+
+private fun centeredGuideShadowPaint(
+    outerRadius: Float,
+    gradientStops: CenteredGuideShadowGradientStops,
+    shadowOpacity: Float
+): Paint {
+    return Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL
+        shader = RadialGradient(
+            0f,
+            0f,
+            outerRadius,
+            intArrayOf(
+                Color.Transparent.toArgb(),
+                Color.Transparent.toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_INNER_ALPHA * shadowOpacity).toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_MID_ALPHA * shadowOpacity).toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_RING_ALPHA * shadowOpacity).toArgb(),
+                Color.Black.copy(alpha = CAPTURE_GUIDE_SHADOW_OUTER_ALPHA * shadowOpacity).toArgb()
+            ),
+            floatArrayOf(
+                0f,
+                gradientStops.clear,
+                gradientStops.inner,
+                gradientStops.mid,
+                gradientStops.ring,
+                1f
+            ),
+            Shader.TileMode.CLAMP
+        )
+    }
+}
+
+private fun centeredGuideShadowPath(
+    outerRadius: Float,
+    clearRadius: Float
+): AndroidPath {
+    return AndroidPath().apply {
+        fillType = AndroidPath.FillType.EVEN_ODD
+        addCircle(0f, 0f, outerRadius, AndroidPath.Direction.CW)
+        addCircle(0f, 0f, clearRadius, AndroidPath.Direction.CW)
+    }
+}
+
+@Composable
+private fun SelfieStatusBadge(
+    status: SelfieStatus,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .background(
+                color = Color(STATUS_PILL_BACKGROUND_COLOR),
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(8.dp)
+            .semantics(mergeDescendants = true) {
+                testTag = SELFIE_SCAN_STATUS_TAG
+            },
+        horizontalArrangement = Arrangement.Center,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (status.showsActivityIndicator) {
+            CircularProgressIndicator(
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(18.dp)
+                    .testTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG),
+                color = Color.White,
+                strokeWidth = 2.dp
+            )
+        }
+        Text(
+            text = stringResource(id = status.labelRes),
+            color = Color.White,
+            fontSize = 16.sp,
+            lineHeight = 20.sp,
+            style = MaterialTheme.typography.body2.copy(
+                shadow = Shadow(
+                    color = Color.Black.copy(alpha = STATUS_PILL_TEXT_SHADOW_ALPHA),
+                    offset = Offset(x = 0f, y = 1f),
+                    blurRadius = 4f
+                )
+            )
+        )
+    }
+}
+
+@Composable
+private fun CaptureGuide(showCenteredShadow: Boolean) {
+    val centeredShadowAlpha = remember { Animatable(0f) }
+
+    LaunchedEffect(showCenteredShadow) {
+        centeredShadowAlpha.animateTo(
+            targetValue = if (showCenteredShadow) 1f else 0f,
+            animationSpec = tween(
+                durationMillis = CAPTURE_GUIDE_SHADOW_ANIMATION_TIME,
+                easing = FastOutSlowInEasing
+            )
+        )
+    }
+
+    Canvas(
+        modifier = Modifier
+            .fillMaxSize()
+            .testTag(SELFIE_CAPTURE_GUIDE_TAG)
+    ) {
+        if (size.width <= 0f || size.height <= 0f) {
+            return@Canvas
+        }
+
+        val geometry = captureGuideGeometry()
+        if (centeredShadowAlpha.value > 0f) {
+            drawCenteredGuideShadow(
+                center = geometry.center,
+                horizontalRadius = geometry.horizontalRadius,
+                verticalRadius = geometry.verticalRadius,
+                opacity = centeredShadowAlpha.value
+            )
+        }
+
+        drawCaptureGuideTicks(geometry)
+    }
+}
+
+private data class CaptureGuideGeometry(
+    val center: Offset,
+    val horizontalRadius: Float,
+    val verticalRadius: Float
+)
+
+private fun DrawScope.captureGuideGeometry(): CaptureGuideGeometry {
+    return CaptureGuideGeometry(
+        center = Offset(
+            x = size.width / 2f,
+            y = size.height * CAPTURE_GUIDE_CENTER_Y_RATIO
+        ),
+        horizontalRadius = size.width * CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO / 2f,
+        verticalRadius = size.height * CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO / 2f
+    )
+}
+
+private fun DrawScope.drawCaptureGuideTicks(geometry: CaptureGuideGeometry) {
+    with(geometry) {
+        val tickLength = 10.dp.toPx()
+        val strokeWidth = 2.dp.toPx()
+        val shadowOffsetY = 1.dp.toPx()
+        val shadowBlur = 4.dp.toPx()
+        drawIntoCanvas { canvas ->
+            val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color.White.copy(alpha = CAPTURE_GUIDE_TICK_ALPHA).toArgb()
+                style = Paint.Style.STROKE
+                strokeCap = Paint.Cap.BUTT
+                this.strokeWidth = strokeWidth
+                setShadowLayer(
+                    shadowBlur,
+                    0f,
+                    shadowOffsetY,
+                    Color.Black.copy(alpha = CAPTURE_GUIDE_TICK_SHADOW_ALPHA).toArgb()
+                )
+            }
+            repeat(CAPTURE_GUIDE_TICK_COUNT) { index ->
+                val angle = (index.toFloat() / CAPTURE_GUIDE_TICK_COUNT.toFloat()) * Math.PI.toFloat() * 2f
+                val cosAngle = cos(angle)
+                val sinAngle = sin(angle)
+                val tickCenter = Offset(
+                    x = center.x + cosAngle * horizontalRadius,
+                    y = center.y + sinAngle * verticalRadius
+                )
+                val normalX = cosAngle / horizontalRadius
+                val normalY = sinAngle / verticalRadius
+                val normalLength = sqrt((normalX * normalX) + (normalY * normalY))
+                val unitNormalX = normalX / normalLength
+                val unitNormalY = normalY / normalLength
+                val halfTickLength = tickLength / 2f
+
+                canvas.nativeCanvas.drawLine(
+                    tickCenter.x - unitNormalX * halfTickLength,
+                    tickCenter.y - unitNormalY * halfTickLength,
+                    tickCenter.x + unitNormalX * halfTickLength,
+                    tickCenter.y + unitNormalY * halfTickLength,
+                    tickPaint
+                )
+            }
+        }
     }
 }
