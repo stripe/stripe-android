@@ -17,7 +17,8 @@ internal class LinkControllerPlaygroundViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    private val linkController = LinkController.Builder(application, savedStateHandle).build()
+    private val linkControllerBuilder = LinkController.Builder(application, savedStateHandle)
+    private var linkController = linkControllerBuilder.supportedPaymentMethodTypes(emptyList()).build()
     private var linkControllerPresenter: LinkController.Presenter? = null
 
     val status = MutableStateFlow<StatusMessage?>(null)
@@ -72,10 +73,10 @@ internal class LinkControllerPlaygroundViewModel(
         phoneNumber: String?,
         paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
+        linkController = linkControllerBuilder.supportedPaymentMethodTypes(paymentMethodTypes).build()
         linkControllerPresenter?.present(
             email = email,
             phoneNumber = phoneNumber,
-            filterPaymentMethodTypes = paymentMethodTypes,
         )
     }
 

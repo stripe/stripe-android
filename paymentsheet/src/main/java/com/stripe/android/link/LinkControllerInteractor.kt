@@ -240,15 +240,23 @@ internal class LinkControllerInteractor @Inject constructor(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
         email: String,
         phoneNumber: String?,
-        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
+        coroutineScope.launch {
+            val configResult = configureIfNeeded()
+            if (configResult is LinkController.ConfigureResult.Failed) {
+                emitPresentResult(
+                    LinkController.PresentResult.Failed(configResult.error)
+                )
+                return@launch
+            }
+        }
         if (_state.value.presentationType != null) return
         updateState { it.copy(presentationType = PresentationType.Full) }
         present(
             launcher = launcher,
             email = email,
             phoneNumber = phoneNumber,
-            paymentMethodTypes = paymentMethodTypes,
+            paymentMethodTypes = configuration.supportedPaymentMethodTypes,
             onConfigurationError = { error ->
                 updateState { it.copy(presentationType = null) }
                 _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(error))
@@ -256,7 +264,7 @@ internal class LinkControllerInteractor @Inject constructor(
             getLaunchMode = { _, state ->
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
-                    paymentMethodFilters = paymentMethodTypes?.toFilters(),
+                    paymentMethodFilters = configuration.supportedPaymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
                     shouldShowSecondaryCta = false,
                 )

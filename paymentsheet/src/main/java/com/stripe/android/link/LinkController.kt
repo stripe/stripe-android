@@ -22,7 +22,6 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -213,7 +212,7 @@ class LinkController @Inject internal constructor(
         internal val allowUserEmailEdits: Boolean,
         internal val allowLogOut: Boolean,
         internal val linkAppearance: LinkAppearance.State? = null,
-        internal val filterPaymentMethodTypes: List<PaymentMethodType>? = null,
+        internal val supportedPaymentMethodTypes: List<PaymentMethodType>? = null,
     ) : Parcelable {
 
         /**
@@ -386,34 +385,10 @@ class LinkController @Inject internal constructor(
             email: String,
             phoneNumber: String? = null,
         ) {
-            interactor.coroutineScope.launch {
-                val configResult = interactor.configureIfNeeded()
-                if (configResult is ConfigureResult.Failed) {
-                    interactor.emitPresentResult(
-                        PresentResult.Failed(configResult.error)
-                    )
-                    return@launch
-                }
-                interactor.presentFull(
-                    launcher = coordinator.linkActivityResultLauncher,
-                    email = email,
-                    phoneNumber = phoneNumber,
-                    paymentMethodTypes = interactor.configuration.filterPaymentMethodTypes,
-                )
-            }
-        }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun present(
-            email: String,
-            phoneNumber: String? = null,
-            filterPaymentMethodTypes: List<PaymentMethodType>? = null,
-        ) {
             interactor.presentFull(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
                 phoneNumber = phoneNumber,
-                paymentMethodTypes = filterPaymentMethodTypes,
             )
         }
 
@@ -934,10 +909,19 @@ class LinkController @Inject internal constructor(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
     ) {
-        private var filterPaymentMethodTypes: List<PaymentMethodType>? = null
+        private var supportedPaymentMethodTypes: List<PaymentMethodType>? = null
 
-        fun filterPaymentMethodTypes(value: List<PaymentMethodType>?) = apply {
-            this.filterPaymentMethodTypes = value
+        /**
+         * Set the mode for the Link session.
+         *
+         * Defaults to null, showing all supported types.
+         *
+         * @param supportedPaymentMethodTypes Optional list of payment method type to restrict
+         *  * selection to. If null, all supported types are shown.
+         * @return This builder instance for method chaining.
+         */
+        fun supportedPaymentMethodTypes(supportedPaymentMethodTypes: List<PaymentMethodType>?) = apply {
+            this.supportedPaymentMethodTypes = supportedPaymentMethodTypes
         }
 
         /**
@@ -957,7 +941,7 @@ class LinkController @Inject internal constructor(
                 billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
                 allowUserEmailEdits = true,
                 allowLogOut = true,
-                filterPaymentMethodTypes = filterPaymentMethodTypes,
+                supportedPaymentMethodTypes = supportedPaymentMethodTypes,
             )
             return create(
                 application = application,
@@ -970,20 +954,21 @@ class LinkController @Inject internal constructor(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+        // Onramp entry point — no Configuration required at creation time.
+        // configure() must be called before present().
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @JvmStatic
         fun create(
             application: Application,
             savedStateHandle: SavedStateHandle
         ): LinkController {
-            val paymentConfig = com.stripe.android.PaymentConfiguration.getInstance(application)
             return create(
                 application = application,
                 savedStateHandle = savedStateHandle,
                 // Temporarily "android_crypto_onramp" until backend is ready.
                 // Should be "android_link_controller" instead.
                 requestSurface = RequestSurface.CryptoOnramp,
-                configuration = Configuration.default(application, paymentConfig.publishableKey),
+                configuration = Configuration.default(application, "", null)
             )
         }
 
@@ -994,10 +979,7 @@ class LinkController @Inject internal constructor(
             application: Application,
             savedStateHandle: SavedStateHandle,
             requestSurface: RequestSurface,
-            configuration: Configuration = Configuration.default(
-                application,
-                com.stripe.android.PaymentConfiguration.getInstance(application).publishableKey
-            ),
+            configuration: Configuration
         ): LinkController {
             return DaggerLinkControllerComponent.factory()
                 .build(
