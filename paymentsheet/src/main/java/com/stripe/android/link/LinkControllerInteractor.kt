@@ -241,35 +241,36 @@ internal class LinkControllerInteractor @Inject constructor(
         email: String,
         phoneNumber: String?,
     ) {
+        if (_state.value.presentationType != null) return
+        updateState { it.copy(presentationType = PresentationType.Full) }
         coroutineScope.launch {
             val configResult = configureIfNeeded()
             if (configResult is LinkController.ConfigureResult.Failed) {
+                updateState { it.copy(presentationType = null) }
                 emitPresentResult(
                     LinkController.PresentResult.Failed(configResult.error)
                 )
                 return@launch
             }
+            present(
+                launcher = launcher,
+                email = email,
+                phoneNumber = phoneNumber,
+                paymentMethodTypes = configuration.supportedPaymentMethodTypes,
+                onConfigurationError = { error ->
+                    updateState { it.copy(presentationType = null) }
+                    _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(error))
+                },
+                getLaunchMode = { _, state ->
+                    LinkLaunchMode.PaymentMethodSelection(
+                        selectedPayment = state.selectedPaymentMethod?.details,
+                        paymentMethodFilters = configuration.supportedPaymentMethodTypes?.toFilters(),
+                        sharePaymentDetailsImmediatelyAfterCreation = false,
+                        shouldShowSecondaryCta = false,
+                    )
+                }
+            )
         }
-        if (_state.value.presentationType != null) return
-        updateState { it.copy(presentationType = PresentationType.Full) }
-        present(
-            launcher = launcher,
-            email = email,
-            phoneNumber = phoneNumber,
-            paymentMethodTypes = configuration.supportedPaymentMethodTypes,
-            onConfigurationError = { error ->
-                updateState { it.copy(presentationType = null) }
-                _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(error))
-            },
-            getLaunchMode = { _, state ->
-                LinkLaunchMode.PaymentMethodSelection(
-                    selectedPayment = state.selectedPaymentMethod?.details,
-                    paymentMethodFilters = configuration.supportedPaymentMethodTypes?.toFilters(),
-                    sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
-                )
-            }
-        )
     }
 
     fun authenticate(

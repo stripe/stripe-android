@@ -309,9 +309,8 @@ class LinkControllerInteractorTest {
                 email = "test@example.com",
                 phoneNumber = null,
             )
-            val result = awaitItem()
-            assertThat(result).isEqualTo(LinkController.PresentResult.Failed(error))
-            cancelAndIgnoreRemainingEvents()
+            assertThat(awaitItem()).isEqualTo(LinkController.PresentResult.Failed(error))
+            expectNoEvents()
         }
     }
 
