@@ -21,6 +21,7 @@ import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
@@ -1277,7 +1278,6 @@ class LinkControllerInteractorTest {
             launcher = launcher,
             email = "test@example.com",
             phoneNumber = "+15551234567",
-            paymentMethodTypes = null,
         )
 
         val args = launcher.calls.awaitItem().input
@@ -1288,19 +1288,20 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `presentFull() fails when configuration is not set`() = runTest {
-        val interactor = createInteractor()
-
-        interactor.presentResultFlow.test {
-            interactor.presentFull(mock(), "test@example.com", null, null)
-            val result = awaitItem() as LinkController.PresentResult.Failed
-            assertThat(result.error).isInstanceOf(MissingConfigurationException::class.java)
-        }
-    }
-
-    @Test
-    fun `presentFull() with paymentMethodTypes passes filter in launch mode`() = runTest {
-        val interactor = createInteractor()
+    fun `presentFull() with supportedPaymentMethodTypes passes filter in launch mode`() = runTest {
+        val interactor = createInteractor(
+            configuration = LinkController.Configuration(
+                merchantDisplayName = "Test",
+                publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
+                stripeAccountId = null,
+                cardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
+                defaultBillingDetails = ConfigurationDefaults.billingDetails,
+                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
+                allowUserEmailEdits = true,
+                allowLogOut = true,
+                supportedPaymentMethodTypes = listOf(LinkController.PaymentMethodType.Card),
+            )
+        )
         configure(interactor)
 
         val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
@@ -1308,7 +1309,6 @@ class LinkControllerInteractorTest {
             launcher = launcher,
             email = "test@example.com",
             phoneNumber = null,
-            paymentMethodTypes = listOf(LinkController.PaymentMethodType.Card),
         )
 
         val args = launcher.calls.awaitItem().input
@@ -1321,7 +1321,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
+        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null)
 
         interactor.presentResultFlow.test {
             interactor.onLinkActivityResult(
@@ -1339,7 +1339,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
+        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null)
 
         val expectedConfirmationToken = mock<ConfirmationToken>()
         whenever(stripeRepository.createConfirmationToken(any(), any()))
@@ -1365,7 +1365,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
+        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null)
 
         val error = Exception("Link error")
         interactor.presentResultFlow.test {
@@ -1385,7 +1385,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
+        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null)
 
         val expectedError = RuntimeException("CT creation failed")
         whenever(stripeRepository.createConfirmationToken(any(), any()))
@@ -1410,7 +1410,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
+        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null)
 
         interactor.onLinkActivityResult(
             LinkActivityResult.Completed(
@@ -1430,7 +1430,7 @@ class LinkControllerInteractorTest {
         val interactor = createInteractor()
         configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null, null)
+        interactor.presentFull(FakeActivityResultLauncher(), "test@example.com", null)
         interactor.onLinkActivityResult(
             LinkActivityResult.Canceled(
                 reason = LinkActivityResult.Canceled.Reason.BackPressed,
@@ -1473,12 +1473,12 @@ class LinkControllerInteractorTest {
         configure(interactor)
 
         val firstLauncher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentFull(firstLauncher, "test@example.com", null, null)
+        interactor.presentFull(firstLauncher, "test@example.com", null)
         firstLauncher.calls.awaitItem()
 
         // Second call while first is still active — should be ignored.
         val secondLauncher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentFull(secondLauncher, "test@example.com", null, null)
+        interactor.presentFull(secondLauncher, "test@example.com", null)
 
         secondLauncher.calls.expectNoEvents()
     }

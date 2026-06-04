@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 
 internal class FakeLinkConfigurationLoader : LinkConfigurationLoader {
     var shouldUpdateResult: Boolean = false
+    var loadCallCount: Int = 0
 
     var linkConfigurationResult: Result<LinkMetadata> =
         Result.success(
@@ -15,6 +16,7 @@ internal class FakeLinkConfigurationLoader : LinkConfigurationLoader {
         )
 
     override suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata> {
+        loadCallCount++
         if (!shouldUpdateResult) {
             return linkConfigurationResult
         }
