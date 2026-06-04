@@ -11,8 +11,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakePaymentMethodFilter
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
@@ -131,22 +131,36 @@ internal class CreateCustomerStateTest {
     }
 
     @Test
-    fun `Legacy ephemeral key calls repository and sets null default`() = runScenario(
-        customerRepository = FakeCustomerRepository(
-            paymentMethods = PaymentMethodFactory.cards(3),
-        ),
-    ) {
+    fun `Legacy ephemeral key uses prefetched payment methods and sets null default`() = runScenario {
+        val prefetchedPaymentMethods = CompletableDeferred(
+            Result.success(PaymentMethodFactory.cards(3))
+        )
+
         val result = createCustomerState(
             customerMetadata = LEGACY_EK_METADATA,
+            prefetchedPaymentMethods = prefetchedPaymentMethods,
         )
 
         assertThat(result).isNotNull()
         assertThat(result!!.paymentMethods).hasSize(3)
         assertThat(result.defaultPaymentMethodId).isNull()
+    }
 
-        val request = customerRepository.getPaymentMethodsRequests.awaitItem()
-        assertThat(request.customerId).isEqualTo("cus_1")
-        assertThat(request.ephemeralKeySecret).isEqualTo("ek_123")
+    @Test
+    fun `Legacy ephemeral key filters payment methods by supported type`() = runScenario {
+        val cards = PaymentMethodFactory.cards(2)
+        val paymentMethods = cards + listOf(
+            PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
+            PaymentMethodFixtures.AU_BECS_DEBIT,
+        )
+
+        val result = createCustomerState(
+            customerMetadata = LEGACY_EK_METADATA,
+            prefetchedPaymentMethods = CompletableDeferred(Result.success(paymentMethods)),
+        )
+
+        assertThat(result).isNotNull()
+        assertThat(result!!.paymentMethods).containsExactlyElementsIn(cards)
     }
 
     @Test
@@ -162,11 +176,6 @@ internal class CreateCustomerStateTest {
         val filteredCards = cards.take(1)
 
         FakePaymentMethodFilter.test(filteredPaymentMethods = filteredCards) {
-            val createCustomerState = CreateCustomerState(
-                customerRepository = customerRepository,
-                paymentMethodFilter = paymentMethodFilter,
-            )
-
             val result = createCustomerState(
                 initializationMode = DEFAULT_INITIALIZATION_MODE,
                 elementsSession = DEFAULT_ELEMENTS_SESSION.copy(
@@ -175,6 +184,7 @@ internal class CreateCustomerStateTest {
                 metadata = PaymentMethodMetadataFactory.create()
                     .copy(customerMetadata = CUSTOMER_SESSION_METADATA),
                 savedSelection = CompletableDeferred(SavedSelection.None),
+                paymentMethodFilter = paymentMethodFilter,
             )
 
             assertThat(result).isNotNull()
@@ -186,22 +196,14 @@ internal class CreateCustomerStateTest {
     }
 
     private fun runScenario(
-        customerRepository: FakeCustomerRepository = FakeCustomerRepository(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        Scenario(customerRepository = customerRepository).apply {
+        Scenario().apply {
             block()
-            customerRepository.ensureAllEventsConsumed()
         }
     }
 
-    private inner class Scenario(
-        val customerRepository: FakeCustomerRepository,
-    ) {
-        private val createCustomerStateImpl = CreateCustomerState(
-            customerRepository = customerRepository,
-            paymentMethodFilter = FakePaymentMethodFilter.noOp(),
-        )
+    private class Scenario {
 
         suspend fun createCustomerState(
             initializationMode: PaymentElementLoader.InitializationMode = DEFAULT_INITIALIZATION_MODE,
@@ -211,6 +213,8 @@ internal class CreateCustomerStateTest {
             metadata: com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata =
                 PaymentMethodMetadataFactory.create().copy(customerMetadata = customerMetadata),
             savedSelection: CompletableDeferred<SavedSelection> = CompletableDeferred(SavedSelection.None),
+            prefetchedPaymentMethods: PrefetchedPaymentMethods? = null,
+            paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
         ): CustomerState? {
             val session = if (elementsSessionCustomer != elementsSession.customer) {
                 elementsSession.copy(customer = elementsSessionCustomer)
@@ -218,11 +222,17 @@ internal class CreateCustomerStateTest {
                 elementsSession
             }
 
+            val createCustomerStateImpl = CreateCustomerState(
+                paymentMethodFilter = paymentMethodFilter,
+                errorReporter = FakeErrorReporter(),
+            )
+
             return createCustomerStateImpl(
                 initializationMode = initializationMode,
                 elementsSession = session,
                 metadata = metadata,
                 savedSelection = savedSelection,
+                prefetchedPaymentMethods = prefetchedPaymentMethods,
             )
         }
     }
@@ -282,6 +292,7 @@ internal class CreateCustomerStateTest {
             return ElementsSession.Customer(
                 paymentMethods = paymentMethods,
                 defaultPaymentMethod = defaultPaymentMethodId,
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_1",
                     customerId = "cus_1",

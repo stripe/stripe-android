@@ -3,6 +3,8 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.9.2 - 2026-06-01
+
 ### Payments
 * [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now include error code, decline code, and error type in the exception thrown.
 

@@ -128,6 +128,8 @@ internal class EmbeddedPaymentElementTest {
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1, card2)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
@@ -164,6 +166,8 @@ internal class EmbeddedPaymentElementTest {
             response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
         }
         networkRule.setupV1PaymentMethodsResponse(card1)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+        networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
         testContext.configure {
             customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
@@ -203,6 +207,8 @@ internal class EmbeddedPaymentElementTest {
                 response.testBodyFromFile("elements-sessions-deferred_payment_intent_no_link.json")
             }
             networkRule.setupV1PaymentMethodsResponse(card1, card2)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.USBankAccount.code)
+            networkRule.setupV1PaymentMethodsResponse(type = PaymentMethod.Type.SepaDebit.code)
 
             testContext.configure {
                 customer(PaymentSheet.CustomerConfiguration("cus_123", "ek_test"))
@@ -258,14 +264,6 @@ internal class EmbeddedPaymentElementTest {
 
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
         }
 
         networkRule.enqueue(

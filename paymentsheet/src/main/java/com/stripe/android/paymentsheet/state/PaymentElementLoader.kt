@@ -6,6 +6,7 @@ import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
@@ -26,6 +27,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -44,10 +46,12 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.attestation.IntegrityRequestManager
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
@@ -230,6 +234,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentConfiguration: Provider<PaymentConfiguration>,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
+    private val customerRepository: CustomerRepository,
     private val createCustomerState: CreateCustomerState,
     private val checkoutSessionLoader: CheckoutSessionLoader,
     private val elementsSessionLoader: ElementsSessionLoader,
@@ -237,6 +242,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
+    private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -285,6 +291,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
         }
 
+        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
+
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
             initializationMode = initializationMode,
@@ -298,8 +306,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        // Pre-fetch PMM Promotions for BNPLs
-        paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+        fetchPaymentMethodMessaging(elementsSession)
 
         val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
 
@@ -363,6 +370,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     elementsSession = elementsSession,
                     metadata = paymentMethodMetadata,
                     savedSelection = savedSelection,
+                    prefetchedPaymentMethods = prefetchedPaymentMethods,
                 )
             }
         }
@@ -407,6 +415,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             state = state
         )
 
+        logPaymentMethodMessagingExposure(pmMetadata)
+
         reportSuccessfulLoad(
             elementsSession = elementsSession,
             state = state,
@@ -415,6 +425,29 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         return@runCatching state
+    }
+
+    private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
+        configuration: CommonConfiguration,
+    ): PrefetchedPaymentMethods? {
+        val customer = configuration.customer ?: return null
+        val accessType = customer.accessType
+        if (accessType !is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey) return null
+
+        return async {
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadPrefetchPMs) {
+                customerRepository.getPaymentMethods(
+                    customerId = customer.id,
+                    ephemeralKeySecret = accessType.ephemeralKeySecret,
+                    types = listOf(
+                        PaymentMethod.Type.Card,
+                        PaymentMethod.Type.SepaDebit,
+                        PaymentMethod.Type.USBankAccount,
+                    ), // These are the only payment method types we support as saved payment methods.
+                    silentlyFail = paymentConfiguration.get().isLiveMode(),
+                )
+            }
+        }
     }
 
     private suspend fun loadSession(
@@ -797,6 +830,20 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     "error \"${unavailableCustomPaymentMethod.error}\"!"
             )
         }
+    }
+
+    private fun fetchPaymentMethodMessaging(elementsSession: ElementsSession) {
+        val variant = elementsSession.experimentsData?.experimentAssignments[
+            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+        ] ?: return
+
+        if (variant == "treatment") {
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+        }
+    }
+
+    private fun logPaymentMethodMessagingExposure(metadata: PaymentMethodMetadata) {
+        paymentMethodMessagePromotionsExperimentHandler.logExposure(metadata)
     }
 }
 

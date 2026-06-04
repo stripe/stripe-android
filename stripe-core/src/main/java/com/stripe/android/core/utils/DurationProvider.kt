@@ -26,6 +26,7 @@ interface DurationProvider {
         PaymentSheetLoadIsGooglePayReady,
         PaymentSheetLoadRetrieveSavedPaymentMethodSelection,
         PaymentSheetLoadSessionLoad,
+        PaymentSheetLoadPrefetchPMs,
         PaymentSheetLoadCreateLinkState,
         PaymentSheetLoadCreateCustomerState,
         PaymentSheetLoadRetrieveInitialPaymentSelection,

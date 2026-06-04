@@ -23,6 +23,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.theme.DefaultLinkTheme
@@ -30,6 +32,7 @@ import com.stripe.android.link.theme.LinkTheme
 import com.stripe.android.link.ui.PrimaryButton
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.text.Html
 
 @Composable
 @Suppress("LongMethod")
@@ -82,10 +85,14 @@ fun CrsCarfDeclarationScreen(
 
                     Spacer(Modifier.height(16.dp))
 
-                    Text(
-                        text = attestationText,
+                    Html(
+                        html = attestationText,
                         style = LinkTheme.typography.body,
                         color = LinkTheme.colors.textPrimary,
+                        urlSpanStyle = SpanStyle(
+                            color = LinkTheme.colors.textBrand,
+                            textDecoration = TextDecoration.Underline
+                        ),
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(1f, fill = false)

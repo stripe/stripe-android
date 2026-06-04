@@ -424,7 +424,10 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             val quantity = obj.optInt(FIELD_QUANTITY, -1).takeIf { it > 0 } ?: return@mapNotNull null
             val subtotal = obj.optLong(FIELD_SUBTOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
             val total = obj.optLong(FIELD_TOTAL, -1).takeIf { it >= 0 } ?: return@mapNotNull null
-            val unitAmount = if (quantity > 0) total / quantity else null
+            val unitAmount = obj.optLong(FIELD_UNIT_AMOUNT_OVERRIDE, -1).takeIf { it >= 0 }
+                ?: obj.optJSONObject(FIELD_PRICE)
+                    ?.optLong(FIELD_UNIT_AMOUNT, -1)
+                    ?.takeIf { it >= 0 }
             CheckoutSessionResponse.LineItem(
                 id = id,
                 name = name,
@@ -525,6 +528,9 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_LINE_ITEMS = "line_items"
     private const val FIELD_ID = "id"
     private const val FIELD_QUANTITY = "quantity"
+    private const val FIELD_PRICE = "price"
+    private const val FIELD_UNIT_AMOUNT = "unit_amount"
+    private const val FIELD_UNIT_AMOUNT_OVERRIDE = "unit_amount_override"
     private const val FIELD_ADAPTIVE_PRICING_INFO = "adaptive_pricing_info"
     private const val FIELD_ACTIVE_PRESENTMENT_CURRENCY = "active_presentment_currency"
     private const val FIELD_INTEGRATION_AMOUNT = "integration_amount"
