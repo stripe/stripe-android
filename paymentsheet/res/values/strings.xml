@@ -146,8 +146,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_bank_payment_promo_ineligible">No %s promo</string>
   <!-- Text displayed on manage card screen when card details are not editable. -->
   <string name="stripe_paymentsheet_card_details_cannot_be_changed">Card details cannot be changed.</string>
-  <!-- Text displayed on manage card screen when card details are not editable. -->
-  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Payment method details cannot be changed.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved to make future payments. -->
   <string name="stripe_paymentsheet_card_mandate">By providing your card information, you allow %s to charge your card for future payments in accordance with their terms.</string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant. -->
@@ -175,12 +173,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_bank_account">Manage US bank account</string>
   <!-- Title shown above a view containing a customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_card">Manage card</string>
-  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
-  <string name="stripe_paymentsheet_manage_payment_method">Manage payment method</string>
   <!-- Title shown above a view containing the customer's cards that they can delete or update -->
   <string name="stripe_paymentsheet_manage_cards">Manage cards</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Manage bank account</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Manage payment method</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Manage payment methods</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -253,6 +251,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Default payment method was not changed. Please try again.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Payment method details cannot be changed.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Card brand was not updated. Please try again.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
