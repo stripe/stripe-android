@@ -247,7 +247,8 @@ internal class CryptoApiRepository @Inject constructor(
             options = buildRequestOptions(),
             params = mapOf(
                 "crypto_customer_id" to cryptoCustomerId,
-                "country_hint" to countryHint
+                "country_hint" to countryHint,
+                "ui_mode" to "headless"
             ).filterNotNullValues()
         )
 
@@ -267,7 +268,7 @@ internal class CryptoApiRepository @Inject constructor(
         )
         return executePost(
             url = paymentToken,
-            paramsJson = Json.encodeToJsonElement(params).jsonObject,
+            paramsJson = json.encodeToJsonElement(params).jsonObject,
             responseSerializer = CreatePaymentTokenResponse.serializer()
         )
     }
