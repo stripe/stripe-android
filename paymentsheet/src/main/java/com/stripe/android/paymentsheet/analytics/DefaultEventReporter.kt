@@ -106,14 +106,38 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     private fun buildLoadTimings(): Map<String, Int> {
-        return listOf(
-            DurationProvider.Key.PaymentSheetLoadSessionLoad to "fetchElementsSession",
-            DurationProvider.Key.PaymentSheetLoadPrefetchPMs to "fetchSavedPaymentMethods",
-            DurationProvider.Key.PaymentSheetLoadCreateLinkState to "lookUpLinkAccount",
-            DurationProvider.Key.PaymentSheetLoadCreateCustomerState to "retrieveCustomer",
-        ).mapNotNull { (key, name) ->
-            durationProvider.completedDuration(key)?.let { duration ->
-                name to duration.inWholeMilliseconds.toInt()
+        return DurationProvider.Key.entries.map { entry ->
+            entry to (
+                when (entry) {
+                DurationProvider.Key.PaymentSheetLoadSessionLoad -> "fetchElementsSession"
+                DurationProvider.Key.PaymentSheetLoadPrefetchPMs -> "fetchSavedPaymentMethods"
+                DurationProvider.Key.PaymentSheetLoadCreateLinkState -> "lookUpLinkAccount"
+                DurationProvider.Key.PaymentSheetLoadCreateCustomerState -> "retrieveCustomer"
+                DurationProvider.Key.Loading,
+                DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported,
+                DurationProvider.Key.PaymentSheetLoadIsGooglePayReady,
+                DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection,
+                DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection,
+                DurationProvider.Key.Checkout,
+                DurationProvider.Key.LinkSignup,
+                DurationProvider.Key.ConfirmButtonClicked,
+                DurationProvider.Key.TapToAdd,
+                DurationProvider.Key.CardScan,
+                DurationProvider.Key.Captcha,
+                DurationProvider.Key.CaptchaAttach,
+                DurationProvider.Key.PaymentLauncher,
+                DurationProvider.Key.PrepareAttestation,
+                DurationProvider.Key.Attest,
+                DurationProvider.Key.IntentConfirmationChallenge,
+                DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
+                DurationProvider.Key.PaymentMethodMessaging -> null
+            }
+            )
+        }.mapNotNull { (key, name) ->
+            name?.let {
+                durationProvider.completedDuration(key)?.let { duration ->
+                    name to duration.inWholeMilliseconds.toInt()
+                }
             }
         }.toMap()
     }
