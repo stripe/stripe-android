@@ -955,7 +955,7 @@ class LinkController @Inject internal constructor(
                 savedStateHandle = savedStateHandle,
                 requestSurface = RequestSurface.PaymentElement,
                 configuration = configuration,
-            )
+            ).also { it.configureEagerly() }
         }
     }
 

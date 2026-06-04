@@ -375,8 +375,8 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
 ).firstOrNull { it != null }
 
 private fun LinkController.PresentResult.toStatusString(): String = when (this) {
-    is LinkController.PresentResult.Completed -> "Completed: ${paymentMethod.id}"
-    LinkController.PresentResult.Canceled -> "Canceled"
+    is LinkController.PresentResult.Completed -> "Completed: ${confirmationToken.id}"
+    is LinkController.PresentResult.Canceled -> "Canceled"
     is LinkController.PresentResult.Failed -> "Failed: ${error.message}"
 }
 
