@@ -107,12 +107,10 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private fun buildLoadTimings(): Map<String, Int> {
         return listOf(
-            DurationProvider.Key.PaymentSheetLoadLogLoadStarted to "logLoadStarted",
             DurationProvider.Key.PaymentSheetLoadSessionLoad to "fetchElementsSession",
             DurationProvider.Key.PaymentSheetLoadPrefetchPMs to "fetchSavedPaymentMethods",
             DurationProvider.Key.PaymentSheetLoadCreateLinkState to "lookUpLinkAccount",
             DurationProvider.Key.PaymentSheetLoadCreateCustomerState to "retrieveCustomer",
-            DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes to "computePaymentMethodTypes",
         ).mapNotNull { (key, name) ->
             durationProvider.completedDuration(key)?.let { duration ->
                 name to duration.inWholeMilliseconds.toInt()

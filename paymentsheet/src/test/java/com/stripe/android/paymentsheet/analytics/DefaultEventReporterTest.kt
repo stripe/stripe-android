@@ -177,12 +177,10 @@ class DefaultEventReporterTest {
                 duration = 1.seconds,
             )
         )
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadLogLoadStarted] = 5.seconds
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 100.seconds
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadPrefetchPMs] = 50.seconds
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateLinkState] = 20.seconds
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateCustomerState] = 30.seconds
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes] = 10.seconds
 
         eventReporter.onLoadSucceeded(
             paymentSelection = PaymentSelection.GooglePay,
@@ -193,12 +191,10 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_load_succeeded")
         @Suppress("UNCHECKED_CAST")
         val loadTimings = request.params["load_timings"] as Map<String, Int>
-        assertThat(loadTimings["logLoadStarted"]).isEqualTo(5000)
         assertThat(loadTimings["fetchElementsSession"]).isEqualTo(100000)
         assertThat(loadTimings["fetchSavedPaymentMethods"]).isEqualTo(50000)
         assertThat(loadTimings["lookUpLinkAccount"]).isEqualTo(20000)
         assertThat(loadTimings["retrieveCustomer"]).isEqualTo(30000)
-        assertThat(loadTimings["computePaymentMethodTypes"]).isEqualTo(10000)
     }
 
     @Test
@@ -234,7 +230,6 @@ class DefaultEventReporterTest {
                 duration = 2.seconds,
             )
         )
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadLogLoadStarted] = 3.seconds
         durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.seconds
 
         val error = RuntimeException("Test error")
@@ -244,12 +239,10 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_load_failed")
         @Suppress("UNCHECKED_CAST")
         val loadTimings = request.params["load_timings"] as Map<String, Int>
-        assertThat(loadTimings["logLoadStarted"]).isEqualTo(3000)
         assertThat(loadTimings["fetchElementsSession"]).isEqualTo(200000)
         assertThat(loadTimings).doesNotContainKey("fetchSavedPaymentMethods")
         assertThat(loadTimings).doesNotContainKey("lookUpLinkAccount")
         assertThat(loadTimings).doesNotContainKey("retrieveCustomer")
-        assertThat(loadTimings).doesNotContainKey("computePaymentMethodTypes")
     }
 
     @Test

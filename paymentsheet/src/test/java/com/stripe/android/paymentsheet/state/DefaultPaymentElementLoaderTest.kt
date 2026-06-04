@@ -17,6 +17,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -4655,11 +4656,9 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         assertThat(result.isSuccess).isTrue()
-        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadLogLoadStarted)).isNotNull()
         assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadSessionLoad)).isNotNull()
         assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState)).isNotNull()
         assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadCreateCustomerState)).isNotNull()
-        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes)).isNotNull()
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -4682,8 +4681,6 @@ internal class DefaultPaymentElementLoaderTest {
         )
 
         assertThat(result.isFailure).isTrue()
-        // logLoadStarted should be recorded since it runs before the session load
-        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadLogLoadStarted)).isNotNull()
         // Session load fails, so it should not have a completed duration
         assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadSessionLoad)).isNull()
 

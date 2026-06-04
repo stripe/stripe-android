@@ -273,9 +273,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             callbackIdentifier = paymentElementCallbackIdentifier,
         )
 
-        durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadLogLoadStarted) {
-            eventReporter.onLoadStarted(metadata.initializedViaCompose)
-        }
+        eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(configuration)
 
         val isGooglePaySupportedOnDevice = async {
@@ -350,24 +348,22 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
 
-            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
-                val metadata = createPaymentMethodMetadata(
-                    integrationConfiguration = integrationConfiguration,
-                    elementsSession = elementsSession,
-                    configuration = configuration,
-                    linkStateResult = linkStateResult,
-                    isGooglePayReady = isGooglePayReady,
-                    isGooglePaySupported = isGooglePaySupported,
-                    initializationMode = initializationMode,
-                    customerMetadata = customerMetadata,
-                    clientAttributionMetadata = clientAttributionMetadata,
-                )
-                if (!supportsIntent(metadata)) {
-                    val requested = elementsSession.stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
-                    throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
-                }
-                metadata
+            val metadata = createPaymentMethodMetadata(
+                integrationConfiguration = integrationConfiguration,
+                elementsSession = elementsSession,
+                configuration = configuration,
+                linkStateResult = linkStateResult,
+                isGooglePayReady = isGooglePayReady,
+                isGooglePaySupported = isGooglePaySupported,
+                initializationMode = initializationMode,
+                customerMetadata = customerMetadata,
+                clientAttributionMetadata = clientAttributionMetadata,
+            )
+            if (!supportsIntent(metadata)) {
+                val requested = elementsSession.stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+                throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
             }
+            metadata
         }
 
         val customer = async {

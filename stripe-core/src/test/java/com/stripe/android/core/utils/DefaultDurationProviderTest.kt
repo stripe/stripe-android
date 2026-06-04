@@ -83,8 +83,6 @@ class DefaultDurationProviderTest {
         assertThat(provider.completedDuration(DurationProvider.Key.PaymentSheetLoadPrefetchPMs)).isNull()
         assertThat(provider.completedDuration(DurationProvider.Key.PaymentSheetLoadCreateLinkState)).isNull()
         assertThat(provider.completedDuration(DurationProvider.Key.PaymentSheetLoadCreateCustomerState)).isNull()
-        assertThat(provider.completedDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes)).isNull()
-        assertThat(provider.completedDuration(DurationProvider.Key.PaymentSheetLoadLogLoadStarted)).isNull()
     }
 
     @Test
