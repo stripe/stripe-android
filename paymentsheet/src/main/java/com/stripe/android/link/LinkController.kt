@@ -22,6 +22,7 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -194,6 +195,12 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun clearLinkAccount() {
         return interactor.clearLinkAccount()
+    }
+
+    internal fun configureEagerly() {
+        interactor.coroutineScope.launch {
+            interactor.configureIfNeeded()
+        }
     }
 
     /**
