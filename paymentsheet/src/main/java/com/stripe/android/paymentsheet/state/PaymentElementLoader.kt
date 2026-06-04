@@ -348,7 +348,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
 
-            val metadata = createPaymentMethodMetadata(
+            createPaymentMethodMetadata(
                 integrationConfiguration = integrationConfiguration,
                 elementsSession = elementsSession,
                 configuration = configuration,
@@ -359,11 +359,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerMetadata = customerMetadata,
                 clientAttributionMetadata = clientAttributionMetadata,
             )
-            if (!supportsIntent(metadata)) {
-                val requested = elementsSession.stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
-                throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
-            }
-            metadata
         }
 
         val customer = async {
@@ -401,6 +396,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         val pmMetadata = paymentMethodMetadata.await()
 
         warnUnactivatedIfNeeded(stripeIntent)
+
+        if (!supportsIntent(pmMetadata)) {
+            val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
+            throw PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(requested)
+        }
 
         val state = PaymentElementLoader.State(
             config = configuration,
