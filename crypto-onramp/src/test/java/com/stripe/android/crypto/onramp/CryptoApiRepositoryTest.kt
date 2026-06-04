@@ -337,7 +337,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testSubmitIdentifiersSucceedsWhenValid() {
+    fun testSubmitIdentifiersSucceedsWhenCompleted() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
