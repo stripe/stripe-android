@@ -596,7 +596,8 @@ internal class PlaygroundSettings private constructor(
             TermsDisplaySettingsDefinition,
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions)
+            FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions),
+            FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotionsDelay)
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

@@ -21,6 +21,7 @@ import dagger.Module
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Provider
@@ -55,11 +56,11 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
 
     override fun fetchPromotionsAsync(intent: StripeIntent) {
         if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
-
         eventReporter.onPaymentMethodMessagePromotionsFetchBegin()
         promotionsDeferred?.cancel()
         promotionsDeferred = null
         promotionsDeferred = viewModelScope.async(workContext) {
+            if (FeatureFlags.paymentMethodMessagePromotionsDelay.isEnabled) delay(10000)
             stripeRepository.retrievePaymentMethodMessagePromotionsForPaymentSheet(
                 amount = intent.amount?.toInt() ?: 0,
                 currency = intent.currency ?: "usd",

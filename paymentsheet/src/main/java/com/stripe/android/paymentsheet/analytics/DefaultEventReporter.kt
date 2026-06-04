@@ -544,6 +544,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onPaymentMethodMessagePromotionsFetchBegin() {
         durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
+        println("PMM Experiment ${PaymentSheetEvent.PaymentMethodMessaging.Fetched().eventName}")
         fireEvent(
             PaymentSheetEvent.PaymentMethodMessaging.Fetched()
         )
@@ -551,6 +552,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
         val duration = durationProvider.end(DurationProvider.Key.PaymentMethodMessaging)
+        println("PMM Experiment ${PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully).eventName}. displayed_successfully: $displayedSuccessfully, Duration: $duration")
         fireEvent(
             PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully)
         )

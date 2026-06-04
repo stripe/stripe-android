@@ -29,6 +29,8 @@ internal class DefaultPaymentMethodMessagePromotionsExperimentHandler @Inject co
             layout = metadata.paymentMethodOrientation().toLayout(),
         )
 
+        println("PMM Experiment exposure: $exposure")
+
         eventReporter.onExperimentExposure(exposure)
     }
 
