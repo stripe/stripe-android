@@ -27,7 +27,7 @@ internal class FakeDurationProvider(
     }
 
     override fun completedDuration(key: DurationProvider.Key): Duration? {
-        return null
+        throw NotImplementedError("completedDuration is not implemented in FakeDurationProvider")
     }
 
     override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
