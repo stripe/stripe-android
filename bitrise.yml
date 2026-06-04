@@ -366,6 +366,36 @@ workflows:
           title: Export PaymentSheet E2E test results
           inputs:
             - test_title: PaymentSheet E2E tests
+  run-paymentsheet-latency-difference:
+    before_run:
+      - start_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Install Ruby via asdf
+          inputs:
+            - content: asdf install ruby 3.2.4
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Measure PaymentSheet latency difference
+          timeout: 7200
+          inputs:
+            - content: |
+                ruby scripts/measure_latency_difference.rb \
+                  --base-commit "$BASE_COMMIT" \
+                  --commit "$COMMIT"
+      - bundle::export_instrumentation_test_results:
+          title: Export PaymentSheet latency difference results
+          inputs:
+            - test_title: PaymentSheet latency difference
+    meta:
+      bitrise.io:
+        stack: linux-docker-android-22.04
+        machine_type_id: g2.linux.x-large
   run-paymentsheet-latency-synthetics:
     before_run:
       - start_emulator
