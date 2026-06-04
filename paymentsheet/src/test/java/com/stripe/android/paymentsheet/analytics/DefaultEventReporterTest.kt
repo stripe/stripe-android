@@ -41,6 +41,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Stack
 import javax.inject.Provider
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -177,10 +178,10 @@ class DefaultEventReporterTest {
                 duration = 1.seconds,
             )
         )
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 100.seconds
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadPrefetchPMs] = 50.seconds
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateLinkState] = 20.seconds
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateCustomerState] = 30.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 100.milliseconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadPrefetchPMs] = 50.milliseconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateLinkState] = 20.milliseconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateCustomerState] = 30.milliseconds
 
         eventReporter.onLoadSucceeded(
             paymentSelection = PaymentSelection.GooglePay,
@@ -191,10 +192,10 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_load_succeeded")
 
         val loadTimings = request.params["load_timings"] as Map<*, *>
-        assertThat(loadTimings).containsEntry("fetchElementsSession", 100000)
-        assertThat(loadTimings).containsEntry("fetchSavedPaymentMethods", 50000)
-        assertThat(loadTimings).containsEntry("lookUpLinkAccount", 20000)
-        assertThat(loadTimings).containsEntry("retrieveCustomer", 30000)
+        assertThat(loadTimings).containsEntry("fetchElementsSession", 100)
+        assertThat(loadTimings).containsEntry("fetchSavedPaymentMethods", 50)
+        assertThat(loadTimings).containsEntry("lookUpLinkAccount", 20)
+        assertThat(loadTimings).containsEntry("retrieveCustomer", 30)
     }
 
     @Test
@@ -230,7 +231,7 @@ class DefaultEventReporterTest {
                 duration = 2.seconds,
             )
         )
-        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.seconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.milliseconds
 
         val error = RuntimeException("Test error")
         eventReporter.onLoadFailed(error = error)
@@ -239,7 +240,7 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_load_failed")
 
         val loadTimings = request.params["load_timings"] as Map<*, *>
-        assertThat(loadTimings).containsEntry("fetchElementsSession", 200000)
+        assertThat(loadTimings).containsEntry("fetchElementsSession", 200)
         assertThat(loadTimings).doesNotContainKey("fetchSavedPaymentMethods")
         assertThat(loadTimings).doesNotContainKey("lookUpLinkAccount")
         assertThat(loadTimings).doesNotContainKey("retrieveCustomer")
