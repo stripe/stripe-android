@@ -334,6 +334,64 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
+    fun `On Google Pay selection with displayItems, should return expected option with displayItems`() {
+        val displayItems = listOf(
+            com.stripe.android.GooglePayJsonFactory.DisplayItem(
+                label = "Widget",
+                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 2000L,
+            ),
+            com.stripe.android.GooglePayJsonFactory.DisplayItem(
+                label = "Tax",
+                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
+                price = 500L,
+            ),
+        )
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+            googlePayDisplayItems = displayItems,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
+        ).isEqualTo(displayItems)
+    }
+
+    @Test
+    fun `On Google Pay selection without displayItems, should return empty displayItems`() {
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
+        ).isEmpty()
+    }
+
+    @Test
     fun `On Link selection but with no configuration, should return null`() {
         assertThat(
             PaymentSelection.Link(brand = LinkBrand.Link).toConfirmationOption(

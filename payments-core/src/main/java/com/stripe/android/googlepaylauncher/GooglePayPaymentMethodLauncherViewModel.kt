@@ -1,5 +1,6 @@
 package com.stripe.android.googlepaylauncher
 
+import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -13,6 +14,7 @@ import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.BuildConfig
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
@@ -28,6 +30,7 @@ import java.util.Locale
 import javax.inject.Inject
 
 internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
+    private val context: Context,
     private val paymentsClient: PaymentsClient,
     private val requestOptions: ApiRequest.Options,
     private val args: GooglePayPaymentMethodLauncherContractV2.Args,
@@ -81,14 +84,22 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     internal fun createTransactionInfo(
         args: GooglePayPaymentMethodLauncherContractV2.Args
     ): GooglePayJsonFactory.TransactionInfo {
+        // Google Pay requires totalPriceLabel when displayItems are present.
+        val label = args.label ?: if (args.displayItems.isNotEmpty()) {
+            context.getString(R.string.stripe_google_pay_total)
+        } else {
+            null
+        }
         return if (shouldHidePrice(args)) {
             GooglePayJsonFactory.TransactionInfo(
                 currencyCode = args.currencyCode,
                 totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.NotCurrentlyKnown,
                 countryCode = args.config.merchantCountryCode,
                 transactionId = args.transactionId,
-                totalPriceLabel = args.label,
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                totalPrice = null,
+                totalPriceLabel = label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
+                displayItems = args.displayItems,
             )
         } else {
             GooglePayJsonFactory.TransactionInfo(
@@ -97,8 +108,9 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
                 countryCode = args.config.merchantCountryCode,
                 transactionId = args.transactionId,
                 totalPrice = args.amount,
-                totalPriceLabel = args.label,
-                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default
+                totalPriceLabel = label,
+                checkoutOption = GooglePayJsonFactory.TransactionInfo.CheckoutOption.Default,
+                displayItems = args.displayItems,
             )
         }
     }
