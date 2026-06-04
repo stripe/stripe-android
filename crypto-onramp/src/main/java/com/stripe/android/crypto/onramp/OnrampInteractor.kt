@@ -384,7 +384,7 @@ internal class OnrampInteractor @Inject constructor(
         return cryptoApiRepository.submitIdentifiers(identifiers, secret)
             .fold(
                 onSuccess = { result ->
-                    analyticsService?.track(OnrampAnalyticsEvent.IdentifiersSubmitted(result.valid))
+                    analyticsService?.track(OnrampAnalyticsEvent.IdentifiersSubmitted(result.completed))
                     OnrampSubmitIdentifiersResult.Completed(result)
                 },
                 onFailure = { error ->

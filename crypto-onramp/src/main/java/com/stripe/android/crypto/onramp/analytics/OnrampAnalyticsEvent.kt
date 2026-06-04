@@ -77,10 +77,10 @@ internal sealed class OnrampAnalyticsEvent(
         name = "identifier_requirements_retrieved"
     )
 
-    class IdentifiersSubmitted(valid: Boolean) : OnrampAnalyticsEvent(
+    class IdentifiersSubmitted(completed: Boolean) : OnrampAnalyticsEvent(
         name = "identifiers_submitted",
         params = mapOf(
-            "valid" to valid.toString()
+            "completed" to completed.toString()
         )
     )
 

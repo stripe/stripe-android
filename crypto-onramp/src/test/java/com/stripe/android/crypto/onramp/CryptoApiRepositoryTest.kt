@@ -237,12 +237,9 @@ class CryptoApiRepositoryTest {
                             {
                                 "regulation": "eu_mica",
                                 "type": "mt_nic"
-                            },
-                            {
-                                "regulation": "eu_carf",
-                                "type": "fr_spi"
                             }
-                        ]
+                        ],
+                        "carf_tin_required": true
                     }
                     """,
                 emptyMap()
@@ -269,10 +266,6 @@ class CryptoApiRepositoryTest {
                     ComplianceIdentifierRequirement(
                         type = ComplianceIdentifierType.MT_NIC,
                         regulation = ComplianceRegulation.EuMica
-                    ),
-                    ComplianceIdentifierRequirement(
-                        type = ComplianceIdentifierType.FR_SPI,
-                        regulation = ComplianceRegulation.EuCarf
                     )
                 )
             assertThat(result.getOrThrow().alternatives)
@@ -282,6 +275,7 @@ class CryptoApiRepositoryTest {
                         alternativeMissingIdentifiers = listOf(ComplianceIdentifierType.MT_PP)
                     )
                 )
+            assertThat(result.getOrThrow().carfTinRequired).isTrue()
         }
     }
 
@@ -304,14 +298,6 @@ class CryptoApiRepositoryTest {
                         ],
                         "identifiers": [
                             {
-                                "regulation": "eu_carf",
-                                "type": "de_stn"
-                            },
-                            {
-                                "regulation": "eu_carf",
-                                "type": "mt_nic"
-                            },
-                            {
                                 "regulation": "eu_mica",
                                 "type": "mt_nic"
                             }
@@ -320,7 +306,8 @@ class CryptoApiRepositoryTest {
                             "de_stn",
                             "mt_nic"
                         ],
-                        "valid": false,
+                        "completed": false,
+                        "carf_tin_required": false,
                         "ignored_field": "ignored"
                     }
                     """,
@@ -350,7 +337,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testSubmitIdentifiersSucceedsWhenValid() {
+    fun testSubmitIdentifiersSucceedsWhenCompleted() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -359,7 +346,8 @@ class CryptoApiRepositoryTest {
                         "alternatives": [],
                         "identifiers": [],
                         "invalid_identifiers": [],
-                        "valid": true
+                        "completed": true,
+                        "carf_tin_required": false
                     }
                     """,
                 emptyMap()
@@ -381,10 +369,11 @@ class CryptoApiRepositoryTest {
             assertThat(result.getOrThrow())
                 .isEqualTo(
                     SubmitIdentifiersResult(
-                        valid = true,
+                        completed = true,
                         identifiers = emptyList(),
                         alternatives = emptyList(),
-                        invalidIdentifiers = emptyList()
+                        invalidIdentifiers = emptyList(),
+                        carfTinRequired = false
                     )
                 )
         }
@@ -829,17 +818,9 @@ class CryptoApiRepositoryTest {
     }
 
     private fun assertSubmitIdentifiersResult(result: SubmitIdentifiersResult) {
-        assertThat(result.valid).isFalse()
+        assertThat(result.completed).isFalse()
         assertThat(result.identifiers)
             .containsExactly(
-                ComplianceIdentifierRequirement(
-                    type = ComplianceIdentifierType.DE_STN,
-                    regulation = ComplianceRegulation.EuCarf
-                ),
-                ComplianceIdentifierRequirement(
-                    type = ComplianceIdentifierType.MT_NIC,
-                    regulation = ComplianceRegulation.EuCarf
-                ),
                 ComplianceIdentifierRequirement(
                     type = ComplianceIdentifierType.MT_NIC,
                     regulation = ComplianceRegulation.EuMica
@@ -854,5 +835,6 @@ class CryptoApiRepositoryTest {
             )
         assertThat(result.invalidIdentifiers)
             .isEqualTo(listOf(ComplianceIdentifierType.DE_STN, ComplianceIdentifierType.MT_NIC))
+        assertThat(result.carfTinRequired).isFalse()
     }
 }

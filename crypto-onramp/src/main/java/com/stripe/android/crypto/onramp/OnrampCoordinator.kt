@@ -116,7 +116,7 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Retrieves compliance identifiers still required for MiCA and CRS/CARF compliance.
+     * Retrieves MiCA identifiers and whether a CRS/CARF TIN is still required.
      * Requires an authenticated Link user.
      */
     suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {

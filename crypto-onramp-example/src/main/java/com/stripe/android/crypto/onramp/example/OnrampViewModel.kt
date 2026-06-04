@@ -1032,6 +1032,8 @@ internal class OnrampViewModel(
         requirements: ComplianceIdentifierRequirements
     ): String {
         return buildString {
+            append("CARF TIN required: ${requirements.carfTinRequired}")
+            append("\n")
             append("Identifiers: ")
             append(formatIdentifierRequirements(requirements.identifiers))
             append("\nAlternatives: ")
@@ -1041,7 +1043,8 @@ internal class OnrampViewModel(
 
     private fun formatSubmitIdentifiersResult(result: SubmitIdentifiersResult): String {
         return buildString {
-            append("Valid: ${result.valid}")
+            append("Completed: ${result.completed}")
+            append("\nCARF TIN required: ${result.carfTinRequired}")
             append("\nIdentifiers: ")
             append(formatIdentifierRequirements(result.identifiers))
             append("\nAlternatives: ")
