@@ -1,19 +1,17 @@
 package com.stripe.android.core.utils
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
 class DefaultDurationProviderTest {
 
-    /**
-     * Creates a fresh [DefaultDurationProvider] instance for each test via reflection,
-     * avoiding shared singleton state.
-     */
     private fun createProvider(): DurationProvider {
-        val constructor = DefaultDurationProvider::class.java.getDeclaredConstructor()
-        constructor.isAccessible = true
-        return constructor.newInstance()
+        return DefaultDurationProvider(
+            uptimeMillis = { 10L },
+            logger = Logger.noop(),
+        )
     }
 
     @Test
