@@ -271,12 +271,12 @@ internal interface EventReporter : CardScanEventsReporter {
     /**
      * Promotions fetched from PMM API.
      */
-    fun onPaymentMethodMessagePromotionsFetched()
+    fun onPaymentMethodMessagePromotionsFetchBegin()
 
     /**
-     * Promotions request is not completed when attempting to display promotions.
+     * Attempted to display promotions.
      */
-    fun onPaymentMethodMessagePromotionsIncomplete()
+    fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean)
 
     enum class Mode(val code: String) {
         Complete("complete"),

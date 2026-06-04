@@ -48,8 +48,9 @@ internal class PaymentOptionsViewModelModule {
 
     @Provides
     fun providesPaymentMethodMessageHelper(
-        args: PaymentOptionContract.Args
+        args: PaymentOptionContract.Args,
+        eventReporter: EventReporter
     ): PaymentMethodMessagePromotionsHelper {
-        return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions)
+        return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, eventReporter)
     }
 }

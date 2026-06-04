@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodMessagePromotionList
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.repositories.DefaultPaymentMethodMessagePromotionsHelper
 import com.stripe.android.testing.AbsFakeStripeRepository
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -36,6 +37,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true,
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
         val request = fakeRepository.calls.awaitItem()
         assertThat(request.amount).isEqualTo(1099)
         assertThat(request.currency).isEqualTo("usd")
@@ -48,6 +50,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("treatment")
         val result = helper.getPromotionIfAvailableForCode(
@@ -55,7 +58,24 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             metadata
         )
 
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
         assertThat(result).isEqualTo(AFTERPAY_PROMOTION)
+    }
+
+    @Test
+    fun `getPromotionIfAvailableForCode logs displayed successfully as false if not available`() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        val metadata = getMetadata("treatment")
+        val result = helper.getPromotionIfAvailableForCode(
+            "afterpay_clearpay",
+            metadata
+        )
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isFalse()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -63,6 +83,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
         assertThat(helper.getPromotionIfAvailableForCode("afterpay_clearpay", metadata)).isNull()
@@ -73,6 +94,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
         assertThat(helper.getPromotionProvider("afterpay_clearpay", metadata)).isNull()
@@ -83,6 +105,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
         assertThat(helper.getPromotionProvider("card", metadata)).isNull()
@@ -93,6 +116,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("treatment")
         val result = helper.getPromotionProvider(
@@ -100,6 +124,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             metadata
         )?.invoke()
 
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
         assertThat(result).isEqualTo(AFTERPAY_PROMOTION)
     }
 
@@ -116,6 +141,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
         val fakeRepository = FakePromotionsStripeRepository(repositoryResult)
         val testDispatcher = StandardTestDispatcher(testScheduler)
+        val eventReporter = FakeEventReporter()
 
         val helper = DefaultPaymentMethodMessagePromotionsHelper(
             stripeRepository = fakeRepository,
@@ -124,19 +150,24 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             },
             viewModelScope = this,
             workContext = testDispatcher,
+            eventReporter = eventReporter
         )
 
         Scenario(
             helper = helper,
             fakeRepository = fakeRepository,
             dispatcher = testDispatcher,
+            eventReporter = eventReporter
         ).block()
+
+        eventReporter.validate()
     }
 
     private data class Scenario(
         val helper: DefaultPaymentMethodMessagePromotionsHelper,
         val fakeRepository: FakePromotionsStripeRepository,
         val dispatcher: TestDispatcher,
+        val eventReporter: FakeEventReporter
     )
 
     private class FakePromotionsStripeRepository(
