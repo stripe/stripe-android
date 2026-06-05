@@ -84,7 +84,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
-                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty()
+                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty(),
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -98,9 +99,47 @@ internal class DefaultEventReporter @Inject internal constructor(
             event = PaymentSheetEvent.LoadFailed(
                 duration = duration,
                 error = error,
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
+    }
+
+    private fun buildLoadTimings(): Map<String, Int> {
+        return DurationProvider.Key.entries.map { entry ->
+            entry to (
+                when (entry) {
+                DurationProvider.Key.PaymentSheetLoadSessionLoad -> "fetchElementsSession"
+                DurationProvider.Key.PaymentSheetLoadPrefetchPMs -> "fetchSavedPaymentMethods"
+                DurationProvider.Key.PaymentSheetLoadCreateLinkState -> "lookUpLinkAccount"
+                DurationProvider.Key.PaymentSheetLoadCreateCustomerState -> "retrieveCustomer"
+                DurationProvider.Key.Loading,
+                DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported,
+                DurationProvider.Key.PaymentSheetLoadIsGooglePayReady,
+                DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection,
+                DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection,
+                DurationProvider.Key.Checkout,
+                DurationProvider.Key.LinkSignup,
+                DurationProvider.Key.ConfirmButtonClicked,
+                DurationProvider.Key.TapToAdd,
+                DurationProvider.Key.CardScan,
+                DurationProvider.Key.Captcha,
+                DurationProvider.Key.CaptchaAttach,
+                DurationProvider.Key.PaymentLauncher,
+                DurationProvider.Key.PrepareAttestation,
+                DurationProvider.Key.Attest,
+                DurationProvider.Key.IntentConfirmationChallenge,
+                DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
+                DurationProvider.Key.PaymentMethodMessaging -> null
+            }
+            )
+        }.mapNotNull { (key, name) ->
+            name?.let {
+                durationProvider.completedDuration(key)?.let { duration ->
+                    name to duration.inWholeMilliseconds.toInt()
+                }
+            }
+        }.toMap()
     }
 
     override fun onElementsSessionLoadFailed(error: Throwable) {

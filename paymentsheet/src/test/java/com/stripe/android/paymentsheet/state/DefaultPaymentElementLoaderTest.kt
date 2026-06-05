@@ -17,6 +17,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -4639,6 +4640,65 @@ internal class DefaultPaymentElementLoaderTest {
         ),
     )
 
+    @Test
+    fun `load populates expected timing keys`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadSessionLoad
+            )
+        ).isNotNull()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadCreateLinkState
+            )
+        ).isNotNull()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadCreateCustomerState
+            )
+        ).isNotNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `prefetchPMs timing key is absent when no legacy ephemeral key customer`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        // No legacy ephemeral key customer, so fetchSavedPaymentMethods should not be timed
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadPrefetchPMs)).isNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
     private fun runFilterScenario(
         filteredPaymentMethods: List<PaymentMethod>? = null,
         block: suspend FilterScenario.() -> Unit
@@ -4739,8 +4799,9 @@ internal class DefaultPaymentElementLoaderTest {
         paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper =
             FakePaymentMethodMessagePromotionsHelper(),
+        durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
-            FakePaymentMethodMessagePromotionsExperimentHandler()
+            FakePaymentMethodMessagePromotionsExperimentHandler(),
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
         val createLinkState = DefaultCreateLinkState(
@@ -4788,7 +4849,7 @@ internal class DefaultPaymentElementLoaderTest {
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
-            durationProvider = FakeDurationProvider(),
+            durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
         )
     }
