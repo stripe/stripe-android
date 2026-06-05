@@ -2,6 +2,7 @@ package com.stripe.android.payments.financialconnections
 
 import com.stripe.android.core.utils.FeatureFlags.financialConnectionsFullSdkUnavailable
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment.CONNECTIONS_FC_LITE_VS_NATIVE
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_FC_LITE
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_PREFER_FC_LITE
 import com.stripe.android.testing.FeatureFlagTestRule
@@ -22,7 +23,7 @@ class GetFinancialConnectionsAvailabilityTest {
     @Test
     fun `when prefer lite flag is enabled should return Lite regardless of full SDK availability`() {
         val elementsSession = createSession(
-            mapOf(ELEMENTS_PREFER_FC_LITE to true)
+            flags = mapOf(ELEMENTS_PREFER_FC_LITE to true)
         )
         assertEquals(
             FinancialConnectionsAvailability.Lite,
@@ -36,7 +37,7 @@ class GetFinancialConnectionsAvailabilityTest {
     @Test
     fun `when killswitch is enabled should take priority over prefer lite flag`() {
         val elementsSession = createSession(
-            mapOf(
+            flags = mapOf(
                 ELEMENTS_PREFER_FC_LITE to true,
                 ELEMENTS_DISABLE_FC_LITE to true
             )
@@ -65,7 +66,7 @@ class GetFinancialConnectionsAvailabilityTest {
     @Test
     fun `when lite killswitch is enabled and full not available should return None`() {
         val elementsSession = createSession(
-            mapOf(ELEMENTS_DISABLE_FC_LITE to true)
+            flags = mapOf(ELEMENTS_DISABLE_FC_LITE to true)
         )
         assertEquals(
             null,
@@ -101,9 +102,62 @@ class GetFinancialConnectionsAvailabilityTest {
         )
     }
 
-    private fun createSession(flags: Map<ElementsSession.Flag, Boolean>): ElementsSession {
+    @Test
+    fun `when experiment assignment is treatment should return Lite regardless of full SDK availability`() {
+        val elementsSession = createSession(
+            flags = emptyMap(),
+            experimentAssignments = mapOf(CONNECTIONS_FC_LITE_VS_NATIVE to "treatment")
+        )
+        assertEquals(
+            FinancialConnectionsAvailability.Lite,
+            GetFinancialConnectionsAvailability(
+                elementsSession = elementsSession,
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
+            )
+        )
+    }
+
+    @Test
+    fun `when experiment assignment is control should not prefer Lite`() {
+        val elementsSession = createSession(
+            flags = emptyMap(),
+            experimentAssignments = mapOf(CONNECTIONS_FC_LITE_VS_NATIVE to "control")
+        )
+        assertEquals(
+            FinancialConnectionsAvailability.Full,
+            GetFinancialConnectionsAvailability(
+                elementsSession = elementsSession,
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
+            )
+        )
+    }
+
+    @Test
+    fun `when experiment is treatment but killswitch is enabled should not use Lite`() {
+        val elementsSession = createSession(
+            flags = mapOf(ELEMENTS_DISABLE_FC_LITE to true),
+            experimentAssignments = mapOf(CONNECTIONS_FC_LITE_VS_NATIVE to "treatment")
+        )
+        assertEquals(
+            FinancialConnectionsAvailability.Full,
+            GetFinancialConnectionsAvailability(
+                elementsSession = elementsSession,
+                isFullSdkAvailable = isFinancialConnectionsFullSdkAvailable(true)
+            )
+        )
+    }
+
+    private fun createSession(
+        flags: Map<ElementsSession.Flag, Boolean>,
+        experimentAssignments: Map<ElementsSession.ExperimentAssignment, String> = emptyMap(),
+    ): ElementsSession {
+        val experimentsData = ElementsSession.ExperimentsData(
+            arbId = "test_arb_id",
+            experimentAssignments = experimentAssignments,
+        ).takeIf { experimentAssignments.isNotEmpty() }
         return mock<ElementsSession> {
             on { this.flags } doReturn flags
+            on { this.experimentsData } doReturn experimentsData
         }
     }
 
