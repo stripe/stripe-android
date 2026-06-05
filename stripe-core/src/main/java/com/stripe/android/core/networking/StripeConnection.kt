@@ -6,13 +6,12 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
-import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.Scanner
-import javax.net.ssl.HttpsURLConnection
+import okhttp3.Response
 
 /**
- * A wrapper for accessing a [HttpURLConnection]. Implements [Closeable] to simplify closing related
+ * A wrapper around an OkHttp [Response]. Implements [Closeable] to simplify closing related
  * resources.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -23,40 +22,23 @@ interface StripeConnection<ResponseBodyType> : Closeable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     abstract class AbstractConnection<ResponseBodyType>(
-        private val conn: HttpsURLConnection
+        private val okHttpResponse: Response
     ) : StripeConnection<ResponseBodyType> {
         override val responseCode: Int
             @JvmSynthetic
-            get() {
-                return conn.responseCode
-            }
+            get() = okHttpResponse.code
 
         override val response: StripeResponse<ResponseBodyType>
             @Throws(IOException::class)
             @JvmSynthetic
-            get() {
-                // trigger the request
-                val responseCode = this.responseCode
-                return StripeResponse(
-                    code = responseCode,
-                    body = createBodyFromResponseStream(responseStream),
-                    headers = conn.headerFields
-                )
-            }
-
-        private val responseStream: InputStream?
-            @Throws(IOException::class)
-            get() {
-                return if (responseCode in 200..299) {
-                    conn.inputStream
-                } else {
-                    conn.errorStream
-                }
-            }
+            get() = StripeResponse(
+                code = responseCode,
+                body = createBodyFromResponseStream(okHttpResponse.body?.byteStream()),
+                headers = okHttpResponse.headers.toMultimap()
+            )
 
         override fun close() {
-            responseStream?.close()
-            conn.disconnect()
+            okHttpResponse.close()
         }
 
         internal companion object {
@@ -65,14 +47,14 @@ interface StripeConnection<ResponseBodyType> : Closeable {
     }
 
     /**
-     * Default [StripeConnection] that converts the ResponseStream to a String.
+     * Default [StripeConnection] that converts the response body to a [String].
      */
     class Default internal constructor(
-        conn: HttpsURLConnection
-    ) : AbstractConnection<String>(conn = conn) {
+        okHttpResponse: Response
+    ) : AbstractConnection<String>(okHttpResponse = okHttpResponse) {
 
         /**
-         * Convert stream to a String
+         * Convert stream to a String.
          */
         @Throws(IOException::class)
         override fun createBodyFromResponseStream(responseStream: InputStream?): String? {
@@ -93,15 +75,15 @@ interface StripeConnection<ResponseBodyType> : Closeable {
     }
 
     /**
-     * [StripeConnection] that writes the ResponseStream to a File.
+     * [StripeConnection] that writes the response body to a [File].
      */
     class FileConnection internal constructor(
-        conn: HttpsURLConnection,
+        okHttpResponse: Response,
         private val outputFile: File
-    ) : AbstractConnection<File>(conn = conn) {
+    ) : AbstractConnection<File>(okHttpResponse = okHttpResponse) {
 
         /**
-         * Convert stream to a File
+         * Convert stream to a File.
          */
         @Throws(IOException::class)
         override fun createBodyFromResponseStream(responseStream: InputStream?): File? {
