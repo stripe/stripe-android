@@ -3,6 +3,7 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -19,7 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DropdownFieldController(
     private val config: DropdownConfig,
-    initialValue: String? = null
+    initialValue: String? = null,
+    val autofillType: ContentType? = null,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     val displayItems: List<String> = config.displayItems
     val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement

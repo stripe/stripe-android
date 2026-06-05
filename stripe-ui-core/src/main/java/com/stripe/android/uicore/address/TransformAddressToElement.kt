@@ -2,6 +2,7 @@ package com.stripe.android.uicore.address
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.ResolvableString
@@ -293,7 +294,8 @@ private fun FieldType.toElement(
                 AdministrativeAreaElement(
                     identifierSpec,
                     DropdownFieldController(
-                        AdministrativeAreaConfig(country)
+                        AdministrativeAreaConfig(country),
+                        autofillType = ContentType.AddressRegion,
                     )
                 )
             } else {
@@ -323,6 +325,13 @@ private fun FieldType.toConfig(
             keyboard = keyboardType,
             optional = optional,
             allowsEmojis = false,
+            contentType = when (this) {
+                FieldType.AddressLine1 -> ContentType.AddressStreet
+                FieldType.AddressLine2 -> ContentType.AddressAuxiliaryDetails
+                FieldType.Locality -> ContentType.AddressLocality
+                FieldType.AdministrativeArea -> ContentType.AddressRegion
+                else -> null
+            },
         )
     }
 }
