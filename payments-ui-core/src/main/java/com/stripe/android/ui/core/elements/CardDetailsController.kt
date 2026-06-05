@@ -12,7 +12,6 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.cardscan.CardScanResult
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.DefaultFieldValidationMessageComparator
@@ -111,27 +110,23 @@ internal class CardDetailsController(
         )
     )
 
-    val onCardScanResult: (CardScanResult) -> Unit = { result ->
-        (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
-            cvcElement.controller.onRawValueChange("")
-            numberElement.controller.onRawValueChange(
-                scannedCard.pan
+    fun onScannedCard(cardNumber: String, expirationYear: Int?, expirationMonth: Int?) {
+        cvcElement.controller.onRawValueChange("")
+        numberElement.controller.onRawValueChange(cardNumber)
+        val newDate = if (
+            expirationMonth != null &&
+            expirationYear != null &&
+            DateUtils.isExpiryDataValid(
+                expiryMonth = expirationMonth,
+                expiryYear = expirationYear
             )
-            val newDate = if (
-                scannedCard.expirationMonth != null &&
-                scannedCard.expirationYear != null &&
-                DateUtils.isExpiryDataValid(
-                    expiryMonth = scannedCard.expirationMonth,
-                    expiryYear = scannedCard.expirationYear
-                )
-            ) {
-                @Suppress("MagicNumber")
-                "%02d%02d".format(scannedCard.expirationMonth, scannedCard.expirationYear % 100)
-            } else {
-                ""
-            }
-            expirationDateElement.controller.onRawValueChange(newDate)
+        ) {
+            @Suppress("MagicNumber")
+            "%02d%02d".format(expirationMonth, expirationYear % 100)
+        } else {
+            ""
         }
+        expirationDateElement.controller.onRawValueChange(newDate)
     }
 
     private val rowFields = listOf(expirationDateElement, cvcElement)

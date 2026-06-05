@@ -57,6 +57,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
+import com.stripe.android.utils.setHasAutomaticallyLaunchedCardScan
+import com.stripe.android.utils.shouldAutomaticallyLaunchCardScan
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -3317,7 +3319,7 @@ class CustomerSheetViewModelTest {
             assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
 
             val controller = (formElements[0] as CardDetailsSectionElement).controller
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(controller.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 
@@ -3342,7 +3344,7 @@ class CustomerSheetViewModelTest {
             val formElements = item.asAddState().formElements
             assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
             val controller = (formElements[0] as CardDetailsSectionElement).controller
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(controller.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 
@@ -3365,9 +3367,9 @@ class CustomerSheetViewModelTest {
 
             val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(firstCardFormController).isNotNull()
-            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
-            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
-            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(firstCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
+            firstCardFormController.cardDetailsAction?.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -3389,7 +3391,7 @@ class CustomerSheetViewModelTest {
                 .isEqualTo("card")
             val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(secondCardFormController).isNotNull()
-            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(secondCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
         }
     }
 
@@ -3411,9 +3413,9 @@ class CustomerSheetViewModelTest {
 
             val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(firstCardFormController).isNotNull()
-            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
-            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
-            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(firstCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
+            firstCardFormController.cardDetailsAction?.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
@@ -3450,7 +3452,7 @@ class CustomerSheetViewModelTest {
 
             val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(secondCardFormController).isNotNull()
-            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(secondCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 
@@ -3471,9 +3473,9 @@ class CustomerSheetViewModelTest {
 
             val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(firstCardFormController).isNotNull()
-            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
-            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
-            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(firstCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
+            firstCardFormController.cardDetailsAction?.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
 
@@ -3486,7 +3488,7 @@ class CustomerSheetViewModelTest {
 
             val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(secondCardFormController).isNotNull()
-            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(secondCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 

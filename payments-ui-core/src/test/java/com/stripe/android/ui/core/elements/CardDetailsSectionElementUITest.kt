@@ -1,43 +1,19 @@
 package com.stripe.android.ui.core.elements
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
-import androidx.activity.compose.LocalActivityResultRegistryOwner
-import androidx.activity.result.ActivityResultRegistry
-import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.core.app.ActivityOptionsCompat
-import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
-import com.google.android.gms.wallet.CreditCardExpirationDate
-import com.google.android.gms.wallet.PaymentCardRecognitionResult
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.ui.core.cardscan.CardScanResult
-import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
-import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
-import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
-import com.stripe.android.ui.core.cardscan.LocalPaymentCardRecognitionClient
-import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.mockStatic
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.times
-import org.mockito.Mockito.verify
-import org.mockito.kotlin.any
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
@@ -49,107 +25,11 @@ internal class CardDetailsSectionElementUITest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `CardDetailsSectionElement automatically launches card scan and gets result`() {
-        runScenario(
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                openCardScanAutomaticallyConfig = true,
-                hasAutomaticallyLaunchedCardScanInitialValue = false,
-                savedStateHandle = SavedStateHandle()
-            )
-        ) {
-            composeTestRule.onNodeWithText("4242 4242 4242 4242").assertExists()
-
-            verify(controller, times(1)).onCardScanResult(
-                CardScanResult.Completed(
-                    scannedCard = ScannedCard(
-                        pan = "4242424242424242",
-                        expirationYear = 2042,
-                        expirationMonth = 2,
-                    )
-                )
-            )
-            verify(controller, times(1)).setHasAutomaticallyLaunchedCardScan()
-
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
-        }
-    }
-
-    @Test
-    fun `CardDetailsSectionElement does not launch card scan when openCardScanAutomaticallyConfig false`() {
-        runScenario(
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                openCardScanAutomaticallyConfig = false,
-                hasAutomaticallyLaunchedCardScanInitialValue = false,
-                savedStateHandle = SavedStateHandle()
-            )
-        ) {
-            composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
-            composeTestRule.onNodeWithText("Card number").assertExists()
-
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
-
-            verify(controller, times(0)).onCardScanResult(any())
-            verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
-        }
-    }
-
-    @Test
-    fun `CardDetailsSectionElement does not launch card scan when hasAutomaticallyLaunchedCardScanInitialValue true`() {
-        runScenario(
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                openCardScanAutomaticallyConfig = true,
-                hasAutomaticallyLaunchedCardScanInitialValue = true,
-                savedStateHandle = SavedStateHandle()
-            )
-        ) {
-            composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
-            composeTestRule.onNodeWithText("Card number").assertExists()
-
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
-            verify(controller, times(0)).onCardScanResult(any())
-            verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
-        }
-    }
-
-    @Test
-    fun `CardDetailsSectionElement does not launch card scan when automaticallyLaunchedCardScanFormDataHelper null`() {
-        runScenario(
-            automaticallyLaunchedCardScanFormDataHelper = null
-        ) {
-            composeTestRule.onNodeWithText("4242 4242 4242 4242").assertDoesNotExist()
-            composeTestRule.onNodeWithText("Card number").assertExists()
-
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
-            verify(controller, times(0)).onCardScanResult(any())
-            verify(controller, times(0)).setHasAutomaticallyLaunchedCardScan()
-        }
-    }
-
-    @Test
     fun `CardDetailsSectionElement shows custom action and not card scan when cardDetailsAction is provided`() {
         runScenario(
             cardDetailsAction = FakeCardDetailsAction(contentText = "Tap to add card")
         ) {
             composeTestRule.onNodeWithText("Tap to add card").assertExists()
-            composeTestRule.onNodeWithText("Scan card").assertDoesNotExist()
-        }
-    }
-
-    @Test
-    fun `CardDetailsSectionElement does not auto open card scan if custom action provided`() {
-        runScenario(
-            automaticallyLaunchedCardScanFormDataHelper = AutomaticallyLaunchedCardScanFormDataHelper(
-                openCardScanAutomaticallyConfig = true,
-                hasAutomaticallyLaunchedCardScanInitialValue = false,
-                savedStateHandle = SavedStateHandle()
-            ),
-            cardDetailsAction = FakeCardDetailsAction(contentText = "Tap to add card")
-        ) {
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
-            verify(controller, times(0))
-                .onCardScanResult(any())
-            verify(controller, times(0))
-                .setHasAutomaticallyLaunchedCardScan()
         }
     }
 
@@ -157,98 +37,39 @@ internal class CardDetailsSectionElementUITest {
         private val contentText: String,
     ) : CardDetailsAction {
         @Composable
-        override fun Content(enabled: Boolean) {
+        override fun Content(enabled: Boolean, controller: CardDetailsSectionController) {
             androidx.compose.material.Text(contentText)
         }
     }
 
-    private class Scenario(
-        val controller: CardDetailsSectionController,
-    )
+    private class Scenario
 
-    private fun getController(
-        context: Context,
-        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
-        cardDetailsAction: CardDetailsAction? = null,
-    ): CardDetailsSectionController {
-        val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
-
-        val output = CardDetailsSectionController(
-            cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+    private fun runScenario(
+        cardDetailsAction: CardDetailsAction,
+        block: suspend Scenario.() -> Unit
+    ) = runTest {
+        val controller = CardDetailsSectionController(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             cardBrandFilter = DefaultCardBrandFilter,
-            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             cardDetailsAction = cardDetailsAction,
         )
-        return output
-    }
 
-    private fun runScenario(
-        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
-        cardDetailsAction: CardDetailsAction? = null,
-        block: suspend Scenario.() -> Unit
-    ) = runTest {
-        val mockResult = mock<PaymentCardRecognitionResult>()
-        val mockExpirationDate = mock<CreditCardExpirationDate>()
-        whenever(mockResult.pan).thenReturn("4242424242424242")
-        whenever(mockResult.creditCardExpirationDate).thenReturn(mockExpirationDate)
-        whenever(mockExpirationDate.month).thenReturn(2)
-        whenever(mockExpirationDate.year).thenReturn(2042)
-        val intent = Intent().putExtra(
-            "com.google.android.gms.wallet.PaymentCardRecognitionResult",
-            mockResult
-        )
-        val registryOwner = object : ActivityResultRegistryOwner {
-            override val activityResultRegistry: ActivityResultRegistry =
-                object : ActivityResultRegistry() {
-                    override fun <I : Any?, O : Any?> onLaunch(
-                        requestCode: Int,
-                        contract: ActivityResultContract<I, O>,
-                        input: I,
-                        options: ActivityOptionsCompat?
-                    ) {
-                        this.dispatchResult(
-                            requestCode,
-                            Activity.RESULT_OK,
-                            intent
-                        )
-                    }
-                }
-        }
-        val controller = getController(
-            context = context,
-            cardDetailsAction = cardDetailsAction,
-            automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper
-        )
-
-        val cardDetailsSectionControllerSpy = spy(controller)
-        val scenario = Scenario(
-            controller = cardDetailsSectionControllerSpy,
-        )
-
-        mockStatic(PaymentCardRecognitionResult::class.java).use { mockedStatic ->
-            mockedStatic.`when`<PaymentCardRecognitionResult> {
-                PaymentCardRecognitionResult.getFromIntent(any())
-            }.thenReturn(mockResult)
-            composeTestRule.setContent {
-                CompositionLocalProvider(
-                    LocalActivityResultRegistryOwner provides registryOwner,
-                    LocalCardNumberCompletedEventReporter provides { },
-                    LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
-                    LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(true)
-                ) {
-                    CardDetailsSectionElementUI(
-                        enabled = true,
-                        controller = cardDetailsSectionControllerSpy,
-                        hiddenIdentifiers = emptySet(),
-                        lastTextFieldIdentifier = IdentifierSpec.PostalCode
-                    )
-                }
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalCardNumberCompletedEventReporter provides { },
+            ) {
+                CardDetailsSectionElementUI(
+                    enabled = true,
+                    controller = controller,
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = IdentifierSpec.PostalCode
+                )
             }
         }
 
-        scenario.block()
+        Scenario().block()
     }
 }
