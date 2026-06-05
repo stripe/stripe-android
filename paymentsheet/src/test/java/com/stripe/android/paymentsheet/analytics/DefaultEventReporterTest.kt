@@ -195,7 +195,7 @@ class DefaultEventReporterTest {
         assertThat(loadTimings).containsEntry("fetchElementsSession", 100)
         assertThat(loadTimings).containsEntry("fetchSavedPaymentMethods", 50)
         assertThat(loadTimings).containsEntry("lookUpLinkAccount", 20)
-        assertThat(loadTimings).containsEntry("retrieveCustomer", 30)
+        assertThat(loadTimings).containsEntry("filterPaymentMethods", 30)
     }
 
     @Test
