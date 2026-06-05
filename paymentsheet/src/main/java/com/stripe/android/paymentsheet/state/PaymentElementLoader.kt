@@ -494,7 +494,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state
         )
-        logFcLiteExperiment(elementsSession)
+        logFcLiteExperiment(elementsSession, state.paymentMethodMetadata)
     }
 
     private fun createPaymentMethodMetadata(

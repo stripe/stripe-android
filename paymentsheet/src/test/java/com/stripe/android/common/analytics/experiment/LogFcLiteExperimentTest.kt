@@ -2,6 +2,7 @@ package com.stripe.android.common.analytics.experiment
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.CONNECTIONS_FC_LITE_VS_NATIVE
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.CONNECTIONS_FC_LITE_VS_NATIVE_AA
@@ -41,7 +42,7 @@ class LogFcLiteExperimentTest {
             )
         )
 
-        createExperiment()(elementsSession)
+        createExperiment()(elementsSession, PaymentMethodMetadataFactory.create())
 
         val firstExposure = eventReporter.experimentExposureCalls.awaitItem()
         val secondExposure = eventReporter.experimentExposureCalls.awaitItem()
@@ -65,7 +66,7 @@ class LogFcLiteExperimentTest {
             )
         )
 
-        createExperiment()(elementsSession)
+        createExperiment()(elementsSession, PaymentMethodMetadataFactory.create())
 
         val exposures = listOf(
             eventReporter.experimentExposureCalls.awaitItem().experiment,
@@ -81,24 +82,25 @@ class LogFcLiteExperimentTest {
 
     @Test
     fun `logs correct dimensions`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create()
         val elementsSession = createElementsSession(
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",
                 experimentAssignments = mapOf(CONNECTIONS_FC_LITE_VS_NATIVE to "treatment")
             ),
-            orderedPaymentMethodTypesAndWallets = listOf("card", "us_bank_account"),
         )
 
-        createExperiment()(elementsSession)
+        createExperiment()(elementsSession, metadata)
 
         val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
             as LoggableExperiment.ConnectionsFCLiteVsNative
 
+        val expectedLpms = metadata.sortedSupportedPaymentMethods().map { it.code }.joinToString(",")
         assertThat(exposure.arbId).isEqualTo("test_arb_id")
         assertThat(exposure.elementsSessionId).isEqualTo("session_1234")
         assertThat(exposure.mobileSessionId).isEqualTo("test_mobile_session_id")
         assertThat(exposure.mobileSdkVersion).isEqualTo(StripeSdkVersion.VERSION_NAME)
-        assertThat(exposure.availableLpms).isEqualTo("card,us_bank_account")
+        assertThat(exposure.availableLpms).isEqualTo(expectedLpms)
     }
 
     @Test
@@ -110,7 +112,10 @@ class LogFcLiteExperimentTest {
             )
         )
 
-        createExperiment(isFullSdkAvailable = IsFinancialConnectionsSdkAvailable { true })(elementsSession)
+        createExperiment(isFullSdkAvailable = IsFinancialConnectionsSdkAvailable { true })(
+            elementsSession,
+            PaymentMethodMetadataFactory.create()
+        )
 
         val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
             as LoggableExperiment.ConnectionsFCLiteVsNative
@@ -127,7 +132,10 @@ class LogFcLiteExperimentTest {
             )
         )
 
-        createExperiment(isFullSdkAvailable = IsFinancialConnectionsSdkAvailable { false })(elementsSession)
+        createExperiment(isFullSdkAvailable = IsFinancialConnectionsSdkAvailable { false })(
+            elementsSession,
+            PaymentMethodMetadataFactory.create()
+        )
 
         val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
             as LoggableExperiment.ConnectionsFCLiteVsNative
@@ -139,7 +147,7 @@ class LogFcLiteExperimentTest {
     fun `does not log when experimentsData is null`() = runTest {
         val elementsSession = createElementsSession(experimentsData = null)
 
-        createExperiment()(elementsSession)
+        createExperiment()(elementsSession, PaymentMethodMetadataFactory.create())
 
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
@@ -153,7 +161,7 @@ class LogFcLiteExperimentTest {
             )
         )
 
-        createExperiment()(elementsSession)
+        createExperiment()(elementsSession, PaymentMethodMetadataFactory.create())
 
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
@@ -167,7 +175,7 @@ class LogFcLiteExperimentTest {
             )
         )
 
-        createExperiment()(elementsSession)
+        createExperiment()(elementsSession, PaymentMethodMetadataFactory.create())
 
         val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
             as LoggableExperiment.ConnectionsFCLiteVsNative
@@ -178,8 +186,6 @@ class LogFcLiteExperimentTest {
 
     private fun createElementsSession(
         experimentsData: ElementsSession.ExperimentsData? = null,
-        orderedPaymentMethodTypesAndWallets: List<String> =
-            PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes,
     ): ElementsSession {
         return ElementsSession(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -188,7 +194,7 @@ class LogFcLiteExperimentTest {
             isGooglePayEnabled = false,
             customer = null,
             linkSettings = null,
-            orderedPaymentMethodTypesAndWallets = orderedPaymentMethodTypesAndWallets,
+            orderedPaymentMethodTypesAndWallets = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.paymentMethodTypes,
             customPaymentMethods = emptyList(),
             externalPaymentMethodData = null,
             paymentMethodSpecs = null,

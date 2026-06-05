@@ -2,6 +2,7 @@ package com.stripe.android.common.analytics.experiment
 
 import com.stripe.android.common.di.MOBILE_SESSION_ID
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.CONNECTIONS_FC_LITE_VS_NATIVE
 import com.stripe.android.model.ElementsSession.ExperimentAssignment.CONNECTIONS_FC_LITE_VS_NATIVE_AA
@@ -14,7 +15,7 @@ import javax.inject.Inject
 import javax.inject.Named
 
 internal interface LogFcLiteExperiment {
-    operator fun invoke(elementsSession: ElementsSession)
+    operator fun invoke(elementsSession: ElementsSession, paymentMethodMetadata: PaymentMethodMetadata)
 }
 
 internal class DefaultLogFcLiteExperiment internal constructor(
@@ -34,8 +35,9 @@ internal class DefaultLogFcLiteExperiment internal constructor(
         FinancialConnectionsAvailability.Lite -> "LITE"
     }
 
-    override fun invoke(elementsSession: ElementsSession) {
+    override fun invoke(elementsSession: ElementsSession, paymentMethodMetadata: PaymentMethodMetadata) {
         val experimentsData = elementsSession.experimentsData ?: return
+        val availableLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code }.joinToString(",")
 
         listOf(CONNECTIONS_FC_LITE_VS_NATIVE, CONNECTIONS_FC_LITE_VS_NATIVE_AA).forEach { assignment ->
             val group = experimentsData.experimentAssignments[assignment] ?: return@forEach
@@ -48,7 +50,7 @@ internal class DefaultLogFcLiteExperiment internal constructor(
                     mobileSessionId = mobileSessionId,
                     mobileSdkVersion = StripeSdkVersion.VERSION_NAME,
                     fcSdkAvailability = fcSdkAvailability,
-                    availableLpms = elementsSession.orderedPaymentMethodTypesAndWallets.joinToString(","),
+                    availableLpms = availableLpms,
                 )
             )
         }
