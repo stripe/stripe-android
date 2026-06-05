@@ -27,7 +27,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardScanAction
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
@@ -127,18 +129,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
                     cardFundingFilter = arguments.cardFundingFilter,
-                    cardDetailsAction = arguments.tapToAddHelper?.takeIf {
-                        metadata.isTapToAddSupported
-                    }?.let {
-                        TapToAddCardDetailsAction(
-                            tapToAddHelper = it,
-                            paymentMethodMetadata = metadata,
-                        )
-                    },
-                    automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
-                    isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
-                    enableMlKitCardScan = metadata.enableMlKitCardScan,
-                    disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
+                    cardDetailsAction = createCardDetailsAction(metadata, arguments)
                 )
             )
 
@@ -207,6 +198,26 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     )
                 )
             }
+        }
+    }
+
+    private fun createCardDetailsAction(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+    ): CardDetailsAction {
+        return if (metadata.isTapToAddSupported && arguments.tapToAddHelper != null) {
+            TapToAddCardDetailsAction(
+                tapToAddHelper = arguments.tapToAddHelper,
+                paymentMethodMetadata = metadata,
+            )
+        } else {
+            CardScanAction(
+                isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
+                enableMlKitCardScan = metadata.enableMlKitCardScan,
+                disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
+                automaticallyLaunchedCardScanFormDataHelper =
+                    arguments.automaticallyLaunchedCardScanFormDataHelper,
+            )
         }
     }
 

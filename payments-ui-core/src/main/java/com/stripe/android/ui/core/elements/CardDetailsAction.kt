@@ -6,5 +6,5 @@ import androidx.compose.runtime.Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CardDetailsAction {
     @Composable
-    fun Content(enabled: Boolean)
+    fun Content(enabled: Boolean, controller: CardDetailsSectionController)
 }
