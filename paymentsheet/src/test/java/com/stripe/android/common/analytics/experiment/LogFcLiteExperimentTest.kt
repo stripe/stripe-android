@@ -31,53 +31,37 @@ class LogFcLiteExperimentTest {
     )
 
     @Test
-    fun `logs exposure for both experiments when both are assigned`() = runTest {
+    fun `logs exposure for main experiment when assigned`() = runTest {
         val elementsSession = createElementsSession(
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",
-                experimentAssignments = mapOf(
-                    CONNECTIONS_FC_LITE_VS_NATIVE to "treatment",
-                    CONNECTIONS_FC_LITE_VS_NATIVE_AA to "control",
-                )
+                experimentAssignments = mapOf(CONNECTIONS_FC_LITE_VS_NATIVE to "treatment")
             )
         )
 
         createExperiment()(elementsSession, PaymentMethodMetadataFactory.create())
 
-        val firstExposure = eventReporter.experimentExposureCalls.awaitItem()
-        val secondExposure = eventReporter.experimentExposureCalls.awaitItem()
-
-        val experiments = listOf(firstExposure.experiment, secondExposure.experiment)
-        assertThat(experiments.all { it is LoggableExperiment.ConnectionsFCLiteVsNative }).isTrue()
-
-        val assignments = experiments.map { it.experiment }.toSet()
-        assertThat(assignments).isEqualTo(setOf(CONNECTIONS_FC_LITE_VS_NATIVE, CONNECTIONS_FC_LITE_VS_NATIVE_AA))
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+            as LoggableExperiment.ConnectionsFCLiteVsNative
+        assertThat(exposure.experiment).isEqualTo(CONNECTIONS_FC_LITE_VS_NATIVE)
+        eventReporter.experimentExposureCalls.expectNoEvents()
     }
 
     @Test
-    fun `logs correct group for each experiment`() = runTest {
+    fun `logs exposure for AA experiment when assigned`() = runTest {
         val elementsSession = createElementsSession(
             experimentsData = ElementsSession.ExperimentsData(
                 arbId = "test_arb_id",
-                experimentAssignments = mapOf(
-                    CONNECTIONS_FC_LITE_VS_NATIVE to "treatment",
-                    CONNECTIONS_FC_LITE_VS_NATIVE_AA to "control",
-                )
+                experimentAssignments = mapOf(CONNECTIONS_FC_LITE_VS_NATIVE_AA to "control")
             )
         )
 
         createExperiment()(elementsSession, PaymentMethodMetadataFactory.create())
 
-        val exposures = listOf(
-            eventReporter.experimentExposureCalls.awaitItem().experiment,
-            eventReporter.experimentExposureCalls.awaitItem().experiment,
-        ).map { it as LoggableExperiment.ConnectionsFCLiteVsNative }
-
-        val mainExperiment = exposures.single { it.experiment == CONNECTIONS_FC_LITE_VS_NATIVE }
-        val aaExperiment = exposures.single { it.experiment == CONNECTIONS_FC_LITE_VS_NATIVE_AA }
-
-        assertThat(mainExperiment.group).isEqualTo("treatment")
-        assertThat(aaExperiment.group).isEqualTo("control")
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+            as LoggableExperiment.ConnectionsFCLiteVsNative
+        assertThat(exposure.experiment).isEqualTo(CONNECTIONS_FC_LITE_VS_NATIVE_AA)
+        eventReporter.experimentExposureCalls.expectNoEvents()
     }
 
     @Test
