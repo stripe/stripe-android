@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
@@ -90,7 +91,10 @@ internal class DefaultRetrieveCustomerEmailTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val customerRepository = CallTrackingCustomerRepository()
-        val retrieveEmail = DefaultRetrieveCustomerEmail(customerRepository)
+        val retrieveEmail = DefaultRetrieveCustomerEmail(
+            customerRepository,
+            FakeDurationProvider(),
+        )
 
         val result = retrieveEmail(
             configuration = configuration,

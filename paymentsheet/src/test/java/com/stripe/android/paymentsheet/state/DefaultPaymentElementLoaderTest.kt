@@ -4803,7 +4803,10 @@ internal class DefaultPaymentElementLoaderTest {
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
     ): PaymentElementLoader {
-        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
+        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
+            customerRepo,
+            durationProvider,
+        )
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,
