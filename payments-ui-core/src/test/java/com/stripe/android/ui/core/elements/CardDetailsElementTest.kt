@@ -279,9 +279,11 @@ class CardDetailsElementTest {
         )
 
         cardController.onScannedCard(
-            cardNumber = "4242424242424242",
-            expirationMonth = 1,
-            expirationYear = 2030,
+            ScannedCardDetails(
+                cardNumber = "4242424242424242",
+                expirationMonth = 1,
+                expirationYear = 2030,
+            )
         )
 
         cardDetailsElement.getFormFieldValueFlow().test {

@@ -8,7 +8,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.ui.core.elements.CardDetailsAction
-import com.stripe.android.ui.core.elements.CardDetailsSectionController
+import com.stripe.android.ui.core.elements.ScannedCardDetails
 import com.stripe.android.uicore.utils.collectAsState
 
 internal class TapToAddCardDetailsAction(
@@ -16,7 +16,7 @@ internal class TapToAddCardDetailsAction(
     private val paymentMethodMetadata: PaymentMethodMetadata,
 ) : CardDetailsAction {
     @Composable
-    override fun Content(enabled: Boolean, controller: CardDetailsSectionController) {
+    override fun Content(enabled: Boolean, onScannedCard: (ScannedCardDetails) -> Unit) {
         val isTapToAddEnabled by tapToAddHelper.isTapToAddEnabled.collectAsState()
         var buttonReportedShown by rememberSaveable { mutableStateOf(false) }
 

@@ -15,7 +15,7 @@ class CardScanAction(
     val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
 ) : CardDetailsAction {
     @Composable
-    override fun Content(enabled: Boolean, controller: CardDetailsSectionController) {
+    override fun Content(enabled: Boolean, onScannedCard: (ScannedCardDetails) -> Unit) {
         val context = LocalContext.current
         val launcher = rememberCardScanLauncher(
             isStripeCardScanAllowed = isStripeCardScanAllowed,
@@ -23,10 +23,12 @@ class CardScanAction(
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             onResult = { result ->
                 (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
-                    controller.onScannedCard(
-                        cardNumber = scannedCard.pan,
-                        expirationYear = scannedCard.expirationYear,
-                        expirationMonth = scannedCard.expirationMonth,
+                    onScannedCard(
+                        ScannedCardDetails(
+                            cardNumber = scannedCard.pan,
+                            expirationYear = scannedCard.expirationYear,
+                            expirationMonth = scannedCard.expirationMonth,
+                        )
                     )
                 }
             },
