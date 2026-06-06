@@ -65,6 +65,28 @@ internal sealed class LoggableExperiment(
         }
     }
 
+    data class ConnectionsFCLiteVsNative(
+        override val arbId: String,
+        override val group: String,
+        override val experiment: ExperimentAssignment,
+        val elementsSessionId: String,
+        val mobileSessionId: String,
+        val mobileSdkVersion: String,
+        val fcSdkAvailability: String,
+        val availableLpms: String,
+    ) : LoggableExperiment(
+        arbId = arbId,
+        group = group,
+        experiment = experiment,
+        dimensions = mapOf(
+            "elements_session_id" to elementsSessionId,
+            "mobile_session_id" to mobileSessionId,
+            "mobile_sdk_version" to mobileSdkVersion,
+            "fc_sdk_availability" to fcSdkAvailability,
+            "available_lpms" to availableLpms,
+        )
+    )
+
     data class OcsMobilePaymentMethodMessagingPromotions(
         val experimentsData: ElementsSession.ExperimentsData,
         override val group: String,
