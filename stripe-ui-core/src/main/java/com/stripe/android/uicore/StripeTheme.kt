@@ -31,6 +31,7 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -790,6 +791,17 @@ fun StripeTheme.getOuterFormInsets(): PaddingValues = PaddingValues(
     end = formInsets.end.dp
 )
 
+/**
+ * Check the luminance of [StripeColors.component] to determine if background is dark. Used because some users force
+ * always light/always dark by passing light/dark colors to both colorsDark and colorsLight.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Composable
+fun isComponentColorDark(): Boolean {
+    val color = MaterialTheme.stripeColors.component
+    return color.luminance() < MIN_LUMINANCE_FOR_LIGHT_COLORS
+}
+
 private fun TextStyle.toCompat(): TextStyle {
     return copy(
         lineHeight = TextStyle.Default.lineHeight,
@@ -816,3 +828,6 @@ private fun Color.modifyBrightness(transform: (Float) -> Float): Color {
     val lightness = hsl[2]
     return Color.hsl(hue, saturation, transform(lightness))
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val MIN_LUMINANCE_FOR_LIGHT_COLORS = 0.5
