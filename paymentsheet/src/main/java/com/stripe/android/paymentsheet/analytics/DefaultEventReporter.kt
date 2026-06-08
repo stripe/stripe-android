@@ -109,30 +109,37 @@ internal class DefaultEventReporter @Inject internal constructor(
         return DurationProvider.Key.entries.map { entry ->
             entry to (
                 when (entry) {
-                DurationProvider.Key.PaymentSheetLoadSessionLoad -> "fetchElementsSession"
-                DurationProvider.Key.PaymentSheetLoadPrefetchPMs -> "fetchSavedPaymentMethods"
-                DurationProvider.Key.PaymentSheetLoadCreateLinkState -> "lookUpLinkAccount"
-                DurationProvider.Key.PaymentSheetLoadCreateCustomerState -> "retrieveCustomer"
-                DurationProvider.Key.Loading,
-                DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported,
-                DurationProvider.Key.PaymentSheetLoadIsGooglePayReady,
-                DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection,
-                DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection,
-                DurationProvider.Key.Checkout,
-                DurationProvider.Key.LinkSignup,
-                DurationProvider.Key.ConfirmButtonClicked,
-                DurationProvider.Key.TapToAdd,
-                DurationProvider.Key.CardScan,
-                DurationProvider.Key.Captcha,
-                DurationProvider.Key.CaptchaAttach,
-                DurationProvider.Key.PaymentLauncher,
-                DurationProvider.Key.PrepareAttestation,
-                DurationProvider.Key.Attest,
-                DurationProvider.Key.IntentConfirmationChallenge,
-                DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
-                DurationProvider.Key.PaymentMethodMessaging -> null
-            }
-            )
+                    // These are all shared with iOS
+                    DurationProvider.Key.PaymentSheetLoadSessionLoad -> "fetchElementsSession"
+                    DurationProvider.Key.PaymentSheetLoadPrefetchPMs -> "fetchSavedPaymentMethods"
+                    DurationProvider.Key.PaymentSheetLoadCreateLinkState -> "lookUpLinkAccount"
+                    DurationProvider.Key.PaymentSheetLoadCreateCustomerState -> "filterPaymentMethods"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveCustomer -> "retrieveCustomer"
+                    DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes -> "computePaymentMethodTypes"
+                    // These are specific to Android
+                    DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported -> "isGooglePaySupported"
+                    DurationProvider.Key.PaymentSheetLoadIsGooglePayReady -> "isGooglePayReady"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection ->
+                        "retrieveSavedPaymentMethodSelection"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection ->
+                        "retrieveInitialPaymentSelection"
+                    // We don't send load timings for these.
+                    DurationProvider.Key.Loading,
+                    DurationProvider.Key.Checkout,
+                    DurationProvider.Key.LinkSignup,
+                    DurationProvider.Key.ConfirmButtonClicked,
+                    DurationProvider.Key.TapToAdd,
+                    DurationProvider.Key.CardScan,
+                    DurationProvider.Key.Captcha,
+                    DurationProvider.Key.CaptchaAttach,
+                    DurationProvider.Key.PaymentLauncher,
+                    DurationProvider.Key.PrepareAttestation,
+                    DurationProvider.Key.Attest,
+                    DurationProvider.Key.IntentConfirmationChallenge,
+                    DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
+                    DurationProvider.Key.PaymentMethodMessaging -> null
+                }
+                )
         }.mapNotNull { (key, name) ->
             name?.let {
                 durationProvider.completedDuration(key)?.let { duration ->

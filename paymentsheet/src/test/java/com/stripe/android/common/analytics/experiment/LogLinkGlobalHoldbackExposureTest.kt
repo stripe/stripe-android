@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -60,7 +61,10 @@ class LogLinkGlobalHoldbackExposureTest {
         logger = FakeLogger()
         linkRepository = FakeLinkRepository()
         customerRepository = FakeCustomerRepository()
-        retrieveCustomerEmail = DefaultRetrieveCustomerEmail(customerRepository)
+        retrieveCustomerEmail = DefaultRetrieveCustomerEmail(
+            customerRepository,
+            FakeDurationProvider(),
+        )
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
         logLinkHoldbackExperiment = DefaultLogLinkHoldbackExperiment(
