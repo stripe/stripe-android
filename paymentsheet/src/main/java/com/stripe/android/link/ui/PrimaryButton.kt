@@ -19,6 +19,7 @@ import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,6 +43,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.Amount
+import kotlinx.coroutines.delay
 import com.stripe.android.ui.core.R as uiCoreR
 
 @Composable
@@ -50,6 +52,7 @@ internal fun PrimaryButton(
     label: String,
     state: PrimaryButtonState,
     onButtonClick: () -> Unit,
+    onCompleted: () -> Unit = {},
     allowedDisabledClicks: Boolean = false,
     onDisabledButtonClick: () -> Unit = {},
     @DrawableRes iconStart: Int? = null,
@@ -79,6 +82,7 @@ internal fun PrimaryButton(
                 PrimaryContent(
                     state = state,
                     label = label,
+                    onCompleted = onCompleted,
                     iconStart = iconStart,
                     iconEnd = iconEnd,
                 )
@@ -97,6 +101,7 @@ internal fun PrimaryButton(
 private fun PrimaryContent(
     state: PrimaryButtonState,
     label: String,
+    onCompleted: () -> Unit,
     @DrawableRes iconStart: Int? = null,
     @DrawableRes iconEnd: Int? = null
 ) {
@@ -109,16 +114,22 @@ private fun PrimaryContent(
             strokeWidth = 4.dp,
             filledColor = LinkTheme.colors.onButtonBrand,
         )
-        PrimaryButtonState.Completed -> Icon(
-            painter = painterResource(id = R.drawable.stripe_link_complete),
-            contentDescription = null,
-            modifier = Modifier
-                .size(24.dp)
-                .semantics {
-                    testTag = CompletedIconTestTag
-                },
-            tint = LinkTheme.colors.onButtonBrand
-        )
+        PrimaryButtonState.Completed -> {
+            LaunchedEffect(Unit) {
+                delay(COMPLETED_HOLD_MS)
+                onCompleted()
+            }
+            Icon(
+                painter = painterResource(id = R.drawable.stripe_link_complete),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .semantics {
+                        testTag = CompletedIconTestTag
+                    },
+                tint = LinkTheme.colors.onButtonBrand
+            )
+        }
         else -> Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             PrimaryButtonIcon(iconStart)
             Text(
@@ -208,6 +219,7 @@ internal fun completePaymentButtonLabel(
     is LinkLaunchMode.Authorization -> uiCoreR.string.stripe_continue_button_label.resolvableString
 }
 
+private const val COMPLETED_HOLD_MS = 1100L
 private val PrimaryButtonIconWidth = 13.dp
 private val PrimaryButtonIconHeight = 16.dp
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"

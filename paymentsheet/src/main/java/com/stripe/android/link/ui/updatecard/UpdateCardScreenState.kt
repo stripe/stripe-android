@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.updatecard
 import androidx.compose.runtime.Immutable
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkScreen.UpdateCard.BillingDetailsUpdateFlow
 import com.stripe.android.link.ui.PrimaryButtonState
 import com.stripe.android.model.CardBrand
@@ -19,6 +20,8 @@ internal data class UpdateCardScreenState(
     val preferredCardBrand: CardBrand? = null,
     val error: ResolvableString? = null,
     val processing: Boolean = false,
+    val hasCompleted: Boolean = false,
+    val completedResult: LinkActivityResult? = null,
 ) {
 
     private val readyToSubmit: Boolean
@@ -29,6 +32,7 @@ internal data class UpdateCardScreenState(
 
     val primaryButtonState: PrimaryButtonState
         get() = when {
+            hasCompleted -> PrimaryButtonState.Completed
             readyToSubmit.not() -> PrimaryButtonState.Disabled
             processing -> PrimaryButtonState.Processing
             else -> PrimaryButtonState.Enabled

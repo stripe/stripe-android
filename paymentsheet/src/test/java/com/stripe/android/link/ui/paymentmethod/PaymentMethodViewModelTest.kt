@@ -127,6 +127,10 @@ class PaymentMethodViewModelTest {
         val paymentDetails = TestFactory.LINK_NEW_PAYMENT_DETAILS
         assertThat(call.paymentDetails).isEqualTo(paymentDetails)
         assertThat(call.cvc).isEqualTo("111")
+        assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Completed)
+
+        viewModel.onCompleted()
+
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
@@ -134,7 +138,6 @@ class PaymentMethodViewModelTest {
                     selectedPayment = null,
                 )
             )
-        assertThat(viewModel.state.value.primaryButtonState).isEqualTo(PrimaryButtonState.Enabled)
     }
 
     @Test

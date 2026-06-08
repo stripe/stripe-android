@@ -126,11 +126,12 @@ internal class UpdateCardScreenViewModel @Inject constructor(
                             linkAccount = account
                         )
 
-                        _state.update { it.copy(processing = false) }
                         when (confirmationResult) {
-                            is Result.Canceled -> Unit
-                            is Result.Failed -> _state.update { it.copy(error = confirmationResult.error) }
-                            is Result.Completed -> dismissWithResult(confirmationResult.linkActivityResult)
+                            is Result.Canceled -> _state.update { it.copy(processing = false) }
+                            is Result.Failed -> _state.update { it.copy(processing = false, error = confirmationResult.error) }
+                            is Result.Completed -> {
+                                _state.update { it.copy(hasCompleted = true, completedResult = confirmationResult.linkActivityResult) }
+                            }
                         }
                     } else {
                         // Regular update flow, just navigate back
@@ -147,6 +148,11 @@ internal class UpdateCardScreenViewModel @Inject constructor(
 
     fun onDisabledUpdateClicked() {
         interactor.value?.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
+    }
+
+    fun onCompleted() {
+        val result = _state.value.completedResult ?: return
+        dismissWithResult(result)
     }
 
     private fun CardUpdateParams.toApiParams(): PaymentMethodCreateParams = PaymentMethodCreateParams.create(

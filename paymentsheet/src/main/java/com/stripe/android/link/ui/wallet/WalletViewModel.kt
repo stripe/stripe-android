@@ -361,9 +361,14 @@ internal class WalletViewModel(
                 }
             }
             is CompleteLinkFlow.Result.Completed -> {
-                dismissWithResult(result.linkActivityResult)
+                _uiState.update { it.copy(hasCompleted = true, completedResult = result.linkActivityResult) }
             }
         }
+    }
+
+    fun onCompleted() {
+        val result = _uiState.value.completedResult ?: return
+        dismissWithResult(result)
     }
 
     fun onPayAnotherWayClicked() {

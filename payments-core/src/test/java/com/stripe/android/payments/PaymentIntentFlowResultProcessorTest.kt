@@ -848,6 +848,83 @@ internal class PaymentIntentFlowResultProcessorTest {
                 )
         }
 
+    @Test
+    fun `does not poll for unrecognized payment method type with unknown outcome`() =
+        runTest(testDispatcher) {
+            val paymentMethodWithUnknownType = PaymentMethodFactory.card().copy(type = null)
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = paymentMethodWithUnknownType,
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected second retrieve call")),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+
+            assertThat(result).isEqualTo(
+                PaymentIntentResult(
+                    intent = requiresActionIntent,
+                    outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                    failureMessage = "We are unable to authenticate your payment method." +
+                        " Please choose a different payment method and try again.",
+                )
+            )
+        }
+
+    @Test
+    fun `does not poll when payment method is null with unknown outcome`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = null,
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.failure(Exception("Unexpected second retrieve call")),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            verify(mockStripeRepository, times(1)).retrievePaymentIntent(any(), any(), any())
+
+            assertThat(result).isEqualTo(
+                PaymentIntentResult(
+                    intent = requiresActionIntent,
+                    outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                    failureMessage = "We are unable to authenticate your payment method." +
+                        " Please choose a different payment method and try again.",
+                )
+            )
+        }
+
     private suspend fun runCanceledFlow(
         initialIntent: PaymentIntent,
         refreshedIntent: PaymentIntent = initialIntent,

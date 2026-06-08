@@ -3,6 +3,7 @@ package com.stripe.android.link.ui.wallet
 import androidx.compose.runtime.Immutable
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
@@ -29,6 +30,7 @@ internal data class WalletUiState(
     val primaryButtonLabel: ResolvableString,
     val secondaryButtonLabel: ResolvableString?,
     val hasCompleted: Boolean,
+    val completedResult: LinkActivityResult? = null,
     val addPaymentMethodOptions: List<AddPaymentMethodOption>,
     val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
     val userSetIsExpanded: Boolean? = null,

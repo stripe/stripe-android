@@ -46,6 +46,7 @@ internal fun UpdateCardScreen(viewModel: UpdateCardScreenViewModel) {
             state = state,
             onUpdateClicked = viewModel::onUpdateClicked,
             onDisabledButtonClicked = viewModel::onDisabledUpdateClicked,
+            onCompleted = viewModel::onCompleted,
         )
     }
 }
@@ -55,7 +56,8 @@ internal fun UpdateCardScreenBody(
     interactor: EditCardDetailsInteractor,
     state: UpdateCardScreenState,
     onUpdateClicked: () -> Unit,
-    onDisabledButtonClicked: () -> Unit
+    onDisabledButtonClicked: () -> Unit,
+    onCompleted: () -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -88,6 +90,7 @@ internal fun UpdateCardScreenBody(
             modifier = Modifier.padding(vertical = 16.dp),
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
+            onCompleted = onCompleted,
             allowedDisabledClicks = true,
             onButtonClick = {
                 focusManager.clearFocus()

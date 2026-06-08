@@ -126,6 +126,7 @@ internal fun WalletScreen(
         onExpandedChanged = viewModel::onExpandedChanged,
         onPrimaryButtonClick = viewModel::onPrimaryButtonClicked,
         onDisabledButtonClick = viewModel::handleDisabledButtonClick,
+        onCompleted = viewModel::onCompleted,
         onPayAnotherWayClicked = viewModel::onPayAnotherWayClicked,
         onRemoveClicked = viewModel::onRemoveClicked,
         onUpdateClicked = viewModel::onUpdateClicked,
@@ -149,6 +150,7 @@ internal fun WalletBody(
     onAddPaymentMethodOptionClicked: (AddPaymentMethodOption) -> Unit,
     onPrimaryButtonClick: () -> Unit,
     onDisabledButtonClick: () -> Unit,
+    onCompleted: () -> Unit = {},
     onPayAnotherWayClicked: () -> Unit,
     onDismissAlert: () -> Unit,
     onSetDefaultClicked: (ConsumerPaymentDetails.PaymentDetails) -> Unit,
@@ -223,6 +225,7 @@ internal fun WalletBody(
                     state = state,
                     onPrimaryButtonClick = onPrimaryButtonClick,
                     onDisabledButtonClick = onDisabledButtonClick,
+                    onCompleted = onCompleted,
                     onPayAnotherWayClicked = onPayAnotherWayClicked
                 )
             }
@@ -396,6 +399,7 @@ private fun ActionSection(
     state: WalletUiState,
     onPrimaryButtonClick: () -> Unit,
     onDisabledButtonClick: () -> Unit,
+    onCompleted: () -> Unit,
     onPayAnotherWayClicked: () -> Unit
 ) {
     Column {
@@ -406,6 +410,7 @@ private fun ActionSection(
             label = state.primaryButtonLabel.resolve(),
             state = state.primaryButtonState,
             onButtonClick = onPrimaryButtonClick,
+            onCompleted = onCompleted,
             allowedDisabledClicks = true,
             onDisabledButtonClick = onDisabledButtonClick,
         )

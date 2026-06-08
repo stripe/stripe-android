@@ -111,12 +111,14 @@ internal class PaymentMethodViewModel @Inject constructor(
                             val params = paymentMethodCreateParams.toParamMap()
                             val cardMap = params["card"] as? Map<*, *>?
                             val billingDetailsMap = params["billing_details"] as? Map<*, *>?
-                            attemptCompletion(
+                            val completed = attemptCompletion(
                                 paymentDetails = linkPaymentDetails,
                                 cvc = cardMap?.get("cvc") as? String?,
                                 billingPhone = billingDetailsMap?.get("phone") as? String?
                             )
-                            updateButtonState(PrimaryButtonState.Enabled)
+                            if (!completed) {
+                                updateButtonState(PrimaryButtonState.Enabled)
+                            }
                         },
                         onFailure = { error ->
                             _state.update {
@@ -139,7 +141,7 @@ internal class PaymentMethodViewModel @Inject constructor(
         paymentDetails: LinkPaymentDetails,
         cvc: String?,
         billingPhone: String?
-    ) {
+    ): Boolean {
         val result = completeLinkFlow(
             selectedPaymentDetails = LinkPaymentMethod.LinkPaymentDetails(
                 linkPaymentDetails = paymentDetails,
@@ -148,10 +150,16 @@ internal class PaymentMethodViewModel @Inject constructor(
             ),
             linkAccount = linkAccount
         )
-        when (result) {
-            is Result.Canceled -> Unit
-            is Result.Failed -> _state.update { it.copy(errorMessage = result.error) }
-            is Result.Completed -> dismissWithResult(result.linkActivityResult)
+        return when (result) {
+            is Result.Canceled -> false
+            is Result.Failed -> {
+                _state.update { it.copy(errorMessage = result.error) }
+                false
+            }
+            is Result.Completed -> {
+                _state.update { it.copy(primaryButtonState = PrimaryButtonState.Completed, completedResult = result.linkActivityResult) }
+                true
+            }
         }
     }
 
@@ -173,6 +181,11 @@ internal class PaymentMethodViewModel @Inject constructor(
         _state.update {
             it.copy(errorMessage = null, isValidating = false)
         }
+    }
+
+    fun onCompleted() {
+        val result = _state.value.completedResult ?: return
+        dismissWithResult(result)
     }
 
     companion object {

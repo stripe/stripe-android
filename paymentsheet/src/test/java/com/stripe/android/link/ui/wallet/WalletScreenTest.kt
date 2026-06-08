@@ -472,7 +472,7 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `pay button state switches to processing state during payment`() = runTest(dispatcher) {
+    fun `pay button state switches to completed state after successful payment`() = runTest(dispatcher) {
         val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
             expiryYear = 2999,
             cvcCheck = CvcCheck.Pass
@@ -509,7 +509,7 @@ internal class WalletScreenTest {
 
         onWalletErrorTag().assertDoesNotExist()
 
-        assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Processing)
+        assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Completed)
     }
 
     @Test
@@ -779,6 +779,7 @@ internal class WalletScreenTest {
             onExpandedChanged = {},
             onPrimaryButtonClick = {},
             onDisabledButtonClick = {},
+            onCompleted = {},
             onPayAnotherWayClicked = {},
             onRemoveClicked = onRemoveClicked,
             onSetDefaultClicked = onSetDefaultClicked,

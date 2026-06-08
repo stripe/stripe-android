@@ -313,6 +313,7 @@ internal class WalletScreenScreenshotTest {
                     onExpandedChanged = {},
                     onPrimaryButtonClick = {},
                     onDisabledButtonClick = {},
+                    onCompleted = {},
                     onPayAnotherWayClicked = {},
                     onRemoveClicked = {},
                     onUpdateClicked = {},

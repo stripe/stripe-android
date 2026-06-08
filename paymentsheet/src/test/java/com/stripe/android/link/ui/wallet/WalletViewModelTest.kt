@@ -535,6 +535,10 @@ class WalletViewModelTest {
             )
         )
 
+        assertThat(viewModel.uiState.value.hasCompleted).isTrue()
+
+        viewModel.onCompleted()
+
         assertThat(result)
             .isEqualTo(
                 LinkActivityResult.Completed(
@@ -888,6 +892,8 @@ class WalletViewModelTest {
         )
 
         viewModel.onPrimaryButtonClicked()
+
+        viewModel.onCompleted()
 
         val completedResult = linkActivityResult as? LinkActivityResult.Completed
         assertThat(completedResult?.shippingAddress).isEqualTo(CONSUMER_SHIPPING_ADDRESSES.addresses.first())
