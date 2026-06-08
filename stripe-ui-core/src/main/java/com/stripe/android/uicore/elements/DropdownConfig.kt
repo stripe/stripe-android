@@ -26,7 +26,6 @@ interface DropdownConfig {
     val disableDropdownWithSingleElement: Boolean
         get() = false
 
-    /** The autofill content type for this dropdown, or null if not autofillable **/
     val autofillType: ContentType?
         get() = null
 

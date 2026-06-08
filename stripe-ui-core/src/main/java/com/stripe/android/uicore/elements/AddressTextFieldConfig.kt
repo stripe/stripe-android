@@ -9,14 +9,8 @@ import com.stripe.android.core.strings.ResolvableString
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldConfig(
     label: ResolvableString,
-    capitalization: KeyboardCapitalization = KeyboardCapitalization.Words,
-    keyboard: KeyboardType = KeyboardType.Text,
-    optional: Boolean = false,
-    val autofillContentType: ContentType? = null,
-) : SimpleTextFieldConfig(
-    label = label,
-    capitalization = capitalization,
-    keyboard = keyboard,
-    optional = optional,
-    allowsEmojis = false,
-)
+    capitalization: KeyboardCapitalization,
+    keyboard: KeyboardType,
+    optional: Boolean,
+    val autofillContentType: ContentType?,
+) : SimpleTextFieldConfig(label, capitalization, keyboard, optional = optional, allowsEmojis = false)

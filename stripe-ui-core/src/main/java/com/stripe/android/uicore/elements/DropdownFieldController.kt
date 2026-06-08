@@ -84,7 +84,7 @@ class DropdownFieldController(
 
     fun onAutofillValue(value: String) {
         val displayItemIndex = displayItems.indexOfFirst { it.equals(value, ignoreCase = true) }
-            .takeIf { it != -1 }
+            .takeUnless { it == -1 }
         if (displayItemIndex != null) {
             onValueChange(displayItemIndex)
         } else {
