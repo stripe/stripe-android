@@ -28,8 +28,6 @@ internal interface LinkControllerComponent {
             @BindsInstance @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,
             @BindsInstance requestSurface: RequestSurface,
-            // todo thread mode to PaymentElementLoader
-            @BindsInstance mode: LinkController.Mode,
         ): LinkControllerComponent
     }
 }
