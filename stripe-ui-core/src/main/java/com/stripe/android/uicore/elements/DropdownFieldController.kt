@@ -3,7 +3,6 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -21,8 +20,8 @@ import kotlinx.coroutines.flow.StateFlow
 class DropdownFieldController(
     private val config: DropdownConfig,
     initialValue: String? = null,
-    val autofillType: ContentType? = null,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
+    val autofillType = config.autofillType
     val displayItems: List<String> = config.displayItems
     val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement
     private val dropdownMode = config.mode
@@ -81,6 +80,16 @@ class DropdownFieldController(
         safelyUpdateSelectedIndex(
             displayItems.indexOf(config.convertFromRaw(rawValue)).takeUnless { it == -1 } ?: initialIndex
         )
+    }
+
+    fun onAutofillValue(value: String) {
+        val displayItemIndex = displayItems.indexOfFirst { it.equals(value, ignoreCase = true) }
+            .takeIf { it != -1 }
+        if (displayItemIndex != null) {
+            onValueChange(displayItemIndex)
+        } else {
+            onRawValueChange(value)
+        }
     }
 
     private fun safelyUpdateSelectedIndex(index: Int?) {

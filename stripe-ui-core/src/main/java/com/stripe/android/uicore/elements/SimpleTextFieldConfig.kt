@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
@@ -17,7 +16,6 @@ open class SimpleTextFieldConfig(
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
     override val optional: Boolean = false,
     val allowsEmojis: Boolean = true,
-    val contentType: ContentType? = null,
 ) : TextFieldConfig {
     override val debugLabel: String = "generic_text"
     override val visualTransformation: VisualTransformation? = null

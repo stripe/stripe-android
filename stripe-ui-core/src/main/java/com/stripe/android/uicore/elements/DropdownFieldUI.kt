@@ -127,7 +127,7 @@ fun DropDown(
                         contentType = autofillType
                         contentDataType = ContentDataType.Text
                         onAutofillText { text ->
-                            controller.onRawValueChange(text.text)
+                            controller.onAutofillValue(text.text)
                             true
                         }
                     }

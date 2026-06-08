@@ -156,7 +156,8 @@ class SimpleTextFieldController(
         is PostalCodeConfig -> ContentType.PostalCode
         is EmailConfig -> ContentType.EmailAddress
         is NameConfig -> ContentType.PersonFullName
-        else -> (textFieldConfig as? SimpleTextFieldConfig)?.contentType
+        is AddressTextFieldConfig -> textFieldConfig.autofillContentType
+        else -> null
     }
 
     override val placeHolder = MutableStateFlow(textFieldConfig.placeHolder)

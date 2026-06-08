@@ -10,6 +10,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
+import com.stripe.android.uicore.elements.AddressTextFieldConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PostalCodeConfig
@@ -18,7 +19,6 @@ import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextElement
-import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.utils.asIndividualDigits
@@ -295,7 +295,6 @@ private fun FieldType.toElement(
                     identifierSpec,
                     DropdownFieldController(
                         AdministrativeAreaConfig(country),
-                        autofillType = ContentType.AddressRegion,
                     )
                 )
             } else {
@@ -319,13 +318,12 @@ private fun FieldType.toConfig(
             country = countryCode,
             optional = optional,
         )
-        else -> SimpleTextFieldConfig(
+        else -> AddressTextFieldConfig(
             label = resolvableString(label),
             capitalization = capitalization,
             keyboard = keyboardType,
             optional = optional,
-            allowsEmojis = false,
-            contentType = when (this) {
+            autofillContentType = when (this) {
                 FieldType.AddressLine1 -> ContentType.AddressStreet
                 FieldType.AddressLine2 -> ContentType.AddressAuxiliaryDetails
                 FieldType.Locality -> ContentType.AddressLocality
