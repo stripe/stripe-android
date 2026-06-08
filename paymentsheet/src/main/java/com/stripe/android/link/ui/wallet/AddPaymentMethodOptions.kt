@@ -17,7 +17,7 @@ internal class AddPaymentMethodOptions @AssistedInject constructor(
 ) {
     val values: List<AddPaymentMethodOption> = run {
         val stripeIntent = configuration.stripeIntent
-        val supportedPaymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
+        val supportedPaymentMethodTypes = stripeIntent.supportedPaymentMethodTypes()
         val paymentMethodFilter = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
 
         buildList {
