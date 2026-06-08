@@ -34,6 +34,53 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter 
 	public static synthetic fun verifyKycInfo$default (Lcom/stripe/android/crypto/onramp/OnrampCoordinator$Presenter;Lcom/stripe/android/paymentsheet/PaymentSheet$Address;ILjava/lang/Object;)V
 }
 
+public final class com/stripe/android/crypto/onramp/exception/APIErrorContext {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component10 ()Lcom/stripe/android/core/exception/StripeException;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun component3 ()Ljava/lang/String;
+	public final fun component4 ()Ljava/lang/String;
+	public final fun component5 ()Ljava/lang/String;
+	public final fun component6 ()Ljava/lang/String;
+	public final fun component7 ()Ljava/lang/String;
+	public final fun component8 ()Ljava/lang/String;
+	public final fun component9 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getApiErrorCode ()Ljava/lang/String;
+	public final fun getApiErrorMessage ()Ljava/lang/String;
+	public final fun getApiErrorType ()Ljava/lang/String;
+	public final fun getApiUserMessage ()Ljava/lang/String;
+	public final fun getAppPackageName ()Ljava/lang/String;
+	public final fun getDocUrl ()Ljava/lang/String;
+	public final fun getMode ()Ljava/lang/String;
+	public final fun getOperation ()Ljava/lang/String;
+	public final fun getReason ()Ljava/lang/String;
+	public final fun getRequestId ()Ljava/lang/String;
+	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/AppAttestationException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException : com/stripe/android/core/exception/StripeException, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
+	public static final field $stable I
+	public final fun getContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public final fun getDeveloperMessage ()Ljava/lang/String;
+	public final fun getDocUrl ()Ljava/lang/String;
+	public final fun getSdkVersions ()Ljava/util/List;
+	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;
+	public synthetic fun getUnderlyingError ()Ljava/lang/Throwable;
+	public final fun getUserMessage ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/crypto/onramp/exception/MissingConsumerSecretException : java/lang/IllegalStateException {
 	public static final field $stable I
 }
@@ -53,6 +100,35 @@ public final class com/stripe/android/crypto/onramp/exception/MissingPlatformSet
 
 public final class com/stripe/android/crypto/onramp/exception/PaymentFailedException : java/lang/IllegalStateException {
 	public static final field $stable I
+}
+
+public final class com/stripe/android/crypto/onramp/exception/SDKVersion {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
+	public final fun component1 ()Ljava/lang/String;
+	public final fun component2 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/exception/SDKVersion;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/exception/SDKVersion;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/exception/SDKVersion;
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDebugDescription ()Ljava/lang/String;
+	public final fun getName ()Ljava/lang/String;
+	public final fun getVersion ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public abstract interface class com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
+	public abstract fun getCode ()Ljava/lang/String;
+	public abstract fun getDeveloperMessage ()Ljava/lang/String;
+	public abstract fun getDocUrl ()Ljava/lang/String;
+	public abstract fun getSdkVersions ()Ljava/util/List;
+	public abstract fun getUnderlyingError ()Ljava/lang/Throwable;
+	public abstract fun getUserMessage ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/lang/Enum {

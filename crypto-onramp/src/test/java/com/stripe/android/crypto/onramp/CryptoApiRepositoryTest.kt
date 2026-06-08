@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -766,6 +767,51 @@ class CryptoApiRepositoryTest {
 
             assertThat(result.isFailure)
                 .isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun testCollectWalletAddressPreservesTopLevelOnrampErrorFields() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                400,
+                """
+                    {
+                        "error": {
+                            "code": "link_failed_to_attest_request",
+                            "message": "App attestation failed",
+                            "reason": "app_not_play_recognized",
+                            "user_message": "This app couldn't be verified. Install it from Google Play and try again.",
+                            "ignored_top_level_field": "ignored_value",
+                            "extra_fields": {
+                                "legacy_reason": "legacy_value"
+                            }
+                        }
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.setWalletAddress(
+                walletAddress = "0x1234567890abcdef",
+                network = CryptoNetwork.Ethereum,
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            val error = result.exceptionOrNull()
+
+            assertThat(error).isInstanceOf(APIException::class.java)
+
+            val stripeError = (error as APIException).stripeError
+            assertThat(stripeError?.code).isEqualTo("link_failed_to_attest_request")
+            assertThat(stripeError?.extraFields?.get("legacy_reason")).isEqualTo("legacy_value")
+            assertThat(stripeError?.extraFields?.get("reason")).isEqualTo("app_not_play_recognized")
+            assertThat(stripeError?.extraFields?.get("user_message"))
+                .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+            assertThat(stripeError?.extraFields?.get("ignored_top_level_field")).isNull()
         }
     }
 
