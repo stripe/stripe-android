@@ -209,7 +209,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 coroutineScope.launch {
                     interactor.getOrFetchPlatformKey().fold(
                         onSuccess = {
-                            googlePayPaymentMethodLauncher?.present(
+                            googlePayPaymentMethodLauncher?.presentWithoutCachedReadyCheck(
                                 currencyCode = selection.currencyCode,
                                 amount = selection.amount,
                                 clientAttributionMetadata = null,

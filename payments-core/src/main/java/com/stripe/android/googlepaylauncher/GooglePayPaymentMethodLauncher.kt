@@ -265,6 +265,55 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
             "present() may only be called when Google Pay is available on this device."
         }
 
+        launch(
+            currencyCode = currencyCode,
+            amount = amount,
+            clientAttributionMetadata = clientAttributionMetadata,
+            transactionId = transactionId,
+            label = label,
+            isElements = isElements,
+            publishableKey = publishableKey,
+            displayItems = displayItems,
+        )
+    }
+
+    /**
+     * Launches Google Pay without consulting this launcher's cached ready state. The launched
+     * activity still verifies Google Pay availability before loading payment data.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun presentWithoutCachedReadyCheck(
+        currencyCode: String,
+        amount: Long = 0L,
+        clientAttributionMetadata: ClientAttributionMetadata?,
+        transactionId: String? = null,
+        label: String? = null,
+        isElements: Boolean = false,
+        publishableKey: String? = null,
+        displayItems: List<com.stripe.android.GooglePayJsonFactory.DisplayItem> = emptyList(),
+    ) {
+        launch(
+            currencyCode = currencyCode,
+            amount = amount,
+            clientAttributionMetadata = clientAttributionMetadata,
+            transactionId = transactionId,
+            label = label,
+            isElements = isElements,
+            publishableKey = publishableKey,
+            displayItems = displayItems,
+        )
+    }
+
+    private fun launch(
+        currencyCode: String,
+        amount: Long,
+        clientAttributionMetadata: ClientAttributionMetadata?,
+        transactionId: String?,
+        label: String?,
+        isElements: Boolean,
+        publishableKey: String?,
+        displayItems: List<com.stripe.android.GooglePayJsonFactory.DisplayItem>,
+    ) {
         activityResultLauncher.launch(
             GooglePayPaymentMethodLauncherContractV2.Args(
                 config = config,

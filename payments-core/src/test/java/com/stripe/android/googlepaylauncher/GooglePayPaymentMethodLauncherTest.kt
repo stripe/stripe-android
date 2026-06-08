@@ -127,6 +127,21 @@ class GooglePayPaymentMethodLauncherTest {
         }
     }
 
+    @Test
+    fun `presentWithoutCachedReadyCheck() should launch when Google Pay readiness is stale`() {
+        val result = GooglePayPaymentMethodLauncher.Result.Completed(CARD_PAYMENT_METHOD)
+
+        runGooglePayPaymentMethodLauncherTest(
+            result = result,
+            isReady = false,
+        ) { _, launcher ->
+            launcher.presentWithoutCachedReadyCheck(
+                currencyCode = "usd",
+                clientAttributionMetadata = null
+            )
+        }
+    }
+
     private companion object {
         val CONFIG = GooglePayPaymentMethodLauncher.Config(
             GooglePayEnvironment.Test,
