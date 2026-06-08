@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [ADDED][12987](https://github.com/stripe/stripe-android/pull/12987) Added a manual capture mode for identity document verification, allowing users to tap "Take Photo" instead of relying on automatic capture.
+
 ### CryptoOnramp
 * [CHANGED] Updated EU compliance identifier APIs to match the latest backend contract, including CRS/CARF TIN requirements and `SubmitIdentifiersResult.completed`.
 * [ADDED] Added known compliance identifier types for Spain NIF (`es_nif`) and France NIR (`fr_nir`).
