@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.10.0 - 2026-06-08
 
 ### Identity
 * [ADDED][12987](https://github.com/stripe/stripe-android/pull/12987) Added a manual capture mode for identity document verification, allowing users to tap "Take Photo" instead of relying on automatic capture.
