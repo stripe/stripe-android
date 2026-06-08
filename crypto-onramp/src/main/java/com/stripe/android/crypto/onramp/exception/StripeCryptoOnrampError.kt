@@ -21,9 +21,9 @@ interface StripeCryptoOnrampError {
     val developerMessage: String
 
     /**
-     * A stable error code, when available.
+     * A stable SDK-owned error code.
      */
-    val code: String?
+    val code: String
 
     /**
      * A documentation URL for recovery guidance, when available.

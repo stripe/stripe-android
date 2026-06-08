@@ -36,7 +36,7 @@ internal fun Throwable.toCryptoOnrampError(
         AppAttestationException(
             context = apiErrorContext,
             sdkVersions = sdkVersions,
-            fallbackUserMessage = context.getString(
+            userMessage = context.getString(
                 R.string.stripe_onramp_app_attestation_default_user_message,
             ),
         )
@@ -44,7 +44,7 @@ internal fun Throwable.toCryptoOnrampError(
         UncategorizedApiErrorException(
             context = apiErrorContext,
             sdkVersions = sdkVersions,
-            fallbackUserMessage = context.getString(
+            userMessage = context.getString(
                 R.string.stripe_onramp_default_api_error_user_message,
             ),
         )
@@ -52,7 +52,7 @@ internal fun Throwable.toCryptoOnrampError(
 }
 
 private fun StripeError.isAppAttestationError(): Boolean {
-    return code == ERROR_CODE_APP_ATTESTATION_FAILED
+    return code == APP_ATTESTATION_ERROR_CODE
 }
 
 private fun StripeException.apiErrorType(): String? {
@@ -68,6 +68,5 @@ private fun String?.toMode(): String? {
     }
 }
 
-private const val ERROR_CODE_APP_ATTESTATION_FAILED = "link_failed_to_attest_request"
 private const val FIELD_REASON = "reason"
 private const val FIELD_USER_MESSAGE = "user_message"

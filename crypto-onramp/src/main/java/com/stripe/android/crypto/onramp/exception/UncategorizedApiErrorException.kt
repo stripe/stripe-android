@@ -9,13 +9,19 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 class UncategorizedApiErrorException internal constructor(
     context: APIErrorContext,
     sdkVersions: List<SDKVersion>,
-    fallbackUserMessage: String,
+    userMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
     sdkVersions = sdkVersions,
-    userMessage = context.userMessage(fallbackUserMessage),
+    userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderGenericApiDeveloperMessage(
         context = context,
+        code = context.code(fallback = UNCATEGORIZED_API_ERROR_CODE),
         sdkVersions = sdkVersions,
     ),
-)
+) {
+    override val code: String
+        get() = context.code(fallback = UNCATEGORIZED_API_ERROR_CODE)
+}
+
+private const val UNCATEGORIZED_API_ERROR_CODE = "uncategorized_api_error"

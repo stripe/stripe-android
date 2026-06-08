@@ -9,15 +9,23 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 class AppAttestationException internal constructor(
     context: APIErrorContext,
     sdkVersions: List<SDKVersion>,
-    fallbackUserMessage: String,
+    userMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
     sdkVersions = sdkVersions,
-    userMessage = context.userMessage(fallbackUserMessage),
-    developerMessage = buildAppAttestationDeveloperMessage(context, sdkVersions),
-)
+    userMessage = userMessage,
+    developerMessage = buildAppAttestationDeveloperMessage(
+        context = context,
+        code = context.code(fallback = APP_ATTESTATION_ERROR_CODE),
+        sdkVersions = sdkVersions,
+    ),
+) {
+    override val code: String
+        get() = context.code(fallback = APP_ATTESTATION_ERROR_CODE)
+}
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"
+internal const val APP_ATTESTATION_ERROR_CODE = "link_failed_to_attest_request"
 private const val APP_NOT_REGISTERED_REASON = "app_not_registered"
 private const val ATTESTATION_DATA_MISSING_REASON = "attestation_data_missing"
 private const val APP_NOT_PLAY_RECOGNIZED_REASON = "app_not_play_recognized"
@@ -93,12 +101,14 @@ private fun attestationSummary(description: String): String {
 
 private fun buildAppAttestationDeveloperMessage(
     context: APIErrorContext,
+    code: String,
     sdkVersions: List<SDKVersion>,
 ): String {
     return CryptoOnrampErrorRenderer.renderApiDeveloperMessage(
         context = context,
         summary = appAttestationSummary(context.reason)
             ?: (context.apiErrorMessage ?: "App attestation failed."),
+        code = code,
         nextStep = appAttestationNextStep(context.reason),
         sdkVersions = sdkVersions,
     )

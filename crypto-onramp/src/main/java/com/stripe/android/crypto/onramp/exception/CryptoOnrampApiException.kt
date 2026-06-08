@@ -26,9 +26,6 @@ abstract class CryptoOnrampApiException internal constructor(
     message = userMessage,
 ),
 StripeCryptoOnrampError {
-    final override val code: String?
-        get() = context.apiErrorCode
-
     final override val docUrl: String?
         get() = context.docUrl
 
@@ -90,6 +87,6 @@ data class APIErrorContext(
         get() = underlyingError.requestId
 }
 
-internal fun APIErrorContext.userMessage(fallbackUserMessage: String): String {
-    return apiUserMessage ?: fallbackUserMessage
+internal fun APIErrorContext.code(fallback: String): String {
+    return apiErrorCode ?: fallback
 }

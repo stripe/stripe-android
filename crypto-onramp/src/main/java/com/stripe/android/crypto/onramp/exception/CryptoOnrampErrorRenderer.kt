@@ -3,11 +3,13 @@ package com.stripe.android.crypto.onramp.exception
 internal object CryptoOnrampErrorRenderer {
     fun renderGenericApiDeveloperMessage(
         context: APIErrorContext,
+        code: String,
         sdkVersions: List<SDKVersion>,
     ): String {
         return renderApiDeveloperMessage(
             context = context,
             summary = context.apiErrorMessage ?: "Stripe API request failed.",
+            code = code,
             nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
             sdkVersions = sdkVersions,
         )
@@ -16,13 +18,14 @@ internal object CryptoOnrampErrorRenderer {
     fun renderApiDeveloperMessage(
         context: APIErrorContext,
         summary: String,
+        code: String,
         nextStep: String,
         sdkVersions: List<SDKVersion>,
     ): String {
         return renderDeveloperMessage(
             summary = summary,
             requestContext = requestContextLines(context),
-            code = context.apiErrorCode,
+            code = code,
             nextStep = nextStep,
             docUrl = context.docUrl,
             sdkVersions = sdkVersions,
@@ -32,15 +35,13 @@ internal object CryptoOnrampErrorRenderer {
     private fun renderDeveloperMessage(
         summary: String,
         requestContext: List<String>,
-        code: String?,
+        code: String,
         nextStep: String,
         docUrl: String?,
         sdkVersions: List<SDKVersion>,
     ): String {
         val footer = buildList {
-            code?.let {
-                add("Code: $it")
-            }
+            add("Code: $code")
             add("Next step: $nextStep")
             docUrl?.let {
                 add("Docs: $it")

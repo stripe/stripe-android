@@ -67,11 +67,11 @@ public final class com/stripe/android/crypto/onramp/exception/APIErrorContext {
 
 public final class com/stripe/android/crypto/onramp/exception/AppAttestationException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
 }
 
 public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException : com/stripe/android/core/exception/StripeException, com/stripe/android/crypto/onramp/exception/StripeCryptoOnrampError {
 	public static final field $stable I
-	public final fun getCode ()Ljava/lang/String;
 	public final fun getContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
 	public final fun getDeveloperMessage ()Ljava/lang/String;
 	public final fun getDocUrl ()Ljava/lang/String;
@@ -128,6 +128,7 @@ public abstract interface class com/stripe/android/crypto/onramp/exception/Strip
 
 public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/lang/Enum {
