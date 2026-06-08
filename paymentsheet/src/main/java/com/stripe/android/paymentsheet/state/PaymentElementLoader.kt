@@ -350,17 +350,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
 
-            createPaymentMethodMetadata(
-                integrationConfiguration = integrationConfiguration,
-                elementsSession = elementsSession,
-                configuration = configuration,
-                linkStateResult = linkStateResult,
-                isGooglePayReady = isGooglePayReady,
-                isGooglePaySupported = isGooglePaySupported,
-                initializationMode = initializationMode,
-                customerMetadata = customerMetadata,
-                clientAttributionMetadata = clientAttributionMetadata,
-            )
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
+                createPaymentMethodMetadata(
+                    integrationConfiguration = integrationConfiguration,
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    linkStateResult = linkStateResult,
+                    isGooglePayReady = isGooglePayReady,
+                    isGooglePaySupported = isGooglePaySupported,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
         }
 
         val customer = async {
