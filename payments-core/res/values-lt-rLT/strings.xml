@@ -156,6 +156,8 @@
   <string name="stripe_fpx_bank_offline">%s – neprisijungęs</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Jūsų mokėjimo būdas buvo atmestas.</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">Iš viso</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->
   <string name="stripe_insufficient_funds">Jūsų kortelėje nėra pakankamai lėšų.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

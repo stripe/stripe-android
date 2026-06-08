@@ -144,6 +144,8 @@
   <string name="stripe_id_number">Identifikační číslo</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">Jsem připraven/a</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Snímek pořízen</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Identifikační číslo, které jste zadali, je neúplné.</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">Poslední 4 pozice čísla sociálního pojištění</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Příjmení</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Automatické</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Načítání</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Ruční</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Posuňte průkaz totožnosti blíže</string>
   <!-- Instructional text when camera is too close to a document -->

@@ -144,6 +144,8 @@
   <string name="stripe_id_number">Identificatienummer</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">Ik ben klaar</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Afbeelding gemaakt</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Het opgegeven identificatienummer is onvolledig.</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">Laatste vier cijfers van socialezekerheidsnummer</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Achternaam</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Automatisch</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Bezig met laden</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Handmatig</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Houd het identiteitsbewijs dichter bij</string>
   <!-- Instructional text when camera is too close to a document -->
