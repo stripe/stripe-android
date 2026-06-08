@@ -175,6 +175,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Hallake kaarte</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Pangakonto haldamine</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Makseviisi haldamine</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Halda makseviise</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -247,6 +249,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Vaikemakseviisi ei muudetud. Palun proovige uuesti.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kokku: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Makseviisi andmeid ei saa muuta.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kaardi kaubamärki ei värskendatud. Proovige uuesti.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->

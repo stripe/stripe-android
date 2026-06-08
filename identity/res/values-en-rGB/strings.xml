@@ -144,6 +144,8 @@
   <string name="stripe_id_number">ID Number</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">I\'m ready</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Image taken</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">The ID number you entered is incomplete.</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,10 +162,10 @@
   <string name="stripe_last_4_of_ssn">Last 4 of Social Security number</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Last</string>
-  <!-- Status while screen is loading -->
-  <string name="stripe_loading">Loading</string>
   <!-- Segmented control option for automatic identity document capture -->
   <string name="stripe_live">Auto</string>
+  <!-- Status while screen is loading -->
+  <string name="stripe_loading">Loading</string>
   <!-- Segmented control option for manual identity document capture -->
   <string name="stripe_manual">Manual</string>
   <!-- Instructional text when camera is too far from a document -->
@@ -216,8 +218,6 @@
   <string name="stripe_rotate_document">Keep ID level</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="stripe_scanned">Scanned</string>
-  <!-- State when a manual identity document image has been captured -->
-  <string name="stripe_image_taken">Image taken</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
   <string name="stripe_select">Select</string>
   <!-- Instructional text when selfie is captured -->

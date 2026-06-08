@@ -175,6 +175,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Pārvaldīt kartes</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Pārvaldīt bankas kontu</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Pārvaldīt maksājuma veidu</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Pārvaldīt maksājuma veidus</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -247,6 +249,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Noklusējuma maksājumu veids netika mainīts. Mēģiniet vēlreiz.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Maksājuma veida informāciju nevar mainīt.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kartes zīmols netika atjaunināts. Lūdzu, mēģiniet vēlreiz.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->

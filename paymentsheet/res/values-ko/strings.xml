@@ -175,6 +175,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">카드 관리</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">은행 계좌 관리</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">결제 방식 관리</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">결제 방식 관리</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -247,6 +249,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">기본 결제 방식이 변경되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">결제 방식 세부사항은 변경할 수 없습니다.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">카드 브랜드가 업데이트되지 않았습니다. 다시 시도하십시오.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->

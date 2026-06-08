@@ -144,6 +144,8 @@
   <string name="stripe_id_number">Nomor Identifikasi</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">Saya siap</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Gambar diambil</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Nomor identifikasi yang Anda masukkan tidak lengkap.</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">4 angka terakhir Nomor Jaminan Sosial</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Belakang</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Otomatis</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Memuat</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Manual</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Dekatkan identitas</string>
   <!-- Instructional text when camera is too close to a document -->
