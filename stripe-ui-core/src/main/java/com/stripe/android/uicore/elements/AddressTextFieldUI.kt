@@ -29,11 +29,19 @@ fun AddressTextFieldUI(
     val textFieldInsets = LocalTextFieldInsets.current
 
     val isError = error != null
+    val isInline = controller.inlinePredictionsState != null
+    val query by controller.inlineQuery.collectAsState()
+
+    val fieldModifier = if (isInline) {
+        modifier.fillMaxWidth()
+    } else {
+        modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }
+    }
 
     CompatTextField(
-        value = "",
-        enabled = false,
-        onValueChange = {},
+        value = if (isInline) query else "",
+        enabled = if (isInline) enabled else false,
+        onValueChange = { v -> if (isInline) controller.onInlineQueryChanged(v) },
         errorMessage = null,
         isError = isError,
         label = {
@@ -44,18 +52,9 @@ fun AddressTextFieldUI(
         singleLine = true,
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            fieldDisplayState = when (isError) {
-                true -> FieldDisplayState.ERROR
-                false -> FieldDisplayState.NORMAL
-            },
-            disabledIndicatorColor = if (isError) {
-                MaterialTheme.colors.error
-            } else {
-                Color.Transparent
-            },
+            fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
+            disabledIndicatorColor = if (!isInline && isError) MaterialTheme.colors.error else Color.Transparent,
         ),
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled) { onClick() },
+        modifier = fieldModifier,
     )
 }

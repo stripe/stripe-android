@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -39,7 +40,8 @@ internal fun InputAddressScreen(
     onCloseClick: () -> Unit,
     topContent: @Composable ColumnScope.() -> Unit,
     formContent: @Composable ColumnScope.() -> Unit,
-    bottomContent: @Composable ColumnScope.() -> Unit
+    bottomContent: @Composable ColumnScope.() -> Unit,
+    footerContent: @Composable ColumnScope.() -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -80,6 +82,7 @@ internal fun InputAddressScreen(
                     },
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
+                footerContent()
             }
         }
     }
@@ -158,6 +161,24 @@ internal fun InputAddressScreen(
                         viewModel.clickCheckbox(!checkboxChecked)
                     }
                 )
+            }
+        },
+        footerContent = {
+            if (viewModel.autocompleteConfig.isInlineAutocomplete &&
+                viewModel.autocompleteConfig.googlePlacesApiKey != null
+            ) {
+                val isFormExpanded by viewModel.isFormExpanded.collectAsState()
+                if (!isFormExpanded) {
+                    TextButton(
+                        onClick = { viewModel.onEnterManually() },
+                        modifier = Modifier.padding(top = 4.dp),
+                    ) {
+                        Text(
+                            text = stringResource(R.string.stripe_paymentsheet_enter_address_manually),
+                            style = MaterialTheme.typography.button,
+                        )
+                    }
+                }
             }
         }
     )

@@ -43,19 +43,16 @@ class TestAutocompleteAddressInteractor private constructor(
                 autocompleteConfig = autocompleteConfig,
             )
 
-            val registerCalls = interactor.registerCalls
-            val onAutocompleteCalls = interactor.onAutocompleteCalls
-
             test(
                 Scenario(
                     interactor = interactor,
-                    registerCalls = registerCalls,
-                    onAutocompleteCalls = onAutocompleteCalls,
+                    registerCalls = interactor.registerCalls,
+                    onAutocompleteCalls = interactor.onAutocompleteCalls,
                 )
             )
 
-            registerCalls.ensureAllEventsConsumed()
-            onAutocompleteCalls.ensureAllEventsConsumed()
+            interactor.registerCalls.ensureAllEventsConsumed()
+            interactor.onAutocompleteCalls.ensureAllEventsConsumed()
         }
 
         fun noOp(
