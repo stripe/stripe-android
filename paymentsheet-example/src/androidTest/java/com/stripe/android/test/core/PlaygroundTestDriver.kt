@@ -41,6 +41,7 @@ import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.embedded.form.EMBEDDED_FORM_ACTIVITY_PRIMARY_BUTTON
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
@@ -72,7 +73,6 @@ import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
 import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -1286,25 +1286,42 @@ internal class PlaygroundTestDriver(
         requestedBrowser: Browser?
     ) {
         if (authorizeAction?.requiresBrowser == true) {
-            requestedBrowser?.let {
-                val browserUI = BrowserUI.convert(it)
-                Assume.assumeTrue(getBrowser(browserUI) == browserUI)
-            } ?: Assume.assumeTrue(selectors.getInstalledBrowsers().isNotEmpty())
+            getBrowser(BrowserUI.convert(requestedBrowser))
         }
         if (authorizeAction == AuthorizeAction.DisplayQrCode) {
-            // Browserstack tests fail on pixel 2 API 26.
+            // Some older Pixel 2 API 26 environments do not support this QR-code flow reliably.
             assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
+        }
+    }
+
+    private fun requireBrowserSupport(condition: Boolean, lazyMessage: () -> String) {
+        if (condition) {
+            return
+        }
+
+        val message = lazyMessage()
+        if (BuildConfig.IS_RUNNING_IN_CI) {
+            fail(message)
+        } else {
+            Assume.assumeTrue(message, false)
         }
     }
 
     private fun getBrowser(requestedBrowser: BrowserUI?): BrowserUI {
         val installedBrowsers = selectors.getInstalledBrowsers()
+        val installedBrowserNames = installedBrowsers.joinToString { it.name }.ifEmpty { "none" }
 
         return requestedBrowser?.let {
-            // Assume true will mark the test as skipped if it can't be executed
-            Assume.assumeTrue(installedBrowsers.contains(it))
+            // Local runs skip if the requested browser is unavailable; CI fails to preserve coverage.
+            requireBrowserSupport(installedBrowsers.contains(it)) {
+                "Required browser ${it.name} is not installed. Installed browsers: $installedBrowserNames"
+            }
             it
-        } ?: installedBrowsers.first()
+        } ?: installedBrowsers.firstOrNull().also { browser ->
+            requireBrowserSupport(browser != null) {
+                "No supported browser is installed. Installed browsers: $installedBrowserNames"
+            }
+        }!!
     }
 
     private fun monitorCurrentActivity(application: Application) {
@@ -1369,7 +1386,9 @@ internal class PlaygroundTestDriver(
                         browserIconAtPrompt(selectedBrowser).click()
                     }
 
-                    assumeTrue(browserWindow(selectedBrowser)?.exists() == true)
+                    requireBrowserSupport(browserWindow(selectedBrowser)?.exists() == true) {
+                        "Expected ${selectedBrowser.name} to open for authorization, but no browser window appeared."
+                    }
 
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }

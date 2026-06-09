@@ -117,6 +117,18 @@ android {
             dimension "base"
         }
     }
+
+    testOptions {
+        managedDevices {
+            localDevices {
+                register("pixel2api33Browser") {
+                    device = "Pixel 2"
+                    apiLevel = 33
+                    systemImageSource = "google"
+                }
+            }
+        }
+    }
 }
 
 dependencies {

@@ -1,15 +1,24 @@
-# Running BrowserStack Tests
+# Running PaymentSheet E2E Tests
 
-You can run BrowserStack tests with the following command:
+Run the same Gradle Managed Device suite used in CI with:
 
 ```bash
-./gradlew :paymentsheet-example:assembleBaseDebugAndroidTest :paymentsheet-example:assembleBaseDebug && \
-  BROWSERSTACK_USERNAME=YOUR_BROWSERSTACK_USERNAME \
-  BROWSERSTACK_ACCESS_KEY=YOUR_BROWSERSTACK_ACCESS_KEY \
-  python scripts/browserstack.py \
-  --test \
-  --apk paymentsheet-example/build/outputs/apk/base/debug/paymentsheet-example-base-debug.apk \
-  --espresso paymentsheet-example/build/outputs/apk/androidTest/base/debug/paymentsheet-example-base-debug-androidTest.apk
+./gradlew \
+  :paymentsheet-example:pixel2api33BrowserBaseDebugAndroidTest \
+  --init-script build-configuration/instrumentation-test-init.gradle
 ```
 
-Get your `BROWSERSTACK_USERNAME` and `BROWSERSTACK_ACCESS_KEY` through [browserstack](https://app-automate.browserstack.com/dashboard/v2).
+CI runs the same task with retries and sharding:
+
+```bash
+./scripts/retry.sh 3 ./gradlew \
+  -Pandroid.experimental.androidTest.numManagedDeviceShards=3 \
+  -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=3 \
+  :paymentsheet-example:pixel2api33BrowserBaseDebugAndroidTest \
+  -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN \
+  --init-script build-configuration/instrumentation-test-init.gradle
+```
+
+The `pixel2api33Browser` managed device uses the Google API system image so browser-based
+authorization flows run against a Chrome-capable emulator. Local runs can still skip
+browser-specific tests if the required browser is unavailable.

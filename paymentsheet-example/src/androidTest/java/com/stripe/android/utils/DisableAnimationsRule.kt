@@ -7,8 +7,8 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 /**
- * BrowserStack does not offer an API for Espresso tests to disable animations. This rule allows
- * certain tests to disable animations on the device.
+ * Some test environments do not expose a direct way to disable animations ahead of time.
+ * This rule forces animations off on the device for the duration of the test.
  */
 class DisableAnimationsRule : TestRule {
 

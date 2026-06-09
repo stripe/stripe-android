@@ -8,8 +8,9 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * This tests that authorization works with firefox and chrome browsers.  If a browser
- * is specified in the test parameters and it is not available the test will be skipped.
+ * This tests that authorization works with firefox and chrome browsers. If a browser
+ * is specified in the test parameters and it is not available, local runs will skip.
+ * CI treats missing browser support as a failure so coverage regressions are visible.
  * Note that if a webview is used because there is no browser or a returnURL is specified
  * this it cannot be actuated with UI Automator.
  */
@@ -31,7 +32,7 @@ internal class TestBrowsers : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("On browserstack's Google Pixel, the connection to stripe.com is deemed insecure and the page does not load.")
+    @Ignore("Firefox is not reliably available on the managed device image used for CI coverage.")
     fun testAuthorizeFirefox() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copy(
