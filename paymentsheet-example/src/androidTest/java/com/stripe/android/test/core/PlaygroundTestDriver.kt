@@ -1386,7 +1386,7 @@ internal class PlaygroundTestDriver(
                         browserIconAtPrompt(selectedBrowser).click()
                     }
 
-                    requireBrowserSupport(browserWindow(selectedBrowser)?.exists() == true) {
+                    requireBrowserSupport(waitForBrowserWindow(selectedBrowser)) {
                         "Expected ${selectedBrowser.name} to open for authorization, but no browser window appeared."
                     }
 

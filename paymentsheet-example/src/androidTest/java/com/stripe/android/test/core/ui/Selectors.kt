@@ -154,6 +154,20 @@ internal class Selectors(
 
     fun browserWindow(browser: BrowserUI): UiObject? = browserWindow(device, browser)
 
+    fun waitForBrowserWindow(
+        browser: BrowserUI,
+        timeoutMillis: Long = DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+    ): Boolean {
+        if (browserWindow(browser)?.exists() == true) {
+            return true
+        }
+
+        return device.wait(
+            Until.findObject(By.pkg(browser.packageName)),
+            timeoutMillis,
+        ) != null
+    }
+
     val closeButton = UiAutomatorText("Close", device = device)
 
     fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
