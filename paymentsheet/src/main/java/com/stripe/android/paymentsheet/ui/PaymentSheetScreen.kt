@@ -76,7 +76,6 @@ import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.shoppay.ShopPayButton
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
@@ -355,7 +354,6 @@ private fun PaymentSheetContent(
                 processingState = walletsProcessingState,
                 onGooglePayPressed = state.onGooglePayPressed,
                 onLinkPressed = state.onLinkPressed,
-                onShopPayPressed = state.onShopPayPressed,
                 dividerSpacing = currentScreen.walletsDividerSpacing,
                 modifier = Modifier.padding(bottom = bottomSpacing),
                 cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
@@ -416,7 +414,6 @@ internal fun Wallet(
     processingState: WalletsProcessingState?,
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
-    onShopPayPressed: () -> Unit,
     dividerSpacing: Dp,
     modifier: Modifier = Modifier,
     cardBrandFilter: CardBrandFilter,
@@ -429,7 +426,6 @@ internal fun Wallet(
             state = state,
             onGooglePayPressed = onGooglePayPressed,
             onLinkPressed = onLinkPressed,
-            onShopPayPressed = onShopPayPressed,
             cardBrandFilter = cardBrandFilter,
             cardFundingFilter = cardFundingFilter
         )
@@ -458,7 +454,6 @@ private fun WalletHeader(
     state: WalletsState,
     onGooglePayPressed: () -> Unit,
     onLinkPressed: () -> Unit,
-    onShopPayPressed: () -> Unit,
     cardBrandFilter: CardBrandFilter,
     cardFundingFilter: CardFundingFilter
 ) {
@@ -492,9 +487,6 @@ private fun WalletHeader(
                         linkBrand = wallet.linkBrand,
                         onClick = onLinkPressed,
                     )
-                }
-                WalletsState.ShopPay -> {
-                    ShopPayButton(onClick = onShopPayPressed)
                 }
             }
         }

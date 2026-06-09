@@ -2150,7 +2150,6 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field RevolutPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Satispay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
-	public static final field ShopPay Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sunbit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Swish Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Twint Lcom/stripe/android/model/PaymentMethod$Type;
@@ -2719,18 +2718,6 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$SepaDebit 
 	public final fun getIban ()Ljava/lang/String;
 	public fun hashCode ()I
 	public final fun setIban (Ljava/lang/String;)V
-	public fun toParamMap ()Ljava/util/Map;
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
-}
-
-public final class com/stripe/android/model/PaymentMethodCreateParams$ShopPay : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
-	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public fun <init> (Ljava/lang/String;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
 	public fun toParamMap ()Ljava/util/Map;
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V

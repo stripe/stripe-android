@@ -259,8 +259,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_qrcode_lpm_confirm_payment">Per completar la compra, confirmeu el pagament al banc o a l\'aplicació de pagament dins de %s.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Elimina el compte bancari que acaba en %s</string>
-  <!-- Accessibility description for a button that launches Shop Pay. -->
-  <string name="stripe_shop_pay_button_description">Botó de Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Mostra el menú</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

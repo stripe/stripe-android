@@ -411,23 +411,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
-    class ShopPayWebviewLoadAttempt : PaymentSheetEvent() {
-        override val eventName: String = "mc_shoppay_webview_load_attempt"
-    }
-
-    class ShopPayWebviewConfirmSuccess : PaymentSheetEvent() {
-        override val eventName: String = "mc_shoppay_webview_confirm_success"
-    }
-
-    class ShopPayWebviewCancelled(
-        didReceiveECEClick: Boolean,
-    ) : PaymentSheetEvent() {
-        override val eventName: String = "mc_shoppay_webview_cancelled"
-        override val params: Map<String, Any?> = mapOf(
-            "did_receive_ece_click" to didReceiveECEClick
-        )
-    }
-
     class CardScanStarted(
         implementation: String,
     ) : PaymentSheetEvent() {
@@ -639,7 +622,6 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                 }
             }
             null -> "unknown"
-            is PaymentSelection.ShopPay -> "shop_pay"
         }
 
         private fun formatEventName(mode: EventReporter.Mode, eventName: String): String {
@@ -686,7 +668,6 @@ internal fun PaymentSelection.code(): String {
     return when (this) {
         is PaymentSelection.GooglePay -> "google_pay"
         is PaymentSelection.Link -> "link"
-        is PaymentSelection.ShopPay -> "shop_pay"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
         is PaymentSelection.ExternalPaymentMethod -> type
@@ -717,7 +698,6 @@ internal fun PaymentSelection.linkContext(): String? {
         is PaymentSelection.New,
         is PaymentSelection.Saved,
         is PaymentSelection.CustomPaymentMethod,
-        is PaymentSelection.ExternalPaymentMethod,
-        is PaymentSelection.ShopPay -> null
+        is PaymentSelection.ExternalPaymentMethod -> null
     }
 }

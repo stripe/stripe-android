@@ -43,7 +43,6 @@ import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallba
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
@@ -841,7 +840,6 @@ class PaymentSheet internal constructor(
             ConfigurationDefaults.customPaymentMethods,
         internal val link: LinkConfiguration = ConfigurationDefaults.link,
         internal val walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons,
-        internal val shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration,
         internal val googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey,
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
@@ -981,7 +979,6 @@ class PaymentSheet internal constructor(
             private var allowedCardFundingTypes: List<CardFundingType> = ConfigurationDefaults.allowedCardFundingTypes
             private var link: PaymentSheet.LinkConfiguration = ConfigurationDefaults.link
             private var walletButtons: WalletButtonsConfiguration = ConfigurationDefaults.walletButtons
-            private var shopPayConfiguration: ShopPayConfiguration? = ConfigurationDefaults.shopPayConfiguration
             private var googlePlacesApiKey: String? = ConfigurationDefaults.googlePlacesApiKey
             private var termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap()
             private var opensCardScannerAutomatically: Boolean =
@@ -1134,14 +1131,6 @@ class PaymentSheet internal constructor(
             }
 
             /**
-             * Configuration related to `ShopPay`
-             */
-            @ShopPayPreview
-            fun shopPayConfiguration(shopPayConfiguration: ShopPayConfiguration) = apply {
-                this.shopPayConfiguration = shopPayConfiguration
-            }
-
-            /**
              * Google Places API key to support autocomplete when collecting billing details
              */
             @AddressAutocompletePreview
@@ -1192,7 +1181,6 @@ class PaymentSheet internal constructor(
                 customPaymentMethods = customPaymentMethods,
                 link = link,
                 walletButtons = walletButtons,
-                shopPayConfiguration = shopPayConfiguration,
                 googlePlacesApiKey = googlePlacesApiKey,
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
@@ -1210,7 +1198,6 @@ class PaymentSheet internal constructor(
         @OptIn(
             ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
             WalletButtonsPreview::class,
-            ShopPayPreview::class,
             CardFundingFilteringPrivatePreview::class,
             AddressAutocompletePreview::class
         )
@@ -1237,7 +1224,6 @@ class PaymentSheet internal constructor(
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
-                shopPayConfiguration?.let { shopPayConfiguration(it) }
                 googlePlacesApiKey?.let { googlePlacesApiKey(it) }
                 userOverrideCountry?.let { userOverrideCountry(it) }
             }
@@ -3880,89 +3866,6 @@ class PaymentSheet internal constructor(
         enum class Wallet {
             Link,
             GooglePay,
-            ShopPay
-        }
-    }
-
-    /**
-     * Configuration related to Shop Pay, which only applies when using wallet buttons.
-     *
-     * @param shopId The corresponding store's shopId.
-     * @param billingAddressRequired Whether or not billing address is required. Defaults to `true`.
-     * @param emailRequired Whether or not email is required. Defaults to `true`.
-     * @param shippingAddressRequired Whether or not to collect the customer's shipping address.
-     * @param lineItems An array of [LineItem] objects. These are shown as line items in the
-     * payment interface, if line items are supported. You can represent discounts as negative
-     * amount [LineItem]s.
-     * @param shippingRates A list of [ShippingRate] objects. The first shipping rate listed
-     * appears in the payment interface as the default option.
-     */
-    @Poko
-    @Parcelize
-    class ShopPayConfiguration(
-        val shopId: String,
-        val billingAddressRequired: Boolean = true,
-        val emailRequired: Boolean = true,
-        val shippingAddressRequired: Boolean,
-        val allowedShippingCountries: List<String>,
-        val lineItems: List<LineItem>,
-        val shippingRates: List<ShippingRate>
-    ) : Parcelable {
-        /**
-         * A type used to describe a single item for in the Shop Pay wallet UI.
-         */
-        @Poko
-        @Parcelize
-        class LineItem(
-            val name: String,
-            val amount: Int
-        ) : Parcelable
-
-        /**
-         * A shipping rate option.
-         */
-        @Poko
-        @Parcelize
-        class ShippingRate(
-            val id: String,
-            val amount: Int,
-            val displayName: String,
-            val deliveryEstimate: DeliveryEstimate?
-        ) : Parcelable
-
-        /**
-         * Type used to describe DeliveryEstimates for shipping.
-         * See https://docs.stripe.com/js/elements_object/create_express_checkout_element#express_checkout_element_create-options-shippingRates-deliveryEstimate
-         */
-        sealed interface DeliveryEstimate : Parcelable {
-            @Poko
-            @Parcelize
-            class Range(
-                val maximum: DeliveryEstimateUnit?,
-                val minimum: DeliveryEstimateUnit?
-            ) : DeliveryEstimate
-
-            @Poko
-            @Parcelize
-            class Text(
-                val value: String
-            ) : DeliveryEstimate
-
-            @Poko
-            @Parcelize
-            class DeliveryEstimateUnit(
-                val unit: TimeUnit,
-                val value: Int
-            ) : Parcelable {
-
-                enum class TimeUnit {
-                    HOUR,
-                    DAY,
-                    BUSINESS_DAY,
-                    WEEK,
-                    MONTH
-                }
-            }
         }
     }
 
@@ -4128,14 +4031,6 @@ class PaymentSheet internal constructor(
             @ExperimentalAnalyticEventCallbackApi
             fun analyticEventCallback(callback: AnalyticEventCallback) = apply {
                 callbacksBuilder.analyticEventCallback(callback)
-            }
-
-            /**
-             * @param handlers Handlers for shop-pay specific events like shipping method and contact updates.
-             */
-            @ShopPayPreview
-            fun shopPayHandlers(handlers: ShopPayHandlers) = apply {
-                callbacksBuilder.shopPayHandlers(handlers)
             }
 
             /**

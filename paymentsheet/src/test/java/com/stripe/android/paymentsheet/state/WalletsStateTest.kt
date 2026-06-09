@@ -20,7 +20,6 @@ class WalletsStateTest {
         val state = createViaFactory(
             isLinkAvailable = false,
             isGooglePayReady = false,
-            isShopPayAvailable = false,
         )
 
         assertThat(state).isNull()
@@ -48,15 +47,6 @@ class WalletsStateTest {
         val googlePay = state?.googlePay(WalletLocation.INLINE)
         assertThat(googlePay).isNotNull()
         assertThat(googlePay?.buttonType).isEqualTo(GooglePayButtonType.Pay)
-    }
-
-    @Test
-    fun `create returns state with ShopPay when isShopPayAvailable is true`() {
-        val state = createViaFactory(isShopPayAvailable = true)
-
-        assertThat(state).isNotNull()
-        val shopPay = state?.shopPay(WalletLocation.INLINE)
-        assertThat(shopPay).isEqualTo(WalletsState.ShopPay)
     }
 
     @Test
@@ -128,7 +118,6 @@ class WalletsStateTest {
         isLinkAvailable: Boolean? = false,
         linkEmail: String? = null,
         isGooglePayReady: Boolean = false,
-        isShopPayAvailable: Boolean = false,
         buttonsEnabled: Boolean = true,
         paymentMethodTypes: List<String> = listOf(PaymentMethod.Type.Card.code),
         isSetupIntent: Boolean = false,
@@ -137,14 +126,12 @@ class WalletsStateTest {
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
             isGooglePayReady = isGooglePayReady,
-            isShopPayAvailable = isShopPayAvailable,
             googlePayButtonType = GooglePayButtonType.Pay,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = null,
             onGooglePayPressed = {},
             onLinkPressed = {},
-            onShopPayPressed = {},
             isSetupIntent = isSetupIntent,
             walletsAllowedInHeader = emptyList(),
             cardFundingFilter = DefaultCardFundingFilter,
@@ -162,7 +149,6 @@ class WalletsStateTest {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = listOf(WalletType.Link, WalletType.GooglePay),
         )
 
@@ -174,35 +160,18 @@ class WalletsStateTest {
     }
 
     @Test
-    fun `wallets returns only ShopPay inline when Link and GooglePay allowed in header`() {
-        val state = createWalletsState(
-            hasLink = true,
-            hasGooglePay = true,
-            hasShopPay = true,
-            walletsAllowedInHeader = listOf(WalletType.Link, WalletType.GooglePay),
-        )
-
-        val wallets = state.wallets(WalletLocation.INLINE)
-
-        assertThat(wallets).hasSize(1)
-        assertThat(wallets.first()).isEqualTo(WalletsState.ShopPay)
-    }
-
-    @Test
     fun `wallets returns all wallets inline when none allowed in header`() {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = emptyList(),
         )
 
         val wallets = state.wallets(WalletLocation.INLINE)
 
-        assertThat(wallets).hasSize(3)
+        assertThat(wallets).hasSize(2)
         assertThat(wallets.filterIsInstance<WalletsState.GooglePay>()).hasSize(1)
         assertThat(wallets.filterIsInstance<WalletsState.Link>()).hasSize(1)
-        assertThat(wallets.filterIsInstance<WalletsState.ShopPay>()).hasSize(1)
     }
 
     @Test
@@ -210,7 +179,6 @@ class WalletsStateTest {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = emptyList(),
         )
 
@@ -224,7 +192,6 @@ class WalletsStateTest {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = listOf(WalletType.Link),
         )
 
@@ -235,19 +202,17 @@ class WalletsStateTest {
     }
 
     @Test
-    fun `wallets returns GooglePay and ShopPay inline when only Link allowed in header`() {
+    fun `wallets returns GooglePay inline when only Link allowed in header`() {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = listOf(WalletType.Link),
         )
 
         val wallets = state.wallets(WalletLocation.INLINE)
 
-        assertThat(wallets).hasSize(2)
+        assertThat(wallets).hasSize(1)
         assertThat(wallets.filterIsInstance<WalletsState.GooglePay>()).hasSize(1)
-        assertThat(wallets.filterIsInstance<WalletsState.ShopPay>()).hasSize(1)
     }
 
     @Test
@@ -255,7 +220,6 @@ class WalletsStateTest {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = listOf(WalletType.GooglePay),
         )
 
@@ -266,48 +230,17 @@ class WalletsStateTest {
     }
 
     @Test
-    fun `wallets returns Link and ShopPay inline when only GooglePay allowed in header`() {
+    fun `wallets returns Link inline when only GooglePay allowed in header`() {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = listOf(WalletType.GooglePay),
         )
 
         val wallets = state.wallets(WalletLocation.INLINE)
 
-        assertThat(wallets).hasSize(2)
-        assertThat(wallets.filterIsInstance<WalletsState.Link>()).hasSize(1)
-        assertThat(wallets.filterIsInstance<WalletsState.ShopPay>()).hasSize(1)
-    }
-
-    @Test
-    fun `wallets never returns ShopPay in header`() {
-        val state = createWalletsState(
-            hasLink = false,
-            hasGooglePay = false,
-            hasShopPay = true,
-            walletsAllowedInHeader = WalletType.entries,
-        )
-
-        val wallets = state.wallets(WalletLocation.HEADER)
-
-        assertThat(wallets).isEmpty()
-    }
-
-    @Test
-    fun `wallets returns ShopPay inline even when all wallets allowed in header`() {
-        val state = createWalletsState(
-            hasLink = false,
-            hasGooglePay = false,
-            hasShopPay = true,
-            walletsAllowedInHeader = WalletType.entries,
-        )
-
-        val wallets = state.wallets(WalletLocation.INLINE)
-
         assertThat(wallets).hasSize(1)
-        assertThat(wallets.first()).isEqualTo(WalletsState.ShopPay)
+        assertThat(wallets.filterIsInstance<WalletsState.Link>()).hasSize(1)
     }
 
     @Test
@@ -315,7 +248,6 @@ class WalletsStateTest {
         val state = createWalletsState(
             hasLink = false,
             hasGooglePay = false,
-            hasShopPay = false,
             walletsAllowedInHeader = WalletType.entries,
         )
 
@@ -324,11 +256,10 @@ class WalletsStateTest {
     }
 
     @Test
-    fun `wallets maintains order GooglePay then Link then ShopPay`() {
+    fun `wallets maintains order GooglePay then Link`() {
         val state = createWalletsState(
             hasLink = true,
             hasGooglePay = true,
-            hasShopPay = true,
             walletsAllowedInHeader = emptyList(),
         )
 
@@ -336,7 +267,6 @@ class WalletsStateTest {
 
         assertThat(wallets[0]).isInstanceOf(WalletsState.GooglePay::class.java)
         assertThat(wallets[1]).isInstanceOf(WalletsState.Link::class.java)
-        assertThat(wallets[2]).isInstanceOf(WalletsState.ShopPay::class.java)
     }
 
     // endregion
@@ -344,7 +274,6 @@ class WalletsStateTest {
     private fun createWalletsState(
         hasLink: Boolean,
         hasGooglePay: Boolean,
-        hasShopPay: Boolean,
         walletsAllowedInHeader: List<WalletType>,
     ): WalletsState {
         return WalletsState(
@@ -366,13 +295,11 @@ class WalletsStateTest {
             } else {
                 null
             },
-            shopPay = if (hasShopPay) WalletsState.ShopPay else null,
             walletsAllowedInHeader = walletsAllowedInHeader,
             buttonsEnabled = true,
             dividerTextResource = R.string.stripe_paymentsheet_or_pay_using,
             onGooglePayPressed = {},
             onLinkPressed = {},
-            onShopPayPressed = {},
             cardFundingFilter = DefaultCardFundingFilter,
             cardBrandFilter = DefaultCardBrandFilter,
         )

@@ -28,7 +28,6 @@ internal object ConfigurationDefaults {
     val allowedCardFundingTypes: List<PaymentSheet.CardFundingType> = PaymentSheet.CardFundingType.entries
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod> = emptyList()
     val walletButtons: PaymentSheet.WalletButtonsConfiguration = PaymentSheet.WalletButtonsConfiguration()
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration? = null
     val googlePlacesApiKey: String? = null
     const val opensCardScannerAutomatically: Boolean = false
     val userOverrideCountry: String? = null

@@ -514,22 +514,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    override fun onShopPayWebViewLoadAttempt() {
-        fireEvent(PaymentSheetEvent.ShopPayWebviewLoadAttempt())
-    }
-
-    override fun onShopPayWebViewConfirmSuccess() {
-        fireEvent(PaymentSheetEvent.ShopPayWebviewConfirmSuccess())
-    }
-
-    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
-        fireEvent(
-            PaymentSheetEvent.ShopPayWebviewCancelled(
-                didReceiveECEClick = didReceiveECEClick,
-            )
-        )
-    }
-
     override fun onCardScanStarted(implementation: String) {
         durationProvider.start(DurationProvider.Key.CardScan)
         fireEvent(

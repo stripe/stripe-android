@@ -125,7 +125,6 @@ internal val WalletType.configType: PaymentSheet.WalletButtonsConfiguration.Wall
     get() = when (this) {
         WalletType.Link -> PaymentSheet.WalletButtonsConfiguration.Wallet.Link
         WalletType.GooglePay -> PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay
-        WalletType.ShopPay -> PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay
     }
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
