@@ -273,6 +273,9 @@ class DefaultWalletButtonsInteractorTest {
         )
 
         assertThat(eventReporter.walletButtonTappedCalls.awaitItem()).isEqualTo("google_pay")
+        analyticsEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+        )
 
         eventReporter.validate()
     }
