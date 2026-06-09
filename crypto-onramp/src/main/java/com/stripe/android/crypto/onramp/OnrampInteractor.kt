@@ -14,6 +14,7 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
+import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
@@ -75,6 +76,7 @@ internal class OnrampInteractor @Inject constructor(
     private val linkController: LinkController,
     private val cryptoApiRepository: CryptoApiRepository,
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory,
+    private val errorLogger: OnrampErrorLogger,
     private val checkoutHandler: OnrampSessionClientSecretProvider,
     private val savedStateHandle: SavedStateHandle
 ) {
@@ -99,6 +101,7 @@ internal class OnrampInteractor @Inject constructor(
         operation: Operation,
         error: Throwable,
     ) {
+        errorLogger.log(operation, error)
         analyticsService?.track(
             OnrampAnalyticsEvent.ErrorOccurred(
                 operation = operation,
