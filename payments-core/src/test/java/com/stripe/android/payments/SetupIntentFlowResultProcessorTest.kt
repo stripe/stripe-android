@@ -12,6 +12,7 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_RETRIEVE_CALLS
+import com.stripe.android.testing.FakePollingAnalyticsEventReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -38,7 +39,8 @@ internal class SetupIntentFlowResultProcessorTest {
         { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
         mockStripeRepository,
         Logger.noop(),
-        testDispatcher
+        testDispatcher,
+        FakePollingAnalyticsEventReporter(),
     )
 
     @Test

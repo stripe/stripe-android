@@ -17,6 +17,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.shouldRefresh
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.polling.PollingAnalyticsEventReporter
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -35,6 +36,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
+    private val pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -262,6 +264,13 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // at least once after the polling duration
         if (shouldRetry(stripeIntentResult) || stripeIntentResult == null) {
             stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+
+            if (shouldRetry(stripeIntentResult)) {
+                pollingAnalyticsEventReporter.onPollingTimedOut(
+                    paymentMethodType = originalIntent.paymentMethod?.type?.code ?: "unknown",
+                    lastKnownStatus = stripeIntentResult?.getOrNull()?.status?.name,
+                )
+            }
         }
 
         return stripeIntentResult as Result<T>
@@ -312,13 +321,15 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
     logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
     context,
     publishableKeyProvider,
     stripeRepository,
     logger,
-    workContext
+    workContext,
+    pollingAnalyticsEventReporter,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,
@@ -376,13 +387,15 @@ internal class SetupIntentFlowResultProcessor @Inject constructor(
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     stripeRepository: StripeRepository,
     logger: Logger,
-    @IOContext workContext: CoroutineContext
+    @IOContext workContext: CoroutineContext,
+    pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
     context,
     publishableKeyProvider,
     stripeRepository,
     logger,
-    workContext
+    workContext,
+    pollingAnalyticsEventReporter,
 ) {
     override suspend fun retrieveStripeIntent(
         clientSecret: String,

@@ -19,6 +19,7 @@ import com.stripe.android.payments.PaymentFlowResultProcessor.Companion.REDUCED_
 import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_REFRESH_CALLS
 import com.stripe.android.payments.PaymentIntentFlowResultProcessorTest.Companion.MINIMUM_RETRIEVE_CALLS
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakePollingAnalyticsEventReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -890,12 +891,14 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     private fun createProcessor(
         stripeRepository: StripeRepository = mockStripeRepository,
+        pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
     ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
         stripeRepository,
         Logger.noop(),
-        testDispatcher
+        testDispatcher,
+        pollingAnalyticsEventReporter,
     )
 
     private class FakeStripeRepository(

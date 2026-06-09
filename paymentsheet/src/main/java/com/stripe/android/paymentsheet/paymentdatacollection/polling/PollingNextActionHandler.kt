@@ -51,46 +51,50 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
         actionable: StripeIntent,
         host: AuthActivityStarterHost,
         requestOptions: ApiRequest.Options
-    ) = when (actionable.paymentMethod?.type) {
-        PaymentMethod.Type.Blik ->
-            PollingContract.Args(
-                clientSecret = requireNotNull(actionable.clientSecret),
-                statusBarColor = host.statusBarColor,
-                timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
-                initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
-                ctaText = R.string.stripe_blik_confirm_payment,
-                stripeAccountId = requestOptions.stripeAccount,
-                qrCodeUrl = null,
-                paymentMethodType = PaymentMethod.Type.Blik.code,
-            )
-        PaymentMethod.Type.PayNow ->
-            PollingContract.Args(
-                clientSecret = requireNotNull(actionable.clientSecret),
-                statusBarColor = host.statusBarColor,
-                timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
-                initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
-                ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                stripeAccountId = requestOptions.stripeAccount,
-                qrCodeUrl = getQrCodeForPayNow(actionable),
-                paymentMethodType = PaymentMethod.Type.PayNow.code,
-            )
-        PaymentMethod.Type.PromptPay ->
-            PollingContract.Args(
-                clientSecret = requireNotNull(actionable.clientSecret),
-                statusBarColor = host.statusBarColor,
-                timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
-                initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
-                ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
-                stripeAccountId = requestOptions.stripeAccount,
-                qrCodeUrl = getQrCodeForPromptPay(actionable),
-                paymentMethodType = PaymentMethod.Type.PromptPay.code,
-            )
-        else ->
-            error(
-                "Received invalid payment method type " +
-                    "${actionable.paymentMethod?.type?.code} " +
-                    "in PollingAuthenticator"
-            )
+    ): PollingContract.Args {
+        val paymentMethodType = requireNotNull(actionable.paymentMethod?.type?.code) {
+            "Received null payment method type in PollingAuthenticator"
+        }
+        return when (actionable.paymentMethod?.type) {
+            PaymentMethod.Type.Blik ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = BLIK_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = BLIK_INITIAL_DELAY_IN_SECONDS,
+                    ctaText = R.string.stripe_blik_confirm_payment,
+                    stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = null,
+                    paymentMethodType = paymentMethodType,
+                )
+            PaymentMethod.Type.PayNow ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = PAYNOW_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = PAYNOW_INITIAL_DELAY_IN_SECONDS,
+                    ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
+                    stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = getQrCodeForPayNow(actionable),
+                    paymentMethodType = paymentMethodType,
+                )
+            PaymentMethod.Type.PromptPay ->
+                PollingContract.Args(
+                    clientSecret = requireNotNull(actionable.clientSecret),
+                    statusBarColor = host.statusBarColor,
+                    timeLimitInSeconds = PROMPTPAY_TIME_LIMIT_IN_SECONDS,
+                    initialDelayInSeconds = PROMPTPAY_INITIAL_DELAY_IN_SECONDS,
+                    ctaText = R.string.stripe_qrcode_lpm_confirm_payment,
+                    stripeAccountId = requestOptions.stripeAccount,
+                    qrCodeUrl = getQrCodeForPromptPay(actionable),
+                    paymentMethodType = paymentMethodType,
+                )
+            else ->
+                error(
+                    "Received invalid payment method type " +
+                        "$paymentMethodType in PollingAuthenticator"
+                )
+        }
     }
 
     private fun getQrCodeForPayNow(actionable: StripeIntent): String {

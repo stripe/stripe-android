@@ -12,7 +12,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.polling.PollingAnalyticsEventReporter
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.polling.IntentStatusPoller
 import kotlinx.coroutines.Dispatchers
@@ -89,7 +89,7 @@ internal class PollingViewModel @Inject constructor(
     private val poller: IntentStatusPoller,
     private val timeProvider: TimeProvider,
     private val savedStateHandle: SavedStateHandle,
-    private val errorReporter: ErrorReporter,
+    private val pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -133,12 +133,9 @@ internal class PollingViewModel @Inject constructor(
                 it.copy(pollingState = PollingState.Success)
             }
         } else {
-            errorReporter.report(
-                errorEvent = ErrorReporter.ExpectedErrorEvent.POLLING_TIMED_OUT,
-                additionalNonPiiParams = mapOf(
-                    "payment_method_type" to args.paymentMethodType,
-                    "last_known_status" to (intentStatus?.name ?: "unknown"),
-                ),
+            pollingAnalyticsEventReporter.onPollingTimedOut(
+                paymentMethodType = args.paymentMethodType,
+                lastKnownStatus = intentStatus?.name,
             )
             _uiState.update {
                 it.copy(pollingState = PollingState.Failed)

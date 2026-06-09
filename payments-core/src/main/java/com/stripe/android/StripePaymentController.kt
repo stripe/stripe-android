@@ -32,6 +32,7 @@ import com.stripe.android.payments.PaymentIntentFlowResultProcessor
 import com.stripe.android.payments.SetupIntentFlowResultProcessor
 import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
 import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
+import com.stripe.android.polling.DefaultPollingAnalyticsEventReporter
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
@@ -60,19 +61,25 @@ constructor(
 ) : PaymentController {
 
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
+    private val pollingAnalyticsEventReporter = DefaultPollingAnalyticsEventReporter(
+        analyticsRequestExecutor,
+        paymentAnalyticsRequestFactory,
+    )
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
         publishableKeyProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
-        workContext
+        workContext,
+        pollingAnalyticsEventReporter,
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
         publishableKeyProvider,
         stripeRepository,
         Logger.getInstance(enableLogging),
-        workContext
+        workContext,
+        pollingAnalyticsEventReporter,
     )
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)

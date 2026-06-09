@@ -5,8 +5,8 @@ import android.content.Context
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.polling.DefaultPollingAnalyticsEventReporter
+import com.stripe.android.polling.PollingAnalyticsEventReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
@@ -32,7 +32,7 @@ internal interface PollingViewModelModule {
     fun bindsTimeProvider(impl: DefaultTimeProvider): TimeProvider
 
     @Binds
-    fun bindsErrorReporter(impl: RealErrorReporter): ErrorReporter
+    fun bindsPollingAnalyticsEventReporter(impl: DefaultPollingAnalyticsEventReporter): PollingAnalyticsEventReporter
 
     @Binds
     fun bindsAnalyticsRequestFactory(impl: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory

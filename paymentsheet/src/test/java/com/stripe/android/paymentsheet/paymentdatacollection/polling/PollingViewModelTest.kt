@@ -3,11 +3,10 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.FakePollingAnalyticsEventReporter
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -204,12 +203,12 @@ class PollingViewModelTest {
         val fakePoller = FakeIntentStatusPoller().apply {
             emitNextPollResult(StripeIntent.Status.RequiresAction)
         }
-        val errorReporter = FakeErrorReporter()
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
 
         createPollingViewModel(
             poller = fakePoller,
             timeLimit = 10.seconds,
-            errorReporter = errorReporter,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
         )
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
@@ -221,11 +220,13 @@ class PollingViewModelTest {
 
         advanceTimeBy(3.seconds)
 
-        val call = errorReporter.awaitCall()
-        assertThat(call.errorEvent)
-            .isEqualTo(ErrorReporter.ExpectedErrorEvent.POLLING_TIMED_OUT)
-        assertThat(call.additionalNonPiiParams["payment_method_type"]).isEqualTo("blik")
-        assertThat(call.additionalNonPiiParams["last_known_status"]).isEqualTo("RequiresAction")
+        val call = pollingAnalyticsEventReporter.awaitCall()
+        assertThat(call).isEqualTo(
+            FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                paymentMethodType = "blik",
+                lastKnownStatus = "RequiresAction",
+            )
+        )
     }
 
     @Test
@@ -233,12 +234,12 @@ class PollingViewModelTest {
         val fakePoller = FakeIntentStatusPoller().apply {
             emitNextPollResult(StripeIntent.Status.RequiresAction)
         }
-        val errorReporter = FakeErrorReporter()
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
             timeLimit = 10.seconds,
-            errorReporter = errorReporter,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
         )
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
@@ -251,7 +252,7 @@ class PollingViewModelTest {
         advanceTimeBy(3.seconds)
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Success)
-        errorReporter.ensureAllEventsConsumed()
+        pollingAnalyticsEventReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -340,7 +341,7 @@ private fun createPollingViewModel(
     timeProvider: TimeProvider = FakeTimeProvider(),
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
     qrCodeUrl: String? = null,
-    errorReporter: FakeErrorReporter = FakeErrorReporter(),
+    pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
 ): PollingViewModel {
     return PollingViewModel(
         args = PollingViewModel.Args(
@@ -355,6 +356,6 @@ private fun createPollingViewModel(
         poller = poller,
         timeProvider = timeProvider,
         savedStateHandle = savedStateHandle,
-        errorReporter = errorReporter,
+        pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
     )
 }
