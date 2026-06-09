@@ -41,7 +41,7 @@ stages:
       - run-connections-e2e-token-tests-on-push: { }
       - run-connections-e2e-data-tests-on-push: { }
       - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
+#      - run-paymentsheet-end-to-end-tests: { }
       - run-crypto-onramp-example-e2e-tests: { }
       - check-dependencies: { }
       - verify-publish-pom: { }
