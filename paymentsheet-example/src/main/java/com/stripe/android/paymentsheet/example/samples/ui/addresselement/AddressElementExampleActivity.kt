@@ -41,69 +41,74 @@ class AddressElementExampleActivity : AppCompatActivity() {
         supportActionBar?.title = getString(R.string.address_element_title)
 
         setContent {
-            val viewModel by viewModels<AddressElementExampleViewModel>()
-            val viewState by viewModel.state.collectAsState()
+            AddressElementScreen()
+        }
+    }
+}
 
-            val addressLauncher = rememberAddressLauncher(
-                callback = viewModel::handleResult,
-            )
+@Composable
+private fun AddressElementScreen() {
+    val viewModel by viewModels<AddressElementExampleViewModel>()
+    val viewState by viewModel.state.collectAsState()
 
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        paddingValues = WindowInsets.systemBars.only(
-                            WindowInsetsSides.Horizontal + WindowInsetsSides.Top
-                        ).asPaddingValues()
-                    ),
-            ) {
-                when (val state = viewState) {
-                    is AddressElementExampleViewState.Loading -> {
-                        CircularProgressIndicator()
-                    }
-                    is AddressElementExampleViewState.Content -> {
-                        state.address?.let { address ->
-                            Address(address)
-                        }
+    val addressLauncher = rememberAddressLauncher(
+        callback = viewModel::handleResult,
+    )
 
-                        var inlineAutocompleteEnabled by remember { mutableStateOf(false) }
-
-                        val context = LocalContext.current
-                        Button(
-                            onClick = {
-                                val config = AddressLauncher.Configuration.Builder()
-                                    // Provide your Google Places API key to enable autocomplete
-                                    .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
-                                    .build()
-
-                                addressLauncher.present(
-                                    publishableKey = state.publishableKey,
-                                    configuration = config,
-                                )
-                            },
-                            modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
-                        ) {
-                            Text("Select address")
-                        }
-
-                        // Toggle takes effect on the next AE launch — the ViewModel reads the
-                        // flag once at init time, so the current session is unaffected.
-                        Button(
-                            onClick = {
-                                inlineAutocompleteEnabled = !inlineAutocompleteEnabled
-                                FeatureFlags.inlineAddressAutocomplete.setEnabled(inlineAutocompleteEnabled)
-                            },
-                            modifier = Modifier.testTag(INLINE_AUTOCOMPLETE_TOGGLE_BUTTON)
-                        ) {
-                            Text("Enables inline autocomplete: $inlineAutocompleteEnabled")
-                        }
-                    }
-                    is AddressElementExampleViewState.Error -> {
-                        Text(state.message)
-                    }
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(
+                paddingValues = WindowInsets.systemBars.only(
+                    WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                ).asPaddingValues()
+            ),
+    ) {
+        when (val state = viewState) {
+            is AddressElementExampleViewState.Loading -> {
+                CircularProgressIndicator()
+            }
+            is AddressElementExampleViewState.Content -> {
+                state.address?.let { address ->
+                    Address(address)
                 }
+
+                var inlineAutocompleteEnabled by remember { mutableStateOf(false) }
+
+                val context = LocalContext.current
+                Button(
+                    onClick = {
+                        val config = AddressLauncher.Configuration.Builder()
+                            // Provide your Google Places API key to enable autocomplete
+                            .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                            .build()
+
+                        addressLauncher.present(
+                            publishableKey = state.publishableKey,
+                            configuration = config,
+                        )
+                    },
+                    modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
+                ) {
+                    Text("Select address")
+                }
+
+                // Toggle takes effect on the next AE launch — the ViewModel reads the
+                // flag once at init time, so the current session is unaffected.
+                Button(
+                    onClick = {
+                        inlineAutocompleteEnabled = !inlineAutocompleteEnabled
+                        FeatureFlags.inlineAddressAutocomplete.setEnabled(inlineAutocompleteEnabled)
+                    },
+                    modifier = Modifier.testTag(INLINE_AUTOCOMPLETE_TOGGLE_BUTTON)
+                ) {
+                    Text("Enables inline autocomplete: $inlineAutocompleteEnabled")
+                }
+            }
+            is AddressElementExampleViewState.Error -> {
+                Text(state.message)
             }
         }
     }
