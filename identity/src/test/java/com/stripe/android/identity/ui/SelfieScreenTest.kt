@@ -98,15 +98,15 @@ class SelfieScreenTest {
     fun verifyNullScanningState() {
         testSelfieScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(),
-            messageId = R.string.stripe_position_selfie
+            messageId = R.string.stripe_selfie_place_face
         ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_place_face))
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_hold_still_selfie))
+            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_place_face))
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
@@ -118,15 +118,15 @@ class SelfieScreenTest {
     fun verifyInitialScanningState() {
         testSelfieScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Initial>()),
-            messageId = R.string.stripe_position_selfie
+            messageId = R.string.stripe_selfie_place_face
         ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
-            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
+            onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_place_face))
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_hold_still_selfie))
+            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_place_face))
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()
@@ -161,18 +161,18 @@ class SelfieScreenTest {
     fun verifySatisfiedScanningState() {
         testSelfieScanScreen(
             scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Satisfied>()),
-            messageId = R.string.stripe_selfie_capture_complete
+            messageId = R.string.stripe_captured_front_selfie
         ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
 
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG)
-                .assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
+                .assertTextEquals(context.getString(R.string.stripe_captured_front_selfie))
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_TAG).assertExists()
             onNodeWithTag(SELFIE_CAPTURE_GUIDE_SHADOW_TAG).assertDoesNotExist()
-            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_hold_still_selfie))
+            onNodeWithTag(SELFIE_SCAN_STATUS_TAG).assertTextEquals(context.getString(R.string.stripe_captured_front_selfie))
             onNodeWithTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG).assertDoesNotExist()
             onNodeWithTag(RESULT_VIEW_TAG).assertDoesNotExist()
             onNodeWithTag(RETAKE_SELFIE_BUTTON_TAG).assertDoesNotExist()

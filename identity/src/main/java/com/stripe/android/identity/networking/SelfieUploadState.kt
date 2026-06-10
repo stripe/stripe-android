@@ -15,7 +15,11 @@ internal data class SelfieUploadState(
     val lastHighResResult: Resource<UploadedResult> = Resource.idle(),
     val lastLowResResult: Resource<UploadedResult> = Resource.idle(),
     val bestHighResResult: Resource<UploadedResult> = Resource.idle(),
-    val bestLowResResult: Resource<UploadedResult> = Resource.idle()
+    val bestLowResResult: Resource<UploadedResult> = Resource.idle(),
+    val leftHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val leftLowResResult: Resource<UploadedResult> = Resource.idle(),
+    val rightHighResResult: Resource<UploadedResult> = Resource.idle(),
+    val rightLowResResult: Resource<UploadedResult> = Resource.idle()
 ) : Parcelable {
 
     @IgnoredOnParcel
@@ -25,7 +29,11 @@ internal data class SelfieUploadState(
         lastHighResResult,
         lastLowResResult,
         bestHighResResult,
-        bestLowResResult
+        bestLowResResult,
+        leftHighResResult,
+        leftLowResResult,
+        rightHighResResult,
+        rightLowResResult
     )
 
     fun update(
@@ -49,6 +57,16 @@ internal data class SelfieUploadState(
                     bestHighResResult = Resource.success(newResult)
                 )
             }
+            FaceDetectorTransitioner.Selfie.LEFT -> {
+                this.copy(
+                    leftHighResResult = Resource.success(newResult)
+                )
+            }
+            FaceDetectorTransitioner.Selfie.RIGHT -> {
+                this.copy(
+                    rightHighResResult = Resource.success(newResult)
+                )
+            }
         }
     } else {
         when (selfie) {
@@ -65,6 +83,16 @@ internal data class SelfieUploadState(
             FaceDetectorTransitioner.Selfie.BEST -> {
                 this.copy(
                     bestLowResResult = Resource.success(newResult)
+                )
+            }
+            FaceDetectorTransitioner.Selfie.LEFT -> {
+                this.copy(
+                    leftLowResResult = Resource.success(newResult)
+                )
+            }
+            FaceDetectorTransitioner.Selfie.RIGHT -> {
+                this.copy(
+                    rightLowResResult = Resource.success(newResult)
                 )
             }
         }
@@ -92,6 +120,16 @@ internal data class SelfieUploadState(
                     bestHighResResult = Resource.error(msg = message, throwable = throwable)
                 )
             }
+            FaceDetectorTransitioner.Selfie.LEFT -> {
+                this.copy(
+                    leftHighResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            }
+            FaceDetectorTransitioner.Selfie.RIGHT -> {
+                this.copy(
+                    rightHighResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            }
         }
     } else {
         when (selfie) {
@@ -108,6 +146,16 @@ internal data class SelfieUploadState(
             FaceDetectorTransitioner.Selfie.BEST -> {
                 this.copy(
                     bestLowResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            }
+            FaceDetectorTransitioner.Selfie.LEFT -> {
+                this.copy(
+                    leftLowResResult = Resource.error(msg = message, throwable = throwable)
+                )
+            }
+            FaceDetectorTransitioner.Selfie.RIGHT -> {
+                this.copy(
+                    rightLowResResult = Resource.error(msg = message, throwable = throwable)
                 )
             }
         }
@@ -147,6 +195,28 @@ internal data class SelfieUploadState(
             } else {
                 this.copy(
                     lastLowResResult = Resource.loading()
+                )
+            }
+        }
+        FaceDetectorTransitioner.Selfie.LEFT -> {
+            if (isHighRes) {
+                this.copy(
+                    leftHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    leftLowResResult = Resource.loading()
+                )
+            }
+        }
+        FaceDetectorTransitioner.Selfie.RIGHT -> {
+            if (isHighRes) {
+                this.copy(
+                    rightHighResResult = Resource.loading()
+                )
+            } else {
+                this.copy(
+                    rightLowResResult = Resource.loading()
                 )
             }
         }

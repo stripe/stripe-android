@@ -616,8 +616,8 @@ internal class IdentityViewModel(
         result: IdentityAggregator.FinalResult,
         verificationPage: VerificationPage
     ) {
-        val filteredFrames =
-            (result.identityState.transitioner as FaceDetectorTransitioner).filteredFrames
+        val transitioner = result.identityState.transitioner as FaceDetectorTransitioner
+        val filteredFrames = transitioner.filteredFrames
         require(filteredFrames.size == FaceDetectorTransitioner.NUM_FILTERED_FRAMES) {
             "FaceDetectorTransitioner incorrectly collected ${filteredFrames.size} frames " +
                 "instead of ${FaceDetectorTransitioner.NUM_FILTERED_FRAMES} frames"
@@ -637,13 +637,16 @@ internal class IdentityViewModel(
         listOf(
             (FaceDetectorTransitioner.Selfie.FIRST),
             (FaceDetectorTransitioner.Selfie.BEST),
-            (FaceDetectorTransitioner.Selfie.LAST)
+            (FaceDetectorTransitioner.Selfie.LAST),
+            (FaceDetectorTransitioner.Selfie.LEFT),
+            (FaceDetectorTransitioner.Selfie.RIGHT)
         ).forEach { selfie ->
+            val selfieFrame = transitioner.frameForSelfie(selfie)
             listOf(true, false).forEach { isHighRes ->
                 runCatching {
                     processSelfieScanResultAndUpload(
-                        originalBitmap = filteredFrames[selfie.index].first.cameraPreviewImage.image,
-                        boundingBox = filteredFrames[selfie.index].second.boundingBox,
+                        originalBitmap = selfieFrame.first.cameraPreviewImage.image,
+                        boundingBox = selfieFrame.second.boundingBox,
                         selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
                         isHighRes = isHighRes,
                         selfie = selfie
@@ -1980,7 +1983,11 @@ internal class IdentityViewModel(
                                 bestExposureIso = selfieBestExposureIso,
                                 bestFocalLength = selfieBestFocalLength,
                                 bestExposureDuration = selfieBestExposureDuration,
-                                bestIsVirtualCamera = selfieBestIsVirtualCamera
+                                bestIsVirtualCamera = selfieBestIsVirtualCamera,
+                                leftHighResResult = it.leftHighResResult.data,
+                                leftLowResResult = it.leftLowResResult.data,
+                                rightHighResResult = it.rightHighResResult.data,
+                                rightLowResResult = it.rightLowResResult.data,
                             ),
                             fromRoute = SelfieDestination.ROUTE.route
                         ) {

@@ -29,6 +29,12 @@
   <string name="stripe_camera_permission_rationale">This app uses the camera to scan your identification documents and takes photos to verify your identity.</string>
   <!-- Instructional text during selfie is being captured -->
   <string name="stripe_capturing">Capturing…</string>
+  <!-- Status text displayed when the front selfie has been captured -->
+  <string name="stripe_captured_front_selfie">Captured front</string>
+  <!-- Status text displayed when the left side selfie has been captured -->
+  <string name="stripe_captured_left_selfie">Captured left side</string>
+  <!-- Status text displayed when the right side selfie has been captured -->
+  <string name="stripe_captured_right_selfie">Captured right side</string>
   <!-- Description of the check mark, used for A11Y -->
   <string name="stripe_check_mark">Check mark to indicate document capture success</string>
   <!-- Text for choosing a photo from gallery -->
@@ -225,13 +231,19 @@
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Selfie captures are complete</string>
   <!-- Status text displayed over the blurred selfie while checking uploaded selfie images -->
-  <string name="stripe_selfie_checking_images">Great! Checking your images....</string>
+  <string name="stripe_selfie_checking_images">Great! Checking your scan...</string>
   <!-- Title of selfie capture screen -->
   <string name="stripe_selfie_captures">Selfie captures</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">one selfie captured</string>
+  <!-- Status text instructing the user to turn left for selfie capture -->
+  <string name="stripe_selfie_look_left">Look left</string>
+  <!-- Status text instructing the user to turn right for selfie capture -->
+  <string name="stripe_selfie_look_right">Look right</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
+  <!-- Status text instructing the user to place their face inside the selfie guide -->
+  <string name="stripe_selfie_place_face">Place your face within the frame</string>
   <!-- Title for the optional training consent section on the selfie warmup page -->
   <string name="stripe_selfie_training_consent_title">Help us improve verifications</string>
   <!-- Body for selfie warmup page -->

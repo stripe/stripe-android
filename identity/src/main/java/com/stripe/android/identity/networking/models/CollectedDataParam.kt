@@ -161,6 +161,10 @@ internal data class CollectedDataParam(
             bestFocalLength: Float? = null,
             bestExposureDuration: Long? = null,
             bestIsVirtualCamera: Boolean? = null,
+            leftHighResResult: UploadedResult? = null,
+            leftLowResResult: UploadedResult? = null,
+            rightHighResResult: UploadedResult? = null,
+            rightLowResResult: UploadedResult? = null,
         ) = CollectedDataParam(
             face = FaceUploadParam(
                 bestHighResImage = requireNotNull(bestHighResResult.uploadedStripeFile.id),
@@ -178,6 +182,10 @@ internal data class CollectedDataParam(
                 bestIsVirtualCamera = bestIsVirtualCamera,
                 bestExposureIso = bestExposureIso,
                 trainingConsent = trainingConsent,
+                leftHighResImage = leftHighResResult?.uploadedStripeFile?.id,
+                leftLowResImage = leftLowResResult?.uploadedStripeFile?.id,
+                rightHighResImage = rightHighResResult?.uploadedStripeFile?.id,
+                rightLowResImage = rightLowResResult?.uploadedStripeFile?.id,
             )
         )
 

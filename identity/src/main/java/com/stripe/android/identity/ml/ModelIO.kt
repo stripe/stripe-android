@@ -49,5 +49,18 @@ internal data class IDDetectorOutput(
  */
 internal data class FaceDetectorOutput(
     val boundingBox: BoundingBox,
-    val resultScore: Float
+    val resultScore: Float,
+    val pose: FacePose? = null
 ) : AnalyzerOutput
+
+/**
+ * Optional pose metadata for a detected face.
+ *
+ * The current TFLite face detector does not produce pose. MediaPipe face-landmarker output can
+ * populate this later, and the selfie capture state machine will use it to validate side captures.
+ */
+internal data class FacePose(
+    val yaw: Float,
+    val pitch: Float,
+    val roll: Float
+)

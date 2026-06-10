@@ -11,6 +11,7 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
+import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,11 +44,11 @@ internal class SelfieScanViewModel(
                 when (it.scanState) {
                     is IdentityScanState.Finished -> R.string.stripe_selfie_capture_complete
                     is IdentityScanState.Found -> R.string.stripe_capturing
-                    is IdentityScanState.Initial -> R.string.stripe_position_selfie
-                    is IdentityScanState.Satisfied -> R.string.stripe_selfie_capture_complete
+                    is IdentityScanState.Initial -> it.scanState.selfieInstruction()
+                    is IdentityScanState.Satisfied -> it.scanState.selfieCapturedMessage()
                     is IdentityScanState.TimeOut -> null
                     is IdentityScanState.Unsatisfied -> null
-                    null -> R.string.stripe_selfie_capture_complete
+                    null -> R.string.stripe_selfie_place_face
                 }
             }
             is State.Scanned -> R.string.stripe_selfie_capture_complete
@@ -57,8 +58,26 @@ internal class SelfieScanViewModel(
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.Lazily,
-            initialValue = R.string.stripe_position_selfie
+            initialValue = R.string.stripe_selfie_place_face
         )
+
+    private fun IdentityScanState.Initial.selfieInstruction(): Int {
+        return when ((transitioner as? FaceDetectorTransitioner)?.activeCapture) {
+            FaceDetectorTransitioner.Capture.LEFT -> R.string.stripe_selfie_look_left
+            FaceDetectorTransitioner.Capture.RIGHT -> R.string.stripe_selfie_look_right
+            FaceDetectorTransitioner.Capture.FRONT,
+            null -> R.string.stripe_selfie_place_face
+        }
+    }
+
+    private fun IdentityScanState.Satisfied.selfieCapturedMessage(): Int {
+        return when ((transitioner as? FaceDetectorTransitioner)?.completedCapture) {
+            FaceDetectorTransitioner.Capture.LEFT -> R.string.stripe_captured_left_selfie
+            FaceDetectorTransitioner.Capture.RIGHT -> R.string.stripe_captured_right_selfie
+            FaceDetectorTransitioner.Capture.FRONT,
+            null -> R.string.stripe_captured_front_selfie
+        }
+    }
 
     internal class SelfieScanViewModelFactory @Inject constructor(
         private val verificationFlowFinishable: VerificationFlowFinishable,

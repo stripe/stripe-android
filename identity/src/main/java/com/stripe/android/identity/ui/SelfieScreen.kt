@@ -116,6 +116,7 @@ private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.22f
 private const val CAPTURE_GUIDE_SHADOW_RING_ALPHA = 0.3f
 private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.36f
 private const val CAPTURE_GUIDE_TICK_ALPHA = 0.8f
+private const val CAPTURE_GUIDE_ACTIVE_TICK_COLOR = 0xFF2DD36F
 private const val CAPTURE_GUIDE_TICK_SHADOW_ALPHA = 0.3f
 private const val CAPTURED_SELFIE_OVERLAY_ALPHA = 0.16f
 private const val STATUS_PILL_TEXT_SHADOW_ALPHA = 0.35f
@@ -267,6 +268,7 @@ private fun SelfieCaptureScreen(
                 maxLines = 3
             )
 
+            val scanState = (selfieScannerState as? IdentityScanViewModel.State.Scanning)?.scanState
             val isCheckingImages = faceDetectorTransitioner != null
             SelfieCameraViewFinder(
                 cameraManager = cameraManager,
@@ -274,6 +276,7 @@ private fun SelfieCaptureScreen(
                 status = selfieScannerState.status(),
                 showCaptureGuideShadow = (selfieScannerState as? IdentityScanViewModel.State.Scanning)
                     ?.scanState is IdentityScanState.Found,
+                captureGuideTone = scanState.captureGuideTone(),
                 showCaptureGuide = !isCheckingImages,
                 capturedSelfie = faceDetectorTransitioner?.lastCapturedSelfie()
             )
@@ -305,6 +308,7 @@ private fun SelfieCameraViewFinder(
     identityViewModel: IdentityViewModel,
     status: SelfieStatus?,
     showCaptureGuideShadow: Boolean,
+    captureGuideTone: CaptureGuideTone,
     showCaptureGuide: Boolean,
     capturedSelfie: Bitmap?
 ) {
@@ -333,7 +337,7 @@ private fun SelfieCameraViewFinder(
             cameraManager = cameraManager
         )
         if (showCaptureGuide) {
-            CaptureGuide(showCaptureGuideShadow)
+            CaptureGuide(showCaptureGuideShadow, captureGuideTone)
             if (showCaptureGuideShadow) {
                 Box(
                     modifier = Modifier
@@ -344,10 +348,16 @@ private fun SelfieCameraViewFinder(
         }
         status?.let {
             val statusModifier = when (it) {
-                SelfieStatus.HoldStill ->
+                SelfieStatus.PlaceFace,
+                SelfieStatus.HoldStill,
+                SelfieStatus.CapturedFront,
+                SelfieStatus.CapturedLeft,
+                SelfieStatus.CapturedRight ->
                     Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 40.dp)
+                SelfieStatus.LookLeft,
+                SelfieStatus.LookRight,
                 SelfieStatus.CheckingImages ->
                     Modifier
                         .align(Alignment.Center)
@@ -414,8 +424,32 @@ private enum class SelfieStatus(
     @param:StringRes val labelRes: Int,
     val showsActivityIndicator: Boolean
 ) {
+    PlaceFace(
+        labelRes = R.string.stripe_selfie_place_face,
+        showsActivityIndicator = false
+    ),
+    LookLeft(
+        labelRes = R.string.stripe_selfie_look_left,
+        showsActivityIndicator = false
+    ),
+    LookRight(
+        labelRes = R.string.stripe_selfie_look_right,
+        showsActivityIndicator = false
+    ),
     HoldStill(
         labelRes = R.string.stripe_hold_still_selfie,
+        showsActivityIndicator = false
+    ),
+    CapturedFront(
+        labelRes = R.string.stripe_captured_front_selfie,
+        showsActivityIndicator = false
+    ),
+    CapturedLeft(
+        labelRes = R.string.stripe_captured_left_selfie,
+        showsActivityIndicator = false
+    ),
+    CapturedRight(
+        labelRes = R.string.stripe_captured_right_selfie,
         showsActivityIndicator = false
     ),
     CheckingImages(
@@ -426,9 +460,45 @@ private enum class SelfieStatus(
 
 private fun IdentityScanViewModel.State.status(): SelfieStatus? {
     return when (this) {
-        is IdentityScanViewModel.State.Scanning -> SelfieStatus.HoldStill
+        is IdentityScanViewModel.State.Scanning -> scanState.status()
         is IdentityScanViewModel.State.Scanned -> SelfieStatus.CheckingImages
         else -> null
+    }
+}
+
+private fun IdentityScanState?.status(): SelfieStatus? {
+    val transitioner = this?.transitioner as? FaceDetectorTransitioner
+    return when (this) {
+        null -> SelfieStatus.PlaceFace
+        is IdentityScanState.Initial -> when (transitioner?.activeCapture) {
+            FaceDetectorTransitioner.Capture.LEFT -> SelfieStatus.LookLeft
+            FaceDetectorTransitioner.Capture.RIGHT -> SelfieStatus.LookRight
+            FaceDetectorTransitioner.Capture.FRONT,
+            null -> SelfieStatus.PlaceFace
+        }
+        is IdentityScanState.Found -> SelfieStatus.HoldStill
+        is IdentityScanState.Satisfied -> when (transitioner?.completedCapture) {
+            FaceDetectorTransitioner.Capture.LEFT -> SelfieStatus.CapturedLeft
+            FaceDetectorTransitioner.Capture.RIGHT -> SelfieStatus.CapturedRight
+            FaceDetectorTransitioner.Capture.FRONT,
+            null -> SelfieStatus.CapturedFront
+        }
+        is IdentityScanState.Finished -> SelfieStatus.CapturedRight
+        is IdentityScanState.TimeOut,
+        is IdentityScanState.Unsatisfied -> null
+    }
+}
+
+private enum class CaptureGuideTone {
+    Default,
+    Active
+}
+
+private fun IdentityScanState?.captureGuideTone(): CaptureGuideTone {
+    return when (this) {
+        is IdentityScanState.Found,
+        is IdentityScanState.Satisfied -> CaptureGuideTone.Active
+        else -> CaptureGuideTone.Default
     }
 }
 
@@ -594,7 +664,10 @@ private fun SelfieStatusBadge(
 }
 
 @Composable
-private fun CaptureGuide(showCenteredShadow: Boolean) {
+private fun CaptureGuide(
+    showCenteredShadow: Boolean,
+    captureGuideTone: CaptureGuideTone
+) {
     val centeredShadowAlpha = remember { Animatable(0f) }
 
     LaunchedEffect(showCenteredShadow) {
@@ -626,7 +699,7 @@ private fun CaptureGuide(showCenteredShadow: Boolean) {
             )
         }
 
-        drawCaptureGuideTicks(geometry)
+        drawCaptureGuideTicks(geometry, captureGuideTone)
     }
 }
 
@@ -647,7 +720,10 @@ private fun DrawScope.captureGuideGeometry(): CaptureGuideGeometry {
     )
 }
 
-private fun DrawScope.drawCaptureGuideTicks(geometry: CaptureGuideGeometry) {
+private fun DrawScope.drawCaptureGuideTicks(
+    geometry: CaptureGuideGeometry,
+    captureGuideTone: CaptureGuideTone
+) {
     with(geometry) {
         val tickLength = 10.dp.toPx()
         val strokeWidth = 2.dp.toPx()
@@ -655,7 +731,10 @@ private fun DrawScope.drawCaptureGuideTicks(geometry: CaptureGuideGeometry) {
         val shadowBlur = 4.dp.toPx()
         drawIntoCanvas { canvas ->
             val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.White.copy(alpha = CAPTURE_GUIDE_TICK_ALPHA).toArgb()
+                color = when (captureGuideTone) {
+                    CaptureGuideTone.Default -> Color.White.copy(alpha = CAPTURE_GUIDE_TICK_ALPHA)
+                    CaptureGuideTone.Active -> Color(CAPTURE_GUIDE_ACTIVE_TICK_COLOR)
+                }.toArgb()
                 style = Paint.Style.STROKE
                 strokeCap = Paint.Cap.BUTT
                 this.strokeWidth = strokeWidth

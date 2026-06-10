@@ -226,20 +226,22 @@ internal class IdentityViewModelTest {
         listOf(
             (FaceDetectorTransitioner.Selfie.FIRST),
             (FaceDetectorTransitioner.Selfie.BEST),
-            (FaceDetectorTransitioner.Selfie.LAST)
+            (FaceDetectorTransitioner.Selfie.LAST),
+            (FaceDetectorTransitioner.Selfie.LEFT),
+            (FaceDetectorTransitioner.Selfie.RIGHT)
         ).forEach { selfie ->
-            verify(mockIdentityAnalyticsRequestFactory, times(6)).imageUpload(
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull(),
-                anyOrNull()
-            )
             listOf(true, false).forEach { isHighRes ->
                 testUploadSelfieScanSuccessResult(selfie, isHighRes)
             }
         }
+        verify(mockIdentityAnalyticsRequestFactory, times(10)).imageUpload(
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull(),
+            anyOrNull()
+        )
     }
 
     @Test
@@ -264,7 +266,11 @@ internal class IdentityViewModelTest {
             (viewModel.selfieUploadState.value.bestHighResResult),
             (viewModel.selfieUploadState.value.bestLowResResult),
             (viewModel.selfieUploadState.value.lastHighResResult),
-            (viewModel.selfieUploadState.value.lastLowResResult)
+            (viewModel.selfieUploadState.value.lastLowResResult),
+            (viewModel.selfieUploadState.value.leftHighResResult),
+            (viewModel.selfieUploadState.value.leftLowResResult),
+            (viewModel.selfieUploadState.value.rightHighResResult),
+            (viewModel.selfieUploadState.value.rightLowResResult)
         ).forEach { uploadedResult ->
             assertThat(uploadedResult).isEqualTo(
                 Resource.error<UploadedResult>(
@@ -1091,10 +1097,11 @@ internal class IdentityViewModelTest {
         selfie: FaceDetectorTransitioner.Selfie,
         isHighRes: Boolean
     ) {
+        val selfieFrame = SELFIE_FRAME_BY_VARIANT.getValue(selfie)
         if (isHighRes) { // high res
             verify(mockIdentityIO).cropAndPadBitmap(
-                same(FILTERED_FRAMES[selfie.index].first.cameraPreviewImage.image),
-                same(FILTERED_FRAMES[selfie.index].second.boundingBox),
+                same(selfieFrame.first.cameraPreviewImage.image),
+                same(selfieFrame.second.boundingBox),
                 any()
             )
 
@@ -1106,6 +1113,8 @@ internal class IdentityViewModelTest {
                         FaceDetectorTransitioner.Selfie.FIRST -> "${VERIFICATION_SESSION_ID}_face_first_crop_frame.jpeg"
                         FaceDetectorTransitioner.Selfie.BEST -> "${VERIFICATION_SESSION_ID}_face.jpeg"
                         FaceDetectorTransitioner.Selfie.LAST -> "${VERIFICATION_SESSION_ID}_face_last_crop_frame.jpeg"
+                        FaceDetectorTransitioner.Selfie.LEFT -> "${VERIFICATION_SESSION_ID}_face_left_crop_frame.jpeg"
+                        FaceDetectorTransitioner.Selfie.RIGHT -> "${VERIFICATION_SESSION_ID}_face_right_crop_frame.jpeg"
                     }
                 ),
                 eq(HIGH_RES_IMAGE_MAX_DIMENSION),
@@ -1116,6 +1125,8 @@ internal class IdentityViewModelTest {
                     FaceDetectorTransitioner.Selfie.FIRST -> viewModel.selfieUploadState.value.firstHighResResult
                     FaceDetectorTransitioner.Selfie.BEST -> viewModel.selfieUploadState.value.bestHighResResult
                     FaceDetectorTransitioner.Selfie.LAST -> viewModel.selfieUploadState.value.lastHighResResult
+                    FaceDetectorTransitioner.Selfie.LEFT -> viewModel.selfieUploadState.value.leftHighResResult
+                    FaceDetectorTransitioner.Selfie.RIGHT -> viewModel.selfieUploadState.value.rightHighResResult
                 }
             ).isEqualTo(
                 Resource.success(
@@ -1126,13 +1137,15 @@ internal class IdentityViewModelTest {
             )
         } else { // low res
             verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(
-                same(FILTERED_FRAMES[selfie.index].first.cameraPreviewImage.image),
+                same(selfieFrame.first.cameraPreviewImage.image),
                 eq(VERIFICATION_SESSION_ID),
                 eq(
                     when (selfie) {
                         FaceDetectorTransitioner.Selfie.FIRST -> "${VERIFICATION_SESSION_ID}_face_first_full_frame.jpeg"
                         FaceDetectorTransitioner.Selfie.BEST -> "${VERIFICATION_SESSION_ID}_face_full_frame.jpeg"
                         FaceDetectorTransitioner.Selfie.LAST -> "${VERIFICATION_SESSION_ID}_face_last_full_frame.jpeg"
+                        FaceDetectorTransitioner.Selfie.LEFT -> "${VERIFICATION_SESSION_ID}_face_left_full_frame.jpeg"
+                        FaceDetectorTransitioner.Selfie.RIGHT -> "${VERIFICATION_SESSION_ID}_face_right_full_frame.jpeg"
                     }
                 ),
                 eq(LOW_RES_IMAGE_MAX_DIMENSION),
@@ -1143,6 +1156,8 @@ internal class IdentityViewModelTest {
                     FaceDetectorTransitioner.Selfie.FIRST -> viewModel.selfieUploadState.value.firstLowResResult
                     FaceDetectorTransitioner.Selfie.BEST -> viewModel.selfieUploadState.value.bestLowResResult
                     FaceDetectorTransitioner.Selfie.LAST -> viewModel.selfieUploadState.value.lastLowResResult
+                    FaceDetectorTransitioner.Selfie.LEFT -> viewModel.selfieUploadState.value.leftLowResResult
+                    FaceDetectorTransitioner.Selfie.RIGHT -> viewModel.selfieUploadState.value.rightLowResResult
                 }
             ).isEqualTo(
                 Resource.success(
@@ -1353,6 +1368,35 @@ internal class IdentityViewModelTest {
                 resultScore = 0.82f
             ) // last
         )
+        val LEFT_SELFIE_FRAME =
+            AnalyzerInput(
+                cameraPreviewImage = CameraPreviewImage(
+                    image = mock(),
+                    viewBounds = mock()
+                ),
+                viewFinderBounds = mock()
+            ) to FaceDetectorOutput(
+                boundingBox = mock(),
+                resultScore = 0.83f
+            )
+        val RIGHT_SELFIE_FRAME =
+            AnalyzerInput(
+                cameraPreviewImage = CameraPreviewImage(
+                    image = mock(),
+                    viewBounds = mock()
+                ),
+                viewFinderBounds = mock()
+            ) to FaceDetectorOutput(
+                boundingBox = mock(),
+                resultScore = 0.84f
+            )
+        val SELFIE_FRAME_BY_VARIANT = mapOf(
+            FaceDetectorTransitioner.Selfie.FIRST to FILTERED_FRAMES[FaceDetectorTransitioner.INDEX_FIRST],
+            FaceDetectorTransitioner.Selfie.BEST to FILTERED_FRAMES[FaceDetectorTransitioner.INDEX_BEST],
+            FaceDetectorTransitioner.Selfie.LAST to FILTERED_FRAMES[FaceDetectorTransitioner.INDEX_LAST],
+            FaceDetectorTransitioner.Selfie.LEFT to LEFT_SELFIE_FRAME,
+            FaceDetectorTransitioner.Selfie.RIGHT to RIGHT_SELFIE_FRAME
+        )
         val FINAL_FACE_DETECTOR_RESULT = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(
@@ -1369,6 +1413,9 @@ internal class IdentityViewModelTest {
                 type = IdentityScanState.ScanType.SELFIE,
                 transitioner = mock<FaceDetectorTransitioner> {
                     on { filteredFrames }.thenReturn(FILTERED_FRAMES)
+                    SELFIE_FRAME_BY_VARIANT.forEach { (selfie, frame) ->
+                        on { frameForSelfie(selfie) }.thenReturn(frame)
+                    }
                 }
             )
         )

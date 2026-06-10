@@ -61,9 +61,22 @@ internal class FaceDetectorTransitioner(
     )
 
     @VisibleForTesting
+    internal var activeCapture = Capture.FRONT
+        private set
+
+    @VisibleForTesting
+    internal var completedCapture: Capture? = null
+        private set
+
+    private var captureStarted = false
+
+    @VisibleForTesting
     fun resetAndReturn(): FaceDetectorTransitioner {
         timeoutAt = TimeSource.Monotonic.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
         motionBlurDetector.reset()
+        activeCapture = Capture.FRONT
+        completedCapture = null
+        captureStarted = false
         return this
     }
 
@@ -71,11 +84,12 @@ internal class FaceDetectorTransitioner(
         val input: AnalyzerInput,
         val output: FaceDetectorOutput,
         val bestFrameScore: Float,
+        val capture: Capture = Capture.FRONT,
     )
 
     internal val filteredFrames: List<Pair<AnalyzerInput, FaceDetectorOutput>>
         get() {
-            val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[SELFIES]) {
+            val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[Capture.FRONT.frameIdentifier]) {
                 "No frames saved"
             }
             require(savedFrames.size >= NUM_FILTERED_FRAMES) {
@@ -104,9 +118,35 @@ internal class FaceDetectorTransitioner(
             return filteredFrames[INDEX_BEST].second.resultScore
         }
 
+    internal fun frameForSelfie(selfie: Selfie): Pair<AnalyzerInput, FaceDetectorOutput> {
+        return when (selfie) {
+            Selfie.FIRST,
+            Selfie.BEST,
+            Selfie.LAST -> filteredFrames[selfie.index]
+            Selfie.LEFT,
+            Selfie.RIGHT -> sideFrame(selfie.capture)
+        }
+    }
+
+    private fun sideFrame(capture: Capture): Pair<AnalyzerInput, FaceDetectorOutput> {
+        require(capture == Capture.LEFT || capture == Capture.RIGHT) {
+            "Expected a side capture, got $capture"
+        }
+        val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[capture.frameIdentifier]) {
+            "No frames saved for $capture"
+        }
+        require(savedFrames.isNotEmpty()) {
+            "No frames saved for $capture"
+        }
+        val bestFrame = requireNotNull(savedFrames.maxByOrNull { it.bestFrameScore }) {
+            "Couldn't find best frame for $capture"
+        }
+        return bestFrame.input to bestFrame.output
+    }
+
     internal val scoreVariance: Float
         get() {
-            val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[SELFIES]) {
+            val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[Capture.FRONT.frameIdentifier]) {
                 "No frames saved"
             }
             require(savedFrames.size == numFrames) {
@@ -133,9 +173,12 @@ internal class FaceDetectorTransitioner(
         override fun getSaveFrameIdentifier(
             frame: SelfieFrame,
             metaData: FaceDetectorOutput
-        ) = SELFIES
+        ) = frame.capture.frameIdentifier
 
-        fun selfieCollected(): Int = getSavedFrames()[SELFIES]?.size ?: 0
+        fun selfieCollected(): Int = framesCollected(Capture.FRONT)
+
+        fun framesCollected(capture: Capture): Int =
+            getSavedFrames()[capture.frameIdentifier]?.size ?: 0
     }
 
     override suspend fun transitionFromInitial(
@@ -146,7 +189,10 @@ internal class FaceDetectorTransitioner(
         require(analyzerOutput is FaceDetectorOutput) {
             "Unexpected output type: $analyzerOutput"
         }
-        selfieFrameSaver.reset()
+        if (!captureStarted) {
+            selfieFrameSaver.reset()
+            captureStarted = true
+        }
 
         val nowTimestampMs = SystemClock.elapsedRealtime()
         val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
@@ -157,17 +203,19 @@ internal class FaceDetectorTransitioner(
                 IdentityScanState.TimeOut(initialState.type, this)
             }
 
-            isFaceValid(analyzerOutput, motionBlurResult) -> {
+            isFrameValidForActiveCapture(analyzerOutput, motionBlurResult) -> {
                 Log.d(TAG, "Valid face found, transition to Found")
-                selfieFrameSaver.saveFrame(
-                    SelfieFrame(
-                        input = analyzerInput,
-                        output = analyzerOutput,
-                        bestFrameScore = calculateBestFrameScore(analyzerOutput, motionBlurResult),
-                    ),
-                    analyzerOutput
+                saveFrame(
+                    analyzerInput = analyzerInput,
+                    analyzerOutput = analyzerOutput,
+                    motionBlurResult = motionBlurResult
                 )
-                Found(initialState.type, this)
+                if (isActiveCaptureCollected()) {
+                    completedCapture = activeCapture
+                    Satisfied(initialState.type, this)
+                } else {
+                    Found(initialState.type, this)
+                }
             }
 
             else -> {
@@ -203,27 +251,25 @@ internal class FaceDetectorTransitioner(
                 foundState
             }
 
-            isFaceValid(analyzerOutput, motionBlurResult) -> {
-                selfieFrameSaver.saveFrame(
-                    SelfieFrame(
-                        input = analyzerInput,
-                        output = analyzerOutput,
-                        bestFrameScore = calculateBestFrameScore(analyzerOutput, motionBlurResult),
-                    ),
-                    analyzerOutput
+            isFrameValidForActiveCapture(analyzerOutput, motionBlurResult) -> {
+                saveFrame(
+                    analyzerInput = analyzerInput,
+                    analyzerOutput = analyzerOutput,
+                    motionBlurResult = motionBlurResult
                 )
-                if (selfieFrameSaver.selfieCollected() >= selfieCapturePage.numSamples) {
+                if (isActiveCaptureCollected()) {
+                    completedCapture = activeCapture
                     Log.d(
                         TAG,
-                        "A valid selfie captured, enough selfie " +
-                            "collected(${selfieCapturePage.numSamples}), transitions to Satisfied"
+                        "A valid selfie captured for $activeCapture, transitions to Satisfied"
                     )
                     Satisfied(foundState.type, this)
                 } else {
                     Log.d(
                         TAG,
-                        "A valid selfie captured, need ${selfieCapturePage.numSamples} selfies" +
-                            " but has ${selfieFrameSaver.selfieCollected()}, stays in Found"
+                        "A valid selfie captured for $activeCapture, need " +
+                            "${requiredFramesForActiveCapture()} frames but has " +
+                            "${activeCaptureCollected()}, stays in Found"
                     )
                     Found(foundState.type, this)
                 }
@@ -260,7 +306,17 @@ internal class FaceDetectorTransitioner(
         analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
-        return Finished(satisfiedState.type, this)
+        val nextCapture = activeCapture.next()
+        return if (nextCapture == null) {
+            Finished(satisfiedState.type, this)
+        } else {
+            activeCapture = nextCapture
+            completedCapture = null
+            Initial(
+                type = satisfiedState.type,
+                transitioner = this
+            )
+        }
     }
 
     override suspend fun transitionFromUnsatisfied(
@@ -293,6 +349,58 @@ internal class FaceDetectorTransitioner(
             isFaceScoreOverThreshold(analyzerOutput.resultScore) &&
             // Match iOS: treat frames as invalid only when motion blur is explicitly detected.
             motionBlurResult?.hasMotionBlur != true
+
+    private fun isFrameValidForActiveCapture(
+        analyzerOutput: FaceDetectorOutput,
+        motionBlurResult: MotionBlurDetector.Output?,
+    ): Boolean {
+        return isFaceValid(analyzerOutput, motionBlurResult) &&
+            isPoseValidForActiveCapture(analyzerOutput)
+    }
+
+    private fun isPoseValidForActiveCapture(analyzerOutput: FaceDetectorOutput): Boolean {
+        val pose = analyzerOutput.pose ?: return true
+        return when (activeCapture) {
+            Capture.FRONT -> true
+            Capture.LEFT -> pose.yaw < -SIDE_CAPTURE_YAW_THRESHOLD
+            Capture.RIGHT -> pose.yaw > SIDE_CAPTURE_YAW_THRESHOLD
+        }
+    }
+
+    private suspend fun saveFrame(
+        analyzerInput: AnalyzerInput,
+        analyzerOutput: FaceDetectorOutput,
+        motionBlurResult: MotionBlurDetector.Output?,
+    ) {
+        selfieFrameSaver.saveFrame(
+            SelfieFrame(
+                input = analyzerInput,
+                output = analyzerOutput,
+                bestFrameScore = calculateBestFrameScore(analyzerOutput, motionBlurResult),
+                capture = activeCapture,
+            ),
+            analyzerOutput
+        )
+    }
+
+    private fun isActiveCaptureCollected() =
+        activeCaptureCollected() >= requiredFramesForActiveCapture()
+
+    private fun activeCaptureCollected(): Int {
+        return if (activeCapture == Capture.FRONT) {
+            selfieFrameSaver.selfieCollected()
+        } else {
+            selfieFrameSaver.framesCollected(activeCapture)
+        }
+    }
+
+    private fun requiredFramesForActiveCapture(): Int {
+        return if (activeCapture == Capture.FRONT) {
+            selfieCapturePage.numSamples
+        } else {
+            SIDE_CAPTURE_NUM_FRAMES
+        }
+    }
 
     @Suppress("MagicNumber")
     private fun calculateBestFrameScore(
@@ -374,22 +482,45 @@ internal class FaceDetectorTransitioner(
     private fun isFaceScoreOverThreshold(actualScore: Float) =
         actualScore > selfieCapturePage.models.faceDetectorMinScore
 
-    internal enum class Selfie(val index: Int, val value: String) {
-        FIRST(INDEX_FIRST, VALUE_FIRST), BEST(INDEX_BEST, VALUE_BEST), LAST(INDEX_LAST, VALUE_LAST)
+    internal enum class Capture(val frameIdentifier: String) {
+        FRONT(SELFIES),
+        LEFT(LEFT_SELFIE),
+        RIGHT(RIGHT_SELFIE);
+
+        fun next(): Capture? = when (this) {
+            FRONT -> LEFT
+            LEFT -> RIGHT
+            RIGHT -> null
+        }
+    }
+
+    internal enum class Selfie(val index: Int, val value: String, val capture: Capture) {
+        FIRST(INDEX_FIRST, VALUE_FIRST, Capture.FRONT),
+        BEST(INDEX_BEST, VALUE_BEST, Capture.FRONT),
+        LAST(INDEX_LAST, VALUE_LAST, Capture.FRONT),
+        LEFT(INDEX_SIDE, VALUE_LEFT, Capture.LEFT),
+        RIGHT(INDEX_SIDE, VALUE_RIGHT, Capture.RIGHT)
     }
 
     internal companion object {
         val TAG: String = FaceDetectorTransitioner::class.java.simpleName
         const val SELFIES = "SELFIES"
+        const val LEFT_SELFIE = "LEFT_SELFIE"
+        const val RIGHT_SELFIE = "RIGHT_SELFIE"
         const val NUM_FILTERED_FRAMES = 3
         const val INDEX_FIRST = 0
         const val INDEX_BEST = 1
         const val INDEX_LAST = 2
+        const val INDEX_SIDE = -1
         const val VALUE_FIRST = "first"
         const val VALUE_LAST = "last"
         const val VALUE_BEST = "best"
+        const val VALUE_LEFT = "left"
+        const val VALUE_RIGHT = "right"
         const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
 
+        private const val SIDE_CAPTURE_NUM_FRAMES = 2
+        private const val SIDE_CAPTURE_YAW_THRESHOLD = 10f
         private const val DEFAULT_MOTION_BLUR_MIN_DURATION_MS = 100L
         private const val DEFAULT_UNKNOWN_STABILITY_SCORE = 0.5f
 

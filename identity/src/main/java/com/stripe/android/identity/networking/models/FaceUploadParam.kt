@@ -39,5 +39,13 @@ internal data class FaceUploadParam(
     @SerialName("best_exposure_iso")
     val bestExposureIso: Float? = null,
     @SerialName("training_consent")
-    val trainingConsent: Boolean? = null
+    val trainingConsent: Boolean? = null,
+    @SerialName("left_high_res_image")
+    val leftHighResImage: String? = null,
+    @SerialName("left_low_res_image")
+    val leftLowResImage: String? = null,
+    @SerialName("right_high_res_image")
+    val rightHighResImage: String? = null,
+    @SerialName("right_low_res_image")
+    val rightLowResImage: String? = null
 ) : Parcelable
