@@ -88,6 +88,8 @@ class AddressElementExampleActivity : AppCompatActivity() {
                             Text("Select address")
                         }
 
+                        // Toggle takes effect on the next AE launch — the ViewModel reads the
+                        // flag once at init time, so the current session is unaffected.
                         Button(
                             onClick = {
                                 inlineAutocompleteEnabled = !inlineAutocompleteEnabled

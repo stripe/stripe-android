@@ -20,7 +20,8 @@ class AddressTextFieldController(
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
 
-    val inlineQuery = MutableStateFlow("")
+    private val _inlineQuery = MutableStateFlow("")
+    val inlineQuery: StateFlow<String> = _inlineQuery
 
     override val showOptionalLabel: Boolean = false
     override val label = stateFlowOf(label)
@@ -42,7 +43,7 @@ class AddressTextFieldController(
     }
 
     fun onInlineQueryChanged(query: String) {
-        inlineQuery.value = query
+        _inlineQuery.value = query
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {

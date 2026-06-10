@@ -46,6 +46,22 @@ class AddressTextFieldControllerTest {
         }
     }
 
+    @Test
+    fun `onInlineQueryChanged updates inlineQuery`() = runTest {
+        val controller = createAddressController()
+
+        turbineScope {
+            val inlineQueryTurbine = controller.inlineQuery.testIn(this)
+
+            assertThat(inlineQueryTurbine.awaitItem()).isEqualTo("")
+
+            controller.onInlineQueryChanged("123 Main")
+            assertThat(inlineQueryTurbine.awaitItem()).isEqualTo("123 Main")
+
+            inlineQueryTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun createAddressController(): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),

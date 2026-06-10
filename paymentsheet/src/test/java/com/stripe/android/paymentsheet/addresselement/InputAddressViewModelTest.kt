@@ -3,11 +3,13 @@ package com.stripe.android.paymentsheet.addresselement
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -48,6 +50,12 @@ class InputAddressViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val inlineAutocompleteRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.inlineAddressAutocomplete,
+        isEnabled = false,
+    )
 
     @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest(UnconfinedTestDispatcher()) {
@@ -915,6 +923,19 @@ class InputAddressViewModelTest {
         addressFields.forEach {
             it.setRawValue(values)
         }
+    }
+
+    @Test
+    fun `isInlineAutocomplete is false when flag is disabled`() {
+        val viewModel = createViewModel()
+        assertThat(viewModel.autocompleteConfig.isInlineAutocomplete).isFalse()
+    }
+
+    @Test
+    fun `isInlineAutocomplete is true when flag is enabled`() {
+        inlineAutocompleteRule.setEnabled(true)
+        val viewModel = createViewModel()
+        assertThat(viewModel.autocompleteConfig.isInlineAutocomplete).isTrue()
     }
 
     private fun createShowState(isChecked: Boolean) =
