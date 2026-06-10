@@ -467,6 +467,27 @@ class Checkout private constructor(
         }
     }
 
+    /**
+     * Updates the billing address for tax calculation while the payment sheet is presented.
+     * Unlike [updateBillingAddress], this bypasses the `integrationLaunched` check since it is
+     * called from within the sheet itself (e.g., when the user provides billing details and
+     * tax needs to be recalculated before the sheet can dismiss).
+     */
+    internal suspend fun updateBillingAddressFromSheet(
+        name: String? = null,
+        phoneNumber: String? = null,
+        address: Address,
+    ): Result<Unit> {
+        val built = address.build()
+        return withInternalStateForInSheetUpdate(
+            additionalStateMutations = {
+                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
+            },
+        ) { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+        }
+    }
+
     internal suspend fun updateCurrency(currency: String): Result<Unit> {
         val result = withInternalState { sessionId ->
             component.checkoutSessionRepository.updateCurrency(sessionId, currency)
@@ -511,7 +532,25 @@ class Checkout private constructor(
                 )
             )
         }
-        // Run network requests with a mutex to ensure events are processed in order.
+        return withInternalStateLocked(additionalStateMutations, block)
+    }
+
+    /**
+     * Like [withInternalState] but allows mutations while the payment sheet is presented.
+     * Used for in-sheet updates (e.g., tax recalculation triggered by billing address collection).
+     * Analogous to iOS's `requireOpenSessionForInSheetUpdate`.
+     */
+    internal suspend fun withInternalStateForInSheetUpdate(
+        additionalStateMutations: InternalState.() -> InternalState = { this },
+        block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
+    ): Result<Unit> {
+        return withInternalStateLocked(additionalStateMutations, block)
+    }
+
+    private suspend fun withInternalStateLocked(
+        additionalStateMutations: InternalState.() -> InternalState = { this },
+        block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
+    ): Result<Unit> {
         return mutex.withLock {
             _isLoading.value = true
             val result = runCatching {

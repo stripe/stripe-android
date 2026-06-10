@@ -43,6 +43,10 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
         error("This should never be called!")
     }
 
+    override fun setProcessing(isProcessing: Boolean) {
+        // no-op for tests
+    }
+
     override fun setResult(result: FormResult) {
         resultTurbine.add(result)
     }

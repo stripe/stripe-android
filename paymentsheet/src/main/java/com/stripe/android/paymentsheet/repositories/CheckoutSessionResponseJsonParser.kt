@@ -41,6 +41,11 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
         val taxStatus = parseTaxStatus(json.optJSONObject(FIELD_TAX))
+            .takeIf { it != CheckoutSessionResponse.TaxStatus.UNKNOWN }
+            ?: parseTaxStatusFromMeta(
+                taxMeta = json.optJSONObject(FIELD_TAX_META),
+                taxContext = json.optJSONObject(FIELD_TAX_CONTEXT),
+            )
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
         val customerEmail = StripeJsonUtils.optString(json, FIELD_CUSTOMER_EMAIL)
@@ -123,6 +128,28 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             "requires_billing_address" -> CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
             else -> CheckoutSessionResponse.TaxStatus.UNKNOWN
         }
+    }
+
+    private fun parseTaxStatusFromMeta(
+        taxMeta: JSONObject?,
+        taxContext: JSONObject?,
+    ): CheckoutSessionResponse.TaxStatus {
+        if (taxMeta == null) return CheckoutSessionResponse.TaxStatus.UNKNOWN
+        val metaStatus = taxMeta.optString(FIELD_STATUS)
+        if (metaStatus == "requires_location_inputs") {
+            val addressSource = taxContext?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE) ?: ""
+            return when {
+                addressSource.contains("billing") ->
+                    CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+                addressSource.contains("shipping") ->
+                    CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
+                else -> CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+            }
+        }
+        if (metaStatus == "complete") {
+            return CheckoutSessionResponse.TaxStatus.READY
+        }
+        return CheckoutSessionResponse.TaxStatus.UNKNOWN
     }
 
     private fun parseElementsSessionParams(
@@ -491,6 +518,9 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_STATUS = "status"
     private const val FIELD_LIVE_MODE = "livemode"
     private const val FIELD_TAX = "tax"
+    private const val FIELD_TAX_META = "tax_meta"
+    private const val FIELD_TAX_CONTEXT = "tax_context"
+    private const val FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE = "automatic_tax_address_source"
     private const val FIELD_CURRENCY = "currency"
     private const val FIELD_CUSTOMER_EMAIL = "customer_email"
     private const val FIELD_ELEMENTS_SESSION = "elements_session"

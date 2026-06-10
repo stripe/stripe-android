@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.checkout.InSheetCheckoutSessionUpdater
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -96,6 +97,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
 ) {
+
+    private val inSheetCheckoutSessionUpdater = InSheetCheckoutSessionUpdater(
+        paymentMethodMetadata = args.state.paymentMethodMetadata,
+    )
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -386,16 +391,38 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     linkExpressMode = LinkExpressMode.ENABLED,
                 )
+            } else if (inSheetCheckoutSessionUpdater.requiresTaxUpdate()) {
+                viewModelScope.launch {
+                    performInSheetTaxUpdate(paymentSelection)
+                }
             } else {
-                _paymentOptionsActivityResult.tryEmit(
-                    PaymentOptionsActivityResult.Succeeded(
-                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                        paymentSelection = paymentSelection.withLinkDetails(),
-                        paymentMethods = customerStateHolder.paymentMethods.value
-                    )
-                )
+                emitSucceededResult(paymentSelection)
             }
         }
+    }
+
+    private suspend fun performInSheetTaxUpdate(paymentSelection: PaymentSelection) {
+        savedStateHandle[SAVE_PROCESSING] = true
+        inSheetCheckoutSessionUpdater.updateBillingAddressForTax(paymentSelection).fold(
+            onSuccess = {
+                savedStateHandle[SAVE_PROCESSING] = false
+                emitSucceededResult(paymentSelection)
+            },
+            onFailure = { error ->
+                savedStateHandle[SAVE_PROCESSING] = false
+                onError(error.stripeErrorMessage())
+            }
+        )
+    }
+
+    private fun emitSucceededResult(paymentSelection: PaymentSelection) {
+        _paymentOptionsActivityResult.tryEmit(
+            PaymentOptionsActivityResult.Succeeded(
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                paymentSelection = paymentSelection.withLinkDetails(),
+                paymentMethods = customerStateHolder.paymentMethods.value
+            )
+        )
     }
 
     private fun onDisabledClick() {

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.checkout.InSheetCheckoutSessionUpdater
+import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -32,6 +34,10 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : SheetActivityConfirmationHelper {
 
+    private val inSheetCheckoutSessionUpdater = InSheetCheckoutSessionUpdater(
+        paymentMethodMetadata = paymentMethodMetadata,
+    )
+
     override fun confirm() {
         if (onClickDelegate.onClickOverride != null) {
             onClickDelegate.onClickOverride?.invoke()
@@ -42,13 +48,13 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
 
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
-                    stateHelper.setResult(
-                        FormResult.Complete(
-                            selection = selectionHolder.selection.value,
-                            hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value
-                        )
-                    )
+                    if (inSheetCheckoutSessionUpdater.requiresTaxUpdate()) {
+                        coroutineScope.launch {
+                            performInSheetTaxUpdateThenContinue()
+                        }
+                    } else {
+                        emitContinueResult()
+                    }
                 }
                 EmbeddedPaymentElement.FormSheetAction.Confirm -> {
                     confirmationArgs()?.let { args ->
@@ -59,6 +65,34 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
                 }
             }
         }
+    }
+
+    private suspend fun performInSheetTaxUpdateThenContinue() {
+        val selection = selectionHolder.selection.value ?: run {
+            emitContinueResult()
+            return
+        }
+        stateHelper.setProcessing(true)
+        inSheetCheckoutSessionUpdater.updateBillingAddressForTax(selection).fold(
+            onSuccess = {
+                stateHelper.setProcessing(false)
+                emitContinueResult()
+            },
+            onFailure = { error ->
+                stateHelper.setProcessing(false)
+                stateHelper.updateError(error.stripeErrorMessage())
+            }
+        )
+    }
+
+    private fun emitContinueResult() {
+        stateHelper.setResult(
+            FormResult.Complete(
+                selection = selectionHolder.selection.value,
+                hasBeenConfirmed = false,
+                customerState = customerStateHolder.customer.value
+            )
+        )
     }
 
     private fun confirmationArgs(): ConfirmationHandler.Args? {

@@ -40,6 +40,7 @@ internal interface SheetActivityStateHolder {
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
+    fun setProcessing(isProcessing: Boolean)
 
     fun setResult(result: FormResult)
 
@@ -163,6 +164,15 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         _state.update {
             it.copy(
                 error = error
+            )
+        }
+    }
+
+    override fun setProcessing(isProcessing: Boolean) {
+        _state.update {
+            it.copy(
+                isProcessing = isProcessing,
+                isEnabled = if (isProcessing) false else selectionHolder.selection.value != null,
             )
         }
     }

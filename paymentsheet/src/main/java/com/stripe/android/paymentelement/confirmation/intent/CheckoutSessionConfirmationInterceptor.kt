@@ -102,7 +102,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
-            expectedAmount = intent.amount,
+            expectedAmount = currentExpectedAmount() ?: intent.amount,
             savePaymentMethod = savePaymentMethod,
         )
         else -> ConfirmCheckoutSessionParams(
@@ -110,6 +110,12 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
         )
+    }
+
+    private fun currentExpectedAmount(): Long? {
+        val checkout = CheckoutInstances[integrationMetadata.instancesKey].firstOrNull()
+            ?: return null
+        return checkout.internalState.checkoutSessionResponse.amount
     }
 
     private suspend fun confirmCheckoutSession(
