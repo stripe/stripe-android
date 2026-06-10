@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.NFC" />
 
     <application>
         <activity
@@ -54,7 +55,10 @@
         <activity
             android:name="com.stripe.android.common.taptoadd.TapToAddActivity"
             android:theme="@style/StripePaymentSheetTapToAddTheme" />
-
+        <activity
+            android:name="com.stripe.android.common.nfcscan.NfcScanningActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:exported="false" />
         <activity
             android:name="com.stripe.android.attestation.AttestationActivity"
             android:theme="@style/StripeTransparentTheme"

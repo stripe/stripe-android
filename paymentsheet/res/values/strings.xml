@@ -390,4 +390,15 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_wallet_update_card">Update card</string>
   <!-- A text notice shown when the user selects an expired card. -->
   <string name="stripe_wallet_update_expired_card_error">This card has expired. Update your card info or choose a different payment method.</string>
+
+  <!-- NFC card scanning screen -->
+  <string name="stripe_nfc_scan_tap_behind_device">Tap behind device to add card</string>
+  <!-- Secondary line under the NFC scan title; explains where to hold the card. -->
+  <string name="stripe_nfc_scan_instruction_subtitle">Hold your card near the contactless area on the back of this phone.</string>
+  <string name="stripe_nfc_scan_add_card_manually">Add card manually</string>
+  <string name="stripe_nfc_scan_save_card_for_future">Save this card for future %s payments</string>
+  <string name="stripe_nfc_scan_save_card_generic">Save this card for future payments</string>
+  <string name="stripe_nfc_scan_close">Close</string>
+  <!-- Shown with the error icon when NFC read fails. -->
+  <string name="stripe_nfc_scan_error">Couldn\'t read card</string>
 </resources>
