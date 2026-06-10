@@ -251,6 +251,60 @@ internal class PaymentDetailsListItemScreenShotTest {
         )
     }
 
+    @Test
+    fun testUnknownWithSublabelEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Generic(
+                    id = "csmrpd_126",
+                    last4 = "0x••••22Dd",
+                    isDefault = false,
+                    nickname = null,
+                    billingAddress = null,
+                    billingEmailAddress = null,
+                    rawType = "CRYPTO",
+                    display = ConsumerPaymentDetails.Display(
+                        label = "Crypto",
+                        sublabel = "0x••••22Dd",
+                        icon = null
+                    ),
+                    nextActionTypes = emptyList()
+                ),
+                enabled = true,
+                isSelected = false,
+                isAvailable = true,
+                isUpdating = false
+            )
+        )
+    }
+
+    @Test
+    fun testUnknownWithoutSublabelEnabled() {
+        snapshot(
+            state = State(
+                details = ConsumerPaymentDetails.Generic(
+                    id = "csmrpd_126",
+                    last4 = "0x••••22Dd",
+                    isDefault = false,
+                    nickname = null,
+                    billingAddress = null,
+                    billingEmailAddress = null,
+                    rawType = "CRYPTO",
+                    display = ConsumerPaymentDetails.Display(
+                        label = "Crypto",
+                        sublabel = null,
+                        icon = null
+                    ),
+                    nextActionTypes = emptyList()
+                ),
+                enabled = true,
+                isSelected = false,
+                isAvailable = true,
+                isUpdating = false
+            )
+        )
+    }
+
     private fun snapshot(state: State) {
         paparazziRule.snapshot {
             DefaultLinkTheme {

@@ -364,11 +364,22 @@ public final class com/stripe/android/link/ui/verification/VerificationScreenKt 
 	public static final fun VerificationPreview (Landroidx/compose/runtime/Composer;I)V
 }
 
+public final class com/stripe/android/link/ui/wallet/ComposableSingletons$IconKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$IconKt;
+	public fun <init> ()V
+	public final fun getLambda$-2139801056$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt {
 	public static final field INSTANCE Lcom/stripe/android/link/ui/wallet/ComposableSingletons$PaymentDetailsKt;
 	public fun <init> ()V
+	public final fun getLambda$-1132714699$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$1381508991$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda$629401301$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/link/ui/wallet/IconKt {
+	public static final fun Icon (Ljava/lang/String;Landroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function3;Landroidx/compose/runtime/Composer;II)V
 }
 
 public abstract interface annotation class com/stripe/android/paymentelement/AddressAutocompletePreview : java/lang/annotation/Annotation {

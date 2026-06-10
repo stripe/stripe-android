@@ -133,7 +133,7 @@ interface ConsumersApiService {
     suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,
@@ -481,7 +481,7 @@ class ConsumersApiServiceImpl(
     override suspend fun sharePaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         requestSurface: String,
         requestOptions: ApiRequest.Options,

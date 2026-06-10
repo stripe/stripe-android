@@ -170,6 +170,30 @@ internal class WalletScreenScreenshotTest {
     }
 
     @Test
+    fun testCollapsedStateWithUnknownSelected() {
+        snapshot(
+            state = walletUiState(
+                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
+                    it is ConsumerPaymentDetails.Generic
+                },
+                userSetIsExpanded = false,
+            )
+        )
+    }
+
+    @Test
+    fun testUnknownPaymentOption() {
+        snapshot(
+            state = walletUiState(
+                selectedItem = TestFactory.CONSUMER_PAYMENT_DETAILS.paymentDetails.firstOrNull {
+                    it is ConsumerPaymentDetails.Generic
+                },
+                userSetIsExpanded = true,
+            )
+        )
+    }
+
+    @Test
     fun testAlertMessage() {
         snapshot(
             state = walletUiState(

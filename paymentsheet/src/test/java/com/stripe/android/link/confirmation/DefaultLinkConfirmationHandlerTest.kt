@@ -35,6 +35,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 
+@Suppress("LargeClass")
 internal class DefaultLinkConfirmationHandlerTest {
     private val dispatcher = UnconfinedTestDispatcher()
 
@@ -363,6 +364,39 @@ internal class DefaultLinkConfirmationHandlerTest {
             val option = args.confirmationOption as LinkPassthroughConfirmationOption
             assertThat(option.paymentDetailsId).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.id)
             assertThat(option.expectedPaymentMethodType).isEqualTo(ConsumerPaymentDetails.Card.TYPE)
+        }
+
+    @Test
+    fun `confirm with unknown payment details in passthrough mode uses correct confirmation args`() =
+        runTest(dispatcher) {
+            val configuration = TestFactory.LINK_CONFIGURATION.copy(passthroughModeEnabled = true)
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration
+            )
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                )
+            )
+
+            val result = handler.confirm(
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC,
+                linkAccount = TestFactory.LINK_ACCOUNT,
+                cvc = CVC,
+                billingPhone = null
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+
+            val args = confirmationHandler.startTurbine.awaitItem()
+            assertThat(args.intent).isEqualTo(configuration.stripeIntent)
+
+            val option = args.confirmationOption as LinkPassthroughConfirmationOption
+            assertThat(option.paymentDetailsId).isEqualTo(TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC.id)
+            assertThat(option.expectedPaymentMethodType).isNull()
         }
 
     @Test
