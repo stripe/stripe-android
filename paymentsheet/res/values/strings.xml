@@ -162,6 +162,12 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">Card was not updated. Please try again.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Choose a payment method</string>
+  <!-- Accessibility label for a control that lets the customer choose which currency to pay in. -->
+  <string name="stripe_paymentsheet_currency_selector_label">Choose currency</string>
+  <!-- Accessibility description for a currency option, e.g. "USD, $61.06". Parameters: %1$s = currency code, %2$s = formatted amount -->
+  <string name="stripe_paymentsheet_currency_option_accessibility">%1$s, %2$s</string>
+  <!-- Accessibility description for a selected currency option with exchange rate, e.g. "USD, $61.06, 1 EUR = 1.19749 USD". Parameters: %1$s = currency option description, %2$s = exchange rate -->
+  <string name="stripe_paymentsheet_currency_option_with_exchange_rate">%1$s, %2$s</string>
   <string name="stripe_paymentsheet_close">Close</string>
   <!-- A button used to confirm selecting a saved payment method -->
   <string name="stripe_paymentsheet_confirm">Confirm</string>

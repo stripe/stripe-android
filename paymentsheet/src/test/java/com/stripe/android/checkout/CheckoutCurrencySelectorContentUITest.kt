@@ -1,6 +1,11 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -54,6 +59,19 @@ internal class CheckoutCurrencySelectorContentUITest {
         composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR).assertExists()
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD").assertExists()
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR").assertExists()
+    }
+
+    @Test
+    fun whenAdaptivePricingInfoIsPresent_currencySelectorContentHasAccessibleLabels() = runScenario {
+        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR)
+            .assertContentDescriptionEquals("Choose currency")
+
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
+            .assertContentDescriptionContains("EUR")
+            .assertContentDescriptionContains("1 USD = 0.900961 EUR")
+
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
+            .assertContentDescriptionContains("USD")
     }
 
     @Test
@@ -111,4 +129,15 @@ internal class CheckoutCurrencySelectorContentUITest {
             ),
         )
     }
+}
+
+private fun SemanticsNodeInteraction.assertContentDescriptionContains(value: String): SemanticsNodeInteraction {
+    return assert(
+        SemanticsMatcher("ContentDescription contains '$value'") { node ->
+            node.config.contains(SemanticsProperties.ContentDescription) &&
+                node.config[SemanticsProperties.ContentDescription].any {
+                    it.contains(value)
+                }
+        }
+    )
 }

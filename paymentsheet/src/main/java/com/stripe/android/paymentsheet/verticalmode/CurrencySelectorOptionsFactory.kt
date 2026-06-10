@@ -14,25 +14,29 @@ internal object CurrencySelectorOptionsFactory {
 
         val integrationCode = adaptivePricingInfo.integrationCurrency.uppercase()
         val localCode = localOption.currency.uppercase()
+        val integrationAmount = CurrencyFormatter.format(
+            amount = adaptivePricingInfo.integrationAmount,
+            amountCurrencyCode = adaptivePricingInfo.integrationCurrency,
+            targetLocale = locale,
+        )
+        val localAmount = CurrencyFormatter.format(
+            amount = localOption.amount,
+            amountCurrencyCode = localOption.currency,
+            targetLocale = locale,
+        )
 
         val integrationFlag = currencyCodeToFlagEmoji(integrationCode)
         val integrationCurrencyOption = CurrencyOption(
             code = integrationCode,
-            displayableText = integrationFlag + CurrencyFormatter.format(
-                amount = adaptivePricingInfo.integrationAmount,
-                amountCurrencyCode = adaptivePricingInfo.integrationCurrency,
-                targetLocale = locale,
-            ),
+            displayableText = integrationFlag + integrationAmount,
+            formattedAmount = integrationAmount,
         )
 
         val localFlag = currencyCodeToFlagEmoji(localCode)
         val localCurrencyOption = CurrencyOption(
             code = localCode,
-            displayableText = localFlag + CurrencyFormatter.format(
-                amount = localOption.amount,
-                amountCurrencyCode = localOption.currency,
-                targetLocale = locale,
-            ),
+            displayableText = localFlag + localAmount,
+            formattedAmount = localAmount,
         )
 
         val selectedCode = adaptivePricingInfo.activePresentmentCurrency.uppercase()
