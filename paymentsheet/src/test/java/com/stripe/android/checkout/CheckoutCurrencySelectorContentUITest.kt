@@ -5,7 +5,6 @@ import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assert
-import androidx.compose.ui.test.assertContentDescriptionEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -63,15 +62,11 @@ internal class CheckoutCurrencySelectorContentUITest {
 
     @Test
     fun whenAdaptivePricingInfoIsPresent_currencySelectorContentHasAccessibleLabels() = runScenario {
-        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR)
-            .assertContentDescriptionEquals("Choose currency")
-
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
-            .assertContentDescriptionContains("EUR")
-            .assertContentDescriptionContains("1 USD = 0.900961 EUR")
+            .assertContentDescriptionContains("45.94")
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
-            .assertContentDescriptionContains("USD")
+            .assertContentDescriptionContains("50.99")
     }
 
     @Test

@@ -65,29 +65,23 @@ internal class CurrencySelectorToggleUITest {
     @Test
     fun options_haveAccessibleLabelsAndSelectedStateDescriptions() = runScenario {
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
-            .assertContentDescription("USD, $50.99")
+            .assertContentDescription("$50.99")
             .assertStateDescription("Selected")
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
-            .assertContentDescription("EUR, €45.87")
+            .assertContentDescription("€45.87")
             .assertStateDescription("Not selected")
     }
 
     @Test
-    fun selector_hasAccessibleGroupLabel() = runScenario {
-        composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR)
-            .assertContentDescription("Choose currency")
-    }
-
-    @Test
-    fun selectedOption_includesExchangeRateInAccessibleLabel() = runScenario(
+    fun exchangeRate_isNotDuplicatedInOptionAccessibleLabel() = runScenario(
         exchangeRateText = "1 USD = 0.900961 EUR",
     ) {
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
-            .assertContentDescription("USD, $50.99, 1 USD = 0.900961 EUR")
+            .assertContentDescription("$50.99")
 
         composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
-            .assertContentDescription("EUR, €45.87")
+            .assertContentDescription("€45.87")
     }
 
     @Test
@@ -122,24 +116,17 @@ internal class CurrencySelectorToggleUITest {
     }
 
     @Test
-    fun errorMessage_isExposedOnSelectorAndOptions() = runScenario(errorMessage = "Something went wrong.") {
+    fun errorMessage_isExposedOnSelector() = runScenario(errorMessage = "Something went wrong.") {
         composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR)
-            .assertHasErrorMessage("Something went wrong.")
-
-        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
-            .assertHasErrorMessage("Something went wrong.")
-
-        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
             .assertHasErrorMessage("Something went wrong.")
     }
 
     @Test
-    fun exchangeRate_isDisplayedAndAnnouncedPolitely() = runScenario(
+    fun exchangeRate_isDisplayed() = runScenario(
         exchangeRateText = "1 USD = 0.900961 EUR",
     ) {
         composeRule.onNodeWithText("1 USD = 0.900961 EUR")
             .assertIsDisplayed()
-            .assertLiveRegionMode(LiveRegionMode.Polite)
     }
 
     @Test

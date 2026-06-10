@@ -30,6 +30,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.LiveRegionMode
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.error
 import androidx.compose.ui.semantics.liveRegion
@@ -43,7 +44,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.R
 import androidx.compose.ui.R as ComposeR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
@@ -101,8 +101,6 @@ internal fun CurrencySelectorToggle(
     val fontFamily = appearance.fontResId?.let { FontFamily(Font(it)) }
     val bodyStyle = MaterialTheme.typography.subtitle1.withAppearance(fontFamily, appearance.sizeScaleFactor)
     val captionStyle = MaterialTheme.typography.caption.withAppearance(fontFamily, appearance.sizeScaleFactor)
-    val selectorLabel = stringResource(R.string.stripe_paymentsheet_currency_selector_label)
-
     Column(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -116,7 +114,6 @@ internal fun CurrencySelectorToggle(
                     shape = shape,
                 )
                 .semantics {
-                    contentDescription = selectorLabel
                     if (errorMessage != null) {
                         error(errorMessage)
                     }
@@ -140,8 +137,6 @@ internal fun CurrencySelectorToggle(
                     unselectedTextColor = unselectedText,
                     textStyle = bodyStyle,
                     contentVerticalPaddingDp = appearance.contentVerticalPaddingDp,
-                    exchangeRateText = options.exchangeRateText,
-                    errorMessage = errorMessage,
                 )
                 CurrencyOptionItem(
                     currency = options.second,
@@ -154,8 +149,6 @@ internal fun CurrencySelectorToggle(
                     unselectedTextColor = unselectedText,
                     textStyle = bodyStyle,
                     contentVerticalPaddingDp = appearance.contentVerticalPaddingDp,
-                    exchangeRateText = options.exchangeRateText,
-                    errorMessage = errorMessage,
                 )
             }
         }
@@ -167,8 +160,7 @@ internal fun CurrencySelectorToggle(
                 textAlign = TextAlign.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 4.dp)
-                    .semantics { liveRegion = LiveRegionMode.Polite },
+                    .padding(top = 4.dp),
             )
         }
         if (errorMessage != null) {
@@ -199,8 +191,6 @@ private fun RowScope.CurrencyOptionItem(
     unselectedTextColor: Color,
     textStyle: TextStyle,
     contentVerticalPaddingDp: Float,
-    exchangeRateText: String?,
-    errorMessage: String?,
 ) {
     val isSelected = currency.code == options.selectedCode
     val backgroundColor = if (isSelected) pillBackground else trackBackground
@@ -212,11 +202,7 @@ private fun RowScope.CurrencyOptionItem(
             ComposeR.string.not_selected
         }
     )
-    val accessibilityLabel = currencyOptionAccessibilityLabel(
-        currency = currency,
-        isSelected = isSelected,
-        exchangeRateText = exchangeRateText,
-    )
+    val accessibilityLabel = currency.formattedAmount
 
     Box(
         contentAlignment = Alignment.Center,
@@ -236,9 +222,6 @@ private fun RowScope.CurrencyOptionItem(
             .semantics {
                 contentDescription = accessibilityLabel
                 stateDescription = accessibilityDescription
-                if (errorMessage != null) {
-                    error(errorMessage)
-                }
             }
             .padding(vertical = contentVerticalPaddingDp.dp)
             .testTag("$TEST_TAG_CURRENCY_OPTION_PREFIX${currency.code}"),
@@ -253,35 +236,16 @@ private fun RowScope.CurrencyOptionItem(
 }
 
 @Composable
-private fun currencyOptionAccessibilityLabel(
-    currency: CurrencyOption,
-    isSelected: Boolean,
-    exchangeRateText: String?,
-): String {
-    val currencyAccessibilityText = stringResource(
-        R.string.stripe_paymentsheet_currency_option_accessibility,
-        currency.code,
-        currency.formattedAmount,
-    )
-    return if (isSelected && exchangeRateText != null) {
-        stringResource(
-            R.string.stripe_paymentsheet_currency_option_with_exchange_rate,
-            currencyAccessibilityText,
-            exchangeRateText,
-        )
-    } else {
-        currencyAccessibilityText
-    }
-}
-
-@Composable
 private fun CurrencyOptionContent(
     currency: CurrencyOption,
     isSelected: Boolean,
     textColor: Color,
     textStyle: TextStyle,
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clearAndSetSemantics {},
+    ) {
         if (isSelected) {
             Icon(
                 painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
