@@ -3,8 +3,6 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
-
-## 23.9.3 - 2026-06-09
 ### AddressElement
 * [ADDED] Added autofill support for Address Element text fields and the state/province dropdown.
 
