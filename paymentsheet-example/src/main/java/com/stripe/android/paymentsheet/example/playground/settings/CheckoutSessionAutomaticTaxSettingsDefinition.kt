@@ -16,8 +16,5 @@ internal object CheckoutSessionAutomaticTaxSettingsDefinition : BooleanSettingsD
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.automaticTax(value)
-        if (value) {
-            checkoutRequestBuilder.billingAddressCollection("required")
-        }
     }
 }
