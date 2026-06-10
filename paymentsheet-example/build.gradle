@@ -70,7 +70,7 @@ android {
         applicationId "com.stripe.android.paymentsheet.example"
         versionCode 11
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunner "com.stripe.android.utils.PaymentSheetTestRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
         buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
