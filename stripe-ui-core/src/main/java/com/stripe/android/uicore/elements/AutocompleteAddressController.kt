@@ -123,6 +123,7 @@ class AutocompleteAddressController(
             inlinePredictionsState = if (isInline) interactor.inlinePredictionsState else null,
             onInlinePredictionSelected = if (isInline) interactor::onPredictionSelected else null,
             onInlineDismissed = if (isInline) interactor::onDismissed else null,
+            onInlineEnterManually = if (isInline) interactor::onEnterManuallyFromInline else null,
             getAttributionDrawable = if (isInline) config.getAttributionDrawable else null,
         )
     }

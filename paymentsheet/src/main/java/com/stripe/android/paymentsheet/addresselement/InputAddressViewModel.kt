@@ -252,6 +252,10 @@ internal class InputAddressViewModel @Inject constructor(
         eventListener?.invoke(AutocompleteAddressInteractor.Event.OnExpandForm(currentValues))
     }
 
+    override fun onEnterManuallyFromInline() {
+        onEnterManually()
+    }
+
     private fun canUseShippingSameAsBilling(): Boolean {
         return args.config?.let { config ->
             if (initialBillingAddress == null) {

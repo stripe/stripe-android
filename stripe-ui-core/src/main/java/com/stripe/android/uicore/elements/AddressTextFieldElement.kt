@@ -13,6 +13,7 @@ class AddressTextFieldElement(
     inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
     onInlinePredictionSelected: ((String) -> Unit)? = null,
     onInlineDismissed: (() -> Unit)? = null,
+    onInlineEnterManually: (() -> Unit)? = null,
     getAttributionDrawable: ((Boolean) -> Int?)? = null,
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
@@ -25,6 +26,7 @@ class AddressTextFieldElement(
             inlinePredictionsState = inlinePredictionsState,
             onInlinePredictionSelected = onInlinePredictionSelected,
             onInlineDismissed = onInlineDismissed,
+            onInlineEnterManually = onInlineEnterManually,
             getAttributionDrawable = getAttributionDrawable,
         )
 

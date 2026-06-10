@@ -24,6 +24,8 @@ interface AutocompleteAddressInteractor {
 
     fun onDismissed() = Unit
 
+    fun onEnterManuallyFromInline() = Unit
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Config(
         val googlePlacesApiKey: String?,

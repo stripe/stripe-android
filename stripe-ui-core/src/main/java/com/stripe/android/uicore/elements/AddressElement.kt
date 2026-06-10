@@ -35,6 +35,7 @@ class AddressElement(
     inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
     onInlinePredictionSelected: ((String) -> Unit)? = null,
     onInlineDismissed: (() -> Unit)? = null,
+    onInlineEnterManually: (() -> Unit)? = null,
     getAttributionDrawable: ((Boolean) -> Int?)? = null,
 ) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
@@ -67,6 +68,7 @@ class AddressElement(
         inlinePredictionsState = inlinePredictionsState,
         onInlinePredictionSelected = onInlinePredictionSelected,
         onInlineDismissed = onInlineDismissed,
+        onInlineEnterManually = onInlineEnterManually,
         getAttributionDrawable = getAttributionDrawable,
     )
 
