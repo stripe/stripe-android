@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.activity.result.ActivityResultRegistry
@@ -11,36 +10,27 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.SavedStateHandle
-import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.ReceiveTurbine
+import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.DefaultCardBrandFilter
-import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.FakePaymentCardRecognitionClient
 import com.stripe.android.ui.core.cardscan.LocalCardScanEventsReporter
 import com.stripe.android.ui.core.cardscan.LocalPaymentCardRecognitionClient
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.mockStatic
-import org.mockito.Mockito.spy
-import org.mockito.Mockito.times
 import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
-import org.mockito.kotlin.never
-import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardScanActionTest {
-    private val context: Context = ApplicationProvider.getApplicationContext()
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -52,10 +42,12 @@ internal class CardScanActionTest {
             savedStateHandle = SavedStateHandle()
         )
         runScenario(helper = helper) {
-            verify(controller, times(1)).onScannedCard(
-                cardNumber = "4242424242424242",
-                expirationYear = 2042,
-                expirationMonth = 2,
+            assertThat(onScannedCardCalls.awaitItem().scannedCardDetails).isEqualTo(
+                ScannedCardDetails(
+                    cardNumber = "4242424242424242",
+                    expirationYear = 2042,
+                    expirationMonth = 2,
+                )
             )
             assertThat(helper.hasAutomaticallyLaunchedCardScan).isTrue()
             assertThat(helper.shouldLaunchCardScanAutomatically).isFalse()
@@ -70,7 +62,7 @@ internal class CardScanActionTest {
             savedStateHandle = SavedStateHandle()
         )
         runScenario(helper = helper) {
-            verify(controller, never()).onScannedCard(any(), anyOrNull(), anyOrNull())
+            onScannedCardCalls.expectNoEvents()
             assertThat(helper.shouldLaunchCardScanAutomatically).isFalse()
         }
     }
@@ -83,7 +75,7 @@ internal class CardScanActionTest {
             savedStateHandle = SavedStateHandle()
         )
         runScenario(helper = helper) {
-            verify(controller, never()).onScannedCard(any(), anyOrNull(), anyOrNull())
+            onScannedCardCalls.expectNoEvents()
             assertThat(helper.shouldLaunchCardScanAutomatically).isFalse()
         }
     }
@@ -91,12 +83,16 @@ internal class CardScanActionTest {
     @Test
     fun `does not launch card scan when automaticallyLaunchedCardScanFormDataHelper null`() {
         runScenario(helper = null) {
-            verify(controller, never()).onScannedCard(any(), anyOrNull(), anyOrNull())
+            onScannedCardCalls.expectNoEvents()
         }
     }
 
     private class Scenario(
-        val controller: CardDetailsSectionController,
+        val onScannedCardCalls: ReceiveTurbine<OnScannedCardCall>,
+    )
+
+    private data class OnScannedCardCall(
+        val scannedCardDetails: ScannedCardDetails,
     )
 
     private fun runScenario(
@@ -126,22 +122,19 @@ internal class CardScanActionTest {
                     }
                 }
         }
+
+        val onScannedCardCalls = Turbine<OnScannedCardCall>()
+        val onScannedCard = { scannedCardDetails: ScannedCardDetails ->
+            onScannedCardCalls.add(OnScannedCardCall(scannedCardDetails))
+        }
+
         val action = CardScanAction(
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
             disableSsdOcrCardScan = false,
             automaticallyLaunchedCardScanFormDataHelper = helper,
         )
-        val controller = CardDetailsSectionController(
-            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
-            initialValues = emptyMap(),
-            collectName = false,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            cardBrandFilter = DefaultCardBrandFilter,
-            cardDetailsAction = action,
-        )
-        val controllerSpy = spy(controller)
-        val scenario = Scenario(controller = controllerSpy)
+        val scenario = Scenario(onScannedCardCalls = onScannedCardCalls)
 
         mockStatic(PaymentCardRecognitionResult::class.java).use { mockedStatic ->
             mockedStatic.`when`<PaymentCardRecognitionResult> {
@@ -153,7 +146,7 @@ internal class CardScanActionTest {
                     LocalCardScanEventsReporter provides FakeCardScanEventsReporter(),
                     LocalPaymentCardRecognitionClient provides FakePaymentCardRecognitionClient(true)
                 ) {
-                    action.Content(enabled = true, controllerSpy)
+                    action.Content(enabled = true, onScannedCard = onScannedCard)
                 }
             }
         }
