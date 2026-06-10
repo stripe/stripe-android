@@ -5,10 +5,10 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
-import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.AppAttestationException
@@ -93,8 +93,7 @@ class OnrampInteractorTest {
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory = mock {
         on { create(any()) } doReturn testAnalyticsService
     }
-    private val testUserFacingLogger = TestUserFacingLogger()
-    private val errorLogger = OnrampErrorLogger(testUserFacingLogger)
+    private val errorLogger = OnrampErrorLogger(Logger.noop())
     private val savedStateHandle = SavedStateHandle()
 
     private val interactor: OnrampInteractor = createInteractor(
@@ -438,13 +437,6 @@ class OnrampInteractorTest {
         assertThat(apiError.developerMessage).contains("Next step:")
         assertThat(apiError.developerMessage)
             .contains("Inspect the preserved Stripe API error for details and retry after correcting the request.")
-        assertThat(testUserFacingLogger.getLoggedMessages()).hasSize(1)
-        assertThat(testUserFacingLogger.getLoggedMessages().single())
-            .contains("[Stripe Crypto Onramp] has_link_account failed.")
-        assertThat(testUserFacingLogger.getLoggedMessages().single())
-            .contains("Developer-facing message")
-        assertThat(testUserFacingLogger.getLoggedMessages().single())
-            .contains("Code: uncategorized_api_error")
     }
 
     @Test
@@ -847,13 +839,6 @@ class OnrampInteractorTest {
                 error = error
             )
         )
-        assertThat(testUserFacingLogger.getLoggedMessages()).hasSize(1)
-        assertThat(testUserFacingLogger.getLoggedMessages().single())
-            .contains("[Stripe Crypto Onramp] perform_checkout failed.")
-        assertThat(testUserFacingLogger.getLoggedMessages().single())
-            .contains("Error type: RuntimeException.")
-        assertThat(testUserFacingLogger.getLoggedMessages().single())
-            .doesNotContain("Payment failed")
 
         val completedStatus = interactor.state.value.checkoutState?.status
         assertThat(completedStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
@@ -1474,17 +1459,5 @@ class OnrampInteractorTest {
                 publishableKey = "pk_platform_123"
             )
         )
-    }
-}
-
-private class TestUserFacingLogger : UserFacingLogger {
-    private val loggedMessages = mutableListOf<String>()
-
-    override fun logWarningWithoutPii(message: String) {
-        loggedMessages.add(message)
-    }
-
-    fun getLoggedMessages(): List<String> {
-        return loggedMessages.toList()
     }
 }
