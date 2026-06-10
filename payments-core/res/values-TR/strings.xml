@@ -156,6 +156,8 @@
   <string name="stripe_fpx_bank_offline">%s - Çevrimdışı</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Ödeme yönteminiz reddedildi.</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">Toplam</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->
   <string name="stripe_insufficient_funds">Kartınızda yeterli fon yok.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

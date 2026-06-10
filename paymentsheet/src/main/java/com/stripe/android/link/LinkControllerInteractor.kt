@@ -234,6 +234,9 @@ internal class LinkControllerInteractor @Inject constructor(
                         LinkController.PaymentMethodType.Card -> {
                             config.billingDetailsCollectionConfiguration.name
                         }
+                        LinkController.PaymentMethodType.Generic -> {
+                            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic
+                        }
                     }
 
                     val billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration
@@ -734,6 +737,9 @@ internal fun ConsumerPaymentDetails.PaymentDetails.toPreview(
         is ConsumerPaymentDetails.BankAccount -> {
             LinkController.PaymentMethodType.BankAccount
         }
+        is ConsumerPaymentDetails.Generic -> {
+            LinkController.PaymentMethodType.Generic
+        }
     }
 
     return LinkController.PaymentMethodPreview(
@@ -762,6 +768,8 @@ internal fun ConsumerPaymentDetails.PaymentDetails.getIconDrawableRes(isDarkThem
         is ConsumerPaymentDetails.Card ->
             getIconDrawableRes(PaymentMethodPreviewDetails.Card(brand, funding.code, last4), isDarkTheme)
         is ConsumerPaymentDetails.Passthrough ->
+            getLinkIconArrow()
+        is ConsumerPaymentDetails.Generic ->
             getLinkIconArrow()
     }
 }
@@ -798,4 +806,5 @@ private fun LinkController.PaymentMethodType.toFilter(): LinkPaymentMethodFilter
     when (this) {
         LinkController.PaymentMethodType.Card -> LinkPaymentMethodFilter.Card
         LinkController.PaymentMethodType.BankAccount -> LinkPaymentMethodFilter.BankAccount
+        LinkController.PaymentMethodType.Generic -> LinkPaymentMethodFilter.Generic
     }

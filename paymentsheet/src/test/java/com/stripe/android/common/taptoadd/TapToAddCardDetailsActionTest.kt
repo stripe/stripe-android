@@ -8,6 +8,8 @@ import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.ui.core.elements.CardDetailsSectionController
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -34,7 +36,7 @@ internal class TapToAddCardDetailsActionTest {
             )
 
             composeTestRule.setContent {
-                action.Content(enabled = true)
+                action.Content(enabled = true, controller = fakeController())
             }
 
             composeTestRule.waitForIdle()
@@ -57,7 +59,7 @@ internal class TapToAddCardDetailsActionTest {
             )
 
             composeTestRule.setContent {
-                action.Content(enabled = false)
+                action.Content(enabled = false, controller = fakeController())
             }
 
             composeTestRule.waitForIdle()
@@ -81,7 +83,7 @@ internal class TapToAddCardDetailsActionTest {
             val enabledHolder = mutableStateOf(true)
 
             composeTestRule.setContent {
-                action.Content(enabled = enabledHolder.value)
+                action.Content(enabled = enabledHolder.value, controller = fakeController())
             }
 
             composeTestRule.waitForIdle()
@@ -95,4 +97,9 @@ internal class TapToAddCardDetailsActionTest {
             composeTestRule.waitForIdle()
         }
     }
+
+    private fun fakeController() = CardDetailsSectionController(
+        cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+        initialValues = emptyMap(),
+    )
 }

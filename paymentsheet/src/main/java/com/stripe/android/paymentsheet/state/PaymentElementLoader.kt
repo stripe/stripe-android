@@ -5,6 +5,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.coroutines.runCatching
@@ -227,6 +228,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
+    private val logFcLiteExperiment: LogFcLiteExperiment,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
@@ -348,17 +350,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
 
-            createPaymentMethodMetadata(
-                integrationConfiguration = integrationConfiguration,
-                elementsSession = elementsSession,
-                configuration = configuration,
-                linkStateResult = linkStateResult,
-                isGooglePayReady = isGooglePayReady,
-                isGooglePaySupported = isGooglePaySupported,
-                initializationMode = initializationMode,
-                customerMetadata = customerMetadata,
-                clientAttributionMetadata = clientAttributionMetadata,
-            )
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
+                createPaymentMethodMetadata(
+                    integrationConfiguration = integrationConfiguration,
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    linkStateResult = linkStateResult,
+                    isGooglePayReady = isGooglePayReady,
+                    isGooglePaySupported = isGooglePaySupported,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
         }
 
         val customer = async {
@@ -410,7 +414,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
-        logLinkExperimentExposures(
+        logExperimentExposures(
             elementsSession = elementsSession,
             state = state
         )
@@ -479,7 +483,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private fun logLinkExperimentExposures(
+    private fun logExperimentExposures(
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
@@ -492,6 +496,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state
         )
+        logFcLiteExperiment(elementsSession, state.paymentMethodMetadata)
     }
 
     private fun createPaymentMethodMetadata(

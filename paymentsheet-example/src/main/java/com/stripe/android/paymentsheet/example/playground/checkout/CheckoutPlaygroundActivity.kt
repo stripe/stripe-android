@@ -28,12 +28,15 @@ import androidx.compose.material.Divider
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -129,6 +132,7 @@ class CheckoutPlaygroundActivity : AppCompatActivity() {
     }
 }
 
+@Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun CheckoutScreen(
     checkout: Checkout,
@@ -152,6 +156,33 @@ private fun CheckoutScreen(
     val error by errorMessage.collectAsState()
     var promotionCode by rememberSaveable { mutableStateOf("") }
 
+    var contentVerticalPaddingDp by rememberSaveable { mutableFloatStateOf(4f) }
+    var cornerRadiusDp by rememberSaveable { mutableFloatStateOf(16f) }
+    var borderWidthDp by rememberSaveable { mutableFloatStateOf(1f) }
+    var sizeScaleFactor by rememberSaveable { mutableFloatStateOf(1.0f) }
+    var useCustomColors by rememberSaveable { mutableStateOf(false) }
+
+    val appearance = remember(
+        contentVerticalPaddingDp, cornerRadiusDp, borderWidthDp, sizeScaleFactor, useCustomColors,
+    ) {
+        Checkout.CurrencySelectorContentAppearance()
+            .contentVerticalPaddingDp(contentVerticalPaddingDp)
+            .cornerRadiusDp(cornerRadiusDp)
+            .borderWidthDp(borderWidthDp)
+            .sizeScaleFactor(sizeScaleFactor)
+            .apply {
+                if (useCustomColors) {
+                    selectedBackground(Color(0xFF6200EE))
+                    selectedTextColor(Color.White)
+                    background(Color(0xFFE8DEF8))
+                    textColor(Color(0xFF1C1B1F))
+                    borderColor(Color(0xFF6200EE))
+                    textSecondaryColor(Color(0xFF49454F))
+                    dangerColor(Color(0xFFB3261E))
+                }
+            }
+    }
+
     val context = LocalContext.current
     LaunchedEffect(error) {
         error?.let {
@@ -165,7 +196,19 @@ private fun CheckoutScreen(
     Box {
         PlaygroundTheme(
             content = {
-                checkout.CurrencySelectorContent()
+                checkout.CurrencySelectorContent(appearance = appearance)
+                CurrencySelectorAppearanceSection(
+                    contentVerticalPaddingDp = contentVerticalPaddingDp,
+                    onVerticalPaddingDpChange = { contentVerticalPaddingDp = it },
+                    cornerRadiusDp = cornerRadiusDp,
+                    onCornerRadiusDpChange = { cornerRadiusDp = it },
+                    borderWidthDp = borderWidthDp,
+                    onBorderWidthDpChange = { borderWidthDp = it },
+                    sizeScaleFactor = sizeScaleFactor,
+                    onSizeScaleFactorChange = { sizeScaleFactor = it },
+                    useCustomColors = useCustomColors,
+                    onUseCustomColorsChange = { useCustomColors = it },
+                )
                 LineItemsSection(checkoutSession, updateLineItemQuantity)
                 ShippingAddressSection(
                     lastAddressDetails = lastAddressDetails,
@@ -725,6 +768,90 @@ private fun AppliedBalanceRow(appliedBalance: Long, currency: String) {
         label = "Applied balance",
         amount = "-${formatAmount(-appliedBalance, currency)}",
     )
+}
+
+@Composable
+private fun CurrencySelectorAppearanceSection(
+    contentVerticalPaddingDp: Float,
+    onVerticalPaddingDpChange: (Float) -> Unit,
+    cornerRadiusDp: Float,
+    onCornerRadiusDpChange: (Float) -> Unit,
+    borderWidthDp: Float,
+    onBorderWidthDpChange: (Float) -> Unit,
+    sizeScaleFactor: Float,
+    onSizeScaleFactorChange: (Float) -> Unit,
+    useCustomColors: Boolean,
+    onUseCustomColorsChange: (Boolean) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "Currency Selector Appearance",
+            style = MaterialTheme.typography.h6,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        SliderRow(
+            label = "Vertical Padding",
+            value = contentVerticalPaddingDp,
+            range = 0f..24f,
+            onValueChange = onVerticalPaddingDpChange,
+        )
+        SliderRow(
+            label = "Corner Radius",
+            value = cornerRadiusDp,
+            range = 0f..32f,
+            onValueChange = onCornerRadiusDpChange,
+        )
+        SliderRow(
+            label = "Border Width",
+            value = borderWidthDp,
+            range = 0f..4f,
+            onValueChange = onBorderWidthDpChange,
+        )
+        SliderRow(
+            label = "Size Scale",
+            value = sizeScaleFactor,
+            range = 0.5f..2.0f,
+            onValueChange = onSizeScaleFactorChange,
+        )
+
+        Spacer(modifier = Modifier.height(PADDING))
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(PADDING),
+        ) {
+            Button(
+                onClick = { onUseCustomColorsChange(!useCustomColors) },
+            ) {
+                Text(if (useCustomColors) "Reset Colors" else "Use Custom Colors")
+            }
+        }
+
+        Divider(modifier = Modifier.padding(vertical = PADDING))
+    }
+}
+
+@Composable
+private fun SliderRow(
+    label: String,
+    value: Float,
+    range: ClosedFloatingPointRange<Float>,
+    onValueChange: (Float) -> Unit,
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "$label: ${"%.1f".format(value)}",
+            style = MaterialTheme.typography.caption,
+        )
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = range,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
 }
 
 private fun formatAmount(amount: Long, currencyCode: String): String {

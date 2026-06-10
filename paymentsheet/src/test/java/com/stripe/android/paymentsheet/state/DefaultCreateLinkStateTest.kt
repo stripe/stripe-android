@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.test.runTest
@@ -137,7 +138,10 @@ internal class DefaultCreateLinkStateTest {
 
     private fun createLinkStateFactory(
         cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory = FakeCardFundingFilterFactory(),
-        retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(FakeCustomerRepository()),
+        retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(
+            FakeCustomerRepository(),
+            FakeDurationProvider(),
+        ),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },

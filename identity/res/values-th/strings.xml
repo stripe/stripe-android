@@ -144,6 +144,8 @@
   <string name="stripe_id_number">หมายเลขประจำตัวประชาชน</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">ฉันพร้อมแล้ว</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">ถ่ายภาพแล้ว</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">หมายเลขประจำตัวประชาชนที่คุณป้อนไม่ครบถ้วน</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">ตัวเลข 4 หลักสุดท้ายของหมายเลขประกันสังคม</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">นามสกุล</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">อัตโนมัติ</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">กำลังโหลด</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">ด้วยตนเอง</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">เลื่อนเอกสารเข้ามา</string>
   <!-- Instructional text when camera is too close to a document -->

@@ -1,7 +1,12 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.10.0 - 2026-06-08
+
+### Identity
+* [ADDED][12987](https://github.com/stripe/stripe-android/pull/12987) Added a manual capture mode for identity document verification, allowing users to tap "Take Photo" instead of relying on automatic capture.
 
 ### CryptoOnramp
 * [CHANGED] Updated EU compliance identifier APIs to match the latest backend contract, including CRS/CARF TIN requirements and `SubmitIdentifiersResult.completed`.
@@ -11,6 +16,11 @@ NEXT_VERSION_BUMP: MINOR
 
 ### Payments
 * [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now include error code, decline code, and error type in the exception thrown.
+
+### CryptoOnramp
+* [ADDED][13156](https://github.com/stripe/stripe-android/pull/13156) Added `SDKVersion`, `StripeCryptoOnrampError`, `CryptoOnrampApiException`, `AppAttestationException`, and `UncategorizedApiErrorException` to expose richer developer-facing diagnostics and preserved backend API error context for Crypto Onramp failures.
+* [CHANGED][13156](https://github.com/stripe/stripe-android/pull/13156) Improved Crypto Onramp API error handling with localized fallback user messaging and more consistent error mapping across attestation, payment collection, and checkout flows.
+
 
 ## 23.9.1 - 2026-05-26
 

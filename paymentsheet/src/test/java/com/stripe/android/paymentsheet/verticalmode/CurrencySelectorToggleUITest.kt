@@ -7,6 +7,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -14,6 +16,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CurrencySelectorToggleUITest {
 
@@ -23,8 +26,8 @@ internal class CurrencySelectorToggleUITest {
     @get:Rule
     val composeCleanupRule = createComposeCleanupRule()
 
-    private val usdOption = CurrencyOption(code = "USD", displayableText = "\uD83C\uDDFA\uD83C\uDDF8 $50.99")
-    private val eurOption = CurrencyOption(code = "EUR", displayableText = "\uD83C\uDDEA\uD83C\uDDFA €45.87")
+    private val usdOption = CurrencyOption(code = "USD", displayableText = "🇺🇸 $50.99")
+    private val eurOption = CurrencyOption(code = "EUR", displayableText = "🇪🇺 €45.87")
 
     @Test
     fun clickingSelectedOption_doesNotCallCallback() = runScenario {
@@ -77,6 +80,7 @@ internal class CurrencySelectorToggleUITest {
                 onCurrencySelected = { onCurrencySelectedCalls.add(it) },
                 isEnabled = isEnabled,
                 errorMessage = errorMessage,
+                appearance = Checkout.CurrencySelectorContentAppearance().build(),
             )
         }
 

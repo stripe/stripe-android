@@ -156,6 +156,8 @@
   <string name="stripe_fpx_bank_offline">%s - offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Din betalningsmetod godkändes inte.</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">Totalsumma</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->
   <string name="stripe_insufficient_funds">Saldot på kortet är inte tillräckligt.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

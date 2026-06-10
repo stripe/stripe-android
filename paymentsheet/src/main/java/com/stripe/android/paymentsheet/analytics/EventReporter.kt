@@ -114,6 +114,11 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onAnalyticsEvent(event: AnalyticsEvent)
 
     /**
+     * The customer has tapped a wallet button (e.g. Google Pay, Link, Shop Pay).
+     */
+    fun onWalletButtonTapped(walletType: String)
+
+    /**
      * The customer has pressed the confirm button.
      */
     fun onPressConfirmButton(

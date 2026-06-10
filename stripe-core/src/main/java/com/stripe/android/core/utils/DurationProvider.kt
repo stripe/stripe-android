@@ -2,6 +2,7 @@ package com.stripe.android.core.utils
 
 import android.os.SystemClock
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.Logger
 import kotlin.time.Duration
@@ -13,6 +14,7 @@ interface DurationProvider {
     fun start(key: Key, reset: Boolean = true)
     fun elapsed(key: Key): Duration?
     fun end(key: Key): Duration?
+    fun completedDuration(key: Key): Duration?
 
     suspend fun <T> measureDuration(
         key: Key,
@@ -28,8 +30,10 @@ interface DurationProvider {
         PaymentSheetLoadSessionLoad,
         PaymentSheetLoadPrefetchPMs,
         PaymentSheetLoadCreateLinkState,
+        PaymentSheetLoadRetrieveCustomer,
         PaymentSheetLoadCreateCustomerState,
         PaymentSheetLoadRetrieveInitialPaymentSelection,
+        PaymentSheetLoadComputePaymentMethodTypes,
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
@@ -47,14 +51,20 @@ interface DurationProvider {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultDurationProvider private constructor() : DurationProvider {
-    private val logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
+class DefaultDurationProvider @VisibleForTesting internal constructor(
+    private val uptimeMillis: () -> Long = { SystemClock.uptimeMillis() },
+    private val logger: Logger = Logger.getInstance(enableLogging = BuildConfig.DEBUG)
+) : DurationProvider {
 
     private val store = mutableMapOf<DurationProvider.Key, Long>()
+    private val completedStore = mutableMapOf<DurationProvider.Key, Duration>()
 
     override fun start(key: DurationProvider.Key, reset: Boolean) {
         if (reset || key !in store) {
-            val startTime = SystemClock.uptimeMillis()
+            if (reset) {
+                completedStore.remove(key)
+            }
+            val startTime = uptimeMillis()
             store[key] = startTime
             logger.debug("DURATION_STARTED: ${key.name}: $startTime")
         }
@@ -62,18 +72,24 @@ class DefaultDurationProvider private constructor() : DurationProvider {
 
     override fun elapsed(key: DurationProvider.Key): Duration? {
         val startTime = store[key] ?: return null
-        return (SystemClock.uptimeMillis() - startTime).milliseconds
+        return (uptimeMillis() - startTime).milliseconds
     }
 
     override fun end(key: DurationProvider.Key): Duration? {
         val startTime = store.remove(key) ?: return null
-        val endTime = SystemClock.uptimeMillis()
+        val endTime = uptimeMillis()
         logger.debug("DURATION_ENDED: ${key.name}: $endTime")
-        return (endTime - startTime).milliseconds
+        val duration = (endTime - startTime).milliseconds
+        completedStore[key] = duration
+        return duration
+    }
+
+    override fun completedDuration(key: DurationProvider.Key): Duration? {
+        return completedStore[key]
     }
 
     override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
-        start(key)
+        start(key, reset = true)
         return try {
             block()
         } finally {

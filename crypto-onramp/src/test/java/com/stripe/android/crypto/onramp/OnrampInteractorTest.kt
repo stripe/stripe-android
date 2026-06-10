@@ -1,13 +1,22 @@
 package com.stripe.android.crypto.onramp
 
+import android.app.Application
 import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
+import com.stripe.android.crypto.onramp.exception.AppAttestationException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
+import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
+import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.SDKVersion
+import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
@@ -180,6 +189,310 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.WalletRegistered(CryptoNetwork.Ethereum)
         )
+    }
+
+    @Test
+    fun testRegisterWalletAddressMapsBackendAttestationError() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val backendError = APIException(
+            stripeError = StripeError(
+                type = "api_error",
+                code = "link_failed_to_attest_request",
+                message = "App attestation failed",
+                extraFields = mapOf(
+                    "reason" to "app_not_play_recognized",
+                    "user_message" to
+                        "This app couldn't be verified. Install it from Google Play " +
+                            "and try again."
+                )
+            ),
+            requestId = "req_123",
+            statusCode = 400,
+        )
+        whenever(cryptoApiRepository.setWalletAddress(any(), any(), any())).thenReturn(
+            Result.failure(backendError)
+        )
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.registerWalletAddress(
+            walletAddress = "0x1234567890abcdef",
+            network = CryptoNetwork.Ethereum
+        )
+
+        assertThat(result).isInstanceOf(OnrampRegisterWalletAddressResult.Failed::class.java)
+
+        val error = (result as OnrampRegisterWalletAddressResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertAppNotPlayRecognizedAttestationError(
+            attestationError = attestationError,
+            backendError = backendError,
+        )
+    }
+
+    @Test
+    fun testHasLinkAccountMapsAttestationInvalidRequestError() = runTest {
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    code = "link_failed_to_attest_request",
+                    message = "App attestation failed",
+                    extraFields = mapOf(
+                        "reason" to "app_not_play_recognized",
+                        "user_message" to "This app couldn't be verified. Install it from Google Play and try again."
+                    )
+                ),
+                requestId = "req_456",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.context.mode).isEqualTo("test")
+        assertThat(attestationError.context.apiErrorType).isNull()
+        assertThat(attestationError.context.apiUserMessage)
+            .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+        assertThat(attestationError.message)
+            .isEqualTo(
+                "This app couldn't be verified due to an attestation error. Please try again later " +
+                    "or contact the developer if the issue persists."
+            )
+        assertThat(attestationError.developerMessage).contains("Request Context:")
+        assertThat(attestationError.developerMessage).contains("operation: has_link_account")
+        assertThat(attestationError.developerMessage).contains("request_id: req_456")
+        assertThat(attestationError.developerMessage).doesNotContain("type:")
+    }
+
+    @Test
+    fun testHasLinkAccountMapsUncategorizedInvalidRequestError() = runTest {
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    code = "email_blocked",
+                    message = "This email address can't be used.",
+                    docUrl = "https://stripe.com/docs/error-codes/email_blocked",
+                    extraFields = mapOf(
+                        "reason" to "email_blocked",
+                        "user_message" to "This email can't be used. Try another one."
+                    )
+                ),
+                requestId = "req_789",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
+
+        val apiError = error as UncategorizedApiErrorException
+        assertThat(apiError.context.reason).isEqualTo("email_blocked")
+        assertThat(apiError.context.apiUserMessage).isEqualTo("This email can't be used. Try another one.")
+        assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
+        assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
+        assertThat(apiError.context.apiErrorType).isNull()
+        assertThat(apiError.code).isEqualTo("email_blocked")
+        assertThat(apiError.docUrl).isEqualTo("https://stripe.com/docs/error-codes/email_blocked")
+        assertThat(apiError.sdkVersions).hasSize(1)
+        assertThat(apiError.sdkVersions.single().name).isEqualTo("stripe-android")
+        assertThat(apiError.sdkVersions.single().version).isNotEmpty()
+        assertThat(apiError.underlyingError).isSameInstanceAs(apiError.context.underlyingError)
+        assertThat(apiError.developerMessage)
+            .isEqualTo(
+                """
+                This email address can't be used.
+
+                Request Context:
+                  operation: has_link_account
+                  app_id: ${RuntimeEnvironment.getApplication().packageName}
+                  mode: test
+                  reason: email_blocked
+                  request_id: req_789
+
+                Code: email_blocked
+                Next step: Inspect the preserved Stripe API error for details and retry after correcting the request.
+                Docs: https://stripe.com/docs/error-codes/email_blocked
+                SDK: ${apiError.sdkVersions.single().debugDescription}
+                """.trimIndent()
+            )
+    }
+
+    @Test
+    fun testHasLinkAccountIncludesAdditionalSdkVersionsInDeveloperMessage() = runTest {
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    code = "link_failed_to_attest_request",
+                    message = "App attestation failed",
+                    extraFields = mapOf(
+                        "reason" to "app_not_play_recognized",
+                    )
+                ),
+                requestId = "req_456",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(
+            createConfigurationState(
+                additionalSdkVersions = listOf(
+                    SDKVersion(name = "stripe-react-native", version = "1.2.3"),
+                ),
+            ),
+        )
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertThat(attestationError.sdkVersions).containsExactly(
+            SDKVersion(name = "stripe-android", version = attestationError.sdkVersions.first().version),
+            SDKVersion(name = "stripe-react-native", version = "1.2.3"),
+        ).inOrder()
+        assertThat(attestationError.developerMessage).contains(
+            "SDK: stripe-android@${attestationError.sdkVersions.first().version}, stripe-react-native@1.2.3"
+        )
+    }
+
+    @Test
+    fun uncategorizedApiErrorExceptionFallsBackToSafeUserMessage() = runTest {
+        val application = mock<Application> {
+            on { packageName } doReturn "com.example.app"
+            on { getString(any()) } doReturn "Something went wrong. Please try again later."
+        }
+        val interactor = OnrampInteractor(
+            application = application,
+            linkController = linkController,
+            cryptoApiRepository = cryptoApiRepository,
+            analyticsServiceFactory = analyticsServiceFactory,
+            checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+            savedStateHandle = SavedStateHandle()
+        )
+
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    message = "Developer-facing message"
+                ),
+                requestId = "req_999",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
+
+        val apiError = error as UncategorizedApiErrorException
+        assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
+        assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
+        assertThat(apiError.code).isEqualTo("uncategorized_api_error")
+        assertThat(apiError.context.apiErrorType).isNull()
+        assertThat(apiError.developerMessage).contains("Developer-facing message")
+        assertThat(apiError.developerMessage).contains("Code: uncategorized_api_error")
+        assertThat(apiError.developerMessage).contains("Next step:")
+        assertThat(apiError.developerMessage)
+            .contains("Inspect the preserved Stripe API error for details and retry after correcting the request.")
+    }
+
+    @Test
+    fun appAttestationExceptionUsesSingleLocalizedFallbackUserMessage() = runTest {
+        val application = mock<Application> {
+            on { packageName } doReturn "com.example.app"
+            on { getString(any()) } doReturn
+                "This app couldn't be verified due to an attestation error. Please try again later or contact the developer if the issue persists."
+        }
+        val interactor = OnrampInteractor(
+            application = application,
+            linkController = linkController,
+            cryptoApiRepository = cryptoApiRepository,
+            analyticsServiceFactory = analyticsServiceFactory,
+            checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
+            savedStateHandle = SavedStateHandle()
+        )
+
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
+            on { email } doReturn "test@example.com"
+            on { error } doReturn InvalidRequestException(
+                stripeError = StripeError(
+                    code = "link_failed_to_attest_request",
+                    message = "App attestation failed",
+                    extraFields = mapOf(
+                        "reason" to "android_environment_mismatch"
+                    )
+                ),
+                requestId = "req_attestation_fallback",
+                statusCode = 400,
+            )
+        }
+        whenever(linkController.lookupConsumer(any())).thenReturn(failedResult)
+
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.hasLinkAccount("test@example.com")
+
+        assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
+
+        val error = (result as OnrampHasLinkAccountResult.Failed).error
+        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+
+        val attestationError = error as AppAttestationException
+        assertThat(attestationError.context.reason).isEqualTo("android_environment_mismatch")
+        assertThat(attestationError.context.apiErrorType).isNull()
+        assertThat(attestationError.userMessage)
+            .isEqualTo(
+                "This app couldn't be verified due to an attestation error. Please try " +
+                    "again later or contact the developer if the issue persists."
+            )
+        assertThat(attestationError.message)
+            .isEqualTo(
+                "This app couldn't be verified due to an attestation error. Please try " +
+                    "again later or contact the developer if the issue persists."
+            )
+        assertThat(attestationError.developerMessage)
+            .contains("the Play Integrity distribution channel does not match this Stripe mode")
+        assertThat(attestationError.developerMessage).doesNotContain("type:")
     }
 
     @Test
@@ -468,6 +781,35 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun testHandlePresentPaymentMethodsResultMissingSelectedPaymentMethod() {
+        val context = RuntimeEnvironment.getApplication()
+        val mockState = LinkController.State(
+            internalLinkAccount = null,
+            merchantLogoUrl = null,
+            selectedPaymentMethodPreview = null,
+            createdPaymentMethod = null
+        )
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockState))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.handlePresentPaymentMethodsResult(
+            LinkController.PresentPaymentMethodsResult.Success,
+            context
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        val failed = result as OnrampCollectPaymentMethodResult.Failed
+        assertThat(failed.error).isInstanceOf(MissingPaymentMethodException::class.java)
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                error = failed.error
+            )
+        )
+    }
+
+    @Test
     fun testOnAuthorize() {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
@@ -645,6 +987,81 @@ class OnrampInteractorTest {
         verify(recoveredRepository).getOnrampSession(
             sessionId = "cos_test_session_id",
             sessionClientSecret = "test_secret"
+        )
+    }
+
+    @Test
+    fun continueCheckout_withoutPendingSession_returnsFailedAndTracksError() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        interactor.continueCheckout()
+
+        val checkoutStatus = interactor.state.value.checkoutState?.status
+        assertThat(checkoutStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (checkoutStatus as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        val error = (result as OnrampCheckoutResult.Failed).error
+        assertThat(error).isInstanceOf(PaymentFailedException::class.java)
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error
+            )
+        )
+    }
+
+    @Test
+    fun startCheckout_requiresPaymentMethod_returnsFailedAndTracksError() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+        whenever(
+            cryptoApiRepository.getOnrampSession(
+                sessionId = "cos_test_session_id",
+                sessionClientSecret = "test_secret"
+            )
+        ).thenReturn(
+            Result.success(
+                GetOnrampSessionResponse(
+                    id = "cos_test_session_id",
+                    clientSecret = "test_secret",
+                    paymentIntentClientSecret = "pi_test_secret"
+                )
+            )
+        )
+        whenever(
+            cryptoApiRepository.retrievePaymentIntent(
+                clientSecret = "pi_test_secret",
+                publishableKey = "pk_platform_123"
+            )
+        ).thenReturn(
+            Result.success(
+                paymentIntent(status = StripeIntent.Status.RequiresPaymentMethod)
+            )
+        )
+
+        interactor.startCheckout("cos_test_session_id")
+
+        val checkoutStatus = interactor.state.value.checkoutState?.status
+        assertThat(checkoutStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (checkoutStatus as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        val error = (result as OnrampCheckoutResult.Failed).error
+        assertThat(error).isInstanceOf(PaymentFailedException::class.java)
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error
+            )
         )
     }
 
@@ -890,26 +1307,93 @@ class OnrampInteractorTest {
         consumerSessionClientSecret = null
     )
 
-    private fun createConfigurationState(cryptoCustomerId: String? = null): OnrampConfiguration.State =
+    private fun createConfigurationState(
+        cryptoCustomerId: String? = null,
+        additionalSdkVersions: List<SDKVersion> = emptyList(),
+    ): OnrampConfiguration.State =
         OnrampConfiguration()
             .merchantDisplayName("merchant-display-name")
             .publishableKey("pk_test_12345")
             .appearance(mock())
             .cryptoCustomerId(cryptoCustomerId)
+            .additionalSdkVersions(additionalSdkVersions)
             .build()
 
     private fun createInteractor(
+        application: Application = createApplication(),
         cryptoApiRepository: CryptoApiRepository,
         savedStateHandle: SavedStateHandle,
     ): OnrampInteractor {
         return OnrampInteractor(
-            application = RuntimeEnvironment.getApplication(),
+            application = application,
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = savedStateHandle
         )
+    }
+
+    private fun createApplication(
+        defaultApiErrorUserMessage: String = "Something went wrong. Please try again later.",
+        defaultAppAttestationUserMessage: String =
+            "This app couldn't be verified due to an attestation error. Please try again later " +
+                "or contact the developer if the issue persists.",
+    ): Application {
+        val runtimeApplication = RuntimeEnvironment.getApplication()
+
+        return mock {
+            on { packageName } doReturn runtimeApplication.packageName
+            on { getString(R.string.stripe_onramp_default_api_error_user_message) } doReturn
+                defaultApiErrorUserMessage
+            on { getString(R.string.stripe_onramp_app_attestation_default_user_message) } doReturn
+                defaultAppAttestationUserMessage
+        }
+    }
+
+    private fun assertAppNotPlayRecognizedAttestationError(
+        attestationError: AppAttestationException,
+        backendError: APIException,
+    ) {
+        assertThat(attestationError.context.apiUserMessage)
+            .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+        assertThat(attestationError.userMessage)
+            .isEqualTo(
+                "This app couldn't be verified due to an attestation error. Please try again later " +
+                    "or contact the developer if the issue persists."
+            )
+        assertThat(attestationError.message)
+            .isEqualTo(
+                "This app couldn't be verified due to an attestation error. Please try again later " +
+                    "or contact the developer if the issue persists."
+            )
+        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.context.mode).isEqualTo("test")
+        assertThat(attestationError.context.apiErrorType).isEqualTo("api_error")
+        assertThat(attestationError.code).isEqualTo("link_failed_to_attest_request")
+        assertThat(attestationError.docUrl).isNull()
+        assertThat(attestationError.sdkVersions).hasSize(1)
+        assertThat(attestationError.sdkVersions.single().name).isEqualTo("stripe-android")
+        assertThat(attestationError.sdkVersions.single().version).isNotEmpty()
+        assertThat(attestationError.underlyingError).isSameInstanceAs(backendError)
+        assertThat(attestationError.developerMessage)
+            .isEqualTo(
+                """
+                App attestation failed: this app is not recognized by Google Play.
+
+                Request Context:
+                  operation: register_wallet_address
+                  app_id: ${RuntimeEnvironment.getApplication().packageName}
+                  mode: test
+                  reason: app_not_play_recognized
+                  request_id: req_123
+                  type: api_error
+
+                Code: link_failed_to_attest_request
+                Next step: Install the app from a Google Play testing or production track and retry the Onramp flow. Internal, closed, open testing, and production tracks are supported. Debug builds and sideloaded APKs will not pass this check.
+                SDK: ${attestationError.sdkVersions.single().debugDescription}
+                """.trimIndent()
+            )
     }
 
     private suspend fun stubCheckoutRequiresNextAction() {

@@ -2,7 +2,9 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import com.stripe.android.Stripe
+import com.stripe.android.common.analytics.experiment.DefaultLogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
@@ -45,6 +47,13 @@ internal class LinkHoldbackExposureModule {
     fun providesLogLinkGlobalHoldbackExposure(
         default: DefaultLogLinkHoldbackExperiment
     ): LogLinkHoldbackExperiment {
+        return default
+    }
+
+    @Provides
+    fun providesLogFcLiteExperiment(
+        default: DefaultLogFcLiteExperiment
+    ): LogFcLiteExperiment {
         return default
     }
 

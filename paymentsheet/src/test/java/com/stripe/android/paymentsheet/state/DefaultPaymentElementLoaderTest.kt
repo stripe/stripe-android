@@ -8,6 +8,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.configuration.ConfigurationDefaults
@@ -17,6 +18,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -71,6 +73,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
 import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -4639,6 +4642,65 @@ internal class DefaultPaymentElementLoaderTest {
         ),
     )
 
+    @Test
+    fun `load populates expected timing keys`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadSessionLoad
+            )
+        ).isNotNull()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadCreateLinkState
+            )
+        ).isNotNull()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadCreateCustomerState
+            )
+        ).isNotNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `prefetchPMs timing key is absent when no legacy ephemeral key customer`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        // No legacy ephemeral key customer, so fetchSavedPaymentMethods should not be timed
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadPrefetchPMs)).isNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
     private fun runFilterScenario(
         filteredPaymentMethods: List<PaymentMethod>? = null,
         block: suspend FilterScenario.() -> Unit
@@ -4712,6 +4774,7 @@ internal class DefaultPaymentElementLoaderTest {
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
         logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
+        logFcLiteExperiment: LogFcLiteExperiment = FakeLogFcLiteExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
@@ -4739,10 +4802,14 @@ internal class DefaultPaymentElementLoaderTest {
         paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper =
             FakePaymentMethodMessagePromotionsHelper(),
+        durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
-            FakePaymentMethodMessagePromotionsExperimentHandler()
+            FakePaymentMethodMessagePromotionsExperimentHandler(),
     ): PaymentElementLoader {
-        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
+        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
+            customerRepo,
+            durationProvider,
+        )
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,
@@ -4769,6 +4836,7 @@ internal class DefaultPaymentElementLoaderTest {
             workContext = testDispatcher,
             createLinkState = createLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
+            logFcLiteExperiment = logFcLiteExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             integrityRequestManager = integrityRequestManager,
@@ -4788,7 +4856,7 @@ internal class DefaultPaymentElementLoaderTest {
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
-            durationProvider = FakeDurationProvider(),
+            durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
         )
     }

@@ -8,8 +8,6 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.ui.core.cardscan.CardScanResult
-import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -280,14 +278,10 @@ class CardDetailsElementTest {
             controller = cardController
         )
 
-        cardController.onCardScanResult(
-            CardScanResult.Completed(
-                scannedCard = ScannedCard(
-                    pan = "4242424242424242",
-                    expirationMonth = 1,
-                    expirationYear = 2030,
-                )
-            )
+        cardController.onScannedCard(
+            cardNumber = "4242424242424242",
+            expirationMonth = 1,
+            expirationYear = 2030,
         )
 
         cardDetailsElement.getFormFieldValueFlow().test {
