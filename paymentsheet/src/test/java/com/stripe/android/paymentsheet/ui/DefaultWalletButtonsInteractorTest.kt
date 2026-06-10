@@ -36,6 +36,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.CoroutineTestRule
@@ -246,6 +247,38 @@ class DefaultWalletButtonsInteractorTest {
                 assertThat(state.buttonsEnabled).isTrue()
             }
         }
+
+    @Test
+    fun `on button pressed, should fire wallet button tapped analytics event`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val interactor = createInteractor(
+            arguments = null,
+            eventReporter = eventReporter,
+        )
+
+        interactor.handleViewAction(
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(
+                button = WalletButtonsInteractor.WalletButton.GooglePay(
+                    buttonType = null,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                    allowCreditCards = true,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(
+                        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all()
+                    ),
+                    cardFundingFilter = DefaultCardFundingFilter,
+                    additionalEnabledNetworks = emptyList(),
+                ),
+                clickHandler = { false },
+            )
+        )
+
+        assertThat(eventReporter.walletButtonTappedCalls.awaitItem()).isEqualTo("google_pay")
+        analyticsEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+        )
+
+        eventReporter.validate()
+    }
 
     @Test
     fun `on button pressed with no arguments, should report unexpected error`() = runTest {
@@ -1085,6 +1118,7 @@ class DefaultWalletButtonsInteractorTest {
         arguments: DefaultWalletButtonsInteractor.Arguments? = null,
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: FakeEventReporter = FakeEventReporter(),
         linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit = {
@@ -1096,6 +1130,7 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = confirmationHandler,
             coroutineScope = CoroutineScope(testDispatcher),
             errorReporter = errorReporter,
+            eventReporter = eventReporter,
             linkInlineInteractor = NoOpLinkInlineInteractor(),
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = linkAccountHolder,
