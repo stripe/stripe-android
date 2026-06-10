@@ -100,7 +100,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testConfigureIsSuccessful() = runTest {
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success())
 
         val result = interactor.configure(createConfigurationState())
 
@@ -630,7 +630,7 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithSelectedPaymentPreview()))
         interactor.onLinkControllerState(mockLinkStateWithSelectedPaymentPreview())
 
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success())
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
@@ -670,7 +670,7 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success())
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
@@ -1397,7 +1397,7 @@ class OnrampInteractorTest {
     }
 
     private suspend fun stubCheckoutRequiresNextAction() {
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success())
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()

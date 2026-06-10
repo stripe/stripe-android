@@ -14,6 +14,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.NoLinkAccountFoundException
 import com.stripe.android.link.analytics.LinkEventsReporter
+import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
+import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
@@ -21,6 +23,8 @@ import com.stripe.android.link.model.toPresentation
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -34,7 +38,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.VerificationType
+import com.stripe.android.model.parsers.PaymentMethodJsonParser
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import org.json.JSONObject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -201,6 +207,45 @@ internal class DefaultLinkAccountManager @Inject constructor(
                 paymentMethod = linkPaymentMethod,
                 clientAttributionMetadata = config.clientAttributionMetadata,
             ).getOrThrow()
+        }
+    }
+
+    override suspend fun createConfirmationToken(
+        linkPaymentMethod: LinkPaymentMethod
+    ): Result<ConfirmationToken> {
+        return runCatching {
+            requireNotNull(linkAccountHolder.linkAccountInfo.value.account)
+        }.mapCatching { account ->
+            if (config.passthroughModeEnabled) {
+                val shareDetails = linkRepository.sharePaymentDetails(
+                    consumerSessionClientSecret = account.clientSecret,
+                    paymentDetailsId = linkPaymentMethod.details.id,
+                    expectedPaymentMethodType = computeExpectedPaymentMethodType(
+                        config, linkPaymentMethod.details
+                    ),
+                    cvc = linkPaymentMethod.collectedCvc,
+                    billingPhone = null,
+                    allowRedisplay = null,
+                    apiKey = null,
+                    clientAttributionMetadata = config.clientAttributionMetadata,
+                ).getOrThrow()
+                val json = JSONObject(shareDetails.encodedPaymentMethod)
+                val pm = PaymentMethodJsonParser().parse(json)
+                linkRepository.createConfirmationToken(
+                    confirmationTokenParams = ConfirmationTokenParams(paymentMethodId = pm.id),
+                ).getOrThrow()
+            } else {
+                val params = createPaymentMethodCreateParams(
+                    selectedPaymentDetails = linkPaymentMethod.details,
+                    consumerSessionClientSecret = account.clientSecret,
+                    cvc = linkPaymentMethod.collectedCvc,
+                    billingPhone = linkPaymentMethod.billingPhone,
+                    clientAttributionMetadata = config.clientAttributionMetadata,
+                )
+                linkRepository.createConfirmationToken(
+                    confirmationTokenParams = ConfirmationTokenParams(paymentMethodData = params),
+                ).getOrThrow()
+            }
         }
     }
 

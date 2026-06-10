@@ -93,7 +93,7 @@ class AddPaymentMethodOptionsTest {
 
     @Test
     fun `values returns empty when Generic filter applied`() {
-        val options = createOptions(paymentMethodFilter = LinkPaymentMethodFilter.Generic)
+        val options = createOptions(paymentMethodFilters = listOf(LinkPaymentMethodFilter.Generic))
 
         assertThat(options.values).isEmpty()
     }

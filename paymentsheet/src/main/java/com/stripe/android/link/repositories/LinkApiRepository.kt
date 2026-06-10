@@ -13,6 +13,8 @@ import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.confirmation.createPaymentMethodCreateParams
 import com.stripe.android.link.utils.toConsumerBillingAddress
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.model.ConfirmationToken
+import com.stripe.android.model.ConfirmationTokenParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
@@ -528,6 +530,15 @@ internal class LinkApiRepository @Inject constructor(
             phoneNumber = phoneNumber,
             requestSurface = requestSurface.value,
             requestOptions = apiRequestOptions,
+        )
+    }
+
+    override suspend fun createConfirmationToken(
+        confirmationTokenParams: ConfirmationTokenParams,
+    ): Result<ConfirmationToken> = withContext(workContext) {
+        stripeRepository.createConfirmationToken(
+            confirmationTokenParams = confirmationTokenParams,
+            options = apiRequestOptions,
         )
     }
 

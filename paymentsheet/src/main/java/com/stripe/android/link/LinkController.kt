@@ -22,7 +22,6 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -61,6 +60,35 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun configure(configuration: Configuration): ConfigureResult {
         return interactor.configure(configuration)
+    }
+
+    /**
+     * Configure the controller with the customer's email, phone number, and supported payment method types.
+     *
+     * A default [Configuration] is built automatically from the [PaymentConfiguration] publishable key.
+     * The [state] will reset and the Link session will be reloaded. The result is delivered
+     * asynchronously via [callback].
+     *
+     * @param email The customer's email address.
+     * @param phoneNumber Optional phone number to pre-fill during sign-up, in E.164 format.
+     * @param supportedPaymentMethodTypes Optional list of payment method types to restrict selection to.
+     *   If null, all supported types are shown.
+     * @param callback Receives the [ConfigureResult] when configuration completes.
+     */
+    fun configure(
+        displayName: String,
+        email: String,
+        phoneNumber: String? = null,
+        supportedPaymentMethodTypes: List<PaymentMethodType>? = null,
+        callback: ConfigureCallback,
+    ) {
+        interactor.configure(
+            displayName = displayName,
+            email = email,
+            phoneNumber = phoneNumber,
+            supportedPaymentMethodTypes = supportedPaymentMethodTypes,
+            callback = callback,
+        )
     }
 
     /**
@@ -197,12 +225,6 @@ class LinkController @Inject internal constructor(
         return interactor.clearLinkAccount()
     }
 
-    internal fun configureEagerly() {
-        interactor.coroutineScope.launch {
-            interactor.configureIfNeeded()
-        }
-    }
-
     /**
      * Configuration for [LinkController].
      */
@@ -220,6 +242,8 @@ class LinkController @Inject internal constructor(
         internal val allowLogOut: Boolean,
         internal val linkAppearance: LinkAppearance.State? = null,
         internal val supportedPaymentMethodTypes: List<PaymentMethodType>? = null,
+        internal val email: String = "",
+        internal val phoneNumber: String? = null,
     ) : Parcelable {
 
         /**
@@ -383,19 +407,12 @@ class LinkController @Inject internal constructor(
          * and payment method creation — in a single call. The result is delivered through the
          * [PresentCallback] provided to [createPresenter].
          *
+         * The email and phone number provided in [LinkController.configure] are used for the flow.
          * If a presentation is already in progress, this call will be ignored.
-         *
-         * @param email The email address to use for the Link flow.
-         * @param phoneNumber Optional phone number to pre-fill during sign-up, in E.164 format.
          */
-        fun present(
-            email: String,
-            phoneNumber: String? = null,
-        ) {
+        fun present() {
             interactor.presentFull(
                 launcher = coordinator.linkActivityResultLauncher,
-                email = email,
-                phoneNumber = phoneNumber,
             )
         }
 
@@ -502,7 +519,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Result of presenting Link payment methods to the user.
+     * Result of configuring the Link controller.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface ConfigureResult {
@@ -510,7 +527,7 @@ class LinkController @Inject internal constructor(
          * Configuration was successful.
          */
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        data object Success : ConfigureResult
+        class Success : ConfigureResult
 
         /**
          * Configuration failed.
@@ -796,6 +813,13 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Callback for receiving results from [LinkController.configure].
+     */
+    fun interface ConfigureCallback {
+        fun onConfigured(result: ConfigureResult)
+    }
+
+    /**
      * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authenticate] and
      * [Presenter.authenticateExistingConsumer].
      */
@@ -916,21 +940,6 @@ class LinkController @Inject internal constructor(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
     ) {
-        private var supportedPaymentMethodTypes: List<PaymentMethodType>? = null
-
-        /**
-         * Set the mode for the Link session.
-         *
-         * Defaults to null, showing all supported types.
-         *
-         * @param supportedPaymentMethodTypes Optional list of payment method type to restrict
-         *  * selection to. If null, all supported types are shown.
-         * @return This builder instance for method chaining.
-         */
-        fun supportedPaymentMethodTypes(supportedPaymentMethodTypes: List<PaymentMethodType>?) = apply {
-            this.supportedPaymentMethodTypes = supportedPaymentMethodTypes
-        }
-
         /**
          * Build the [LinkController] instance.
          *
@@ -938,24 +947,17 @@ class LinkController @Inject internal constructor(
          */
         fun build(): LinkController {
             val paymentConfig = com.stripe.android.PaymentConfiguration.getInstance(application)
-            val appName = application.applicationInfo.loadLabel(application.packageManager).toString()
-            val configuration = Configuration(
-                merchantDisplayName = appName,
+            val configuration = Configuration.default(
+                context = application,
                 publishableKey = paymentConfig.publishableKey,
                 stripeAccountId = paymentConfig.stripeAccountId,
-                cardBrandAcceptance = ConfigurationDefaults.cardBrandAcceptance,
-                defaultBillingDetails = null,
-                billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
-                allowUserEmailEdits = true,
-                allowLogOut = true,
-                supportedPaymentMethodTypes = supportedPaymentMethodTypes,
             )
             return create(
                 application = application,
                 savedStateHandle = savedStateHandle,
                 requestSurface = RequestSurface.PaymentElement,
                 configuration = configuration,
-            ).also { it.configureEagerly() }
+            )
         }
     }
 

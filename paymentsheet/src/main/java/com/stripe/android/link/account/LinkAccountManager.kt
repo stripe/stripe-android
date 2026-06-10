@@ -8,6 +8,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -111,6 +112,10 @@ internal interface LinkAccountManager {
     suspend fun createPaymentMethod(
         linkPaymentMethod: LinkPaymentMethod
     ): Result<PaymentMethod>
+
+    suspend fun createConfirmationToken(
+        linkPaymentMethod: LinkPaymentMethod
+    ): Result<ConfirmationToken>
 
     suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams

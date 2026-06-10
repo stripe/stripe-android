@@ -18,7 +18,6 @@ internal class LinkControllerPlaygroundViewModel(
 ) : AndroidViewModel(application) {
 
     private var linkController = LinkController.Builder(application, savedStateHandle)
-        .supportedPaymentMethodTypes(null)
         .build()
     private var linkControllerPresenter: LinkController.Presenter? = null
 
@@ -51,7 +50,7 @@ internal class LinkControllerPlaygroundViewModel(
     }
 
     fun configureLinkController(config: LinkController.Configuration) {
-        if (state.value.configureResult == LinkController.ConfigureResult.Success) {
+        if (state.value.configureResult == LinkController.ConfigureResult.Success()) {
             // Assumes `config` doesn't change in LinkControllerPlaygroundActivity.
             return
         }
@@ -74,9 +73,17 @@ internal class LinkControllerPlaygroundViewModel(
         phoneNumber: String?,
         paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
-        linkControllerPresenter?.present(
+        linkController.configure(
+            displayName = "PaymentSheet Example",
             email = email,
             phoneNumber = phoneNumber,
+            supportedPaymentMethodTypes = paymentMethodTypes,
+            callback = { result ->
+                if (result is LinkController.ConfigureResult.Success) {
+                    linkControllerPresenter?.present()
+                }
+                state.update { it.copy(configureResult = result) }
+            },
         )
     }
 

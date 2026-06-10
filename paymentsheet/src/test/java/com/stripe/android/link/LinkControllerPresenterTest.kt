@@ -3,8 +3,6 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.link.injection.LinkControllerPresenterComponent
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.doReturn
@@ -41,27 +39,12 @@ class LinkControllerPresenterTest {
     }
 
     @Test
-    fun `configureEagerly() launches configureIfNeeded on the interactor scope`() = runTest {
-        val testScope = TestScope(UnconfinedTestDispatcher())
-        whenever(interactor.coroutineScope).doReturn(testScope)
-        whenever(interactor.configureIfNeeded()).doReturn(LinkController.ConfigureResult.Success)
-
-        controller.configureEagerly()
-
-        verify(interactor).configureIfNeeded()
-    }
-
-    @Test
     fun `present() delegates to presentFull on the interactor`() = runTest {
         val launcher: ActivityResultLauncher<LinkActivityContract.Args> = mock()
         whenever(coordinator.linkActivityResultLauncher).doReturn(launcher)
 
-        presenter.present("test@example.com")
+        presenter.present()
 
-        verify(interactor).presentFull(
-            launcher = launcher,
-            email = "test@example.com",
-            phoneNumber = null,
-        )
+        verify(interactor).presentFull(launcher = launcher)
     }
 }

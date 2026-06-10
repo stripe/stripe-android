@@ -12,6 +12,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsUpdateParams
 import com.stripe.android.model.ConsumerSession
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.yield
+import org.mockito.kotlin.mock
 
 internal open class FakeLinkAccountManager(
     val linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
@@ -108,6 +110,7 @@ internal open class FakeLinkAccountManager(
     var createPaymentMethodResult: Result<com.stripe.android.model.PaymentMethod> = Result.success(
         value = PaymentMethodFixtures.CARD_PAYMENT_METHOD
     )
+    var createConfirmationTokenResult: Result<ConfirmationToken> = Result.success(mock())
     var sharePaymentDetails: Result<SharePaymentDetails> = Result.success(TestFactory.LINK_SHARE_PAYMENT_DETAILS)
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePhoneNumberResult: Result<LinkAccount> = Result.success(TestFactory.LINK_ACCOUNT)
@@ -263,6 +266,10 @@ internal open class FakeLinkAccountManager(
     ): Result<com.stripe.android.model.PaymentMethod> {
         return createPaymentMethodResult
     }
+
+    override suspend fun createConfirmationToken(
+        linkPaymentMethod: LinkPaymentMethod
+    ) = createConfirmationTokenResult
 
     override suspend fun startVerification(isResendSmsCode: Boolean): Result<LinkAccount> {
         startVerificationTurbine.add(isResendSmsCode)
