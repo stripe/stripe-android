@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.LocalTextFieldInsets
@@ -29,11 +31,20 @@ fun AddressTextFieldUI(
     val textFieldInsets = LocalTextFieldInsets.current
 
     val isError = error != null
+    val inlinePredictionsState = controller.inlinePredictionsState
+    val isInline = inlinePredictionsState != null
+    val query by if (isInline) controller.inlineQuery.collectAsState() else remember { mutableStateOf("") }
+
+    val fieldModifier = if (isInline) {
+        modifier.fillMaxWidth()
+    } else {
+        modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }
+    }
 
     CompatTextField(
-        value = "",
-        enabled = false,
-        onValueChange = {},
+        value = if (isInline) query else "",
+        enabled = if (isInline) enabled else false,
+        onValueChange = { v -> if (isInline) controller.onInlineQueryChanged(v) },
         errorMessage = null,
         isError = isError,
         label = {
@@ -44,18 +55,9 @@ fun AddressTextFieldUI(
         singleLine = true,
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            fieldDisplayState = when (isError) {
-                true -> FieldDisplayState.ERROR
-                false -> FieldDisplayState.NORMAL
-            },
-            disabledIndicatorColor = if (isError) {
-                MaterialTheme.colors.error
-            } else {
-                Color.Transparent
-            },
+            fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
+            disabledIndicatorColor = if (!isInline && isError) MaterialTheme.colors.error else Color.Transparent,
         ),
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled) { onClick() },
+        modifier = fieldModifier,
     )
 }

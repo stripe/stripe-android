@@ -9,7 +9,8 @@ import kotlinx.coroutines.flow.StateFlow
 class AddressTextFieldElement(
     override val identifier: IdentifierSpec,
     label: ResolvableString,
-    onNavigation: (() -> Unit)? = null
+    onNavigation: (() -> Unit)? = null,
+    inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
@@ -17,7 +18,8 @@ class AddressTextFieldElement(
     override val controller: AddressTextFieldController =
         AddressTextFieldController(
             label = label,
-            onNavigation = onNavigation
+            onNavigation = onNavigation,
+            inlinePredictionsState = inlinePredictionsState,
         )
 
     override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> {

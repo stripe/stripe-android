@@ -114,6 +114,7 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
+            inlinePredictionsState = if (config.isInlineAutocomplete) interactor.inlinePredictionsState else null,
         )
     }
 

@@ -19,11 +19,14 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
@@ -65,6 +68,8 @@ class AddressElementExampleActivity : AppCompatActivity() {
                             Address(address)
                         }
 
+                        var inlineAutocompleteEnabled by remember { mutableStateOf(false) }
+
                         val context = LocalContext.current
                         Button(
                             onClick = {
@@ -81,6 +86,16 @@ class AddressElementExampleActivity : AppCompatActivity() {
                             modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
                         ) {
                             Text("Select address")
+                        }
+
+                        Button(
+                            onClick = {
+                                inlineAutocompleteEnabled = !inlineAutocompleteEnabled
+                                FeatureFlags.inlineAddressAutocomplete.setEnabled(inlineAutocompleteEnabled)
+                            },
+                            modifier = Modifier.testTag(INLINE_AUTOCOMPLETE_TOGGLE_BUTTON)
+                        ) {
+                            Text("Enables inline autocomplete: $inlineAutocompleteEnabled")
                         }
                     }
                     is AddressElementExampleViewState.Error -> {
@@ -129,3 +144,4 @@ private fun Address(addressDetails: AddressDetails) {
 }
 
 internal const val SELECT_ADDRESS_BUTTON = "SELECT_ADDRESS_BUTTON"
+internal const val INLINE_AUTOCOMPLETE_TOGGLE_BUTTON = "INLINE_AUTOCOMPLETE_TOGGLE_BUTTON"
