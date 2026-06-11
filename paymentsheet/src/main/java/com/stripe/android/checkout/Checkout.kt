@@ -467,14 +467,14 @@ class Checkout private constructor(
         }
     }
 
-    // Bypasses the integrationLaunched guard for in-sheet mutations (iOS: requireOpenSessionForInSheetUpdate)
     internal suspend fun updateBillingAddressFromSheet(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
     ): Result<Unit> {
         val built = address.build()
-        return withInternalStateForInSheetUpdate(
+        return withInternalState(
+            allowWhileSheetPresented = true,
             additionalStateMutations = {
                 copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
             },
@@ -517,30 +517,17 @@ class Checkout private constructor(
     }
 
     private suspend fun withInternalState(
+        allowWhileSheetPresented: Boolean = false,
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<Unit> {
-        if (internalState.integrationLaunched) {
+        if (!allowWhileSheetPresented && internalState.integrationLaunched) {
             return Result.failure(
                 IllegalStateException(
                     "Cannot mutate checkout session while a payment flow is presented."
                 )
             )
         }
-        return withInternalStateLocked(additionalStateMutations, block)
-    }
-
-    private suspend fun withInternalStateForInSheetUpdate(
-        additionalStateMutations: InternalState.() -> InternalState = { this },
-        block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
-    ): Result<Unit> {
-        return withInternalStateLocked(additionalStateMutations, block)
-    }
-
-    private suspend fun withInternalStateLocked(
-        additionalStateMutations: InternalState.() -> InternalState = { this },
-        block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
-    ): Result<Unit> {
         return mutex.withLock {
             _isLoading.value = true
             val result = runCatching {
