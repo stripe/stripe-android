@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.nfcscan.NfcScanningAction
 import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -210,6 +211,8 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 tapToAddHelper = arguments.tapToAddHelper,
                 paymentMethodMetadata = metadata,
             )
+        } else if (metadata.isNfcScanningEnabled) {
+            NfcScanningAction(merchantName = metadata.merchantName)
         } else {
             CardScanAction(
                 isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,

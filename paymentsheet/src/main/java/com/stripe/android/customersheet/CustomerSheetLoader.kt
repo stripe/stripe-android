@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -25,7 +26,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
@@ -40,7 +40,7 @@ internal interface CustomerSheetLoader {
 
 internal class DefaultCustomerSheetLoader(
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
-    private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
+    private val isNfcScanningAvailable: IsNfcScanningAvailable,
     private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
     private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
@@ -52,14 +52,14 @@ internal class DefaultCustomerSheetLoader(
     @Inject
     constructor(
         googlePayRepositoryFactory: GooglePayRepositoryFactory,
-        isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
+        isNfcScanningAvailable: IsNfcScanningAvailable,
         lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
-        isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+        isNfcScanningAvailable = isNfcScanningAvailable,
         lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
         intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
@@ -165,12 +165,18 @@ internal class DefaultCustomerSheetLoader(
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
 
+        val isNfcScanningAvailable = isNfcScanningAvailable.get(
+            elementsSession = elementsSession,
+            customerMetadata = customerMetadata,
+        )
+
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             customerMetadata = customerMetadata,
+            isNfcScanningEnabled = isNfcScanningAvailable,
             integrationMetadata = IntegrationMetadata.CustomerSheet(
                 attachmentStyle = if (intentDataSourceProvider.await().canCreateSetupIntents) {
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent
