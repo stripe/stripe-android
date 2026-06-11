@@ -1,10 +1,14 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.InSheetCheckoutSessionUpdater
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
@@ -34,9 +38,17 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
 ) : SheetActivityConfirmationHelper {
 
+    @OptIn(CheckoutSessionPreview::class)
     private val inSheetCheckoutSessionUpdater = InSheetCheckoutSessionUpdater(
-        paymentMethodMetadata = paymentMethodMetadata,
+        checkout = resolveCheckout(),
     )
+
+    @OptIn(CheckoutSessionPreview::class)
+    private fun resolveCheckout(): Checkout? {
+        val metadata = paymentMethodMetadata.integrationMetadata
+            as? IntegrationMetadata.CheckoutSession ?: return null
+        return CheckoutInstances[metadata.instancesKey].firstOrNull()
+    }
 
     override fun confirm() {
         if (onClickDelegate.onClickOverride != null) {
