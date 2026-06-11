@@ -38,9 +38,13 @@ import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -99,6 +103,7 @@ internal const val SELFIE_HAVING_TROUBLE_TAG = "SelfieHavingTroubleTag"
 internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
 internal const val SELFIE_CAPTURE_GUIDE_SHADOW_TAG = "SelfieCaptureGuideShadowTag"
 internal const val SELFIE_SCAN_ACTIVITY_INDICATOR_TAG = "SelfieScanActivityIndicatorTag"
+internal const val SELFIE_CAPTURED_CHECK_TAG = "SelfieCapturedCheckTag"
 private const val CAPTURE_GUIDE_TICK_COUNT = 77
 private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
 private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
@@ -270,15 +275,18 @@ private fun SelfieCaptureScreen(
 
             val scanState = (selfieScannerState as? IdentityScanViewModel.State.Scanning)?.scanState
             val isCheckingImages = faceDetectorTransitioner != null
+            val status = selfieScannerState.status()
+            val isShowingSideCapturePrompt = scanState.isWaitingForSideCapturePrompt()
             SelfieCameraViewFinder(
                 cameraManager = cameraManager,
                 identityViewModel = identityViewModel,
-                status = selfieScannerState.status(),
+                status = status,
                 showCaptureGuideShadow = (selfieScannerState as? IdentityScanViewModel.State.Scanning)
                     ?.scanState is IdentityScanState.Found,
                 captureGuideTone = scanState.captureGuideTone(),
                 showCaptureGuide = !isCheckingImages,
-                capturedSelfie = faceDetectorTransitioner?.lastCapturedSelfie()
+                capturedSelfie = faceDetectorTransitioner?.lastCapturedSelfie(),
+                isShowingSideCapturePrompt = isShowingSideCapturePrompt
             )
             if (!isCheckingImages) {
                 Text(
@@ -310,7 +318,8 @@ private fun SelfieCameraViewFinder(
     showCaptureGuideShadow: Boolean,
     captureGuideTone: CaptureGuideTone,
     showCaptureGuide: Boolean,
-    capturedSelfie: Bitmap?
+    capturedSelfie: Bitmap?,
+    isShowingSideCapturePrompt: Boolean
 ) {
     // Wait for camera adapter to be initialized before accessing lens model
     LaunchedEffect(cameraManager.cameraAdapter) {
@@ -334,7 +343,8 @@ private fun SelfieCameraViewFinder(
     ) {
         SelfieCameraViewFinderContent(
             capturedSelfie = capturedSelfie,
-            cameraManager = cameraManager
+            cameraManager = cameraManager,
+            blurCamera = isShowingSideCapturePrompt
         )
         if (showCaptureGuide) {
             CaptureGuide(showCaptureGuideShadow, captureGuideTone)
@@ -346,21 +356,22 @@ private fun SelfieCameraViewFinder(
                 )
             }
         }
+        if (status?.isCaptured == true) {
+            CapturedSelfieCheckmark(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        }
         status?.let {
-            val statusModifier = when (it) {
-                SelfieStatus.PlaceFace,
-                SelfieStatus.HoldStill,
-                SelfieStatus.CapturedFront,
-                SelfieStatus.CapturedLeft,
-                SelfieStatus.CapturedRight ->
-                    Modifier
-                        .align(Alignment.BottomCenter)
-                        .padding(bottom = 40.dp)
-                SelfieStatus.LookLeft,
-                SelfieStatus.LookRight,
-                SelfieStatus.CheckingImages ->
+            val statusModifier = when {
+                it == SelfieStatus.CheckingImages ||
+                    (it.isSideCaptureInstruction && isShowingSideCapturePrompt) ->
                     Modifier
                         .align(Alignment.Center)
+
+                else ->
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 32.dp)
             }
             SelfieStatusBadge(
                 status = it,
@@ -386,7 +397,8 @@ private fun AnnounceSelfieStatus(status: SelfieStatus?) {
 @Composable
 private fun SelfieCameraViewFinderContent(
     capturedSelfie: Bitmap?,
-    cameraManager: IdentityCameraManager
+    cameraManager: IdentityCameraManager,
+    blurCamera: Boolean
 ) {
     if (capturedSelfie != null) {
         Image(
@@ -405,8 +417,15 @@ private fun SelfieCameraViewFinderContent(
                 .background(Color.Black.copy(alpha = CAPTURED_SELFIE_OVERLAY_ALPHA))
         )
     } else {
+        val cameraModifier = if (blurCamera) {
+            Modifier
+                .fillMaxSize()
+                .blur(16.dp)
+        } else {
+            Modifier.fillMaxSize()
+        }
         AndroidView(
-            modifier = Modifier.fillMaxSize(),
+            modifier = cameraModifier,
             factory = {
                 CameraView(
                     it,
@@ -458,6 +477,18 @@ private enum class SelfieStatus(
     )
 }
 
+private val SelfieStatus.isCaptured: Boolean
+    get() = when (this) {
+        SelfieStatus.CapturedFront,
+        SelfieStatus.CapturedLeft,
+        SelfieStatus.CapturedRight -> true
+
+        else -> false
+    }
+
+private val SelfieStatus.isSideCaptureInstruction: Boolean
+    get() = this == SelfieStatus.LookLeft || this == SelfieStatus.LookRight
+
 private fun IdentityScanViewModel.State.status(): SelfieStatus? {
     return when (this) {
         is IdentityScanViewModel.State.Scanning -> scanState.status()
@@ -502,8 +533,42 @@ private fun IdentityScanState?.captureGuideTone(): CaptureGuideTone {
     }
 }
 
+private fun IdentityScanState?.isWaitingForSideCapturePrompt(): Boolean {
+    return (this?.transitioner as? FaceDetectorTransitioner)?.isWaitingForSideCapturePrompt == true
+}
+
 private fun FaceDetectorTransitioner.lastCapturedSelfie(): Bitmap {
     return filteredFrames[FaceDetectorTransitioner.INDEX_LAST].first.cameraPreviewImage.image
+}
+
+@Composable
+private fun CapturedSelfieCheckmark(
+    modifier: Modifier = Modifier
+) {
+    Canvas(
+        modifier = modifier
+            .size(36.dp)
+            .testTag(SELFIE_CAPTURED_CHECK_TAG)
+    ) {
+        drawCircle(
+            color = Color.White.copy(alpha = 0.94f),
+            radius = size.minDimension / 2f
+        )
+        val checkPath = Path().apply {
+            moveTo(size.width * 0.3f, size.height * 0.52f)
+            lineTo(size.width * 0.44f, size.height * 0.66f)
+            lineTo(size.width * 0.72f, size.height * 0.36f)
+        }
+        drawPath(
+            path = checkPath,
+            color = Color(0xFF8F949B),
+            style = Stroke(
+                width = 3.dp.toPx(),
+                cap = StrokeCap.Round,
+                join = StrokeJoin.Round
+            )
+        )
+    }
 }
 
 private fun DrawScope.drawCenteredGuideShadow(
@@ -628,9 +693,9 @@ private fun SelfieStatusBadge(
         modifier = modifier
             .background(
                 color = Color(STATUS_PILL_BACKGROUND_COLOR),
-                shape = RoundedCornerShape(8.dp)
+                shape = RoundedCornerShape(4.dp)
             )
-            .padding(8.dp)
+            .padding(horizontal = 8.dp, vertical = 6.dp)
             .semantics(mergeDescendants = true) {
                 testTag = SELFIE_SCAN_STATUS_TAG
             },
@@ -640,18 +705,18 @@ private fun SelfieStatusBadge(
         if (status.showsActivityIndicator) {
             CircularProgressIndicator(
                 modifier = Modifier
-                    .padding(end = 8.dp)
-                    .size(18.dp)
+                    .padding(end = 6.dp)
+                    .size(14.dp)
                     .testTag(SELFIE_SCAN_ACTIVITY_INDICATOR_TAG),
                 color = Color.White,
-                strokeWidth = 2.dp
+                strokeWidth = 1.5f.dp
             )
         }
         Text(
             text = stringResource(id = status.labelRes),
             color = Color.White,
-            fontSize = 16.sp,
-            lineHeight = 20.sp,
+            fontSize = 12.sp,
+            lineHeight = 16.sp,
             style = MaterialTheme.typography.body2.copy(
                 shadow = Shadow(
                     color = Color.Black.copy(alpha = STATUS_PILL_TEXT_SHADOW_ALPHA),

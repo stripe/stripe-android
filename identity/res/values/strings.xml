@@ -151,7 +151,7 @@
   <!-- Instructional text when camera is focusing on a document while scanning it -->
   <string name="stripe_hold_still">Hold still, scanning</string>
   <!-- Status text displayed over the selfie viewfinder while capturing selfies -->
-  <string name="stripe_hold_still_selfie">Hold still</string>
+  <string name="stripe_hold_still_selfie">Hold still...</string>
   <!-- display name for ID -->
   <string name="stripe_id_card">ID</string>
   <!-- Label for ID number section -->
@@ -237,9 +237,9 @@
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">one selfie captured</string>
   <!-- Status text instructing the user to turn left for selfie capture -->
-  <string name="stripe_selfie_look_left">Look left</string>
+  <string name="stripe_selfie_look_left">&#8592; Look left</string>
   <!-- Status text instructing the user to turn right for selfie capture -->
-  <string name="stripe_selfie_look_right">Look right</string>
+  <string name="stripe_selfie_look_right">Look right &#8594;</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Your selfie images have not been saved. Do you want to leave?</string>
   <!-- Status text instructing the user to place their face inside the selfie guide -->

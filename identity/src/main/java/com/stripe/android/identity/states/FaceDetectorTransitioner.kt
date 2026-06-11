@@ -28,6 +28,7 @@ import kotlin.time.TimeSource
  *
  * To transition from [Initial] state -
  * * Check if it's timeout since the start of the scan.
+ * * If waiting to capture a side pose, keep the instruction visible before saving frames.
  * * Check if a valid face is present, see [isFaceValid] for details. Save the frame and transition to Found if so.
  * * Otherwise stay in [Initial]
  *
@@ -41,7 +42,7 @@ import kotlin.time.TimeSource
  *  *   Otherwise transition to [Unsatisfied]
  *
  * To transition from [Satisfied] state -
- * * Directly transitions to [Finished]
+ * * Move to the next selfie pose, or transition to [Finished] after all poses have been captured.
  *
  * To transition from [Unsatisfied] state -
  * * Directly transitions to [Initial]
@@ -49,7 +50,8 @@ import kotlin.time.TimeSource
 internal class FaceDetectorTransitioner(
     private val selfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
     internal val selfieFrameSaver: SelfieFrameSaver = SelfieFrameSaver(),
-    private val stayInFoundDuration: Int = DEFAULT_STAY_IN_FOUND_DURATION
+    private val stayInFoundDuration: Int = DEFAULT_STAY_IN_FOUND_DURATION,
+    private val sideCapturePromptDuration: Int = DEFAULT_SIDE_CAPTURE_PROMPT_DURATION
 ) : IdentityScanStateTransitioner {
     @VisibleForTesting
     var timeoutAt: ComparableTimeMark =
@@ -69,6 +71,11 @@ internal class FaceDetectorTransitioner(
         private set
 
     private var captureStarted = false
+    private var activeCaptureStartedAt: ComparableTimeMark = TimeSource.Monotonic.markNow()
+    private var sideCapturePromptCompleted = true
+
+    internal val isWaitingForSideCapturePrompt: Boolean
+        get() = shouldWaitForSideCapturePrompt()
 
     @VisibleForTesting
     fun resetAndReturn(): FaceDetectorTransitioner {
@@ -77,6 +84,8 @@ internal class FaceDetectorTransitioner(
         activeCapture = Capture.FRONT
         completedCapture = null
         captureStarted = false
+        activeCaptureStartedAt = TimeSource.Monotonic.markNow()
+        sideCapturePromptCompleted = true
         return this
     }
 
@@ -194,15 +203,20 @@ internal class FaceDetectorTransitioner(
             captureStarted = true
         }
 
+        if (timeoutAt.hasPassedNow()) {
+            Log.d(TAG, "Timeout in Initial state: $initialState")
+            return IdentityScanState.TimeOut(initialState.type, this)
+        }
+        if (shouldWaitForSideCapturePrompt()) {
+            Log.d(TAG, "Showing $activeCapture instruction prompt, stay in Initial")
+            return initialState
+        }
+
+        val shouldRefreshInitialAfterSidePrompt = consumeSideCapturePromptCompletion()
         val nowTimestampMs = SystemClock.elapsedRealtime()
         val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
 
         return when {
-            timeoutAt.hasPassedNow() -> {
-                Log.d(TAG, "Timeout in Initial state: $initialState")
-                IdentityScanState.TimeOut(initialState.type, this)
-            }
-
             isFrameValidForActiveCapture(analyzerOutput, motionBlurResult) -> {
                 Log.d(TAG, "Valid face found, transition to Found")
                 saveFrame(
@@ -220,7 +234,11 @@ internal class FaceDetectorTransitioner(
 
             else -> {
                 Log.d(TAG, "Valid face not found, stay in Initial")
-                initialState
+                if (shouldRefreshInitialAfterSidePrompt) {
+                    Initial(initialState.type, this)
+                } else {
+                    initialState
+                }
             }
         }
     }
@@ -311,7 +329,10 @@ internal class FaceDetectorTransitioner(
             Finished(satisfiedState.type, this)
         } else {
             activeCapture = nextCapture
+            activeCaptureStartedAt = TimeSource.Monotonic.markNow()
             completedCapture = null
+            sideCapturePromptCompleted = false
+            motionBlurDetector.reset()
             Initial(
                 type = satisfiedState.type,
                 transitioner = this
@@ -365,6 +386,19 @@ internal class FaceDetectorTransitioner(
             Capture.LEFT -> pose.yaw < -SIDE_CAPTURE_YAW_THRESHOLD
             Capture.RIGHT -> pose.yaw > SIDE_CAPTURE_YAW_THRESHOLD
         }
+    }
+
+    private fun shouldWaitForSideCapturePrompt(): Boolean {
+        return activeCapture != Capture.FRONT &&
+            activeCaptureStartedAt.elapsedNow() < sideCapturePromptDuration.milliseconds
+    }
+
+    private fun consumeSideCapturePromptCompletion(): Boolean {
+        if (activeCapture == Capture.FRONT || sideCapturePromptCompleted) {
+            return false
+        }
+        sideCapturePromptCompleted = true
+        return true
     }
 
     private suspend fun saveFrame(
@@ -518,6 +552,7 @@ internal class FaceDetectorTransitioner(
         const val VALUE_LEFT = "left"
         const val VALUE_RIGHT = "right"
         const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
+        const val DEFAULT_SIDE_CAPTURE_PROMPT_DURATION = 900
 
         private const val SIDE_CAPTURE_NUM_FRAMES = 2
         private const val SIDE_CAPTURE_YAW_THRESHOLD = 10f
