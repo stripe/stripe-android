@@ -185,7 +185,7 @@ workflows:
       - _run-connections-e2e-tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-connections-e2e-data-tests-on-push:
     envs:
@@ -196,7 +196,7 @@ workflows:
       - _run-connections-e2e-tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-connections-e2e-token-tests-on-push:
     envs:
@@ -207,7 +207,7 @@ workflows:
       - _run-connections-e2e-tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-connections-e2e-livemode-tests:
     envs:
@@ -312,7 +312,7 @@ workflows:
             - test_title: PaymentSheet instrumentation tests
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-financial-connections-instrumentation-tests:
     before_run:
@@ -375,7 +375,7 @@ workflows:
             - content: ./gradlew :paymentsheet-example:assembleBaseDebug :paymentsheet-example:assembleBaseDebugAndroidTest -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-paymentsheet-e2e-shard-1:
     envs:
@@ -384,7 +384,7 @@ workflows:
       - _run-paymentsheet-e2e-shard
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-paymentsheet-e2e-shard-2:
     envs:
@@ -393,7 +393,7 @@ workflows:
       - _run-paymentsheet-e2e-shard
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-paymentsheet-e2e-shard-3:
     envs:
@@ -402,7 +402,7 @@ workflows:
       - _run-paymentsheet-e2e-shard
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-paymentsheet-e2e-shard-4:
     envs:
@@ -411,7 +411,7 @@ workflows:
       - _run-paymentsheet-e2e-shard
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-paymentsheet-e2e-shard-5:
     envs:
@@ -420,7 +420,7 @@ workflows:
       - _run-paymentsheet-e2e-shard
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   _run-paymentsheet-e2e-shard:
     before_run:
@@ -466,7 +466,7 @@ workflows:
             - test_title: PaymentSheet latency synthetics
     meta:
       bitrise.io:
-        stack: linux-docker-android-22.04
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
         machine_type_id: g2.linux.x-large
   run-crypto-onramp-example-e2e-tests:
     before_run:
@@ -667,5 +667,5 @@ step_bundles:
                 bash "$BITRISE_SOURCE_DIR/scripts/store_in_bitrise_test_results_folder.sh" "$test_type" "$test_title"
 meta:
   bitrise.io:
-    stack: linux-docker-android-22.04
+    stack: ubuntu-resolute-26.04-bitrise-2026-android
     machine_type_id: g2.linux.medium
