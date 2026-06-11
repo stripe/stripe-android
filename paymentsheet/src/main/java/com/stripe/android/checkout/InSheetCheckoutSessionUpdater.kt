@@ -71,10 +71,11 @@ internal class InSheetCheckoutSessionUpdater(
 
         val address = billingAddress.toCheckoutAddress()
 
-        return checkout.updateBillingAddressFromSheet(
+        return checkout.updateBillingAddress(
             name = billingDetails.name,
             phoneNumber = billingDetails.phone,
             address = address,
+            allowWhileSheetPresented = true,
         )
     }
 }

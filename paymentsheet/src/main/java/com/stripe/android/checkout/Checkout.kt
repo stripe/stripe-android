@@ -456,25 +456,11 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
+        allowWhileSheetPresented: Boolean = false,
     ): Result<Unit> {
         val built = address.build()
         return withInternalState(
-            additionalStateMutations = {
-                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
-            },
-        ) { sessionId ->
-            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
-        }
-    }
-
-    internal suspend fun updateBillingAddressFromSheet(
-        name: String? = null,
-        phoneNumber: String? = null,
-        address: Address,
-    ): Result<Unit> {
-        val built = address.build()
-        return withInternalState(
-            allowWhileSheetPresented = true,
+            allowWhileSheetPresented = allowWhileSheetPresented,
             additionalStateMutations = {
                 copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
             },
