@@ -39,7 +39,8 @@ internal fun InputAddressScreen(
     onCloseClick: () -> Unit,
     topContent: @Composable ColumnScope.() -> Unit,
     formContent: @Composable ColumnScope.() -> Unit,
-    bottomContent: @Composable ColumnScope.() -> Unit
+    bottomContent: @Composable ColumnScope.() -> Unit,
+    footerContent: @Composable ColumnScope.() -> Unit = {},
 ) {
     val focusManager = LocalFocusManager.current
     Scaffold(
@@ -80,6 +81,7 @@ internal fun InputAddressScreen(
                     },
                     modifier = Modifier.padding(vertical = 16.dp),
                 )
+                footerContent()
             }
         }
     }
@@ -159,6 +161,6 @@ internal fun InputAddressScreen(
                     }
                 )
             }
-        }
+        },
     )
 }

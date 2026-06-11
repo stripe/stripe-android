@@ -1,19 +1,30 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import android.text.SpannableString
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
+import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
+import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
+import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
+import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -21,6 +32,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
@@ -29,12 +41,14 @@ import org.robolectric.RobolectricTestRunner
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
     private val eventReporter = mock<AddressLauncherEventReporter>()
+    private val mockPlacesClient = mock<PlacesClientProxy>()
 
     private fun createViewModel(
         address: AddressDetails? = null,
         config: AddressLauncher.Configuration = AddressLauncher.Configuration.Builder()
             .address(address)
-            .build()
+            .build(),
+        placesClient: PlacesClientProxy? = null,
     ): InputAddressViewModel {
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
@@ -43,11 +57,35 @@ class InputAddressViewModelTest {
             ),
             navigator,
             eventReporter,
+            placesClient = placesClient,
+            context = ApplicationProvider.getApplicationContext(),
         )
     }
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @Test
+    fun `autocomplete config disables inline autocomplete by default`() {
+        FeatureFlags.inlineAddressAutocomplete.reset()
+
+        val viewModel = createViewModel()
+
+        assertThat(viewModel.autocompleteConfig.isInlineAutocomplete).isFalse()
+    }
+
+    @Test
+    fun `autocomplete config enables inline autocomplete when feature flag is enabled`() {
+        FeatureFlags.inlineAddressAutocomplete.setEnabled(true)
+
+        try {
+            val viewModel = createViewModel()
+
+            assertThat(viewModel.autocompleteConfig.isInlineAutocomplete).isTrue()
+        } finally {
+            FeatureFlags.inlineAddressAutocomplete.reset()
+        }
+    }
 
     @Test
     fun `no autocomplete address passed has an empty address to start`() = runTest(UnconfinedTestDispatcher()) {
@@ -837,6 +875,122 @@ class InputAddressViewModelTest {
                 assertThat(awaitItem()).isEqualTo(createShowState(isChecked = true))
             }
         }
+
+    @Test
+    fun `onQueryChanged never calls places client when query is too short`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(placesClient = mockPlacesClient)
+
+        viewModel.onQueryChanged("a", "US")
+
+        advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+        verify(mockPlacesClient, never()).findAutocompletePredictions(any(), any(), any())
+    }
+
+    @Test
+    fun `onQueryChanged never calls places client when country is not supported`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .autocompleteCountries(setOf("US", "CA"))
+                .build(),
+            placesClient = mockPlacesClient,
+        )
+
+        viewModel.onQueryChanged("123 Main Street", "GB")
+
+        advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+        verify(mockPlacesClient, never()).findAutocompletePredictions(any(), any(), any())
+    }
+
+    @Test
+    fun `onQueryChanged allows any country when autocompleteCountries is empty`() = runTest(UnconfinedTestDispatcher()) {
+        whenever(mockPlacesClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(FindAutocompletePredictionsResponse(emptyList()))
+        )
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration.Builder()
+                .autocompleteCountries(emptySet())
+                .build(),
+            placesClient = mockPlacesClient,
+        )
+
+        viewModel.inlinePredictionsState.test {
+            assertThat(awaitItem()).isEqualTo(AutocompleteAddressInteractor.InlinePredictionsState.Idle)
+            viewModel.onQueryChanged("123 Main Street", "JP")
+            advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+            assertThat(awaitItem()).isEqualTo(
+                AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = "123 Main Street",
+                    predictions = emptyList(),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `onQueryChanged emits Results on successful prediction fetch`() = runTest(UnconfinedTestDispatcher()) {
+        val prediction = AutocompletePrediction(
+            primaryText = SpannableString("123 King Street"),
+            secondaryText = SpannableString("San Francisco, CA, USA"),
+            placeId = "place123",
+        )
+        whenever(mockPlacesClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(FindAutocompletePredictionsResponse(listOf(prediction)))
+        )
+        val viewModel = createViewModel(placesClient = mockPlacesClient)
+
+        viewModel.inlinePredictionsState.test {
+            assertThat(awaitItem()).isEqualTo(AutocompleteAddressInteractor.InlinePredictionsState.Idle)
+            viewModel.onQueryChanged("123 King", "US")
+            advanceTimeBy(AutocompleteViewModel.SEARCH_DEBOUNCE_MS + 1)
+            assertThat(awaitItem()).isEqualTo(
+                AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = "123 King",
+                    predictions = listOf(
+                        AutocompleteAddressInteractor.InlineAddressPrediction(
+                            id = "place123",
+                            primaryText = "123 King Street",
+                            secondaryText = "San Francisco, CA, USA",
+                        )
+                    ),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `onPredictionSelected populates address fields via event and clears predictions state`() = runTest(UnconfinedTestDispatcher()) {
+        whenever(mockPlacesClient.fetchPlace(eq("place123"))).thenReturn(
+            Result.success(
+                FetchPlaceResponse(
+                    Place(
+                        listOf(
+                            AddressComponent(shortName = "123", longName = "123", types = listOf(Place.Type.STREET_NUMBER.value)),
+                            AddressComponent(shortName = "King Street", longName = "King Street", types = listOf(Place.Type.ROUTE.value)),
+                            AddressComponent(shortName = "South SF", longName = "South San Francisco", types = listOf(Place.Type.LOCALITY.value)),
+                            AddressComponent(shortName = "CA", longName = "California", types = listOf(Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value)),
+                            AddressComponent(shortName = "US", longName = "United States", types = listOf(Place.Type.COUNTRY.value)),
+                            AddressComponent(shortName = "99999", longName = "99999", types = listOf(Place.Type.POSTAL_CODE.value)),
+                        )
+                    )
+                )
+            )
+        )
+        val viewModel = createViewModel(placesClient = mockPlacesClient)
+        val capturedEvents = mutableListOf<AutocompleteAddressInteractor.Event>()
+        viewModel.register { capturedEvents.add(it) }
+
+        viewModel.onPredictionSelected("place123")
+
+        assertThat(viewModel.inlinePredictionsState.value)
+            .isEqualTo(AutocompleteAddressInteractor.InlinePredictionsState.Idle)
+        assertThat(capturedEvents).hasSize(1)
+        val event = capturedEvents[0] as AutocompleteAddressInteractor.Event.OnValues
+        assertThat(event.values?.get(IdentifierSpec.Line1)).isEqualTo("123 King Street")
+        assertThat(event.values?.get(IdentifierSpec.City)).isEqualTo("South San Francisco")
+        assertThat(event.values?.get(IdentifierSpec.State)).isEqualTo("CA")
+        assertThat(event.values?.get(IdentifierSpec.Country)).isEqualTo("US")
+        assertThat(event.values?.get(IdentifierSpec.PostalCode)).isEqualTo("99999")
+    }
 
     private fun doesNotUseAddressTest(
         config: AddressLauncher.Configuration,

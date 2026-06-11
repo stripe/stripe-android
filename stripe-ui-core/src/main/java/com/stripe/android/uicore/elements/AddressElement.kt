@@ -32,6 +32,11 @@ class AddressElement(
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
+    inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
+    onInlinePredictionSelected: ((String) -> Unit)? = null,
+    onInlineDismissed: (() -> Unit)? = null,
+    onInlineEnterManually: (() -> Unit)? = null,
+    getAttributionDrawable: ((Boolean) -> Int?)? = null,
 ) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
     override val allowsUserInteraction: Boolean = true
@@ -54,11 +59,20 @@ class AddressElement(
         )
     )
 
+    private val condensedMode = addressInputMode as? AddressInputMode.AutocompleteCondensed
+
     private val addressAutoCompleteElement = AddressTextFieldElement(
         identifier = IdentifierSpec.OneLineAddress,
         label = resolvableString(R.string.stripe_address_label_address),
-        onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
+        onNavigation = condensedMode?.onNavigation,
+        inlinePredictionsState = inlinePredictionsState,
+        onInlinePredictionSelected = onInlinePredictionSelected,
+        onInlineDismissed = onInlineDismissed,
+        onInlineEnterManually = onInlineEnterManually,
+        getAttributionDrawable = getAttributionDrawable,
     )
+
+    val inlineQuery: StateFlow<String> get() = addressAutoCompleteElement.inlineQuery
 
     @VisibleForTesting
     val phoneNumberElement = PhoneNumberElement(

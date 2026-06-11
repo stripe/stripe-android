@@ -541,6 +541,7 @@ internal class PlaygroundSettings private constructor(
             CollectAddressSettingsDefinition,
             AllowedBillingCountriesSettingsDefinition,
             AutocompleteAddressSettingsDefinition,
+            FeatureFlagSettingsDefinition(FeatureFlags.inlineAddressAutocomplete),
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
