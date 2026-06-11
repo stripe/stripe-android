@@ -9,6 +9,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import com.stripe.android.uicore.StripeColors
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -56,7 +57,9 @@ internal class NfcScanningActivity : AppCompatActivity() {
                 }
             }
 
-            StripeTheme {
+            StripeTheme(
+                colors = StripeTheme.getColors(isDark = false),
+            ) {
                 NfcScanningScreen(
                     state = state,
                     tapZone = viewModel.tapZone,

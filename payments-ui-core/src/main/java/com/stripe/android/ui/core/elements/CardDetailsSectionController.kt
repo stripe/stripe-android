@@ -37,7 +37,7 @@ class CardDetailsSectionController(
         cardDetailsElement.onValidationStateChanged(isValidating)
     }
 
-    internal fun onScannedCard(scannedCardDetails: ScannedCardDetails) {
-        cardDetailsElement.controller.onScannedCard(scannedCardDetails)
+    internal fun onScannedCard(scannedCardDetails: ScannedCardDetails, showAsPill: Boolean = false) {
+        cardDetailsElement.controller.onScannedCard(scannedCardDetails, showAsPill)
     }
 }

@@ -58,6 +58,7 @@
         <activity
             android:name="com.stripe.android.common.nfcscan.NfcScanningActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:screenOrientation="portrait"
             android:exported="false" />
         <activity
             android:name="com.stripe.android.attestation.AttestationActivity"

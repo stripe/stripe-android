@@ -3,7 +3,6 @@ package com.stripe.android.common.nfcscan
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.common.nfcscan.apdu.IsoCardReader
 import com.stripe.android.common.nfcscan.apdu.IsoNfcTagTransceiver
-import com.stripe.android.common.nfcscan.apdu.NfcCardData
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
@@ -19,7 +18,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface NfcCardScanner {
     sealed interface State {
         data object Scanning : State
-        data class Complete(val cardData: NfcCardData) : State
+        data class Complete(val cardData: ScannedCardData) : State
         data class Failed(val error: Throwable) : State
     }
 

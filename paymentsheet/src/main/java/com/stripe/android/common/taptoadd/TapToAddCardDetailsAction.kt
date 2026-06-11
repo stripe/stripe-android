@@ -16,7 +16,7 @@ internal class TapToAddCardDetailsAction(
     private val paymentMethodMetadata: PaymentMethodMetadata,
 ) : CardDetailsAction {
     @Composable
-    override fun Content(enabled: Boolean, onScannedCard: (ScannedCardDetails) -> Unit) {
+    override fun Content(enabled: Boolean, onScannedCard: (ScannedCardDetails, Boolean) -> Unit) {
         val isTapToAddEnabled by tapToAddHelper.isTapToAddEnabled.collectAsState()
         var buttonReportedShown by rememberSaveable { mutableStateOf(false) }
 

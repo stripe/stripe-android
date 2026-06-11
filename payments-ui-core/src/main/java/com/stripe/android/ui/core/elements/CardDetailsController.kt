@@ -28,6 +28,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
@@ -49,6 +50,7 @@ internal class CardDetailsController(
     dateConfig: TextFieldConfig = DateConfig(),
     private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
 ) : SectionFieldValidationController, SectionFieldComposable {
+    private val showAsPill = MutableStateFlow(false)
 
     val nameElement = if (collectName) {
         SimpleTextElement(
@@ -110,7 +112,7 @@ internal class CardDetailsController(
         )
     )
 
-    fun onScannedCard(scannedCardDetails: ScannedCardDetails) {
+    fun onScannedCard(scannedCardDetails: ScannedCardDetails, showAsPill: Boolean = false) {
         cvcElement.controller.onRawValueChange("")
         numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
         val newDate = if (
@@ -127,10 +129,11 @@ internal class CardDetailsController(
             ""
         }
         expirationDateElement.controller.onRawValueChange(newDate)
+        this.showAsPill.value = showAsPill
     }
 
     private val rowFields = listOf(expirationDateElement, cvcElement)
-    val fields = listOfNotNull(
+    private val defaultFields = listOfNotNull(
         nameElement,
         numberElement,
         RowElement(
@@ -139,6 +142,35 @@ internal class CardDetailsController(
             RowController(rowFields)
         )
     )
+
+    val fields = combineAsStateFlow(
+        numberElement.controller.formFieldValue,
+        expirationDateElement.controller.isComplete,
+        showAsPill,
+    ) { numberEntry, isExpirationDateComplete, showAsPill ->
+        val numberValue = numberEntry.value
+        val cardBrand = numberElement.controller.cardBrandFlow.value
+
+        if (numberEntry.isComplete && numberValue != null && isExpirationDateComplete && showAsPill) {
+            listOfNotNull(
+                nameElement,
+                SavedPillElement(
+                    controller = SavedPillController(
+                        last4 = numberValue.takeLast(4),
+                        cardBrand = cardBrand,
+                        onRemoveClicked = {
+                            numberElement.controller.onRawValueChange("")
+                            expirationDateElement.controller.onRawValueChange("")
+                            this.showAsPill.value = false
+                        }
+                    )
+                ),
+                cvcElement,
+            )
+        } else {
+            defaultFields
+        }
+    }
 
     override val validationMessage = combineAsStateFlow(
         listOfNotNull(
@@ -154,7 +186,7 @@ internal class CardDetailsController(
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {
-        fields.forEach {
+        defaultFields.forEach {
             it.onValidationStateChanged(isValidating)
         }
     }

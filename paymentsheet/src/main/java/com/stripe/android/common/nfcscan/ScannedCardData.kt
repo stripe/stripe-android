@@ -1,6 +1,6 @@
-package com.stripe.android.common.nfcscan.apdu
+package com.stripe.android.common.nfcscan
 
-internal data class NfcCardData(
+internal data class ScannedCardData(
     val cardNumber: String,
     val expirationMonth: Int,
     val expirationYear: Int,

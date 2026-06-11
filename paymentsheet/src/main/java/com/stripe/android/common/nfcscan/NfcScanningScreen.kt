@@ -10,13 +10,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
@@ -24,11 +22,8 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Checkbox
-import androidx.compose.material.CheckboxDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -42,27 +37,34 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.CheckboxElementUI
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 private val CircleSize = 160.dp
+
+/** Outer bounds for coil + success halo; fixed so tap-zone alignment and title never shift. */
+private val CoilStageSize = CircleSize + 26.dp
+
 private val ScanRingColor = Color(0xFF90BEF5)
 private val SuccessRingColor = Color(0xFF81C784)
 private val SuccessCircleColor = Color(0xFF3A8A3A)
 private val SuccessBackgroundColor = Color(0xFFEBF5EB)
-private val IconTintScanning = Color(0xFF5B7FA6)
-private val ScreenBackgroundIdle = Color(0xFFF7F7F9)
+private val IconTintScanning = Color(0xFF636366)
+private val ScreenBackgroundIdle = Color(0xFFFFFFFF)
 private val TitleColor = Color(0xFF1A1A1A)
-private val SubtitleColor = Color(0xFF636366)
 private val ErrorIconTint = Color(0xFFE53935)
 
 /** Scale of the reading-state ripple after it expands from the shrink phase. */
@@ -107,13 +109,47 @@ internal fun NfcScanningScreen(
         animationSpec = tween(500),
         label = "ringColor",
     )
-
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(screenBackground),
     ) {
-        // NFC coil and ripples: full window + tap-zone bias so alignment matches the physical coil.
+        val canRenderTopUserInput = tapZone.yBias >= 0.8
+        val canRenderTopCloseButton = tapZone.yBias > 0.1
+
+        if (canRenderTopUserInput || canRenderTopCloseButton) {
+            Box(Modifier.align(Alignment.TopCenter).windowInsetsPadding(WindowInsets.safeDrawing)) {
+                Column(Modifier.fillMaxWidth()) {
+                    if (canRenderTopCloseButton) {
+                        CloseButton(
+                            onClose = onClose,
+                        )
+                    }
+
+                    if (canRenderTopUserInput) {
+                        Column(
+                            modifier = Modifier,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Spacer(
+                                modifier = Modifier.height(12.dp)
+                            )
+
+                            SaveForFutureUse(
+                                merchantName = merchantName,
+                                shouldSave = shouldSave,
+                                onShouldSaveChanged = onShouldSaveChanged,
+                            )
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            AddCardManuallyButton(onAddManually = onAddManually)
+                        }
+                    }
+                }
+            }
+        }
+
         Box(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = BiasAlignment(
@@ -128,100 +164,107 @@ internal fun NfcScanningScreen(
             )
         }
 
-        // Copy, actions, and system bar padding — kept inside safe + IME bounds (not the coil).
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .windowInsetsPadding(WindowInsets.safeDrawing)
-                .imePadding()
-                .padding(horizontal = 20.dp),
-        ) {
-            IconButton(
-                onClick = onClose,
-                modifier = Modifier.padding(top = 2.dp),
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
-                    contentDescription = stringResource(R.string.stripe_nfc_scan_close),
-                    tint = Color(0xFF8A8A8F),
-                    modifier = Modifier.size(20.dp),
-                )
+        val canRenderBottomUserInput = tapZone.yBias < 0.8
+        val canRenderBottomCloseButton = tapZone.yBias <= 0.1
+
+        if (canRenderBottomUserInput || canRenderBottomCloseButton) {
+            Box(Modifier.align(Alignment.BottomCenter).windowInsetsPadding(WindowInsets.safeDrawing)) {
+                Column(Modifier.fillMaxWidth()) {
+                    if (canRenderBottomUserInput) {
+                        Column(
+                            modifier = Modifier.padding(horizontal = 20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            AddCardManuallyButton(onAddManually = onAddManually)
+
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            SaveForFutureUse(
+                                merchantName = merchantName,
+                                shouldSave = shouldSave,
+                                onShouldSaveChanged = onShouldSaveChanged,
+                            )
+
+                            Spacer(
+                                modifier = Modifier.height(12.dp)
+                            )
+                        }
+                    }
+
+                    if (canRenderBottomCloseButton) {
+                        CloseButton(
+                            modifier = Modifier,
+                            onClose = onClose,
+                        )
+                    }
+                }
             }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Text(
-                text = stringResource(R.string.stripe_nfc_scan_tap_behind_device),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.SemiBold,
-                fontSize = 20.sp,
-                lineHeight = 26.sp,
-                color = TitleColor,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = stringResource(R.string.stripe_nfc_scan_instruction_subtitle),
-                textAlign = TextAlign.Center,
-                fontWeight = FontWeight.Normal,
-                fontSize = 15.sp,
-                lineHeight = 20.sp,
-                color = SubtitleColor,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(28.dp))
-
-            OutlinedButton(
-                onClick = onAddManually,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = TitleColor,
-                ),
-                border = BorderStroke(1.dp, Color(0xFFD1D1D6)),
-            ) {
-                Text(
-                    text = stringResource(R.string.stripe_nfc_scan_add_card_manually),
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            val saveText = if (merchantName != null) {
-                stringResource(R.string.stripe_nfc_scan_save_card_for_future, merchantName)
-            } else {
-                stringResource(R.string.stripe_nfc_scan_save_card_generic)
-            }
-
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Checkbox(
-                    checked = shouldSave,
-                    onCheckedChange = onShouldSaveChanged,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = MaterialTheme.colors.primary,
-                    ),
-                )
-                Text(
-                    text = saveText,
-                    fontSize = 14.sp,
-                    lineHeight = 18.sp,
-                    color = Color(0xFF3C3C43).copy(alpha = 0.85f),
-                )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
         }
     }
+}
+
+@Composable
+private fun CloseButton(
+    modifier: Modifier = Modifier,
+    onClose: () -> Unit
+) {
+    IconButton(
+        onClick = onClose,
+        modifier = modifier,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
+            contentDescription = stringResource(R.string.stripe_nfc_scan_close),
+            tint = Color(0xFF8A8A8F),
+        )
+    }
+}
+
+@Composable
+private fun AddCardManuallyButton(
+    modifier: Modifier = Modifier,
+    onAddManually: () -> Unit,
+) {
+    OutlinedButton(
+        onClick = onAddManually,
+        modifier = modifier
+            .fillMaxWidth()
+            .height(52.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            backgroundColor = Color.White,
+            contentColor = TitleColor,
+        ),
+        border = BorderStroke(1.dp, Color(0xFFD1D1D6)),
+    ) {
+        Text(
+            text = stringResource(R.string.stripe_nfc_scan_add_card_manually),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 16.sp,
+        )
+    }
+}
+
+@Composable
+private fun SaveForFutureUse(
+    modifier: Modifier = Modifier,
+    merchantName: String?,
+    shouldSave: Boolean,
+    onShouldSaveChanged: (Boolean) -> Unit,
+) {
+    val saveText = if (merchantName != null) {
+        stringResource(R.string.stripe_nfc_scan_save_card_for_future, merchantName)
+    } else {
+        stringResource(R.string.stripe_nfc_scan_save_card_generic)
+    }
+
+    CheckboxElementUI(
+        modifier = modifier,
+        label = saveText,
+        isEnabled = true,
+        isChecked = shouldSave,
+        onValueChange = onShouldSaveChanged,
+    )
 }
 
 @Composable
@@ -240,11 +283,14 @@ private fun NfcScanCircle(
         else -> CoilCenterContent.Tap
     }
 
-    Box(contentAlignment = Alignment.Center) {
+    Box(
+        modifier = Modifier.size(CoilStageSize),
+        contentAlignment = Alignment.Center,
+    ) {
         if (isComplete) {
             Box(
                 modifier = Modifier
-                    .size(CircleSize + 26.dp)
+                    .size(CoilStageSize)
                     .background(ringColor.copy(alpha = 0.38f), CircleShape),
             )
         }
@@ -270,34 +316,60 @@ private fun NfcScanCircle(
                 animationSpec = tween(400),
                 label = "coilCenter",
             ) { content ->
-                when (content) {
-                    CoilCenterContent.Success -> {
-                        Icon(
-                            painter = painterResource(R.drawable.stripe_ic_nfc_scan_check),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(64.dp),
-                        )
-                    }
-                    CoilCenterContent.Error -> {
-                        Icon(
-                            painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
-                            contentDescription = stringResource(R.string.stripe_nfc_scan_error),
-                            tint = ErrorIconTint,
-                            modifier = Modifier.size(44.dp),
-                        )
-                    }
-                    CoilCenterContent.Tap -> {
-                        Icon(
-                            painter = painterResource(R.drawable.stripe_ic_nfc_tap),
-                            contentDescription = null,
-                            tint = IconTintScanning,
-                            modifier = Modifier.size(80.dp),
-                        )
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    when (content) {
+                        CoilCenterContent.Success -> {
+                            Icon(
+                                painter = painterResource(R.drawable.stripe_ic_nfc_scan_check),
+                                contentDescription = null,
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(64.dp),
+                            )
+                        }
+                        CoilCenterContent.Error -> {
+                            Icon(
+                                painter = painterResource(R.drawable.stripe_ic_paymentsheet_close),
+                                contentDescription = stringResource(R.string.stripe_nfc_scan_error),
+                                tint = ErrorIconTint,
+                                modifier = Modifier.size(44.dp),
+                            )
+                        }
+                        CoilCenterContent.Tap -> {
+                            Icon(
+                                painter = painterResource(R.drawable.stripe_ic_emv_tap),
+                                contentDescription = null,
+                                tint = IconTintScanning,
+                                modifier = Modifier.size(80.dp),
+                            )
+                        }
                     }
                 }
             }
         }
+
+        Text(
+            text = stringResource(R.string.stripe_nfc_scan_tap_behind_device),
+            textAlign = TextAlign.Center,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 20.sp,
+            lineHeight = 26.sp,
+            color = TitleColor,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+
+                    layout(placeable.width, 0) {
+                        val spacingGap = 8.dp.roundToPx()
+
+                        // Place the text directly below the image baseline
+                        placeable.placeRelative(0, spacingGap)
+                    }
+                },
+        )
     }
 }
 
@@ -364,4 +436,20 @@ private fun ReadingRippleRing(circleSize: Dp, color: Color) {
             }
             .background(color, CircleShape),
     )
+}
+
+@Preview
+@Composable
+private fun ThisIsATest() {
+    StripeTheme {
+        NfcScanningScreen(
+            state = NfcScanningState.Scanning,
+            tapZone = TapZone(0.5f, 0.5f),
+            shouldSave = false,
+            merchantName = "Example, Inc.",
+            onClose = {},
+            onAddManually = {},
+            onShouldSaveChanged = {},
+        )
+    }
 }

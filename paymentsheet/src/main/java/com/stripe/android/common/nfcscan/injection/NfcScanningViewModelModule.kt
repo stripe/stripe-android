@@ -11,6 +11,8 @@ import com.stripe.android.common.nfcscan.hardware.DefaultNfcHardwareDelegate
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.common.nfcscan.DefaultNfcCardScanner
 import com.stripe.android.common.nfcscan.NfcCardScanner
+import com.stripe.android.common.nfcscan.apdu.DefaultIsoCardDataParser
+import com.stripe.android.common.nfcscan.apdu.IsoCardDataParser
 import com.stripe.android.common.nfcscan.tapzone.DefaultTapZoneResolver
 import com.stripe.android.common.nfcscan.tapzone.TapZoneResolver
 import com.stripe.android.core.injection.CoroutineContextModule
@@ -20,6 +22,7 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import javax.inject.Singleton
 
 @Module(
     includes = [CoroutineContextModule::class]
@@ -41,6 +44,9 @@ internal interface NfcScanningViewModelModule {
 
     @Binds
     fun bindsIsoCardReader(reader: DefaultIsoCardReader): IsoCardReader
+
+    @Binds
+    fun bindsIsoCardDataParser(reader: DefaultIsoCardDataParser): IsoCardDataParser
 
     companion object {
         @Provides

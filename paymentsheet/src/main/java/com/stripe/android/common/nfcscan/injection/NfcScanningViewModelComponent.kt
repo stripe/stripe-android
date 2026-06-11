@@ -4,7 +4,9 @@ import android.app.Application
 import com.stripe.android.common.nfcscan.NfcScanningViewModel
 import dagger.BindsInstance
 import dagger.Component
+import javax.inject.Singleton
 
+@Singleton
 @Component(
     modules = [NfcScanningViewModelModule::class]
 )

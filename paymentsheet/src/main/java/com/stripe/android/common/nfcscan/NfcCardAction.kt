@@ -11,7 +11,7 @@ internal class NfcCardAction(val paymentMethodMetadata: PaymentMethodMetadata) :
     @Composable
     override fun Content(
         enabled: Boolean,
-        onScannedCard: (ScannedCardDetails) -> Unit
+        onScannedCard: (ScannedCardDetails, Boolean) -> Unit
     ) {
         val launcher = rememberLauncherForActivityResult(NfcScanningContract) { result ->
             if (result is NfcScanningContract.Result.Complete) {
@@ -20,7 +20,8 @@ internal class NfcCardAction(val paymentMethodMetadata: PaymentMethodMetadata) :
                         cardNumber = result.cardNumber,
                         expirationYear = result.expirationYear,
                         expirationMonth = result.expirationMonth,
-                    )
+                    ),
+                    true,
                 )
             }
         }

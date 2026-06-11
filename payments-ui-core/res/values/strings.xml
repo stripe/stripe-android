@@ -34,6 +34,8 @@
   <string name="stripe_card_brand_not_accepted">(not accepted)</string>
   <!-- Shown in a dropdown picker next to a card brand that is not accepted by a merchant. E.g. "Visa (not accepted)" -->
   <string name="stripe_card_brand_not_accepted_with_brand">%1$s (not accepted)</string>
+  <!-- Accessibility content description for the remove control on the saved card summary pill. -->
+  <string name="stripe_saved_pill_remove_card">Remove saved card</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_card_with_tap_or_enter_manually">Tap or enter manually</string>
   <!-- Cash App mandate text -->
