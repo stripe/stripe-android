@@ -101,7 +101,7 @@ workflows:
       - INCLUDE_PAPARAZZI_ON_FAILURE: true
     meta:
       bitrise.io:
-        stack: osx-xcode-16.2.x    # Specify Mac stack just for this workflow
+        stack: osx-xcode-26.5.x    # Specify Mac stack just for this workflow
         machine_type_id: g2.mac.4large # Appropriate Mac instance
     before_run:
       - prepare_all
