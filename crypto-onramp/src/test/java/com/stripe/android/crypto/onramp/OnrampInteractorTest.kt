@@ -63,7 +63,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
-import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentIntent
@@ -83,6 +82,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
+import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")

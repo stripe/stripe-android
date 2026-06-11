@@ -5,8 +5,8 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
-import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 
 internal fun Throwable.toCryptoOnrampError(
     context: Context,
