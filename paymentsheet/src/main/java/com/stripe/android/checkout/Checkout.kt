@@ -460,18 +460,18 @@ class Checkout private constructor(
         name = name,
         phoneNumber = phoneNumber,
         address = address,
-        allowWhileSheetPresented = false,
+        isInSheetUpdate = false,
     )
 
     internal suspend fun updateBillingAddressInternal(
         name: String?,
         phoneNumber: String?,
         address: Address,
-        allowWhileSheetPresented: Boolean,
+        isInSheetUpdate: Boolean,
     ): Result<Unit> {
         val built = address.build()
         return withInternalState(
-            allowWhileSheetPresented = allowWhileSheetPresented,
+            isInSheetUpdate = isInSheetUpdate,
             additionalStateMutations = {
                 copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
             },
@@ -514,17 +514,18 @@ class Checkout private constructor(
     }
 
     private suspend fun withInternalState(
-        allowWhileSheetPresented: Boolean = false,
+        isInSheetUpdate: Boolean = false,
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<Unit> {
-        if (!allowWhileSheetPresented && internalState.integrationLaunched) {
+        if (!isInSheetUpdate && internalState.integrationLaunched) {
             return Result.failure(
                 IllegalStateException(
                     "Cannot mutate checkout session while a payment flow is presented."
                 )
             )
         }
+        // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
             _isLoading.value = true
             val result = runCatching {

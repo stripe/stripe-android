@@ -75,7 +75,7 @@ internal class InSheetCheckoutSessionUpdater(
             name = billingDetails.name,
             phoneNumber = billingDetails.phone,
             address = address,
-            allowWhileSheetPresented = true,
+            isInSheetUpdate = true,
         )
     }
 }
