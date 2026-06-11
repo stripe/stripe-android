@@ -31,6 +31,7 @@ import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
+import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
@@ -58,6 +59,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+internal data class OnrampAlert(
+    val title: String,
+    val message: String,
+)
 
 @Suppress("TooManyFunctions", "LargeClass")
 internal class OnrampViewModel(
@@ -90,6 +96,10 @@ internal class OnrampViewModel(
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
 
+    private val _initializationFailureAlert = MutableStateFlow<OnrampAlert?>(null)
+    val initializationFailureAlert: StateFlow<OnrampAlert?> =
+        _initializationFailureAlert.asStateFlow()
+
     private val _checkoutEvent = MutableStateFlow<CheckoutEvent?>(null)
     val checkoutEvent: StateFlow<CheckoutEvent?> = _checkoutEvent.asStateFlow()
 
@@ -103,7 +113,15 @@ internal class OnrampViewModel(
 
     init {
         viewModelScope.launch {
-            onrampCoordinator.configure(OnrampConfigurationFactory.create())
+            when (val result = onrampCoordinator.configure(OnrampConfigurationFactory.create())) {
+                is OnrampConfigurationResult.Completed -> Unit
+                is OnrampConfigurationResult.Failed -> {
+                    _initializationFailureAlert.value = OnrampAlert(
+                        title = "Failed to initialize CryptoOnrampCoordinator",
+                        message = result.error.message ?: "Unknown error"
+                    )
+                }
+            }
 
             if (savedUiState == null) {
                 val savedUser = userDataStore.load()
@@ -277,6 +295,10 @@ internal class OnrampViewModel(
 
     fun clearMessage() {
         _message.value = null
+    }
+
+    fun clearInitializationFailureAlert() {
+        _initializationFailureAlert.value = null
     }
 
     fun onVerifyIdentityResult(result: OnrampVerifyIdentityResult) {
