@@ -20,7 +20,7 @@ object FeatureFlags {
     val paymentMethodMessagePromotions = FeatureFlag("Use BNPL Promotions")
     val disablePassiveCaptchaWarmup = FeatureFlag("Disable Passive Captcha Warm-Up")
     val forceTapToAddWithTerminal = FeatureFlag("Tap to Add: Force Terminal integration to be available")
-    val inlineAddressAutocomplete = FeatureFlag("Address Element: inline autocomplete suggestions")
+    val inlineAddressAutocompleteEnabled = FeatureFlag("Address Element: inline autocomplete suggestions")
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

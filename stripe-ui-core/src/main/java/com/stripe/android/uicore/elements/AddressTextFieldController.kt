@@ -16,12 +16,20 @@ import kotlinx.coroutines.flow.StateFlow
 class AddressTextFieldController(
     label: ResolvableString,
     private val onNavigation: (() -> Unit)? = null,
-    val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
+    private val inlinePredictionsState: AutocompleteAddressInteractor.InlinePredictionsState? = null,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
 
     private val _inlineQuery = MutableStateFlow("")
-    val inlineQuery: StateFlow<String> = _inlineQuery
+
+    val isInline: Boolean = inlinePredictionsState != null
+
+    val fieldState: StateFlow<FieldState> = _inlineQuery.mapAsStateFlow { query ->
+        FieldState(
+            value = if (isInline) query else "",
+            enabled = isInline,
+        )
+    }
 
     override val showOptionalLabel: Boolean = false
     override val label = stateFlowOf(label)
@@ -42,8 +50,10 @@ class AddressTextFieldController(
         // No-op, this field does not support direct input manipulation
     }
 
-    fun onInlineQueryChanged(query: String) {
-        _inlineQuery.value = query
+    fun onValueChange(value: String) {
+        if (isInline) {
+            _inlineQuery.value = value
+        }
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {
@@ -64,4 +74,10 @@ class AddressTextFieldController(
     fun launchAutocompleteScreen() {
         onNavigation?.invoke()
     }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class FieldState(
+        val value: String,
+        val enabled: Boolean,
+    )
 }

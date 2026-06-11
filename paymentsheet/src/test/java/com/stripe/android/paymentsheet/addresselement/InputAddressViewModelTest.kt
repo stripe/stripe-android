@@ -53,7 +53,7 @@ class InputAddressViewModelTest {
 
     @get:Rule
     val inlineAutocompleteRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.inlineAddressAutocomplete,
+        featureFlag = FeatureFlags.inlineAddressAutocompleteEnabled,
         isEnabled = false,
     )
 
@@ -926,16 +926,16 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `isInlineAutocomplete is false when flag is disabled`() {
+    fun `isInlineAutocompleteEnabled is false when flag is disabled`() {
         val viewModel = createViewModel()
-        assertThat(viewModel.autocompleteConfig.isInlineAutocomplete).isFalse()
+        assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isFalse()
     }
 
     @Test
-    fun `isInlineAutocomplete is true when flag is enabled`() {
+    fun `isInlineAutocompleteEnabled is true when flag is enabled`() {
         inlineAutocompleteRule.setEnabled(true)
         val viewModel = createViewModel()
-        assertThat(viewModel.autocompleteConfig.isInlineAutocomplete).isTrue()
+        assertThat(viewModel.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
     }
 
     private fun createShowState(isChecked: Boolean) =

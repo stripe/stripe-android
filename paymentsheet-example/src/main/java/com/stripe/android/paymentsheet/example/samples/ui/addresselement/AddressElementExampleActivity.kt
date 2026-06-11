@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -96,17 +97,14 @@ private fun AddressElementScreen(viewModel: AddressElementExampleViewModel) {
                     Text("Select address")
                 }
 
-                // Toggle takes effect on the next AE launch — the ViewModel reads the
-                // flag once at init time, so the current session is unaffected.
-                Button(
-                    onClick = {
-                        inlineAutocompleteEnabled = !inlineAutocompleteEnabled
-                        FeatureFlags.inlineAddressAutocomplete.setEnabled(inlineAutocompleteEnabled)
+                Text("Inline autocomplete (WIP)")
+                Switch(
+                    checked = inlineAutocompleteEnabled,
+                    onCheckedChange = { enabled ->
+                        inlineAutocompleteEnabled = enabled
+                        FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(enabled)
                     },
-                    modifier = Modifier.testTag(INLINE_AUTOCOMPLETE_TOGGLE_BUTTON)
-                ) {
-                    Text("Enables inline autocomplete: $inlineAutocompleteEnabled")
-                }
+                )
             }
             is AddressElementExampleViewState.Error -> {
                 Text(state.message)
@@ -152,4 +150,3 @@ private fun Address(addressDetails: AddressDetails) {
 }
 
 internal const val SELECT_ADDRESS_BUTTON = "SELECT_ADDRESS_BUTTON"
-internal const val INLINE_AUTOCOMPLETE_TOGGLE_BUTTON = "INLINE_AUTOCOMPLETE_TOGGLE_BUTTON"

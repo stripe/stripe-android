@@ -68,8 +68,15 @@ internal class InputAddressViewModel @Inject constructor(
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
-        isInlineAutocomplete = FeatureFlags.inlineAddressAutocomplete.isEnabled,
+        isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
     )
+
+    override val inlinePredictionsState: AutocompleteAddressInteractor.InlinePredictionsState? =
+        if (autocompleteConfig.isInlineAutocompleteEnabled) {
+            AutocompleteAddressInteractor.InlinePredictionsState
+        } else {
+            null
+        }
 
     val addressFormController = AddressFormController(
         initialValues = _collectedAddress.value?.toIdentifierMap() ?: emptyMap(),

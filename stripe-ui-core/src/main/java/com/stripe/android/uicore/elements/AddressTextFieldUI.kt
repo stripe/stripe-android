@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.LocalTextFieldInsets
@@ -27,24 +25,21 @@ fun AddressTextFieldUI(
 ) {
     val label by controller.label.collectAsState()
     val error by controller.validationMessage.collectAsState()
+    val fieldState by controller.fieldState.collectAsState()
 
     val textFieldInsets = LocalTextFieldInsets.current
-
     val isError = error != null
-    val inlinePredictionsState = controller.inlinePredictionsState
-    val isInline = inlinePredictionsState != null
-    val query by if (isInline) controller.inlineQuery.collectAsState() else remember { mutableStateOf("") }
 
-    val fieldModifier = if (isInline) {
+    val fieldModifier = if (fieldState.enabled) {
         modifier.fillMaxWidth()
     } else {
         modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }
     }
 
     CompatTextField(
-        value = if (isInline) query else "",
-        enabled = if (isInline) enabled else false,
-        onValueChange = { v -> if (isInline) controller.onInlineQueryChanged(v) },
+        value = fieldState.value,
+        enabled = fieldState.enabled,
+        onValueChange = { controller.onValueChange(it) },
         errorMessage = null,
         isError = isError,
         label = {
@@ -56,7 +51,11 @@ fun AddressTextFieldUI(
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
             fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
-            disabledIndicatorColor = if (!isInline && isError) MaterialTheme.colors.error else Color.Transparent,
+            disabledIndicatorColor = if (!fieldState.enabled && isError) {
+                MaterialTheme.colors.error
+            } else {
+                Color.Transparent
+            },
         ),
         modifier = fieldModifier,
     )

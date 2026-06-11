@@ -3,7 +3,6 @@ package com.stripe.android.uicore.elements
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -25,21 +24,20 @@ class AddressTextFieldElementTest {
 
     @Test
     fun `inlinePredictionsState is passed through to controller`() {
-        val state = stateFlowOf(AutocompleteAddressInteractor.InlinePredictionsState.Idle)
         val element = AddressTextFieldElement(
             identifier = IdentifierSpec.OneLineAddress,
             label = "Address".resolvableString,
-            inlinePredictionsState = state,
+            inlinePredictionsState = AutocompleteAddressInteractor.InlinePredictionsState,
         )
-        assertThat(element.controller.inlinePredictionsState).isEqualTo(state)
+        assertThat(element.controller.isInline).isTrue()
     }
 
     @Test
-    fun `inlinePredictionsState defaults to null in controller`() {
+    fun `inlinePredictionsState defaults to null - controller is not inline`() {
         val element = AddressTextFieldElement(
             identifier = IdentifierSpec.OneLineAddress,
             label = "Address".resolvableString,
         )
-        assertThat(element.controller.inlinePredictionsState).isNull()
+        assertThat(element.controller.isInline).isFalse()
     }
 }

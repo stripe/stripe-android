@@ -10,7 +10,7 @@ class AddressTextFieldElement(
     override val identifier: IdentifierSpec,
     label: ResolvableString,
     onNavigation: (() -> Unit)? = null,
-    inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
+    inlinePredictionsState: AutocompleteAddressInteractor.InlinePredictionsState? = null,
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
