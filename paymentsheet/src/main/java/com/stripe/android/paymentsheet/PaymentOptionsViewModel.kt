@@ -403,7 +403,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     linkExpressMode = LinkExpressMode.ENABLED,
                 )
-            } else if (inSheetCheckoutSessionUpdater.requiresTaxUpdate()) {
+            } else if (inSheetCheckoutSessionUpdater.requiresUpdate()) {
                 viewModelScope.launch {
                     performInSheetTaxUpdate(paymentSelection)
                 }
@@ -415,7 +415,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     private suspend fun performInSheetTaxUpdate(paymentSelection: PaymentSelection) {
         savedStateHandle[SAVE_PROCESSING] = true
-        inSheetCheckoutSessionUpdater.updateBillingAddressForTax(paymentSelection).fold(
+        inSheetCheckoutSessionUpdater.performUpdate(paymentSelection).fold(
             onSuccess = {
                 savedStateHandle[SAVE_PROCESSING] = false
                 emitSucceededResult(paymentSelection)

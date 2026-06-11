@@ -60,7 +60,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
 
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
-                    if (inSheetCheckoutSessionUpdater.requiresTaxUpdate()) {
+                    if (inSheetCheckoutSessionUpdater.requiresUpdate()) {
                         coroutineScope.launch {
                             performInSheetTaxUpdateThenContinue()
                         }
@@ -85,7 +85,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
             return
         }
         stateHelper.setProcessing(true)
-        inSheetCheckoutSessionUpdater.updateBillingAddressForTax(selection).fold(
+        inSheetCheckoutSessionUpdater.performUpdate(selection).fold(
             onSuccess = {
                 stateHelper.setProcessing(false)
                 emitContinueResult()
