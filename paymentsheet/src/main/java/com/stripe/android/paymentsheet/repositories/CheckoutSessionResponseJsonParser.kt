@@ -40,6 +40,8 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val mode = parseMode(json.optString(FIELD_MODE))
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
+        // Server currently returns tax status via tax_meta/tax_context. The "tax" field
+        // is a planned future format that isn't live yet but has test coverage.
         val taxStatus = parseTaxStatus(json.optJSONObject(FIELD_TAX))
             .takeIf { it != CheckoutSessionResponse.TaxStatus.UNKNOWN }
             ?: parseTaxStatusFromMeta(
