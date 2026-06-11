@@ -62,7 +62,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
                     if (inSheetCheckoutSessionUpdater.requiresUpdate()) {
                         coroutineScope.launch {
-                            performInSheetTaxUpdateThenContinue()
+                            performCheckoutSessionUpdateThenContinue()
                         }
                     } else {
                         emitContinueResult()
@@ -79,7 +79,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
         }
     }
 
-    private suspend fun performInSheetTaxUpdateThenContinue() {
+    private suspend fun performCheckoutSessionUpdateThenContinue() {
         val selection = selectionHolder.selection.value ?: run {
             emitContinueResult()
             return

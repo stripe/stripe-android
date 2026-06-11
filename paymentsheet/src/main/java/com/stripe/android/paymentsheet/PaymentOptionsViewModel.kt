@@ -56,6 +56,7 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -405,7 +406,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 )
             } else if (inSheetCheckoutSessionUpdater.requiresUpdate()) {
                 viewModelScope.launch {
-                    performInSheetTaxUpdate(paymentSelection)
+                    performCheckoutSessionUpdateThenContinue(paymentSelection)
                 }
             } else {
                 emitSucceededResult(paymentSelection)
@@ -413,15 +414,18 @@ internal class PaymentOptionsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun performInSheetTaxUpdate(paymentSelection: PaymentSelection) {
+    private suspend fun performCheckoutSessionUpdateThenContinue(paymentSelection: PaymentSelection) {
+        updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
         savedStateHandle[SAVE_PROCESSING] = true
         inSheetCheckoutSessionUpdater.performUpdate(paymentSelection).fold(
             onSuccess = {
                 savedStateHandle[SAVE_PROCESSING] = false
+                updatePrimaryButtonState(PrimaryButton.State.Ready)
                 emitSucceededResult(paymentSelection)
             },
             onFailure = { error ->
                 savedStateHandle[SAVE_PROCESSING] = false
+                updatePrimaryButtonState(PrimaryButton.State.Ready)
                 onError(error.stripeErrorMessage())
             }
         )
