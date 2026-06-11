@@ -35,20 +35,21 @@ import com.stripe.android.paymentsheet.example.Settings
 
 class AddressElementExampleActivity : AppCompatActivity() {
 
+    private val viewModel by viewModels<AddressElementExampleViewModel>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.title = getString(R.string.address_element_title)
 
         setContent {
-            AddressElementScreen()
+            AddressElementScreen(viewModel)
         }
     }
 }
 
 @Composable
-private fun AddressElementScreen() {
-    val viewModel by viewModels<AddressElementExampleViewModel>()
+private fun AddressElementScreen(viewModel: AddressElementExampleViewModel) {
     val viewState by viewModel.state.collectAsState()
 
     val addressLauncher = rememberAddressLauncher(
