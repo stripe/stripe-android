@@ -525,16 +525,27 @@ class Checkout private constructor(
                 )
             )
         }
+        if (internalState.checkoutSessionResponse.status != CheckoutSessionResponse.Status.OPEN) {
+            return Result.failure(
+                IllegalStateException(
+                    "Cannot mutate checkout session that is not open."
+                )
+            )
+        }
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            _isLoading.value = true
+            if (!isInSheetUpdate) {
+                _isLoading.value = true
+            }
             val result = runCatching {
                 internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
             }.map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 _checkoutSession.value = response.asCheckoutSession()
             }
-            _isLoading.value = false
+            if (!isInSheetUpdate) {
+                _isLoading.value = false
+            }
             result
         }
     }

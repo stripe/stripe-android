@@ -1169,7 +1169,7 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parse tax status unknown for unrecognized address source`() {
+    fun `parse tax status defaults to billing for unrecognized address source`() {
         val json = JSONObject(
             """
             {
@@ -1185,7 +1185,7 @@ class CheckoutSessionResponseJsonParserTest {
         val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
-        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS)
     }
 
     @Test

@@ -11,11 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.checkout.Checkout
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.InSheetCheckoutSessionUpdater
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -103,17 +99,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customViewModelScope = customViewModelScope,
 ) {
 
-    @OptIn(CheckoutSessionPreview::class)
-    private val inSheetCheckoutSessionUpdater = InSheetCheckoutSessionUpdater(
-        checkout = resolveCheckout(),
-    )
-
-    @OptIn(CheckoutSessionPreview::class)
-    private fun resolveCheckout(): Checkout? {
-        val metadata = args.state.paymentMethodMetadata.integrationMetadata
-            as? IntegrationMetadata.CheckoutSession ?: return null
-        return CheckoutInstances[metadata.instancesKey].firstOrNull()
-    }
+    private val inSheetCheckoutSessionUpdater =
+        InSheetCheckoutSessionUpdater.create(args.state.paymentMethodMetadata)
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,

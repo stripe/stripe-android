@@ -126,12 +126,11 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val metaStatus = taxMeta.optString(FIELD_STATUS)
         if (metaStatus == "requires_location_inputs") {
             val addressSource = taxContext?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE) ?: ""
-            return when {
-                addressSource.contains("billing") ->
-                    CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
-                addressSource.contains("shipping") ->
-                    CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
-                else -> CheckoutSessionResponse.TaxStatus.UNKNOWN
+            // Default to billing (aligned with iOS and web). Only shipping if explicitly stated.
+            return if (addressSource == "session.shipping") {
+                CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
+            } else {
+                CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
             }
         }
         if (metaStatus == "complete") {

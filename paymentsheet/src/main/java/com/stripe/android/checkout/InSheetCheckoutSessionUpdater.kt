@@ -1,5 +1,7 @@
 package com.stripe.android.checkout
 
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.billingDetails
@@ -9,6 +11,15 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 internal class InSheetCheckoutSessionUpdater(
     private val checkout: Checkout?,
 ) {
+    companion object {
+        fun create(paymentMethodMetadata: PaymentMethodMetadata): InSheetCheckoutSessionUpdater {
+            val metadata = paymentMethodMetadata.integrationMetadata
+                as? IntegrationMetadata.CheckoutSession
+            val checkout = metadata?.let { CheckoutInstances[it.instancesKey].firstOrNull() }
+            return InSheetCheckoutSessionUpdater(checkout)
+        }
+    }
+
     fun requiresUpdate(): Boolean {
         val checkout = checkout ?: return false
         val taxStatus = checkout.internalState.checkoutSessionResponse.taxStatus
