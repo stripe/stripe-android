@@ -6,22 +6,24 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -46,6 +48,8 @@ fun InlineAddressPredictionsUI(
     val results = state as? AutocompleteAddressInteractor.InlinePredictionsState.Results
     val expanded = loading || (results != null && results.predictions.isNotEmpty())
 
+    val closeIcon = TextFieldIcon.Trailing(idRes = R.drawable.stripe_ic_material_close, isTintable = true, onClick = onClear)
+
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismiss,
@@ -54,34 +58,56 @@ fun InlineAddressPredictionsUI(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(40.dp)
+                .padding(horizontal = 16.dp),
         ) {
             if (loading) {
                 Box(
                     contentAlignment = Alignment.Center,
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
                 ) {
                     CircularProgressIndicator(
-                        modifier = Modifier
-                            .padding(vertical = 4.dp)
-                            .size(24.dp),
+                        modifier = Modifier.size(24.dp),
                         color = MaterialTheme.colors.primary,
                         strokeWidth = 2.dp,
                     )
                 }
+            } else if (attributionDrawable != null) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.weight(1f),
+                ) {
+                    Text(
+                        text = stringResource(R.string.stripe_address_suggestions),
+                        color = AttributionTextColor,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(end = 4.dp),
+                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.stripe_google_maps_logo),
+                        contentDescription = stringResource(R.string.stripe_address_google_maps),
+                        modifier = Modifier.height(18.dp).padding(top = 3.dp),
+                    )
+                }
             } else {
-                Spacer(modifier = Modifier.weight(1f))
+                Box(modifier = Modifier.weight(1f))
             }
-            IconButton(onClick = onClear) {
-                Icon(
-                    painter = painterResource(id = R.drawable.stripe_ic_material_close),
-                    contentDescription = null,
-                    tint = MaterialTheme.stripeColors.onComponent,
+            CompositionLocalProvider(LocalContentColor provides MaterialTheme.stripeColors.onComponent) {
+                TrailingIcon(
+                    trailingIcon = closeIcon,
+                    loading = false,
+                    modifier = Modifier
+                        .height(24.dp)
+                        .width(16.dp),
                 )
             }
         }
 
-        if (!loading && results != null) {
+        if (results != null) {
             Divider()
             results.predictions.forEach { prediction ->
                 Column(
@@ -107,29 +133,27 @@ fun InlineAddressPredictionsUI(
                 Divider()
             }
 
-            attributionDrawable?.let { drawable ->
-                Image(
-                    painter = painterResource(id = drawable),
-                    contentDescription = null,
-                    modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp),
-                )
-            }
-
             onEnterManually?.let {
-                Divider()
-                Text(
-                    text = stringResource(R.string.stripe_address_enter_manually),
-                    color = MaterialTheme.colors.primary,
-                    style = MaterialTheme.typography.body1,
+                Box(
+                    contentAlignment = Alignment.CenterStart,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { it() }
-                        .padding(vertical = 12.dp, horizontal = 16.dp),
-                )
+                        .height(36.dp)
+                        .clickable(onClick = it)
+                        .padding(horizontal = 16.dp),
+                ) {
+                    Text(
+                        text = stringResource(R.string.stripe_address_enter_manually),
+                        color = MaterialTheme.colors.primary,
+                        style = MaterialTheme.typography.body1,
+                    )
+                }
             }
         }
     }
 }
+
+private val AttributionTextColor = Color(0xFF5E5E5E)
 
 private fun buildBoldMatchText(primaryText: String, query: String): String {
     if (query.isBlank()) return primaryText
