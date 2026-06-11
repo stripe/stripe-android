@@ -12,13 +12,6 @@
 
 **GitHub Issues** — use `gh` CLI with `GH_HOST=github.com` prefix (`export` for reads, inline for writes). Always use `--state all` when searching. Check existing issues before investigating user reports.
 
-**Local Backend** — To connect the `paymentsheet-example` playground to a local backend, add to `gradle.properties`:
-```
-STRIPE_PAYMENTSHEET_EXAMPLE_BACKEND_URL=http://10.0.2.2:8081/
-STRIPE_PAYMENTSHEET_EXAMPLE_USES_CLEARTEXT_TRAFFIC=true
-```
-`10.0.2.2` is the emulator's alias for host localhost. Use the machine's IP for physical devices. Backend source: `stripe-internal/sandbox-apps` repo, `stripe-mobile-playground-backend/`.
-
 **Internal Tools** — Jira: MOBILESDK, RUN_MOBILESDK | Trailhead space: mobile-sdk
 
 ## Architecture
