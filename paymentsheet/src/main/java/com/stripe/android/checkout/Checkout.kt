@@ -467,12 +467,7 @@ class Checkout private constructor(
         }
     }
 
-    /**
-     * Updates the billing address for tax calculation while the payment sheet is presented.
-     * Unlike [updateBillingAddress], this bypasses the `integrationLaunched` check since it is
-     * called from within the sheet itself (e.g., when the user provides billing details and
-     * tax needs to be recalculated before the sheet can dismiss).
-     */
+    // Bypasses the integrationLaunched guard for in-sheet mutations (iOS: requireOpenSessionForInSheetUpdate)
     internal suspend fun updateBillingAddressFromSheet(
         name: String? = null,
         phoneNumber: String? = null,
@@ -535,12 +530,7 @@ class Checkout private constructor(
         return withInternalStateLocked(additionalStateMutations, block)
     }
 
-    /**
-     * Like [withInternalState] but allows mutations while the payment sheet is presented.
-     * Used for in-sheet updates (e.g., tax recalculation triggered by billing address collection).
-     * Analogous to iOS's `requireOpenSessionForInSheetUpdate`.
-     */
-    internal suspend fun withInternalStateForInSheetUpdate(
+    private suspend fun withInternalStateForInSheetUpdate(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<Unit> {
@@ -554,7 +544,9 @@ class Checkout private constructor(
         return mutex.withLock {
             _isLoading.value = true
             val result = runCatching {
-                internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
+                withTimeout(SERVER_UPDATE_TIMEOUT_MS) {
+                    internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
+                }
             }.map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 _checkoutSession.value = response.asCheckoutSession()

@@ -143,7 +143,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
                     CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
                 addressSource.contains("shipping") ->
                     CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
-                else -> CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+                else -> CheckoutSessionResponse.TaxStatus.UNKNOWN
             }
         }
         if (metaStatus == "complete") {

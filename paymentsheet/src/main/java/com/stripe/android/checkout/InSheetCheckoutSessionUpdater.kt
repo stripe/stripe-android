@@ -63,6 +63,12 @@ internal class InSheetCheckoutSessionUpdater(
                 IllegalStateException("Billing details have no address")
             )
 
+        if (billingAddress.country.isNullOrEmpty()) {
+            return Result.failure(
+                IllegalStateException("Billing address has no country")
+            )
+        }
+
         val address = billingAddress.toCheckoutAddress()
 
         return checkout.updateBillingAddressFromSheet(
@@ -76,7 +82,7 @@ internal class InSheetCheckoutSessionUpdater(
 @OptIn(CheckoutSessionPreview::class)
 private fun com.stripe.android.model.Address.toCheckoutAddress(): Address {
     return Address()
-        .country(country ?: "")
+        .country(requireNotNull(country))
         .line1(line1)
         .line2(line2)
         .city(city)
