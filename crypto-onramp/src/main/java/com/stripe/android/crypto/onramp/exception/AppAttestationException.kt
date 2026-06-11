@@ -26,6 +26,7 @@ class AppAttestationException internal constructor(
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"
 internal const val APP_ATTESTATION_ERROR_CODE = "link_failed_to_attest_request"
+internal const val APP_ATTESTATION_UNAVAILABLE_REASON = "app_attestation_unavailable"
 private const val APP_NOT_REGISTERED_REASON = "app_not_registered"
 private const val ATTESTATION_DATA_MISSING_REASON = "attestation_data_missing"
 private const val APP_NOT_PLAY_RECOGNIZED_REASON = "app_not_play_recognized"
@@ -62,10 +63,16 @@ private const val ANDROID_ENVIRONMENT_MISMATCH_NEXT_STEP =
     "Install the app from the Google Play track that matches this Stripe mode, then retry the Onramp flow."
 private const val ANDROID_VERDICT_VALIDATION_FAILED_NEXT_STEP =
     "Generate a new Play Integrity verdict and retry the Onramp flow. If the issue persists, check your app attestation configuration."
+private const val APP_ATTESTATION_UNAVAILABLE_NEXT_STEP =
+    "Confirm app attestation is enabled for this Stripe account and that this app's package name is registered as trusted, then call configure again."
 private const val DEFAULT_ATTESTATION_NEXT_STEP =
     "Inspect the preserved Stripe API error for details and retry after correcting the app attestation configuration."
 
 private fun appAttestationSummary(reason: String?): String? {
+    if (reason == APP_ATTESTATION_UNAVAILABLE_REASON) {
+        return "App attestation unavailable: this app isn't configured to use Stripe Crypto Onramp."
+    }
+
     return appAttestationDescription(reason)?.let(::attestationSummary)
 }
 
@@ -85,6 +92,7 @@ private fun appAttestationDescription(reason: String?): String? {
 private fun appAttestationNextStep(reason: String?): String {
     return when (reason) {
         ATTESTATION_NOT_ENABLED_REASON -> ATTESTATION_NOT_ENABLED_NEXT_STEP
+        APP_ATTESTATION_UNAVAILABLE_REASON -> APP_ATTESTATION_UNAVAILABLE_NEXT_STEP
         APP_NOT_REGISTERED_REASON -> APP_NOT_REGISTERED_NEXT_STEP
         ATTESTATION_DATA_MISSING_REASON -> ATTESTATION_DATA_MISSING_NEXT_STEP
         APP_NOT_PLAY_RECOGNIZED_REASON -> APP_NOT_PLAY_RECOGNIZED_NEXT_STEP
