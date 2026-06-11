@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsSdkAvailable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.validate
@@ -40,6 +41,7 @@ internal interface CustomerSheetLoader {
 
 internal class DefaultCustomerSheetLoader(
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
+    private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
     private val isNfcScanningAvailable: IsNfcScanningAvailable,
     private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
@@ -52,6 +54,7 @@ internal class DefaultCustomerSheetLoader(
     @Inject
     constructor(
         googlePayRepositoryFactory: GooglePayRepositoryFactory,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
         isNfcScanningAvailable: IsNfcScanningAvailable,
         lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
@@ -59,6 +62,7 @@ internal class DefaultCustomerSheetLoader(
         @IOContext workContext: CoroutineContext,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
+        isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         isNfcScanningAvailable = isNfcScanningAvailable,
         lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,

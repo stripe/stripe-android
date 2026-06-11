@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
 import com.stripe.android.view.ActivityStarter
@@ -32,10 +33,11 @@ internal object NfcScanningContract : ActivityResultContract<NfcScanningContract
             .putExtra(EXTRA_ARGS, input)
     }
 
-    @Suppress("DEPRECATION")
-    override fun parseResult(resultCode: Int, intent: Intent?): Result =
-        intent?.getParcelableExtra(EXTRA_RESULT)
-            ?: Result.Canceled
+    override fun parseResult(resultCode: Int, intent: Intent?): Result {
+        return intent?.let {
+            IntentCompat.getParcelableExtra(it, EXTRA_RESULT, Result::class.java)
+        } ?: Result.Canceled
+    }
 
     internal sealed interface Result : ActivityStarter.Result {
         @Parcelize
