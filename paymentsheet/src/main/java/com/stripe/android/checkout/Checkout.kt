@@ -544,9 +544,7 @@ class Checkout private constructor(
         return mutex.withLock {
             _isLoading.value = true
             val result = runCatching {
-                withTimeout(SERVER_UPDATE_TIMEOUT_MS) {
-                    internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
-                }
+                internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
             }.map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 _checkoutSession.value = response.asCheckoutSession()
