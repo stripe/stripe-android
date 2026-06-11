@@ -505,8 +505,42 @@ internal class PaymentOptionsActivityTest {
         assertThat(result.isSuccess).isTrue()
     }
 
+    @Test
+    fun `promotion message is displayed when selecting klarna from saved PMs screen`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = PaymentMethodFixtures.createCards(1),
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+            ),
+        )
+
+        runActivityScenario(
+            args = args,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+                promotions = FakePaymentMethodMessagePromotionsHelper.promotions
+            ),
+        ) {
+            it.onActivity {
+                composeTestRule.onNodeWithTag(
+                    PaymentOptionsItem.AddCard.viewType.name
+                ).performClick()
+
+                composeTestRule.onNodeWithTag(
+                    "PaymentMethodsUITestTagklarna"
+                ).performClick()
+
+                composeTestRule.onNodeWithText(
+                    "This is a message",
+                    substring = true,
+                ).assertIsDisplayed()
+            }
+        }
+    }
+
     private fun runActivityScenario(
         args: PaymentOptionContract.Args = PAYMENT_OPTIONS_CONTRACT_ARGS,
+        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
+            FakePaymentMethodMessagePromotionsHelper(),
         block: (InjectableActivityScenario<PaymentOptionsActivity>) -> Unit,
     ) {
         val intent = Intent(
@@ -535,7 +569,7 @@ internal class PaymentOptionsActivityTest {
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             )
         }
 
