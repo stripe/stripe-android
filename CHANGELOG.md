@@ -6,6 +6,9 @@ NEXT_VERSION_BUMP: PATCH
 ### AddressElement
 * [ADDED] Added autofill support for Address Element text fields and the state/province dropdown.
 
+### CryptoOnramp
+* [CHANGED] Renamed the EU attestation presentation API from `presentCrsCarfDeclaration()` to `presentUserAttestation()`, and renamed `OnrampCrsCarfDeclarationResult` to `OnrampUserAttestationResult`.
+
 ## 23.10.0 - 2026-06-08
 
 ### Identity

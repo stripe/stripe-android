@@ -35,7 +35,7 @@ internal fun OnrampApp(
     onAuthenticateUser: (String) -> Unit,
     onCollectPayment: (PaymentMethodSelection) -> Unit,
     onStartVerification: () -> Unit,
-    onShowCrsCarfDeclaration: () -> Unit,
+    onShowUserAttestation: () -> Unit,
     onSubmitAddress: (PaymentSheet.Address) -> Unit,
     onVerifyKyc: () -> Unit,
 ) {
@@ -107,7 +107,7 @@ internal fun OnrampApp(
                     onAuthenticateUser = onAuthenticateUser,
                     onRegisterWalletAddress = viewModel::registerWalletAddress,
                     onStartVerification = onStartVerification,
-                    onShowCrsCarfDeclaration = onShowCrsCarfDeclaration,
+                    onShowUserAttestation = onShowUserAttestation,
                     onCollectPayment = onCollectPayment,
                     onCreatePaymentToken = viewModel::createCryptoPaymentToken,
                     onVerifyKyc = onVerifyKyc

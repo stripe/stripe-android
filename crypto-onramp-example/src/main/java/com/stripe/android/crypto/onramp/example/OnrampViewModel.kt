@@ -32,7 +32,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -73,7 +73,7 @@ internal class OnrampViewModel(
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
-        .crsCarfDeclarationCallback(callback = ::onCrsCarfDeclarationResult)
+        .userAttestationCallback(callback = ::onUserAttestationResult)
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator.Builder().build(getApplication(), savedStateHandle, callbacks)
@@ -302,16 +302,16 @@ internal class OnrampViewModel(
         }
     }
 
-    fun onCrsCarfDeclarationResult(result: OnrampCrsCarfDeclarationResult) {
+    fun onUserAttestationResult(result: OnrampUserAttestationResult) {
         when (result) {
-            is OnrampCrsCarfDeclarationResult.Confirmed -> {
-                _message.value = "CRS CARF Declaration Confirmed"
+            is OnrampUserAttestationResult.Confirmed -> {
+                _message.value = "User Attestation Confirmed"
             }
-            is OnrampCrsCarfDeclarationResult.Failed -> {
-                _message.value = "CRS CARF Declaration failed: ${result.error.message}"
+            is OnrampUserAttestationResult.Failed -> {
+                _message.value = "User Attestation failed: ${result.error.message}"
             }
-            is OnrampCrsCarfDeclarationResult.Cancelled -> {
-                _message.value = "CRS CARF Declaration cancelled, please try again"
+            is OnrampUserAttestationResult.Cancelled -> {
+                _message.value = "User Attestation cancelled, please try again"
             }
         }
     }
