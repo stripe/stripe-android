@@ -71,7 +71,7 @@ internal class InSheetCheckoutSessionUpdater(
 
         val address = billingAddress.toCheckoutAddress()
 
-        return checkout.updateBillingAddress(
+        return checkout.updateBillingAddressInternal(
             name = billingDetails.name,
             phoneNumber = billingDetails.phone,
             address = address,

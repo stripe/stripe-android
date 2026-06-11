@@ -456,6 +456,12 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
+    ): Result<Unit> = updateBillingAddressInternal(name, phoneNumber, address)
+
+    internal suspend fun updateBillingAddressInternal(
+        name: String? = null,
+        phoneNumber: String? = null,
+        address: Address,
         allowWhileSheetPresented: Boolean = false,
     ): Result<Unit> {
         val built = address.build()
