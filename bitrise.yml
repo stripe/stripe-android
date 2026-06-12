@@ -166,16 +166,28 @@ workflows:
       - MAESTRO_TAGS: testmode-payments
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-data-tests:
     envs:
       - MAESTRO_TAGS: testmode-data
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-token-tests:
     envs:
       - MAESTRO_TAGS: testmode-token
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-connections-e2e-payments-tests-on-push:
     envs:
       - MAESTRO_TAGS: testmode-payments
@@ -214,6 +226,10 @@ workflows:
       - MAESTRO_TAGS: livemode-data
     before_run:
       - _run-connections-e2e-tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   _run-connect-e2e-tests:
     before_run:
       - build-connect-debug
