@@ -29,6 +29,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkDismissalCoordinator
 import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.RealLinkDismissalCoordinator
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.FakeLinkAccountManager
@@ -36,6 +37,7 @@ import com.stripe.android.link.account.LinkAccountManager
 import com.stripe.android.link.confirmation.DefaultCompleteLinkFlow
 import com.stripe.android.link.confirmation.FakeLinkConfirmationHandler
 import com.stripe.android.link.confirmation.LinkConfirmationHandler
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.BottomSheetContent
 import com.stripe.android.link.ui.PrimaryButtonState
@@ -55,13 +57,12 @@ import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.link.confirmation.Result as LinkConfirmationResult
 
 @RunWith(AndroidJUnit4::class)
@@ -472,7 +473,24 @@ internal class WalletScreenTest {
     }
 
     @Test
-    fun `pay button state switches to completed state after successful payment`() = runTest(dispatcher) {
+    fun `pay button state switches to processing then completed state after successful payment`() = runTest(dispatcher) {
+        val confirmationResult = CompletableDeferred<LinkConfirmationResult>()
+        val linkConfirmationHandler = object : LinkConfirmationHandler {
+            override suspend fun confirm(
+                paymentDetails: ConsumerPaymentDetails.PaymentDetails,
+                linkAccount: LinkAccount,
+                cvc: String?,
+                billingPhone: String?
+            ): LinkConfirmationResult = confirmationResult.await()
+
+            override suspend fun confirm(
+                paymentDetails: LinkPaymentDetails,
+                linkAccount: LinkAccount,
+                cvc: String?,
+                billingPhone: String?
+            ): LinkConfirmationResult = confirmationResult.await()
+        }
+
         val cardRequiringCvc = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(
             expiryYear = 2999,
             cvcCheck = CvcCheck.Pass
@@ -481,8 +499,6 @@ internal class WalletScreenTest {
         linkAccountManager.listPaymentDetailsResult = Result.success(
             ConsumerPaymentDetails(paymentDetails = listOf(cardRequiringCvc))
         )
-        val linkConfirmationHandler = FakeLinkConfirmationHandler()
-        linkConfirmationHandler.confirmResult = com.stripe.android.link.confirmation.Result.Succeeded
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
@@ -502,12 +518,13 @@ internal class WalletScreenTest {
         composeTestRule.waitForIdle()
 
         onWalletPayButton().assertIsEnabled()
-
         onWalletPayButton().performClick()
-
         composeTestRule.waitForIdle()
 
-        onWalletErrorTag().assertDoesNotExist()
+        assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Processing)
+
+        confirmationResult.complete(LinkConfirmationResult.Succeeded)
+        composeTestRule.waitForIdle()
 
         assertThat(viewModel.uiState.value.primaryButtonState).isEqualTo(PrimaryButtonState.Completed)
     }
@@ -627,14 +644,12 @@ internal class WalletScreenTest {
 
     @Test
     fun `pay method row is loading when card is being updated`() = runTest(dispatcher) {
+        val updateResult = CompletableDeferred<Result<ConsumerPaymentDetails>>()
         val linkAccountManager = object : FakeLinkAccountManager() {
             override suspend fun updatePaymentDetails(
                 updateParams: ConsumerPaymentDetailsUpdateParams,
                 phone: String?
-            ): Result<ConsumerPaymentDetails> {
-                delay(1.seconds)
-                return super.updatePaymentDetails(updateParams, phone)
-            }
+            ): Result<ConsumerPaymentDetails> = updateResult.await()
         }
         val card1 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card1", isDefault = false)
         val card2 = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD.copy(id = "card2", isDefault = true)
@@ -666,7 +681,8 @@ internal class WalletScreenTest {
         onWalletPaymentMethodRowLoadingIndicator().assertIsDisplayed()
         onWalletPayButton().assertIsNotEnabled()
 
-        dispatcher.scheduler.advanceTimeBy(1.1.seconds)
+        updateResult.complete(Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS))
+        composeTestRule.waitForIdle()
 
         onWalletPaymentMethodRowLoadingIndicator().assertDoesNotExist()
         onWalletPayButton()
