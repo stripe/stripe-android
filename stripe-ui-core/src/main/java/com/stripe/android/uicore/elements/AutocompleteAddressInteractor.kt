@@ -5,7 +5,6 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface AutocompleteAddressInteractor {
     val autocompleteConfig: Config
-
     fun register(onEvent: (Event) -> Unit)
 
     fun onAutocomplete(country: String)
@@ -14,7 +13,8 @@ interface AutocompleteAddressInteractor {
     class Config(
         val googlePlacesApiKey: String?,
         val autocompleteCountries: Set<String>,
-        val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke()
+        val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
+        val isInlineAutocompleteEnabled: Boolean = false,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
