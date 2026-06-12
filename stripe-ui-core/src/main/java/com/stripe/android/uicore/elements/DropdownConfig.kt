@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.ResolvableString
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -24,6 +25,9 @@ interface DropdownConfig {
     /** Whether the dropdown should be disabled when there is only one single item **/
     val disableDropdownWithSingleElement: Boolean
         get() = false
+
+    val autofillType: ContentType?
+        get() = null
 
     /** The label identifying the selected item used when the dropdown menu is collapsed **/
     fun getSelectedItemLabel(index: Int): String

@@ -156,6 +156,7 @@ class SimpleTextFieldController(
         is PostalCodeConfig -> ContentType.PostalCode
         is EmailConfig -> ContentType.EmailAddress
         is NameConfig -> ContentType.PersonFullName
+        is AddressTextFieldConfig -> textFieldConfig.autofillContentType
         else -> null
     }
 

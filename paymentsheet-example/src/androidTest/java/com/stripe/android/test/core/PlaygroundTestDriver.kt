@@ -1292,7 +1292,7 @@ internal class PlaygroundTestDriver(
             } ?: Assume.assumeTrue(selectors.getInstalledBrowsers().isNotEmpty())
         }
         if (authorizeAction == AuthorizeAction.DisplayQrCode) {
-            // Browserstack tests fail on pixel 2 API 26.
+            // Tests fail on pixel 2 API 26.
             assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
         }
     }

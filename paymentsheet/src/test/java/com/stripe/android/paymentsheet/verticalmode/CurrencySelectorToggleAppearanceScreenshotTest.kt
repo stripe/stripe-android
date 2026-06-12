@@ -23,8 +23,8 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
     )
 
     private val options = CurrencySelectorOptions(
-        first = CurrencyOption(code = "USD", displayableText = "🇺🇸 \$50.99"),
-        second = CurrencyOption(code = "EUR", displayableText = "🇪🇺 €45.87"),
+        first = CurrencyOption(code = "USD", displayableText = "🇺🇸 \$50.99", formattedAmount = "\$50.99"),
+        second = CurrencyOption(code = "EUR", displayableText = "🇪🇺 €45.87", formattedAmount = "€45.87"),
         selectedCode = "USD",
         exchangeRateText = "1 USD = 0.91 EUR",
     )

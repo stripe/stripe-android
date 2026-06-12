@@ -27,8 +27,16 @@ class CurrencySelectorOptionsFactoryTest {
 
         assertThat(result).isEqualTo(
             CurrencySelectorOptions(
-                first = CurrencyOption(code = "USD", displayableText = "🇺🇸 \$61.06"),
-                second = CurrencyOption(code = "EUR", displayableText = "🇪🇺 €50.99"),
+                first = CurrencyOption(
+                    code = "USD",
+                    displayableText = "🇺🇸 \$61.06",
+                    formattedAmount = "\$61.06",
+                ),
+                second = CurrencyOption(
+                    code = "EUR",
+                    displayableText = "🇪🇺 €50.99",
+                    formattedAmount = "€50.99",
+                ),
                 selectedCode = "USD",
                 exchangeRateText = "1 EUR = 1.19749 USD",
             )
