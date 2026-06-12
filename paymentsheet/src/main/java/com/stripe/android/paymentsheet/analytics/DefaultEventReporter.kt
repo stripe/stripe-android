@@ -605,10 +605,8 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
         val duration = durationProvider.end(DurationProvider.Key.PaymentMethodMessaging)
-        val event = PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully)
-        println("YEET ${event.eventName} ${event.params}")
         fireEvent(
-            event
+            PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully)
         )
     }
 
