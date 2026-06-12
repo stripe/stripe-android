@@ -110,6 +110,19 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         dispatcher.scheduler.advanceUntilIdle()
         val metadata = getMetadata("control")
         helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
+        eventReporter.pmmPromotionsDisplayed.expectNoEvents()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed does not fire event for unsupported PM`() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("treatment")
+        helper.reportPromotionDisplayed("card", metadata)
+        eventReporter.pmmPromotionsDisplayed.expectNoEvents()
     }
 
     @Test

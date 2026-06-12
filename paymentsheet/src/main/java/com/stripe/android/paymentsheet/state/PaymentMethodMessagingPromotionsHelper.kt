@@ -103,18 +103,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata
     ) {
-        if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
-
-        if (!PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)) return
-
-        val variant = metadata.experimentsData?.experimentAssignments[
-            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
-        ] ?: return
-
-        if (variant != "treatment") return
-
-        val displayedSuccessfully = getPromotionIfAvailableForCode(code, metadata) != null
-        eventReporter.onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully)
+        reportPromotionDisplayedInternal(code, metadata, eventReporter)
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
@@ -169,18 +158,7 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata
     ) {
-        if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
-
-        if (!PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)) return
-
-        val variant = metadata.experimentsData?.experimentAssignments[
-            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
-        ] ?: return
-
-        if (variant != "treatment") return
-
-        val displayedSuccessfully = getPromotionIfAvailableForCode(code, metadata) != null
-        eventReporter.onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully)
+        reportPromotionDisplayedInternal(code, metadata, eventReporter)
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
@@ -256,6 +234,25 @@ private fun PaymentMethodMessagePromotionsHelper.getPromotionProviderInternal(
     } else {
         null
     }
+}
+
+private fun PaymentMethodMessagePromotionsHelper.reportPromotionDisplayedInternal(
+    code: PaymentMethodCode,
+    metadata: PaymentMethodMetadata,
+    eventReporter: EventReporter
+) {
+    if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
+
+    if (!PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)) return
+
+    val variant = metadata.experimentsData?.experimentAssignments[
+        ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+    ] ?: return
+
+    if (variant != "treatment") return
+
+    val displayedSuccessfully = getPromotionIfAvailableForCode(code, metadata) != null
+    eventReporter.onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully)
 }
 
 @Module
