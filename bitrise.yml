@@ -24,11 +24,8 @@ pipelines:
       run-connections-e2e-data-tests-on-push: { }
       run-cardscan-instrumentation-tests: { }
       run-crypto-onramp-example-e2e-tests: { }
-      build-paymentsheet-e2e: { }
       run-paymentsheet-e2e:
         parallel: 5
-        depends_on:
-          - build-paymentsheet-e2e
       check-dependencies: { }
       verify-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
@@ -345,21 +342,6 @@ workflows:
           title: Export CardScan instrumentation test results
           inputs:
             - test_title: CardScan instrumentation tests
-  build-paymentsheet-e2e:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Compile PaymentSheet E2E tests
-          timeout: 1200
-          inputs:
-            - content: ./gradlew :paymentsheet-example:assembleBaseDebug :paymentsheet-example:assembleBaseDebugAndroidTest -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
   run-paymentsheet-e2e:
     before_run:
       - prepare_all
