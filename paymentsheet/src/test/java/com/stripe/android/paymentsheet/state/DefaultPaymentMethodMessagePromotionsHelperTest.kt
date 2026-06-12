@@ -58,12 +58,11 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             metadata
         )
 
-        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
         assertThat(result).isEqualTo(AFTERPAY_PROMOTION)
     }
 
     @Test
-    fun `getPromotionIfAvailableForCode logs displayed successfully as false if not available`() = runScenario(
+    fun `getPromotionIfAvailableForCode returns null if not available`() = runScenario(
         featureFlagEnabled = true
     ) {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
@@ -74,8 +73,43 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             metadata
         )
 
-        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isFalse()
         assertThat(result).isNull()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed fires event with true when promotion available`() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("treatment")
+        helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed fires event with false when promotion not available`() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        val metadata = getMetadata("treatment")
+        helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isFalse()
+    }
+
+    @Test
+    fun `reportPromotionDisplayed does not fire event when not in treatment`() = runScenario(
+        featureFlagEnabled = true
+    ) {
+        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        eventReporter.pmmPromotionsFetched.awaitItem()
+        dispatcher.scheduler.advanceUntilIdle()
+        val metadata = getMetadata("control")
+        helper.reportPromotionDisplayed("afterpay_clearpay", metadata)
     }
 
     @Test
@@ -124,7 +158,6 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
             metadata
         )?.invoke()
 
-        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
         assertThat(result).isEqualTo(AFTERPAY_PROMOTION)
     }
 
