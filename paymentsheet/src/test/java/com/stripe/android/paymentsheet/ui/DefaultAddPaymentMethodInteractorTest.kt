@@ -201,7 +201,8 @@ class DefaultAddPaymentMethodInteractorTest {
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
             reportPromotionDisplayed = { reportPromotionDisplayedTurbine.add(it) },
         ) {
-            // Initial state fires for the initially selected PM
+            // Initial state fires for the initially selected PM, actual promotions helper will only send event for
+            // supported PMs
             assertThat(reportPromotionDisplayedTurbine.awaitItem()).isEqualTo("card")
 
             interactor.handleViewAction(

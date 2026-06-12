@@ -142,7 +142,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
 
 internal class PrefetchedPaymentMethodMessagePromotionsHelper(
     private val promotions: List<PaymentMethodMessagePromotion>?,
-    private val eventReporter: EventReporter,
+    private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
     override fun fetchPromotionsAsync(intent: StripeIntent) {
         // NO-OP
