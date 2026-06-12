@@ -15,19 +15,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
@@ -36,78 +32,61 @@ import com.stripe.android.paymentsheet.example.Settings
 
 class AddressElementExampleActivity : AppCompatActivity() {
 
-    private val viewModel by viewModels<AddressElementExampleViewModel>()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         supportActionBar?.title = getString(R.string.address_element_title)
 
         setContent {
-            AddressElementScreen(viewModel)
-        }
-    }
-}
+            val viewModel by viewModels<AddressElementExampleViewModel>()
+            val viewState by viewModel.state.collectAsState()
 
-@Composable
-private fun AddressElementScreen(viewModel: AddressElementExampleViewModel) {
-    val viewState by viewModel.state.collectAsState()
+            val addressLauncher = rememberAddressLauncher(
+                callback = viewModel::handleResult,
+            )
 
-    val addressLauncher = rememberAddressLauncher(
-        callback = viewModel::handleResult,
-    )
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(
+                        paddingValues = WindowInsets.systemBars.only(
+                            WindowInsetsSides.Horizontal + WindowInsetsSides.Top
+                        ).asPaddingValues()
+                    ),
+            ) {
+                when (val state = viewState) {
+                    is AddressElementExampleViewState.Loading -> {
+                        CircularProgressIndicator()
+                    }
+                    is AddressElementExampleViewState.Content -> {
+                        state.address?.let { address ->
+                            Address(address)
+                        }
 
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(
-                paddingValues = WindowInsets.systemBars.only(
-                    WindowInsetsSides.Horizontal + WindowInsetsSides.Top
-                ).asPaddingValues()
-            ),
-    ) {
-        when (val state = viewState) {
-            is AddressElementExampleViewState.Loading -> {
-                CircularProgressIndicator()
-            }
-            is AddressElementExampleViewState.Content -> {
-                state.address?.let { address ->
-                    Address(address)
+                        val context = LocalContext.current
+                        Button(
+                            onClick = {
+                                val config = AddressLauncher.Configuration.Builder()
+                                    // Provide your Google Places API key to enable autocomplete
+                                    .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                                    .build()
+
+                                addressLauncher.present(
+                                    publishableKey = state.publishableKey,
+                                    configuration = config,
+                                )
+                            },
+                            modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
+                        ) {
+                            Text("Select address")
+                        }
+                    }
+                    is AddressElementExampleViewState.Error -> {
+                        Text(state.message)
+                    }
                 }
-
-                var inlineAutocompleteEnabled by remember { mutableStateOf(false) }
-
-                val context = LocalContext.current
-                Button(
-                    onClick = {
-                        val config = AddressLauncher.Configuration.Builder()
-                            // Provide your Google Places API key to enable autocomplete
-                            .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
-                            .build()
-
-                        addressLauncher.present(
-                            publishableKey = state.publishableKey,
-                            configuration = config,
-                        )
-                    },
-                    modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
-                ) {
-                    Text("Select address")
-                }
-
-                Text("Inline autocomplete (WIP)")
-                Switch(
-                    checked = inlineAutocompleteEnabled,
-                    onCheckedChange = { enabled ->
-                        inlineAutocompleteEnabled = enabled
-                        FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(enabled)
-                    },
-                )
-            }
-            is AddressElementExampleViewState.Error -> {
-                Text(state.message)
             }
         }
     }

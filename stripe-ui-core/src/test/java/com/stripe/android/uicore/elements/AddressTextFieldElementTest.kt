@@ -21,23 +21,4 @@ class AddressTextFieldElementTest {
             )
         }
     }
-
-    @Test
-    fun `inlinePredictionsState is passed through to controller`() {
-        val element = AddressTextFieldElement(
-            identifier = IdentifierSpec.OneLineAddress,
-            label = "Address".resolvableString,
-            inlinePredictionsState = AutocompleteAddressInteractor.InlinePredictionsState,
-        )
-        assertThat(element.controller.isInline).isTrue()
-    }
-
-    @Test
-    fun `inlinePredictionsState defaults to null - controller is not inline`() {
-        val element = AddressTextFieldElement(
-            identifier = IdentifierSpec.OneLineAddress,
-            label = "Address".resolvableString,
-        )
-        assertThat(element.controller.isInline).isFalse()
-    }
 }

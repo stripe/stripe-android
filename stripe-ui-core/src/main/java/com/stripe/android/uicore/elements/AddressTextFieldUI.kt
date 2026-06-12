@@ -25,21 +25,15 @@ fun AddressTextFieldUI(
 ) {
     val label by controller.label.collectAsState()
     val error by controller.validationMessage.collectAsState()
-    val fieldState by controller.fieldState.collectAsState()
 
     val textFieldInsets = LocalTextFieldInsets.current
+
     val isError = error != null
 
-    val fieldModifier = if (fieldState.enabled) {
-        modifier.fillMaxWidth()
-    } else {
-        modifier.fillMaxWidth().clickable(enabled = enabled) { onClick() }
-    }
-
     CompatTextField(
-        value = fieldState.value,
-        enabled = fieldState.enabled,
-        onValueChange = { controller.onValueChange(it) },
+        value = "",
+        enabled = false,
+        onValueChange = {},
         errorMessage = null,
         isError = isError,
         label = {
@@ -50,13 +44,18 @@ fun AddressTextFieldUI(
         singleLine = true,
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
-            disabledIndicatorColor = if (!fieldState.enabled && isError) {
+            fieldDisplayState = when (isError) {
+                true -> FieldDisplayState.ERROR
+                false -> FieldDisplayState.NORMAL
+            },
+            disabledIndicatorColor = if (isError) {
                 MaterialTheme.colors.error
             } else {
                 Color.Transparent
             },
         ),
-        modifier = fieldModifier,
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(enabled = enabled) { onClick() },
     )
 }

@@ -71,13 +71,6 @@ internal class InputAddressViewModel @Inject constructor(
         isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
     )
 
-    override val inlinePredictionsState: AutocompleteAddressInteractor.InlinePredictionsState? =
-        if (autocompleteConfig.isInlineAutocompleteEnabled) {
-            AutocompleteAddressInteractor.InlinePredictionsState
-        } else {
-            null
-        }
-
     val addressFormController = AddressFormController(
         initialValues = _collectedAddress.value?.toIdentifierMap() ?: emptyMap(),
         interactor = this,

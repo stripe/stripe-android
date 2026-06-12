@@ -5,9 +5,6 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface AutocompleteAddressInteractor {
     val autocompleteConfig: Config
-    val inlinePredictionsState: InlinePredictionsState?
-        get() = null
-
     fun register(onEvent: (Event) -> Unit)
 
     fun onAutocomplete(country: String)
@@ -19,9 +16,6 @@ interface AutocompleteAddressInteractor {
         val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
         val isInlineAutocompleteEnabled: Boolean = false,
     )
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object InlinePredictionsState
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface Event {
