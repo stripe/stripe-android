@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -26,6 +27,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.error
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -34,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import androidx.compose.ui.R as ComposeR
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal const val TEST_TAG_CURRENCY_SELECTOR = "TEST_TAG_CURRENCY_SELECTOR"
@@ -47,6 +58,7 @@ private const val DISABLED_ALPHA = 0.6f
 internal data class CurrencyOption(
     val code: String,
     val displayableText: String,
+    val formattedAmount: String,
 )
 
 internal data class CurrencySelectorOptions(
@@ -89,7 +101,6 @@ internal fun CurrencySelectorToggle(
     val fontFamily = appearance.fontResId?.let { FontFamily(Font(it)) }
     val bodyStyle = MaterialTheme.typography.subtitle1.withAppearance(fontFamily, appearance.sizeScaleFactor)
     val captionStyle = MaterialTheme.typography.caption.withAppearance(fontFamily, appearance.sizeScaleFactor)
-
     Column(modifier = modifier) {
         Box(
             modifier = Modifier
@@ -102,12 +113,18 @@ internal fun CurrencySelectorToggle(
                     color = borderColor,
                     shape = shape,
                 )
+                .semantics {
+                    if (errorMessage != null) {
+                        error(errorMessage)
+                    }
+                }
                 .testTag(TEST_TAG_CURRENCY_SELECTOR),
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
+                    .height(IntrinsicSize.Min)
+                    .selectableGroup(),
             ) {
                 CurrencyOptionItem(
                     currency = options.first,
@@ -155,6 +172,7 @@ internal fun CurrencySelectorToggle(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 4.dp)
+                    .semantics { liveRegion = LiveRegionMode.Assertive }
                     .testTag(TEST_TAG_CURRENCY_SELECTOR_ERROR),
             )
         }
@@ -177,6 +195,14 @@ private fun RowScope.CurrencyOptionItem(
     val isSelected = currency.code == options.selectedCode
     val backgroundColor = if (isSelected) pillBackground else trackBackground
     val textColor = if (isSelected) selectedTextColor else unselectedTextColor
+    val accessibilityDescription = stringResource(
+        if (isSelected) {
+            ComposeR.string.selected
+        } else {
+            ComposeR.string.not_selected
+        }
+    )
+    val accessibilityLabel = currency.formattedAmount
 
     Box(
         contentAlignment = Alignment.Center,
@@ -185,29 +211,56 @@ private fun RowScope.CurrencyOptionItem(
             .background(backgroundColor)
             .selectable(
                 selected = isSelected,
-                enabled = isEnabled && !isSelected,
-                onClick = { onCurrencySelected(currency) },
+                enabled = isEnabled,
+                role = Role.RadioButton,
+                onClick = {
+                    if (!isSelected) {
+                        onCurrencySelected(currency)
+                    }
+                },
             )
+            .semantics {
+                contentDescription = accessibilityLabel
+                stateDescription = accessibilityDescription
+            }
             .padding(vertical = contentVerticalPaddingDp.dp)
             .testTag("$TEST_TAG_CURRENCY_OPTION_PREFIX${currency.code}"),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (isSelected) {
-                Icon(
-                    painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
-                    contentDescription = null,
-                    modifier = Modifier.size(16.dp),
-                    tint = textColor,
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-            }
-            Text(
-                text = currency.displayableText,
-                style = textStyle,
-                color = textColor,
-                fontWeight = if (isSelected) FontWeight.Medium else null,
+        CurrencyOptionContent(
+            currency = currency,
+            isSelected = isSelected,
+            textColor = textColor,
+            textStyle = textStyle,
+        )
+    }
+}
+
+@Composable
+private fun CurrencyOptionContent(
+    currency: CurrencyOption,
+    isSelected: Boolean,
+    textColor: Color,
+    textStyle: TextStyle,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.clearAndSetSemantics {},
+    ) {
+        if (isSelected) {
+            Icon(
+                painter = painterResource(StripeUiCoreR.drawable.stripe_ic_checkmark),
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = textColor,
             )
+            Spacer(modifier = Modifier.width(6.dp))
         }
+        Text(
+            text = currency.displayableText,
+            style = textStyle,
+            color = textColor,
+            fontWeight = if (isSelected) FontWeight.Medium else null,
+        )
     }
 }
 

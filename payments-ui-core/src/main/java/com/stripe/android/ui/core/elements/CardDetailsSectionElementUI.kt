@@ -43,7 +43,7 @@ fun CardDetailsSectionElementUI(
                         heading()
                     }
             )
-            controller.cardDetailsAction?.Content(enabled, controller)
+            controller.cardDetailsAction?.Content(enabled, controller::onScannedCard)
         }
         SectionElementUI(
             modifier = Modifier.padding(top = 8.dp),

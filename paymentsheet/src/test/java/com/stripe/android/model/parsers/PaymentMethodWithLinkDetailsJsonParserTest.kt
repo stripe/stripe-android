@@ -1,6 +1,7 @@
 package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.LinkPaymentDetails
 import org.json.JSONObject
 import org.junit.Test
 
@@ -13,8 +14,20 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         }
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
-        assertThat(paymentMethod).isNotNull()
-        assertThat(paymentMethod?.linkPaymentDetails).isNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNull()
+        assertThat(paymentMethod.isLinkPassthroughMode).isFalse()
+    }
+
+    @Test
+    fun `Marks payment method as Link passthrough when it has Link origin and no Link payment details`() {
+        val json = JSONObject().apply {
+            put("payment_method", CARD_PAYMENT_METHOD_JSON)
+            put("is_link_origin", true)
+        }
+        val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
+
+        assertThat(paymentMethod.linkPaymentDetails).isNull()
+        assertThat(paymentMethod.isLinkPassthroughMode).isTrue()
     }
 
     @Test
@@ -24,11 +37,12 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         val json = JSONObject().apply {
             put("payment_method", PAYMENT_METHOD_JSON)
             put("link_payment_details", linkPaymentDetails)
+            put("is_link_origin", true)
         }
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
-        assertThat(paymentMethod).isNotNull()
-        assertThat(paymentMethod?.linkPaymentDetails).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNotNull()
+        assertThat(paymentMethod.isLinkPassthroughMode).isFalse()
     }
 
     @Test
@@ -42,13 +56,23 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
         assertThat(paymentMethod).isNotNull()
-        assertThat(paymentMethod?.linkPaymentDetails).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNotNull()
     }
 
     @Test
-    fun `Does not support method that has Link payment details of unsupported type`() {
+    fun `Supports payment method that has Link payment details of unknown type`() {
         val linkPaymentDetails = JSONObject().apply {
-            put("type", "KLARNA")
+            put("id", "UNKNOWN123")
+            put("type", "Crypto")
+            put("is_default", false)
+            put("next_action_types", org.json.JSONArray())
+            put(
+                "display",
+                JSONObject().apply {
+                    put("label", "Klarna")
+                    put("last4", "1234")
+                }
+            )
         }
         val json = JSONObject().apply {
             put("payment_method", PAYMENT_METHOD_JSON)
@@ -56,7 +80,25 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
         }
         val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
 
-        assertThat(paymentMethod).isNull()
+        assertThat(paymentMethod).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isInstanceOf(LinkPaymentDetails.Generic::class.java as Class<*>)
+    }
+
+    @Test
+    fun `Does not support method that has Link payment details of unsupported type`() {
+        val linkPaymentDetails = JSONObject().apply {
+            put("id", "UNKNOWN123")
+            put("type", "KLARNA")
+            put("is_default", false)
+        }
+        val json = JSONObject().apply {
+            put("payment_method", PAYMENT_METHOD_JSON)
+            put("link_payment_details", linkPaymentDetails)
+        }
+        val paymentMethod = PaymentMethodWithLinkDetailsJsonParser.parse(json)
+
+        assertThat(paymentMethod).isNotNull()
+        assertThat(paymentMethod.linkPaymentDetails).isNull()
     }
 
     private companion object {
@@ -75,6 +117,61 @@ class PaymentMethodWithLinkDetailsJsonParserTest {
                 "email": "email@email.com"
               },
               "type": "link"
+            }
+            """.trimIndent()
+        )
+
+        val CARD_PAYMENT_METHOD_JSON = JSONObject(
+            """
+            {
+              "id": "pm_1QoYo1Esh8quxL21bpIFTRrP",
+              "object": "payment_method",
+              "allow_redisplay": "always",
+              "billing_details": {
+                "address": {
+                  "city": null,
+                  "country": "US",
+                  "line1": null,
+                  "line2": null,
+                  "postal_code": "12345",
+                  "state": null
+                },
+                "email": null,
+                "name": null,
+                "phone": null,
+                "tax_id": null
+              },
+              "card": {
+                "brand": "visa",
+                "checks": {
+                  "address_line1_check": null,
+                  "address_postal_code_check": null,
+                  "cvc_check": null
+                },
+                "country": "US",
+                "display_brand": "visa",
+                "exp_month": 4,
+                "exp_year": 2026,
+                "funding": "credit",
+                "generated_from": null,
+                "last4": "4242",
+                "networks": {
+                  "available": [
+                    "visa"
+                  ],
+                  "preferred": null
+                },
+                "regulated_status": "unregulated",
+                "three_d_secure_usage": {
+                  "supported": true
+                },
+                "wallet": null
+              },
+              "created": 1738624313,
+              "customer": "cus_Qurj8RK03RchBB",
+              "livemode": false,
+              "radar_options": {},
+              "type": "card"
             }
             """.trimIndent()
         )

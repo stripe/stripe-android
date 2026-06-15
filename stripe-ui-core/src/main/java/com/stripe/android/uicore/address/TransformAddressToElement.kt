@@ -2,11 +2,13 @@ package com.stripe.android.uicore.address
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.AddressTextFieldConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaConfig
 import com.stripe.android.uicore.elements.AdministrativeAreaElement
 import com.stripe.android.uicore.elements.DropdownFieldController
@@ -293,7 +295,7 @@ private fun FieldType.toElement(
                 AdministrativeAreaElement(
                     identifierSpec,
                     DropdownFieldController(
-                        AdministrativeAreaConfig(country)
+                        AdministrativeAreaConfig(country),
                     )
                 )
             } else {
@@ -317,13 +319,32 @@ private fun FieldType.toConfig(
             country = countryCode,
             optional = optional,
         )
-        else -> SimpleTextFieldConfig(
-            label = resolvableString(label),
-            capitalization = capitalization,
-            keyboard = keyboardType,
-            optional = optional,
-            allowsEmojis = false,
-        )
+        else -> {
+            val autofillContentType = when (this) {
+                FieldType.AddressLine1 -> ContentType.AddressStreet
+                FieldType.AddressLine2 -> ContentType.AddressAuxiliaryDetails
+                FieldType.Locality -> ContentType.AddressLocality
+                FieldType.AdministrativeArea -> ContentType.AddressRegion
+                else -> null
+            }
+            if (autofillContentType != null) {
+                AddressTextFieldConfig(
+                    label = resolvableString(label),
+                    capitalization = capitalization,
+                    keyboard = keyboardType,
+                    optional = optional,
+                    autofillContentType = autofillContentType,
+                )
+            } else {
+                SimpleTextFieldConfig(
+                    label = resolvableString(label),
+                    capitalization = capitalization,
+                    keyboard = keyboardType,
+                    optional = optional,
+                    allowsEmojis = false,
+                )
+            }
+        }
     }
 }
 

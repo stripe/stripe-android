@@ -391,6 +391,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class WalletButtonTapped(
+        walletType: String,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_wallet_button_tapped"
+        override val params: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to walletType
+        )
+    }
+
     class ShopPayWebviewLoadAttempt : PaymentSheetEvent() {
         override val eventName: String = "mc_shoppay_webview_load_attempt"
     }
