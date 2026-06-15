@@ -20,9 +20,6 @@ import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
-import com.stripe.paymentelementtestpages.CurrencySelector
-import com.stripe.paymentelementtestpages.FormPage
-import com.stripe.paymentelementtestpages.VerticalModePage
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -38,9 +35,6 @@ internal class PaymentSheetCheckoutSessionTest {
     private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-    private val formPage: FormPage = FormPage(composeTestRule)
-    private val verticalModePage: VerticalModePage = VerticalModePage(composeTestRule)
-    private val currencySelector: CurrencySelector = CurrencySelector(composeTestRule)
 
     private val defaultConfiguration = PaymentSheet.Configuration.Builder(
         merchantDisplayName = "Checkout Session Test",
