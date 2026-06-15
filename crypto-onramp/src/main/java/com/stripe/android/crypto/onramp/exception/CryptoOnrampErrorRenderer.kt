@@ -1,6 +1,23 @@
 package com.stripe.android.crypto.onramp.exception
 
 internal object CryptoOnrampErrorRenderer {
+    fun renderDeveloperMessage(
+        developerBody: String,
+        code: String,
+        nextStep: String,
+        docUrl: String?,
+        sdkVersions: List<SDKVersion>,
+    ): String {
+        return renderDeveloperMessage(
+            summary = developerBody,
+            requestContext = emptyList(),
+            code = code,
+            nextStep = nextStep,
+            docUrl = docUrl,
+            sdkVersions = sdkVersions,
+        )
+    }
+
     fun renderGenericApiDeveloperMessage(
         context: APIErrorContext,
         code: String,

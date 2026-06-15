@@ -63,7 +63,7 @@ private const val ANDROID_ENVIRONMENT_MISMATCH_NEXT_STEP =
     "Install the app from the Google Play track that matches this Stripe mode, then retry the Onramp flow."
 private const val ANDROID_VERDICT_VALIDATION_FAILED_NEXT_STEP =
     "Generate a new Play Integrity verdict and retry the Onramp flow. If the issue persists, check your app attestation configuration."
-private const val APP_ATTESTATION_UNAVAILABLE_NEXT_STEP =
+internal const val APP_ATTESTATION_UNAVAILABLE_NEXT_STEP =
     "Confirm app attestation is enabled for this Stripe account and that this app's package name is registered as trusted, then call configure again."
 private const val DEFAULT_ATTESTATION_NEXT_STEP =
     "Inspect the preserved Stripe API error for details and retry after correcting the app attestation configuration."

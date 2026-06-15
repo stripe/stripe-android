@@ -11,6 +11,8 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.AppAttestationException
+import com.stripe.android.crypto.onramp.exception.AppAttestationUnavailableException
+import com.stripe.android.crypto.onramp.exception.CryptoOnrampApiException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
@@ -122,9 +124,10 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampConfigurationResult.Failed::class.java)
 
         val error = (result as OnrampConfigurationResult.Failed).error
-        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+        assertThat(error).isInstanceOf(AppAttestationUnavailableException::class.java)
+        assertThat(error).isNotInstanceOf(CryptoOnrampApiException::class.java)
 
-        val attestationError = error as AppAttestationException
+        val attestationError = error as AppAttestationUnavailableException
         assertAppAttestationUnavailableError(
             attestationError = attestationError,
             underlyingError = linkError,
@@ -144,10 +147,11 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampConfigurationResult.Failed::class.java)
 
         val error = (result as OnrampConfigurationResult.Failed).error
-        assertThat(error).isInstanceOf(AppAttestationException::class.java)
+        assertThat(error).isInstanceOf(AppAttestationUnavailableException::class.java)
+        assertThat(error).isNotInstanceOf(CryptoOnrampApiException::class.java)
 
         assertAppAttestationUnavailableError(
-            attestationError = error as AppAttestationException,
+            attestationError = error as AppAttestationUnavailableException,
             underlyingError = linkError,
         )
     }
@@ -1401,19 +1405,9 @@ class OnrampInteractorTest {
     }
 
     private fun assertAppAttestationUnavailableError(
-        attestationError: AppAttestationException,
+        attestationError: AppAttestationUnavailableException,
         underlyingError: Throwable,
     ) {
-        assertThat(attestationError.context.reason).isEqualTo("app_attestation_unavailable")
-        assertThat(attestationError.context.operation).isEqualTo("configure")
-        assertThat(attestationError.context.appPackageName).isEqualTo(RuntimeEnvironment.getApplication().packageName)
-        assertThat(attestationError.context.mode).isEqualTo("test")
-        assertThat(attestationError.context.apiErrorCode).isEqualTo("app_attestation_unavailable")
-        assertThat(attestationError.context.apiErrorType).isNull()
-        assertThat(attestationError.context.apiErrorMessage).isNull()
-        assertThat(attestationError.context.apiUserMessage).isNull()
-        assertThat(attestationError.context.docUrl).isNull()
-        assertThat(attestationError.context.requestId).isNull()
         assertThat(attestationError.code).isEqualTo("app_attestation_unavailable")
         assertThat(attestationError.docUrl).isNull()
         assertThat(attestationError.userMessage)
@@ -1424,22 +1418,25 @@ class OnrampInteractorTest {
         assertThat(attestationError.sdkVersions.single().name).isEqualTo("stripe-android")
         assertThat(attestationError.sdkVersions.single().version).isNotEmpty()
         assertThat(attestationError.underlyingError).isSameInstanceAs(underlyingError)
-        assertThat(attestationError.developerMessage)
-            .isEqualTo(
-                """
-                App attestation unavailable: this app isn't configured to use Stripe Crypto Onramp.
-
-                Request Context:
-                  operation: configure
-                  app_id: ${RuntimeEnvironment.getApplication().packageName}
-                  mode: test
-                  reason: app_attestation_unavailable
-
-                Code: app_attestation_unavailable
-                Next step: Confirm app attestation is enabled for this Stripe account and that this app's package name is registered as trusted, then call configure again.
-                SDK: ${attestationError.sdkVersions.single().debugDescription}
-                """.trimIndent()
+        val developerMessageBody =
+            "App attestation unavailable: this app isn't configured to use Stripe Crypto Onramp.\n\n" +
+                "This usually means app attestation isn't enabled for this Stripe account, or " +
+                "this app isn't registered as a trusted application. Use your Android package " +
+                "name and contact Stripe to enable app attestation or register the app for this " +
+                "account."
+        val expectedDeveloperMessage = buildList {
+            add(developerMessageBody)
+            add("")
+            add("Code: app_attestation_unavailable")
+            add(
+                "Next step: Confirm app attestation is enabled for this Stripe account and that " +
+                    "this app's package name is registered as trusted, then call configure again."
             )
+            add("SDK: ${attestationError.sdkVersions.single().debugDescription}")
+        }.joinToString(separator = "\n")
+
+        assertThat(attestationError.developerMessage)
+            .isEqualTo(expectedDeveloperMessage)
     }
 
     private fun assertAppNotPlayRecognizedAttestationError(

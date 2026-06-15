@@ -27,8 +27,6 @@ internal fun Throwable.toCryptoOnrampError(
 
         return apiBackedAttestationError ?: toAppAttestationUnavailableError(
             context = context,
-            operation = operation,
-            publishableKey = publishableKey,
             additionalSdkVersions = additionalSdkVersions,
         )
     }
@@ -36,8 +34,6 @@ internal fun Throwable.toCryptoOnrampError(
     if (this is LinkUnavailableException) {
         return toAppAttestationUnavailableError(
             context = context,
-            operation = operation,
-            publishableKey = publishableKey,
             additionalSdkVersions = additionalSdkVersions,
         )
     }
@@ -100,25 +96,12 @@ private fun Throwable.toCryptoOnrampErrorIfAppAttestationApiError(
     }
 }
 
-private fun StripeException.toAppAttestationUnavailableError(
+private fun Throwable.toAppAttestationUnavailableError(
     context: Context,
-    operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
-    publishableKey: String?,
     additionalSdkVersions: List<SDKVersion>,
-): AppAttestationException {
-    return AppAttestationException(
-        context = APIErrorContext(
-            reason = APP_ATTESTATION_UNAVAILABLE_REASON,
-            operation = operation.value,
-            appPackageName = context.packageName,
-            mode = publishableKey.toMode(),
-            apiErrorCode = APP_ATTESTATION_UNAVAILABLE_REASON,
-            apiErrorType = null,
-            apiErrorMessage = null,
-            apiUserMessage = null,
-            docUrl = null,
-            underlyingError = this,
-        ),
+): AppAttestationUnavailableException {
+    return AppAttestationUnavailableException(
+        underlyingError = this,
         sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
         userMessage = context.getString(
             R.string.stripe_onramp_app_attestation_unavailable_user_message,
