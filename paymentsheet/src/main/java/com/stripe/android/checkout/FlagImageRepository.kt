@@ -10,9 +10,7 @@ internal class FlagImageRepository(
     private val imageLoader: StripeImageLoader,
     private val displayDensity: Float,
 ) {
-    private val cache = mutableMapOf<String, Bitmap>()
-
-    suspend fun prefetch(
+    suspend fun fetch(
         integrationCurrencyCode: String,
         localCurrencyCode: String,
     ): PrefetchResult {
@@ -23,10 +21,12 @@ internal class FlagImageRepository(
             return PrefetchResult(images = null, failures = emptyList())
         }
 
-        val dpr = displayDensity.roundToInt().coerceIn(1, 4)
+        val images = mutableMapOf<String, Bitmap>()
         val failures = mutableListOf<PrefetchFailure>()
 
         coroutineScope {
+            val dpr = displayDensity.roundToInt().coerceIn(1, 4)
+
             val integrationUrl = buildFlagUrl(integrationCountry, dpr)
             val localUrl = buildFlagUrl(localCountry, dpr)
 
@@ -47,19 +47,15 @@ internal class FlagImageRepository(
             }
 
             if (integrationBitmap != null && localBitmap != null) {
-                cache[integrationCurrencyCode.uppercase()] = integrationBitmap
-                cache[localCurrencyCode.uppercase()] = localBitmap
+                images[integrationCurrencyCode.uppercase()] = integrationBitmap
+                images[localCurrencyCode.uppercase()] = localBitmap
             }
         }
 
         return PrefetchResult(
-            images = if (failures.isEmpty()) cache.toMap() else null,
+            images = if (failures.isEmpty()) images else null,
             failures = failures,
         )
-    }
-
-    fun get(currencyCode: String): Bitmap? {
-        return cache[currencyCode.uppercase()]
     }
 
     internal data class PrefetchResult(

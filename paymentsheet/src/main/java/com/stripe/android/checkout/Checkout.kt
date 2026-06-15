@@ -97,11 +97,11 @@ class Checkout private constructor(
         ): Map<String, Bitmap>? {
             val adaptivePricingInfo = response.adaptivePricingInfo ?: return null
             val localOption = adaptivePricingInfo.localCurrencyOptions.firstOrNull() ?: return null
-            val repository = FlagImageRepository(
+            val flagImageRepository = FlagImageRepository(
                 imageLoader = DefaultStripeImageLoader(context),
                 displayDensity = context.resources.displayMetrics.density,
             )
-            val result = repository.prefetch(
+            val result = flagImageRepository.fetch(
                 integrationCurrencyCode = adaptivePricingInfo.integrationCurrency,
                 localCurrencyCode = localOption.currency,
             )

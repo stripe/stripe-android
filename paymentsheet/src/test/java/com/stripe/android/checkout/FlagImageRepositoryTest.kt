@@ -16,7 +16,7 @@ class FlagImageRepositoryTest {
         val fakeLoader = FakeStripeImageLoader()
         val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
 
-        val result = repository.prefetch("usd", "eur")
+        val result = repository.fetch("usd", "eur")
 
         assertThat(result.images).isNotNull()
         assertThat(result.images!!.keys).containsExactly("USD", "EUR")
@@ -30,7 +30,7 @@ class FlagImageRepositoryTest {
         )
         val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
 
-        val result = repository.prefetch("usd", "eur")
+        val result = repository.fetch("usd", "eur")
 
         assertThat(result.images).isNull()
         assertThat(result.failures).hasSize(1)
@@ -45,7 +45,7 @@ class FlagImageRepositoryTest {
         )
         val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
 
-        val result = repository.prefetch("usd", "eur")
+        val result = repository.fetch("usd", "eur")
 
         assertThat(result.images).isNull()
         assertThat(result.failures).hasSize(1)
@@ -62,66 +62,32 @@ class FlagImageRepositoryTest {
         )
         val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
 
-        val result = repository.prefetch("usd", "eur")
+        val result = repository.fetch("usd", "eur")
 
         assertThat(result.images).isNull()
         assertThat(result.failures).hasSize(2)
     }
 
     @Test
-    fun `X-currency integration code - skips prefetch and returns empty failures`() = runTest {
+    fun `X-currency integration code - skips fetch and returns empty failures`() = runTest {
         val fakeLoader = FakeStripeImageLoader()
         val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
 
-        val result = repository.prefetch("xaf", "usd")
+        val result = repository.fetch("xaf", "usd")
 
         assertThat(result.images).isNull()
         assertThat(result.failures).isEmpty()
     }
 
     @Test
-    fun `X-currency local code - skips prefetch and returns empty failures`() = runTest {
+    fun `X-currency local code - skips fetch and returns empty failures`() = runTest {
         val fakeLoader = FakeStripeImageLoader()
         val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
 
-        val result = repository.prefetch("usd", "xpf")
+        val result = repository.fetch("usd", "xpf")
 
         assertThat(result.images).isNull()
         assertThat(result.failures).isEmpty()
-    }
-
-    @Test
-    fun `get returns cached bitmap after successful prefetch`() = runTest {
-        val fakeLoader = FakeStripeImageLoader()
-        val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
-
-        repository.prefetch("usd", "eur")
-
-        assertThat(repository.get("USD")).isNotNull()
-        assertThat(repository.get("EUR")).isNotNull()
-    }
-
-    @Test
-    fun `get returns null when prefetch failed`() = runTest {
-        val fakeLoader = FakeStripeImageLoader(
-            failingUrls = setOf(FlagImageRepository.buildFlagUrl("US", dpr = 3)),
-        )
-        val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
-
-        repository.prefetch("usd", "eur")
-
-        assertThat(repository.get("USD")).isNull()
-        assertThat(repository.get("EUR")).isNull()
-    }
-
-    @Test
-    fun `get returns null for currency not prefetched`() = runTest {
-        val fakeLoader = FakeStripeImageLoader()
-        val repository = FlagImageRepository(fakeLoader, displayDensity = 3f)
-
-        repository.prefetch("usd", "eur")
-
-        assertThat(repository.get("GBP")).isNull()
     }
 
     @Test
