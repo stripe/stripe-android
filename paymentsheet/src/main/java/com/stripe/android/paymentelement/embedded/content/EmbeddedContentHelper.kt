@@ -175,7 +175,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             confirmationHandler = confirmationHandler,
             coroutineScope = coroutineScope,
             errorReporter = errorReporter,
-            eventReporter = eventReporter,
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = linkAccountHolder,
             linkInlineInteractor = NoOpLinkInlineInteractor(),

@@ -50,8 +50,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetails.BankAccount
 import com.stripe.android.model.ConsumerPaymentDetails.Card
-import com.stripe.android.model.ConsumerPaymentDetails.Display
-import com.stripe.android.model.ConsumerPaymentDetails.Generic
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.getCardBrandIconForVerticalMode
@@ -206,21 +204,6 @@ private fun PaymentDetailsListItemPreview() {
         billingAddress = null,
         billingEmailAddress = null
     )
-    val generic = Generic(
-        id = "unknown_id",
-        last4 = "4444",
-        isDefault = false,
-        nickname = null,
-        billingAddress = null,
-        billingEmailAddress = null,
-        rawType = "CRYPTO",
-        display = Display(
-            label = "Crypto",
-            sublabel = "0x••••22Dd",
-            icon = null
-        ),
-        nextActionTypes = emptyList()
-    )
     DefaultLinkTheme {
         Column {
             PaymentDetailsListItem(
@@ -260,16 +243,6 @@ private fun PaymentDetailsListItemPreview() {
                 isSelected = false,
                 isAvailable = false,
                 isUpdating = true,
-                onClick = {},
-                onMenuButtonClick = {}
-            )
-            PaymentDetailsListItem(
-                paymentDetails = generic,
-                isClickable = true,
-                isMenuButtonClickable = true,
-                isSelected = true,
-                isAvailable = true,
-                isUpdating = false,
                 onClick = {},
                 onMenuButtonClick = {}
             )
@@ -359,14 +332,6 @@ internal fun RowScope.PaymentDetails(
                 title = paymentDetails.displayName.resolve(),
                 subtitle = null,
                 icon = CardBrand.Unknown.getCardBrandIconForVerticalMode(),
-            )
-        }
-        is Generic -> {
-            PaymentMethodInfo(
-                modifier = modifier,
-                title = paymentDetails.displayName.resolve(),
-                subtitle = paymentDetails.display.sublabel,
-                icon = { Icon(iconUrl = paymentDetails.display.icon?.defaultUrl, errorContent = { BankIcon(null) }) }
             )
         }
     }

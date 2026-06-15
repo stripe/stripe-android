@@ -21,7 +21,7 @@ def getProxyIpAddress() {
 }
 
 def getSentryDsn() {
-    if (gradle.ext.isCi) {
+    if (gradle.ext.isCi || gradle.ext.isBrowserstackBuild) {
         return findProperty('STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN') ?: ""
     } else {
         return ""
@@ -70,9 +70,10 @@ android {
         applicationId "com.stripe.android.paymentsheet.example"
         versionCode 11
 
-        testInstrumentationRunner "com.stripe.android.utils.PaymentSheetTestRunner"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
+        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
         buildConfigField "boolean", "DIRECTLY_TO_PLAYGROUND", "${directlyToPlayground()}"
         buildConfigField "boolean", "RUN_LATENCY_TESTS_IN_CI", "${runLatencyTestsInCi()}"
         buildConfigField "int", "LATENCY_EXPERIMENT_ITERATIONS", "${getLatencyExperimentIterations()}"

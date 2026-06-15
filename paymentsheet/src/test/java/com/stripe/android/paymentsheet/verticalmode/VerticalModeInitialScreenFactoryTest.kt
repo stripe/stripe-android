@@ -12,14 +12,11 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.FakeBaseSheetViewModel
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import kotlin.test.Test
 
@@ -89,48 +86,6 @@ class VerticalModeInitialScreenFactoryTest {
         assertThat(screens[1]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
     }
 
-    @Test
-    fun `reports promotion displayed for single supported PM with no saved PMs`() {
-        val promotionsHelper = FakePaymentMethodMessagePromotionsHelper(
-            promotions = FakePaymentMethodMessagePromotionsHelper.promotions
-        )
-        runScenario(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("klarna"),
-                )
-            ),
-            paymentMethodMessagePromotionsHelper = promotionsHelper,
-        ) {
-            assertThat(screens).hasSize(1)
-            assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalModeForm>()
-        }
-        runTest {
-            val event = promotionsHelper.reportPromotionDisplayedCalls.awaitItem()
-            assertThat(event.first).isEqualTo("klarna")
-            assertThat(event.second).isTrue()
-        }
-    }
-
-    @Test
-    fun `does not report promotion displayed when multiple PMs available`() {
-        val promotionsHelper = FakePaymentMethodMessagePromotionsHelper(
-            promotions = FakePaymentMethodMessagePromotionsHelper.promotions
-        )
-        runScenario(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                    paymentMethodTypes = listOf("card", "klarna"),
-                )
-            ),
-            paymentMethodMessagePromotionsHelper = promotionsHelper,
-        ) {
-            assertThat(screens).hasSize(1)
-            assertThat(screens[0]).isInstanceOf<PaymentSheetScreen.VerticalMode>()
-        }
-        promotionsHelper.reportPromotionDisplayedCalls.ensureAllEventsConsumed()
-    }
-
     private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
             linkState = LinkState(
@@ -141,7 +96,6 @@ class VerticalModeInitialScreenFactoryTest {
         ),
         hasSavedPaymentMethods: Boolean = false,
         selection: PaymentSelection? = null,
-        paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
         block: Scenario.() -> Unit,
     ) {
         val fakeViewModel = FakeBaseSheetViewModel.create(
@@ -172,7 +126,7 @@ class VerticalModeInitialScreenFactoryTest {
             viewModel = fakeViewModel,
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = null
         )
         Scenario(
             screens = screens

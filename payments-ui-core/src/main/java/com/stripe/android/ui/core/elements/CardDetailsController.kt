@@ -110,19 +110,19 @@ internal class CardDetailsController(
         )
     )
 
-    fun onScannedCard(scannedCardDetails: ScannedCardDetails) {
+    fun onScannedCard(cardNumber: String, expirationYear: Int?, expirationMonth: Int?) {
         cvcElement.controller.onRawValueChange("")
-        numberElement.controller.onRawValueChange(scannedCardDetails.cardNumber)
+        numberElement.controller.onRawValueChange(cardNumber)
         val newDate = if (
-            scannedCardDetails.expirationMonth != null &&
-            scannedCardDetails.expirationYear != null &&
+            expirationMonth != null &&
+            expirationYear != null &&
             DateUtils.isExpiryDataValid(
-                expiryMonth = scannedCardDetails.expirationMonth,
-                expiryYear = scannedCardDetails.expirationYear
+                expiryMonth = expirationMonth,
+                expiryYear = expirationYear
             )
         ) {
             @Suppress("MagicNumber")
-            "%02d%02d".format(scannedCardDetails.expirationMonth, scannedCardDetails.expirationYear % 100)
+            "%02d%02d".format(expirationMonth, expirationYear % 100)
         } else {
             ""
         }

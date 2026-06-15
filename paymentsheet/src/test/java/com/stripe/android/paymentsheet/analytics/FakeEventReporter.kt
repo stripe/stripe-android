@@ -60,9 +60,6 @@ internal class FakeEventReporter : EventReporter {
     private val _formCompletedCalls = Turbine<FormCompletedCall>()
     val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCalls
 
-    private val _walletButtonTappedCalls = Turbine<String>()
-    val walletButtonTappedCalls: ReceiveTurbine<String> = _walletButtonTappedCalls
-
     private val _pressConfirmButtonCalls = Turbine<PaymentSelection>()
     val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection> = _pressConfirmButtonCalls
 
@@ -120,7 +117,6 @@ internal class FakeEventReporter : EventReporter {
         _experimentExposureCalls.ensureAllEventsConsumed()
         _removePaymentMethodCalls.ensureAllEventsConsumed()
         _formCompletedCalls.ensureAllEventsConsumed()
-        _walletButtonTappedCalls.ensureAllEventsConsumed()
         _pressConfirmButtonCalls.ensureAllEventsConsumed()
         _usBankAccountFormEventCalls.ensureAllEventsConsumed()
         _tapToAddButtonShownCalls.ensureAllEventsConsumed()
@@ -177,10 +173,6 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
-    }
-
-    override fun onWalletButtonTapped(walletType: String) {
-        _walletButtonTappedCalls.add(walletType)
     }
 
     override fun onPressConfirmButton(paymentSelection: PaymentSelection) {

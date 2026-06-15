@@ -15,10 +15,6 @@ internal class FakePaymentMethodMessagePromotionsHelper(
     private val _calls = Turbine<Unit>()
     val calls: ReceiveTurbine<Unit> = _calls
 
-    private val _reportPromotionDisplayedCalls = Turbine<Pair<PaymentMethodCode, Boolean>>()
-    val reportPromotionDisplayedCalls: ReceiveTurbine<Pair<PaymentMethodCode, Boolean>> =
-        _reportPromotionDisplayedCalls
-
     override fun fetchPromotionsAsync(intent: StripeIntent) {
         _calls.add(Unit)
     }
@@ -41,14 +37,6 @@ internal class FakePaymentMethodMessagePromotionsHelper(
         metadata: PaymentMethodMetadata
     ): (() -> PaymentMethodMessagePromotion?)? {
         return { getPromotionIfAvailableForCode(code, metadata) }
-    }
-
-    override fun reportPromotionDisplayed(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ) {
-        val displayedSuccessfully = getPromotionIfAvailableForCode(code, metadata) != null
-        _reportPromotionDisplayedCalls.add(code to displayedSuccessfully)
     }
 
     fun validate() {

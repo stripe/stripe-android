@@ -40,7 +40,6 @@ internal object CheckoutStateFactory {
                 shippingAddress = shippingAddress,
                 billingAddress = billingAddress,
                 integrationLaunched = integrationLaunched,
-                flagImages = null,
             ),
         )
     }

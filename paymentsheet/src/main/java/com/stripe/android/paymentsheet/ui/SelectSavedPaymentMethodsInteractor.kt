@@ -12,7 +12,6 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
-import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -246,7 +245,6 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
-            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
         ): SelectSavedPaymentMethodsInteractor {
             return DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
@@ -261,7 +259,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
-                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                        paymentMethodMessagePromotionsHelper = null
                     )
                     viewModel.navigationHandler.transitionTo(
                         AddAnotherPaymentMethod(interactor = interactor)

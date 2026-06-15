@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.TestFactory
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.LinkCardBrand
+import com.stripe.android.model.Address
 import com.stripe.android.model.LinkMode
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -85,6 +86,74 @@ internal class AddPaymentMethodRequirementTest {
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
         )
         assertThat(AddPaymentMethodRequirement.UnsupportedForSetup.isMetBy(metadata, "")).isFalse()
+    }
+
+    @Test
+    fun testShippingAddressReturnsTrue() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                shipping = PaymentIntent.Shipping(
+                    name = "Example Buyer",
+                    address = Address(
+                        line1 = "123 Main St",
+                        country = "US",
+                        postalCode = "12345"
+                    )
+                )
+            )
+        )
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isTrue()
+    }
+
+    @Test
+    fun testShippingAddressReturnsTrueWhenMetadataAllowsPaymentMethodsRequiringShippingAddress() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                shipping = null
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+        )
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isTrue()
+    }
+
+    @Test
+    fun testShippingAddressReturnsFalseWithNullName() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                shipping = PaymentIntent.Shipping(
+                    address = Address(
+                        line1 = "123 Main St",
+                        country = "US",
+                        postalCode = "12345"
+                    )
+                )
+            )
+        )
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isFalse()
+    }
+
+    @Test
+    fun testShippingAddressReturnsFalseWithNullLine1() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                shipping = PaymentIntent.Shipping(
+                    name = "Example Buyer",
+                    address = Address(
+                        country = "US",
+                        postalCode = "12345"
+                    )
+                )
+            )
+        )
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isFalse()
+    }
+
+    @Test
+    fun testShippingAddressReturnsFalseWithSetupIntent() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+        )
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata, "")).isFalse()
     }
 
     @Test

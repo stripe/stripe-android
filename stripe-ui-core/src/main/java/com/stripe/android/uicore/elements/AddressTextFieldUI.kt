@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.LocalTextFieldInsets
@@ -24,18 +25,21 @@ fun AddressTextFieldUI(
     }
 ) {
     val label by controller.label.collectAsState()
-    val error by controller.validationMessage.collectAsState()
-
+    val textFieldState by controller.textFieldState.collectAsState()
     val textFieldInsets = LocalTextFieldInsets.current
 
-    val isError = error != null
+    val fieldModifier = remember(textFieldState.isEditable, enabled) {
+        modifier.fillMaxWidth().then(
+            if (textFieldState.isEditable) Modifier else Modifier.clickable(enabled = enabled) { onClick() }
+        )
+    }
 
     CompatTextField(
-        value = "",
-        enabled = false,
-        onValueChange = {},
+        value = textFieldState.value,
+        enabled = textFieldState.isEditable && enabled,
+        onValueChange = { v -> controller.onInlineQueryChanged(v) },
         errorMessage = null,
-        isError = isError,
+        isError = textFieldState.fieldDisplayState == FieldDisplayState.ERROR,
         label = {
             FormLabel(label.resolve())
         },
@@ -44,18 +48,13 @@ fun AddressTextFieldUI(
         singleLine = true,
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            fieldDisplayState = when (isError) {
-                true -> FieldDisplayState.ERROR
-                false -> FieldDisplayState.NORMAL
-            },
-            disabledIndicatorColor = if (isError) {
+            fieldDisplayState = textFieldState.fieldDisplayState,
+            disabledIndicatorColor = if (textFieldState.showDisabledErrorIndicator) {
                 MaterialTheme.colors.error
             } else {
                 Color.Transparent
             },
         ),
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(enabled = enabled) { onClick() },
+        modifier = fieldModifier,
     )
 }

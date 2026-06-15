@@ -726,7 +726,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             PaymentSheetScreen.SelectSavedPaymentMethods(
                 interactor = interactor,

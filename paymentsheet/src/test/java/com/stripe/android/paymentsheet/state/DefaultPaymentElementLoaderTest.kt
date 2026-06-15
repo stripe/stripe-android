@@ -14,7 +14,6 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
@@ -97,7 +96,6 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
-import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -184,14 +182,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
-
-    @Test
-    fun `isNfcScanningAvailable in metadata is true if isNfcScanningAvailable is true`() =
-        runIsNfcScanningAvailableTest(expectedIsNfcScanningAvailable = true)
-
-    @Test
-    fun `isNfcScanningAvailable in metadata is false if isNfcScanningAvailable is false`() =
-        runIsNfcScanningAvailableTest(expectedIsNfcScanningAvailable = false)
 
     @Test
     fun `load with empty merchantDisplayName returns failure`() = runScenario {
@@ -4711,32 +4701,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    private fun runIsNfcScanningAvailableTest(
-        expectedIsNfcScanningAvailable: Boolean
-    ) = runScenario {
-        val loader = createPaymentElementLoader(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = expectedIsNfcScanningAvailable),
-        )
-
-        val state = loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            ),
-        ).getOrThrow()
-
-        assertThat(state.paymentMethodMetadata.isNfcScanningEnabled).isEqualTo(expectedIsNfcScanningAvailable)
-
-        consumeLoadingEvents()
-
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
-    }
-
     private fun runFilterScenario(
         filteredPaymentMethods: List<PaymentMethod>? = null,
         block: suspend FilterScenario.() -> Unit
@@ -4841,8 +4805,6 @@ internal class DefaultPaymentElementLoaderTest {
         durationProvider: FakeDurationProvider = FakeDurationProvider(),
         paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
             FakePaymentMethodMessagePromotionsExperimentHandler(),
-        isNfcScanningAvailable: IsNfcScanningAvailable =
-            FakeIsNfcScanningAvailable(result = false),
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
@@ -4896,7 +4858,6 @@ internal class DefaultPaymentElementLoaderTest {
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
-            isNfcScanningAvailable = isNfcScanningAvailable,
         )
     }
 

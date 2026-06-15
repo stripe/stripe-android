@@ -36,10 +36,7 @@ internal class TapToAddCardDetailsActionTest {
             )
 
             composeTestRule.setContent {
-                action.Content(
-                    enabled = true,
-                    onScannedCard = { throw IllegalStateException("Should not be called!") }
-                )
+                action.Content(enabled = true, controller = fakeController())
             }
 
             composeTestRule.waitForIdle()
@@ -62,10 +59,7 @@ internal class TapToAddCardDetailsActionTest {
             )
 
             composeTestRule.setContent {
-                action.Content(
-                    enabled = false,
-                    onScannedCard = { throw IllegalStateException("Should not be called!") }
-                )
+                action.Content(enabled = false, controller = fakeController())
             }
 
             composeTestRule.waitForIdle()
@@ -89,10 +83,7 @@ internal class TapToAddCardDetailsActionTest {
             val enabledHolder = mutableStateOf(true)
 
             composeTestRule.setContent {
-                action.Content(
-                    enabled = enabledHolder.value,
-                    onScannedCard = { throw IllegalStateException("Should not be called!") }
-                )
+                action.Content(enabled = enabledHolder.value, controller = fakeController())
             }
 
             composeTestRule.waitForIdle()

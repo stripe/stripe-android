@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface AutocompleteAddressInteractor {
     val autocompleteConfig: Config
+
     fun register(onEvent: (Event) -> Unit)
 
     fun onAutocomplete(country: String)

@@ -1245,35 +1245,6 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    @Test
-    fun `promotion message is displayed when selecting klarna from saved PMs screen`() {
-        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-            paymentMethodTypes = listOf("card", "klarna"),
-        )
-        val viewModel = createViewModel(
-            paymentIntent = paymentIntent,
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(
-                promotions = FakePaymentMethodMessagePromotionsHelper.promotions
-            ),
-        )
-        val scenario = activityScenario(viewModel)
-
-        scenario.launch(intent).onActivity {
-            composeTestRule.onNodeWithTag(
-                PaymentOptionsItem.AddCard.viewType.name
-            ).performClick()
-
-            composeTestRule.onNodeWithTag(
-                "PaymentMethodsUITestTagklarna"
-            ).performClick()
-
-            composeTestRule.onNodeWithText(
-                "This is a message",
-                substring = true,
-            ).assertIsDisplayed()
-        }
-    }
-
     private fun activityScenario(
         viewModel: PaymentSheetViewModel = createViewModel(),
     ): InjectableActivityScenario<PaymentSheetActivity> {
@@ -1296,8 +1267,6 @@ internal class PaymentSheetActivityTest {
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         confirmationHandlerFactory: ConfirmationHandler.Factory? = null,
         integrationMetadata: IntegrationMetadata? = null,
-        paymentMethodMessagePromotionsHelper: FakePaymentMethodMessagePromotionsHelper =
-            FakePaymentMethodMessagePromotionsHelper(),
     ): PaymentSheetViewModel = runBlocking {
         val coordinator = FakeLinkConfigurationCoordinator(
             accountStatus = AccountStatus.SignedOut,
@@ -1368,7 +1337,7 @@ internal class PaymentSheetActivityTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
             )
         }
     }

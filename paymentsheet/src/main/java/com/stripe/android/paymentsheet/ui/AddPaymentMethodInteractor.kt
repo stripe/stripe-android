@@ -78,7 +78,6 @@ internal class DefaultAddPaymentMethodInteractor(
     private val reportFieldInteraction: (PaymentMethodCode) -> Unit,
     private val onFormFieldValuesChanged: (FormFieldValues?, String) -> Unit,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
-    private val reportPromotionDisplayed: (PaymentMethodCode) -> Unit,
     private val createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments,
     private val coroutineScope: CoroutineScope,
     private val uiContext: CoroutineContext,
@@ -113,9 +112,6 @@ internal class DefaultAddPaymentMethodInteractor(
                 reportFieldInteraction = viewModel.analyticsListener::reportFieldInteraction,
                 onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
-                reportPromotionDisplayed = { code ->
-                    paymentMethodMessagePromotionsHelper?.reportPromotionDisplayed(code, paymentMethodMetadata)
-                },
                 createUSBankAccountFormArguments = {
                     USBankAccountFormArguments.create(
                         viewModel = viewModel,
@@ -153,7 +149,6 @@ internal class DefaultAddPaymentMethodInteractor(
 
     private fun getInitialState(): AddPaymentMethodInteractor.State {
         val selectedPaymentMethodCode = selectedPaymentMethodCode.value
-        reportPromotionDisplayed(selectedPaymentMethodCode)
 
         return AddPaymentMethodInteractor.State(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -230,7 +225,6 @@ internal class DefaultAddPaymentMethodInteractor(
                 if (selectedPaymentMethodCode.value != viewAction.code) {
                     _selectedPaymentMethodCode.value = viewAction.code
                     reportPaymentMethodTypeSelected(viewAction.code)
-                    reportPromotionDisplayed(viewAction.code)
                 }
             }
             is AddPaymentMethodInteractor.ViewAction.UpdatePaymentMethodVisibility -> {

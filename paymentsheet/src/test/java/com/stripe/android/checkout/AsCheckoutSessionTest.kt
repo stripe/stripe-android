@@ -13,132 +13,132 @@ class AsCheckoutSessionTest {
 
     @Test
     fun `maps id`() {
-        val session = createSession(id = "cs_test_123")
+        val session = createResponse(id = "cs_test_123").asCheckoutSession()
         assertThat(session.id).isEqualTo("cs_test_123")
     }
 
     @Test
     fun `maps status open`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.OPEN)
+        val session = createResponse(status = CheckoutSessionResponse.Status.OPEN).asCheckoutSession()
         assertThat(session.status).isEqualTo(CheckoutSession.Status.Open)
     }
 
     @Test
     fun `maps status complete`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.COMPLETE)
+        val session = createResponse(status = CheckoutSessionResponse.Status.COMPLETE).asCheckoutSession()
         assertThat(session.status).isEqualTo(CheckoutSession.Status.Complete)
     }
 
     @Test
     fun `maps status expired`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.EXPIRED)
+        val session = createResponse(status = CheckoutSessionResponse.Status.EXPIRED).asCheckoutSession()
         assertThat(session.status).isEqualTo(CheckoutSession.Status.Expired)
     }
 
     @Test
     fun `maps status unknown`() {
-        val session = createSession(status = CheckoutSessionResponse.Status.UNKNOWN)
+        val session = createResponse(status = CheckoutSessionResponse.Status.UNKNOWN).asCheckoutSession()
         assertThat(session.status).isEqualTo(CheckoutSession.Status.Unknown)
     }
 
     @Test
     fun `maps livemode true`() {
-        val session = createSession(liveMode = true)
+        val session = createResponse(liveMode = true).asCheckoutSession()
         assertThat(session.liveMode).isTrue()
     }
 
     @Test
     fun `maps livemode false`() {
-        val session = createSession(liveMode = false)
+        val session = createResponse(liveMode = false).asCheckoutSession()
         assertThat(session.liveMode).isFalse()
     }
 
     @Test
     fun `maps currency`() {
-        val session = createSession(currency = "eur")
+        val session = createResponse(currency = "eur").asCheckoutSession()
         assertThat(session.currency).isEqualTo("eur")
     }
 
     @Test
     fun `maps customerEmail`() {
-        val session = createSession(customerEmail = "test@example.com")
+        val session = createResponse(customerEmail = "test@example.com").asCheckoutSession()
         assertThat(session.customerEmail).isEqualTo("test@example.com")
     }
 
     @Test
     fun `null customerEmail maps to null`() {
-        val session = createSession(customerEmail = null)
+        val session = createResponse(customerEmail = null).asCheckoutSession()
         assertThat(session.customerEmail).isNull()
     }
 
     @Test
     fun `maps tax status ready`() {
-        val session = createSession(taxStatus = CheckoutSessionResponse.TaxStatus.READY)
+        val session = createResponse(taxStatus = CheckoutSessionResponse.TaxStatus.READY).asCheckoutSession()
         assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Ready)
     }
 
     @Test
     fun `maps tax status requires shipping address`() {
-        val session = createSession(
+        val session = createResponse(
             taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
-        )
+        ).asCheckoutSession()
         assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresShippingAddress)
     }
 
     @Test
     fun `maps tax status requires billing address`() {
-        val session = createSession(
+        val session = createResponse(
             taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
-        )
+        ).asCheckoutSession()
         assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.RequiresBillingAddress)
     }
 
     @Test
     fun `maps tax status unknown`() {
-        val session = createSession(taxStatus = CheckoutSessionResponse.TaxStatus.UNKNOWN)
+        val session = createResponse(taxStatus = CheckoutSessionResponse.TaxStatus.UNKNOWN).asCheckoutSession()
         assertThat(session.tax.status).isEqualTo(CheckoutSession.Tax.Status.Unknown)
     }
 
     @Test
     fun `null totalSummary maps to null`() {
-        val session = createSession(totalSummary = null)
+        val session = createResponse(totalSummary = null).asCheckoutSession()
         assertThat(session.totalSummary).isNull()
     }
 
     @Test
     fun `maps totalSummary subtotal`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(subtotal = 5000L),
-        )
+        ).asCheckoutSession()
         assertThat(session.totalSummary?.subtotal).isEqualTo(5000L)
     }
 
     @Test
     fun `maps totalSummary totalDueToday`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(totalDueToday = 4044L),
-        )
+        ).asCheckoutSession()
         assertThat(session.totalSummary?.totalDueToday).isEqualTo(4044L)
     }
 
     @Test
     fun `maps totalSummary totalAmountDue`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(totalAmountDue = 3000L),
-        )
+        ).asCheckoutSession()
         assertThat(session.totalSummary?.totalAmountDue).isEqualTo(3000L)
     }
 
     @Test
     fun `maps discountAmounts`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(
                 discountAmounts = listOf(
                     CheckoutSessionResponse.DiscountAmount(amount = 500L, displayName = "SUMMER10"),
                     CheckoutSessionResponse.DiscountAmount(amount = 250L, displayName = "LOYALTY5"),
                 ),
             ),
-        )
+        ).asCheckoutSession()
         val discounts = session.totalSummary!!.discountAmounts
         assertThat(discounts).hasSize(2)
         assertThat(discounts[0].amount).isEqualTo(500L)
@@ -149,7 +149,7 @@ class AsCheckoutSessionTest {
 
     @Test
     fun `maps taxAmounts`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(
                 taxAmounts = listOf(
                     CheckoutSessionResponse.TaxAmount(
@@ -160,7 +160,7 @@ class AsCheckoutSessionTest {
                     ),
                 ),
             ),
-        )
+        ).asCheckoutSession()
         val taxes = session.totalSummary!!.taxAmounts
         assertThat(taxes).hasSize(1)
         assertThat(taxes[0].amount).isEqualTo(294L)
@@ -171,7 +171,7 @@ class AsCheckoutSessionTest {
 
     @Test
     fun `maps shippingRate`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(
                 shippingRate = CheckoutSessionResponse.ShippingRate(
                     id = "shr_standard",
@@ -180,7 +180,7 @@ class AsCheckoutSessionTest {
                     deliveryEstimate = "5-7 business days",
                 ),
             ),
-        )
+        ).asCheckoutSession()
         val shipping = session.totalSummary!!.shippingRate!!
         assertThat(shipping.id).isEqualTo("shr_standard")
         assertThat(shipping.amount).isEqualTo(500L)
@@ -190,31 +190,31 @@ class AsCheckoutSessionTest {
 
     @Test
     fun `null shippingRate maps to null`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(shippingRate = null),
-        )
+        ).asCheckoutSession()
         assertThat(session.totalSummary!!.shippingRate).isNull()
     }
 
     @Test
     fun `maps appliedBalance`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(appliedBalance = -200L),
-        )
+        ).asCheckoutSession()
         assertThat(session.totalSummary!!.appliedBalance).isEqualTo(-200L)
     }
 
     @Test
     fun `null appliedBalance maps to null`() {
-        val session = createSession(
+        val session = createResponse(
             totalSummary = TotalSummaryResponseFactory.create(appliedBalance = null),
-        )
+        ).asCheckoutSession()
         assertThat(session.totalSummary!!.appliedBalance).isNull()
     }
 
     @Test
     fun `maps lineItems`() {
-        val session = createSession(
+        val session = createResponse(
             lineItems = listOf(
                 CheckoutSessionResponse.LineItem(
                     id = "li_1",
@@ -225,7 +225,7 @@ class AsCheckoutSessionTest {
                     total = 1998L,
                 ),
             ),
-        )
+        ).asCheckoutSession()
         val items = session.lineItems
         assertThat(items).hasSize(1)
         assertThat(items[0].id).isEqualTo("li_1")
@@ -238,13 +238,13 @@ class AsCheckoutSessionTest {
 
     @Test
     fun `empty lineItems maps to empty list`() {
-        val session = createSession()
+        val session = createResponse().asCheckoutSession()
         assertThat(session.lineItems).isEmpty()
     }
 
     @Test
     fun `maps shippingOptions`() {
-        val session = createSession(
+        val session = createResponse(
             shippingOptions = listOf(
                 CheckoutSessionResponse.ShippingRate(
                     id = "shr_standard",
@@ -259,7 +259,7 @@ class AsCheckoutSessionTest {
                     deliveryEstimate = "1-3 business days",
                 ),
             ),
-        )
+        ).asCheckoutSession()
         val options = session.shippingOptions
         assertThat(options).hasSize(2)
         assertThat(options[0].id).isEqualTo("shr_standard")
@@ -274,11 +274,11 @@ class AsCheckoutSessionTest {
 
     @Test
     fun `empty shippingOptions maps to empty list`() {
-        val session = createSession()
+        val session = createResponse().asCheckoutSession()
         assertThat(session.shippingOptions).isEmpty()
     }
 
-    private fun createSession(
+    private fun createResponse(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
         status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
         liveMode: Boolean = false,
@@ -288,22 +288,17 @@ class AsCheckoutSessionTest {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
-    ): CheckoutSession {
-        return InternalState(
-            key = "CheckoutConfigurationMergerTest",
-            configuration = Checkout.Configuration().build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = id,
-                status = status,
-                liveMode = liveMode,
-                currency = currency,
-                customerEmail = customerEmail,
-                taxStatus = taxStatus,
-                totalSummary = totalSummary,
-                lineItems = lineItems,
-                shippingOptions = shippingOptions,
-            ),
-            flagImages = null,
-        ).asCheckoutSession()
+    ): CheckoutSessionResponse {
+        return CheckoutSessionResponseFactory.create(
+            id = id,
+            status = status,
+            liveMode = liveMode,
+            currency = currency,
+            customerEmail = customerEmail,
+            taxStatus = taxStatus,
+            totalSummary = totalSummary,
+            lineItems = lineItems,
+            shippingOptions = shippingOptions,
+        )
     }
 }

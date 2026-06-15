@@ -269,14 +269,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onWalletButtonTapped(walletType: String) {
-        fireEvent(
-            PaymentSheetEvent.WalletButtonTapped(
-                walletType = walletType,
-            )
-        )
-    }
-
     override fun onPressConfirmButton(paymentSelection: PaymentSelection) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 

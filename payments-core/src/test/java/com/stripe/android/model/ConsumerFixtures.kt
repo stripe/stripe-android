@@ -264,63 +264,6 @@ object ConsumerFixtures {
         """.trimIndent()
     )
 
-    val CONSUMER_SINGLE_GENERIC_PAYMENT_DETAILS_JSON = JSONObject(
-        """
-            {
-              "redacted_payment_details": [
-                {
-                  "id": "csmrpd_126",
-                  "is_default": false,
-                  "type": "CRYPTO",
-                  "display": {
-                    "type": "0x••••22Dd",
-                    "label": "Crypto",
-                    "sublabel": "0x••••22Dd",
-                    "last4": "0x••••22Dd",
-                    "icon": {
-                      "default": "https://example.com/crypto-icon.png"
-                    }
-                  },
-                  "next_action_types": ["redirect_to_url"]
-                }
-              ]
-            }
-        """.trimIndent()
-    )
-
-    val CONSUMER_GENERIC_PAYMENT_DETAILS_NO_SUBLABEL_ICON_JSON = JSONObject(
-        """
-            {
-              "redacted_payment_details": [
-                {
-                  "id": "csmrpd_126",
-                  "is_default": false,
-                  "type": "CRYPTO",
-                  "display": {
-                    "type": "0x••••22Dd",
-                    "label": "Crypto"
-                  },
-                  "next_action_types": []
-                }
-              ]
-            }
-        """.trimIndent()
-    )
-
-    val CONSUMER_GENERIC_PAYMENT_DETAILS_NO_DISPLAY_JSON = JSONObject(
-        """
-            {
-              "redacted_payment_details": [
-                {
-                  "id": "csmrpd_126",
-                  "is_default": false,
-                  "type": "CRYPTO"
-                }
-              ]
-            }
-        """.trimIndent()
-    )
-
     val PAYMENT_DETAILS_SHARE_JSON = JSONObject(
         """
         {

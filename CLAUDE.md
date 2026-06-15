@@ -28,7 +28,7 @@ Multi-module Android library for payment processing and financial services.
 - Dagger/Hilt DI in some modules; binary-compatibility-validator for API compat
 - Gradle with shared deps (dependencies.gradle), AGP 8.13.x, Kotlin 2.3.x
 - Detekt for static analysis, Paparazzi for screenshot testing
-- No defaults for internal code: public APIs give parameters defaults (`= null`, `= false`) for ergonomic construction; non-public code (`internal` or `@RestrictTo`) omits defaults on both model fields and function parameters to force explicit decisions at each call site
+- Nullable field defaults: public models give nullable fields `= null` for ergonomic construction; non-public models (`internal` or `@RestrictTo`) omit defaults to force explicit decisions at each call site
 
 **Testing** — MUST invoke the relevant skill before writing any test code:
 - `write-unit-tests` — unit test structure, runScenario pattern, Turbine Flow testing, Truth assertions

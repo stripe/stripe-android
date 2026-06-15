@@ -37,7 +37,7 @@ class CardDetailsSectionController(
         cardDetailsElement.onValidationStateChanged(isValidating)
     }
 
-    internal fun onScannedCard(scannedCardDetails: ScannedCardDetails) {
-        cardDetailsElement.controller.onScannedCard(scannedCardDetails)
+    internal fun onScannedCard(cardNumber: String, expirationYear: Int?, expirationMonth: Int?) {
+        cardDetailsElement.controller.onScannedCard(cardNumber, expirationYear, expirationMonth)
     }
 }

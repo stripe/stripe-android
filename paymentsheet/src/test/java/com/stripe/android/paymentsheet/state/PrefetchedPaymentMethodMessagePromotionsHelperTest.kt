@@ -29,7 +29,29 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
                 )
             )
 
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isTrue()
         assertThat(result).isEqualTo(promotion)
+    }
+
+    @Test
+    fun `logs displayed successfully as false if promotion not available and in treatment`() = runScenario(
+        promotions = null
+    ) {
+        val result = helper.getPromotionIfAvailableForCode(
+            PaymentMethod.Type.Affirm.code,
+            PaymentMethodMetadataFactory.create(
+                experimentsData = ElementsSession.ExperimentsData(
+                    arbId = "arb_123",
+                    experimentAssignments = mapOf(
+                        ElementsSession.ExperimentAssignment
+                            .OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
+                    )
+                )
+            )
+        )
+
+        assertThat(eventReporter.pmmPromotionsDisplayed.awaitItem()).isFalse()
+        assertThat(result).isNull()
     }
 
     @Test

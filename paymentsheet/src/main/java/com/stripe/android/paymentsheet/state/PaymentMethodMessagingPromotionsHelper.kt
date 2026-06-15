@@ -41,11 +41,6 @@ internal interface PaymentMethodMessagePromotionsHelper {
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata
     ): (() -> PaymentMethodMessagePromotion?)?
-
-    fun reportPromotionDisplayed(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    )
 }
 
 @Singleton
@@ -82,28 +77,29 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
     ): PaymentMethodMessagePromotion? {
-        if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return null
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            val variant = metadata.experimentsData?.experimentAssignments[
+                ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+            ] ?: return null
 
-        val variant = metadata.experimentsData?.experimentAssignments[
-            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
-        ] ?: return null
-
-        if (variant != "treatment") return null
-
-        return if (promotionsDeferred?.isCompleted == true) {
-            promotionsDeferred?.getCompleted()?.getOrNull()?.promotions?.find {
-                it.paymentMethodType.lowercase() == code
+            if (variant == "treatment") {
+                val promotion = if (promotionsDeferred?.isCompleted == true) {
+                    promotionsDeferred?.getCompleted()?.getOrNull()?.promotions?.find {
+                        it.paymentMethodType.lowercase() == code
+                    }
+                } else {
+                    null
+                }
+                eventReporter.onPaymentMethodMessagePromotionDisplayed(
+                    displayedSuccessfully = promotion != null
+                )
+                promotion
+            } else {
+                null
             }
         } else {
             null
         }
-    }
-
-    override fun reportPromotionDisplayed(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ) {
-        reportPromotionDisplayedInternal(code, metadata, eventReporter)
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
@@ -141,24 +137,25 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata
     ): PaymentMethodMessagePromotion? {
-        if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return null
+        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
+            val variant = metadata.experimentsData?.experimentAssignments[
+                ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+            ] ?: return null
 
-        val variant = metadata.experimentsData?.experimentAssignments[
-            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
-        ] ?: return null
-
-        if (variant != "treatment") return null
-
-        return promotions?.find {
-            it.paymentMethodType.lowercase() == code
+            if (variant == "treatment") {
+                val promotion = promotions?.find {
+                    it.paymentMethodType.lowercase() == code
+                }
+                eventReporter.onPaymentMethodMessagePromotionDisplayed(
+                    displayedSuccessfully = promotion != null
+                )
+                promotion
+            } else {
+                null
+            }
+        } else {
+            null
         }
-    }
-
-    override fun reportPromotionDisplayed(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ) {
-        reportPromotionDisplayedInternal(code, metadata, eventReporter)
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
@@ -190,13 +187,6 @@ internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessage
         metadata: PaymentMethodMetadata
     ): PaymentMethodMessagePromotion? {
         return null
-    }
-
-    override fun reportPromotionDisplayed(
-        code: PaymentMethodCode,
-        metadata: PaymentMethodMetadata
-    ) {
-        // NO-OP
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
@@ -234,25 +224,6 @@ private fun PaymentMethodMessagePromotionsHelper.getPromotionProviderInternal(
     } else {
         null
     }
-}
-
-private fun PaymentMethodMessagePromotionsHelper.reportPromotionDisplayedInternal(
-    code: PaymentMethodCode,
-    metadata: PaymentMethodMetadata,
-    eventReporter: EventReporter
-) {
-    if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
-
-    if (!PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)) return
-
-    val variant = metadata.experimentsData?.experimentAssignments[
-        ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
-    ] ?: return
-
-    if (variant != "treatment") return
-
-    val displayedSuccessfully = getPromotionIfAvailableForCode(code, metadata) != null
-    eventReporter.onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully)
 }
 
 @Module

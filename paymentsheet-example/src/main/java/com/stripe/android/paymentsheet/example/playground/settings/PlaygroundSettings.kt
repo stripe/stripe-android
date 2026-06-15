@@ -596,8 +596,7 @@ internal class PlaygroundSettings private constructor(
             TermsDisplaySettingsDefinition,
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions),
-            FeatureFlagSettingsDefinition(FeatureFlags.enableNfcScanning),
+            FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions)
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

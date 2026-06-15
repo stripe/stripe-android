@@ -116,11 +116,9 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
-                cardNumber = "5555555555554444",
-                expirationYear = 2044,
-                expirationMonth = 4,
-            )
+            cardNumber = "5555555555554444",
+            expirationYear = 2044,
+            expirationMonth = 4,
         )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -151,11 +149,9 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
-                cardNumber = "5555555555554444",
-                expirationYear = 2044,
-                expirationMonth = 4,
-            )
+            cardNumber = "5555555555554444",
+            expirationYear = 2044,
+            expirationMonth = 4,
         )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -186,11 +182,9 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
-                cardNumber = "5555555555554444",
-                expirationYear = 2009,
-                expirationMonth = 12,
-            )
+            cardNumber = "5555555555554444",
+            expirationYear = 2009,
+            expirationMonth = 12,
         )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
@@ -206,11 +200,9 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
-                cardNumber = "5555555555554444",
-                expirationYear = 2029,
-                expirationMonth = 1,
-            )
+            cardNumber = "5555555555554444",
+            expirationYear = 2029,
+            expirationMonth = 1,
         )
 
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
@@ -237,11 +229,9 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
-                cardNumber = "5555555555554444",
-                expirationYear = null,
-                expirationMonth = null,
-            )
+            cardNumber = "5555555555554444",
+            expirationYear = null,
+            expirationMonth = null,
         )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)

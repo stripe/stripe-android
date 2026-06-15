@@ -8,7 +8,6 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.LinkPaymentDetails.BankAccount
 import com.stripe.android.model.LinkPaymentDetails.Card
-import com.stripe.android.model.LinkPaymentDetails.Generic
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -22,14 +21,12 @@ internal val LinkPaymentDetails.label: ResolvableString
     get() = when (this) {
         is Card -> makeCardDisplayName(nickname, funding, brand)
         is BankAccount -> bankName?.resolvableString ?: "••••$last4".resolvableString
-        is Generic -> label.resolvableString
     }
 
 internal val LinkPaymentDetails.sublabel: ResolvableString?
     get() = when (this) {
         is Card -> "•••• $last4".resolvableString
         is BankAccount -> if (bankName != null) "••••$last4".resolvableString else null
-        is Generic -> sublabel?.resolvableString
     }
 
 internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
@@ -39,7 +36,6 @@ internal val ConsumerPaymentDetails.PaymentDetails.displayName: ResolvableString
         is ConsumerPaymentDetails.Passthrough -> {
             "•••• $last4".resolvableString
         }
-        is ConsumerPaymentDetails.Generic -> display.label.resolvableString
     }
 
 internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: ResolvableString
@@ -53,9 +49,6 @@ internal val ConsumerPaymentDetails.PaymentDetails.paymentOptionLabel: Resolvabl
             }
             is ConsumerPaymentDetails.Passthrough -> {
                 listOf("•••• $last4".resolvableString)
-            }
-            is ConsumerPaymentDetails.Generic -> {
-                listOfNotNull(display.label.resolvableString, display.sublabel?.resolvableString)
             }
         }
         return components.joinToString(separator = " ")

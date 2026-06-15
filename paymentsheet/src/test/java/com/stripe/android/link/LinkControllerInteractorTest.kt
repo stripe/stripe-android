@@ -538,23 +538,6 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `onPresentPaymentMethods() with Generic payment method uses automatic name collection`() = runTest {
-        val interactor = createInteractor()
-        configure(interactor)
-
-        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
-        interactor.presentPaymentMethods(
-            launcher = launcher,
-            email = null,
-            paymentMethodType = LinkController.PaymentMethodType.Generic
-        )
-
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
-        assertThat(collectionConfig.name)
-            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
-    }
-
-    @Test
     fun `onLinkActivityResult() with PaymentMethodObtained result does nothing`() = runTest {
         val interactor = createInteractor()
         configure(interactor)

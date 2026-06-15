@@ -91,7 +91,6 @@ internal data class PaymentMethodMetadata(
     val isTapToAddSupported: Boolean,
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
-    val isNfcScanningEnabled: Boolean,
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
@@ -366,7 +365,6 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
-            isNfcScanningEnabled: Boolean,
             paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
@@ -423,7 +421,6 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
                 isTapToAddSupported = isTapToAddAvailable,
-                isNfcScanningEnabled = isNfcScanningEnabled,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
@@ -439,7 +436,6 @@ internal data class PaymentMethodMetadata(
             configuration: CustomerSheet.Configuration,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
-            isNfcScanningEnabled: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
@@ -496,7 +492,6 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
-                isNfcScanningEnabled = isNfcScanningEnabled,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,

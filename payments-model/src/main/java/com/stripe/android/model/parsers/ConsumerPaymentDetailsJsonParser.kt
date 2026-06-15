@@ -17,7 +17,6 @@ private const val FIELD_CARD_DETAILS = "card_details"
 private const val FIELD_CARD_LAST_4 = "last4"
 private const val FIELD_BANK_ACCOUNT_DETAILS = "bank_account_details"
 private const val FIELD_BANK_ACCOUNT_LAST_4 = "last4"
-private const val FIELD_UNKNOWN_LAST_4 = "last4"
 private const val FIELD_BANK_ACCOUNT_BANK_ACCOUNT_NAME = "bank_account_name"
 
 private const val FIELD_BILLING_ADDRESS = "billing_address"
@@ -42,12 +41,6 @@ private const val FIELD_BANK_ACCOUNT_BANK_ICON_CODE = "bank_icon_code"
 private const val FIELD_IS_DEFAULT = "is_default"
 private const val FIELD_NICKNAME = "nickname"
 private const val FIELD_FUNDING = "funding"
-private const val FIELD_DISPLAY = "display"
-private const val FIELD_LABEL = "label"
-private const val FIELD_SUBLABEL = "sublabel"
-private const val FIELD_ICON = "icon"
-private const val FIELD_DEFAULT_ICON = "default"
-private const val FIELD_NEXT_ACTION_TYPES = "next_action_types"
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails> {
@@ -70,6 +63,7 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
             val id = json.getString(FIELD_ID)
             val isDefault = json.optBoolean(FIELD_IS_DEFAULT)
             val nickname = optString(json, FIELD_NICKNAME)?.takeIf { it.isNotBlank() }
+
             when (type.lowercase()) {
                 "card" -> {
                     val cardDetails = json.getJSONObject(FIELD_CARD_DETAILS)
@@ -106,31 +100,9 @@ object ConsumerPaymentDetailsJsonParser : ModelJsonParser<ConsumerPaymentDetails
                         billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS)
                     )
                 }
-                else -> {
-                    val display = json.optJSONObject(FIELD_DISPLAY)
-                    display?.let {
-                        ConsumerPaymentDetails.Generic(
-                            id = id,
-                            last4 = display.optString(FIELD_UNKNOWN_LAST_4),
-                            isDefault = isDefault,
-                            nickname = nickname,
-                            billingAddress = parseBillingAddress(json),
-                            billingEmailAddress = optString(json, FIELD_BILLING_EMAIL_ADDRESS),
-                            rawType = type,
-                            display = parseDisplay(display),
-                            nextActionTypes = jsonArrayToList(json.getJSONArray(FIELD_NEXT_ACTION_TYPES))
-                        )
-                    }
-                }
+                else -> null
             }
         }
-
-    private fun parseDisplay(display: JSONObject) = ConsumerPaymentDetails.Display(
-        label = display.getString(FIELD_LABEL),
-        sublabel = display.optString(FIELD_SUBLABEL).takeIf { it.isNotBlank() },
-        icon = display.optJSONObject(FIELD_ICON)
-            ?.let { ConsumerPaymentDetails.Display.Icon(defaultUrl = it.getString(FIELD_DEFAULT_ICON)) }
-    )
 
     private fun parseBillingAddress(json: JSONObject) =
         json.optJSONObject(FIELD_BILLING_ADDRESS)?.let { address ->

@@ -19,9 +19,8 @@ import kotlinx.coroutines.flow.StateFlow
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class DropdownFieldController(
     private val config: DropdownConfig,
-    initialValue: String? = null,
+    initialValue: String? = null
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
-    val autofillType = config.autofillType
     val displayItems: List<String> = config.displayItems
     val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement
     private val dropdownMode = config.mode
@@ -80,16 +79,6 @@ class DropdownFieldController(
         safelyUpdateSelectedIndex(
             displayItems.indexOf(config.convertFromRaw(rawValue)).takeUnless { it == -1 } ?: initialIndex
         )
-    }
-
-    fun onAutofillValue(value: String) {
-        val displayItemIndex = displayItems.indexOfFirst { it.equals(value, ignoreCase = true) }
-            .takeUnless { it == -1 }
-        if (displayItemIndex != null) {
-            onValueChange(displayItemIndex)
-        } else {
-            onRawValueChange(value)
-        }
     }
 
     private fun safelyUpdateSelectedIndex(index: Int?) {

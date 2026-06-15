@@ -76,12 +76,6 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                             editCardDetailsInteractor = interactor.editCardDetailsInteractor,
                         )
                     }
-                    is LinkPaymentDetails.Generic -> {
-                        GenericUi(
-                            label = savedPaymentMethod.paymentDetails.label,
-                            last4 = savedPaymentMethod.paymentDetails.last4
-                        )
-                    }
                 }
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
@@ -328,16 +322,6 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     }
 }
 
-@Composable
-private fun GenericUi(label: String, last4: String) {
-    CommonTextField(
-        value = "$label $last4",
-        onValueChange = {},
-        enabled = false,
-        label = stringResource(R.string.stripe_label_payment_method),
-    )
-}
-
 @Preview
 @Composable
 private fun PreviewUpdatePaymentMethodUI() {
@@ -392,9 +376,6 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
                     }
                     is LinkPaymentDetails.Card -> {
                         PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
-                    }
-                    is LinkPaymentDetails.Generic -> {
-                        PaymentSheetR.string.stripe_paymentsheet_unknown_details_cannot_be_changed
                     }
                 }
             }

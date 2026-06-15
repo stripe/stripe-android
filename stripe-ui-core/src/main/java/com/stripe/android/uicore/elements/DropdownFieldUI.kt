@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.ContentDataType
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -38,10 +37,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.contentDataType
-import androidx.compose.ui.semantics.contentType
-import androidx.compose.ui.semantics.onAutofillText
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
@@ -121,18 +116,6 @@ fun DropDown(
             .wrapContentSize(Alignment.TopStart)
             .background(MaterialTheme.stripeColors.component)
             .then(modifier)
-            .then(
-                controller.autofillType?.let { autofillType ->
-                    Modifier.semantics {
-                        contentType = autofillType
-                        contentDataType = ContentDataType.Text
-                        onAutofillText { text ->
-                            controller.onAutofillValue(text.text)
-                            true
-                        }
-                    }
-                } ?: Modifier
-            )
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(

@@ -1145,7 +1145,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -1215,7 +1214,6 @@ internal class PaymentMethodMetadataTest {
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
-            isNfcScanningEnabled = false,
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
@@ -1281,7 +1279,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -1320,7 +1317,6 @@ internal class PaymentMethodMetadataTest {
             configuration = configuration,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isNfcScanningEnabled = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
         )
@@ -1376,7 +1372,6 @@ internal class PaymentMethodMetadataTest {
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
-            isNfcScanningEnabled = false,
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
@@ -2117,7 +2112,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2188,7 +2182,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2214,7 +2207,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2244,7 +2236,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2283,14 +2274,11 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
     }
 
-    private fun createCustomerSheetMetadata(
-        attestOnIntentConfirmationFlag: Boolean,
-    ): PaymentMethodMetadata {
+    private fun createCustomerSheetMetadata(attestOnIntentConfirmationFlag: Boolean): PaymentMethodMetadata {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         ).copy(
@@ -2310,7 +2298,6 @@ internal class PaymentMethodMetadataTest {
             configuration = configuration,
             sharedDataSpecs = emptyList(),
             isGooglePayReady = false,
-            isNfcScanningEnabled = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
         )

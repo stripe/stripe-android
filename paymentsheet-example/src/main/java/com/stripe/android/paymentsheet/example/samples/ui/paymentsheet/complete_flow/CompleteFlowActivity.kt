@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CompletedPaymentAlertDialog
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.paymentsheet.example.samples.ui.shared.Receipt
+import com.stripe.android.paymentsheet.rememberPaymentSheet
 
 internal class CompleteFlowActivity : AppCompatActivity() {
 
@@ -36,9 +37,9 @@ internal class CompleteFlowActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val paymentSheet = PaymentSheet.Builder(
-                resultCallback = viewModel::handlePaymentSheetResult,
-            ).build()
+            val paymentSheet = rememberPaymentSheet(
+                paymentResultCallback = viewModel::handlePaymentSheetResult,
+            )
 
             PaymentSheetExampleTheme {
                 val uiState by viewModel.state.collectAsState()

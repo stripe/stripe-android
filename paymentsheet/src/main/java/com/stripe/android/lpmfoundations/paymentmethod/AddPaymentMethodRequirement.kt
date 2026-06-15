@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.model.LinkMode
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 
@@ -14,6 +15,21 @@ internal enum class AddPaymentMethodRequirement {
     UnsupportedForSetup {
         override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
             return !metadata.hasIntentToSetup(code)
+        }
+    },
+
+    /** Indicates that a payment method requires shipping information. */
+    ShippingAddress {
+        override fun isMetBy(metadata: PaymentMethodMetadata, code: String): Boolean {
+            if (metadata.allowsPaymentMethodsRequiringShippingAddress) {
+                return true
+            }
+
+            val shipping = (metadata.stripeIntent as? PaymentIntent)?.shipping
+            return shipping?.name != null &&
+                shipping.address.line1 != null &&
+                shipping.address.country != null &&
+                shipping.address.postalCode != null
         }
     },
 

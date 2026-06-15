@@ -37,7 +37,7 @@ internal class CardDetailsSectionElementUITest {
         private val contentText: String,
     ) : CardDetailsAction {
         @Composable
-        override fun Content(enabled: Boolean, onScannedCard: (ScannedCardDetails) -> Unit) {
+        override fun Content(enabled: Boolean, controller: CardDetailsSectionController) {
             androidx.compose.material.Text(contentText)
         }
     }

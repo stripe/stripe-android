@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.autofill.ContentType
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.R as CoreR
 
@@ -14,7 +13,6 @@ class AdministrativeAreaConfig(
 
     override val mode = DropdownConfig.Mode.Full(selectsFirstOptionAsDefault = false)
     override val debugLabel = "administrativeArea"
-    override val autofillType: ContentType = ContentType.AddressRegion
 
     override val label = resolvableString(country.label)
 

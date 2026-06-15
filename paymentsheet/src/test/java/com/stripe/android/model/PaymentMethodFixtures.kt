@@ -680,18 +680,6 @@ internal object PaymentMethodFixtures {
         ).toDisplayableSavedPaymentMethod()
     }
 
-    fun displayableLinkGenericPaymentMethod(): DisplayableSavedPaymentMethod {
-        return LINK_PAYMENT_METHOD.copy(
-            linkPaymentDetails = LinkPaymentDetails.Generic(
-                nickname = null,
-                label = "Pix",
-                sublabel = null,
-                icon = null,
-                last4 = "1234",
-            ),
-        ).toDisplayableSavedPaymentMethod()
-    }
-
     fun defaultDisplayableCard(): DisplayableSavedPaymentMethod {
         return CARD_PAYMENT_METHOD.copy(
             id = "pm_234567890",

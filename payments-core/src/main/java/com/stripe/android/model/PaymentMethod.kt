@@ -174,7 +174,6 @@ constructor(
             requiresMandate = true,
             requiresMandateForPaymentIntent = true,
             hasDelayedSettlement = false,
-            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION)
         ),
         Card(
             "card",

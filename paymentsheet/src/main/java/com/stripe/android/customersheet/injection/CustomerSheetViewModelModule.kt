@@ -5,8 +5,6 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
-import com.stripe.android.common.nfcscan.DefaultIsNfcScanningAvailable
-import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -36,8 +34,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
-import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
-import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactoryForCustomerSheet
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
@@ -76,16 +72,6 @@ internal interface CustomerSheetViewModelModule {
     fun bindsPrefsRepositoryFactory(
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
-
-    @Binds
-    fun bindsTapToAddAvailabilityFactory(
-        tapToAddAvailabilityFactory: TapToAddAvailabilityFactoryForCustomerSheet
-    ): TapToAddAvailabilityFactory
-
-    @Binds
-    fun bindsIsNfcScanningAvailable(
-        isNfcScanningAvailable: DefaultIsNfcScanningAvailable
-    ): IsNfcScanningAvailable
 
     @Suppress("TooManyFunctions")
     companion object {

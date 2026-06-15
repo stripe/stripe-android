@@ -461,18 +461,6 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onWalletButtonTapped fires event`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onWalletButtonTapped(walletType = "google_pay")
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_wallet_button_tapped")
-        assertThat(request.params).containsEntry("selected_lpm", "google_pay")
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
     fun `onAutofill fires event`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 

@@ -35,7 +35,6 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
-import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.configType
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerViewModel
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -157,7 +156,6 @@ internal class DefaultWalletButtonsInteractor constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val coroutineScope: CoroutineScope,
     private val errorReporter: ErrorReporter,
-    private val eventReporter: EventReporter,
     private val linkInlineInteractor: LinkInlineInteractor,
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
@@ -250,7 +248,6 @@ internal class DefaultWalletButtonsInteractor constructor(
     override fun handleViewAction(action: WalletButtonsInteractor.ViewAction) {
         when (action) {
             is OnButtonPressed -> {
-                eventReporter.onWalletButtonTapped(action.button.walletType.code)
                 analyticsCallbackProvider.get()?.onEvent(
                     AnalyticEvent.TapsButtonInWalletsButtonsView(action.button.walletType.code)
                 )
@@ -365,7 +362,6 @@ internal class DefaultWalletButtonsInteractor constructor(
 
             return DefaultWalletButtonsInteractor(
                 errorReporter = flowControllerViewModel.flowControllerStateComponent.errorReporter,
-                eventReporter = flowControllerViewModel.flowControllerStateComponent.eventReporter,
                 arguments = combineAsStateFlow(
                     linkHandler.linkConfigurationCoordinator.emailFlow,
                     flowControllerViewModel.stateFlow,
@@ -403,14 +399,12 @@ internal class DefaultWalletButtonsInteractor constructor(
             confirmationHandler: ConfirmationHandler,
             coroutineScope: CoroutineScope,
             errorReporter: ErrorReporter,
-            eventReporter: EventReporter,
             linkPaymentLauncher: LinkPaymentLauncher,
             linkAccountHolder: LinkAccountHolder,
             analyticsCallbackProvider: Provider<AnalyticEventCallback?>,
         ): WalletButtonsInteractor {
             return DefaultWalletButtonsInteractor(
                 errorReporter = errorReporter,
-                eventReporter = eventReporter,
                 arguments = combineAsStateFlow(
                     embeddedLinkHelper.linkEmail,
                     confirmationStateHolder.stateFlow,

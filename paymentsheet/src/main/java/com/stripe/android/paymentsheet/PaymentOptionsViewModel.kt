@@ -460,7 +460,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             SelectSavedPaymentMethods(interactor = interactor)
         } else {

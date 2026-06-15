@@ -13,11 +13,22 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class AddressTextFieldState(
+    val value: String,
+    val isEditable: Boolean,
+    val fieldDisplayState: FieldDisplayState,
+    val showDisabledErrorIndicator: Boolean,
+)
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
     label: ResolvableString,
     private val onNavigation: (() -> Unit)? = null,
+    isInlineEnabled: Boolean = false,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
+    private val _inlineQuery = MutableStateFlow("")
+    private val isEditable = isInlineEnabled
 
     override val showOptionalLabel: Boolean = false
     override val label = stateFlowOf(label)
@@ -34,8 +45,25 @@ class AddressTextFieldController(
             FormFieldEntry(value, complete)
         }
 
+    val textFieldState: StateFlow<AddressTextFieldState> =
+        combineAsStateFlow(_inlineQuery, validationMessage) { query, error ->
+        val isError = error != null
+        AddressTextFieldState(
+            value = if (isEditable) query else "",
+            isEditable = isEditable,
+            fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
+            showDisabledErrorIndicator = !isEditable && isError,
+        )
+    }
+
     override fun onRawValueChange(rawValue: String) {
         // No-op, this field does not support direct input manipulation
+    }
+
+    fun onInlineQueryChanged(query: String) {
+        if (isEditable) {
+            _inlineQuery.value = query
+        }
     }
 
     override fun onValidationStateChanged(isValidating: Boolean) {
@@ -50,7 +78,7 @@ class AddressTextFieldController(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
-        AddressTextFieldUI(controller = this, enabled = enabled)
+        AddressTextFieldUI(controller = this, enabled = enabled, modifier = modifier)
     }
 
     fun launchAutocompleteScreen() {

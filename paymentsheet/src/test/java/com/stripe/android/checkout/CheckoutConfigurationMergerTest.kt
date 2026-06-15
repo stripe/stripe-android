@@ -623,7 +623,6 @@ class CheckoutConfigurationMergerTest {
             billingPhoneNumber = billingPhoneNumber,
             shippingAddress = shippingAddress,
             billingAddress = billingAddress,
-            flagImages = null,
         )
     }
 }

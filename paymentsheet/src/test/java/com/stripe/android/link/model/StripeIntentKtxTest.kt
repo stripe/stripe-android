@@ -1,6 +1,7 @@
 package com.stripe.android.link.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.TestFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -10,43 +11,58 @@ import org.robolectric.RobolectricTestRunner
 class StripeIntentKtxTest {
 
     @Test
-    fun `When funding sources contains card then returns card`() {
-        val supportedTypes = stripeIntent(fundingSources = listOf("card"))
-            .supportedPaymentMethodTypes()
-        assertThat(supportedTypes).containsExactly("card")
-    }
-
-    @Test
-    fun `When funding sources contains card and bank_account then returns both`() {
-        val supportedTypes = stripeIntent(fundingSources = listOf("card", "bank_account"))
-            .supportedPaymentMethodTypes()
+    fun `When test mode and test account then all funding sources are enabled`() {
+        val supportedTypes = stripeIntent(liveMode = false)
+            .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
         assertThat(supportedTypes).containsExactly("card", "bank_account")
     }
 
     @Test
-    fun `When funding sources contains generic types then returns them`() {
-        val supportedTypes = stripeIntent(fundingSources = listOf("card", "crypto", "pix"))
-            .supportedPaymentMethodTypes()
-        assertThat(supportedTypes).containsExactly("card", "crypto", "pix")
+    fun `When live mode and test account then uses intent funding sources`() {
+        val supportedTypes = stripeIntent(fundingSources = listOf("card"))
+            .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
+        assertThat(supportedTypes).containsExactly("card")
     }
 
     @Test
-    fun `When funding sources contains only generic types then returns them`() {
-        val supportedTypes = stripeIntent(fundingSources = listOf("crypto", "pix"))
-            .supportedPaymentMethodTypes()
-        assertThat(supportedTypes).containsExactly("crypto", "pix")
+    fun `When test mode and not test account then uses intent funding sources`() {
+        val supportedTypes = stripeIntent(fundingSources = listOf("card"))
+            .supportedPaymentMethodTypes(linkAccount("test@test.abc"))
+        assertThat(supportedTypes).containsExactly("card")
     }
 
     @Test
-    fun `When funding sources is empty then defaults to card`() {
-        val supportedTypes = stripeIntent(fundingSources = emptyList())
-            .supportedPaymentMethodTypes()
+    fun `When funding sources is empty then default to card`() {
+        val supportedTypes = stripeIntent()
+            .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
+        assertThat(supportedTypes).containsExactly("card")
+    }
+
+    @Test
+    fun `When funding sources contains invalid items, then return only valid items`() {
+        val supportedTypes = stripeIntent(fundingSources = listOf("invalid", "invalid2", "card"))
+            .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
+        assertThat(supportedTypes).containsExactly("card")
+    }
+
+    @Test
+    fun `When funding sources contains only invalid items, then return card`() {
+        val supportedTypes = stripeIntent(fundingSources = listOf("invalid", "invalid2", "bank_acc0unt"))
+            .supportedPaymentMethodTypes(linkAccount("test+multiple_funding_sources@test.abc"))
         assertThat(supportedTypes).containsExactly("card")
     }
 
     private fun stripeIntent(
         fundingSources: List<String> = emptyList(),
+        liveMode: Boolean = true
     ) = PaymentIntentFixtures.PI_SUCCEEDED.copy(
         linkFundingSources = fundingSources,
+        isLiveMode = liveMode
+    )
+
+    private fun linkAccount(accountEmail: String) = LinkAccount(
+        consumerSession = TestFactory.CONSUMER_SESSION.copy(
+            emailAddress = accountEmail
+        )
     )
 }
