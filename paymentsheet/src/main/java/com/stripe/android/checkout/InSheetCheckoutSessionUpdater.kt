@@ -22,9 +22,8 @@ internal class InSheetCheckoutSessionUpdater(
 
     fun requiresUpdate(): Boolean {
         val checkout = checkout ?: return false
-        val taxStatus = checkout.internalState.checkoutSessionResponse.taxStatus
-        return taxStatus == CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS ||
-            taxStatus == CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
+        return checkout.internalState.checkoutSessionResponse.taxStatus ==
+            CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
     }
 
     suspend fun performUpdate(
@@ -32,15 +31,7 @@ internal class InSheetCheckoutSessionUpdater(
     ): Result<Unit> {
         val checkout = checkout
             ?: return Result.failure(IllegalStateException("No Checkout instance"))
-
-        return when (checkout.internalState.checkoutSessionResponse.taxStatus) {
-            CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS ->
-                updateWithBillingAddress(checkout, paymentSelection)
-            CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS ->
-                Result.failure(IllegalStateException("Shipping address update not yet supported"))
-            else ->
-                Result.success(Unit)
-        }
+        return updateWithBillingAddress(checkout, paymentSelection)
     }
 
     private suspend fun updateWithBillingAddress(
