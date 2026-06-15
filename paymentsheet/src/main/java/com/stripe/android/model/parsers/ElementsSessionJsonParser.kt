@@ -533,7 +533,7 @@ internal class ElementsSessionJsonParser(
         return paymentMethods.map { pm ->
             val cardArt = cardArtMap[pm.id]
             val card = pm.card
-            if (cardArt != null && card != null) {
+            if (cardArt != null && card != null && !pm.isLinkPassthroughMode) {
                 pm.copy(card = card.copy(cardArt = cardArt))
             } else {
                 pm
