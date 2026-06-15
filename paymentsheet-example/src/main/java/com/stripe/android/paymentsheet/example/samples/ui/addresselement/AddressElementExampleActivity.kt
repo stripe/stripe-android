@@ -13,17 +13,25 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.unit.dp
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
@@ -63,6 +71,21 @@ class AddressElementExampleActivity : AppCompatActivity() {
                     is AddressElementExampleViewState.Content -> {
                         state.address?.let { address ->
                             Address(address)
+                        }
+
+                        var inlineAutocompleteEnabled by remember {
+                            mutableStateOf(FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled)
+                        }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("Inline autocomplete")
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Switch(
+                                checked = inlineAutocompleteEnabled,
+                                onCheckedChange = { enabled ->
+                                    inlineAutocompleteEnabled = enabled
+                                    FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(enabled)
+                                },
+                            )
                         }
 
                         val context = LocalContext.current

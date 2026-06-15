@@ -46,9 +46,100 @@ class AddressTextFieldControllerTest {
         }
     }
 
-    private fun createAddressController(): AddressTextFieldController {
+    @Test
+    fun `non-inline mode - textFieldState is not editable with empty value`() = runTest {
+        val controller = createAddressController(isInlineEnabled = false)
+
+        turbineScope {
+            val stateTurbine = controller.textFieldState.testIn(this)
+
+            val state = stateTurbine.awaitItem()
+            assertThat(state.isEditable).isFalse()
+            assertThat(state.value).isEqualTo("")
+
+            stateTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `non-inline mode - shows disabled error indicator when validating`() = runTest {
+        val controller = createAddressController(isInlineEnabled = false)
+
+        turbineScope {
+            val stateTurbine = controller.textFieldState.testIn(this)
+
+            stateTurbine.awaitItem() // initial state
+
+            controller.onValidationStateChanged(true)
+
+            val state = stateTurbine.awaitItem()
+            assertThat(state.showDisabledErrorIndicator).isTrue()
+            assertThat(state.fieldDisplayState).isEqualTo(FieldDisplayState.ERROR)
+
+            stateTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `inline mode - textFieldState is editable and tracks query`() = runTest {
+        val controller = createAddressController(isInlineEnabled = true)
+
+        turbineScope {
+            val stateTurbine = controller.textFieldState.testIn(this)
+
+            val initial = stateTurbine.awaitItem()
+            assertThat(initial.isEditable).isTrue()
+            assertThat(initial.value).isEqualTo("")
+
+            controller.onInlineQueryChanged("123 Main St")
+
+            val updated = stateTurbine.awaitItem()
+            assertThat(updated.value).isEqualTo("123 Main St")
+
+            stateTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `inline mode - error does not show disabled indicator`() = runTest {
+        val controller = createAddressController(isInlineEnabled = true)
+
+        turbineScope {
+            val stateTurbine = controller.textFieldState.testIn(this)
+
+            stateTurbine.awaitItem() // initial state
+
+            controller.onValidationStateChanged(true)
+
+            val state = stateTurbine.awaitItem()
+            assertThat(state.showDisabledErrorIndicator).isFalse()
+            assertThat(state.fieldDisplayState).isEqualTo(FieldDisplayState.ERROR)
+
+            stateTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `non-inline mode - query ignored when inline is disabled`() = runTest {
+        val controller = createAddressController(isInlineEnabled = false)
+
+        turbineScope {
+            val stateTurbine = controller.textFieldState.testIn(this)
+
+            stateTurbine.awaitItem() // initial state
+
+            controller.onInlineQueryChanged("should be ignored")
+
+            stateTurbine.expectNoEvents()
+
+            stateTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    private fun createAddressController(isInlineEnabled: Boolean = false): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),
+            isInlineEnabled = isInlineEnabled,
         )
     }
 }

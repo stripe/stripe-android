@@ -257,6 +257,7 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun onAutocomplete(country: String) {
+        if (autocompleteConfig.isInlineAutocompleteEnabled) return
         viewModelScope.launch {
             _collectedAddress.emit(getCurrentAddress())
             navigator.navigateTo(

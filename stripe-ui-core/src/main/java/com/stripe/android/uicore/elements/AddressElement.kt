@@ -32,6 +32,7 @@ class AddressElement(
     shippingValuesMap: Map<IdentifierSpec, String?>?,
     private val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
     private val hideCountry: Boolean = false,
+    private val isInlineEnabled: Boolean = false,
 ) : SectionMultiFieldElement(_identifier), AddressFieldsElement {
 
     override val allowsUserInteraction: Boolean = true
@@ -58,6 +59,8 @@ class AddressElement(
         identifier = IdentifierSpec.OneLineAddress,
         label = resolvableString(R.string.stripe_address_label_address),
         onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
+            ?.takeIf { !isInlineEnabled },
+        isInlineEnabled = isInlineEnabled,
     )
 
     @VisibleForTesting
