@@ -534,18 +534,14 @@ class Checkout private constructor(
         }
         // Run network requests with a mutex to ensure events are processed in order.
         return mutex.withLock {
-            if (!isInSheetUpdate) {
-                _isLoading.value = true
-            }
+            _isLoading.value = true
             val result = runCatching {
                 internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
             }.map { response ->
                 internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
                 _checkoutSession.value = response.asCheckoutSession()
             }
-            if (!isInSheetUpdate) {
-                _isLoading.value = false
-            }
+            _isLoading.value = false
             result
         }
     }
