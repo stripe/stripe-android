@@ -6,6 +6,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -50,6 +51,7 @@ import com.stripe.android.ui.core.cardscan.CardScanEvent
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.CompletableSingle
 import com.stripe.android.utils.FakeElementsSessionRepository
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
@@ -132,6 +134,32 @@ internal class DefaultCustomerSheetLoaderTest {
             )
         )
         assertThat(state.validationError).isNull()
+    }
+
+    @Test
+    fun `isNfcScanningEnabled is true in metadata if IsNfcScanningAvailable when true`() = runTest {
+        val loader = createCustomerSheetLoader(
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = true),
+        )
+
+        val state = loader.load(
+            configuration = CustomerSheet.Configuration(merchantDisplayName = "Example")
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.isNfcScanningEnabled).isTrue()
+    }
+
+    @Test
+    fun `isNfcScanningEnabled is false in metadata if IsNfcScanningAvailable when false`() = runTest {
+        val loader = createCustomerSheetLoader(
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+        )
+
+        val state = loader.load(
+            configuration = CustomerSheet.Configuration(merchantDisplayName = "Example")
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.isNfcScanningEnabled).isFalse()
     }
 
     @Test
@@ -744,6 +772,8 @@ internal class DefaultCustomerSheetLoaderTest {
         savedSelection: SavedSelection? = null,
         isPaymentMethodSyncDefaultEnabled: Boolean = false,
         defaultPaymentMethodId: String? = null,
+        isNfcScanningAvailable: IsNfcScanningAvailable =
+            FakeIsNfcScanningAvailable(result = false),
         initializationDataSource: CustomerSheetInitializationDataSource = FakeCustomerSheetInitializationDataSource(
             onLoadCustomerSheetSession = {
                 CustomerSheetDataResult.success(
@@ -779,6 +809,7 @@ internal class DefaultCustomerSheetLoaderTest {
             intentDataSourceProvider = CompletableSingle(intentDataSource),
             isGooglePayReady = isGooglePayReady,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            isNfcScanningAvailable = isNfcScanningAvailable,
             lpmRepository = lpmRepository,
             errorReporter = errorReporter,
             eventReporter = eventReporter,
@@ -839,6 +870,8 @@ internal class DefaultCustomerSheetLoaderTest {
         isGooglePayReady: Boolean = true,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable =
             IsFinancialConnectionsSdkAvailable { false },
+        isNfcScanningAvailable: IsNfcScanningAvailable =
+            FakeIsNfcScanningAvailable(result = false),
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
         eventReporter: CustomerSheetEventReporter = FakeCustomerSheetEventReporter(),
@@ -858,6 +891,7 @@ internal class DefaultCustomerSheetLoaderTest {
                     }
                 }
             },
+            isNfcScanningAvailable = isNfcScanningAvailable,
             initializationDataSourceProvider = initializationDataSourceProvider,
             intentDataSourceProvider = intentDataSourceProvider,
             lpmRepository = lpmRepository,
