@@ -78,6 +78,7 @@
     <ID>LongMethod:UpdatePaymentMethodUI.kt:@Composable internal fun UpdatePaymentMethodUI</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable internal fun WalletBody</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable private fun PaymentMethodSection</ID>
+    <ID>MagicNumber:FlagImageRepository.kt:FlagImageRepository$4</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.5f</ID>

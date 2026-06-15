@@ -37,13 +37,13 @@ internal class CurrencySelectorToggleUITest {
 
     private val usdOption = CurrencyOption(
         code = "USD",
-        displayableText = "🇺🇸 $50.99",
         formattedAmount = "$50.99",
+        flag = FlagContent.Emoji("🇺🇸"),
     )
     private val eurOption = CurrencyOption(
         code = "EUR",
-        displayableText = "🇪🇺 €45.87",
         formattedAmount = "€45.87",
+        flag = FlagContent.Emoji("🇪🇺"),
     )
 
     @Test
