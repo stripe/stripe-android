@@ -24,14 +24,14 @@ class StripeIntentKtxTest {
     }
 
     @Test
-    fun `When funding sources contains unknown types then returns them`() {
+    fun `When funding sources contains generic types then returns them`() {
         val supportedTypes = stripeIntent(fundingSources = listOf("card", "crypto", "pix"))
             .supportedPaymentMethodTypes()
         assertThat(supportedTypes).containsExactly("card", "crypto", "pix")
     }
 
     @Test
-    fun `When funding sources contains only unknown types then returns them`() {
+    fun `When funding sources contains only generic types then returns them`() {
         val supportedTypes = stripeIntent(fundingSources = listOf("crypto", "pix"))
             .supportedPaymentMethodTypes()
         assertThat(supportedTypes).containsExactly("crypto", "pix")
