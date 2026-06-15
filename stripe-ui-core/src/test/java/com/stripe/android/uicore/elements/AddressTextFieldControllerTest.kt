@@ -48,7 +48,7 @@ class AddressTextFieldControllerTest {
 
     @Test
     fun `non-inline mode - textFieldState is not editable with empty value`() = runTest {
-        val controller = createAddressController(isInlineEnabled = false)
+        val controller = createAddressController(isInlineAutocompleteEnabled = false)
 
         turbineScope {
             val stateTurbine = controller.textFieldState.testIn(this)
@@ -63,7 +63,7 @@ class AddressTextFieldControllerTest {
 
     @Test
     fun `non-inline mode - shows disabled error indicator when validating`() = runTest {
-        val controller = createAddressController(isInlineEnabled = false)
+        val controller = createAddressController(isInlineAutocompleteEnabled = false)
 
         turbineScope {
             val stateTurbine = controller.textFieldState.testIn(this)
@@ -82,7 +82,7 @@ class AddressTextFieldControllerTest {
 
     @Test
     fun `inline mode - textFieldState is editable and tracks query`() = runTest {
-        val controller = createAddressController(isInlineEnabled = true)
+        val controller = createAddressController(isInlineAutocompleteEnabled = true)
 
         turbineScope {
             val stateTurbine = controller.textFieldState.testIn(this)
@@ -102,7 +102,7 @@ class AddressTextFieldControllerTest {
 
     @Test
     fun `inline mode - error does not show disabled indicator`() = runTest {
-        val controller = createAddressController(isInlineEnabled = true)
+        val controller = createAddressController(isInlineAutocompleteEnabled = true)
 
         turbineScope {
             val stateTurbine = controller.textFieldState.testIn(this)
@@ -121,7 +121,7 @@ class AddressTextFieldControllerTest {
 
     @Test
     fun `non-inline mode - query ignored when inline is disabled`() = runTest {
-        val controller = createAddressController(isInlineEnabled = false)
+        val controller = createAddressController(isInlineAutocompleteEnabled = false)
 
         turbineScope {
             val stateTurbine = controller.textFieldState.testIn(this)
@@ -136,10 +136,10 @@ class AddressTextFieldControllerTest {
         }
     }
 
-    private fun createAddressController(isInlineEnabled: Boolean = false): AddressTextFieldController {
+    private fun createAddressController(isInlineAutocompleteEnabled: Boolean = false): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),
-            isInlineEnabled = isInlineEnabled,
+            isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
         )
     }
 }

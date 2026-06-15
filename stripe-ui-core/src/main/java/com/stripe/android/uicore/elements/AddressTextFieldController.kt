@@ -24,11 +24,11 @@ data class AddressTextFieldState(
 class AddressTextFieldController(
     label: ResolvableString,
     private val onNavigation: (() -> Unit)? = null,
-    isInlineEnabled: Boolean = false,
+    isInlineAutocompleteEnabled: Boolean = false,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
     private val _inlineQuery = MutableStateFlow("")
-    private val isEditable = isInlineEnabled
+    private val isEditable = isInlineAutocompleteEnabled
 
     override val showOptionalLabel: Boolean = false
     override val label = stateFlowOf(label)
@@ -45,15 +45,16 @@ class AddressTextFieldController(
             FormFieldEntry(value, complete)
         }
 
-    val textFieldState: StateFlow<AddressTextFieldState> = combineAsStateFlow(_inlineQuery, validationMessage) { query, error ->
-        val isError = error != null
-        AddressTextFieldState(
-            value = if (isEditable) query else "",
-            isEditable = isEditable,
-            fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
-            showDisabledErrorIndicator = !isEditable && isError,
-        )
-    }
+    val textFieldState: StateFlow<AddressTextFieldState> =
+        combineAsStateFlow(_inlineQuery, validationMessage) { query, error ->
+            val isError = error != null
+            AddressTextFieldState(
+                value = if (isEditable) query else "",
+                isEditable = isEditable,
+                fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
+                showDisabledErrorIndicator = !isEditable && isError,
+            )
+        }
 
     override fun onRawValueChange(rawValue: String) {
         // No-op, this field does not support direct input manipulation

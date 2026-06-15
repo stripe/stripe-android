@@ -114,7 +114,7 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            isInlineEnabled = config.isInlineAutocompleteEnabled,
+            isInlineAutocompleteEnabled = config.isInlineAutocompleteEnabled,
         )
     }
 
