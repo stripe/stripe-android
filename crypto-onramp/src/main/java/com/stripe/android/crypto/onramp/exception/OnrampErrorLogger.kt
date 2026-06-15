@@ -12,12 +12,15 @@ internal class OnrampErrorLogger @Inject constructor(
         error: Throwable,
     ) {
         logger.error(
-            "[Stripe Crypto Onramp] ${operation.value} failed.\n${error.developerLogMessage()}"
+            "[Stripe Crypto Onramp] ${operation.value} failed.\n${error.developerLogMessage()}",
+            error
         )
     }
 
     private fun Throwable.developerLogMessage(): String {
         return (this as? StripeCryptoOnrampError)?.developerMessage
-            ?: "Inspect the returned failure error for details. Error type: ${javaClass.simpleName}."
+            ?: ("Inspect the returned failure error for details. Error type: ${javaClass.simpleName}.\n" +
+                "Message: ${this.message}\n" +
+                "Cause: ${this.cause?.message}")
     }
 }
