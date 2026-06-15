@@ -30,7 +30,7 @@ import kotlinx.coroutines.launch
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 internal class FormViewModel(
-    val elements: List<FormElement>,
+    formElements: List<FormElement>,
     val formArguments: FormArguments,
 ) : ViewModel() {
     internal class Factory(
@@ -41,9 +41,20 @@ internal class FormViewModel(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             return FormViewModel(
-                elements = formElements,
+                formElements = formElements,
                 formArguments = formArguments,
             ) as T
+        }
+    }
+
+    var elements: List<FormElement> = formElements
+        private set
+
+    fun updateFormElements(newFormElements: List<FormElement>) {
+        val currentIdentifiers = elements.map { it.identifier }
+        val newIdentifiers = newFormElements.map { it.identifier }
+        if (currentIdentifiers != newIdentifiers) {
+            elements = newFormElements
         }
     }
 

@@ -743,11 +743,94 @@ internal class FormViewModelTest {
         }
     }
 
+    @Test
+    fun `updateFormElements updates elements when identifiers differ`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val originalElements = listOf(
+            EmailSpec().transform(emptyMap()),
+        )
+        val formViewModel = createViewModel(args, originalElements)
+
+        assertThat(formViewModel.elements).isEqualTo(originalElements)
+
+        val newElements = listOf(
+            NameSpec().transform(emptyMap()),
+            EmailSpec().transform(emptyMap()),
+        )
+        formViewModel.updateFormElements(newElements)
+
+        assertThat(formViewModel.elements).isEqualTo(newElements)
+    }
+
+    @Test
+    fun `updateFormElements preserves form field values when identifiers match`() = runTest {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.P24.code
+        )
+        val originalElements = listOf(
+            NameSpec().transform(emptyMap()),
+            EmailSpec().transform(emptyMap()),
+        )
+        val formViewModel = createViewModel(args, originalElements)
+
+        val nameController = getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            CoreR.string.stripe_address_label_full_name
+        )
+        val emailController = getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            UiCoreR.string.stripe_email
+        )
+
+        nameController?.onValueChange("Jane Doe")
+        emailController?.onValueChange("jane@example.com")
+
+        val newElementsWithSameIdentifiers = listOf(
+            NameSpec().transform(emptyMap()),
+            EmailSpec().transform(emptyMap()),
+        )
+        formViewModel.updateFormElements(newElementsWithSameIdentifiers)
+
+        val updatedNameController = getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            CoreR.string.stripe_address_label_full_name
+        )
+        val updatedEmailController = getSectionFieldTextControllerWithLabel(
+            formViewModel,
+            UiCoreR.string.stripe_email
+        )
+
+        assertThat(updatedNameController?.fieldValue?.first()).isEqualTo("Jane Doe")
+        assertThat(updatedEmailController?.fieldValue?.first()).isEqualTo("jane@example.com")
+    }
+
+    @Test
+    fun `updateFormElements does not update elements when identifiers match`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val originalElements = listOf(
+            EmailSpec().transform(emptyMap()),
+            CountrySpec().transform(emptyMap()),
+        )
+        val formViewModel = createViewModel(args, originalElements)
+
+        val newElementsWithSameIdentifiers = listOf(
+            EmailSpec().transform(emptyMap()),
+            CountrySpec().transform(emptyMap()),
+        )
+        formViewModel.updateFormElements(newElementsWithSameIdentifiers)
+
+        assertThat(formViewModel.elements).isSameInstanceAs(originalElements)
+    }
+
     private fun createViewModel(
         arguments: FormArguments,
         formElements: List<FormElement>,
     ) = FormViewModel(
         formArguments = arguments,
-        elements = formElements,
+        formElements = formElements,
     )
 }
