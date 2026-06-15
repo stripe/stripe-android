@@ -11,24 +11,19 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class AddressTextFieldState(
-    val value: String,
-    val isEditable: Boolean,
-    val fieldDisplayState: FieldDisplayState,
-    val showDisabledErrorIndicator: Boolean,
-)
+import kotlinx.coroutines.flow.asStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
     label: ResolvableString,
-    private val onNavigation: (() -> Unit)? = null,
-    isInlineAutocompleteEnabled: Boolean = false,
+    addressInputMode: AddressInputMode,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
     private val _inlineQuery = MutableStateFlow("")
-    private val isEditable = isInlineAutocompleteEnabled
+    private val onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
+
+    val isEditable = addressInputMode is AddressInputMode.AutocompleteInline
+    val inlineQuery: StateFlow<String> = _inlineQuery.asStateFlow()
 
     override val showOptionalLabel: Boolean = false
     override val label = stateFlowOf(label)
@@ -43,17 +38,6 @@ class AddressTextFieldController(
     override val formFieldValue: StateFlow<FormFieldEntry> =
         combineAsStateFlow(isComplete, rawFieldValue) { complete, value ->
             FormFieldEntry(value, complete)
-        }
-
-    val textFieldState: StateFlow<AddressTextFieldState> =
-        combineAsStateFlow(_inlineQuery, validationMessage) { query, error ->
-            val isError = error != null
-            AddressTextFieldState(
-                value = if (isEditable) query else "",
-                isEditable = isEditable,
-                fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
-                showDisabledErrorIndicator = !isEditable && isError,
-            )
         }
 
     override fun onRawValueChange(rawValue: String) {

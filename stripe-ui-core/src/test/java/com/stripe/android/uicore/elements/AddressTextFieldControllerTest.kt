@@ -47,75 +47,28 @@ class AddressTextFieldControllerTest {
     }
 
     @Test
-    fun `non-inline mode - textFieldState is not editable with empty value`() = runTest {
+    fun `non-inline mode - is not editable`() = runTest {
         val controller = createAddressController(isInlineAutocompleteEnabled = false)
 
-        turbineScope {
-            val stateTurbine = controller.textFieldState.testIn(this)
-
-            val state = stateTurbine.awaitItem()
-            assertThat(state.isEditable).isFalse()
-            assertThat(state.value).isEqualTo("")
-
-            stateTurbine.cancelAndIgnoreRemainingEvents()
-        }
+        assertThat(controller.isEditable).isFalse()
     }
 
     @Test
-    fun `non-inline mode - shows disabled error indicator when validating`() = runTest {
-        val controller = createAddressController(isInlineAutocompleteEnabled = false)
-
-        turbineScope {
-            val stateTurbine = controller.textFieldState.testIn(this)
-
-            stateTurbine.awaitItem() // initial state
-
-            controller.onValidationStateChanged(true)
-
-            val state = stateTurbine.awaitItem()
-            assertThat(state.showDisabledErrorIndicator).isTrue()
-            assertThat(state.fieldDisplayState).isEqualTo(FieldDisplayState.ERROR)
-
-            stateTurbine.cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `inline mode - textFieldState is editable and tracks query`() = runTest {
+    fun `inline mode - is editable and tracks query`() = runTest {
         val controller = createAddressController(isInlineAutocompleteEnabled = true)
 
-        turbineScope {
-            val stateTurbine = controller.textFieldState.testIn(this)
+        assertThat(controller.isEditable).isTrue()
 
-            val initial = stateTurbine.awaitItem()
-            assertThat(initial.isEditable).isTrue()
-            assertThat(initial.value).isEqualTo("")
+        turbineScope {
+            val queryTurbine = controller.inlineQuery.testIn(this)
+
+            assertThat(queryTurbine.awaitItem()).isEqualTo("")
 
             controller.onInlineQueryChanged("123 Main St")
 
-            val updated = stateTurbine.awaitItem()
-            assertThat(updated.value).isEqualTo("123 Main St")
+            assertThat(queryTurbine.awaitItem()).isEqualTo("123 Main St")
 
-            stateTurbine.cancelAndIgnoreRemainingEvents()
-        }
-    }
-
-    @Test
-    fun `inline mode - error does not show disabled indicator`() = runTest {
-        val controller = createAddressController(isInlineAutocompleteEnabled = true)
-
-        turbineScope {
-            val stateTurbine = controller.textFieldState.testIn(this)
-
-            stateTurbine.awaitItem() // initial state
-
-            controller.onValidationStateChanged(true)
-
-            val state = stateTurbine.awaitItem()
-            assertThat(state.showDisabledErrorIndicator).isFalse()
-            assertThat(state.fieldDisplayState).isEqualTo(FieldDisplayState.ERROR)
-
-            stateTurbine.cancelAndIgnoreRemainingEvents()
+            queryTurbine.cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -124,22 +77,32 @@ class AddressTextFieldControllerTest {
         val controller = createAddressController(isInlineAutocompleteEnabled = false)
 
         turbineScope {
-            val stateTurbine = controller.textFieldState.testIn(this)
+            val queryTurbine = controller.inlineQuery.testIn(this)
 
-            stateTurbine.awaitItem() // initial state
+            queryTurbine.awaitItem() // initial ""
 
             controller.onInlineQueryChanged("should be ignored")
 
-            stateTurbine.expectNoEvents()
+            queryTurbine.expectNoEvents()
 
-            stateTurbine.cancelAndIgnoreRemainingEvents()
+            queryTurbine.cancelAndIgnoreRemainingEvents()
         }
     }
 
     private fun createAddressController(isInlineAutocompleteEnabled: Boolean = false): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),
-            isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
+            addressInputMode = if (isInlineAutocompleteEnabled) {
+                AddressInputMode.AutocompleteInline(
+                    googleApiKey = "test-key",
+                    autocompleteCountries = emptySet(),
+                    phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
+                    nameConfig = AddressFieldConfiguration.HIDDEN,
+                    emailConfig = AddressFieldConfiguration.HIDDEN,
+                )
+            } else {
+                AddressInputMode.NoAutocomplete()
+            },
         )
     }
 }

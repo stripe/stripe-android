@@ -25,21 +25,25 @@ fun AddressTextFieldUI(
     }
 ) {
     val label by controller.label.collectAsState()
-    val textFieldState by controller.textFieldState.collectAsState()
+    val inlineQuery by controller.inlineQuery.collectAsState()
+    val error by controller.validationMessage.collectAsState()
     val textFieldInsets = LocalTextFieldInsets.current
 
-    val fieldModifier = remember(textFieldState.isEditable, enabled) {
+    val isEditable = controller.isEditable
+    val isError = error != null
+
+    val fieldModifier = remember(isEditable, enabled) {
         modifier.fillMaxWidth().then(
-            if (textFieldState.isEditable) Modifier else Modifier.clickable(enabled = enabled) { onClick() }
+            if (isEditable) Modifier else Modifier.clickable(enabled = enabled) { onClick() }
         )
     }
 
     CompatTextField(
-        value = textFieldState.value,
-        enabled = textFieldState.isEditable && enabled,
+        value = if (isEditable) inlineQuery else "",
+        enabled = isEditable && enabled,
         onValueChange = { v -> controller.onInlineQueryChanged(v) },
         errorMessage = null,
-        isError = textFieldState.fieldDisplayState == FieldDisplayState.ERROR,
+        isError = isError,
         label = {
             FormLabel(label.resolve())
         },
@@ -48,8 +52,8 @@ fun AddressTextFieldUI(
         singleLine = true,
         contentPadding = textFieldInsets.asPaddingValues(),
         colors = TextFieldColors(
-            fieldDisplayState = textFieldState.fieldDisplayState,
-            disabledIndicatorColor = if (textFieldState.showDisabledErrorIndicator) {
+            fieldDisplayState = if (isError) FieldDisplayState.ERROR else FieldDisplayState.NORMAL,
+            disabledIndicatorColor = if (!isEditable && isError) {
                 MaterialTheme.colors.error
             } else {
                 Color.Transparent

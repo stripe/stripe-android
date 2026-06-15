@@ -114,7 +114,6 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            isInlineAutocompleteEnabled = config.isInlineAutocompleteEnabled,
         )
     }
 
@@ -126,6 +125,14 @@ class AutocompleteAddressController(
 
         return if (googlePlacesApiKey == null) {
             AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
+            )
+        } else if (config.isInlineAutocompleteEnabled) {
+            AddressInputMode.AutocompleteInline(
+                googleApiKey = googlePlacesApiKey,
+                autocompleteCountries = config.autocompleteCountries,
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
