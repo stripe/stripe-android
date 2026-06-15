@@ -349,18 +349,19 @@ workflows:
       - conclude_all
     steps:
       - script@1:
-          title: Execute PaymentSheet E2E tests (shard $((BITRISE_IO_PARALLEL_INDEX + 1)))
+          title: Execute PaymentSheet E2E tests
           timeout: 2400
           inputs:
             - content: |-
                 #!/usr/bin/env bash
                 set -euo pipefail
+                envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
                 CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 5)
-                ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                ./scripts/retry.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
-            - test_title: PaymentSheet E2E tests (shard $((BITRISE_IO_PARALLEL_INDEX + 1)))
+            - test_title: "PaymentSheet E2E tests (shard $PAYMENTSHEET_E2E_SHARD_DISPLAY)"
   run-paymentsheet-latency-synthetics:
     before_run:
       - start_emulator
