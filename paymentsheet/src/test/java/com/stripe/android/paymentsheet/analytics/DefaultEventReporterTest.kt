@@ -1433,6 +1433,24 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("selected_lpm", "card")
     }
 
+    @Test
+    fun `onPaymentMethodMessagePromotionDisplayed fires event with duration`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.elapsedCalls.push(
+            FakeDurationProvider.ElapsedCall(
+                key = DurationProvider.Key.PaymentMethodMessaging,
+                duration = 3.seconds,
+            )
+        )
+
+        eventReporter.onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully = true)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "payment_method_messaging_displayed")
+        assertThat(request.params).containsEntry("duration", 3.0f)
+        assertThat(request.params).containsEntry("displayed_successfully", true)
+    }
+
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
         block: suspend Scenario.() -> Unit
@@ -1526,6 +1544,7 @@ class DefaultEventReporterTest {
     private class FakeDurationProvider : DurationProvider {
         val startCalls: Stack<StartCall> = Stack()
         val endCalls: Stack<EndCall> = Stack()
+        val elapsedCalls: Stack<ElapsedCall> = Stack()
         val completedDurations: MutableMap<DurationProvider.Key, Duration> = mutableMapOf()
 
         override fun start(key: DurationProvider.Key, reset: Boolean) {
@@ -1534,8 +1553,10 @@ class DefaultEventReporterTest {
             assertThat(call.reset).isEqualTo(reset)
         }
 
-        override fun elapsed(key: DurationProvider.Key): Duration? {
-            return null
+        override fun elapsed(key: DurationProvider.Key): Duration {
+            val call = elapsedCalls.pop()
+            assertThat(call.key).isEqualTo(key)
+            return call.duration
         }
 
         override fun end(key: DurationProvider.Key): Duration {
@@ -1563,9 +1584,11 @@ class DefaultEventReporterTest {
         fun validate() {
             assertThat(startCalls).isEmpty()
             assertThat(endCalls).isEmpty()
+            assertThat(elapsedCalls).isEmpty()
         }
 
         data class StartCall(val key: DurationProvider.Key, val reset: Boolean)
         data class EndCall(val key: DurationProvider.Key, val duration: Duration)
+        data class ElapsedCall(val key: DurationProvider.Key, val duration: Duration)
     }
 }
