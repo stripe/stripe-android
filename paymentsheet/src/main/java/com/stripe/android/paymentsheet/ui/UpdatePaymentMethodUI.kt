@@ -76,7 +76,12 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                             editCardDetailsInteractor = interactor.editCardDetailsInteractor,
                         )
                     }
-                    is LinkPaymentDetails.Generic -> {}
+                    is LinkPaymentDetails.Generic -> {
+                        GenericUi(
+                            label = savedPaymentMethod.paymentDetails.label,
+                            last4 = savedPaymentMethod.paymentDetails.last4
+                        )
+                    }
                 }
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
@@ -321,6 +326,16 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
             }
         )
     }
+}
+
+@Composable
+private fun GenericUi(label: String, last4: String) {
+    CommonTextField(
+        value = "$label $last4",
+        onValueChange = {},
+        enabled = false,
+        label = stringResource(R.string.stripe_label_payment_method),
+    )
 }
 
 @Preview

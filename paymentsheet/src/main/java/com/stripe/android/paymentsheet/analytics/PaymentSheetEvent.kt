@@ -391,6 +391,17 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class AdaptivePricingFlagImageLoadFailed(
+        countryCode: String,
+        url: String,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "elements.adaptive_pricing.flag_image_load.failed"
+        override val params: Map<String, Any?> = mapOf(
+            "country_code" to countryCode,
+            "url" to url,
+        )
+    }
+
     class WalletButtonTapped(
         walletType: String,
     ) : PaymentSheetEvent() {
@@ -598,7 +609,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
 
         class Displayed(val duration: Duration?, displayedSuccessfully: Boolean) : PaymentMethodMessaging() {
-            override val eventName: String = "payment_method_messaging_incomplete"
+            override val eventName: String = "payment_method_messaging_displayed"
             override val params: Map<String, Any?> = duration.mapOfDurationInSeconds() + mapOf(
                 "displayed_successfully" to displayedSuccessfully
             )

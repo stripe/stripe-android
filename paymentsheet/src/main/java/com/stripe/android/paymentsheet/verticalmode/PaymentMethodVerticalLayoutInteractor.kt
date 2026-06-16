@@ -561,6 +561,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             is ViewAction.PaymentMethodSelected -> {
                 reportPaymentMethodTypeSelected(viewAction.selectedPaymentMethodCode)
 
+                paymentMethodMessagePromotionsHelper?.reportPromotionDisplayed(
+                    viewAction.selectedPaymentMethodCode,
+                    paymentMethodMetadata
+                )
                 if (shouldTransitionToFormScreen(viewAction.selectedPaymentMethodCode)) {
                     reportFormShown(viewAction.selectedPaymentMethodCode)
                     transitionToFormScreen(viewAction.selectedPaymentMethodCode)
