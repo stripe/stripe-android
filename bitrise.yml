@@ -13,17 +13,21 @@ app:
 
 pipelines:
   main-trigger-pipeline:
-    stages:
-      - stage-trigger-run-all: { }
-  pipeline-paymentsheet-e2e-tests:
-    triggers:
-      push:
-        - branch: master
-      pull_request:
-        - source_branch: '*'
-    stages:
-      - stage-build-paymentsheet-e2e: { }
-      - stage-run-paymentsheet-e2e-tests: { }
+    workflows:
+      check: { }
+      test: { }
+      run-instrumentation-tests: { }
+      run-paymentsheet-instrumentation-tests: { }
+      run-financial-connections-instrumentation-tests: { }
+      run-connections-e2e-payments-tests-on-push: { }
+      run-connections-e2e-token-tests-on-push: { }
+      run-connections-e2e-data-tests-on-push: { }
+      run-cardscan-instrumentation-tests: { }
+      run-crypto-onramp-example-e2e-tests: { }
+      run-paymentsheet-e2e:
+        parallel: 5
+      check-dependencies: { }
+      verify-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
     stages:
       - stage-run-connect-e2e-tests: { }
@@ -39,30 +43,6 @@ pipelines:
       - stage-run-connections-e2e-tests: { }
       - stage-notify-connections-e2e-failure: { }
 stages:
-  stage-trigger-run-all:
-    workflows:
-      - check: { }
-      - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-connections-e2e-payments-tests-on-push: { }
-      - run-connections-e2e-token-tests-on-push: { }
-      - run-connections-e2e-data-tests-on-push: { }
-      - run-cardscan-instrumentation-tests: { }
-      - run-crypto-onramp-example-e2e-tests: { }
-      - check-dependencies: { }
-      - verify-publish-pom: { }
-  stage-build-paymentsheet-e2e:
-    workflows:
-      - build-paymentsheet-e2e: { }
-  stage-run-paymentsheet-e2e-tests:
-    workflows:
-      - run-paymentsheet-e2e-shard-1: { }
-      - run-paymentsheet-e2e-shard-2: { }
-      - run-paymentsheet-e2e-shard-3: { }
-      - run-paymentsheet-e2e-shard-4: { }
-      - run-paymentsheet-e2e-shard-5: { }
   stage-run-connect-e2e-tests:
     workflows:
       - run-connect-e2e-tests: { }
@@ -362,85 +342,26 @@ workflows:
           title: Export CardScan instrumentation test results
           inputs:
             - test_title: CardScan instrumentation tests
-  build-paymentsheet-e2e:
+  run-paymentsheet-e2e:
     before_run:
       - prepare_all
     after_run:
       - conclude_all
     steps:
       - script@1:
-          title: Compile PaymentSheet E2E tests
-          timeout: 1200
-          inputs:
-            - content: ./gradlew :paymentsheet-example:assembleBaseDebug :paymentsheet-example:assembleBaseDebugAndroidTest -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-e2e-shard-1:
-    envs:
-      - SHARD_INDEX: "0"
-    before_run:
-      - _run-paymentsheet-e2e-shard
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-e2e-shard-2:
-    envs:
-      - SHARD_INDEX: "1"
-    before_run:
-      - _run-paymentsheet-e2e-shard
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-e2e-shard-3:
-    envs:
-      - SHARD_INDEX: "2"
-    before_run:
-      - _run-paymentsheet-e2e-shard
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-e2e-shard-4:
-    envs:
-      - SHARD_INDEX: "3"
-    before_run:
-      - _run-paymentsheet-e2e-shard
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-e2e-shard-5:
-    envs:
-      - SHARD_INDEX: "4"
-    before_run:
-      - _run-paymentsheet-e2e-shard
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  _run-paymentsheet-e2e-shard:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Execute PaymentSheet E2E tests (shard $SHARD_INDEX)
+          title: Execute PaymentSheet E2E tests
           timeout: 2400
           inputs:
             - content: |-
                 #!/usr/bin/env bash
                 set -euo pipefail
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$SHARD_INDEX" --num-shards 5)
-                ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 5)
+                ./scripts/retry.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
-            - test_title: PaymentSheet E2E tests (shard $SHARD_INDEX)
+            - test_title: "PaymentSheet E2E tests (shard $PAYMENTSHEET_E2E_SHARD_DISPLAY)"
   run-paymentsheet-latency-synthetics:
     before_run:
       - start_emulator

@@ -1,10 +1,14 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import android.graphics.Bitmap
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.Test
 
+@RunWith(RobolectricTestRunner::class)
 class CurrencySelectorOptionsFactoryTest {
 
     @Test
@@ -23,19 +27,23 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
         assertThat(result).isEqualTo(
             CurrencySelectorOptions(
                 first = CurrencyOption(
                     code = "USD",
-                    displayableText = "🇺🇸 \$61.06",
                     formattedAmount = "\$61.06",
+                    flag = FlagContent.Emoji("🇺🇸"),
                 ),
                 second = CurrencyOption(
                     code = "EUR",
-                    displayableText = "🇪🇺 €50.99",
                     formattedAmount = "€50.99",
+                    flag = FlagContent.Emoji("🇪🇺"),
                 ),
                 selectedCode = "USD",
                 exchangeRateText = "1 EUR = 1.19749 USD",
@@ -52,7 +60,11 @@ class CurrencySelectorOptionsFactoryTest {
             localCurrencyOptions = emptyList(),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
         assertThat(result).isNull()
     }
@@ -73,7 +85,11 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
         assertThat(result?.selectedCode).isEqualTo("EUR")
         assertThat(result?.exchangeRateText).isNull()
@@ -95,7 +111,11 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
         assertThat(result?.selectedCode).isEqualTo("USD")
     }
@@ -116,10 +136,14 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
-        assertThat(result?.first?.displayableText).isEqualTo("🇺🇸 \$35.00")
-        assertThat(result?.second?.displayableText).isEqualTo("🇯🇵 ¥5,000")
+        assertThat(result?.first?.formattedAmount).isEqualTo("\$35.00")
+        assertThat(result?.second?.formattedAmount).isEqualTo("¥5,000")
         assertThat(result?.exchangeRateText).isEqualTo("1 JPY = 0.00680 USD")
     }
 
@@ -139,7 +163,11 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
         assertThat(result?.selectedCode).isEqualTo("EUR")
         assertThat(result?.exchangeRateText).isEqualTo("1 USD = 0.897235 EUR")
@@ -161,10 +189,14 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
-        assertThat(result?.first?.displayableText).isEqualTo("🇺🇸 \$15.00")
-        assertThat(result?.second?.displayableText).isEqualTo("FCFA1,000")
+        assertThat(result?.first?.formattedAmount).isEqualTo("\$15.00")
+        assertThat(result?.second?.formattedAmount).isEqualTo("FCFA1,000")
     }
 
     @Test
@@ -183,10 +215,14 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
-        assertThat(result?.first?.displayableText).isEqualTo("🇪🇺 €6.00")
-        assertThat(result?.second?.displayableText).isEqualTo("CFPF500")
+        assertThat(result?.first?.formattedAmount).isEqualTo("€6.00")
+        assertThat(result?.second?.formattedAmount).isEqualTo("CFPF500")
     }
 
     @Test
@@ -205,11 +241,90 @@ class CurrencySelectorOptionsFactoryTest {
             ),
         )
 
-        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US)
+        val result = CurrencySelectorOptionsFactory.create(
+            adaptivePricingInfo = adaptivePricingInfo,
+            locale = Locale.US,
+            flagImages = null,
+        )
 
         assertThat(result?.first?.code).isEqualTo("USD")
         assertThat(result?.second?.code).isEqualTo("EUR")
         assertThat(result?.selectedCode).isEqualTo("USD")
         assertThat(result?.exchangeRateText).isEqualTo("1 EUR = 1.10000 USD")
+    }
+
+    @Test
+    fun `flag images used when both currencies have bitmaps`() {
+        val usBitmap = Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)
+        val euBitmap = Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)
+        val flagImages = mapOf("USD" to usBitmap, "EUR" to euBitmap)
+
+        val adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+            activePresentmentCurrency = "usd",
+            integrationAmount = 5099L,
+            integrationCurrency = "eur",
+            localCurrencyOptions = listOf(
+                CheckoutSessionResponse.LocalCurrencyOption(
+                    amount = 6106L,
+                    conversionMarkupBps = 150,
+                    currency = "usd",
+                    presentmentExchangeRate = "1.19749",
+                )
+            ),
+        )
+
+        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US, flagImages)
+
+        assertThat(result?.first?.flag).isEqualTo(FlagContent.Image(usBitmap))
+        assertThat(result?.second?.flag).isEqualTo(FlagContent.Image(euBitmap))
+        assertThat(result?.first?.formattedAmount).isEqualTo("\$61.06")
+        assertThat(result?.second?.formattedAmount).isEqualTo("€50.99")
+    }
+
+    @Test
+    fun `flag images not used when one currency bitmap is missing`() {
+        val usBitmap = Bitmap.createBitmap(48, 48, Bitmap.Config.ARGB_8888)
+        val flagImages = mapOf("USD" to usBitmap)
+
+        val adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+            activePresentmentCurrency = "usd",
+            integrationAmount = 5099L,
+            integrationCurrency = "eur",
+            localCurrencyOptions = listOf(
+                CheckoutSessionResponse.LocalCurrencyOption(
+                    amount = 6106L,
+                    conversionMarkupBps = 150,
+                    currency = "usd",
+                    presentmentExchangeRate = "1.19749",
+                )
+            ),
+        )
+
+        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US, flagImages)
+
+        assertThat(result?.first?.flag).isInstanceOf(FlagContent.Emoji::class.java)
+        assertThat(result?.second?.flag).isInstanceOf(FlagContent.Emoji::class.java)
+    }
+
+    @Test
+    fun `flag images not used when null`() {
+        val adaptivePricingInfo = CheckoutSessionResponse.AdaptivePricingInfo(
+            activePresentmentCurrency = "usd",
+            integrationAmount = 5099L,
+            integrationCurrency = "eur",
+            localCurrencyOptions = listOf(
+                CheckoutSessionResponse.LocalCurrencyOption(
+                    amount = 6106L,
+                    conversionMarkupBps = 150,
+                    currency = "usd",
+                    presentmentExchangeRate = "1.19749",
+                )
+            ),
+        )
+
+        val result = CurrencySelectorOptionsFactory.create(adaptivePricingInfo, Locale.US, null)
+
+        assertThat(result?.first?.flag).isInstanceOf(FlagContent.Emoji::class.java)
+        assertThat(result?.second?.flag).isInstanceOf(FlagContent.Emoji::class.java)
     }
 }

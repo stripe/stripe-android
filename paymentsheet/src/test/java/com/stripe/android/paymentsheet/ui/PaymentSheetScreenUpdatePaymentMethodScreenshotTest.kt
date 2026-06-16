@@ -186,6 +186,16 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         }
     }
 
+    @Test
+    fun updatePaymentMethodScreen_forLinkGeneric() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures.displayableLinkGenericPaymentMethod(),
+                canRemove = true
+            )
+        }
+    }
+
     @Composable
     fun PaymentSheetScreenOnUpdatePaymentMethod(
         paymentMethod: DisplayableSavedPaymentMethod,

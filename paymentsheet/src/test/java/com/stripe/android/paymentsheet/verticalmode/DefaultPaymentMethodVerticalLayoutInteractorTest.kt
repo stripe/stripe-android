@@ -890,6 +890,25 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun handleViewAction_PaymentMethodSelected_reportsPromotionDisplayed_whenTransitioningToFormScreen() {
+        val promotionsHelper = FakePaymentMethodMessagePromotionsHelper(
+            promotions = FakePaymentMethodMessagePromotionsHelper.promotions
+        )
+        runScenario(
+            formTypeForCode = { FormHelper.FormType.UserInteractionRequired },
+            promotionsHelper = promotionsHelper,
+        ) {
+            interactor.handleViewAction(ViewAction.PaymentMethodSelected("klarna"))
+            assertThat(transitionToFormScreenTurbine.awaitItem()).isEqualTo("klarna")
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("klarna")
+            assertThat(reportFormShownTurbine.awaitItem()).isEqualTo("klarna")
+            val reported = promotionsHelper.reportPromotionDisplayedCalls.awaitItem()
+            assertThat(reported.first).isEqualTo("klarna")
+            assertThat(reported.second).isTrue()
+        }
+    }
+
+    @Test
     fun handleViewAction_PaymentMethodSelected_updatesSelectedLPM() {
         runScenario(
             formTypeForCode = { FormHelper.FormType.Empty },
