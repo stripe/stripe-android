@@ -279,7 +279,7 @@ class CardDetailsElementTest {
         )
 
         cardController.onScannedCard(
-            ScannedCardDetails(
+            ScannedCardDetails.Unvalidated(
                 cardNumber = "4242424242424242",
                 expirationMonth = 1,
                 expirationYear = 2030,
