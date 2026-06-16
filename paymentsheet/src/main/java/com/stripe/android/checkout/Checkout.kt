@@ -181,6 +181,29 @@ class Checkout private constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class CurrencySelectorContentAppearance {
+
+        /**
+         * Controls what content is displayed in each currency option's label.
+         */
+        @CheckoutSessionPreview
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class LabelContent {
+            /**
+             * Automatically determines the best display based on the purchase type.
+             */
+            AUTOMATIC,
+
+            /**
+             * Displays only the currency code (e.g., "USD").
+             */
+            CURRENCY_CODE,
+
+            /**
+             * Displays the formatted amount (e.g., "$12.00").
+             */
+            AMOUNT,
+        }
+
         private var contentVerticalPaddingDp: Float = DEFAULT_VERTICAL_PADDING_DP
         private var cornerRadiusDp: Float? = null
         private var borderWidthDp: Float? = null
@@ -195,6 +218,7 @@ class Checkout private constructor(
         @FontRes
         private var fontResId: Int? = null
         private var sizeScaleFactor: Float = DEFAULT_SIZE_SCALE_FACTOR
+        private var labelContent: LabelContent = LabelContent.AUTOMATIC
 
         /**
          * Vertical padding inside each currency option in dp. Default is 4.
@@ -302,6 +326,13 @@ class Checkout private constructor(
             this.sizeScaleFactor = sizeScaleFactor
         }
 
+        /**
+         * Controls what is displayed in each currency option's label. Default is [LabelContent.AUTOMATIC].
+         */
+        fun labelContent(labelContent: LabelContent): CurrencySelectorContentAppearance = apply {
+            this.labelContent = labelContent
+        }
+
         @Parcelize
         internal data class State(
             val contentVerticalPaddingDp: Float,
@@ -316,6 +347,7 @@ class Checkout private constructor(
             @ColorInt val dangerColor: Int?,
             @FontRes val fontResId: Int?,
             val sizeScaleFactor: Float,
+            val labelContent: LabelContent,
         ) : Parcelable
 
         internal fun build(): State = State(
@@ -331,6 +363,7 @@ class Checkout private constructor(
             dangerColor = dangerColor?.toArgb(),
             fontResId = fontResId,
             sizeScaleFactor = sizeScaleFactor,
+            labelContent = labelContent,
         )
 
         internal companion object {
@@ -582,6 +615,8 @@ class Checkout private constructor(
         val isLoading by isLoading.collectAsState()
         val checkoutSession by checkoutSession.collectAsState()
         val currencySelectorOptions = checkoutSession.currencySelectorOptions ?: return
+        val showCurrencyCode =
+            appearanceState.labelContent == CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE
         val errorMessage by viewModel.errorMessage.collectAsState()
         CurrencySelectorToggle(
             options = currencySelectorOptions,
@@ -589,6 +624,7 @@ class Checkout private constructor(
                 viewModel.onCurrencySelected(currencyOption.code)
             },
             isEnabled = !isLoading,
+            showCurrencyCode = showCurrencyCode,
             errorMessage = errorMessage?.resolve(),
             appearance = appearanceState,
         )
