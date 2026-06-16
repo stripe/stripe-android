@@ -52,9 +52,9 @@ android {
 
         managedDevices {
             localDevices {
-                register("pixel2api33") {
+                register("pixel2Emulator") {
                     device = "Pixel 2"
-                    apiLevel = 33
+                    apiLevel = 35
                     systemImageSource = "aosp-atd"
                 }
             }

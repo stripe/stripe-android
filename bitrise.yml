@@ -270,7 +270,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2EmulatorDebugAndroidTest -x :paymentsheet-example:pixel2EmulatorBaseDebugAndroidTest -x :paymentsheet:pixel2EmulatorDebugAndroidTest -x :example:pixel2EmulatorDebugAndroidTest -x :financial-connections:pixel2EmulatorDebugAndroidTest -x :financial-connections-example:pixel2EmulatorDebugAndroidTest -x :camera-core:pixel2EmulatorDebugAndroidTest -x :crypto-onramp-example:pixel2EmulatorDebugAndroidTest -x :stripecardscan:pixel2EmulatorDebugAndroidTest -x :stripecardscan-example:pixel2EmulatorDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export instrumentation test results
           inputs:
@@ -285,7 +285,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2EmulatorDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
@@ -357,7 +357,7 @@ workflows:
                 set -euo pipefail
                 envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
                 CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 5)
-                ./scripts/retry.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                ./scripts/retry.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2EmulatorBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
