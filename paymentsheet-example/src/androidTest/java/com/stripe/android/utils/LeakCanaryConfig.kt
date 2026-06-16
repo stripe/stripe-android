@@ -26,6 +26,18 @@ internal fun configureLeakCanaryForManagedDevices() {
                     fieldName = "runtimeInternalObjects"
                 )
             ),
+            IgnoredReferenceMatcher(
+                pattern = ReferencePattern.InstanceFieldPattern(
+                    className = "com.android.internal.jank.FrameTracker",
+                    fieldName = "mConfig",
+                ),
+            ),
+            IgnoredReferenceMatcher(
+                pattern = ReferencePattern.InstanceFieldPattern(
+                    className = "com.android.internal.jank.InteractionJankMonitor\$Configuration",
+                    fieldName = "mContext",
+                ),
+            ),
         )
     )
 }
