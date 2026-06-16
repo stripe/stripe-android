@@ -20,6 +20,10 @@ internal object VerticalModeInitialScreenFactory {
         val bankFormInteractor = BankFormInteractor.create(viewModel)
 
         if (supportedPaymentMethodTypes.size == 1 && customerStateHolder.paymentMethods.value.isEmpty()) {
+            paymentMethodMessagePromotionsHelper?.reportPromotionDisplayed(
+                supportedPaymentMethodTypes.first(),
+                paymentMethodMetadata
+            )
             return listOf(
                 PaymentSheetScreen.VerticalModeForm(
                     interactor = DefaultVerticalModeFormInteractor.create(
