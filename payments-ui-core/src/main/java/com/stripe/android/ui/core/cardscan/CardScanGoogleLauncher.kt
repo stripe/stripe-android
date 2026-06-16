@@ -28,8 +28,9 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     private val _isAvailable = MutableStateFlow(false)
     override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
-    @VisibleForTesting
-    lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
+    private var deferredResult: IntentSenderRequest? = null
+
+    private lateinit var _activityLauncher: ActivityResultLauncher<IntentSenderRequest>
 
     init {
         paymentCardRecognitionClient.fetchIntent(
@@ -55,13 +56,35 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
         paymentCardRecognitionClient.fetchIntent(
             context = context,
             onFailure = { e ->
+                _isLaunching = false
                 eventsReporter.onCardScanFailed(implementation, e)
             },
             onSuccess = { intentSenderRequest ->
                 eventsReporter.onCardScanStarted("google_pay")
-                activityLauncher.launch(intentSenderRequest, options)
+                launchIntentSenderOrDefer(intentSenderRequest)
             }
         )
+    }
+
+    fun setLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
+        _activityLauncher = launcher
+
+        val pending = deferredResult ?: return
+
+        try {
+            launcher.launch(pending, options)
+            deferredResult = null
+        } catch (_: IllegalStateException) {
+            _isLaunching = false
+        }
+    }
+
+    private fun launchIntentSenderOrDefer(intentSenderRequest: IntentSenderRequest) {
+        try {
+            _activityLauncher.launch(intentSenderRequest, options)
+        } catch (_: IllegalStateException) {
+            deferredResult = intentSenderRequest
+        }
     }
 
     internal fun parseActivityResult(result: ActivityResult): CardScanResult {
@@ -125,7 +148,7 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
                 onResult(launcher.parseActivityResult(result))
             }
             return remember(activityLauncher) {
-                launcher.apply { this.activityLauncher = activityLauncher }
+                launcher.apply { setLauncher(activityLauncher) }
             }
         }
     }
