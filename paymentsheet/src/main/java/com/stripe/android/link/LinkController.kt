@@ -66,28 +66,25 @@ class LinkController @Inject internal constructor(
      * Configure the controller with the customer's email, phone number, and supported payment method types.
      *
      * A default [Configuration] is built automatically from the [PaymentConfiguration] publishable key.
-     * The [state] will reset and the Link session will be reloaded. The result is delivered
-     * asynchronously via [callback].
+     * The [state] will reset and the Link session will be reloaded. The result is returned.
      *
      * @param email The customer's email address.
      * @param phoneNumber Optional phone number to pre-fill during sign-up, in E.164 format.
      * @param supportedPaymentMethodTypes Optional list of payment method types to restrict selection to.
      *   If null, all supported types are shown.
-     * @param callback Receives the [ConfigureResult] when configuration completes.
+     * @return The result of the configuration.
      */
-    fun configure(
+    suspend fun configure(
         displayName: String,
         email: String,
         phoneNumber: String? = null,
         supportedPaymentMethodTypes: List<PaymentMethodType>? = null,
-        callback: ConfigureCallback,
-    ) {
-        interactor.configure(
+    ): ConfigureResult {
+        return interactor.configure(
             displayName = displayName,
             email = email,
             phoneNumber = phoneNumber,
             supportedPaymentMethodTypes = supportedPaymentMethodTypes,
-            callback = callback,
         )
     }
 
@@ -810,13 +807,6 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun interface PresentCallback {
         fun onPresentResult(result: PresentResult)
-    }
-
-    /**
-     * Callback for receiving results from [LinkController.configure].
-     */
-    fun interface ConfigureCallback {
-        fun onConfigured(result: ConfigureResult)
     }
 
     /**

@@ -185,13 +185,12 @@ internal class LinkControllerInteractor @Inject constructor(
             )
     }
 
-    fun configure(
+    suspend fun configure(
         displayName: String,
         email: String,
         phoneNumber: String? = null,
         supportedPaymentMethodTypes: List<LinkController.PaymentMethodType>? = null,
-        callback: LinkController.ConfigureCallback,
-    ) {
+    ): LinkController.ConfigureResult {
         val paymentConfig = PaymentConfiguration.getInstance(application)
         val newConfiguration = LinkController.Configuration(
             merchantDisplayName = displayName,
@@ -207,9 +206,7 @@ internal class LinkControllerInteractor @Inject constructor(
             supportedPaymentMethodTypes = supportedPaymentMethodTypes,
         )
         configuration = newConfiguration
-        coroutineScope.launch {
-            callback.onConfigured(configure(newConfiguration))
-        }
+        return configure(newConfiguration)
     }
 
     private var configureJob: Deferred<LinkController.ConfigureResult>? = null
