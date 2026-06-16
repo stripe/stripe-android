@@ -12,7 +12,7 @@ class AddressTextFieldElementTest {
         val element = AddressTextFieldElement(
             identifier = IdentifierSpec.OneLineAddress,
             label = "Address".resolvableString,
-            onNavigation = null,
+            addressInputMode = AddressInputMode.NoAutocomplete(),
         )
 
         element.getTextFieldIdentifiers().test {
