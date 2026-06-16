@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ConfirmCheckoutSessionParams
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -115,53 +116,20 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun confirmCheckoutSession(
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
+        try {
+            CheckoutInstances.ensureNoMutationInFlight(integrationMetadata.instancesKey)
+        } catch (e: IllegalStateException) {
+            return ConfirmationDefinition.Action.Fail(
+                cause = e,
+                message = e.stripeErrorMessage(),
+                errorType = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
+            )
+        }
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = params,
         ).fold(
-            onSuccess = { response ->
-                CheckoutInstances[integrationMetadata.instancesKey].forEach { checkout ->
-                    checkout.updateWithResponse(response)
-                }
-
-                val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
-                    ?: run {
-                        val exception = IllegalStateException(
-                            "No PaymentIntent or SetupIntent in checkout session confirm response"
-                        )
-                        return@fold ConfirmationDefinition.Action.Fail(
-                            cause = exception,
-                            message = exception.stripeErrorMessage(),
-                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                        )
-                    }
-
-                when {
-                    intent.isConfirmed -> {
-                        ConfirmationDefinition.Action.Complete(
-                            intent = intent,
-                            metadata = MutableConfirmationMetadata().apply {
-                                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-                            },
-                            completedFullPaymentFlow = true,
-                        )
-                    }
-                    intent.requiresAction() -> {
-                        ConfirmationDefinition.Action.Launch(
-                            launcherArguments = Args.NextAction(intent, DeferredIntentConfirmationType.Server),
-                            receivesResultInProcess = false,
-                        )
-                    }
-                    else -> {
-                        val exception = IllegalStateException("Intent has not attempted confirm.")
-                        ConfirmationDefinition.Action.Fail(
-                            cause = exception,
-                            message = exception.stripeErrorMessage(),
-                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                        )
-                    }
-                }
-            },
+            onSuccess = ::handleConfirmResponse,
             onFailure = { error ->
                 ConfirmationDefinition.Action.Fail(
                     cause = error,
@@ -170,6 +138,52 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 )
             }
         )
+    }
+
+    private fun handleConfirmResponse(
+        response: CheckoutSessionResponse,
+    ): ConfirmationDefinition.Action<Args> {
+        CheckoutInstances[integrationMetadata.instancesKey].forEach { checkout ->
+            checkout.updateWithResponse(response)
+        }
+
+        val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
+            ?: run {
+                val exception = IllegalStateException(
+                    "No PaymentIntent or SetupIntent in checkout session confirm response"
+                )
+                return ConfirmationDefinition.Action.Fail(
+                    cause = exception,
+                    message = exception.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+
+        return when {
+            intent.isConfirmed -> {
+                ConfirmationDefinition.Action.Complete(
+                    intent = intent,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
+                    },
+                    completedFullPaymentFlow = true,
+                )
+            }
+            intent.requiresAction() -> {
+                ConfirmationDefinition.Action.Launch(
+                    launcherArguments = Args.NextAction(intent, DeferredIntentConfirmationType.Server),
+                    receivesResultInProcess = false,
+                )
+            }
+            else -> {
+                val exception = IllegalStateException("Intent has not attempted confirm.")
+                ConfirmationDefinition.Action.Fail(
+                    cause = exception,
+                    message = exception.stripeErrorMessage(),
+                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                )
+            }
+        }
     }
 
     @AssistedFactory

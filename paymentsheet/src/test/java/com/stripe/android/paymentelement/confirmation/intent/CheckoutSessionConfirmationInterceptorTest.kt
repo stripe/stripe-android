@@ -10,6 +10,7 @@ import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
+import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
@@ -45,12 +46,16 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -403,6 +408,74 @@ class CheckoutSessionConfirmationInterceptorTest {
 
             assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         }
+    }
+
+    @Test
+    fun `intercept with new PM fails when mutation is in flight`() = runScenario(
+        checkoutInstanceCount = 1,
+    ) {
+        val checkout = checkoutInstances.single()
+        val requestArrived = CountDownLatch(1)
+        val holdResponse = CountDownLatch(1)
+
+        networkRule.checkoutUpdate { response ->
+            requestArrived.countDown()
+            holdResponse.await()
+            response.setBody("{}")
+        }
+
+        val job = backgroundScope.launch(Dispatchers.IO) {
+            checkout.removePromotionCode()
+        }
+
+        assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
+
+        val result = interceptNewPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
+        val failAction = result as ConfirmationDefinition.Action.Fail
+        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failAction.cause.message)
+            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+        assertThat(failAction.errorType)
+            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
+
+        holdResponse.countDown()
+        job.join()
+    }
+
+    @Test
+    fun `intercept with saved PM fails when mutation is in flight`() = runScenario(
+        checkoutInstanceCount = 1,
+    ) {
+        val checkout = checkoutInstances.single()
+        val requestArrived = CountDownLatch(1)
+        val holdResponse = CountDownLatch(1)
+
+        networkRule.checkoutUpdate { response ->
+            requestArrived.countDown()
+            holdResponse.await()
+            response.setBody("{}")
+        }
+
+        val job = backgroundScope.launch(Dispatchers.IO) {
+            checkout.removePromotionCode()
+        }
+
+        assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
+
+        val result = interceptSavedPm()
+
+        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
+        val failAction = result as ConfirmationDefinition.Action.Fail
+        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
+        assertThat(failAction.cause.message)
+            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+        assertThat(failAction.errorType)
+            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
+
+        holdResponse.countDown()
+        job.join()
     }
 
     @Test
