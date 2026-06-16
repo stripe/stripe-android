@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.LocalTextFieldInsets
@@ -32,11 +31,9 @@ fun AddressTextFieldUI(
     val isEditable = controller.isEditable
     val isError = error != null
 
-    val fieldModifier = remember(isEditable, enabled) {
-        modifier.fillMaxWidth().then(
-            if (isEditable) Modifier else Modifier.clickable(enabled = enabled) { onClick() }
-        )
-    }
+    val fieldModifier = modifier.fillMaxWidth().then(
+        if (isEditable) Modifier else Modifier.clickable(enabled = enabled) { onClick() }
+    )
 
     CompatTextField(
         value = if (isEditable) inlineQuery else "",
