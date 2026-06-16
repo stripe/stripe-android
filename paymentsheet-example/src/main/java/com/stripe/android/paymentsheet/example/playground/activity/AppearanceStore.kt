@@ -28,6 +28,7 @@ internal object AppearanceStore {
     data class State(
         val colorsLight: Colors = Colors.light(),
         val colorsDark: Colors = Colors.dark(),
+        val themeMode: ThemeMode = ThemeMode.Automatic,
         val shapes: Shapes = Shapes(),
         val typography: Typography = Typography(),
         val primaryButton: PrimaryButton = PrimaryButton(),
@@ -43,6 +44,7 @@ internal object AppearanceStore {
             return PaymentSheet.Appearance.Builder()
                 .colorsLight(colorsLight.build())
                 .colorsDark(colorsDark.build())
+                .themeMode(themeMode.toPaymentSheetThemeMode())
                 .shapes(shapes.build())
                 .typography(typography.build())
                 .primaryButton(primaryButton.build())
@@ -258,6 +260,21 @@ internal object AppearanceStore {
                         .spacingDp(floatingButtonSpacingDp)
                         .additionalInsetsDp(additionalVerticalInsetsDp)
                         .build()
+                }
+            }
+        }
+
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        enum class ThemeMode {
+            Automatic,
+            AlwaysLight,
+            AlwaysDark;
+
+            fun toPaymentSheetThemeMode(): PaymentSheet.Appearance.ThemeMode {
+                return when (this) {
+                    Automatic -> PaymentSheet.Appearance.ThemeMode.Automatic
+                    AlwaysLight -> PaymentSheet.Appearance.ThemeMode.AlwaysLight
+                    AlwaysDark -> PaymentSheet.Appearance.ThemeMode.AlwaysDark
                 }
             }
         }

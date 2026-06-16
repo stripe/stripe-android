@@ -18,9 +18,16 @@ import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.uicore.ThemeMode as StripeThemeMode
 
 @OptIn(AppearanceAPIAdditionsPreview::class)
 internal fun PaymentSheet.Appearance.parseAppearance() {
+    StripeTheme.themeMode = when (themeMode) {
+        PaymentSheet.Appearance.ThemeMode.Automatic -> StripeThemeMode.Automatic
+        PaymentSheet.Appearance.ThemeMode.AlwaysLight -> StripeThemeMode.AlwaysLight
+        PaymentSheet.Appearance.ThemeMode.AlwaysDark -> StripeThemeMode.AlwaysDark
+    }
+
     StripeTheme.colorsLightMutable = StripeThemeDefaults.colorsLight.copy(
         component = Color(colorsLight.component),
         componentBorder = Color(colorsLight.componentBorder),

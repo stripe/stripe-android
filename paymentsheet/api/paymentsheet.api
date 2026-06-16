@@ -839,6 +839,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Build
 	public final fun sectionSpacing (Lcom/stripe/android/paymentsheet/PaymentSheet$Spacing;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun shapes (Lcom/stripe/android/paymentsheet/PaymentSheet$Shapes;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun textFieldInsets (Lcom/stripe/android/paymentsheet/PaymentSheet$Insets;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
+	public final fun themeMode (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$ThemeMode;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun typography (Lcom/stripe/android/paymentsheet/PaymentSheet$Typography;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 	public final fun verticalModeRowPadding (F)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$Builder;
 }
@@ -852,6 +853,15 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embed
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$ThemeMode : java/lang/Enum {
+	public static final field AlwaysDark Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$ThemeMode;
+	public static final field AlwaysLight Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$ThemeMode;
+	public static final field Automatic Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$ThemeMode;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$ThemeMode;
+	public static fun values ()[Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance$ThemeMode;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet$Appearance$Embedded$Builder {
@@ -2355,4 +2365,3 @@ public final class com/stripe/android/shoppay/ComposableSingletons$ShopPayButton
 	public fun <init> ()V
 	public final fun getLambda$-891608132$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
-
