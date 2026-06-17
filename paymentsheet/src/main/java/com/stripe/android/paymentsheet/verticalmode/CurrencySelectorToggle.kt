@@ -90,6 +90,7 @@ internal fun CurrencySelectorToggle(
     options: CurrencySelectorOptions,
     onCurrencySelected: (CurrencyOption) -> Unit,
     isEnabled: Boolean,
+    showCurrencyCode: Boolean,
     errorMessage: String? = null,
     appearance: Checkout.CurrencySelectorContentAppearance.State,
     modifier: Modifier = Modifier,
@@ -146,6 +147,7 @@ internal fun CurrencySelectorToggle(
                     options = options,
                     onCurrencySelected = onCurrencySelected,
                     isEnabled = isEnabled,
+                    showCurrencyCode = showCurrencyCode,
                     pillBackground = pillBackground,
                     trackBackground = trackBackground,
                     selectedTextColor = selectedText,
@@ -158,6 +160,7 @@ internal fun CurrencySelectorToggle(
                     options = options,
                     onCurrencySelected = onCurrencySelected,
                     isEnabled = isEnabled,
+                    showCurrencyCode = showCurrencyCode,
                     pillBackground = pillBackground,
                     trackBackground = trackBackground,
                     selectedTextColor = selectedText,
@@ -200,6 +203,7 @@ private fun RowScope.CurrencyOptionItem(
     options: CurrencySelectorOptions,
     onCurrencySelected: (CurrencyOption) -> Unit,
     isEnabled: Boolean,
+    showCurrencyCode: Boolean,
     pillBackground: Color,
     trackBackground: Color,
     selectedTextColor: Color,
@@ -217,7 +221,7 @@ private fun RowScope.CurrencyOptionItem(
             ComposeR.string.not_selected
         }
     )
-    val accessibilityLabel = currency.formattedAmount
+    val accessibilityLabel = if (showCurrencyCode) currency.code else currency.formattedAmount
 
     Box(
         contentAlignment = Alignment.Center,
@@ -244,6 +248,7 @@ private fun RowScope.CurrencyOptionItem(
         CurrencyOptionContent(
             currency = currency,
             isSelected = isSelected,
+            showCurrencyCode = showCurrencyCode,
             textColor = textColor,
             textStyle = textStyle,
         )
@@ -254,9 +259,11 @@ private fun RowScope.CurrencyOptionItem(
 private fun CurrencyOptionContent(
     currency: CurrencyOption,
     isSelected: Boolean,
+    showCurrencyCode: Boolean,
     textColor: Color,
     textStyle: TextStyle,
 ) {
+    val displayText = if (showCurrencyCode) currency.code else currency.formattedAmount
     val annotatedText = buildAnnotatedString {
         when (val flag = currency.flag) {
             is FlagContent.Image -> {
@@ -268,7 +275,7 @@ private fun CurrencyOptionContent(
                 append(" ")
             }
         }
-        append(currency.formattedAmount)
+        append(displayText)
     }
     val inlineContent = when (val flag = currency.flag) {
         is FlagContent.Image -> mapOf(

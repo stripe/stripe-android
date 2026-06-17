@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
@@ -14,6 +15,7 @@ import com.stripe.android.crypto.onramp.exception.AppAttestationException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
+import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
@@ -97,6 +99,7 @@ class OnrampInteractorTest {
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory = mock {
         on { create(any()) } doReturn testAnalyticsService
     }
+    private val errorLogger = OnrampErrorLogger(Logger.noop())
     private val savedStateHandle = SavedStateHandle()
 
     private val interactor: OnrampInteractor = createInteractor(
@@ -469,6 +472,7 @@ class OnrampInteractorTest {
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
+            errorLogger = errorLogger,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = SavedStateHandle()
         )
@@ -519,6 +523,7 @@ class OnrampInteractorTest {
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
+            errorLogger = errorLogger,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = SavedStateHandle()
         )
@@ -1491,6 +1496,7 @@ class OnrampInteractorTest {
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
+            errorLogger = errorLogger,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = savedStateHandle
         )

@@ -8,6 +8,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.DefaultStripeTheme
+import com.stripe.android.uicore.elements.AddressInputMode
 import com.stripe.android.uicore.elements.AddressTextFieldController
 import com.stripe.android.uicore.elements.AddressTextFieldUI
 import org.junit.Rule
@@ -53,6 +54,7 @@ class AddressTextFieldUITest {
                 AddressTextFieldUI(
                     controller = AddressTextFieldController(
                         label = resolvableString(UiCoreR.string.stripe_address_label_address),
+                        addressInputMode = AddressInputMode.NoAutocomplete(),
                     ),
                     enabled = enabled,
                     onClick = onClick

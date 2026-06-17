@@ -129,6 +129,14 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
+        } else if (config.isInlineAutocompleteEnabled) {
+            AddressInputMode.AutocompleteInline(
+                googleApiKey = googlePlacesApiKey,
+                autocompleteCountries = config.autocompleteCountries,
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
+            )
         } else if (expandForm || values[IdentifierSpec.Line1] != null) {
             AddressInputMode.AutocompleteExpanded(
                 googleApiKey = googlePlacesApiKey,

@@ -46,9 +46,63 @@ class AddressTextFieldControllerTest {
         }
     }
 
-    private fun createAddressController(): AddressTextFieldController {
+    @Test
+    fun `non-inline mode - is not editable`() = runTest {
+        val controller = createAddressController(isInlineAutocompleteEnabled = false)
+
+        assertThat(controller.isEditable).isFalse()
+    }
+
+    @Test
+    fun `inline mode - is editable and tracks query`() = runTest {
+        val controller = createAddressController(isInlineAutocompleteEnabled = true)
+
+        assertThat(controller.isEditable).isTrue()
+
+        turbineScope {
+            val queryTurbine = controller.inlineQuery.testIn(this)
+
+            assertThat(queryTurbine.awaitItem()).isEqualTo("")
+
+            controller.onInlineQueryChanged("123 Main St")
+
+            assertThat(queryTurbine.awaitItem()).isEqualTo("123 Main St")
+
+            queryTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `non-inline mode - query ignored when inline is disabled`() = runTest {
+        val controller = createAddressController(isInlineAutocompleteEnabled = false)
+
+        turbineScope {
+            val queryTurbine = controller.inlineQuery.testIn(this)
+
+            queryTurbine.awaitItem() // initial ""
+
+            controller.onInlineQueryChanged("should be ignored")
+
+            queryTurbine.expectNoEvents()
+
+            queryTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    private fun createAddressController(isInlineAutocompleteEnabled: Boolean = false): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),
+            addressInputMode = if (isInlineAutocompleteEnabled) {
+                AddressInputMode.AutocompleteInline(
+                    googleApiKey = "test-key",
+                    autocompleteCountries = emptySet(),
+                    phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
+                    nameConfig = AddressFieldConfiguration.HIDDEN,
+                    emailConfig = AddressFieldConfiguration.HIDDEN,
+                )
+            } else {
+                AddressInputMode.NoAutocomplete()
+            },
         )
     }
 }
