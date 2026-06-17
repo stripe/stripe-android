@@ -17,8 +17,10 @@ import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
+import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
+import com.stripe.android.crypto.onramp.model.CryptoConsumerWallet
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
@@ -34,6 +36,7 @@ import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -41,12 +44,15 @@ import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.OnrampSessionTransactionDetails
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.WalletOwnershipChallenge
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierAlternativeGroup
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirement
@@ -188,6 +194,72 @@ class OnrampInteractorTest {
 
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.WalletRegistered(CryptoNetwork.Ethereum)
+        )
+    }
+
+    @Test
+    fun testGetWalletOwnershipChallengeIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val challenge = WalletOwnershipChallenge(
+            challengeId = "woc_123",
+            walletAddress = "0x1234567890abcdef",
+            network = CryptoNetwork.Ethereum,
+            message = "Sign this message",
+            expiresAt = "2026-06-16T12:00:00Z"
+        )
+        whenever(cryptoApiRepository.getWalletOwnershipChallenge(any(), any(), any()))
+            .thenReturn(Result.success(challenge))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.getWalletOwnershipChallenge(
+            walletAddress = "0x1234567890abcdef",
+            network = CryptoNetwork.Ethereum
+        )
+
+        assertThat(result).isInstanceOf(OnrampGetWalletOwnershipChallengeResult.Completed::class.java)
+        assertThat((result as OnrampGetWalletOwnershipChallengeResult.Completed).challenge)
+            .isEqualTo(challenge)
+        verify(cryptoApiRepository).getWalletOwnershipChallenge(
+            walletAddress = "0x1234567890abcdef",
+            network = CryptoNetwork.Ethereum,
+            consumerSessionClientSecret = "secret_123"
+        )
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.WalletOwnershipChallengeRetrieved(CryptoNetwork.Ethereum)
+        )
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        val consumerWallet = CryptoConsumerWallet(
+            id = "ccw_123",
+            isLiveMode = false,
+            network = CryptoNetwork.Ethereum,
+            walletAddress = "0x1234567890abcdef",
+            verifiedOwnership = true
+        )
+        whenever(cryptoApiRepository.submitWalletOwnershipSignature(any(), any(), any()))
+            .thenReturn(Result.success(consumerWallet))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.submitWalletOwnershipSignature(
+            challengeId = "woc_123",
+            signature = "0xsignature"
+        )
+
+        assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Completed::class.java)
+        assertThat((result as OnrampSubmitWalletOwnershipSignatureResult.Completed).consumerWallet)
+            .isEqualTo(consumerWallet)
+        verify(cryptoApiRepository).submitWalletOwnershipSignature(
+            challengeId = "woc_123",
+            signature = "0xsignature",
+            consumerSessionClientSecret = "secret_123"
+        )
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.WalletOwnershipVerified(CryptoNetwork.Ethereum)
         )
     }
 
@@ -1066,6 +1138,60 @@ class OnrampInteractorTest {
     }
 
     @Test
+    fun startCheckout_walletOwnershipVerificationRequired_returnsSpecificFailure() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+        whenever(
+            cryptoApiRepository.getOnrampSession(
+                sessionId = "cos_test_session_id",
+                sessionClientSecret = "test_secret"
+            )
+        ).thenReturn(
+            Result.success(
+                GetOnrampSessionResponse(
+                    id = "cos_test_session_id",
+                    clientSecret = "test_secret",
+                    transactionDetails = OnrampSessionTransactionDetails(
+                        walletAddress = "0x1234567890abcdef",
+                        destinationNetwork = "ethereum",
+                        lastError = WalletOwnershipVerificationRequiredException.CODE
+                    )
+                )
+            )
+        )
+
+        interactor.startCheckout("cos_test_session_id")
+
+        val checkoutStatus = interactor.state.value.checkoutState?.status
+        assertThat(checkoutStatus).isInstanceOf(CheckoutState.Status.Completed::class.java)
+        val result = (checkoutStatus as CheckoutState.Status.Completed).result
+        assertThat(result).isInstanceOf(OnrampCheckoutResult.Failed::class.java)
+        val error = (result as OnrampCheckoutResult.Failed).error
+        assertThat(error).isInstanceOf(WalletOwnershipVerificationRequiredException::class.java)
+
+        val ownershipError = error as WalletOwnershipVerificationRequiredException
+        assertThat(ownershipError.code).isEqualTo(WalletOwnershipVerificationRequiredException.CODE)
+        assertThat(ownershipError.walletAddress).isEqualTo("0x1234567890abcdef")
+        assertThat(ownershipError.network).isEqualTo(CryptoNetwork.Ethereum)
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.ErrorOccurred(
+                operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.PerformCheckout,
+                error = error
+            )
+        )
+    }
+
+    @Test
     fun testAttachKycInfoFailsMissingSecret() = runTest {
         whenever(
             linkController.state(any())
@@ -1103,6 +1229,42 @@ class OnrampInteractorTest {
 
         assertThat(result).isInstanceOf(OnrampRegisterWalletAddressResult.Failed::class.java)
         val failed = result as OnrampRegisterWalletAddressResult.Failed
+        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+    }
+
+    @Test
+    fun testGetWalletOwnershipChallengeFailsMissingSecret() = runTest {
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
+
+        val result = interactor.getWalletOwnershipChallenge(
+            walletAddress = "0xabc",
+            network = CryptoNetwork.Ethereum
+        )
+
+        assertThat(result).isInstanceOf(OnrampGetWalletOwnershipChallengeResult.Failed::class.java)
+        val failed = result as OnrampGetWalletOwnershipChallengeResult.Failed
+        assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureFailsMissingSecret() = runTest {
+        whenever(
+            linkController.state(any())
+        ).thenReturn(
+            MutableStateFlow(mockLinkStateWithAccount(mockLinkAccountWithoutSecret()))
+        )
+
+        val result = interactor.submitWalletOwnershipSignature(
+            challengeId = "woc_123",
+            signature = "0xsignature"
+        )
+
+        assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
+        val failed = result as OnrampSubmitWalletOwnershipSignatureResult.Failed
         assertThat(failed.error).isInstanceOf(MissingConsumerSecretException::class.java)
     }
 

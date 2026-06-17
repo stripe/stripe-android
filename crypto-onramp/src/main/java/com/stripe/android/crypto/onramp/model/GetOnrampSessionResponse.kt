@@ -23,5 +23,25 @@ internal data class GetOnrampSessionResponse(
      * The PaymentIntent client secret associated with this onramp session.
      */
     @SerialName("payment_intent_client_secret")
-    val paymentIntentClientSecret: String
+    val paymentIntentClientSecret: String? = null,
+    /**
+     * Transaction details for this onramp session.
+     */
+    @SerialName("transaction_details")
+    val transactionDetails: OnrampSessionTransactionDetails? = null
 )
+
+@Serializable
+internal data class OnrampSessionTransactionDetails(
+    @SerialName("wallet_address")
+    val walletAddress: String? = null,
+    @SerialName("destination_network")
+    val destinationNetwork: String? = null,
+    @SerialName("last_error")
+    val lastError: String? = null,
+) {
+    val destinationCryptoNetwork: CryptoNetwork?
+        get() = destinationNetwork?.let { value ->
+            CryptoNetwork.values().firstOrNull { it.value == value }
+        }
+}
