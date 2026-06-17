@@ -51,8 +51,8 @@ internal class FormViewModel(
         private set
 
     fun updateFormElements(newFormElements: List<FormElement>) {
-        val currentIdentifiers = elements.map { it.identifier }
-        val newIdentifiers = newFormElements.map { it.identifier }
+        val currentIdentifiers = elements.map { it.identifier to it::class }
+        val newIdentifiers = newFormElements.map { it.identifier to it::class }
         if (currentIdentifiers != newIdentifiers) {
             elements = newFormElements
         }

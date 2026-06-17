@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
+import com.stripe.android.ui.core.elements.AffirmHeaderElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
@@ -20,6 +21,7 @@ import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressFieldsElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -804,6 +806,31 @@ internal class FormViewModelTest {
 
         assertThat(updatedNameController?.fieldValue?.first()).isEqualTo("Jane Doe")
         assertThat(updatedEmailController?.fieldValue?.first()).isEqualTo("jane@example.com")
+    }
+
+    @Test
+    fun `updateFormElements updates elements when identifiers match but types differ`() {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val originalElements = listOf(
+            AffirmHeaderElement(
+                identifier = IdentifierSpec.Generic("affirm_promotion")
+            ),
+        )
+        val formViewModel = createViewModel(args, originalElements)
+
+        assertThat(formViewModel.elements).isEqualTo(originalElements)
+
+        val newElements = listOf(
+            StaticTextElement(
+                identifier = IdentifierSpec.Generic("affirm_promotion"),
+                text = resolvableString("Static text"),
+            ),
+        )
+        formViewModel.updateFormElements(newElements)
+
+        assertThat(formViewModel.elements).isEqualTo(newElements)
     }
 
     @Test
