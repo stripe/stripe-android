@@ -1,10 +1,12 @@
 package com.stripe.android.crypto.onramp.example.ui.screens
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +20,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
@@ -27,7 +30,10 @@ import com.stripe.android.crypto.onramp.example.CHECKOUT_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.COLLECT_CARD_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_CRYPTO_TOKEN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_SESSION_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.GET_WALLET_OWNERSHIP_CHALLENGE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.SUBMIT_DETERMINISTIC_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
@@ -227,6 +233,112 @@ internal fun WalletAddressSection(
             .padding(bottom = 24.dp)
     ) {
         Text("Register Wallet Address")
+    }
+}
+
+@Composable
+@Suppress("LongMethod")
+internal fun WalletOwnershipSection(
+    isExpanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    challengeId: String?,
+    challengeMessage: String?,
+    challengeExpiresAt: String?,
+    verifiedOwnership: Boolean?,
+    signatureInput: String,
+    onSignatureInputChange: (String) -> Unit,
+    onGetWalletOwnershipChallenge: () -> Unit,
+    onSubmitWalletOwnershipSignature: () -> Unit,
+    onSubmitDeterministicWalletOwnershipSignature: () -> Unit,
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onExpandedChange(!isExpanded) }
+            .padding(vertical = 20.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "Wallet Ownership",
+            fontWeight = FontWeight.Bold
+        )
+        Text(text = if (isExpanded) "Hide" else "Show")
+    }
+
+    AnimatedVisibility(visible = isExpanded) {
+        Column {
+            Button(
+                onClick = onGetWalletOwnershipChallenge,
+                modifier = Modifier
+                    .testTag(GET_WALLET_OWNERSHIP_CHALLENGE_BUTTON_TAG)
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text("Get Wallet Ownership Challenge")
+            }
+
+            challengeId?.let { id ->
+                Text(
+                    text = "Challenge ID: $id",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            challengeExpiresAt?.let { expiresAt ->
+                Text(
+                    text = "Challenge expires at: $expiresAt",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            challengeMessage?.let { message ->
+                Text(
+                    text = "Challenge message:\n$message",
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            verifiedOwnership?.let { verified ->
+                Text(
+                    text = "Verified ownership: $verified",
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+            }
+
+            OutlinedTextField(
+                value = signatureInput,
+                onValueChange = onSignatureInputChange,
+                label = { Text("Wallet Ownership Signature") },
+                placeholder = { Text("Signature or deterministic test signature") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            )
+
+            Button(
+                onClick = onSubmitDeterministicWalletOwnershipSignature,
+                enabled = challengeId != null,
+                modifier = Modifier
+                    .testTag(SUBMIT_DETERMINISTIC_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG)
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text("Submit Deterministic Test Signature")
+            }
+
+            Button(
+                onClick = onSubmitWalletOwnershipSignature,
+                enabled = challengeId != null,
+                modifier = Modifier
+                    .testTag(SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG)
+                    .fillMaxWidth()
+                    .padding(bottom = 24.dp)
+            ) {
+                Text("Submit Wallet Ownership Signature")
+            }
+        }
     }
 }
 

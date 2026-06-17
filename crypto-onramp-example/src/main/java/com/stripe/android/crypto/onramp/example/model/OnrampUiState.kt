@@ -22,8 +22,14 @@ internal data class OnrampUiState(
     @TypeParceler<PaymentMethodDisplayData?, NullPaymentMethodDisplayDataParceler>
     val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
+    val cryptoCustomerId: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
+    val walletOwnershipChallengeId: String? = null,
+    val walletOwnershipChallengeMessage: String? = null,
+    val walletOwnershipChallengeExpiresAt: String? = null,
+    val walletOwnershipSignatureInput: String = "",
+    val walletOwnershipVerified: Boolean? = null,
     val authToken: String? = null,
     @TypeParceler<OnrampSessionResponse?, NullOnrampSessionResponseParceler>
     val onrampSession: OnrampSessionResponse? = null,

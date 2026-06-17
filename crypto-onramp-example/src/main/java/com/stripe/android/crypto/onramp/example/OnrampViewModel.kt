@@ -23,6 +23,7 @@ import com.stripe.android.crypto.onramp.example.network.LoginSignUpResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.example.store.OnrampUserDataStore
+import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -33,12 +34,14 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
@@ -112,6 +115,7 @@ internal class OnrampViewModel(
                         currentState.copy(
                             email = it.email,
                             authToken = it.authToken,
+                            cryptoCustomerId = it.cryptoCustomerId,
                             screen = Screen.SeamlessSignIn
                         )
                     } ?: currentState.copy(screen = Screen.LoginSignup)
@@ -266,6 +270,7 @@ internal class OnrampViewModel(
             OnrampUiState(
                 email = it.email,
                 authToken = it.authToken,
+                cryptoCustomerId = it.cryptoCustomerId,
                 screen = Screen.SeamlessSignIn,
                 googlePayIsReady = googlePayIsReady
             )
@@ -392,12 +397,20 @@ internal class OnrampViewModel(
                             cryptoCustomerId = result.customerId,
                             tokenWithLAI = authToken
                         )
+                        userDataStore.save(
+                            OnrampUserData(
+                                email = _uiState.value.email,
+                                authToken = authToken,
+                                cryptoCustomerId = result.customerId
+                            )
+                        )
                     }
                 }
 
                 _uiState.update { currentState ->
                     currentState.copy(
                         screen = Screen.AuthenticatedOperations,
+                        cryptoCustomerId = result.customerId,
                         linkAuthIntentId = null,
                         consentedLinkAuthIntentIds =
                             currentState.consentedLinkAuthIntentIds +
@@ -439,7 +452,12 @@ internal class OnrampViewModel(
                 }
             }
             is OnrampCheckoutResult.Failed -> {
-                _message.value = "Checkout failed: ${result.error.message}"
+                val error = result.error
+                _message.value = if (error is WalletOwnershipVerificationRequiredException) {
+                    "Checkout requires wallet ownership verification for ${error.walletAddress.orEmpty()}"
+                } else {
+                    "Checkout failed: ${error.message}"
+                }
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
@@ -478,6 +496,7 @@ internal class OnrampViewModel(
                         it.copy(
                             screen = Screen.Authentication,
                             email = userInfo.email,
+                            cryptoCustomerId = result.customerId,
                             loadingMessage = null
                         )
                     }
@@ -512,6 +531,11 @@ internal class OnrampViewModel(
                             screen = Screen.AuthenticatedOperations,
                             walletAddress = trimmedWalletAddress,
                             network = network,
+                            walletOwnershipChallengeId = null,
+                            walletOwnershipChallengeMessage = null,
+                            walletOwnershipChallengeExpiresAt = null,
+                            walletOwnershipSignatureInput = "",
+                            walletOwnershipVerified = null,
                             loadingMessage = null
                         )
                     }
@@ -524,6 +548,146 @@ internal class OnrampViewModel(
                             loadingMessage = null
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun getWalletOwnershipChallenge(walletAddress: String, network: CryptoNetwork) {
+        viewModelScope.launch {
+            val trimmedWalletAddress = walletAddress.trim()
+            if (trimmedWalletAddress.isBlank()) {
+                _message.value = "Please enter a wallet address"
+                return@launch
+            }
+
+            _uiState.update {
+                it.copy(
+                    screen = Screen.Loading,
+                    loadingMessage = "Getting wallet ownership challenge..."
+                )
+            }
+
+            when (val result = onrampCoordinator.getWalletOwnershipChallenge(trimmedWalletAddress, network)) {
+                is OnrampGetWalletOwnershipChallengeResult.Completed -> {
+                    val challenge = result.challenge
+                    val deterministicSignature = buildDeterministicTestSignature(
+                        walletAddress = challenge.walletAddress,
+                        challengeId = challenge.challengeId,
+                        cryptoCustomerId = _uiState.value.cryptoCustomerId
+                    )
+                    _message.value = "Wallet ownership challenge created"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            walletAddress = challenge.walletAddress,
+                            network = challenge.network,
+                            walletOwnershipChallengeId = challenge.challengeId,
+                            walletOwnershipChallengeMessage = challenge.message,
+                            walletOwnershipChallengeExpiresAt = challenge.expiresAt,
+                            walletOwnershipSignatureInput = deterministicSignature.orEmpty(),
+                            loadingMessage = null
+                        )
+                    }
+                }
+                is OnrampGetWalletOwnershipChallengeResult.Failed -> handleError(result.error) {
+                    _message.value = "Failed to get wallet ownership challenge: ${result.error.message}"
+                    _uiState.update {
+                        it.copy(
+                            screen = Screen.AuthenticatedOperations,
+                            loadingMessage = null
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    fun submitWalletOwnershipSignature(signature: String) {
+        viewModelScope.launch {
+            val challengeId = _uiState.value.walletOwnershipChallengeId
+            if (challengeId.isNullOrBlank()) {
+                _message.value = "Please get a wallet ownership challenge first"
+                return@launch
+            }
+
+            val trimmedSignature = signature.trim()
+            if (trimmedSignature.isBlank()) {
+                _message.value = "Please enter a wallet ownership signature"
+                return@launch
+            }
+
+            submitWalletOwnershipSignatureInternal(
+                challengeId = challengeId,
+                signature = trimmedSignature
+            )
+        }
+    }
+
+    fun submitDeterministicWalletOwnershipSignature() {
+        viewModelScope.launch {
+            val state = _uiState.value
+            val challengeId = state.walletOwnershipChallengeId
+            if (challengeId.isNullOrBlank()) {
+                _message.value = "Please get a wallet ownership challenge first"
+                return@launch
+            }
+
+            val signature = buildDeterministicTestSignature(
+                walletAddress = state.walletAddress,
+                challengeId = challengeId,
+                cryptoCustomerId = state.cryptoCustomerId
+            )
+            if (signature == null) {
+                _message.value = "No crypto customer ID available for deterministic test signature"
+                return@launch
+            }
+
+            _uiState.update { it.copy(walletOwnershipSignatureInput = signature) }
+            submitWalletOwnershipSignatureInternal(
+                challengeId = challengeId,
+                signature = signature
+            )
+        }
+    }
+
+    fun updateWalletOwnershipSignatureInput(signature: String) {
+        _uiState.update { it.copy(walletOwnershipSignatureInput = signature) }
+    }
+
+    private suspend fun submitWalletOwnershipSignatureInternal(
+        challengeId: String,
+        signature: String
+    ) {
+        _uiState.update {
+            it.copy(
+                screen = Screen.Loading,
+                loadingMessage = "Submitting wallet ownership signature..."
+            )
+        }
+
+        when (val result = onrampCoordinator.submitWalletOwnershipSignature(challengeId, signature)) {
+            is OnrampSubmitWalletOwnershipSignatureResult.Completed -> {
+                val wallet = result.consumerWallet
+                _message.value = "Wallet ownership verification submitted"
+                _uiState.update {
+                    it.copy(
+                        screen = Screen.AuthenticatedOperations,
+                        walletAddress = wallet.walletAddress,
+                        network = wallet.network,
+                        walletOwnershipVerified = wallet.verifiedOwnership,
+                        loadingMessage = null
+                    )
+                }
+            }
+            is OnrampSubmitWalletOwnershipSignatureResult.Failed -> handleError(result.error) {
+                _message.value = "Failed to submit wallet ownership signature: ${result.error.message}"
+                _uiState.update {
+                    it.copy(
+                        screen = Screen.AuthenticatedOperations,
+                        walletOwnershipVerified = false,
+                        loadingMessage = null
+                    )
                 }
             }
         }
@@ -865,7 +1029,8 @@ internal class OnrampViewModel(
                 userDataStore.save(
                     OnrampUserData(
                         email = _uiState.value.email,
-                        authToken = result.value.token
+                        authToken = result.value.token,
+                        cryptoCustomerId = _uiState.value.cryptoCustomerId
                     )
                 )
                 result.value.authIntentId
@@ -955,6 +1120,18 @@ internal class OnrampViewModel(
 
         _message.value = "Please enter a valid password (at least 8 characters)"
         return false
+    }
+
+    private fun buildDeterministicTestSignature(
+        walletAddress: String?,
+        challengeId: String?,
+        cryptoCustomerId: String?,
+    ): String? {
+        if (walletAddress.isNullOrBlank() || challengeId.isNullOrBlank() || cryptoCustomerId.isNullOrBlank()) {
+            return null
+        }
+
+        return "$walletAddress+$cryptoCustomerId+$challengeId"
     }
 
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
