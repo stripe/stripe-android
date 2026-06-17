@@ -231,11 +231,11 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents the CRS/CARF declaration screen and records acceptance when the user confirms.
-         * The result will be delivered through the CRS/CARF declaration callback provided in OnrampCallbacks.
+         * Presents the user attestation screen and records acceptance when the user confirms.
+         * The result will be delivered through the user attestation callback provided in OnrampCallbacks.
          */
-        fun presentCrsCarfDeclaration() {
-            coordinator.presentCrsCarfDeclaration()
+        fun presentUserAttestation() {
+            coordinator.presentUserAttestation()
         }
     }
 
