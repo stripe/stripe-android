@@ -409,10 +409,6 @@ class Checkout private constructor(
      */
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    init {
-        CheckoutInstances.add(internalState.key, this)
-    }
-
     /**
      * Applies a promotion code to the checkout session.
      *

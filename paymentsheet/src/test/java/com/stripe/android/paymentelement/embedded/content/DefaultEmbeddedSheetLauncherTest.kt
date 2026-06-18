@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -474,6 +475,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `launchForm throws when checkout mutation is in flight`() = testScenario {
         val checkout = CheckoutStateFactory.createCheckout(applicationContext)
+        CheckoutInstances.register(checkout.internalState.key, checkout)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -484,7 +486,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
-                instancesKey = "test_key",
+                instancesKey = checkout.internalState.key,
             ),
         )
         val state = EmbeddedConfirmationStateFixtures.defaultState()
@@ -501,6 +503,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `launchManage throws when checkout mutation is in flight`() = testScenario {
         val checkout = CheckoutStateFactory.createCheckout(applicationContext)
+        CheckoutInstances.register(checkout.internalState.key, checkout)
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -511,7 +514,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = DEFAULT_CHECKOUT_SESSION_ID,
-                instancesKey = "test_key",
+                instancesKey = checkout.internalState.key,
             ),
         )
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE

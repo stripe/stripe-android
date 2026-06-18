@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet
 
 import android.content.Context
@@ -473,7 +475,8 @@ internal class PaymentOptionsActivityTest {
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
         val checkout = CheckoutStateFactory.createCheckout(context)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
+        CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, checkout)
+        checkout.markIntegrationLaunched()
 
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
             state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(

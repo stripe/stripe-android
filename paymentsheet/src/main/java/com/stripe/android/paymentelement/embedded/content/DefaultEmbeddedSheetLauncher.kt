@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentelement.embedded.content
 
 import androidx.activity.result.ActivityResultCaller
@@ -119,8 +121,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
-            CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
-            CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+            val checkout = requireNotNull(CheckoutInstances[checkoutSession.instancesKey]) {
+                "Checkout not registered for key '${checkoutSession.instancesKey}'."
+            }
+            checkout.ensureNoMutationInFlight()
+            checkout.markIntegrationLaunched()
         }
         if (embeddedConfirmationState == null) {
             errorReporter.report(
@@ -156,8 +161,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     ) {
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
-            CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
-            CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+            val checkout = requireNotNull(CheckoutInstances[checkoutSession.instancesKey]) {
+                "Checkout not registered for key '${checkoutSession.instancesKey}'."
+            }
+            checkout.ensureNoMutationInFlight()
+            checkout.markIntegrationLaunched()
         }
         if (embeddedConfirmationState == null) {
             errorReporter.report(

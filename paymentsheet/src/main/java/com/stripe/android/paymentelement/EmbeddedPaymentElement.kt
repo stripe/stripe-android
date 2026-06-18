@@ -18,7 +18,6 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutConfigurationMerger
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.ui.DelegateDrawable
 import com.stripe.android.core.utils.StatusBarCompat
@@ -27,6 +26,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedCheckoutRegistrar
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
@@ -59,6 +59,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
     stateHelper: EmbeddedStateHelper,
+    private val checkoutRegistrar: EmbeddedCheckoutRegistrar,
 ) {
 
     /**
@@ -102,7 +103,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ): ConfigureResult {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        checkout.ensureNoMutationInFlight()
+        checkoutRegistrar.register(checkout)
         return configurationCoordinator.configure(
             configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
                 .forCheckoutSession(checkout.internalState),

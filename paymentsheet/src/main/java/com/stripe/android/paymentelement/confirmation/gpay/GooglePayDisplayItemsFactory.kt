@@ -14,8 +14,9 @@ internal object GooglePayDisplayItemsFactory {
         val checkoutSessionMetadata = paymentMethodMetadata.integrationMetadata
             as? IntegrationMetadata.CheckoutSession ?: return emptyList()
 
-        val checkout = CheckoutInstances[checkoutSessionMetadata.instancesKey].firstOrNull()
-            ?: return emptyList()
+        val checkout = requireNotNull(CheckoutInstances[checkoutSessionMetadata.instancesKey]) {
+            "Checkout not registered for key '${checkoutSessionMetadata.instancesKey}'."
+        }
 
         val checkoutSession = checkout.checkoutSession.value
         val items = mutableListOf<GooglePayJsonFactory.DisplayItem>()

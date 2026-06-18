@@ -3,9 +3,9 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
-import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -351,31 +351,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `successful confirm updates multiple Checkout instances`() = runScenario(
-        checkoutInstanceCount = 2
-    ) {
-        val checkout1 = checkoutInstances[0]
-        val checkout2 = checkoutInstances[1]
-        turbineScope {
-            val checkoutSessionTurbine1 = checkout1.checkoutSession.testIn(backgroundScope)
-            val checkoutSessionTurbine2 = checkout2.checkoutSession.testIn(backgroundScope)
-
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptNewPm()
-
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        }
-    }
-
-    @Test
-    fun `successful confirm with new PM updates registered Checkout instances`() = runScenario(
+    fun `successful confirm with new PM updates registered Checkout instance`() = runScenario(
         checkoutInstanceCount = 1
     ) {
         val checkout = checkoutInstances.single()
@@ -393,7 +369,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `successful confirm with saved PM updates registered Checkout instances`() = runScenario(
+    fun `successful confirm with saved PM updates registered Checkout instance`() = runScenario(
         checkoutInstanceCount = 1
     ) {
         val checkout = checkoutInstances.single()
@@ -479,7 +455,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     }
 
     @Test
-    fun `failed confirm does not update registered Checkout instances`() = runScenario(
+    fun `failed confirm does not update registered Checkout instance`() = runScenario(
         checkoutInstanceCount = 1,
     ) {
         networkRule.checkoutConfirm { response ->
@@ -500,7 +476,7 @@ class CheckoutSessionConfirmationInterceptorTest {
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
-        checkoutInstanceCount: Int = 0,
+        checkoutInstanceCount: Int = 1,
         block: suspend Scenario.() -> Unit,
     ) {
         val stripeRepository = FakeCreatePaymentMethodRepository(
@@ -541,6 +517,9 @@ class CheckoutSessionConfirmationInterceptorTest {
                 context = applicationContext,
                 state = CheckoutStateFactory.create(),
             )
+        }
+        checkoutInstances.firstOrNull()?.let {
+            CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, it)
         }
 
         runTest {

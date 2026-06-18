@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -57,6 +58,7 @@ class CheckoutCurrencyUpdaterTest {
             applicationContext,
             CheckoutStateFactory.create(key = instancesKey, checkoutSessionResponse = initialResponse),
         )
+        CheckoutInstances.register(instancesKey, checkout)
 
         networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-init.json")
@@ -130,6 +132,13 @@ class CheckoutCurrencyUpdaterTest {
 
     @Test
     fun `updateCurrency failure on loader - returns failure`() = runTest {
+        val instancesKey = CheckoutStateFactory.DEFAULT_KEY
+        val checkout = Checkout.createWithState(
+            applicationContext,
+            CheckoutStateFactory.create(key = instancesKey),
+        )
+        CheckoutInstances.register(instancesKey, checkout)
+
         networkRule.checkoutUpdate { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -138,7 +147,7 @@ class CheckoutCurrencyUpdaterTest {
         val updater = DefaultCheckoutCurrencyUpdater(checkoutSessionRepository, failingLoader)
 
         val result = updater.updateCurrency(
-            instancesKey = CheckoutStateFactory.DEFAULT_KEY,
+            instancesKey = instancesKey,
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             currencyCode = "eur",
             config = PaymentSheet.Configuration("Test Merchant"),

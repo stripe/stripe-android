@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet
 
 import android.content.Context
@@ -494,8 +496,9 @@ class PaymentSheet internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ) {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
-        CheckoutInstances.markIntegrationLaunched(checkout.internalState.key)
+        checkout.ensureNoMutationInFlight()
+        CheckoutInstances.register(checkout.internalState.key, checkout)
+        checkout.markIntegrationLaunched()
         paymentSheetLauncher.present(
             mode = checkout.internalState.initializationMode,
             configuration = CheckoutConfigurationMerger.PaymentSheetConfiguration(configuration)

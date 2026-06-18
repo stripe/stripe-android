@@ -117,7 +117,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
         try {
-            CheckoutInstances.ensureNoMutationInFlight(integrationMetadata.instancesKey)
+            val checkout = requireNotNull(CheckoutInstances[integrationMetadata.instancesKey]) {
+                "Checkout not registered for key '${integrationMetadata.instancesKey}'."
+            }
+            checkout.ensureNoMutationInFlight()
         } catch (e: IllegalStateException) {
             return ConfirmationDefinition.Action.Fail(
                 cause = e,
@@ -143,9 +146,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private fun handleConfirmResponse(
         response: CheckoutSessionResponse,
     ): ConfirmationDefinition.Action<Args> {
-        CheckoutInstances[integrationMetadata.instancesKey].forEach { checkout ->
-            checkout.updateWithResponse(response)
+        val checkout = requireNotNull(CheckoutInstances[integrationMetadata.instancesKey]) {
+            "Checkout not registered for key '${integrationMetadata.instancesKey}'."
         }
+        checkout.updateWithResponse(response)
 
         val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
             ?: run {

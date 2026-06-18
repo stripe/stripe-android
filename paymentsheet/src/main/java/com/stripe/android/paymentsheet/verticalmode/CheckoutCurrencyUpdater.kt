@@ -43,7 +43,10 @@ internal class DefaultCheckoutCurrencyUpdater @Inject constructor(
 
         val response = responseResult.getOrElse { return Result.failure(it) }
 
-        CheckoutInstances[instancesKey].forEach { it.updateWithResponse(response) }
+        val checkout = requireNotNull(CheckoutInstances[instancesKey]) {
+            "Checkout not registered for key '$instancesKey'."
+        }
+        checkout.updateWithResponse(response)
 
         val newInitMode = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = instancesKey,

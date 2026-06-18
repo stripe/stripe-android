@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Application
@@ -202,7 +204,8 @@ internal class EmbeddedSheetActivityTest {
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
         val checkout = CheckoutStateFactory.createCheckout(applicationContext)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
+        CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, checkout)
+        checkout.markIntegrationLaunched()
 
         launch(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(

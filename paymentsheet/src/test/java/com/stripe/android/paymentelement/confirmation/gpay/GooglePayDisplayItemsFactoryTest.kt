@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import org.junit.After
+import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -45,7 +46,7 @@ class GooglePayDisplayItemsFactoryTest {
     }
 
     @Test
-    fun `returns empty list when no checkout instance exists for key`() {
+    fun `throws when no checkout instance exists for key`() {
         val metadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
                 id = "cs_xxx",
@@ -53,9 +54,11 @@ class GooglePayDisplayItemsFactoryTest {
             ),
         )
 
-        val result = GooglePayDisplayItemsFactory.create(metadata)
+        val error = assertThrows(IllegalArgumentException::class.java) {
+            GooglePayDisplayItemsFactory.create(metadata)
+        }
 
-        assertThat(result).isEmpty()
+        assertThat(error).hasMessageThat().contains("nonexistent_key")
     }
 
     @Test
@@ -209,7 +212,7 @@ class GooglePayDisplayItemsFactoryTest {
                 ),
             ),
         )
-        CheckoutInstances.add(INSTANCES_KEY, checkout)
+        CheckoutInstances.register(INSTANCES_KEY, checkout)
 
         val metadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(

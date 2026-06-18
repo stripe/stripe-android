@@ -3,14 +3,8 @@ package com.stripe.android.checkout
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkouttesting.checkoutUpdate
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertThrows
 import org.junit.Rule
@@ -18,20 +12,16 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 class CheckoutInstancesTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val networkRule = NetworkRule()
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
-        .outerRule(networkRule)
-        .around(PaymentConfigurationTestRule(applicationContext))
+        .outerRule(PaymentConfigurationTestRule(applicationContext))
 
     @After
     fun tearDown() {
@@ -39,152 +29,99 @@ class CheckoutInstancesTest {
     }
 
     @Test
-    fun `get returns empty list for unknown key`() {
-        assertThat(CheckoutInstances["unknown-key"]).isEmpty()
+    fun `get returns null for unknown key`() {
+        assertThat(CheckoutInstances["unknown-key"]).isNull()
     }
 
     @Test
-    fun `add and get round-trips single instance`() {
+    fun `register and get round-trips single instance`() {
         val checkout = createCheckout(key = "key1")
-        CheckoutInstances.clear()
 
-        CheckoutInstances.add("key1", checkout)
+        CheckoutInstances.register("key1", checkout)
 
-        assertThat(CheckoutInstances["key1"]).containsExactly(checkout)
+        assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
     }
 
     @Test
-    fun `add multiple instances with same key returns all`() {
+    fun `register same instance twice is a no-op`() {
+        val checkout = createCheckout(key = "key1")
+
+        CheckoutInstances.register("key1", checkout)
+        CheckoutInstances.register("key1", checkout)
+
+        assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
+    }
+
+    @Test
+    fun `register different instance for same key throws`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key1")
-        CheckoutInstances.clear()
 
-        CheckoutInstances.add("key1", checkout1)
-        CheckoutInstances.add("key1", checkout2)
+        CheckoutInstances.register("key1", checkout1)
 
-        assertThat(CheckoutInstances["key1"]).containsExactly(checkout1, checkout2)
+        val error = assertThrows(IllegalStateException::class.java) {
+            CheckoutInstances.register("key1", checkout2)
+        }
+        assertThat(error).hasMessageThat().contains("key1")
     }
 
     @Test
-    fun `remove clears all instances for a key`() {
+    fun `unregister removes correct instance`() {
         val checkout = createCheckout(key = "key1")
-        CheckoutInstances.clear()
+        CheckoutInstances.register("key1", checkout)
 
-        CheckoutInstances.add("key1", checkout)
-        assertThat(CheckoutInstances["key1"]).isNotEmpty()
+        CheckoutInstances.unregister("key1", checkout)
 
-        CheckoutInstances.remove("key1")
-        assertThat(CheckoutInstances["key1"]).isEmpty()
+        assertThat(CheckoutInstances["key1"]).isNull()
+    }
+
+    @Test
+    fun `unregister with wrong instance is a no-op`() {
+        val checkout1 = createCheckout(key = "key1")
+        val checkout2 = createCheckout(key = "key1")
+        CheckoutInstances.register("key1", checkout1)
+
+        // Attempt to unregister with a different instance - should be ignored.
+        CheckoutInstances.unregister("key1", checkout2)
+
+        assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout1)
     }
 
     @Test
     fun `clear empties the map`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
+
+        CheckoutInstances.register("key1", checkout1)
+        CheckoutInstances.register("key2", checkout2)
+
         CheckoutInstances.clear()
 
-        CheckoutInstances.add("key1", checkout1)
-        CheckoutInstances.add("key2", checkout2)
-
-        CheckoutInstances.clear()
-
-        assertThat(CheckoutInstances["key1"]).isEmpty()
-        assertThat(CheckoutInstances["key2"]).isEmpty()
-    }
-
-    @Test
-    fun `ensureNoMutationInFlight does not throw for unknown key`() {
-        CheckoutInstances.ensureNoMutationInFlight("unknown-key")
-    }
-
-    @Test
-    fun `ensureNoMutationInFlight throws when mutation is in flight`() {
-        val checkout = createCheckout(key = "key1")
-        val requestArrived = CountDownLatch(1)
-        val holdResponse = CountDownLatch(1)
-
-        networkRule.checkoutUpdate { response ->
-            requestArrived.countDown()
-            holdResponse.await()
-            response.setBody("{}")
-        }
-
-        runBlocking {
-            val job = launch(Dispatchers.IO) {
-                checkout.removePromotionCode()
-            }
-
-            assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
-
-            val error = assertThrows(IllegalStateException::class.java) {
-                CheckoutInstances.ensureNoMutationInFlight("key1")
-            }
-            assertThat(error).hasMessageThat()
-                .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-
-            holdResponse.countDown()
-            job.join()
-        }
-    }
-
-    @Test
-    fun `markIntegrationLaunched marks all instances for a key`() = runTest {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key1")
-        CheckoutInstances.clear()
-        CheckoutInstances.add("key1", checkout1)
-        CheckoutInstances.add("key1", checkout2)
-
-        CheckoutInstances.markIntegrationLaunched("key1")
-
-        // Both instances should return failure because integrationLaunched is set.
-        val result1 = checkout1.applyPromotionCode("code")
-        assertThat(result1.isFailure).isTrue()
-        assertThat(result1.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-        val result2 = checkout2.applyPromotionCode("code")
-        assertThat(result2.isFailure).isTrue()
-        assertThat(result2.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-    }
-
-    @Test
-    fun `markIntegrationDismissed clears the flag for all instances`() = runTest {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key1")
-        CheckoutInstances.clear()
-        CheckoutInstances.add("key1", checkout1)
-        CheckoutInstances.add("key1", checkout2)
-
-        CheckoutInstances.markIntegrationLaunched("key1")
-        CheckoutInstances.markIntegrationDismissed("key1")
-
-        // After dismissing, mutations should not throw the integrationLaunched error.
-        // They will fail for other reasons (network), but they won't throw IllegalStateException.
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "error"}}""")
-        }
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "error"}}""")
-        }
-
-        val result1 = checkout1.applyPromotionCode("code")
-        assertThat(result1.isFailure).isTrue()
-        val result2 = checkout2.applyPromotionCode("code")
-        assertThat(result2.isFailure).isTrue()
+        assertThat(CheckoutInstances["key1"]).isNull()
+        assertThat(CheckoutInstances["key2"]).isNull()
     }
 
     @Test
     fun `multiple keys coexist independently`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
-        CheckoutInstances.clear()
 
-        CheckoutInstances.add("key1", checkout1)
-        CheckoutInstances.add("key2", checkout2)
+        CheckoutInstances.register("key1", checkout1)
+        CheckoutInstances.register("key2", checkout2)
 
-        assertThat(CheckoutInstances["key1"]).containsExactly(checkout1)
-        assertThat(CheckoutInstances["key2"]).containsExactly(checkout2)
+        assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout1)
+        assertThat(CheckoutInstances["key2"]).isSameInstanceAs(checkout2)
+    }
+
+    @Test
+    fun `unregister after re-register with same instance leaves key absent`() {
+        val checkout = createCheckout(key = "key1")
+
+        CheckoutInstances.register("key1", checkout)
+        CheckoutInstances.register("key1", checkout) // idempotent
+        CheckoutInstances.unregister("key1", checkout)
+
+        assertThat(CheckoutInstances["key1"]).isNull()
     }
 
     private fun createCheckout(key: String): Checkout {

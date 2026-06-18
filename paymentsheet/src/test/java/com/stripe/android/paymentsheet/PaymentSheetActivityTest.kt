@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet
 
 import android.content.Context
@@ -214,7 +216,8 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
         val checkout = CheckoutStateFactory.createCheckout(context)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
+        CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, checkout)
+        checkout.markIntegrationLaunched()
 
         val viewModel = createViewModel(
             integrationMetadata = IntegrationMetadata.CheckoutSession(

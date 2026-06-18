@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.app.Activity
@@ -119,6 +121,9 @@ internal class DefaultFlowController @Inject internal constructor(
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
 
+    @Volatile
+    private var registeredCheckout: Checkout? = null
+
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
      * after [DefaultFlowController].
@@ -171,6 +176,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     walletsButtonLinkLauncher.unregister()
                     flowControllerLinkLauncher.unregister()
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
+                    registeredCheckout?.let {
+                        CheckoutInstances.unregister(it.internalState.key, it)
+                    }
                 }
             }
         )
@@ -243,7 +251,13 @@ internal class DefaultFlowController @Inject internal constructor(
         configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback
     ) {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        checkout.ensureNoMutationInFlight()
+        val previous = registeredCheckout
+        if (previous != null && previous !== checkout) {
+            CheckoutInstances.unregister(previous.internalState.key, previous)
+        }
+        CheckoutInstances.register(checkout.internalState.key, checkout)
+        registeredCheckout = checkout
         configure(
             mode = checkout.internalState.initializationMode,
             configuration = CheckoutConfigurationMerger.PaymentSheetConfiguration(configuration)
@@ -305,8 +319,11 @@ internal class DefaultFlowController @Inject internal constructor(
             val checkoutSession = state.paymentSheetState.paymentMethodMetadata
                 .integrationMetadata as? IntegrationMetadata.CheckoutSession
             if (checkoutSession != null) {
-                CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
-                CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+                val checkout = requireNotNull(CheckoutInstances[checkoutSession.instancesKey]) {
+                    "Checkout not registered. Call configureWithCheckout first."
+                }
+                checkout.ensureNoMutationInFlight()
+                checkout.markIntegrationLaunched()
             }
 
             val linkConfiguration = state.paymentSheetState.linkConfiguration

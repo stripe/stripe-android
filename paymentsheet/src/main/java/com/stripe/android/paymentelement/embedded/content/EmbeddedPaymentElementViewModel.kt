@@ -17,6 +17,7 @@ import kotlin.reflect.KClass
 internal class EmbeddedPaymentElementViewModel @Inject constructor(
     val embeddedPaymentElementSubcomponentFactory: EmbeddedPaymentElementSubcomponent.Factory,
     @ViewModelScope private val customViewModelScope: CoroutineScope,
+    private val checkoutRegistrar: EmbeddedCheckoutRegistrar,
     eventReporter: EventReporter,
 ) : ViewModel() {
     init {
@@ -24,6 +25,7 @@ internal class EmbeddedPaymentElementViewModel @Inject constructor(
     }
 
     override fun onCleared() {
+        checkoutRegistrar.unregisterIfNeeded()
         customViewModelScope.cancel()
     }
 

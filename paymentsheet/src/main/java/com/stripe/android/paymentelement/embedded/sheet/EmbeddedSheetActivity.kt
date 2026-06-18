@@ -1,3 +1,5 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Activity
@@ -24,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -192,7 +195,12 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         super.onDestroy()
 
         if (isFinishing) {
-            CheckoutInstances.markIntegrationDismissed(args?.paymentMethodMetadata)
+            val key = (args?.paymentMethodMetadata?.integrationMetadata
+                as? IntegrationMetadata.CheckoutSession)?.instancesKey
+            if (key != null) {
+                CheckoutInstances[key]?.markIntegrationDismissed()
+                // No unregister: EmbeddedPaymentElement owns the registration lifetime.
+            }
             if (::eventReporter.isInitialized) {
                 eventReporter.onDismiss()
             }

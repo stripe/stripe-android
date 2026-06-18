@@ -1,57 +1,31 @@
 package com.stripe.android.checkout
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import java.lang.ref.WeakReference
 
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutInstances {
-    private val instanceMap = mutableMapOf<String, MutableList<WeakReference<Checkout>>>()
+    private val instances = mutableMapOf<String, Checkout>()
 
-    operator fun get(key: String): List<Checkout> {
-        val refs = instanceMap[key] ?: return emptyList()
-        val live = refs.mapNotNull { it.get() }
-        if (live.isEmpty()) {
-            instanceMap.remove(key)
-        } else if (live.size != refs.size) {
-            // Prune stale references
-            refs.clear()
-            refs.addAll(live.map { WeakReference(it) })
+    operator fun get(key: String): Checkout? = instances[key]
+
+    fun register(key: String, checkout: Checkout) {
+        val existing = instances[key]
+        check(existing == null || existing === checkout) {
+            "A different Checkout instance is already registered under key '$key'. " +
+                "Close or reconfigure the existing integration before using a new Checkout with the same key."
         }
-        return live
+        instances[key] = checkout
     }
 
-    fun ensureNoMutationInFlight(key: String) {
-        this[key].forEach { it.ensureNoMutationInFlight() }
-    }
-
-    fun markIntegrationLaunched(key: String) {
-        this[key].forEach { it.markIntegrationLaunched() }
-    }
-
-    fun markIntegrationDismissed(key: String) {
-        this[key].forEach { it.markIntegrationDismissed() }
-    }
-
-    fun markIntegrationDismissed(paymentMethodMetadata: PaymentMethodMetadata?) {
-        val checkoutSession = paymentMethodMetadata
-            ?.integrationMetadata as? IntegrationMetadata.CheckoutSession ?: return
-        markIntegrationDismissed(checkoutSession.instancesKey)
-    }
-
-    fun add(key: String, checkout: Checkout) {
-        val refs = instanceMap.getOrPut(key) { mutableListOf() }
-        refs.add(WeakReference(checkout))
-    }
-
-    fun remove(key: String) {
-        instanceMap.remove(key)
+    fun unregister(key: String, checkout: Checkout) {
+        if (instances[key] === checkout) {
+            instances.remove(key)
+        }
     }
 
     @VisibleForTesting
     fun clear() {
-        instanceMap.clear()
+        instances.clear()
     }
 }

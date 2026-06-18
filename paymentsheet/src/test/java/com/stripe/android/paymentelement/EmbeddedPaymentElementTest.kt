@@ -12,6 +12,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
+import com.stripe.android.paymentelement.embedded.content.EmbeddedCheckoutRegistrar
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
@@ -81,6 +82,7 @@ internal class EmbeddedPaymentElementTest {
                 ): EmbeddedPaymentElement.ConfigureResult = error("Not expected")
             },
             stateHelper = FakeEmbeddedStateHelper(),
+            checkoutRegistrar = EmbeddedCheckoutRegistrar(),
         )
     }
 }
