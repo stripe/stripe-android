@@ -759,11 +759,6 @@ internal class PaymentSheetPlaygroundActivity :
                     configuration = playgroundState.paymentSheetConfiguration(viewModel.settings)
                 )
             }
-        } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
-            paymentSheet.presentWithCheckout(
-                checkout = requireNotNull(viewModel.checkout),
-                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
-            )
         } else {
             paymentSheet.presentWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),

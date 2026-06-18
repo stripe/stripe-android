@@ -19,8 +19,6 @@ import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkout.Checkout
-import com.stripe.android.checkout.CheckoutConfigurationMerger
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
@@ -471,35 +469,6 @@ class PaymentSheet internal constructor(
         paymentSheetLauncher.present(
             mode = InitializationMode.DeferredIntent(intentConfiguration),
             configuration = configuration,
-        )
-    }
-
-    /**
-     * Presents [PaymentSheet] using a [Checkout] session.
-     *
-     * While PaymentSheet is presented, [Checkout] mutation methods will return [Result.failure].
-     * Mutations are re-enabled once PaymentSheet is dismissed.
-     *
-     * [Checkout.checkoutSession] may be updated during the flow — for example, when adaptive
-     * pricing converts amounts to the customer's local currency. On successful confirmation, it
-     * is updated with the confirmed session state.
-     *
-     * @param checkout The configured checkout.
-     * @param configuration The [PaymentSheet] configuration.
-     * @throws IllegalStateException if a [Checkout] mutation is currently in flight.
-     */
-    @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun presentWithCheckout(
-        checkout: Checkout,
-        configuration: Configuration,
-    ) {
-        CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
-        CheckoutInstances.markIntegrationLaunched(checkout.internalState.key)
-        paymentSheetLauncher.present(
-            mode = checkout.internalState.initializationMode,
-            configuration = CheckoutConfigurationMerger.PaymentSheetConfiguration(configuration)
-                .forCheckoutSession(checkout.internalState),
         )
     }
 
