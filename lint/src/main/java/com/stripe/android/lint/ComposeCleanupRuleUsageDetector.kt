@@ -30,12 +30,13 @@ internal class ComposeCleanupRuleUsageDetector : Detector(), SourceCodeScanner {
             id = "ComposeCleanupRuleUsageIssue",
             priority = 8,
             briefDescription = """
-                [androidx.compose.ui.test.junit4.createComposeRule] may cause some tests to stall until failure due to
-                Compose not being idle from Robolectric environment reusage.
+                [createComposeRule] (androidx.compose.ui.test.junit4 or junit4.v2) may cause some tests to stall until
+                failure due to Compose not being idle from Robolectric environment reusage.
             """,
             explanation = """
-                Use [com.stripe.android.testing.createComposeCleanupRule] alongside 
-                [androidx.compose.ui.test.junit4.createComposeRule].
+                Use [com.stripe.android.testing.createComposeCleanupRule] alongside
+                [androidx.compose.ui.test.junit4.createComposeRule] or
+                [androidx.compose.ui.test.junit4.v2.createComposeRule].
             """,
             category = Category.CUSTOM_LINT_CHECKS,
             severity = Severity.ERROR,

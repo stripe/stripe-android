@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Application
 import android.os.Bundle
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.v2.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider

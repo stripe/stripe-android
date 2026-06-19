@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import androidx.compose.ui.test.assertAny
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.model.PaymentMethodFixtures

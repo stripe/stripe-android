@@ -25,7 +25,7 @@ internal class MyComposableTest {
 }
 ```
 
-- `createComposeRule()` — provides the Compose test harness
+- `createComposeRule()` — provides the Compose test harness (import `androidx.compose.ui.test.junit4.v2.createComposeRule`; use `junit4.v2.createAndroidComposeRule` / `createEmptyComposeRule` when needed)
 - `createComposeCleanupRule()` — workaround for Robolectric resource leak (import from `com.stripe.android.testing`)
 - `CoroutineTestRule` — controls coroutine dispatching in tests
 

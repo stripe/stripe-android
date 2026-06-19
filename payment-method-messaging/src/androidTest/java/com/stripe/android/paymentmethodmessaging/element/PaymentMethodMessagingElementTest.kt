@@ -2,7 +2,7 @@
 
 package com.stripe.android.paymentmethodmessaging.element
 
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.networktesting.AdvancedFraudSignalsTestRule
 import com.stripe.android.networktesting.NetworkRule

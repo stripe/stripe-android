@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues

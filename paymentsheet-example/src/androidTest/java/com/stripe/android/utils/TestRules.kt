@@ -1,7 +1,7 @@
 package com.stripe.android.utils
 
 import androidx.compose.ui.test.junit4.ComposeTestRule
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.compose.ui.test.junit4.v2.createEmptyComposeRule
 import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.test.core.INDIVIDUAL_TEST_TIMEOUT_SECONDS
 import com.stripe.android.testing.QuarantinedTestRule

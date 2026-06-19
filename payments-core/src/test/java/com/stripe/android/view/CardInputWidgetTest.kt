@@ -7,7 +7,7 @@ import android.os.Parcelable
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.junit4.v2.createComposeRule
 import androidx.core.view.updateLayoutParams
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider

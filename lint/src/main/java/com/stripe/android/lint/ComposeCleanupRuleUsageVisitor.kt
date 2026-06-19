@@ -30,7 +30,8 @@ internal class ComposeCleanupRuleUsageVisitor(
                 PARAMETERIZED_ROBOLECTRIC_TEST_RUNNER_FULL_NAME -> {
                     isRobolectricTest = true
                 }
-                COMPOSE_RULE_FULL_NAME -> {
+                COMPOSE_RULE_FULL_NAME,
+                COMPOSE_RULE_V2_FULL_NAME -> {
                     createComposeCall = node
                 }
                 COMPOSE_CLEANUP_RULE_FULL_NAME -> {
@@ -69,6 +70,7 @@ internal class ComposeCleanupRuleUsageVisitor(
             "org.robolectric.ParameterizedRobolectricTestRunner"
 
         private const val COMPOSE_RULE_FULL_NAME = "androidx.compose.ui.test.junit4.createComposeRule"
+        private const val COMPOSE_RULE_V2_FULL_NAME = "androidx.compose.ui.test.junit4.v2.createComposeRule"
         private const val COMPOSE_CLEANUP_RULE_FULL_NAME = "com.stripe.android.testing.createComposeCleanupRule"
     }
 }
