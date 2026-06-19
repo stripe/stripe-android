@@ -15,7 +15,7 @@ internal object ParcelUtils {
     internal fun <Source : Parcelable> create(
         source: Source
     ): Source {
-        val bundle = bundleOf(KEY to source)
+        val bundle = bundleOf().apply { putParcelable(KEY, source) }
         return requireNotNull(bundle.getParcelable(KEY))
     }
 
@@ -46,7 +46,7 @@ internal object ParcelUtils {
     private inline fun <reified T : Parcelable> createParcelRoundtrip(
         source: Parcelable
     ): T {
-        val bundle = bundleOf(KEY to source)
+        val bundle = bundleOf().apply { putParcelable(KEY, source) }
 
         return requireNotNull(
             copy(bundle, Bundle.CREATOR).getParcelable(KEY)

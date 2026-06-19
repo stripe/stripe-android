@@ -88,7 +88,7 @@ class ChallengeViewArgsTest {
         private fun createParcelRoundtrip(
             source: Parcelable
         ): ChallengeViewArgs {
-            val bundle = bundleOf(KEY to source)
+            val bundle = bundleOf().apply { putParcelable(KEY, source) }
             val bundleCopy = ParcelUtils.copy(bundle, Bundle.CREATOR)
             return requireNotNull(BundleCompat.getParcelable(bundleCopy, KEY, ChallengeViewArgs::class.java))
         }

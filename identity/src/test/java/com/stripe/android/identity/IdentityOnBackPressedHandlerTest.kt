@@ -143,9 +143,7 @@ class IdentityOnBackPressedHandlerTest {
 
         handler.updateState(
             destination = mockDestination,
-            args = bundleOf(
-                ARG_SHOULD_FAIL to true
-            )
+            args = bundleOf().apply { putBoolean(ARG_SHOULD_FAIL, true) }
         )
 
         handler.handleOnBackPressed()
@@ -174,9 +172,7 @@ class IdentityOnBackPressedHandlerTest {
 
         handler.updateState(
             destination = mockDestination,
-            args = bundleOf(
-                ARG_SHOULD_FAIL to false
-            )
+            args = bundleOf().apply { putBoolean(ARG_SHOULD_FAIL, false) }
         )
         handler.handleOnBackPressed()
         verify(mockNavController).navigateUp()

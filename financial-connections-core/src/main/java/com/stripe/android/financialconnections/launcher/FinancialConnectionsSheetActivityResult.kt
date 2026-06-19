@@ -45,7 +45,7 @@ sealed class FinancialConnectionsSheetActivityResult : Parcelable {
     ) : FinancialConnectionsSheetActivityResult()
 
     fun toBundle(): Bundle {
-        return bundleOf(EXTRA_RESULT to this)
+        return bundleOf().apply { putParcelable(EXTRA_RESULT, this@FinancialConnectionsSheetActivityResult) }
     }
 
     companion object {

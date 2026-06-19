@@ -41,9 +41,9 @@ internal class PassiveChallengeActivity : AppCompatActivity() {
     }
 
     private fun dismissWithResult(result: PassiveChallengeActivityResult) {
-        val bundle = bundleOf(
-            PassiveChallengeActivityContract.EXTRA_RESULT to result
-        )
+        val bundle = bundleOf().apply {
+            putParcelable(PassiveChallengeActivityContract.EXTRA_RESULT, result)
+        }
         setResult(RESULT_COMPLETE, Intent().putExtras(bundle))
         finish()
     }

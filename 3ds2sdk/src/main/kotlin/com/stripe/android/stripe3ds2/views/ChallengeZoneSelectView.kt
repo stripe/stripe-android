@@ -176,10 +176,10 @@ internal class ChallengeZoneSelectView @JvmOverloads constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        return bundleOf(
-            STATE_SUPER to super.onSaveInstanceState(),
-            STATE_SELECTED_INDEXED to ArrayList(selectedIndexes)
-        )
+        return bundleOf().apply {
+            putParcelable(STATE_SUPER, super.onSaveInstanceState())
+            putIntegerArrayList(STATE_SELECTED_INDEXED, ArrayList(selectedIndexes))
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {

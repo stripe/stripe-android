@@ -67,7 +67,9 @@ internal class IntentConfirmationChallengeActivityContractTest {
             Activity.RESULT_OK,
             Intent()
                 .putExtras(
-                    bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected)
+                    bundleOf().apply {
+                        putParcelable(IntentConfirmationChallengeActivityContract.EXTRA_RESULT, expected)
+                    }
                 )
         )
 
@@ -82,7 +84,9 @@ internal class IntentConfirmationChallengeActivityContractTest {
             Activity.RESULT_OK,
             Intent()
                 .putExtras(
-                    bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected)
+                    bundleOf().apply {
+                        putParcelable(IntentConfirmationChallengeActivityContract.EXTRA_RESULT, expected)
+                    }
                 )
         )
 
@@ -100,7 +104,9 @@ internal class IntentConfirmationChallengeActivityContractTest {
             Activity.RESULT_OK,
             Intent()
                 .putExtras(
-                    bundleOf(IntentConfirmationChallengeActivityContract.EXTRA_RESULT to expected)
+                    bundleOf().apply {
+                        putParcelable(IntentConfirmationChallengeActivityContract.EXTRA_RESULT, expected)
+                    }
                 )
         )
 

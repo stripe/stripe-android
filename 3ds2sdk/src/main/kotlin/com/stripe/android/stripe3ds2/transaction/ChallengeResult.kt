@@ -17,7 +17,7 @@ sealed class ChallengeResult : Parcelable {
     abstract val initialUiType: UiType?
 
     internal fun toBundle(): Bundle {
-        return bundleOf(EXTRA_RESULT to this)
+        return bundleOf().apply { putParcelable(EXTRA_RESULT, this@ChallengeResult) }
     }
 
     @Parcelize

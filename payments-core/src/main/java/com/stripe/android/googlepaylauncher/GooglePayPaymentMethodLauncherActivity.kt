@@ -182,7 +182,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             RESULT_OK,
             Intent()
                 .putExtras(
-                    bundleOf(GooglePayPaymentMethodLauncherContractV2.EXTRA_RESULT to result)
+                    bundleOf().apply { putParcelable(GooglePayPaymentMethodLauncherContractV2.EXTRA_RESULT, result) }
                 )
         )
         finish()

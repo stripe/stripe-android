@@ -142,9 +142,9 @@ class NativeLinkActivityContractTest {
     }
 
     private fun intent(result: LinkActivityResult): Intent {
-        val bundle = bundleOf(
-            LinkActivityContract.EXTRA_RESULT to result
-        )
+        val bundle = bundleOf().apply {
+            putParcelable(LinkActivityContract.EXTRA_RESULT, result)
+        }
         return Intent().apply {
             putExtras(bundle)
         }

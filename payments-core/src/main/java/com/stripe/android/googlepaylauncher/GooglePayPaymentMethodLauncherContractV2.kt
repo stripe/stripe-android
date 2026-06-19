@@ -60,7 +60,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val publishableKey: String? = null,
         internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
     ) : Parcelable {
-        internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        internal fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@Args) }
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

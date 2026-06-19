@@ -18,7 +18,7 @@ sealed class InitChallengeResult : Parcelable {
         val challengeResult: ChallengeResult
     ) : InitChallengeResult()
 
-    fun toBundle() = bundleOf(KEY_RESULT to this)
+    fun toBundle() = bundleOf().apply { putParcelable(KEY_RESULT, this@InitChallengeResult) }
 
     companion object {
         private const val KEY_RESULT = "key_init_challenge_result"

@@ -21,7 +21,9 @@ internal sealed class InternalCustomPaymentMethodResult : Parcelable {
     data object Canceled : InternalCustomPaymentMethodResult()
 
     @JvmSynthetic
-    fun toBundle(): Bundle = bundleOf(EXTRA_ARGS to this)
+    fun toBundle(): Bundle = bundleOf().apply {
+        putParcelable(EXTRA_ARGS, this@InternalCustomPaymentMethodResult)
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

@@ -110,7 +110,7 @@ internal class PaymentBrowserAuthContract :
             return returnUrl == defaultReturnUrl.value
         }
 
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@Args) }
 
         override fun writeToParcel(parcel: Parcel, flags: Int) {
             parcel.writeString(objectId)

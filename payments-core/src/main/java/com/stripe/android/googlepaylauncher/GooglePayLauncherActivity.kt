@@ -160,7 +160,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             RESULT_OK,
             Intent()
                 .putExtras(
-                    bundleOf(GooglePayLauncherContract.EXTRA_RESULT to result)
+                    bundleOf().apply { putParcelable(GooglePayLauncherContract.EXTRA_RESULT, result) }
                 )
         )
         finish()

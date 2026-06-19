@@ -13,7 +13,7 @@ internal data class ChallengeProgressArgs(
     val accentColor: Int?,
     val sdkTransactionId: SdkTransactionId
 ) : Parcelable {
-    fun toBundle() = bundleOf(EXTRA_ARGS to this)
+    fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@ChallengeProgressArgs) }
 
     companion object {
         private const val EXTRA_ARGS = "com.stripe.android.stripe3ds2.views.ChallengeProgressArgs"

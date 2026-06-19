@@ -52,7 +52,7 @@ class TapToAddContractTest {
 
     private fun intent(result: TapToAddResult?): Intent {
         return Intent().putExtras(
-            bundleOf(ActivityStarter.Result.EXTRA to result)
+            bundleOf().apply { putParcelable(ActivityStarter.Result.EXTRA, result) }
         )
     }
 }

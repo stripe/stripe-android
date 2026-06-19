@@ -636,12 +636,12 @@ class CardInputWidget @JvmOverloads constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        return bundleOf(
-            STATE_SUPER_STATE to super.onSaveInstanceState(),
-            STATE_CARD_VIEWED to isShowingFullCard,
-            STATE_POSTAL_CODE_ENABLED to postalCodeEnabled,
-            STATE_ON_BEHALF_OF to onBehalfOf
-        )
+        return bundleOf().apply {
+            putParcelable(STATE_SUPER_STATE, super.onSaveInstanceState())
+            putBoolean(STATE_CARD_VIEWED, isShowingFullCard)
+            putBoolean(STATE_POSTAL_CODE_ENABLED, postalCodeEnabled)
+            putString(STATE_ON_BEHALF_OF, onBehalfOf)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {

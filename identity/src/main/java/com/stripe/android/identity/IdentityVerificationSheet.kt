@@ -41,7 +41,7 @@ interface IdentityVerificationSheet {
         class Failed(val throwable: Throwable) : VerificationFlowResult()
 
         @JvmSynthetic
-        fun toBundle() = bundleOf(EXTRA to this)
+        fun toBundle() = bundleOf().apply { putParcelable(EXTRA, this@VerificationFlowResult) }
 
         internal companion object {
             internal const val EXTRA = "extra_args"

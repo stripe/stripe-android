@@ -43,7 +43,7 @@ internal object AddressElementActivityContract :
     data class Result(
         val addressOptionsResult: AddressLauncherResult
     ) : ActivityStarter.Result {
-        override fun toBundle() = bundleOf(EXTRA_RESULT to this)
+        override fun toBundle() = bundleOf().apply { putParcelable(EXTRA_RESULT, this@Result) }
     }
 
     const val EXTRA_ARGS =

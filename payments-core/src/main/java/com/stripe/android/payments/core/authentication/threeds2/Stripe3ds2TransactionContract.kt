@@ -44,7 +44,7 @@ internal class Stripe3ds2TransactionContract :
     ) : Parcelable {
         val fingerprint: Stripe3ds2Fingerprint get() = Stripe3ds2Fingerprint(nextActionData)
 
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@Args) }
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

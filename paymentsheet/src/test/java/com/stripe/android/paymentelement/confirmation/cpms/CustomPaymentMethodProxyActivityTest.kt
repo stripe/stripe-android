@@ -89,7 +89,7 @@ internal class CustomPaymentMethodProxyActivityTest {
 
         val scenario = ActivityScenario.launchActivityForResult<CustomPaymentMethodProxyActivity>(
             Intent(context, CustomPaymentMethodProxyActivity::class.java).putExtras(
-                bundleOf(EXTRA_CUSTOM_PAYMENT_METHOD_RESULT to result)
+                bundleOf().apply { putParcelable(EXTRA_CUSTOM_PAYMENT_METHOD_RESULT, result) }
             )
         ).use { scenario ->
             scenario.onActivity {

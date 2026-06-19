@@ -20,7 +20,7 @@ internal class IdentityVerificationSheetContract :
         @InjectorKey val injectorKey: String,
         val presentTime: Long
     ) : Parcelable {
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@Args) }
 
         companion object {
             private const val EXTRA_ARGS = "extra_args"

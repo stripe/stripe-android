@@ -74,7 +74,7 @@ private fun runGooglePayLauncherTest(
 
         // Mock the return value from GooglePayLauncherActivity so that we immediately return
         val resultData = Intent().putExtras(
-            bundleOf(GooglePayLauncherContract.EXTRA_RESULT to result)
+            bundleOf().apply { putParcelable(GooglePayLauncherContract.EXTRA_RESULT, result) }
         )
         val activityResult = Instrumentation.ActivityResult(Activity.RESULT_OK, resultData)
         intending(anyIntent()).respondWith(activityResult)

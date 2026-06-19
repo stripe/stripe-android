@@ -140,7 +140,9 @@ internal class CvcRecollectionConfirmationActivityTest {
         intending(hasComponent(PAYMENT_CONFIRMATION_LAUNCHER_ACTIVITY_NAME)).respondWith(
             Instrumentation.ActivityResult(
                 Activity.RESULT_OK,
-                Intent().putExtras(bundleOf("extra_args" to result))
+                Intent().putExtras(
+                    bundleOf().apply { putParcelable("extra_args", result) }
+                )
             )
         )
     }

@@ -434,11 +434,11 @@ class CardFormView @JvmOverloads constructor(
     }
 
     override fun onSaveInstanceState(): Parcelable {
-        return bundleOf(
-            STATE_SUPER_STATE to super.onSaveInstanceState(),
-            STATE_ENABLED to isEnabled,
-            STATE_ON_BEHALF_OF to onBehalfOf,
-        )
+        return bundleOf().apply {
+            putParcelable(STATE_SUPER_STATE, super.onSaveInstanceState())
+            putBoolean(STATE_ENABLED, isEnabled)
+            putString(STATE_ON_BEHALF_OF, onBehalfOf)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable?) {

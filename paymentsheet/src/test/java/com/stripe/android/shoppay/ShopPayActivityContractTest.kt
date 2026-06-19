@@ -103,7 +103,7 @@ internal class ShopPayActivityContractTest {
 
     private fun intent(result: ShopPayActivityResult): Intent {
         return Intent().putExtras(
-            bundleOf(ShopPayActivityContract.EXTRA_RESULT to result)
+            bundleOf().apply { putParcelable(ShopPayActivityContract.EXTRA_RESULT, result) }
         )
     }
 }

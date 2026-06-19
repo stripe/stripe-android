@@ -13,7 +13,7 @@ import kotlinx.parcelize.Parcelize
 
 internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
     override fun toBundle(): Bundle {
-        return bundleOf(ActivityStarter.Result.EXTRA to this)
+        return bundleOf().apply { putParcelable(ActivityStarter.Result.EXTRA, this@GooglePayLauncherResult) }
     }
 
     @Parcelize

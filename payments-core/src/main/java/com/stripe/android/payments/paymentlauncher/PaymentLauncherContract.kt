@@ -43,7 +43,7 @@ class PaymentLauncherContract :
 
         abstract fun validate(): Result<Unit>
 
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@Args) }
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

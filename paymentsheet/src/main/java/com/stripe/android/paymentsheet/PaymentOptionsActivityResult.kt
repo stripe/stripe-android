@@ -41,7 +41,7 @@ internal sealed class PaymentOptionsActivityResult(
     ) : PaymentOptionsActivityResult(Activity.RESULT_CANCELED)
 
     fun toBundle(): Bundle {
-        return bundleOf(EXTRA_RESULT to this)
+        return bundleOf().apply { putParcelable(EXTRA_RESULT, this@PaymentOptionsActivityResult) }
     }
 
     internal companion object {

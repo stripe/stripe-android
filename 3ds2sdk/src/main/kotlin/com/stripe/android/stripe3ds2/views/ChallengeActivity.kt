@@ -205,7 +205,7 @@ class ChallengeActivity : AppCompatActivity() {
             replace(
                 viewBinding.fragmentContainer.id,
                 ChallengeFragment::class.java,
-                bundleOf(ChallengeFragment.ARG_CRES to cres)
+                bundleOf().apply { putParcelable(ChallengeFragment.ARG_CRES, cres) }
             )
         }
     }

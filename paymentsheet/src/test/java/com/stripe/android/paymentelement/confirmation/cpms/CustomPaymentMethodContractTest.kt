@@ -83,7 +83,9 @@ internal class CustomPaymentMethodContractTest {
         val actualResult = customPaymentMethodContract.parseResult(
             Activity.RESULT_OK,
             intent = Intent().putExtras(
-                bundleOf("unknown_arguments" to InternalCustomPaymentMethodResult.Canceled)
+                bundleOf().apply {
+                    putParcelable("unknown_arguments", InternalCustomPaymentMethodResult.Canceled)
+                }
             )
         )
 

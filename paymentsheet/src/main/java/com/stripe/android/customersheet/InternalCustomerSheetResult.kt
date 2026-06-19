@@ -72,6 +72,6 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     }
 
     internal fun toBundle(): Bundle {
-        return bundleOf(EXTRA_RESULT to this)
+        return bundleOf().apply { putParcelable(EXTRA_RESULT, this@InternalCustomerSheetResult) }
     }
 }

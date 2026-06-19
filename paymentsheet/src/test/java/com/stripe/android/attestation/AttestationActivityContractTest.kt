@@ -85,7 +85,7 @@ internal class AttestationActivityContractTest {
 
     private fun intent(result: AttestationActivityResult): Intent {
         return Intent().putExtras(
-            bundleOf(AttestationActivityContract.EXTRA_RESULT to result)
+            bundleOf().apply { putParcelable(AttestationActivityContract.EXTRA_RESULT, result) }
         )
     }
 }

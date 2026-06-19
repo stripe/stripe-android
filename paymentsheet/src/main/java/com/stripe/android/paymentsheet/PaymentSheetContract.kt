@@ -56,7 +56,7 @@ internal class PaymentSheetContract :
         val paymentSheetResult: PaymentSheetResult
     ) : ActivityStarter.Result {
         override fun toBundle(): Bundle {
-            return bundleOf(EXTRA_RESULT to this)
+            return bundleOf().apply { putParcelable(EXTRA_RESULT, this@Result) }
         }
     }
 

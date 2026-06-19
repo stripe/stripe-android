@@ -22,7 +22,7 @@ sealed class InternalPaymentResult : Parcelable {
     object Canceled : InternalPaymentResult()
 
     @JvmSynthetic
-    internal fun toBundle() = bundleOf(EXTRA to this)
+    internal fun toBundle() = bundleOf().apply { putParcelable(EXTRA, this@InternalPaymentResult) }
 
     internal companion object {
         private const val EXTRA = "extra_args"

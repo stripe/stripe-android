@@ -89,9 +89,9 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
     }
 
     private fun dismissWithResult(result: IntentConfirmationChallengeActivityResult) {
-        val bundle = bundleOf(
-            IntentConfirmationChallengeActivityContract.EXTRA_RESULT to result
-        )
+        val bundle = bundleOf().apply {
+            putParcelable(IntentConfirmationChallengeActivityContract.EXTRA_RESULT, result)
+        }
         setResult(RESULT_COMPLETE, Intent().putExtras(bundle))
         finish()
     }
@@ -114,7 +114,7 @@ internal class IntentConfirmationChallengeActivity : AppCompatActivity() {
         }
 
         internal fun getBundle(args: IntentConfirmationChallengeArgs): Bundle {
-            return bundleOf(EXTRA_ARGS to args)
+            return bundleOf().apply { putParcelable(EXTRA_ARGS, args) }
         }
 
         internal fun getArgs(savedStateHandle: SavedStateHandle): IntentConfirmationChallengeArgs? {

@@ -580,10 +580,10 @@ class CardMultilineWidget @JvmOverloads constructor(
     override fun onSaveInstanceState(): Parcelable {
         super.onSaveInstanceState()
 
-        return bundleOf(
-            STATE_REMAINING_STATE to super.onSaveInstanceState(),
-            STATE_ON_BEHALF_OF to onBehalfOf
-        )
+        return bundleOf().apply {
+            putParcelable(STATE_REMAINING_STATE, super.onSaveInstanceState())
+            putString(STATE_ON_BEHALF_OF, onBehalfOf)
+        }
     }
 
     override fun onRestoreInstanceState(state: Parcelable) {

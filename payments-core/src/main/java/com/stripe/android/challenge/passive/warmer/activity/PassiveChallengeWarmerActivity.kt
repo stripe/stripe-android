@@ -45,9 +45,9 @@ internal class PassiveChallengeWarmerActivity : AppCompatActivity() {
     }
 
     private fun dismissWithResult(result: PassiveChallengeWarmerCompleted) {
-        val bundle = bundleOf(
-            PassiveChallengeWarmerContract.EXTRA_RESULT to result
-        )
+        val bundle = bundleOf().apply {
+            putParcelable(PassiveChallengeWarmerContract.EXTRA_RESULT, result)
+        }
         setResult(RESULT_COMPLETE, Intent().putExtras(bundle))
         finish()
     }

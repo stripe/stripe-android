@@ -16,7 +16,7 @@ internal class PollingContract :
     ActivityResultContract<PollingContract.Args, PaymentFlowResult.Unvalidated>() {
 
     override fun createIntent(context: Context, input: Args): Intent {
-        val args = bundleOf(EXTRA_ARGS to input)
+        val args = bundleOf().apply { putParcelable(EXTRA_ARGS, input) }
         return Intent(context, PollingActivity::class.java).putExtras(args)
     }
 

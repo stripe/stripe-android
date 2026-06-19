@@ -87,7 +87,7 @@ internal class PassiveChallengeActivityContractTest {
 
     private fun intent(result: PassiveChallengeActivityResult): Intent {
         return Intent().putExtras(
-            bundleOf(PassiveChallengeActivityContract.EXTRA_RESULT to result)
+            bundleOf().apply { putParcelable(PassiveChallengeActivityContract.EXTRA_RESULT, result) }
         )
     }
 }

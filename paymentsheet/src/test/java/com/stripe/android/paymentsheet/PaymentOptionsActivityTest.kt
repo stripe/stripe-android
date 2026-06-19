@@ -547,7 +547,7 @@ internal class PaymentOptionsActivityTest {
             ApplicationProvider.getApplicationContext(),
             PaymentOptionsActivity::class.java
         ).putExtras(
-            bundleOf(ActivityStarter.Args.EXTRA to args)
+            bundleOf().apply { putParcelable(ActivityStarter.Args.EXTRA, args) }
         )
 
         val viewModel = TestViewModelFactory.create(

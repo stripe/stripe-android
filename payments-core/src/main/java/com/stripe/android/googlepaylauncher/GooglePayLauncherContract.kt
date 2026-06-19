@@ -58,7 +58,7 @@ class GooglePayLauncherContract :
         internal abstract val clientSecret: String
         internal abstract val config: GooglePayLauncher.Config
 
-        internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        internal fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@Args) }
 
         internal companion object {
             private const val EXTRA_ARGS = "extra_args"

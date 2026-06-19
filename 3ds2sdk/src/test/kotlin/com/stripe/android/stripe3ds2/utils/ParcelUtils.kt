@@ -12,7 +12,7 @@ internal object ParcelUtils {
      * @return the parceled and unparceled object
      */
     internal inline fun <reified Source : Parcelable> get(source: Source): Source {
-        val bundle = bundleOf(KEY to source)
+        val bundle = bundleOf().apply { putParcelable(KEY, source) }
         return requireNotNull(BundleCompat.getParcelable(bundle, KEY, Source::class.java))
     }
 

@@ -110,9 +110,9 @@ internal class LinkActivity : ComponentActivity() {
     }
 
     private fun dismissWithResult(result: LinkActivityResult) {
-        val bundle = bundleOf(
-            LinkActivityContract.EXTRA_RESULT to result
-        )
+        val bundle = bundleOf().apply {
+            putParcelable(LinkActivityContract.EXTRA_RESULT, result)
+        }
         this@LinkActivity.setResult(
             RESULT_COMPLETE,
             Intent().putExtras(bundle)

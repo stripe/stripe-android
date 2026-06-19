@@ -50,7 +50,7 @@ class CollectBankAccountContract :
         open val financialConnectionsAvailability: FinancialConnectionsAvailability?,
         open val hostedSurface: String?
     ) : Parcelable {
-        fun toBundle() = bundleOf(EXTRA_ARGS to this)
+        fun toBundle() = bundleOf().apply { putParcelable(EXTRA_ARGS, this@Args) }
 
         val product: String?
             get() = when (configuration) {
@@ -156,7 +156,7 @@ class CollectBankAccountContract :
         val collectBankAccountResult: CollectBankAccountResultInternal
     ) : Parcelable {
         fun toBundle(): Bundle {
-            return bundleOf(EXTRA_RESULT to this)
+            return bundleOf().apply { putParcelable(EXTRA_RESULT, this@Result) }
         }
     }
 

@@ -1,9 +1,6 @@
 package com.stripe.android.customersheet
 
-import android.os.Bundle
-import androidx.core.os.bundleOf
 import com.stripe.android.paymentsheet.model.PaymentOption
-import com.stripe.android.view.ActivityStarter
 import com.stripe.android.model.PaymentMethod as StripePaymentMethod
 
 sealed class CustomerSheetResult {
@@ -28,14 +25,6 @@ sealed class CustomerSheetResult {
     class Failed internal constructor(
         val exception: Throwable
     ) : CustomerSheetResult()
-
-    internal companion object {
-        private const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
-    }
-
-    internal fun toBundle(): Bundle {
-        return bundleOf(EXTRA_RESULT to this)
-    }
 }
 
 /**

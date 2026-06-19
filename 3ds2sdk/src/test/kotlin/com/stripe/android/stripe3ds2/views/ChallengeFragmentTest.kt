@@ -359,7 +359,7 @@ class ChallengeFragmentTest {
         onFragment: (ChallengeFragment) -> Unit
     ): FragmentScenario<ChallengeFragment> {
         return launchFragmentInContainer<ChallengeFragment>(
-            fragmentArgs = bundleOf(ChallengeFragment.ARG_CRES to cres),
+            fragmentArgs = bundleOf().apply { putParcelable(ChallengeFragment.ARG_CRES, cres) },
             themeResId = R.style.Stripe3DS2Theme,
             factory = ChallengeFragmentFactory(
                 uiCustomization = UiCustomizationFixtures.DEFAULT,

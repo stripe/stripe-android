@@ -37,9 +37,9 @@ internal class AttestationActivity : AppCompatActivity() {
     }
 
     private fun dismissWithResult(result: AttestationActivityResult) {
-        val bundle = bundleOf(
-            AttestationActivityContract.EXTRA_RESULT to result
-        )
+        val bundle = bundleOf().apply {
+            putParcelable(AttestationActivityContract.EXTRA_RESULT, result)
+        }
         setResult(RESULT_COMPLETE, Intent().putExtras(bundle))
         finish()
     }

@@ -35,7 +35,7 @@ sealed class PaymentFlowResult {
         val stripeAccountId: String? = null
     ) : Parcelable {
         @JvmSynthetic
-        fun toBundle() = bundleOf(EXTRA to this)
+        fun toBundle() = bundleOf().apply { putParcelable(EXTRA, this@Unvalidated) }
 
         internal fun validate(): Validated {
             if (exception is Throwable) {
