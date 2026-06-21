@@ -34,8 +34,22 @@ internal fun SettingsUi(
 ) {
     val configurationData by playgroundSettings.configurationData.collectAsState()
     val displayableDefinitions by playgroundSettings.displayableDefinitions.collectAsState()
-    val filteredDefinitions = remember(displayableDefinitions, searchQuery) {
-        displayableDefinitions.filter { it.displayName.matchesQuery(searchQuery) }
+    val confirmationTokenEnabled by playgroundSettings[ConfirmationTokenSettingsDefinition].collectAsState()
+
+    val filteredDefinitions = remember(
+        displayableDefinitions,
+        searchQuery,
+        confirmationTokenEnabled
+    ) {
+        displayableDefinitions
+            .filter { definition ->
+                // Hide CustomerSessionSettingsDefinition when ConfirmationToken is enabled
+                if (definition == CustomerSessionSettingsDefinition && confirmationTokenEnabled) {
+                    false
+                } else {
+                    definition.displayName.matchesQuery(searchQuery)
+                }
+            }
     }
 
     Column(
