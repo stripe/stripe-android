@@ -313,10 +313,9 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(AppAttestationException::class.java)
 
         val attestationError = error as AppAttestationException
-        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
-        assertThat(attestationError.context.mode).isEqualTo("test")
-        assertThat(attestationError.context.apiErrorType).isNull()
-        assertThat(attestationError.context.apiUserMessage)
+        assertThat(attestationError.underlyingError.stripeError?.extraFields?.get("reason"))
+            .isEqualTo("app_not_play_recognized")
+        assertThat(attestationError.underlyingError.stripeError?.extraFields?.get("user_message"))
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
         assertThat(attestationError.message)
             .isEqualTo(
@@ -325,6 +324,8 @@ class OnrampInteractorTest {
             )
         assertThat(attestationError.developerMessage).contains("Request Context:")
         assertThat(attestationError.developerMessage).contains("operation: has_link_account")
+        assertThat(attestationError.developerMessage).contains("mode: test")
+        assertThat(attestationError.developerMessage).contains("reason: app_not_play_recognized")
         assertThat(attestationError.developerMessage).contains("request_id: req_456")
         assertThat(attestationError.developerMessage).doesNotContain("type:")
     }
@@ -360,17 +361,18 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
 
         val apiError = error as UncategorizedApiErrorException
-        assertThat(apiError.context.reason).isEqualTo("email_blocked")
-        assertThat(apiError.context.apiUserMessage).isEqualTo("This email can't be used. Try another one.")
+        assertThat(apiError.underlyingError.stripeError?.extraFields?.get("reason"))
+            .isEqualTo("email_blocked")
+        assertThat(apiError.underlyingError.stripeError?.extraFields?.get("user_message"))
+            .isEqualTo("This email can't be used. Try another one.")
         assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
-        assertThat(apiError.context.apiErrorType).isNull()
         assertThat(apiError.code).isEqualTo("email_blocked")
         assertThat(apiError.docUrl).isEqualTo("https://stripe.com/docs/error-codes/email_blocked")
         assertThat(apiError.sdkVersions).hasSize(1)
         assertThat(apiError.sdkVersions.single().name).isEqualTo("stripe-android")
         assertThat(apiError.sdkVersions.single().version).isNotEmpty()
-        assertThat(apiError.underlyingError).isSameInstanceAs(apiError.context.underlyingError)
+        assertThat(apiError.underlyingError).isInstanceOf(InvalidRequestException::class.java)
         assertThat(apiError.developerMessage)
             .isEqualTo(
                 """
@@ -476,12 +478,12 @@ class OnrampInteractorTest {
         assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.code).isEqualTo("uncategorized_api_error")
-        assertThat(apiError.context.apiErrorType).isNull()
         assertThat(apiError.developerMessage).contains("Developer-facing message")
         assertThat(apiError.developerMessage).contains("Code: uncategorized_api_error")
         assertThat(apiError.developerMessage).contains("Next step:")
         assertThat(apiError.developerMessage)
             .contains("Inspect the preserved Stripe API error for details and retry after correcting the request.")
+        assertThat(apiError.developerMessage).doesNotContain("type:")
     }
 
     @Test
@@ -527,8 +529,9 @@ class OnrampInteractorTest {
         assertThat(error).isInstanceOf(AppAttestationException::class.java)
 
         val attestationError = error as AppAttestationException
-        assertThat(attestationError.context.reason).isEqualTo("android_environment_mismatch")
-        assertThat(attestationError.context.apiErrorType).isNull()
+        assertThat(attestationError.underlyingError.stripeError?.extraFields?.get("reason"))
+            .isEqualTo("android_environment_mismatch")
+        assertThat(attestationError.developerMessage).doesNotContain("type:")
         assertThat(attestationError.userMessage)
             .isEqualTo(
                 "This app couldn't be verified due to an attestation error. Please try " +
@@ -1427,6 +1430,12 @@ class OnrampInteractorTest {
         val expectedDeveloperMessage = buildList {
             add(developerMessageBody)
             add("")
+            add("Request Context:")
+            add("  operation: configure")
+            add("  app_id: ${RuntimeEnvironment.getApplication().packageName}")
+            add("  mode: test")
+            add("  reason: app_attestation_unavailable")
+            add("")
             add("Code: app_attestation_unavailable")
             add(
                 "Next step: Confirm app attestation is enabled for this Stripe account and that " +
@@ -1443,7 +1452,7 @@ class OnrampInteractorTest {
         attestationError: AppAttestationException,
         backendError: APIException,
     ) {
-        assertThat(attestationError.context.apiUserMessage)
+        assertThat(backendError.stripeError?.extraFields?.get("user_message"))
             .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
         assertThat(attestationError.userMessage)
             .isEqualTo(
@@ -1455,9 +1464,9 @@ class OnrampInteractorTest {
                 "This app couldn't be verified due to an attestation error. Please try again later " +
                     "or contact the developer if the issue persists."
             )
-        assertThat(attestationError.context.reason).isEqualTo("app_not_play_recognized")
-        assertThat(attestationError.context.mode).isEqualTo("test")
-        assertThat(attestationError.context.apiErrorType).isEqualTo("api_error")
+        assertThat(backendError.stripeError?.extraFields?.get("reason"))
+            .isEqualTo("app_not_play_recognized")
+        assertThat(backendError.stripeError?.type).isEqualTo("api_error")
         assertThat(attestationError.code).isEqualTo("link_failed_to_attest_request")
         assertThat(attestationError.docUrl).isNull()
         assertThat(attestationError.sdkVersions).hasSize(1)

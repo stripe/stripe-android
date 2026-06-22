@@ -36,28 +36,22 @@ public final class com/stripe/android/crypto/onramp/OnrampCoordinator$Presenter 
 
 public final class com/stripe/android/crypto/onramp/exception/APIErrorContext {
 	public static final field $stable I
-	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)V
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)V
 	public final fun component1 ()Ljava/lang/String;
-	public final fun component10 ()Lcom/stripe/android/core/exception/StripeException;
 	public final fun component2 ()Ljava/lang/String;
 	public final fun component3 ()Ljava/lang/String;
 	public final fun component4 ()Ljava/lang/String;
 	public final fun component5 ()Ljava/lang/String;
 	public final fun component6 ()Ljava/lang/String;
-	public final fun component7 ()Ljava/lang/String;
-	public final fun component8 ()Ljava/lang/String;
-	public final fun component9 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
-	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public final fun component7 ()Lcom/stripe/android/core/exception/StripeException;
+	public final fun copy (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
+	public static synthetic fun copy$default (Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Lcom/stripe/android/core/exception/StripeException;ILjava/lang/Object;)Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getApiErrorCode ()Ljava/lang/String;
 	public final fun getApiErrorMessage ()Ljava/lang/String;
 	public final fun getApiErrorType ()Ljava/lang/String;
 	public final fun getApiUserMessage ()Ljava/lang/String;
-	public final fun getAppPackageName ()Ljava/lang/String;
 	public final fun getDocUrl ()Ljava/lang/String;
-	public final fun getMode ()Ljava/lang/String;
-	public final fun getOperation ()Ljava/lang/String;
 	public final fun getReason ()Ljava/lang/String;
 	public final fun getRequestId ()Ljava/lang/String;
 	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;

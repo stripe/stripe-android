@@ -8,6 +8,7 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 class AppAttestationUnavailableException internal constructor(
     override val underlyingError: Throwable,
+    private val diagnosticContext: DiagnosticContext,
     override val sdkVersions: List<SDKVersion>,
     override val userMessage: String,
 ) : Exception(userMessage, underlyingError),
@@ -17,11 +18,15 @@ class AppAttestationUnavailableException internal constructor(
 
     override val developerMessage: String
         get() = CryptoOnrampErrorRenderer.renderDeveloperMessage(
-            developerBody = APP_ATTESTATION_UNAVAILABLE_DEVELOPER_BODY,
+            summary = APP_ATTESTATION_UNAVAILABLE_DEVELOPER_BODY,
             code = code,
             nextStep = APP_ATTESTATION_UNAVAILABLE_NEXT_STEP,
             docUrl = docUrl,
             sdkVersions = sdkVersions,
+            requestContext = CryptoOnrampErrorRenderer.requestContextLines(
+                diagnosticContext = diagnosticContext,
+                reason = APP_ATTESTATION_UNAVAILABLE_REASON,
+            ),
         )
 
     override val docUrl: String?

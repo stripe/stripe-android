@@ -7,7 +7,7 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 /**
  * Base exception type for Crypto Onramp failures that originate from a Stripe API error payload.
  *
- * [context] preserves the original API-facing fields and request debugging metadata.
+ * [context] preserves the original API-facing fields.
  *
  * `message` is safe to display directly to app users. Use [developerMessage] for richer
  * diagnostics.
@@ -44,18 +44,6 @@ data class APIErrorContext(
      */
     val reason: String?,
     /**
-     * The Crypto Onramp operation that failed.
-     */
-    val operation: String,
-    /**
-     * The Android application package name used for the request.
-     */
-    val appPackageName: String,
-    /**
-     * The Stripe mode inferred from the publishable key, when available.
-     */
-    val mode: String?,
-    /**
      * The raw backend error code, when present.
      */
     val apiErrorCode: String?,
@@ -90,3 +78,18 @@ data class APIErrorContext(
 internal fun APIErrorContext.code(fallback: String): String {
     return apiErrorCode ?: fallback
 }
+
+internal data class DiagnosticContext(
+    /**
+     * The Crypto Onramp operation that failed.
+     */
+    val operation: String,
+    /**
+     * The Android application package name used for the request.
+     */
+    val appPackageName: String,
+    /**
+     * The Stripe mode inferred from the publishable key, when available.
+     */
+    val mode: String?,
+)

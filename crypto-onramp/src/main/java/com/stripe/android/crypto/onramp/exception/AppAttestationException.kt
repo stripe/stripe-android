@@ -8,6 +8,7 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 class AppAttestationException internal constructor(
     context: APIErrorContext,
+    diagnosticContext: DiagnosticContext,
     sdkVersions: List<SDKVersion>,
     userMessage: String,
 ) : CryptoOnrampApiException(
@@ -16,6 +17,7 @@ class AppAttestationException internal constructor(
     userMessage = userMessage,
     developerMessage = buildAppAttestationDeveloperMessage(
         context = context,
+        diagnosticContext = diagnosticContext,
         code = context.code(fallback = APP_ATTESTATION_ERROR_CODE),
         sdkVersions = sdkVersions,
     ),
@@ -109,15 +111,22 @@ private fun attestationSummary(description: String): String {
 
 private fun buildAppAttestationDeveloperMessage(
     context: APIErrorContext,
+    diagnosticContext: DiagnosticContext,
     code: String,
     sdkVersions: List<SDKVersion>,
 ): String {
-    return CryptoOnrampErrorRenderer.renderApiDeveloperMessage(
-        context = context,
+    return CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = appAttestationSummary(context.reason)
             ?: (context.apiErrorMessage ?: "App attestation failed."),
         code = code,
         nextStep = appAttestationNextStep(context.reason),
+        docUrl = context.docUrl,
         sdkVersions = sdkVersions,
+        requestContext = CryptoOnrampErrorRenderer.requestContextLines(
+            diagnosticContext = diagnosticContext,
+            reason = context.reason,
+            requestId = context.requestId,
+            apiErrorType = context.apiErrorType,
+        ),
     )
 }

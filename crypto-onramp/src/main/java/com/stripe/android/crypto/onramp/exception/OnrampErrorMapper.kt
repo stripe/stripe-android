@@ -8,6 +8,7 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 
+@Suppress("LongMethod")
 internal fun Throwable.toCryptoOnrampError(
     context: Context,
     operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
@@ -27,6 +28,8 @@ internal fun Throwable.toCryptoOnrampError(
 
         return apiBackedAttestationError ?: toAppAttestationUnavailableError(
             context = context,
+            operation = operation,
+            publishableKey = publishableKey,
             additionalSdkVersions = additionalSdkVersions,
         )
     }
@@ -34,6 +37,8 @@ internal fun Throwable.toCryptoOnrampError(
     if (this is LinkUnavailableException) {
         return toAppAttestationUnavailableError(
             context = context,
+            operation = operation,
+            publishableKey = publishableKey,
             additionalSdkVersions = additionalSdkVersions,
         )
     }
@@ -45,9 +50,6 @@ internal fun Throwable.toCryptoOnrampError(
 
     val apiErrorContext = APIErrorContext(
         reason = stripeError.extraFields?.get(FIELD_REASON),
-        operation = operation.value,
-        appPackageName = context.packageName,
-        mode = publishableKey.toMode(),
         apiErrorCode = stripeError.code,
         apiErrorType = stripeException.apiErrorType(),
         apiErrorMessage = stripeError.message,
@@ -55,10 +57,16 @@ internal fun Throwable.toCryptoOnrampError(
         docUrl = stripeError.docUrl,
         underlyingError = stripeException,
     )
+    val diagnosticContext = DiagnosticContext(
+        operation = operation.value,
+        appPackageName = context.packageName,
+        mode = publishableKey.toMode(),
+    )
 
     return if (stripeError.isAppAttestationError()) {
         AppAttestationException(
             context = apiErrorContext,
+            diagnosticContext = diagnosticContext,
             sdkVersions = sdkVersions,
             userMessage = context.getString(
                 R.string.stripe_onramp_app_attestation_default_user_message,
@@ -67,6 +75,7 @@ internal fun Throwable.toCryptoOnrampError(
     } else {
         UncategorizedApiErrorException(
             context = apiErrorContext,
+            diagnosticContext = diagnosticContext,
             sdkVersions = sdkVersions,
             userMessage = context.getString(
                 R.string.stripe_onramp_default_api_error_user_message,
@@ -98,10 +107,17 @@ private fun Throwable.toCryptoOnrampErrorIfAppAttestationApiError(
 
 private fun Throwable.toAppAttestationUnavailableError(
     context: Context,
+    operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
+    publishableKey: String?,
     additionalSdkVersions: List<SDKVersion>,
 ): AppAttestationUnavailableException {
     return AppAttestationUnavailableException(
         underlyingError = this,
+        diagnosticContext = DiagnosticContext(
+            operation = operation.value,
+            appPackageName = context.packageName,
+            mode = publishableKey.toMode(),
+        ),
         sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
         userMessage = context.getString(
             R.string.stripe_onramp_app_attestation_unavailable_user_message,
