@@ -111,6 +111,7 @@
     <ID>TooManyFunctions:DefaultFlowController.kt:DefaultFlowController : FlowController</ID>
     <ID>TooManyFunctions:DefaultLinkEventsReporter.kt:DefaultLinkEventsReporter : LinkEventsReporter</ID>
     <ID>TooManyFunctions:DelegateDrawable.kt:DelegateDrawable : Drawable</ID>
+    <ID>TooManyFunctions:EmbeddedPaymentElementViewModelComponent.kt:EmbeddedPaymentElementViewModelModule</ID>
     <ID>TooManyFunctions:FlowControllerModule.kt:FlowControllerModule</ID>
     <ID>TooManyFunctions:LinkEventsReporter.kt:LinkEventsReporter</ID>
     <ID>TooManyFunctions:NativeLinkModule.kt:NativeLinkModule</ID>
