@@ -14,8 +14,6 @@ import com.stripe.android.ui.core.elements.MandateTextElement
 internal object IdealWeroDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Ideal
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOfNotNull(

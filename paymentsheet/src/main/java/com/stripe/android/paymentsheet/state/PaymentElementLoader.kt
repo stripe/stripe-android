@@ -26,6 +26,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AnalyticsMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.SupportedSavedPaymentMethodTypes
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
@@ -445,11 +446,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerRepository.getPaymentMethods(
                     customerId = customer.id,
                     ephemeralKeySecret = accessType.ephemeralKeySecret,
-                    types = listOf(
-                        PaymentMethod.Type.Card,
-                        PaymentMethod.Type.SepaDebit,
-                        PaymentMethod.Type.USBankAccount,
-                    ), // These are the only payment method types we support as saved payment methods.
+                    types = SupportedSavedPaymentMethodTypes.all,
                     silentlyFail = paymentConfiguration.get().isLiveMode(),
                 )
             }

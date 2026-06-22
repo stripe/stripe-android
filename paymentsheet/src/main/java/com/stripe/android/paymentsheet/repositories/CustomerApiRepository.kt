@@ -5,6 +5,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.lpmfoundations.paymentmethod.SupportedSavedPaymentMethodTypes
 import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
@@ -57,11 +58,7 @@ internal class CustomerApiRepository @Inject constructor(
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
         val requests = types.filter { paymentMethodType ->
-            paymentMethodType in setOf(
-                PaymentMethod.Type.Card,
-                PaymentMethod.Type.USBankAccount,
-                PaymentMethod.Type.SepaDebit,
-            )
+            paymentMethodType in SupportedSavedPaymentMethodTypes.all
         }.map { paymentMethodType ->
             async {
                 stripeRepository.getPaymentMethods(

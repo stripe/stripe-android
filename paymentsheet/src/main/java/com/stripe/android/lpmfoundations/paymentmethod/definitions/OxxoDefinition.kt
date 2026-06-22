@@ -12,8 +12,6 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object OxxoDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Oxxo
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(

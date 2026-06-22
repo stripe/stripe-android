@@ -12,8 +12,6 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object AuBecsDebitDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.AuBecsDebit
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(

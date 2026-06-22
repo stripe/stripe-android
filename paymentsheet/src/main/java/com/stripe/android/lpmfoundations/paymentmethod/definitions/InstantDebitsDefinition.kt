@@ -14,8 +14,6 @@ internal object InstantDebitsDefinition : PaymentMethodDefinition {
 
     override val type: PaymentMethod.Type = PaymentMethod.Type.Link
 
-    override val supportedAsSavedPaymentMethod: Boolean = false
-
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf(

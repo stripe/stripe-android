@@ -14,7 +14,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.getDefaultCustomerMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
@@ -408,8 +407,8 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `supportedSavedPaymentMethodTypes filters payment_methods where supportedAsSavedPaymentMethod is false`() {
-        assertThat(AffirmDefinition.supportedAsSavedPaymentMethod).isFalse()
+    fun `supportedSavedPaymentMethodTypes filters payment_methods not in SupportedSavedPaymentMethodTypes`() {
+        assertThat(SupportedSavedPaymentMethodTypes.all).doesNotContain(PaymentMethod.Type.Affirm.code)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm", "sepa_debit"),
