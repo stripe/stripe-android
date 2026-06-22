@@ -173,6 +173,7 @@ internal class PaymentSheetPlaygroundActivity :
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
+            val canUseTapToAdd = playgroundState?.asPaymentState()?.canUseTapToAdd == true
 
             val paymentSheet = remember(playgroundState) {
                 PaymentSheet.Builder(viewModel::onPaymentSheetResult)
@@ -180,7 +181,7 @@ internal class PaymentSheetPlaygroundActivity :
                     .confirmCustomPaymentMethodCallback(this)
                     .analyticEventCallback(viewModel::analyticCallback)
                     .also {
-                        if (playgroundState?.asPaymentState()?.canUseTapToAdd == true) {
+                        if (canUseTapToAdd) {
                             it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
                         }
 
@@ -199,9 +200,12 @@ internal class PaymentSheetPlaygroundActivity :
                 )
                     .externalPaymentMethodConfirmHandler(this)
                     .confirmCustomPaymentMethodCallback(this)
-                    .createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
                     .analyticEventCallback(viewModel::analyticCallback)
                     .also {
+                        if (canUseTapToAdd) {
+                            it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+                        }
+
                         if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
                             it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
                         } else {
