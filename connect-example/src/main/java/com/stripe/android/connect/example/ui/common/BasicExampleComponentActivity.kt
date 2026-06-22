@@ -2,6 +2,7 @@ package com.stripe.android.connect.example.ui.common
 
 import android.content.Context
 import android.os.Bundle
+import android.view.KeyEvent
 import android.view.View
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -160,6 +161,14 @@ abstract class BasicExampleComponentActivity : BaseActivity() {
                 createComponentView(it, embeddedComponentManager)
             })
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            finish()
+            return true
+        }
+        return super.onKeyDown(keyCode, event)
     }
 }
 
