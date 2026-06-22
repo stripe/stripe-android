@@ -2,6 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.utils.collectAsState
@@ -30,6 +31,15 @@ class AutocompleteAddressController(
     private val interactor = interactorFactory.create()
 
     private val config = interactor.autocompleteConfig
+
+    private val onInlinePredictionSelected: ((String) -> Unit)? =
+        if (config.isInlineAutocompleteEnabled) interactor::onPredictionSelected else null
+    private val onInlineDismissed: (() -> Unit)? =
+        if (config.isInlineAutocompleteEnabled) interactor::onDismissed else null
+    private val onInlineEnterManually: (() -> Unit)? =
+        if (config.isInlineAutocompleteEnabled) interactor::onEnterManuallyFromInline else null
+    private val inlineGetAttributionDrawable: ((Boolean) -> Int?)? =
+        if (config.isInlineAutocompleteEnabled) config.getAttributionDrawable else null
 
     private var expandForm = false
 
@@ -63,6 +73,10 @@ class AutocompleteAddressController(
 
     val addressController = addressElementFlow.flatMapLatestAsStateFlow {
         it.addressController
+    }
+
+    private val inlineQuery: StateFlow<String> = addressElementFlow.flatMapLatestAsStateFlow {
+        it.inlineQuery
     }
 
     override val validationMessage: StateFlow<FieldValidationMessage?> = addressController.flatMapLatestAsStateFlow {
@@ -114,6 +128,11 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
+            inlinePredictionsState = if (config.isInlineAutocompleteEnabled) interactor.inlinePredictionsState else null,
+            onInlinePredictionSelected = onInlinePredictionSelected,
+            onInlineDismissed = onInlineDismissed,
+            onInlineEnterManually = onInlineEnterManually,
+            getAttributionDrawable = inlineGetAttributionDrawable,
         )
     }
 
@@ -129,7 +148,7 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled) {
+        } else if (config.isInlineAutocompleteEnabled && !expandForm && values[IdentifierSpec.Line1] == null) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
@@ -183,6 +202,14 @@ class AutocompleteAddressController(
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
         val controller by addressController.collectAsState()
+
+        if (config.isInlineAutocompleteEnabled) {
+            val query by inlineQuery.collectAsState()
+            val country by countryDropdownFieldController.rawFieldValue.collectAsState()
+            LaunchedEffect(query, country) {
+                interactor.onQueryChanged(query, country ?: "")
+            }
+        }
 
         AddressElementUI(
             enabled = enabled,
