@@ -12,7 +12,6 @@ class UncategorizedApiErrorException internal constructor(
     userMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
-    sdkVersions = diagnosticContext.sdkVersions,
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = context.apiErrorMessage ?: "Stripe API request failed.",

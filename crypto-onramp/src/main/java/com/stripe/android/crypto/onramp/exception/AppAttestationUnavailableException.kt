@@ -12,9 +12,6 @@ class AppAttestationUnavailableException internal constructor(
     override val userMessage: String,
 ) : Exception(userMessage, underlyingError),
     StripeCryptoOnrampError {
-    override val sdkVersions: List<SDKVersion>
-        get() = diagnosticContext.sdkVersions
-
     override val code: String
         get() = APP_ATTESTATION_UNAVAILABLE_REASON
 
@@ -24,7 +21,7 @@ class AppAttestationUnavailableException internal constructor(
             code = code,
             nextStep = APP_ATTESTATION_UNAVAILABLE_NEXT_STEP,
             docUrl = docUrl,
-            sdkVersions = sdkVersions,
+            sdkVersions = diagnosticContext.sdkVersions,
             requestContext = CryptoOnrampErrorRenderer.requestContextLines(
                 diagnosticContext = diagnosticContext,
                 reason = APP_ATTESTATION_UNAVAILABLE_REASON,

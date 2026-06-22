@@ -12,7 +12,6 @@ class AppAttestationException internal constructor(
     userMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
-    sdkVersions = diagnosticContext.sdkVersions,
     userMessage = userMessage,
     developerMessage = buildAppAttestationDeveloperMessage(
         context = context,

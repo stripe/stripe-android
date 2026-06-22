@@ -15,7 +15,6 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 @ExperimentalCryptoOnramp
 abstract class CryptoOnrampApiException internal constructor(
     val context: APIErrorContext,
-    final override val sdkVersions: List<SDKVersion>,
     final override val userMessage: String,
     final override val developerMessage: String,
 ) : StripeException(

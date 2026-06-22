@@ -69,7 +69,6 @@ public final class com/stripe/android/crypto/onramp/exception/AppAttestationUnav
 	public fun getCode ()Ljava/lang/String;
 	public fun getDeveloperMessage ()Ljava/lang/String;
 	public fun getDocUrl ()Ljava/lang/String;
-	public fun getSdkVersions ()Ljava/util/List;
 	public fun getUnderlyingError ()Ljava/lang/Throwable;
 	public fun getUserMessage ()Ljava/lang/String;
 }
@@ -79,7 +78,6 @@ public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApi
 	public final fun getContext ()Lcom/stripe/android/crypto/onramp/exception/APIErrorContext;
 	public final fun getDeveloperMessage ()Ljava/lang/String;
 	public final fun getDocUrl ()Ljava/lang/String;
-	public final fun getSdkVersions ()Ljava/util/List;
 	public final fun getUnderlyingError ()Lcom/stripe/android/core/exception/StripeException;
 	public synthetic fun getUnderlyingError ()Ljava/lang/Throwable;
 	public final fun getUserMessage ()Ljava/lang/String;
@@ -125,7 +123,6 @@ public abstract interface class com/stripe/android/crypto/onramp/exception/Strip
 	public abstract fun getCode ()Ljava/lang/String;
 	public abstract fun getDeveloperMessage ()Ljava/lang/String;
 	public abstract fun getDocUrl ()Ljava/lang/String;
-	public abstract fun getSdkVersions ()Ljava/util/List;
 	public abstract fun getUnderlyingError ()Ljava/lang/Throwable;
 	public abstract fun getUserMessage ()Ljava/lang/String;
 }
