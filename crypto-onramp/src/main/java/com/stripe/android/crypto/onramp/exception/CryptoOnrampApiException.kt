@@ -81,6 +81,10 @@ internal fun APIErrorContext.code(fallback: String): String {
 
 internal data class DiagnosticContext(
     /**
+     * SDK versions that participated in this operation.
+     */
+    val sdkVersions: List<SDKVersion>,
+    /**
      * The Crypto Onramp operation that failed.
      */
     val operation: String,

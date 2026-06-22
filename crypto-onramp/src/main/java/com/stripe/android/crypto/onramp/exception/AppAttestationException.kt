@@ -9,17 +9,15 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 class AppAttestationException internal constructor(
     context: APIErrorContext,
     diagnosticContext: DiagnosticContext,
-    sdkVersions: List<SDKVersion>,
     userMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
-    sdkVersions = sdkVersions,
+    sdkVersions = diagnosticContext.sdkVersions,
     userMessage = userMessage,
     developerMessage = buildAppAttestationDeveloperMessage(
         context = context,
         diagnosticContext = diagnosticContext,
         code = context.code(fallback = APP_ATTESTATION_ERROR_CODE),
-        sdkVersions = sdkVersions,
     ),
 ) {
     override val code: String
@@ -113,7 +111,6 @@ private fun buildAppAttestationDeveloperMessage(
     context: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     code: String,
-    sdkVersions: List<SDKVersion>,
 ): String {
     return CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = appAttestationSummary(context.reason)
@@ -121,7 +118,7 @@ private fun buildAppAttestationDeveloperMessage(
         code = code,
         nextStep = appAttestationNextStep(context.reason),
         docUrl = context.docUrl,
-        sdkVersions = sdkVersions,
+        sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
             diagnosticContext = diagnosticContext,
             reason = context.reason,

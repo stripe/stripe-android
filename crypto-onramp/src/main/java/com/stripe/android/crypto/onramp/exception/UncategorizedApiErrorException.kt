@@ -9,18 +9,17 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 class UncategorizedApiErrorException internal constructor(
     context: APIErrorContext,
     diagnosticContext: DiagnosticContext,
-    sdkVersions: List<SDKVersion>,
     userMessage: String,
 ) : CryptoOnrampApiException(
     context = context,
-    sdkVersions = sdkVersions,
+    sdkVersions = diagnosticContext.sdkVersions,
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = context.apiErrorMessage ?: "Stripe API request failed.",
         code = context.code(fallback = UNCATEGORIZED_API_ERROR_CODE),
         nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
         docUrl = context.docUrl,
-        sdkVersions = sdkVersions,
+        sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
             diagnosticContext = diagnosticContext,
             reason = context.reason,

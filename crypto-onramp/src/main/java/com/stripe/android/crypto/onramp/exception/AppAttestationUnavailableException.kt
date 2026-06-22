@@ -9,10 +9,12 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 class AppAttestationUnavailableException internal constructor(
     override val underlyingError: Throwable,
     private val diagnosticContext: DiagnosticContext,
-    override val sdkVersions: List<SDKVersion>,
     override val userMessage: String,
 ) : Exception(userMessage, underlyingError),
     StripeCryptoOnrampError {
+    override val sdkVersions: List<SDKVersion>
+        get() = diagnosticContext.sdkVersions
+
     override val code: String
         get() = APP_ATTESTATION_UNAVAILABLE_REASON
 
