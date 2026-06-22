@@ -25,7 +25,7 @@ internal class EmbeddedCheckoutRegistrar @Inject constructor() {
         if (previous != null && previous !== checkout) {
             CheckoutInstances.unregister(previous.internalState.key, previous)
         }
-        CheckoutInstances.register(checkout.internalState.key, checkout, owner = "EmbeddedPaymentElement")
+        CheckoutInstances.register(checkout.internalState.key, checkout, owner = this)
         registeredCheckout = checkout
     }
 

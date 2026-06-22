@@ -7,7 +7,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutInstances {
 
-    private data class Entry(val checkout: Checkout, val owner: String)
+    private data class Entry(val checkout: Checkout, val owner: Any)
 
     private val instances = mutableMapOf<String, Entry>()
 
@@ -15,11 +15,11 @@ internal object CheckoutInstances {
     operator fun get(key: String): Checkout? = instances[key]?.checkout
 
     @MainThread
-    fun register(key: String, checkout: Checkout, owner: String) {
+    fun register(key: String, checkout: Checkout, owner: Any) {
         val existing = instances[key]
         if (existing != null) {
-            check(existing.checkout === checkout && existing.owner == owner) {
-                "Checkout already registered by '${existing.owner}'. " +
+            check(existing.checkout === checkout && existing.owner === owner) {
+                "Checkout already registered by a different owner. " +
                     "Only one integration can use a Checkout at a time."
             }
         }

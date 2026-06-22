@@ -216,7 +216,7 @@ internal class PaymentSheetActivityTest {
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
         val checkout = CheckoutStateFactory.createCheckout(context)
-        CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, checkout, "test")
+        CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, checkout, this)
         checkout.markIntegrationLaunched()
 
         val viewModel = createViewModel(

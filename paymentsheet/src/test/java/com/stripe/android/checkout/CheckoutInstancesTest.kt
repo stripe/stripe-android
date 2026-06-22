@@ -18,6 +18,7 @@ import org.robolectric.RobolectricTestRunner
 class CheckoutInstancesTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
+    private val owner = Object()
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -37,7 +38,7 @@ class CheckoutInstancesTest {
     fun `register and get round-trips single instance`() {
         val checkout = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout, "test")
+        CheckoutInstances.register("key1", checkout, owner)
 
         assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
     }
@@ -46,8 +47,8 @@ class CheckoutInstancesTest {
     fun `register same instance twice is a no-op`() {
         val checkout = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout, "test")
-        CheckoutInstances.register("key1", checkout, "test")
+        CheckoutInstances.register("key1", checkout, owner)
+        CheckoutInstances.register("key1", checkout, owner)
 
         assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
     }
@@ -57,30 +58,31 @@ class CheckoutInstancesTest {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout1, "test")
+        CheckoutInstances.register("key1", checkout1, owner)
 
         val error = assertThrows(IllegalStateException::class.java) {
-            CheckoutInstances.register("key1", checkout2, "test")
+            CheckoutInstances.register("key1", checkout2, owner)
         }
-        assertThat(error).hasMessageThat().contains("test")
+        assertThat(error).hasMessageThat().contains("different owner")
     }
 
     @Test
     fun `register same instance with different owner throws`() {
         val checkout = createCheckout(key = "key1")
+        val otherOwner = Object()
 
-        CheckoutInstances.register("key1", checkout, "FlowController")
+        CheckoutInstances.register("key1", checkout, owner)
 
         val error = assertThrows(IllegalStateException::class.java) {
-            CheckoutInstances.register("key1", checkout, "EmbeddedPaymentElement")
+            CheckoutInstances.register("key1", checkout, otherOwner)
         }
-        assertThat(error).hasMessageThat().contains("FlowController")
+        assertThat(error).hasMessageThat().contains("different owner")
     }
 
     @Test
     fun `unregister removes correct instance`() {
         val checkout = createCheckout(key = "key1")
-        CheckoutInstances.register("key1", checkout, "test")
+        CheckoutInstances.register("key1", checkout, owner)
 
         CheckoutInstances.unregister("key1", checkout)
 
@@ -91,7 +93,7 @@ class CheckoutInstancesTest {
     fun `unregister with wrong instance is a no-op`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key1")
-        CheckoutInstances.register("key1", checkout1, "test")
+        CheckoutInstances.register("key1", checkout1, owner)
 
         // Attempt to unregister with a different instance - should be ignored.
         CheckoutInstances.unregister("key1", checkout2)
@@ -104,8 +106,8 @@ class CheckoutInstancesTest {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
 
-        CheckoutInstances.register("key1", checkout1, "test")
-        CheckoutInstances.register("key2", checkout2, "test")
+        CheckoutInstances.register("key1", checkout1, owner)
+        CheckoutInstances.register("key2", checkout2, owner)
 
         CheckoutInstances.clear()
 
@@ -118,8 +120,8 @@ class CheckoutInstancesTest {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
 
-        CheckoutInstances.register("key1", checkout1, "test")
-        CheckoutInstances.register("key2", checkout2, "test")
+        CheckoutInstances.register("key1", checkout1, owner)
+        CheckoutInstances.register("key2", checkout2, owner)
 
         assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout1)
         assertThat(CheckoutInstances["key2"]).isSameInstanceAs(checkout2)
@@ -129,8 +131,8 @@ class CheckoutInstancesTest {
     fun `unregister after re-register with same instance leaves key absent`() {
         val checkout = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout, "test")
-        CheckoutInstances.register("key1", checkout, "test") // idempotent
+        CheckoutInstances.register("key1", checkout, owner)
+        CheckoutInstances.register("key1", checkout, owner) // idempotent
         CheckoutInstances.unregister("key1", checkout)
 
         assertThat(CheckoutInstances["key1"]).isNull()

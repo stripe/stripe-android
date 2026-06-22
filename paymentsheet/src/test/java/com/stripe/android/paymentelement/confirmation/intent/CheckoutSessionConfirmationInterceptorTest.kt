@@ -519,7 +519,7 @@ class CheckoutSessionConfirmationInterceptorTest {
             )
         }
         checkoutInstances.firstOrNull()?.let {
-            CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, it, "test")
+            CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, it, this)
         }
 
         runTest {
