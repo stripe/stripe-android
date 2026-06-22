@@ -5,10 +5,10 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.AppAttestationException
@@ -93,13 +93,17 @@ class OnrampInteractorTest {
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory = mock {
         on { create(any()) } doReturn testAnalyticsService
     }
-    private val errorLogger = OnrampErrorLogger(Logger.noop())
+    private val errorLogger = OnrampErrorLogger(NoopUserFacingLogger)
     private val savedStateHandle = SavedStateHandle()
 
     private val interactor: OnrampInteractor = createInteractor(
         cryptoApiRepository = cryptoApiRepository,
         savedStateHandle = savedStateHandle
     )
+
+    private object NoopUserFacingLogger : UserFacingLogger {
+        override fun logWarningWithoutPii(message: String) = Unit
+    }
 
     @Test
     fun testConfigureIsSuccessful() = runTest {

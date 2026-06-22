@@ -1,19 +1,18 @@
 package com.stripe.android.crypto.onramp.exception
 
-import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent.ErrorOccurred.Operation
 import javax.inject.Inject
 
 internal class OnrampErrorLogger @Inject constructor(
-    private val logger: Logger,
+    private val logger: UserFacingLogger,
 ) {
     fun log(
         operation: Operation,
         error: Throwable,
     ) {
-        logger.error(
-            "[Stripe Crypto Onramp] ${operation.value} failed.\n${error.developerLogMessage()}",
-            error
+        logger.logWarningWithoutPii(
+            "[Stripe Crypto Onramp] ${operation.value} failed.\n${error.developerLogMessage()}"
         )
     }
 
