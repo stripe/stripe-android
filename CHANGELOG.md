@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### CryptoOnramp
+* [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+
 ## 23.10.1 - 2026-06-15
 
 ### AddressElement
@@ -16,7 +19,6 @@ NEXT_VERSION_BUMP: PATCH
 ### CryptoOnramp
 * [CHANGED] Updated EU compliance identifier APIs to match the latest backend contract, including CRS/CARF TIN requirements and `SubmitIdentifiersResult.completed`.
 * [ADDED] Added known compliance identifier types for Spain NIF (`es_nif`) and France NIR (`fr_nir`).
-* [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
 
 ## 23.9.2 - 2026-06-01
 
