@@ -37,7 +37,7 @@ class CheckoutInstancesTest {
     fun `register and get round-trips single instance`() {
         val checkout = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout)
+        CheckoutInstances.register("key1", checkout, "test")
 
         assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
     }
@@ -46,8 +46,8 @@ class CheckoutInstancesTest {
     fun `register same instance twice is a no-op`() {
         val checkout = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout)
-        CheckoutInstances.register("key1", checkout)
+        CheckoutInstances.register("key1", checkout, "test")
+        CheckoutInstances.register("key1", checkout, "test")
 
         assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
     }
@@ -57,18 +57,30 @@ class CheckoutInstancesTest {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout1)
+        CheckoutInstances.register("key1", checkout1, "test")
 
         val error = assertThrows(IllegalStateException::class.java) {
-            CheckoutInstances.register("key1", checkout2)
+            CheckoutInstances.register("key1", checkout2, "test")
         }
-        assertThat(error).hasMessageThat().contains("key1")
+        assertThat(error).hasMessageThat().contains("test")
+    }
+
+    @Test
+    fun `register same instance with different owner throws`() {
+        val checkout = createCheckout(key = "key1")
+
+        CheckoutInstances.register("key1", checkout, "FlowController")
+
+        val error = assertThrows(IllegalStateException::class.java) {
+            CheckoutInstances.register("key1", checkout, "EmbeddedPaymentElement")
+        }
+        assertThat(error).hasMessageThat().contains("FlowController")
     }
 
     @Test
     fun `unregister removes correct instance`() {
         val checkout = createCheckout(key = "key1")
-        CheckoutInstances.register("key1", checkout)
+        CheckoutInstances.register("key1", checkout, "test")
 
         CheckoutInstances.unregister("key1", checkout)
 
@@ -79,7 +91,7 @@ class CheckoutInstancesTest {
     fun `unregister with wrong instance is a no-op`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key1")
-        CheckoutInstances.register("key1", checkout1)
+        CheckoutInstances.register("key1", checkout1, "test")
 
         // Attempt to unregister with a different instance - should be ignored.
         CheckoutInstances.unregister("key1", checkout2)
@@ -92,8 +104,8 @@ class CheckoutInstancesTest {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
 
-        CheckoutInstances.register("key1", checkout1)
-        CheckoutInstances.register("key2", checkout2)
+        CheckoutInstances.register("key1", checkout1, "test")
+        CheckoutInstances.register("key2", checkout2, "test")
 
         CheckoutInstances.clear()
 
@@ -106,8 +118,8 @@ class CheckoutInstancesTest {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
 
-        CheckoutInstances.register("key1", checkout1)
-        CheckoutInstances.register("key2", checkout2)
+        CheckoutInstances.register("key1", checkout1, "test")
+        CheckoutInstances.register("key2", checkout2, "test")
 
         assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout1)
         assertThat(CheckoutInstances["key2"]).isSameInstanceAs(checkout2)
@@ -117,8 +129,8 @@ class CheckoutInstancesTest {
     fun `unregister after re-register with same instance leaves key absent`() {
         val checkout = createCheckout(key = "key1")
 
-        CheckoutInstances.register("key1", checkout)
-        CheckoutInstances.register("key1", checkout) // idempotent
+        CheckoutInstances.register("key1", checkout, "test")
+        CheckoutInstances.register("key1", checkout, "test") // idempotent
         CheckoutInstances.unregister("key1", checkout)
 
         assertThat(CheckoutInstances["key1"]).isNull()

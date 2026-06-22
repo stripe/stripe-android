@@ -475,7 +475,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `launchForm throws when checkout mutation is in flight`() = testScenario {
         val checkout = CheckoutStateFactory.createCheckout(applicationContext)
-        CheckoutInstances.register(checkout.internalState.key, checkout)
+        CheckoutInstances.register(checkout.internalState.key, checkout, "test")
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")
@@ -503,7 +503,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `launchManage throws when checkout mutation is in flight`() = testScenario {
         val checkout = CheckoutStateFactory.createCheckout(applicationContext)
-        CheckoutInstances.register(checkout.internalState.key, checkout)
+        CheckoutInstances.register(checkout.internalState.key, checkout, "test")
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)
             response.testBodyFromFile("checkout-session-apply-discount.json")

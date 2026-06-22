@@ -112,7 +112,7 @@ internal class FormActivityTest {
     @Test
     fun `onDestroy clears checkout integration launched flag`() {
         val checkout = CheckoutStateFactory.createCheckout(applicationContext)
-        CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, checkout)
+        CheckoutInstances.register(CheckoutStateFactory.DEFAULT_KEY, checkout, "test")
         checkout.markIntegrationLaunched()
 
         launch(

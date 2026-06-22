@@ -1,25 +1,34 @@
 package com.stripe.android.checkout
 
+import androidx.annotation.MainThread
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutInstances {
-    private val instances = mutableMapOf<String, Checkout>()
 
-    operator fun get(key: String): Checkout? = instances[key]
+    private data class Entry(val checkout: Checkout, val owner: String)
 
-    fun register(key: String, checkout: Checkout) {
+    private val instances = mutableMapOf<String, Entry>()
+
+    @MainThread
+    operator fun get(key: String): Checkout? = instances[key]?.checkout
+
+    @MainThread
+    fun register(key: String, checkout: Checkout, owner: String) {
         val existing = instances[key]
-        check(existing == null || existing === checkout) {
-            "A different Checkout instance is already registered under key '$key'. " +
-                "Close or reconfigure the existing integration before using a new Checkout with the same key."
+        if (existing != null) {
+            check(existing.checkout === checkout && existing.owner == owner) {
+                "Checkout already registered by '${existing.owner}'. " +
+                    "Only one integration can use a Checkout at a time."
+            }
         }
-        instances[key] = checkout
+        instances[key] = Entry(checkout, owner)
     }
 
+    @MainThread
     fun unregister(key: String, checkout: Checkout) {
-        if (instances[key] === checkout) {
+        if (instances[key]?.checkout === checkout) {
             instances.remove(key)
         }
     }

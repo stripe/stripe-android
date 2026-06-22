@@ -212,7 +212,7 @@ class GooglePayDisplayItemsFactoryTest {
                 ),
             ),
         )
-        CheckoutInstances.register(INSTANCES_KEY, checkout)
+        CheckoutInstances.register(INSTANCES_KEY, checkout, "test")
 
         val metadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(

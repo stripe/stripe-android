@@ -2396,7 +2396,7 @@ internal class DefaultFlowControllerTest {
             ),
         )
         flowController.configureExpectingSuccess()
-        CheckoutInstances.register("test_key", checkout)
+        CheckoutInstances.register("test_key", checkout, "test")
 
         networkRule.checkoutUpdate { response ->
             response.setBodyDelay(5, TimeUnit.SECONDS)

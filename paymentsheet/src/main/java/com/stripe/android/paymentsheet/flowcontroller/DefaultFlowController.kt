@@ -256,7 +256,7 @@ internal class DefaultFlowController @Inject internal constructor(
         if (previous != null && previous !== checkout) {
             CheckoutInstances.unregister(previous.internalState.key, previous)
         }
-        CheckoutInstances.register(checkout.internalState.key, checkout)
+        CheckoutInstances.register(checkout.internalState.key, checkout, owner = "FlowController")
         registeredCheckout = checkout
         configure(
             mode = checkout.internalState.initializationMode,
