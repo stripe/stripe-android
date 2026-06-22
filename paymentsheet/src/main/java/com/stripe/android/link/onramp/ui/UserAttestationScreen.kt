@@ -37,7 +37,7 @@ import com.stripe.android.uicore.text.Html
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun CrsCarfDeclarationScreen(
+fun UserAttestationScreen(
     appearance: LinkAppearance.State?,
     attestationText: String,
     onClose: () -> Unit,

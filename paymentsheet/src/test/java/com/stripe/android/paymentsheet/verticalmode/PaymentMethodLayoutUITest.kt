@@ -19,7 +19,6 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -124,7 +123,6 @@ internal class PaymentMethodLayoutUITest(
 
     @Test
     fun clickingOnBnpL_with_promotion_shows_promotion() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm")
@@ -160,7 +158,6 @@ internal class PaymentMethodLayoutUITest(
 
     @Test
     fun clickingOnBnpL_falls_back_to_subtitle_if_promotion_not_available() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm")
@@ -197,7 +194,6 @@ internal class PaymentMethodLayoutUITest(
 
     @Test
     fun does_not_expand_if_shouldExpandOnClick_is_false() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -243,7 +239,6 @@ internal class PaymentMethodLayoutUITest(
 
     @Test
     fun displays_subtitle_if_promotion_provider_is_null() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm")

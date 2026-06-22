@@ -1,0 +1,11 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="12dp"
+    android:height="12dp"
+    android:viewportWidth="12"
+    android:viewportHeight="12">
+    <path
+        android:pathData="M7.4142,6L11.7071,10.2929C12.0976,10.6834 12.0976,11.3166 11.7071,11.7071C11.3166,12.0976 10.6834,12.0976 10.2929,11.7071L6,7.4142L1.7071,11.7071C1.3166,12.0976 0.6834,12.0976 0.2929,11.7071C-0.0976,11.3166 -0.0976,10.6834 0.2929,10.2929L4.5858,6L0.2929,1.7071C-0.0976,1.3166 -0.0976,0.6834 0.2929,0.2929C0.6834,-0.0976 1.3166,-0.0976 1.7071,0.2929L6,4.5858L10.2929,0.2929C10.6834,-0.0976 11.3166,-0.0976 11.7071,0.2929C12.0976,0.6834 12.0976,1.3166 11.7071,1.7071L7.4142,6Z"
+        android:fillColor="@color/stripe_paymentsheet_toolbar_items_color"
+        android:fillAlpha="0.6"
+        android:fillType="evenOdd" />
+</vector>

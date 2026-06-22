@@ -173,6 +173,8 @@
   <string name="stripe_invalid_shipping_information">配送先住所が無効です</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">郵便番号の入力に不備があります。</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">決済手段の詳細</string>
   <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
   <string name="stripe_link_simple_secure_payments">シンプルで安全なワンクリック決済</string>
   <string name="stripe_payment_method_add_new_card">新しいカードを追加...</string>

@@ -84,12 +84,12 @@ internal sealed class OnrampAnalyticsEvent(
         )
     )
 
-    data object CrsCarfDeclarationStarted : OnrampAnalyticsEvent(
-        name = "crs_carf_declaration_started"
+    data object UserAttestationStarted : OnrampAnalyticsEvent(
+        name = "user_attestation_started"
     )
 
-    data object CrsCarfDeclarationCompleted : OnrampAnalyticsEvent(
-        name = "crs_carf_declaration_completed"
+    data object UserAttestationCompleted : OnrampAnalyticsEvent(
+        name = "user_attestation_completed"
     )
 
     class WalletRegistered(
@@ -183,7 +183,7 @@ internal sealed class OnrampAnalyticsEvent(
             VerifyKyc("verify_kyc_info"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
-            PresentCRSCARFDeclaration("prompt_for_crs_carf_declaration")
+            PresentUserAttestation("present_user_attestation")
         }
     }
 

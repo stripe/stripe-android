@@ -17,7 +17,6 @@ import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
@@ -29,7 +28,6 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -40,16 +38,18 @@ import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
-import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
-import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationScreenAction
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
+import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
+import com.stripe.android.crypto.onramp.ui.UserAttestationScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
@@ -370,30 +370,30 @@ internal class OnrampInteractor @Inject constructor(
             )
     }
 
-    suspend fun startCrsCarfDeclaration(): OnrampStartCrsCarfDeclarationResult {
+    suspend fun startUserAttestation(): OnrampStartUserAttestationResult {
         val secret = consumerSessionClientSecret()
         if (secret == null) {
             val error = mapError(
-                operation = Operation.PresentCRSCARFDeclaration,
+                operation = Operation.PresentUserAttestation,
                 error = MissingConsumerSecretException(),
             )
-            trackError(Operation.PresentCRSCARFDeclaration, error)
-            return OnrampStartCrsCarfDeclarationResult.Failed(error)
+            trackError(Operation.PresentUserAttestation, error)
+            return OnrampStartUserAttestationResult.Failed(error)
         }
 
-        return cryptoApiRepository.retrieveCrsCarfDeclaration(secret)
+        return cryptoApiRepository.retrieveUserAttestation(secret)
             .fold(
-                onSuccess = { declaration ->
-                    analyticsService?.track(OnrampAnalyticsEvent.CrsCarfDeclarationStarted)
-                    OnrampStartCrsCarfDeclarationResult.Completed(
-                        declaration = declaration,
+                onSuccess = { attestation ->
+                    analyticsService?.track(OnrampAnalyticsEvent.UserAttestationStarted)
+                    OnrampStartUserAttestationResult.Completed(
+                        attestation = attestation,
                         appearance = state.value.configurationState?.appearance
                     )
                 },
                 onFailure = { error ->
-                    val mappedError = mapError(Operation.PresentCRSCARFDeclaration, error)
-                    trackError(Operation.PresentCRSCARFDeclaration, mappedError)
-                    OnrampStartCrsCarfDeclarationResult.Failed(mappedError)
+                    val mappedError = mapError(Operation.PresentUserAttestation, error)
+                    trackError(Operation.PresentUserAttestation, mappedError)
+                    OnrampStartUserAttestationResult.Failed(mappedError)
                 }
             )
     }
@@ -724,37 +724,37 @@ internal class OnrampInteractor @Inject constructor(
         }
     }
 
-    suspend fun handleCrsCarfDeclarationResult(
-        result: CrsCarfDeclarationActivityResult,
-    ): OnrampCrsCarfDeclarationResult = when (result.action) {
-        is CrsCarfDeclarationScreenAction.Cancelled -> {
-            OnrampCrsCarfDeclarationResult.Cancelled()
+    suspend fun handleUserAttestationResult(
+        result: UserAttestationActivityResult,
+    ): OnrampUserAttestationResult = when (result.action) {
+        is UserAttestationScreenAction.Cancelled -> {
+            OnrampUserAttestationResult.Cancelled()
         }
-        is CrsCarfDeclarationScreenAction.Confirm -> {
+        is UserAttestationScreenAction.Confirm -> {
             val secret = consumerSessionClientSecret()
 
             if (secret != null) {
-                val confirmResult = cryptoApiRepository.confirmCrsCarfDeclaration(secret)
+                val confirmResult = cryptoApiRepository.confirmUserAttestation(secret)
 
                 confirmResult.fold(
                     onSuccess = {
-                        analyticsService?.track(OnrampAnalyticsEvent.CrsCarfDeclarationCompleted)
+                        analyticsService?.track(OnrampAnalyticsEvent.UserAttestationCompleted)
 
-                        OnrampCrsCarfDeclarationResult.Confirmed()
+                        OnrampUserAttestationResult.Confirmed()
                     },
                     onFailure = { error ->
-                        val mappedError = mapError(Operation.PresentCRSCARFDeclaration, error)
-                        trackError(Operation.PresentCRSCARFDeclaration, mappedError)
-                        OnrampCrsCarfDeclarationResult.Failed(mappedError)
+                        val mappedError = mapError(Operation.PresentUserAttestation, error)
+                        trackError(Operation.PresentUserAttestation, mappedError)
+                        OnrampUserAttestationResult.Failed(mappedError)
                     }
                 )
             } else {
                 val error = mapError(
-                    operation = Operation.PresentCRSCARFDeclaration,
+                    operation = Operation.PresentUserAttestation,
                     error = MissingConsumerSecretException(),
                 )
-                trackError(Operation.PresentCRSCARFDeclaration, error)
-                OnrampCrsCarfDeclarationResult.Failed(error)
+                trackError(Operation.PresentUserAttestation, error)
+                OnrampUserAttestationResult.Failed(error)
             }
         }
     }
@@ -1127,21 +1127,21 @@ internal sealed interface OnrampStartKycVerificationResult {
     ) : OnrampStartKycVerificationResult
 }
 
-internal sealed interface OnrampStartCrsCarfDeclarationResult {
+internal sealed interface OnrampStartUserAttestationResult {
     /**
-     * Starting CRS/CARF declaration presentation completed successfully.
+     * Starting user attestation presentation completed successfully.
      */
     class Completed internal constructor(
-        val declaration: CrsCarfDeclaration,
+        val attestation: UserAttestation,
         val appearance: LinkAppearance?
-    ) : OnrampStartCrsCarfDeclarationResult
+    ) : OnrampStartUserAttestationResult
 
     /**
-     * Starting CRS/CARF declaration presentation failed.
+     * Starting user attestation presentation failed.
      */
     class Failed internal constructor(
         val error: Throwable
-    ) : OnrampStartCrsCarfDeclarationResult
+    ) : OnrampStartUserAttestationResult
 }
 
 internal fun LinkController.PaymentMethodType.toDisplayType(): PaymentMethodDisplayData.Type {

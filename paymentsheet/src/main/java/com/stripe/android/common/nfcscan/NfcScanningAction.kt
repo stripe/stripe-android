@@ -15,7 +15,7 @@ internal class NfcScanningAction(private val merchantName: String) : CardDetails
         val launcher = rememberLauncherForActivityResult(NfcScanningContract) { result ->
             if (result is NfcScanningContract.Result.Complete) {
                 onScannedCard(
-                    ScannedCardDetails(
+                    ScannedCardDetails.Validated(
                         cardNumber = result.cardNumber,
                         expirationYear = result.expirationYear,
                         expirationMonth = result.expirationMonth,

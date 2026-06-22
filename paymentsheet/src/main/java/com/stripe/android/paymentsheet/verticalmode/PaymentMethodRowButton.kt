@@ -338,6 +338,7 @@ private fun RowButtonWithEndIconOuterContent(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center
         ) {
             content()
@@ -352,7 +353,6 @@ private fun RowButtonWithEndIconOuterContent(
                 }
             }
         }
-        Spacer(Modifier.weight(1f))
         iconContent()
     }
 }

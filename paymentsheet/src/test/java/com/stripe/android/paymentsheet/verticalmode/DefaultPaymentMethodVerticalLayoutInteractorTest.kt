@@ -8,7 +8,6 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.R
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -1762,7 +1761,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun `Passes promotion provider to supported bnpls`() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -1785,7 +1783,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun `shouldExpandOnClick is false when form type is UserInteractionRequired`() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -1806,7 +1803,6 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     @Test
     fun `shouldExpandOnClick is true when form type is not UserInteractionRequired`() {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "affirm")
