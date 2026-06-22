@@ -101,12 +101,16 @@ class AddressTextFieldController(
                 val attributionDrawable = remember(isDarkTheme) {
                     getAttributionDrawable?.invoke(isDarkTheme)
                 }
+                val predictionSelected = remember {
+                    onInlinePredictionSelected ?: {}
+                }
+                val dismissed = remember { onInlineDismissed ?: {} }
                 InlineAddressPredictionsUI(
                     state = predictionsState,
                     attributionDrawable = attributionDrawable,
                     fieldWidthDp = fieldWidthDp,
-                    onPredictionSelected = onInlinePredictionSelected ?: {},
-                    onDismiss = onInlineDismissed ?: {},
+                    onPredictionSelected = predictionSelected,
+                    onDismiss = dismissed,
                     onClear = onClear,
                     onEnterManually = onInlineEnterManually,
                 )

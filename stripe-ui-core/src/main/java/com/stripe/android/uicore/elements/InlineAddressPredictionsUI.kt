@@ -76,6 +76,34 @@ fun InlineAddressPredictionsUI(
 }
 
 @Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+internal fun InlineAddressPredictionsContent(
+    state: AutocompleteAddressInteractor.InlinePredictionsState,
+    attributionDrawable: Int?,
+    onPredictionSelected: (String) -> Unit,
+    onClear: () -> Unit,
+    onEnterManually: (() -> Unit)?,
+) {
+    val loading = state is AutocompleteAddressInteractor.InlinePredictionsState.Loading
+    val results = state as? AutocompleteAddressInteractor.InlinePredictionsState.Results
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        PredictionsHeader(
+            loading = loading,
+            attributionDrawable = attributionDrawable,
+            onClear = onClear,
+        )
+        if (results != null) {
+            PredictionsList(
+                results = results,
+                onPredictionSelected = onPredictionSelected,
+                onEnterManually = onEnterManually,
+            )
+        }
+    }
+}
+
+@Composable
 private fun PredictionsHeader(
     loading: Boolean,
     attributionDrawable: Int?,
