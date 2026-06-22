@@ -128,7 +128,11 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            inlinePredictionsState = if (config.isInlineAutocompleteEnabled) interactor.inlinePredictionsState else null,
+            inlinePredictionsState = if (config.isInlineAutocompleteEnabled) {
+                interactor.inlinePredictionsState
+            } else {
+                null
+            },
             onInlinePredictionSelected = onInlinePredictionSelected,
             onInlineDismissed = onInlineDismissed,
             onInlineEnterManually = onInlineEnterManually,

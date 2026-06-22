@@ -49,109 +49,143 @@ fun InlineAddressPredictionsUI(
     val results = state as? AutocompleteAddressInteractor.InlinePredictionsState.Results
     val expanded = loading || (results != null && results.predictions.isNotEmpty())
 
-    val closeIcon = TextFieldIcon.Trailing(idRes = R.drawable.stripe_ic_material_close, isTintable = true, onClick = onClear)
-
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismiss,
-        offset = DpOffset(x = (-2).dp, y = 0.dp),
-        modifier = if (fieldWidthDp > 0.dp) Modifier.width(fieldWidthDp + 4.dp) else Modifier.fillMaxWidth(),
+        offset = DpOffset(x = (-1).dp, y = 0.dp),
+        modifier = if (fieldWidthDp > 0.dp) {
+            Modifier.width(fieldWidthDp + 2.dp)
+        } else {
+            Modifier.fillMaxWidth()
+        },
         properties = PopupProperties(focusable = false),
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(40.dp)
-                .padding(horizontal = 16.dp),
-        ) {
-            if (loading) {
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colors.primary,
-                        strokeWidth = 2.dp,
-                    )
-                }
-            } else if (attributionDrawable != null) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.weight(1f),
-                ) {
-                    Text(
-                        text = stringResource(R.string.stripe_address_suggestions),
-                        color = AttributionTextColor,
-                        style = MaterialTheme.typography.caption,
-                        modifier = Modifier.padding(end = 4.dp),
-                    )
-                    Image(
-                        painter = painterResource(id = R.drawable.stripe_google_maps_logo),
-                        contentDescription = stringResource(R.string.stripe_address_google_maps),
-                        modifier = Modifier.height(18.dp).padding(top = 3.dp),
-                    )
-                }
-            } else {
-                Box(modifier = Modifier.weight(1f))
-            }
-            CompositionLocalProvider(LocalContentColor provides MaterialTheme.stripeColors.onComponent) {
-                TrailingIcon(
-                    trailingIcon = closeIcon,
-                    loading = false,
-                    modifier = Modifier
-                        .height(24.dp)
-                        .width(16.dp),
+        PredictionsHeader(
+            loading = loading,
+            attributionDrawable = attributionDrawable,
+            onClear = onClear,
+        )
+        if (results != null) {
+            PredictionsList(
+                results = results,
+                onPredictionSelected = onPredictionSelected,
+                onEnterManually = onEnterManually,
+            )
+        }
+    }
+}
+
+@Composable
+private fun PredictionsHeader(
+    loading: Boolean,
+    attributionDrawable: Int?,
+    onClear: () -> Unit,
+) {
+    val closeIcon = TextFieldIcon.Trailing(
+        idRes = R.drawable.stripe_ic_material_close,
+        isTintable = true,
+        onClick = onClear,
+    )
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(36.dp)
+            .padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+    ) {
+        if (loading) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colors.primary,
+                    strokeWidth = 2.dp,
                 )
             }
+        } else if (attributionDrawable != null) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(1f),
+            ) {
+                Text(
+                    text = stringResource(R.string.stripe_address_suggestions),
+                    color = AttributionTextColor,
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier.padding(end = 4.dp, bottom = 3.dp),
+                )
+                Image(
+                    painter = painterResource(id = R.drawable.stripe_google_maps_logo),
+                    contentDescription = stringResource(R.string.stripe_address_google_maps),
+                    modifier = Modifier.height(18.dp),
+                )
+            }
+        } else {
+            Box(modifier = Modifier.weight(1f))
         }
+        CompositionLocalProvider(LocalContentColor provides MaterialTheme.stripeColors.onComponent) {
+            TrailingIcon(
+                trailingIcon = closeIcon,
+                loading = false,
+                modifier = Modifier
+                    .height(24.dp)
+                    .width(16.dp),
+            )
+        }
+    }
+}
 
-        if (results != null) {
-            val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
-            Divider()
-            results.predictions.forEach { prediction ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable { onPredictionSelected(prediction.id) }
-                        .padding(vertical = 8.dp, horizontal = 16.dp),
-                ) {
-                    val boldText = remember(prediction.primaryText, queryRegex) {
-                        applyBoldMatches(prediction.primaryText, queryRegex)
-                    }
-                    Text(
-                        text = annotatedStringResource(text = boldText),
-                        color = MaterialTheme.stripeColors.onComponent,
-                        style = MaterialTheme.typography.body1,
-                    )
-                    Text(
-                        text = prediction.secondaryText,
-                        color = MaterialTheme.stripeColors.onComponent,
-                        style = MaterialTheme.typography.body1,
-                    )
-                }
-                Divider()
+@Composable
+private fun PredictionsList(
+    results: AutocompleteAddressInteractor.InlinePredictionsState.Results,
+    onPredictionSelected: (String) -> Unit,
+    onEnterManually: (() -> Unit)?,
+) {
+    val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
+    Divider()
+    results.predictions.forEach { prediction ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onPredictionSelected(prediction.id) }
+                .padding(vertical = 8.dp, horizontal = 16.dp),
+        ) {
+            val boldText = remember(prediction.primaryText, queryRegex) {
+                applyBoldMatches(prediction.primaryText, queryRegex)
             }
+            Text(
+                text = annotatedStringResource(text = boldText),
+                color = MaterialTheme.stripeColors.onComponent,
+                style = MaterialTheme.typography.body1,
+            )
+            Text(
+                text = prediction.secondaryText,
+                color = MaterialTheme.stripeColors.onComponent,
+                style = MaterialTheme.typography.body1,
+            )
+        }
+        Divider()
+    }
 
-            onEnterManually?.let {
-                Box(
-                    contentAlignment = Alignment.CenterStart,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(36.dp)
-                        .clickable(onClick = it)
-                        .padding(horizontal = 16.dp),
-                ) {
-                    Text(
-                        text = stringResource(R.string.stripe_address_enter_manually),
-                        color = MaterialTheme.colors.primary,
-                        style = MaterialTheme.typography.body1,
-                    )
-                }
-            }
+    onEnterManually?.let {
+        Box(
+            contentAlignment = Alignment.CenterStart,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(32.dp)
+                .clickable(onClick = it)
+                .padding(horizontal = 16.dp),
+        ) {
+            Text(
+                text = stringResource(R.string.stripe_address_enter_manually),
+                color = MaterialTheme.colors.primary,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.padding(top = 4.dp),
+            )
         }
     }
 }
