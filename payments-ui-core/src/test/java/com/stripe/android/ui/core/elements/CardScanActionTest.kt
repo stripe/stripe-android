@@ -43,7 +43,7 @@ internal class CardScanActionTest {
         )
         runScenario(helper = helper) {
             assertThat(onScannedCardCalls.awaitItem().scannedCardDetails).isEqualTo(
-                ScannedCardDetails(
+                ScannedCardDetails.Unvalidated(
                     cardNumber = "4242424242424242",
                     expirationYear = 2042,
                     expirationMonth = 2,
