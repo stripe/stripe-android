@@ -79,6 +79,7 @@ import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.same
 import org.mockito.kotlin.times
@@ -121,7 +122,7 @@ internal class IdentityViewModelTest {
             File(IMAGE_FILE_NAME)
         )
 
-        on { cropAndPadBitmap(any(), any(), any()) }.thenReturn(
+        on { cropAndPadBitmap(any(), any(), any(), any(), anyOrNull()) }.thenReturn(
             CROPPED_BITMAP
         )
     }
@@ -225,6 +226,32 @@ internal class IdentityViewModelTest {
     }
 
     @Test
+    fun `uploadScanResult document crop fallback sends analytics`() {
+        mockUploadSuccess()
+        val onFallbackCaptor = argumentCaptor<(Float) -> Unit>()
+
+        viewModel.uploadScanResult(
+            FINAL_ID_DETECTOR_RESULT_BACK,
+            mockVerificationPage
+        )
+
+        verify(mockIdentityIO).cropAndPadBitmap(
+            same(INPUT_BITMAP),
+            same(BOUNDING_BOX),
+            any(),
+            eq(true),
+            onFallbackCaptor.capture()
+        )
+
+        onFallbackCaptor.firstValue.invoke(INTERSECTION_RATIO)
+
+        verify(mockIdentityAnalyticsRequestFactory).documentCropFallback(
+            IdentityScanState.ScanType.DOC_BACK,
+            INTERSECTION_RATIO
+        )
+    }
+
+    @Test
     fun `uploadScanResult uploads all files and notifies _selfieUploadedState`() = runBlocking {
         mockUploadSuccess()
         viewModel.uploadScanResult(
@@ -249,6 +276,10 @@ internal class IdentityViewModelTest {
                 testUploadSelfieScanSuccessResult(selfie, isHighRes)
             }
         }
+        verify(mockIdentityAnalyticsRequestFactory, times(0)).documentCropFallback(
+            any(),
+            any()
+        )
     }
 
     @Test
@@ -1032,6 +1063,8 @@ internal class IdentityViewModelTest {
         verify(mockIdentityIO).cropAndPadBitmap(
             same(INPUT_BITMAP),
             same(BOUNDING_BOX),
+            any(),
+            eq(true),
             any()
         )
 
@@ -1154,7 +1187,9 @@ internal class IdentityViewModelTest {
             verify(mockIdentityIO).cropAndPadBitmap(
                 same(FILTERED_FRAMES[selfie.index].first.cameraPreviewImage.image),
                 same(FILTERED_FRAMES[selfie.index].second.boundingBox),
-                any()
+                any(),
+                eq(false),
+                isNull()
             )
 
             verify(mockIdentityIO).resizeBitmapAndCreateFileToUpload(
@@ -1343,6 +1378,7 @@ internal class IdentityViewModelTest {
         val EXTRACTED_BITMAP = mock<Bitmap>()
         val BOUNDING_BOX = mock<BoundingBox>()
         val ALL_SCORES = listOf(1f, 2f, 3f)
+        const val INTERSECTION_RATIO = 0.2f
         val FINAL_ID_DETECTOR_RESULT_FRONT = IdentityAggregator.FinalResult(
             frame = AnalyzerInput(
                 CameraPreviewImage(

@@ -62,7 +62,9 @@ internal interface IdentityIO {
     fun cropAndPadBitmap(
         original: Bitmap,
         boundingBox: BoundingBox,
-        paddingSize: Float
+        paddingSize: Float,
+        fallbackIfMostlyOutOfBounds: Boolean = false,
+        onFallback: ((Float) -> Unit)? = null
     ): Bitmap
 
     /**

@@ -8,6 +8,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Cam
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.CAMERA_ACCESS_STATE_DENIED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.DOC_BACK
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_CAMERA_PERMISSION_DENIED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_DOCUMENT_CROP_FALLBACK
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_EXPERIMENT_EXPOSURE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_GENERIC_ERROR
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
@@ -21,12 +22,14 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Com
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EXCEPTION
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EXPERIMENT_RETRIEVED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_INTERSECTION_RATIO
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_LAST_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_LIVE_MODE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_PREVIOUS_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCAN_TYPE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SESSION_RESULT
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SIDE
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
@@ -191,6 +194,26 @@ class IdentityAnalyticsRequestFactoryTest {
     }
 
     @Test
+    fun testDocumentCropFallback() = runBlocking {
+        factory.verificationPage = liveModePage
+        factory.documentCropFallback(
+            IdentityScanState.ScanType.DOC_FRONT,
+            INTERSECTION_RATIO
+        )
+
+        verify(mockIdentityRepository).sendAnalyticsRequest(
+            argWhere {
+                val metadata = it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>
+                it.eventName == EVENT_DOCUMENT_CROP_FALLBACK &&
+                    metadata[PARAM_SCAN_TYPE] == "doc_front" &&
+                    metadata[PARAM_SIDE] == "front" &&
+                    metadata[PARAM_INTERSECTION_RATIO] == INTERSECTION_RATIO.toString() &&
+                    metadata[PARAM_LIVE_MODE] == "true"
+            }
+        )
+    }
+
+    @Test
     fun testExperimentWithEventMatchedLogged() = runBlocking {
         factory.verificationPage = mockPageScreenPresented
         factory.screenPresented(
@@ -234,5 +257,6 @@ class IdentityAnalyticsRequestFactoryTest {
         const val PREVIOUS_SCREEN_NAME = "previousScreenName"
         const val TEST_SCREEN_NAME = "testScreenName"
         const val VERIFICATION_SESSION = "session1"
+        const val INTERSECTION_RATIO = 0.2f
     }
 }
