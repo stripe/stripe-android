@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.compose.ui.test.hasText
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
@@ -15,11 +16,11 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.utils.PaymentSheetTestRunnerContext
+import com.stripe.android.paymentsheet.utils.FlowControllerTestRunnerContext
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
-import com.stripe.android.paymentsheet.utils.assertFailed
-import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.paymentsheet.utils.expectNoResult
+import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -27,7 +28,7 @@ import org.junit.runner.RunWith
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
-internal class PaymentSheetCheckoutSessionTest {
+internal class FlowControllerCheckoutSessionTest {
     @get:Rule
     val testRules: TestRules = TestRules.create()
 
@@ -47,15 +48,14 @@ internal class PaymentSheetCheckoutSessionTest {
      * Test a successful card setup flow with checkout session (setup mode).
      *
      * Flow:
-     * 1. Present PaymentSheet with checkout session client secret
-     * 2. Initialize checkout session in setup mode (POST /v1/payment_pages/{cs_id}/init)
-     * 3. Fill out card details
-     * 4. Create payment method (POST /v1/payment_methods)
-     * 5. Confirm checkout session — returns setup_intent (POST /v1/payment_pages/{cs_id}/confirm)
-     * 6. Verify setup completed successfully
+     * 1. Configure FlowController with checkout session in setup mode
+     * 2. Fill out card details
+     * 3. Create payment method (POST /v1/payment_methods)
+     * 4. Confirm checkout session (POST /v1/payment_pages/{cs_id}/confirm)
+     * 5. Verify setup completed successfully
      */
     @Test
-    fun testSuccessfulCardSetupWithCheckoutSession() = runPaymentSheetTest(
+    fun testSuccessfulCardSetupWithCheckoutSession() = runFlowControllerTest(
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -63,18 +63,7 @@ internal class PaymentSheetCheckoutSessionTest {
             response.testBodyFromFile("checkout-session-init-setup.json")
         }
 
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val checkout = Checkout.configure(
-            context = context,
-            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
-        ).getOrThrow()
-
-        testContext.presentPaymentSheet {
-            presentWithCheckout(
-                checkout = checkout,
-                configuration = defaultConfiguration,
-            )
-        }
+        testContext.configureWithCheckout()
 
         page.fillOutCardDetails()
 
@@ -88,48 +77,36 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     /**
      * Test a successful card payment flow with checkout session.
      *
      * Flow:
-     * 1. Present PaymentSheet with checkout session client secret
-     * 2. Initialize checkout session (POST /v1/payment_pages/{cs_id}/init)
-     * 3. Fill out card details
-     * 4. Create payment method (POST /v1/payment_methods)
-     * 5. Confirm checkout session (POST /v1/payment_pages/{cs_id}/confirm)
-     * 6. Verify payment completed successfully
+     * 1. Configure FlowController with checkout session
+     * 2. Fill out card details
+     * 3. Create payment method (POST /v1/payment_methods)
+     * 4. Confirm checkout session (POST /v1/payment_pages/{cs_id}/confirm)
+     * 5. Verify payment completed successfully
      */
     @Test
-    fun testSuccessfulCardPaymentWithCheckoutSession() = runPaymentSheetTest(
+    fun testSuccessfulCardPaymentWithCheckoutSession() = runFlowControllerTest(
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
-        // Mock checkout session init API
         networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
 
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val checkout = Checkout.configure(
-            context = context,
-            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
-        ).getOrThrow()
-
-        testContext.presentPaymentSheet {
-            presentWithCheckout(
-                checkout = checkout,
-                configuration = defaultConfiguration,
-            )
-        }
+        testContext.configureWithCheckout()
 
         page.fillOutCardDetails()
 
-        // Mock payment method creation
         networkRule.createPaymentMethod()
 
-        // Mock checkout session confirm API
         networkRule.checkoutConfirm(
             bodyPart("expected_amount", "5099"),
         ) { response ->
@@ -137,21 +114,24 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     /**
-     * Test that PaymentSheet fails to load when the init response already contains a confirmed
+     * Test that FlowController fails to configure when the init response contains a confirmed
      * payment intent alongside the elements_session.
      *
      * When the parser sees both elements_session and payment_intent, it replaces the deferred
      * intent stub in elements_session with the confirmed intent. Since the confirmed intent is
      * in a terminal state (status = "succeeded"), StripeIntentValidator rejects it and
-     * PaymentSheet reports a failure.
+     * configuration reports failure.
      */
     @Test
-    fun testFailsToLoadWhenInitResponseContainsConfirmedIntent() = runPaymentSheetTest(
+    fun testFailsToConfigureWhenInitResponseContainsConfirmedIntent() = runFlowControllerTest(
         networkRule = networkRule,
-        resultCallback = ::assertFailed,
+        resultCallback = ::expectNoResult,
     ) { testContext ->
         networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init-already-confirmed.json")
@@ -163,10 +143,15 @@ internal class PaymentSheetCheckoutSessionTest {
             checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
         ).getOrThrow()
 
-        testContext.presentPaymentSheet {
-            presentWithCheckout(
+        testContext.scenario.onActivity {
+            testContext.flowController.configureWithCheckout(
                 checkout = checkout,
                 configuration = defaultConfiguration,
+                callback = { success, error ->
+                    assertThat(success).isFalse()
+                    assertThat(error).isNotNull()
+                    testContext.markTestSucceeded()
+                },
             )
         }
     }
@@ -229,11 +214,6 @@ internal class PaymentSheetCheckoutSessionTest {
 
     // endregion
 
-    /**
-     * Runs a checkout session test verifying that allow_redisplay is sent with the expected
-     * value on PM creation. Injects customer and save offer fields into the init fixture
-     * using JSON modification.
-     */
     private fun runCheckoutSessionAllowRedisplayTest(
         initFile: String,
         confirmFile: String,
@@ -241,7 +221,7 @@ internal class PaymentSheetCheckoutSessionTest {
         clickSaveCheckbox: Boolean = false,
         noSaveCheckbox: Boolean = false,
         expectedAllowRedisplay: String,
-    ) = runPaymentSheetTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -260,7 +240,7 @@ internal class PaymentSheetCheckoutSessionTest {
             }
         }
 
-        testContext.presentWithCheckout()
+        testContext.configureWithCheckout()
 
         page.fillOutCardDetails()
 
@@ -279,23 +259,9 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         page.clickPrimaryButton()
-    }
 
-    private suspend fun PaymentSheetTestRunnerContext.presentWithCheckout(
-        configuration: PaymentSheet.Configuration = defaultConfiguration,
-    ) {
-        val context = ApplicationProvider.getApplicationContext<Context>()
-        val checkout = Checkout.configure(
-            context = context,
-            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
-        ).getOrThrow()
-
-        presentPaymentSheet {
-            presentWithCheckout(
-                checkout = checkout,
-                configuration = configuration,
-            )
-        }
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     // region customer_email billing details tests
@@ -324,7 +290,7 @@ internal class PaymentSheetCheckoutSessionTest {
         defaultEmail: String? = null,
         fillOutEmail: Boolean = false,
         expectedEmail: String,
-    ) = runPaymentSheetTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -355,7 +321,7 @@ internal class PaymentSheetCheckoutSessionTest {
             )
             .build()
 
-        testContext.presentWithCheckout(configuration = configuration)
+        testContext.configureWithCheckout(configuration = configuration)
 
         if (fillOutEmail) {
             page.waitForText("Email")
@@ -372,6 +338,9 @@ internal class PaymentSheetCheckoutSessionTest {
         }
 
         page.clickPrimaryButton()
+
+        testContext.consumePaymentOptionEventForFlowController("card", "4242")
+        testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
     // endregion
@@ -437,15 +406,16 @@ internal class PaymentSheetCheckoutSessionTest {
         expectCardMandate: Boolean = true,
         expectCashappMandate: Boolean = true,
         jsonModifier: (JSONObject) -> Unit = {},
-    ) = runPaymentSheetTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
-        resultCallback = ::assertCompleted,
+        callConfirmOnPaymentOptionCallback = false,
+        resultCallback = ::expectNoResult,
     ) { testContext ->
         networkRule.checkoutInit { response ->
             response.testBodyFromFile("checkout-session-init.json", jsonModifier)
         }
 
-        testContext.presentWithCheckout()
+        testContext.configureWithCheckout()
 
         page.clickOnLpm("card")
         page.waitForCardForm()
@@ -466,6 +436,28 @@ internal class PaymentSheetCheckoutSessionTest {
     }
 
     // endregion
+
+    private suspend fun FlowControllerTestRunnerContext.configureWithCheckout(
+        configuration: PaymentSheet.Configuration = defaultConfiguration,
+    ) {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val checkout = Checkout.configure(
+            context = context,
+            checkoutSessionClientSecret = "${DEFAULT_CHECKOUT_SESSION_ID}_secret_example",
+        ).getOrThrow()
+
+        configureFlowController {
+            configureWithCheckout(
+                checkout = checkout,
+                configuration = configuration,
+                callback = { success, error ->
+                    assertThat(success).isTrue()
+                    assertThat(error).isNull()
+                    presentPaymentOptions()
+                },
+            )
+        }
+    }
 
     private companion object {
         const val CARD_SFU_MANDATE =

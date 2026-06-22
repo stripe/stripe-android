@@ -22,7 +22,13 @@ internal object InitializationTypeSettingsDefinition :
         add(option("Deferred SSC", InitializationType.DeferredServerSideConfirmation))
         add(option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation))
         add(option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor))
-        add(option("Checkout Session", InitializationType.CheckoutSession))
+        if (configurationData.integrationType in setOf(
+                PlaygroundConfigurationData.IntegrationType.FlowController,
+                PlaygroundConfigurationData.IntegrationType.Embedded,
+            )
+        ) {
+            add(option("Checkout Session", InitializationType.CheckoutSession))
+        }
     }
 
     override fun applicable(
