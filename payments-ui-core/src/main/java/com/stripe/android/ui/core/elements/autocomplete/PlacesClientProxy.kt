@@ -8,7 +8,6 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
-import com.google.android.libraries.places.api.model.PlaceTypes
 import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
@@ -48,7 +47,7 @@ interface PlacesClientProxy {
             googlePlacesApiKey: String,
             isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
-            initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
+            initializer: () -> Unit = { Places.initializeWithNewPlacesApiEnabled(context, googlePlacesApiKey) },
             errorReporter: ErrorReporter
         ): PlacesClientProxy {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isPlacesAvailable()) {
@@ -104,7 +103,6 @@ internal class DefaultPlacesClientProxy(
                     .setSessionToken(token)
                     .setQuery(query)
                     .setCountries(listOf(country))
-                    .setTypesFilter(listOf(PlaceTypes.ADDRESS))
                     .build()
             ).await()
             errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
