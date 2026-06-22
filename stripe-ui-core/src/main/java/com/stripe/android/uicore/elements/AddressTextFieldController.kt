@@ -82,11 +82,14 @@ class AddressTextFieldController(
             var fieldWidthDp by remember { mutableStateOf(0.dp) }
             val density = LocalDensity.current
 
+            val onClear = remember { { _inlineQuery.value = "" } }
+
             androidx.compose.foundation.layout.Box(
                 modifier = modifier
                     .wrapContentSize(Alignment.TopStart)
                     .onSizeChanged { size ->
-                        fieldWidthDp = with(density) { size.width.toDp() }
+                        val newWidth = with(density) { size.width.toDp() }
+                        if (newWidth != fieldWidthDp) fieldWidthDp = newWidth
                     }
             ) {
                 AddressTextFieldUI(
@@ -104,7 +107,7 @@ class AddressTextFieldController(
                     fieldWidthDp = fieldWidthDp,
                     onPredictionSelected = onInlinePredictionSelected ?: {},
                     onDismiss = onInlineDismissed ?: {},
-                    onClear = { _inlineQuery.value = "" },
+                    onClear = onClear,
                     onEnterManually = onInlineEnterManually,
                 )
             }
