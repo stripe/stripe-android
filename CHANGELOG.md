@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.11.0 - 2026-06-22
 
 ### CryptoOnramp
 * [CHANGED] Renamed the EU attestation presentation API from `presentCrsCarfDeclaration()` to `presentUserAttestation()`, `crsCarfDeclarationCallback` to `userAttestationCallback`, and renamed `OnrampCrsCarfDeclarationResult` to `OnrampUserAttestationResult`.
