@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -67,7 +66,6 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
         promotions: List<PaymentMethodMessagePromotion>? = listOf(promotion),
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val eventReporter = FakeEventReporter()
         val helper = PrefetchedPaymentMethodMessagePromotionsHelper(
             promotions = promotions,
