@@ -46,6 +46,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = appearance,
             )
         }
@@ -64,6 +65,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = appearance,
             )
         }
@@ -81,6 +83,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = appearance,
             )
         }
@@ -98,6 +101,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = appearance,
             )
         }
@@ -114,6 +118,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 errorMessage = "Currency unavailable. Try again.",
                 appearance = appearance,
             )
@@ -131,6 +136,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = appearance,
             )
         }
@@ -148,6 +154,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = appearance,
             )
         }
@@ -164,6 +171,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = appearance,
             )
         }
@@ -183,6 +191,24 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
                 options = options.copy(selectedCode = "EUR"),
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
+                appearance = appearance,
+            )
+        }
+    }
+
+    @Test
+    fun testLabelContentCurrencyCode() {
+        val appearance = Checkout.CurrencySelectorContentAppearance()
+            .labelContent(Checkout.CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE)
+            .build()
+
+        paparazziRule.snapshot {
+            CurrencySelectorToggle(
+                options = options,
+                onCurrencySelected = {},
+                isEnabled = true,
+                showCurrencyCode = true,
                 appearance = appearance,
             )
         }

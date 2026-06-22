@@ -17,8 +17,6 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclarationResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -32,6 +30,8 @@ import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.UserAttestation
+import com.stripe.android.crypto.onramp.model.UserAttestationResponse
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirements
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirementsResponse
@@ -161,26 +161,26 @@ internal class CryptoApiRepository @Inject constructor(
         ).mapCatching { it.toSubmitIdentifiersResult() }
     }
 
-    suspend fun retrieveCrsCarfDeclaration(
+    suspend fun retrieveUserAttestation(
         consumerSessionClientSecret: String
-    ): Result<CrsCarfDeclaration> {
+    ): Result<UserAttestation> {
         val request = apiRequestFactory.createGet(
-            url = crsCarfDeclarationUrl,
+            url = userAttestationUrl,
             options = buildRequestOptions(),
             params = credentialsParams(consumerSessionClientSecret).toMap(),
         )
 
         return execute(
             request = request,
-            responseSerializer = CrsCarfDeclarationResponse.serializer()
-        ).map { it.toDeclaration() }
+            responseSerializer = UserAttestationResponse.serializer()
+        ).map { it.toUserAttestation() }
     }
 
-    suspend fun confirmCrsCarfDeclaration(
+    suspend fun confirmUserAttestation(
         consumerSessionClientSecret: String
     ): Result<Unit> {
         return executePost(
-            crsCarfDeclarationUrl,
+            userAttestationUrl,
             credentialsParams(consumerSessionClientSecret),
             Unit.serializer()
         )
@@ -478,7 +478,7 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/crs_carf_declaration`
          */
-        internal val crsCarfDeclarationUrl: String
+        internal val userAttestationUrl: String
             get() = getApiUrl("crypto/internal/crs_carf_declaration")
 
         /**

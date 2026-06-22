@@ -24,8 +24,11 @@ pipelines:
       run-connections-e2e-data-tests-on-push: { }
       run-cardscan-instrumentation-tests: { }
       run-crypto-onramp-example-e2e-tests: { }
+      build-paymentsheet-e2e: { }
       run-paymentsheet-e2e:
         parallel: 5
+        depends_on:
+          - build-paymentsheet-e2e
       check-dependencies: { }
       verify-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
@@ -270,7 +273,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=1 pixel2api33DebugAndroidTest -x :paymentsheet-example:pixel2api33BaseDebugAndroidTest -x :paymentsheet:pixel2api33DebugAndroidTest -x :example:pixel2api33DebugAndroidTest -x :financial-connections:pixel2api33DebugAndroidTest -x :financial-connections-example:pixel2api33DebugAndroidTest -x :camera-core:pixel2api33DebugAndroidTest -x :crypto-onramp-example:pixel2api33DebugAndroidTest -x :stripecardscan:pixel2api33DebugAndroidTest -x :stripecardscan-example:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export instrumentation test results
           inputs:
@@ -285,7 +288,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
@@ -313,7 +316,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export FC instrumentation test results
           inputs:
@@ -337,11 +340,20 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export CardScan instrumentation test results
           inputs:
             - test_title: CardScan instrumentation tests
+  build-paymentsheet-e2e:
+    before_run:
+      - prepare_all
+    steps:
+      - script@1:
+          title: Compile PaymentSheet E2E tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :paymentsheet-example:assembleBaseDebugAndroidTest
   run-paymentsheet-e2e:
     before_run:
       - prepare_all
@@ -357,7 +369,8 @@ workflows:
                 set -euo pipefail
                 envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
                 CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 5)
-                ./scripts/retry.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
@@ -407,7 +420,7 @@ workflows:
           title: Run Crypto Onramp Example E2E Tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :crypto-onramp-example:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew :crypto-onramp-example:connectedDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export Crypto Onramp Example E2E test results
           inputs:

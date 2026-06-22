@@ -7,7 +7,7 @@
             android:exported="false" />
 
         <activity
-            android:name="com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivity"
+            android:name="com.stripe.android.crypto.onramp.ui.UserAttestationActivity"
             android:theme="@style/StripeOnrampTheme"
             android:exported="false" />
     </application>

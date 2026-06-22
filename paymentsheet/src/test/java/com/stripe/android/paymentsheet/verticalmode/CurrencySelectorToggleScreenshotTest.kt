@@ -39,6 +39,7 @@ internal class CurrencySelectorToggleScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = defaultAppearance,
             )
         }
@@ -51,6 +52,7 @@ internal class CurrencySelectorToggleScreenshotTest {
                 options = options.copy(selectedCode = "EUR", exchangeRateText = null),
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 appearance = defaultAppearance,
             )
         }
@@ -63,6 +65,7 @@ internal class CurrencySelectorToggleScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = false,
+                showCurrencyCode = false,
                 appearance = defaultAppearance,
             )
         }
@@ -75,6 +78,7 @@ internal class CurrencySelectorToggleScreenshotTest {
                 options = options,
                 onCurrencySelected = {},
                 isEnabled = true,
+                showCurrencyCode = false,
                 errorMessage = "Something went wrong. Try again.",
                 appearance = defaultAppearance,
             )

@@ -20,7 +20,6 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.DurationProvider
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
@@ -4091,7 +4090,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `logs exposure and fetches messaging for pmm experiment treatment group`() = runScenario {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val reporter = FakeEventReporter()
         val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(
             eventReporter = reporter,
@@ -4133,7 +4131,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `logs exposure does not fetch messaging for pmm experiment control group`() = runScenario {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val reporter = FakeEventReporter()
         val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(
             eventReporter = reporter,
@@ -4174,7 +4171,6 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `does not log exposure or fetch messaging if not assigned to pmm experiment`() = runScenario {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
         val reporter = FakeEventReporter()
         val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(
             eventReporter = reporter,

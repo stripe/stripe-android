@@ -5,7 +5,6 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
@@ -27,15 +26,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     private val testDispatcher = StandardTestDispatcher()
 
     @Test
-    fun `fetchPromotionsAsync does nothing when feature flag is disabled`() = runScenario {
-        helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
-        fakeRepository.calls.expectNoEvents()
-    }
-
-    @Test
-    fun `fetchPromotionsAsync calls repository when feature flag is enabled`() = runScenario(
-        featureFlagEnabled = true,
-    ) {
+    fun `fetchPromotionsAsync calls repository`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         val request = fakeRepository.calls.awaitItem()
@@ -46,9 +37,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `getPromotionIfAvailableForCode returns promotion if available and in treatment`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `getPromotionIfAvailableForCode returns promotion if available and in treatment`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -62,9 +51,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `getPromotionIfAvailableForCode returns null if not available`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `getPromotionIfAvailableForCode returns null if not available`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         val metadata = getMetadata("treatment")
@@ -77,9 +64,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `reportPromotionDisplayed fires event with true when promotion available`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `reportPromotionDisplayed fires event with true when promotion available`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -90,9 +75,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `reportPromotionDisplayed fires event with false when promotion not available`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `reportPromotionDisplayed fires event with false when promotion not available`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         val metadata = getMetadata("treatment")
@@ -102,9 +85,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `reportPromotionDisplayed does not fire event when not in treatment`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `reportPromotionDisplayed does not fire event when not in treatment`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -114,9 +95,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `reportPromotionDisplayed does not fire event for unsupported PM`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `reportPromotionDisplayed does not fire event for unsupported PM`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -126,9 +105,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `getPromotionIfAvailableForCode does not return promotion if variant is control`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `getPromotionIfAvailableForCode does not return promotion if variant is control`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -137,9 +114,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `getPromotionProvider returns null for control`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `getPromotionProvider returns null for control`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -148,9 +123,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `getPromotionProvider returns null for unsupported PMs`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `getPromotionProvider returns null for unsupported PMs`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -159,9 +132,7 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     @Test
-    fun `returns promotion provider for treatment group supported pm`() = runScenario(
-        featureFlagEnabled = true
-    ) {
+    fun `returns promotion provider for treatment group supported pm`() = runScenario {
         helper.fetchPromotionsAsync(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
         eventReporter.pmmPromotionsFetched.awaitItem()
         dispatcher.scheduler.advanceUntilIdle()
@@ -175,7 +146,6 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
     }
 
     private fun runScenario(
-        featureFlagEnabled: Boolean = false,
         repositoryResult: Result<PaymentMethodMessagePromotionList> = Result.success(
             PaymentMethodMessagePromotionList(
                 listOf(AFTERPAY_PROMOTION)
@@ -183,8 +153,6 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
         ),
         block: suspend Scenario.() -> Unit,
     ) = runTest(testDispatcher) {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(featureFlagEnabled)
-
         val fakeRepository = FakePromotionsStripeRepository(repositoryResult)
         val testDispatcher = StandardTestDispatcher(testScheduler)
         val eventReporter = FakeEventReporter()

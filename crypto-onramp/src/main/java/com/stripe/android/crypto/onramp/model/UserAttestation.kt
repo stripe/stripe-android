@@ -5,23 +5,23 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * CRS/CARF declaration text that should be shown before recording acceptance.
+ * User attestation text that should be shown before recording acceptance.
  */
 @Poko
-internal class CrsCarfDeclaration(
+internal class UserAttestation(
     val text: String,
     val version: String
 )
 
 @Serializable
-internal data class CrsCarfDeclarationResponse(
+internal data class UserAttestationResponse(
     @SerialName("text")
     val text: String,
     @SerialName("version")
     val version: String,
 ) {
-    fun toDeclaration(): CrsCarfDeclaration {
-        return CrsCarfDeclaration(
+    fun toUserAttestation(): UserAttestation {
+        return UserAttestation(
             text = text,
             version = version
         )

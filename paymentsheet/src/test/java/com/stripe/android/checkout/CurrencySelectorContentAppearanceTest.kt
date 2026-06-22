@@ -26,6 +26,8 @@ class CurrencySelectorContentAppearanceTest {
         assertThat(state.dangerColor).isNull()
         assertThat(state.fontResId).isNull()
         assertThat(state.sizeScaleFactor).isEqualTo(1.0f)
+        assertThat(state.labelContent)
+            .isEqualTo(Checkout.CurrencySelectorContentAppearance.LabelContent.AUTOMATIC)
     }
 
     @Test
@@ -43,6 +45,7 @@ class CurrencySelectorContentAppearanceTest {
             .dangerColor(Color.Magenta)
             .fontResId(123)
             .sizeScaleFactor(1.5f)
+            .labelContent(Checkout.CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE)
             .build()
 
         assertThat(state.contentVerticalPaddingDp).isEqualTo(12f)
@@ -57,6 +60,8 @@ class CurrencySelectorContentAppearanceTest {
         assertThat(state.dangerColor).isEqualTo(Color.Magenta.toArgb())
         assertThat(state.fontResId).isEqualTo(123)
         assertThat(state.sizeScaleFactor).isEqualTo(1.5f)
+        assertThat(state.labelContent)
+            .isEqualTo(Checkout.CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE)
     }
 
     @Test

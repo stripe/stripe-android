@@ -1,5 +1,6 @@
 apply from: configs.androidLibrary
 
+apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
@@ -38,6 +39,7 @@ dependencies {
 
     testImplementation project(':stripecardscan')
     testImplementation project(':payments-core-testing')
+    testImplementation project(':screenshot-testing')
     testImplementation libs.places
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core

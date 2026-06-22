@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -19,6 +20,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
+import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -30,23 +32,11 @@ fun CardDetailsSectionElementUI(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier) {
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            H6Text(
-                text = stringResource(R.string.stripe_paymentsheet_add_payment_method_card_information),
-                modifier = Modifier
-                    .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
-                        heading()
-                    }
-            )
-            controller.cardDetailsAction?.Content(enabled, controller::onScannedCard)
-        }
+        SectionHeader(
+            enabled = enabled,
+            controller = controller
+        )
         SectionElementUI(
-            modifier = Modifier.padding(top = 8.dp),
             enabled = enabled,
             element = SectionElement(
                 IdentifierSpec.Generic("credit_details"),
@@ -59,5 +49,32 @@ fun CardDetailsSectionElementUI(
             hiddenIdentifiers = hiddenIdentifiers,
             lastTextFieldIdentifier = lastTextFieldIdentifier
         )
+    }
+}
+
+@Composable
+private fun SectionHeader(
+    enabled: Boolean,
+    controller: CardDetailsSectionController
+) {
+    val shouldHideHeader by controller.shouldHideHeader.collectAsState()
+
+    if (!shouldHideHeader) {
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp)
+        ) {
+            H6Text(
+                text = stringResource(R.string.stripe_paymentsheet_add_payment_method_card_information),
+                modifier = Modifier
+                    .semantics(mergeDescendants = true) { // Need to prevent form as focusable accessibility
+                        heading()
+                    }
+            )
+            controller.cardDetailsAction?.Content(enabled, controller::onScannedCard)
+        }
     }
 }

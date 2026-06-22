@@ -15,15 +15,15 @@ import com.stripe.android.crypto.onramp.di.OnrampPresenterScope
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
-import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
-import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityArgs
-import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityContract
-import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
+import com.stripe.android.crypto.onramp.ui.UserAttestationActivityArgs
+import com.stripe.android.crypto.onramp.ui.UserAttestationActivityContract
+import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityArgs
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.crypto.onramp.ui.VerifyKycInfoActivityContract
@@ -96,11 +96,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             callback = ::handleVerifyKycResult
         )
 
-    private val crsCarfDeclarationResultLauncher: ActivityResultLauncher<CrsCarfDeclarationActivityArgs> =
+    private val userAttestationResultLauncher: ActivityResultLauncher<UserAttestationActivityArgs> =
         activity.activityResultRegistry.register(
-            key = "OnrampPresenterCoordinator_CrsCarfResultLauncher($onrampCallbackIdentifier)",
-            contract = CrsCarfDeclarationActivityContract(),
-            callback = ::handleCrsCarfDeclarationResult
+            key = "OnrampPresenterCoordinator_UserAttestationResultLauncher($onrampCallbackIdentifier)",
+            contract = UserAttestationActivityContract(),
+            callback = ::handleUserAttestationResult
         )
 
     init {
@@ -125,7 +125,7 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                 override fun onDestroy(owner: LifecycleOwner) {
                     googlePayActivityResultLauncher.unregister()
                     verifyKycResultLauncher.unregister()
-                    crsCarfDeclarationResultLauncher.unregister()
+                    userAttestationResultLauncher.unregister()
 
                     if (activity.isFinishing) {
                         OnrampCallbackReferences.remove(onrampCallbackIdentifier)
@@ -176,17 +176,17 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    fun presentCrsCarfDeclaration() {
+    fun presentUserAttestation() {
         coroutineScope.launch {
-            when (val result = interactor.startCrsCarfDeclaration()) {
-                is OnrampStartCrsCarfDeclarationResult.Completed -> {
-                    crsCarfDeclarationResultLauncher.launch(
-                        CrsCarfDeclarationActivityArgs(result.declaration, result.appearance)
+            when (val result = interactor.startUserAttestation()) {
+                is OnrampStartUserAttestationResult.Completed -> {
+                    userAttestationResultLauncher.launch(
+                        UserAttestationActivityArgs(result.attestation, result.appearance)
                     )
                 }
-                is OnrampStartCrsCarfDeclarationResult.Failed -> {
-                    onrampCallbacksState.crsCarfDeclarationCallback?.onResult(
-                        OnrampCrsCarfDeclarationResult.Failed(result.error)
+                is OnrampStartUserAttestationResult.Failed -> {
+                    onrampCallbacksState.userAttestationCallback?.onResult(
+                        OnrampUserAttestationResult.Failed(result.error)
                     )
                 }
             }
@@ -313,11 +313,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
-    private fun handleCrsCarfDeclarationResult(result: CrsCarfDeclarationActivityResult) {
+    private fun handleUserAttestationResult(result: UserAttestationActivityResult) {
         coroutineScope.launch {
-            val declarationResult = interactor.handleCrsCarfDeclarationResult(result)
+            val attestationResult = interactor.handleUserAttestationResult(result)
 
-            onrampCallbacksState.crsCarfDeclarationCallback?.onResult(declarationResult)
+            onrampCallbacksState.userAttestationCallback?.onResult(attestationResult)
         }
     }
 

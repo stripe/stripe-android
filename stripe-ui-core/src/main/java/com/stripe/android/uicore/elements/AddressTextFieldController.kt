@@ -11,13 +11,19 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
     label: ResolvableString,
-    private val onNavigation: (() -> Unit)? = null,
+    addressInputMode: AddressInputMode,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
+    private val _inlineQuery = MutableStateFlow("")
+    private val onNavigation = (addressInputMode as? AddressInputMode.AutocompleteCondensed)?.onNavigation
+
+    val isEditable = addressInputMode is AddressInputMode.AutocompleteInline
+    val inlineQuery: StateFlow<String> = _inlineQuery.asStateFlow()
 
     override val showOptionalLabel: Boolean = false
     override val label = stateFlowOf(label)
@@ -38,6 +44,12 @@ class AddressTextFieldController(
         // No-op, this field does not support direct input manipulation
     }
 
+    fun onInlineQueryChanged(query: String) {
+        if (isEditable) {
+            _inlineQuery.value = query
+        }
+    }
+
     override fun onValidationStateChanged(isValidating: Boolean) {
         _isValidating.value = isValidating
     }
@@ -50,7 +62,7 @@ class AddressTextFieldController(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
-        AddressTextFieldUI(controller = this, enabled = enabled)
+        AddressTextFieldUI(controller = this, enabled = enabled, modifier = modifier)
     }
 
     fun launchAutocompleteScreen() {

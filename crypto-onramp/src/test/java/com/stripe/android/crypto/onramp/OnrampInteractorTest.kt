@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
@@ -16,11 +17,11 @@ import com.stripe.android.crypto.onramp.exception.CryptoOnrampApiException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
+import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.GetOnrampSessionResponse
@@ -35,7 +36,6 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -45,10 +45,12 @@ import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierAlternativeGroup
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirement
@@ -57,9 +59,9 @@ import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierTyp
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceRegulation
 import com.stripe.android.crypto.onramp.model.compliance.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
-import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationActivityResult
-import com.stripe.android.crypto.onramp.ui.CrsCarfDeclarationScreenAction
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
+import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
+import com.stripe.android.crypto.onramp.ui.UserAttestationScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
@@ -95,6 +97,7 @@ class OnrampInteractorTest {
     private val analyticsServiceFactory: OnrampAnalyticsService.Factory = mock {
         on { create(any()) } doReturn testAnalyticsService
     }
+    private val errorLogger = OnrampErrorLogger(Logger.noop())
     private val savedStateHandle = SavedStateHandle()
 
     private val interactor: OnrampInteractor = createInteractor(
@@ -448,6 +451,7 @@ class OnrampInteractorTest {
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
+            errorLogger = errorLogger,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = SavedStateHandle()
         )
@@ -498,6 +502,7 @@ class OnrampInteractorTest {
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
+            errorLogger = errorLogger,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = SavedStateHandle()
         )
@@ -639,23 +644,23 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testStartCrsCarfDeclarationIsSuccessful() = runTest {
+    fun testStartUserAttestationIsSuccessful() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        val declaration = CrsCarfDeclaration(
+        val attestation = UserAttestation(
             text = "I confirm this declaration.",
             version = "2026-04-23"
         )
-        whenever(cryptoApiRepository.retrieveCrsCarfDeclaration(any()))
-            .thenReturn(Result.success(declaration))
+        whenever(cryptoApiRepository.retrieveUserAttestation(any()))
+            .thenReturn(Result.success(attestation))
 
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        val result = interactor.startCrsCarfDeclaration()
+        val result = interactor.startUserAttestation()
 
-        assertThat(result).isInstanceOf(OnrampStartCrsCarfDeclarationResult.Completed::class.java)
-        val completed = result as OnrampStartCrsCarfDeclarationResult.Completed
-        assertThat(completed.declaration).isEqualTo(declaration)
-        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CrsCarfDeclarationStarted)
+        assertThat(result).isInstanceOf(OnrampStartUserAttestationResult.Completed::class.java)
+        val completed = result as OnrampStartUserAttestationResult.Completed
+        assertThat(completed.attestation).isEqualTo(attestation)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.UserAttestationStarted)
     }
 
     @Test
@@ -1275,30 +1280,30 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun testHandleCrsCarfDeclarationResultConfirmedSuccess() = runTest {
+    fun testHandleUserAttestationResultConfirmedSuccess() = runTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
-        whenever(cryptoApiRepository.confirmCrsCarfDeclaration(any()))
+        whenever(cryptoApiRepository.confirmUserAttestation(any()))
             .thenReturn(Result.success(Unit))
 
-        val result = interactor.handleCrsCarfDeclarationResult(
-            CrsCarfDeclarationActivityResult(
-                CrsCarfDeclarationScreenAction.Confirm
+        val result = interactor.handleUserAttestationResult(
+            UserAttestationActivityResult(
+                UserAttestationScreenAction.Confirm
             )
         )
 
-        assertThat(result).isInstanceOf(OnrampCrsCarfDeclarationResult.Confirmed::class.java)
-        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CrsCarfDeclarationCompleted)
+        assertThat(result).isInstanceOf(OnrampUserAttestationResult.Confirmed::class.java)
+        testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.UserAttestationCompleted)
     }
 
     @Test
-    fun testHandleCrsCarfDeclarationResultCancelled() = runTest {
-        val result = interactor.handleCrsCarfDeclarationResult(
-            CrsCarfDeclarationActivityResult(
-                CrsCarfDeclarationScreenAction.Cancelled
+    fun testHandleUserAttestationResultCancelled() = runTest {
+        val result = interactor.handleUserAttestationResult(
+            UserAttestationActivityResult(
+                UserAttestationScreenAction.Cancelled
             )
         )
 
-        assertThat(result).isInstanceOf(OnrampCrsCarfDeclarationResult.Cancelled::class.java)
+        assertThat(result).isInstanceOf(OnrampUserAttestationResult.Cancelled::class.java)
     }
 
     @Test
@@ -1381,6 +1386,7 @@ class OnrampInteractorTest {
             linkController = linkController,
             cryptoApiRepository = cryptoApiRepository,
             analyticsServiceFactory = analyticsServiceFactory,
+            errorLogger = errorLogger,
             checkoutHandler = OnrampSessionClientSecretProvider { "test_secret" },
             savedStateHandle = savedStateHandle
         )

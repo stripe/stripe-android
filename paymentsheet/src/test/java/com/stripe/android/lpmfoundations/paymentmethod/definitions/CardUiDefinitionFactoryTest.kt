@@ -18,7 +18,9 @@ import com.stripe.android.screenshottesting.PaparazziConfigOption
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.FormUI
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.ui.core.elements.ScannedCardDetails
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance.DefaultAppearance
@@ -59,6 +61,30 @@ class CardUiDefinitionFactoryTest {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
                 metadata = metadata
+            )
+        }
+    }
+
+    @Test
+    fun testCardWithScannedCardPill() {
+        val formElements = CardDefinition.formElements(metadata = metadata)
+
+        val cardDetailsSection = formElements.filterIsInstance<CardDetailsSectionElement>().first()
+
+        cardDetailsSection.controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        paparazziRule.snapshot {
+            FormUI(
+                hiddenIdentifiers = emptySet(),
+                enabled = true,
+                elements = formElements,
+                lastTextFieldIdentifier = null,
             )
         }
     }

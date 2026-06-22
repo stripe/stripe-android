@@ -134,9 +134,28 @@ internal class CurrencySelectorToggleUITest {
         composeRule.onNodeWithTag(TEST_TAG_CURRENCY_SELECTOR_ERROR).assertDoesNotExist()
     }
 
+    @Test
+    fun showCurrencyCode_displaysCodeInsteadOfAmount() = runScenario(showCurrencyCode = true) {
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
+            .assertContentDescription("USD")
+
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
+            .assertContentDescription("EUR")
+    }
+
+    @Test
+    fun showCurrencyCode_false_displaysFormattedAmount() = runScenario(showCurrencyCode = false) {
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
+            .assertContentDescription("$50.99")
+
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
+            .assertContentDescription("€45.87")
+    }
+
     private fun runScenario(
         selectedCode: String = "USD",
         isEnabled: Boolean = true,
+        showCurrencyCode: Boolean = false,
         errorMessage: String? = null,
         exchangeRateText: String? = null,
         block: suspend Scenario.() -> Unit,
@@ -153,6 +172,7 @@ internal class CurrencySelectorToggleUITest {
                 ),
                 onCurrencySelected = { onCurrencySelectedCalls.add(it) },
                 isEnabled = isEnabled,
+                showCurrencyCode = showCurrencyCode,
                 errorMessage = errorMessage,
                 appearance = Checkout.CurrencySelectorContentAppearance().build(),
             )
