@@ -31,6 +31,7 @@ import org.robolectric.RobolectricTestRunner
 class InputAddressViewModelTest {
     private val navigator = mock<AddressElementNavigator>()
     private val eventReporter = mock<AddressLauncherEventReporter>()
+    private val context = mock<android.content.Context>()
 
     private fun createViewModel(
         address: AddressDetails? = null,
@@ -45,6 +46,8 @@ class InputAddressViewModelTest {
             ),
             navigator,
             eventReporter,
+            placesClient = null,
+            context = context,
         )
     }
 

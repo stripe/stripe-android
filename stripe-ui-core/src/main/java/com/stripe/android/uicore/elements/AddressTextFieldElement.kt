@@ -10,6 +10,11 @@ class AddressTextFieldElement(
     override val identifier: IdentifierSpec,
     label: ResolvableString,
     addressInputMode: AddressInputMode,
+    inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
+    onInlinePredictionSelected: ((String) -> Unit)? = null,
+    onInlineDismissed: (() -> Unit)? = null,
+    onInlineEnterManually: (() -> Unit)? = null,
+    getAttributionDrawable: ((Boolean) -> Int?)? = null,
 ) : SectionSingleFieldElement(identifier) {
     override val allowsUserInteraction: Boolean = true
     override val mandateText: ResolvableString? = null
@@ -18,7 +23,14 @@ class AddressTextFieldElement(
         AddressTextFieldController(
             label = label,
             addressInputMode = addressInputMode,
+            inlinePredictionsState = inlinePredictionsState,
+            onInlinePredictionSelected = onInlinePredictionSelected,
+            onInlineDismissed = onInlineDismissed,
+            onInlineEnterManually = onInlineEnterManually,
+            getAttributionDrawable = getAttributionDrawable,
         )
+
+    val inlineQuery: StateFlow<String> get() = controller.inlineQuery
 
     override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> {
         return MutableStateFlow(listOf(identifier))
