@@ -141,7 +141,8 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND),
                 cardArt = json.optJSONObject(FIELD_CARD_ART)?.let {
                     CardArtJsonParser().parse(it)
-                }
+                },
+                createdFromCardPresent = json.has(FIELD_GENERATED_FROM),
             )
         }
 
@@ -357,6 +358,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
         private const val FIELD_CUSTOMER = "customer"
         private const val FIELD_LIVEMODE = "livemode"
         private const val FIELD_ALLOW_REDISPLAY = "allow_redisplay"
+        private const val FIELD_GENERATED_FROM = "generated_from"
         private const val FIELD_TYPE = "type"
     }
 }

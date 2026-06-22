@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import org.json.JSONObject
 import kotlin.test.Test
 
 class PaymentMethodJsonParserTest {
@@ -193,5 +194,24 @@ class PaymentMethodJsonParserTest {
         val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITHOUT_CARD_ART_JSON)
 
         assertThat(paymentMethod.card?.cardArt).isNull()
+    }
+
+    @Test
+    fun `parse card JSON without generated_from sets createdFromCardPresent to false`() {
+        val paymentMethod = PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_JSON)
+
+        assertThat(paymentMethod.card?.createdFromCardPresent).isFalse()
+    }
+
+    @Test
+    fun `parse card JSON with generated_from key sets createdFromCardPresent to true`() {
+        val json = JSONObject(PaymentMethodFixtures.CARD_JSON.toString())
+
+        json.getJSONObject("card")
+            .put("generated_from", JSONObject())
+
+        val paymentMethod = PaymentMethodJsonParser().parse(json)
+
+        assertThat(paymentMethod.card?.createdFromCardPresent).isTrue()
     }
 }

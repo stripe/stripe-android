@@ -177,6 +177,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
         val cardEditConfiguration = CardEditConfiguration(
             cardBrandFilter = cardBrandFilter,
+            isAutomaticAddressInputMandatory = !savedPaymentMethodCard.card.createdFromCardPresent,
             isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
             areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
         )

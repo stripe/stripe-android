@@ -117,6 +117,71 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
+    fun `optional automatic address with complete billing includes address on card update params`() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            isAutomaticAddressInputMandatory = false,
+            onCardUpdateParamsChanged = { cardUpdateParams = it },
+        )
+        handler.updateBillingDetails(
+            PaymentSheetFixtures.billingDetailsFormState(
+                postalCode = FormFieldEntry("10001", isComplete = true),
+                country = FormFieldEntry("US", isComplete = true),
+            )
+        )
+        assertThat(cardUpdateParams).isNotNull()
+        assertThat(cardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("10001")
+        assertThat(cardUpdateParams?.billingDetails?.address?.country).isEqualTo("US")
+    }
+
+    @Test
+    fun `optional automatic address with incomplete billing has no billing in card update params`() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            isAutomaticAddressInputMandatory = false,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    line1 = null,
+                    line2 = null,
+                    city = null,
+                    state = null,
+                    postalCode = FormFieldEntry("", isComplete = false),
+                    country = FormFieldEntry("", isComplete = false),
+                )
+            )
+        )
+
+        handler.updateCardBrand(CardBrand.Visa)
+
+        assertThat(capturedCardUpdateParams).isNotNull()
+        assertThat(capturedCardUpdateParams?.cardBrand).isEqualTo(CardBrand.Visa)
+        // Billing is not included when automatic fields are incomplete; the card update API call omits it.
+        assertThat(capturedCardUpdateParams?.billingDetails).isNull()
+    }
+
+    @Test
+    fun `full address mode puts line1 on card update params when line1 is changed`() {
+        var cardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            addressCollectionMode = AddressCollectionMode.Full,
+            onCardUpdateParamsChanged = { cardUpdateParams = it },
+        )
+        handler.updateBillingDetails(
+            PaymentSheetFixtures.billingDetailsFormState(
+                line1 = FormFieldEntry("9 New Street", isComplete = true),
+            )
+        )
+        assertThat(cardUpdateParams).isNotNull()
+        assertThat(cardUpdateParams?.billingDetails?.address?.line1).isEqualTo("9 New Street")
+    }
+
+    @Test
     fun stateIsUpdateWhenNewCardBrandIsSelected() {
         val handler = handler()
 
@@ -634,6 +699,7 @@ internal class DefaultEditCardDetailsInteractorTest {
         card: PaymentMethod.Card = PaymentMethodFixtures.CARD_WITH_NETWORKS,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
         isCbcModifiable: Boolean = true,
+        isAutomaticAddressInputMandatory: Boolean = true,
         areExpiryDateAndAddressModificationSupported: Boolean = true,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         nameCollection: CollectionMode = CollectionMode.Automatic,
@@ -648,6 +714,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             cardEditConfiguration = CardEditConfiguration(
                 cardBrandFilter = cardBrandFilter,
                 isCbcModifiable = isCbcModifiable,
+                isAutomaticAddressInputMandatory = isAutomaticAddressInputMandatory,
                 areExpiryDateAndAddressModificationSupported = areExpiryDateAndAddressModificationSupported,
             ),
             requiresModification = requiresModification,

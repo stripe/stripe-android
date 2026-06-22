@@ -128,6 +128,35 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun `when card was created from card present then automatic address is not mandatory in card edit config`() {
+        val editFactory = FakeEditCardDetailsInteractorFactory()
+        val displayable = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(createdFromCardPresent = true)
+        ).toDisplayableSavedPaymentMethod()
+        runScenario(
+            displayableSavedPaymentMethod = displayable,
+            editCardDetailsInteractorFactory = editFactory,
+        ) {
+            assertThat(interactor.editCardDetailsInteractor).isNotNull()
+            assertThat(editFactory.cardEditConfiguration?.isAutomaticAddressInputMandatory)
+                .isFalse()
+        }
+    }
+
+    @Test
+    fun `when card was not created from card present then automatic address is mandatory in card edit config`() {
+        val editFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
+            editCardDetailsInteractorFactory = editFactory,
+        ) {
+            assertThat(interactor.editCardDetailsInteractor).isNotNull()
+            assertThat(editFactory.cardEditConfiguration?.isAutomaticAddressInputMandatory)
+                .isTrue()
+        }
+    }
+
+    @Test
     fun cbcEligibleCard_isModifiablePaymentMethod() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
