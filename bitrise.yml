@@ -375,6 +375,10 @@ workflows:
           title: Export PaymentSheet E2E test results
           inputs:
             - test_title: "PaymentSheet E2E tests (shard $PAYMENTSHEET_E2E_SHARD_DISPLAY)"
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   run-paymentsheet-latency-synthetics:
     before_run:
       - start_emulator
