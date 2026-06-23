@@ -31,8 +31,7 @@ internal data class CheckoutSessionResponse(
 ) : StripeModel {
 
     fun shouldSendTaxRegion(addressType: String): Boolean {
-        return automaticTaxEnabled &&
-            (automaticTaxAddressSource == null || automaticTaxAddressSource == addressType)
+        return automaticTaxEnabled && automaticTaxAddressSource == addressType
     }
 
     @Parcelize
