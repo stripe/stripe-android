@@ -492,7 +492,7 @@ workflows:
                 -camera-front none
                 -netdelay none
                 -netspeed full
-                -memory 4096
+                -memory 3072
                 -no-snapshot
                 -no-audio
                 -no-window
