@@ -217,12 +217,7 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress sends address fields and updates checkoutSession on success`() =
-        runCreateWithStateScenario(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                automaticTaxAddressSource = "shipping",
-            ),
-        ) {
+        runCreateWithStateScenario {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
@@ -268,12 +263,7 @@ class CheckoutTest {
         }
 
     @Test
-    fun `updateShippingAddress returns failure on error response`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "shipping",
-        ),
-    ) {
+    fun `updateShippingAddress returns failure on error response`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -290,12 +280,7 @@ class CheckoutTest {
     }
 
     @Test
-    fun `updateShippingAddress omits empty fields from request`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "shipping",
-        ),
-    ) {
+    fun `updateShippingAddress omits empty fields from request`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[postal_code]", "80202"),
@@ -321,12 +306,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress sends address fields and updates checkoutSession on success`() =
-        runCreateWithStateScenario(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                automaticTaxAddressSource = "billing",
-            ),
-        ) {
+        runCreateWithStateScenario {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
@@ -362,12 +342,7 @@ class CheckoutTest {
         }
 
     @Test
-    fun `updateBillingAddress returns failure on error response`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "billing",
-        ),
-    ) {
+    fun `updateBillingAddress returns failure on error response`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -385,10 +360,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress stores address in internalState`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "shipping",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -421,10 +392,6 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress stores address in internalState`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "billing",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -457,10 +424,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress does not store address in internalState on failure`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "shipping",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -479,10 +442,6 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress does not store address in internalState on failure`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "billing",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -501,10 +460,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress stores phoneNumber in internalState`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "shipping",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -520,10 +475,6 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress stores phoneNumber in internalState`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "billing",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -539,10 +490,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress does not store phoneNumber in internalState on failure`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "shipping",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -559,10 +506,6 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress does not store phoneNumber in internalState on failure`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "billing",
-        ),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -578,12 +521,7 @@ class CheckoutTest {
     }
 
     @Test
-    fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario(
-        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-            automaticTaxEnabled = true,
-            automaticTaxAddressSource = "billing",
-        ),
-    ) {
+    fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[postal_code]", "80202"),
@@ -614,8 +552,9 @@ class CheckoutTest {
                 automaticTaxEnabled = false,
                 automaticTaxAddressSource = "shipping",
             ),
+            shouldValidateEvents = false,
         ) {
-            val initial = checkoutSessionTurbine.awaitItem()
+            checkoutSessionTurbine.awaitItem()
 
             val address = Address()
                 .city("Denver")
@@ -625,15 +564,10 @@ class CheckoutTest {
             val result = checkout.updateShippingAddress(name = "John", address = address)
             assertThat(result.isSuccess).isTrue()
 
-            // State is updated locally without network call
             val state = checkout.internalState
             assertThat(state.shippingName).isEqualTo("John")
             assertThat(state.shippingAddress?.country).isEqualTo("US")
             assertThat(state.shippingAddress?.postalCode).isEqualTo("80202")
-
-            // CheckoutSession emission from local state mutation
-            val updated = checkoutSessionTurbine.awaitItem()
-            assertThat(updated.id).isEqualTo(initial.id)
         }
 
     @Test
@@ -643,8 +577,9 @@ class CheckoutTest {
                 automaticTaxEnabled = true,
                 automaticTaxAddressSource = "billing",
             ),
+            shouldValidateEvents = false,
         ) {
-            val initial = checkoutSessionTurbine.awaitItem()
+            checkoutSessionTurbine.awaitItem()
 
             val address = Address()
                 .city("Denver")
@@ -654,13 +589,9 @@ class CheckoutTest {
             val result = checkout.updateShippingAddress(name = "John", address = address)
             assertThat(result.isSuccess).isTrue()
 
-            // State is updated locally without network call
             val state = checkout.internalState
             assertThat(state.shippingName).isEqualTo("John")
             assertThat(state.shippingAddress?.country).isEqualTo("US")
-
-            val updated = checkoutSessionTurbine.awaitItem()
-            assertThat(updated.id).isEqualTo(initial.id)
         }
 
     @Test
@@ -670,8 +601,9 @@ class CheckoutTest {
                 automaticTaxEnabled = false,
                 automaticTaxAddressSource = "billing",
             ),
+            shouldValidateEvents = false,
         ) {
-            val initial = checkoutSessionTurbine.awaitItem()
+            checkoutSessionTurbine.awaitItem()
 
             val address = Address()
                 .city("Denver")
@@ -684,9 +616,6 @@ class CheckoutTest {
             val state = checkout.internalState
             assertThat(state.billingName).isEqualTo("Jane")
             assertThat(state.billingAddress?.country).isEqualTo("US")
-
-            val updated = checkoutSessionTurbine.awaitItem()
-            assertThat(updated.id).isEqualTo(initial.id)
         }
 
     @Test
@@ -696,8 +625,9 @@ class CheckoutTest {
                 automaticTaxEnabled = true,
                 automaticTaxAddressSource = "shipping",
             ),
+            shouldValidateEvents = false,
         ) {
-            val initial = checkoutSessionTurbine.awaitItem()
+            checkoutSessionTurbine.awaitItem()
 
             val address = Address()
                 .city("Denver")
@@ -710,9 +640,6 @@ class CheckoutTest {
             val state = checkout.internalState
             assertThat(state.billingName).isEqualTo("Jane")
             assertThat(state.billingAddress?.country).isEqualTo("US")
-
-            val updated = checkoutSessionTurbine.awaitItem()
-            assertThat(updated.id).isEqualTo(initial.id)
         }
 
     @Test

@@ -30,12 +30,9 @@ internal data class CheckoutSessionResponse(
     val automaticTaxAddressSource: String?,
 ) : StripeModel {
 
-    /**
-     * Returns true if the tax region should be sent to the server for the given address type.
-     * Only sends when automatic tax is enabled and the address source matches the address type.
-     */
     fun shouldSendTaxRegion(addressType: String): Boolean {
-        return automaticTaxEnabled && automaticTaxAddressSource == addressType
+        return automaticTaxEnabled &&
+            (automaticTaxAddressSource == null || automaticTaxAddressSource == addressType)
     }
 
     @Parcelize
