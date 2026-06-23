@@ -194,24 +194,7 @@ internal class PaymentSheetPlaygroundActivity :
             }
                 .build()
             val flowController = remember(playgroundState) {
-                PaymentSheet.FlowController.Builder(
-                    viewModel::onPaymentSheetResult,
-                    viewModel::onPaymentOptionSelected
-                )
-                    .externalPaymentMethodConfirmHandler(this)
-                    .confirmCustomPaymentMethodCallback(this)
-                    .analyticEventCallback(viewModel::analyticCallback)
-                    .also {
-                        if (canUseTapToAdd) {
-                            it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
-                        }
-
-                        if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
-                            it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
-                        } else {
-                            it.createIntentCallback(viewModel::createIntentCallback)
-                        }
-                    }
+                flowControllerBuilder(canUseTapToAdd, playgroundState)
             }
                 .build()
             val embeddedPaymentElementBuilder = remember(playgroundState) {
@@ -353,6 +336,29 @@ internal class PaymentSheetPlaygroundActivity :
             }
         }
     }
+
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class, TapToAddPreview::class)
+    private fun flowControllerBuilder(
+        canUseTapToAdd: Boolean,
+        playgroundState: PlaygroundState?
+    ): PaymentSheet.FlowController.Builder = PaymentSheet.FlowController.Builder(
+        viewModel::onPaymentSheetResult,
+        viewModel::onPaymentOptionSelected
+    )
+        .externalPaymentMethodConfirmHandler(this)
+        .confirmCustomPaymentMethodCallback(this)
+        .analyticEventCallback(viewModel::analyticCallback)
+        .also {
+            if (canUseTapToAdd) {
+                it.createCardPresentSetupIntentCallback(viewModel::createCardPresentSetupIntent)
+            }
+
+            if (playgroundState?.snapshot[ConfirmationTokenSettingsDefinition] == true) {
+                it.createIntentCallback(viewModel::createIntentWithConfirmationTokenCallback)
+            } else {
+                it.createIntentCallback(viewModel::createIntentCallback)
+            }
+        }
 
     @Composable
     private fun AppearanceButton() {
