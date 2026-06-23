@@ -23,8 +23,7 @@ class AppAttestationUnavailableException internal constructor(
             docUrl = docUrl,
             sdkVersions = diagnosticContext.sdkVersions,
             requestContext = CryptoOnrampErrorRenderer.requestContextLines(
-                diagnosticContext = diagnosticContext,
-                reason = APP_ATTESTATION_UNAVAILABLE_REASON,
+                diagnosticContext = diagnosticContext
             ),
         )
 

@@ -32,7 +32,7 @@ internal object CryptoOnrampErrorRenderer {
 
     fun requestContextLines(
         diagnosticContext: DiagnosticContext,
-        reason: String?,
+        reason: String? = null,
         requestId: String? = null,
         apiErrorType: String? = null,
     ): List<String> {
