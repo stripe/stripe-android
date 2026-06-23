@@ -81,7 +81,6 @@ internal class PaymentSheetLoadParallelismTest {
                             Request.FetchUsBank,
                         )
                     ),
-                    // TODO: why are we fetching customer in this case?
                     RequestOrdering.Singleton(request = Request.FetchCustomer)
                 )
             ),
