@@ -490,21 +490,8 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<Unit> {
-        val built = address.build()
-        return if (internalState.checkoutSessionResponse.shouldSendTaxRegion("shipping")) {
-            withInternalState(
-                additionalStateMutations = {
-                    copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
-                },
-            ) { sessionId ->
-                component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
-            }
-        } else {
-            withLocalStateMutation {
-                copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
-            }
-        }
+    ): Result<Unit> = updateAddress("shipping", address) {
+        copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
     }
 
     /**
@@ -531,20 +518,24 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
+    ): Result<Unit> = updateAddress("billing", address) {
+        copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = it)
+    }
+
+    private suspend fun updateAddress(
+        addressType: String,
+        address: Address,
+        mutation: InternalState.(Address.State) -> InternalState,
     ): Result<Unit> {
         val built = address.build()
-        return if (internalState.checkoutSessionResponse.shouldSendTaxRegion("billing")) {
+        return if (internalState.checkoutSessionResponse.shouldSendTaxRegion(addressType)) {
             withInternalState(
-                additionalStateMutations = {
-                    copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
-                },
+                additionalStateMutations = { mutation(built) },
             ) { sessionId ->
                 component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
             }
         } else {
-            withLocalStateMutation {
-                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
-            }
+            withLocalStateMutation { mutation(built) }
         }
     }
 
