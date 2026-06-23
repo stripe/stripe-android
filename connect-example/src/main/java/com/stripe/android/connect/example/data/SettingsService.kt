@@ -5,7 +5,6 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.stripe.android.connect.AccountOnboardingProps
 import com.stripe.android.connect.PaymentsProps
-import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.appearance.TextTransform
 import com.stripe.android.connect.example.ui.appearance.AppearanceInfo
 import com.stripe.android.connect.example.ui.appearance.CustomThemeOverrides
@@ -186,7 +185,6 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         }
     }
 
-    @OptIn(PreviewConnectSDK::class)
     fun getPaymentsSettings(): PaymentsSettings {
         return PaymentsSettings(
             amountFilterType = AmountFilterType.valueOf(
@@ -225,7 +223,6 @@ class SettingsService @Inject constructor(@ApplicationContext context: Context) 
         )
     }
 
-    @OptIn(PreviewConnectSDK::class)
     fun setPaymentsSettings(value: PaymentsSettings) {
         sharedPreferences.edit {
             putString(PAYMENTS_AMOUNT_FILTER_TYPE, value.amountFilterType.name)
@@ -401,7 +398,6 @@ enum class FieldOption { DEFAULT, CURRENTLY_DUE, EVENTUALLY_DUE }
 enum class FutureRequirement { DEFAULT, OMIT, INCLUDE }
 enum class RequirementsMode { DEFAULT, ONLY, EXCLUDE }
 
-@OptIn(PreviewConnectSDK::class)
 data class PaymentsSettings(
     val amountFilterType: AmountFilterType = AmountFilterType.NONE,
     val amountValue: Double = 0.0,
@@ -486,17 +482,16 @@ data class PaymentsSettings(
         val dateFilter = createDateFilter()
 
         val defaultFilters = if (hasFilters(amountFilter, dateFilter, statusFilters, paymentMethodFilter)) {
-            PaymentsProps.PaymentsListDefaultFilters(
-                amount = amountFilter,
-                date = dateFilter,
-                status = statusFilters.takeIf { it.isNotEmpty() },
-                paymentMethod = paymentMethodFilter
-            )
+            PaymentsProps.PaymentsListDefaultFilters()
+                .amount(amountFilter)
+                .date(dateFilter)
+                .status(statusFilters.takeIf { it.isNotEmpty() })
+                .paymentMethod(paymentMethodFilter)
         } else {
             null
         }
 
-        return PaymentsProps(defaultFilters = defaultFilters)
+        return PaymentsProps().defaultFilters(defaultFilters)
     }
 }
 

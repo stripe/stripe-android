@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.stripe.android.connect.AccountOnboardingListener
-import com.stripe.android.connect.PreviewConnectSDK
 import com.stripe.android.connect.StripeComponentController
 import com.stripe.android.connect.example.R
 import com.stripe.android.connect.example.core.Success
@@ -58,7 +57,6 @@ import com.stripe.android.connect.example.ui.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 
 @Suppress("LongMethod")
-@OptIn(PreviewConnectSDK::class)
 @Composable
 fun ComponentPickerContent(
     viewModel: EmbeddedComponentLoaderViewModel,

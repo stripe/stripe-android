@@ -140,17 +140,18 @@ public abstract interface class com/stripe/android/connect/FetchClientSecretTask
 	public abstract fun onResult (Ljava/lang/String;)V
 }
 
-public final class com/stripe/android/connect/PaymentsProps : android/os/Parcelable {
+public abstract interface class com/stripe/android/connect/PaymentsListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+}
+
+public final class com/stripe/android/connect/PaymentsListener$DefaultImpls {
+	public static fun onLoadError (Lcom/stripe/android/connect/PaymentsListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/PaymentsListener;)V
+}
+
+public final class com/stripe/android/connect/PaymentsProps {
 	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters;)V
-	public synthetic fun <init> (Lcom/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun defaultFilters (Lcom/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters;)Lcom/stripe/android/connect/PaymentsProps;
 }
 
 public abstract class com/stripe/android/connect/PaymentsProps$AmountFilter : android/os/Parcelable {
@@ -272,21 +273,13 @@ public final class com/stripe/android/connect/PaymentsProps$PaymentMethod : java
 	public static fun values ()[Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
 }
 
-public final class com/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters : android/os/Parcelable {
+public final class com/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters {
 	public static final field $stable I
-	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/connect/PaymentsProps$AmountFilter;Lcom/stripe/android/connect/PaymentsProps$DateFilter;Ljava/util/List;Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;)V
-	public synthetic fun <init> (Lcom/stripe/android/connect/PaymentsProps$AmountFilter;Lcom/stripe/android/connect/PaymentsProps$DateFilter;Ljava/util/List;Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
-	public final fun describeContents ()I
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getAmount ()Lcom/stripe/android/connect/PaymentsProps$AmountFilter;
-	public final fun getDate ()Lcom/stripe/android/connect/PaymentsProps$DateFilter;
-	public final fun getPaymentMethod ()Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;
-	public final fun getStatus ()Ljava/util/List;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-	public final fun writeToParcel (Landroid/os/Parcel;I)V
+	public final fun amount (Lcom/stripe/android/connect/PaymentsProps$AmountFilter;)Lcom/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters;
+	public final fun date (Lcom/stripe/android/connect/PaymentsProps$DateFilter;)Lcom/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters;
+	public final fun paymentMethod (Lcom/stripe/android/connect/PaymentsProps$PaymentMethod;)Lcom/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters;
+	public final fun status (Ljava/util/List;)Lcom/stripe/android/connect/PaymentsProps$PaymentsListDefaultFilters;
 }
 
 public final class com/stripe/android/connect/PaymentsProps$Status : java/lang/Enum {
@@ -307,7 +300,12 @@ public final class com/stripe/android/connect/PaymentsProps$Status : java/lang/E
 	public static fun values ()[Lcom/stripe/android/connect/PaymentsProps$Status;
 }
 
-public abstract interface annotation class com/stripe/android/connect/PreviewConnectSDK : java/lang/annotation/Annotation {
+public abstract interface class com/stripe/android/connect/PayoutsListener : com/stripe/android/connect/StripeEmbeddedComponentListener {
+}
+
+public final class com/stripe/android/connect/PayoutsListener$DefaultImpls {
+	public static fun onLoadError (Lcom/stripe/android/connect/PayoutsListener;Ljava/lang/Throwable;)V
+	public static fun onLoaderStart (Lcom/stripe/android/connect/PayoutsListener;)V
 }
 
 public abstract class com/stripe/android/connect/StripeComponentController {

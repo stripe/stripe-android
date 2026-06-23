@@ -3,14 +3,11 @@ package com.stripe.android.connect
 import android.content.Context
 import android.os.Parcelable
 import android.util.AttributeSet
-import androidx.annotation.RestrictTo
 import androidx.core.content.withStyledAttributes
 import com.stripe.android.connect.webview.StripeConnectWebViewContainer
-import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 import java.util.Date
 
-@PreviewConnectSDK
 internal class PaymentsView internal constructor(
     context: Context,
     attrs: AttributeSet? = null,
@@ -20,16 +17,16 @@ internal class PaymentsView internal constructor(
     props: PaymentsProps?,
     cacheKey: String?,
 ) :
-    StripeComponentView<PaymentsListener, PaymentsProps>(
+    StripeComponentView<PaymentsListener, PaymentsProps.State>(
         context = context,
         attrs = attrs,
         defStyleAttr = defStyleAttr,
         embeddedComponent = StripeEmbeddedComponent.PAYMENTS,
         embeddedComponentManager = embeddedComponentManager,
         listener = listener,
-        props = props,
+        props = props?.build(),
     ),
-    StripeConnectWebViewContainer<PaymentsListener, PaymentsProps> {
+    StripeConnectWebViewContainer<PaymentsListener, PaymentsProps.State> {
 
     @JvmOverloads
     constructor(
@@ -55,27 +52,32 @@ internal class PaymentsView internal constructor(
     }
 }
 
-@PreviewConnectSDK
-@Parcelize
-@Poko
-class PaymentsProps(
+class PaymentsProps {
+    private var defaultFilters: PaymentsListDefaultFilters? = null
+
     /**
      * On load, show the payments matching the filter criteria.
      */
-    internal val defaultFilters: PaymentsListDefaultFilters? = null,
-) : Parcelable {
-    @PreviewConnectSDK
+    fun defaultFilters(defaultFilters: PaymentsListDefaultFilters?) = apply {
+        this.defaultFilters = defaultFilters
+    }
+
     @Parcelize
+    internal class State(
+        val defaultFilters: PaymentsListDefaultFilters.State?,
+    ) : Parcelable
+
+    internal fun build(): State {
+        return State(defaultFilters = defaultFilters?.build())
+    }
+
     sealed class AmountFilter : Parcelable {
-        @Poko
         @Parcelize
         internal class Equals(val value: Double) : AmountFilter()
 
-        @Poko
         @Parcelize
         internal class GreaterThan(val value: Double) : AmountFilter()
 
-        @Poko
         @Parcelize
         internal class LessThan(val value: Double) : AmountFilter()
 
@@ -97,18 +99,13 @@ class PaymentsProps(
         }
     }
 
-    @PreviewConnectSDK
-    @Parcelize
     sealed class DateFilter : Parcelable {
-        @Poko
         @Parcelize
         internal class Before(val date: Date) : DateFilter()
 
-        @Poko
         @Parcelize
         internal class After(val date: Date) : DateFilter()
 
-        @Poko
         @Parcelize
         internal class Between(val start: Date, val end: Date) : DateFilter()
 
@@ -124,7 +121,6 @@ class PaymentsProps(
         }
     }
 
-    @PreviewConnectSDK
     enum class Status(internal val value: String) {
         BLOCKED("blocked"),
         CANCELED("canceled"),
@@ -140,7 +136,6 @@ class PaymentsProps(
         UNCAPTURED("uncaptured"),
     }
 
-    @PreviewConnectSDK
     enum class PaymentMethod(internal val value: String) {
         ACH_CREDIT_TRANSFER("ach_credit_transfer"),
         ACH_DEBIT("ach_debit"),
@@ -227,17 +222,57 @@ class PaymentsProps(
         ZIP("zip"),
     }
 
-    @PreviewConnectSDK
-    @Parcelize
-    @Poko
-    class PaymentsListDefaultFilters(
-        val amount: AmountFilter? = null,
-        val date: DateFilter? = null,
-        val status: List<Status>? = null,
-        val paymentMethod: PaymentMethod? = null,
-    ) : Parcelable
+    class PaymentsListDefaultFilters {
+        private var amount: AmountFilter? = null
+        private var date: DateFilter? = null
+        private var status: List<Status>? = null
+        private var paymentMethod: PaymentMethod? = null
+
+        /**
+         * Filter payments by amount.
+         */
+        fun amount(amount: AmountFilter?) = apply {
+            this.amount = amount
+        }
+
+        /**
+         * Filter payments by date.
+         */
+        fun date(date: DateFilter?) = apply {
+            this.date = date
+        }
+
+        /**
+         * Filter payments by status.
+         */
+        fun status(status: List<Status>?) = apply {
+            this.status = status
+        }
+
+        /**
+         * Filter payments by payment method.
+         */
+        fun paymentMethod(paymentMethod: PaymentMethod?) = apply {
+            this.paymentMethod = paymentMethod
+        }
+
+        @Parcelize
+        internal class State(
+            val amount: AmountFilter?,
+            val date: DateFilter?,
+            val status: List<Status>?,
+            val paymentMethod: PaymentMethod?,
+        ) : Parcelable
+
+        internal fun build(): State {
+            return State(
+                amount = amount,
+                date = date,
+                status = status,
+                paymentMethod = paymentMethod,
+            )
+        }
+    }
 }
 
-@PreviewConnectSDK
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface PaymentsListener : StripeEmbeddedComponentListener
