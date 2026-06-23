@@ -492,12 +492,18 @@ class Checkout private constructor(
         address: Address,
     ): Result<Unit> {
         val built = address.build()
-        return withInternalState(
-            additionalStateMutations = {
+        return if (internalState.checkoutSessionResponse.shouldSendTaxRegion("shipping")) {
+            withInternalState(
+                additionalStateMutations = {
+                    copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
+                },
+            ) { sessionId ->
+                component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+            }
+        } else {
+            withLocalStateMutation {
                 copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
-            },
-        ) { sessionId ->
-            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+            }
         }
     }
 
@@ -527,12 +533,18 @@ class Checkout private constructor(
         address: Address,
     ): Result<Unit> {
         val built = address.build()
-        return withInternalState(
-            additionalStateMutations = {
+        return if (internalState.checkoutSessionResponse.shouldSendTaxRegion("billing")) {
+            withInternalState(
+                additionalStateMutations = {
+                    copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
+                },
+            ) { sessionId ->
+                component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+            }
+        } else {
+            withLocalStateMutation {
                 copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
-            },
-        ) { sessionId ->
-            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+            }
         }
     }
 
@@ -567,6 +579,21 @@ class Checkout private constructor(
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
         internalState = internalState.copy(checkoutSessionResponse = response)
         _checkoutSession.value = internalState.asCheckoutSession()
+    }
+
+    private fun withLocalStateMutation(
+        mutation: InternalState.() -> InternalState,
+    ): Result<Unit> {
+        if (internalState.integrationLaunched) {
+            return Result.failure(
+                IllegalStateException(
+                    "Cannot mutate checkout session while a payment flow is presented."
+                )
+            )
+        }
+        internalState = internalState.mutation()
+        _checkoutSession.value = internalState.asCheckoutSession()
+        return Result.success(Unit)
     }
 
     private suspend fun withInternalState(

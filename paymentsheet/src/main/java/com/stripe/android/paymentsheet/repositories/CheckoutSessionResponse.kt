@@ -26,7 +26,17 @@ internal data class CheckoutSessionResponse(
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
     val adaptivePricingInfo: AdaptivePricingInfo?,
+    val automaticTaxEnabled: Boolean,
+    val automaticTaxAddressSource: String?,
 ) : StripeModel {
+
+    /**
+     * Returns true if the tax region should be sent to the server for the given address type.
+     * Only sends when automatic tax is enabled and the address source matches the address type.
+     */
+    fun shouldSendTaxRegion(addressType: String): Boolean {
+        return automaticTaxEnabled && automaticTaxAddressSource == addressType
+    }
 
     @Parcelize
     data class SavedPaymentMethodsOfferSave(

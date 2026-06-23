@@ -1205,4 +1205,92 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
     }
+
+    @Test
+    fun `parse automatic tax enabled and address source from tax_context`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax_context": {
+                    "automatic_tax_enabled": true,
+                    "automatic_tax_address_source": "session.billing"
+                },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isTrue()
+        assertThat(result?.automaticTaxAddressSource).isEqualTo("billing")
+    }
+
+    @Test
+    fun `parse automatic tax address source strips session prefix`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax_context": {
+                    "automatic_tax_enabled": true,
+                    "automatic_tax_address_source": "session.shipping"
+                },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isTrue()
+        assertThat(result?.automaticTaxAddressSource).isEqualTo("shipping")
+    }
+
+    @Test
+    fun `parse automatic tax address source without session prefix is used as-is`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax_context": {
+                    "automatic_tax_enabled": true,
+                    "automatic_tax_address_source": "billing"
+                },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isTrue()
+        assertThat(result?.automaticTaxAddressSource).isEqualTo("billing")
+    }
+
+    @Test
+    fun `parse defaults automaticTaxEnabled to false when tax_context is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isFalse()
+        assertThat(result?.automaticTaxAddressSource).isNull()
+    }
 }

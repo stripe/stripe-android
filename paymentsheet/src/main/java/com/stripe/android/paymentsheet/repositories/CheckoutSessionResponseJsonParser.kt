@@ -80,6 +80,13 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             json.optJSONObject(FIELD_ADAPTIVE_PRICING_INFO)
         )
 
+        val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
+        val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
+        val automaticTaxAddressSource = taxContext
+            ?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE)
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { if (it.startsWith("session.")) it.removePrefix("session.") else it }
+
         return CheckoutSessionResponse(
             id = sessionId,
             amount = amount,
@@ -98,6 +105,8 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             lineItems = lineItems,
             shippingOptions = shippingOptions,
             adaptivePricingInfo = adaptivePricingInfo,
+            automaticTaxEnabled = automaticTaxEnabled,
+            automaticTaxAddressSource = automaticTaxAddressSource,
         )
     }
 
@@ -505,6 +514,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_LIVE_MODE = "livemode"
     private const val FIELD_TAX_META = "tax_meta"
     private const val FIELD_TAX_CONTEXT = "tax_context"
+    private const val FIELD_AUTOMATIC_TAX_ENABLED = "automatic_tax_enabled"
     private const val FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE = "automatic_tax_address_source"
     private const val FIELD_CURRENCY = "currency"
     private const val FIELD_CUSTOMER_EMAIL = "customer_email"
