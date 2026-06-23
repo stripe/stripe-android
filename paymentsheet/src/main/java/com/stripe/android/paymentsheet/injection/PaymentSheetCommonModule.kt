@@ -3,8 +3,7 @@ package com.stripe.android.paymentsheet.injection
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.common.nfcscan.DefaultIsNfcScanningAvailable
-import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
+import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.common.taptoadd.TapToAddHelper
@@ -87,6 +86,7 @@ import javax.inject.Singleton
         PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
+        NfcScanningAvailabilityModule::class,
     ]
 )
 internal abstract class PaymentSheetCommonModule {
@@ -185,11 +185,6 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsTapToAddHelperFactory(factory: DefaultTapToAddHelper.Factory): TapToAddHelper.Factory
-
-    @Binds
-    abstract fun bindsIsNfcScanningAvailable(
-        isNfcScanningAvailable: DefaultIsNfcScanningAvailable,
-    ): IsNfcScanningAvailable
 
     @Suppress("TooManyFunctions")
     companion object {
