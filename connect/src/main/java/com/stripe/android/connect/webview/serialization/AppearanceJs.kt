@@ -1,5 +1,3 @@
-@file:OptIn(com.stripe.android.connect.PreviewConnectSDK::class)
-
 package com.stripe.android.connect.webview.serialization
 
 import androidx.annotation.ColorInt
