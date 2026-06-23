@@ -62,7 +62,7 @@ internal fun Throwable.toCryptoOnrampError(
 
     return if (stripeError.isAppAttestationError()) {
         AppAttestationException(
-            context = apiErrorContext,
+            apiErrorContext = apiErrorContext,
             diagnosticContext = diagnosticContext,
             userMessage = context.getString(
                 R.string.stripe_onramp_app_attestation_default_user_message,
@@ -70,7 +70,7 @@ internal fun Throwable.toCryptoOnrampError(
         )
     } else {
         UncategorizedApiErrorException(
-            context = apiErrorContext,
+            apiErrorContext = apiErrorContext,
             diagnosticContext = diagnosticContext,
             userMessage = context.getString(
                 R.string.stripe_onramp_default_api_error_user_message,

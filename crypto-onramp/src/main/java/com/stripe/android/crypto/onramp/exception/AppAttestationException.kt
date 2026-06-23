@@ -7,20 +7,20 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
  */
 @ExperimentalCryptoOnramp
 class AppAttestationException internal constructor(
-    context: APIErrorContext,
+    apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,
 ) : CryptoOnrampApiException(
-    context = context,
+    apiErrorContext = apiErrorContext,
     userMessage = userMessage,
     developerMessage = buildAppAttestationDeveloperMessage(
-        context = context,
+        apiErrorContext = apiErrorContext,
         diagnosticContext = diagnosticContext,
-        code = context.code(fallback = APP_ATTESTATION_ERROR_CODE),
+        code = apiErrorContext.code(fallback = APP_ATTESTATION_ERROR_CODE),
     ),
 ) {
     override val code: String
-        get() = context.code(fallback = APP_ATTESTATION_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = APP_ATTESTATION_ERROR_CODE)
 }
 
 private const val ATTESTATION_NOT_ENABLED_REASON = "attestation_not_enabled"
@@ -107,22 +107,22 @@ private fun attestationSummary(description: String): String {
 }
 
 private fun buildAppAttestationDeveloperMessage(
-    context: APIErrorContext,
+    apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     code: String,
 ): String {
     return CryptoOnrampErrorRenderer.renderDeveloperMessage(
-        summary = appAttestationSummary(context.reason)
-            ?: (context.apiErrorMessage ?: "App attestation failed."),
+        summary = appAttestationSummary(apiErrorContext.reason)
+            ?: (apiErrorContext.apiErrorMessage ?: "App attestation failed."),
         code = code,
-        nextStep = appAttestationNextStep(context.reason),
-        docUrl = context.docUrl,
+        nextStep = appAttestationNextStep(apiErrorContext.reason),
+        docUrl = apiErrorContext.docUrl,
         sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
             diagnosticContext = diagnosticContext,
-            reason = context.reason,
-            requestId = context.requestId,
-            apiErrorType = context.apiErrorType,
+            reason = apiErrorContext.reason,
+            requestId = apiErrorContext.requestId,
+            apiErrorType = apiErrorContext.apiErrorType,
         ),
     )
 }
