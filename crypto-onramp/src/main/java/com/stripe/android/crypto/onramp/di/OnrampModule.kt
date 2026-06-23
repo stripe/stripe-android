@@ -12,6 +12,8 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.StripeNetworkClient
+import com.stripe.android.core.utils.RealUserFacingLogger
+import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.crypto.onramp.DEFAULT_ONRAMP_INSTANCE_KEY
 import com.stripe.android.crypto.onramp.OnrampCallbackReferences
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
@@ -39,6 +41,9 @@ internal class OnrampModule {
 
     @Provides
     fun provideAppContext(application: Application): Context = application.applicationContext
+
+    @Provides
+    fun provideUserFacingLogger(logger: RealUserFacingLogger): UserFacingLogger = logger
 
     @Provides
     fun provideRequestSurface(): RequestSurface = RequestSurface.CryptoOnramp
