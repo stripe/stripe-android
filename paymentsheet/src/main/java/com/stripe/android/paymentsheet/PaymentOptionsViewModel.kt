@@ -11,6 +11,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.checkout.InSheetCheckoutSessionUpdater
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
@@ -51,6 +52,7 @@ import com.stripe.android.paymentsheet.ui.DefaultAddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -96,6 +98,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
 ) {
+
+    private val inSheetCheckoutSessionUpdater =
+        InSheetCheckoutSessionUpdater.create(args.state.paymentMethodMetadata)
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -386,16 +391,41 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     linkExpressMode = LinkExpressMode.ENABLED,
                 )
+            } else if (inSheetCheckoutSessionUpdater.requiresUpdate()) {
+                viewModelScope.launch {
+                    performCheckoutSessionUpdateThenContinue(paymentSelection)
+                }
             } else {
-                _paymentOptionsActivityResult.tryEmit(
-                    PaymentOptionsActivityResult.Succeeded(
-                        linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
-                        paymentSelection = paymentSelection.withLinkDetails(),
-                        paymentMethods = customerStateHolder.paymentMethods.value
-                    )
-                )
+                emitSucceededResult(paymentSelection)
             }
         }
+    }
+
+    private suspend fun performCheckoutSessionUpdateThenContinue(paymentSelection: PaymentSelection) {
+        updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+        savedStateHandle[SAVE_PROCESSING] = true
+        inSheetCheckoutSessionUpdater.performUpdate(paymentSelection).fold(
+            onSuccess = {
+                savedStateHandle[SAVE_PROCESSING] = false
+                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                emitSucceededResult(paymentSelection)
+            },
+            onFailure = { error ->
+                savedStateHandle[SAVE_PROCESSING] = false
+                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                onError(error.stripeErrorMessage())
+            }
+        )
+    }
+
+    private fun emitSucceededResult(paymentSelection: PaymentSelection) {
+        _paymentOptionsActivityResult.tryEmit(
+            PaymentOptionsActivityResult.Succeeded(
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                paymentSelection = paymentSelection.withLinkDetails(),
+                paymentMethods = customerStateHolder.paymentMethods.value
+            )
+        )
     }
 
     private fun onDisabledClick() {

@@ -525,9 +525,22 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
+    ): Result<Unit> = updateBillingAddressInternal(
+        name = name,
+        phoneNumber = phoneNumber,
+        address = address,
+        isInSheetUpdate = false,
+    )
+
+    internal suspend fun updateBillingAddressInternal(
+        name: String?,
+        phoneNumber: String?,
+        address: Address,
+        isInSheetUpdate: Boolean,
     ): Result<Unit> {
         val built = address.build()
         return withInternalState(
+            isInSheetUpdate = isInSheetUpdate,
             additionalStateMutations = {
                 copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
             },
@@ -570,13 +583,21 @@ class Checkout private constructor(
     }
 
     private suspend fun withInternalState(
+        isInSheetUpdate: Boolean = false,
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<Unit> {
-        if (internalState.integrationLaunched) {
+        if (!isInSheetUpdate && internalState.integrationLaunched) {
             return Result.failure(
                 IllegalStateException(
                     "Cannot mutate checkout session while a payment flow is presented."
+                )
+            )
+        }
+        if (internalState.checkoutSessionResponse.status != CheckoutSessionResponse.Status.OPEN) {
+            return Result.failure(
+                IllegalStateException(
+                    "Cannot mutate checkout session that is not open."
                 )
             )
         }
