@@ -3,7 +3,6 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -31,7 +30,6 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
-import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -589,56 +587,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(customPaymentMethodConfirmationOption.customPaymentMethodType)
             .isEqualTo(customPaymentMethod)
         assertThat(customPaymentMethodConfirmationOption.billingDetails).isEqualTo(billingDetails)
-    }
-
-    @Test
-    fun `On ShopPay selection with config with null shopPay config, should return null`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter,
-            )
-        ).isNull()
-    }
-
-    @Test
-    fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
-                    shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-                    customer = null
-                ),
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter,
-            )
-        ).isNull()
-    }
-
-    @Test
-    fun `On ShopPay selection with config with shopPay config, should return expected option`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
-                    .asCommonConfiguration()
-                    .copy(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                            id = "",
-                            clientSecret = "css_test_123"
-                        ),
-                        shopPayConfiguration = SHOP_PAY_CONFIGURATION
-                    ),
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter,
-            )
-        ).isEqualTo(
-            ShopPayConfirmationOption(
-                shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-                customerSessionClientSecret = "css_test_123",
-                merchantDisplayName = "Merchant, Inc."
-            )
-        )
     }
 
     private fun testLinkInlineSignupConfirmationOption(

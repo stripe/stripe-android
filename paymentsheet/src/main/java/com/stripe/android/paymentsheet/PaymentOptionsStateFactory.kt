@@ -94,8 +94,7 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
             }
             is PaymentSelection.New,
             is PaymentSelection.CustomPaymentMethod,
-            is PaymentSelection.ExternalPaymentMethod,
-            is PaymentSelection.ShopPay -> false
+            is PaymentSelection.ExternalPaymentMethod -> false
         }
     }
 }

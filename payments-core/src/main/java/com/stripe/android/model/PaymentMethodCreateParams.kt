@@ -37,7 +37,6 @@ constructor(
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
-    private val shopPay: ShopPay? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val billingDetails: PaymentMethod.BillingDetails? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val radarOptions: RadarOptions? = null,
@@ -72,7 +71,6 @@ constructor(
         link: Link? = this.link,
         cashAppPay: CashAppPay? = this.cashAppPay,
         swish: Swish? = this.swish,
-        shopPay: ShopPay? = this.shopPay,
         billingDetails: PaymentMethod.BillingDetails? = this.billingDetails,
         allowRedisplay: PaymentMethod.AllowRedisplay? = this.allowRedisplay,
         radarOptions: RadarOptions? = this.radarOptions,
@@ -95,7 +93,6 @@ constructor(
             link = link,
             cashAppPay = cashAppPay,
             swish = swish,
-            shopPay = shopPay,
             billingDetails = billingDetails,
             allowRedisplay = allowRedisplay,
             radarOptions = radarOptions,
@@ -119,7 +116,6 @@ constructor(
         link: Link? = null,
         cashAppPay: CashAppPay? = null,
         swish: Swish? = null,
-        shopPay: ShopPay? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         radarOptions: RadarOptions? = null,
@@ -141,7 +137,6 @@ constructor(
         link,
         cashAppPay,
         swish,
-        shopPay,
         billingDetails,
         allowRedisplay,
         radarOptions,
@@ -298,17 +293,6 @@ constructor(
         metadata = metadata,
     )
 
-    private constructor(
-        shopPay: ShopPay,
-        billingDetails: PaymentMethod.BillingDetails?,
-        metadata: Map<String, String>?,
-    ) : this(
-        type = PaymentMethod.Type.ShopPay,
-        shopPay = shopPay,
-        billingDetails = billingDetails,
-        metadata = metadata,
-    )
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun requiresMandate(): Boolean {
         return requiresMandate
@@ -355,7 +339,6 @@ constructor(
                 PaymentMethod.Type.Netbanking.code -> netbanking?.toParamMap()
                 PaymentMethod.Type.USBankAccount.code -> usBankAccount?.toParamMap()
                 PaymentMethod.Type.Link.code -> link?.toParamMap()
-                PaymentMethod.Type.ShopPay.code -> shopPay?.toParamMap()
                 else -> null
             }.takeUnless { it.isNullOrEmpty() }?.let {
                 mapOf(code to it)
@@ -730,22 +713,6 @@ constructor(
             private const val PARAM_CREDENTIALS = "credentials"
             private const val PARAM_CONSUMER_SESSION_CLIENT_SECRET =
                 "consumer_session_client_secret"
-        }
-    }
-
-    @Parcelize
-    @Poko
-    class ShopPay(
-        internal var externalSourceId: String
-    ) : StripeParamsModel, Parcelable {
-        override fun toParamMap(): Map<String, Any> {
-            return mapOf(
-                PARAM_EXTERNAL_SOURCE_ID to externalSourceId
-            )
-        }
-
-        private companion object {
-            private const val PARAM_EXTERNAL_SOURCE_ID = "external_source_id"
         }
     }
 
@@ -1463,18 +1430,6 @@ constructor(
                 allowRedisplay = allowRedisplay,
                 productUsage = productUsage,
                 clientAttributionMetadata = clientAttributionMetadata,
-            )
-        }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
-        fun createShopPay(
-            externalSourceId: String,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-        ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(
-                type = PaymentMethod.Type.ShopPay,
-                shopPay = ShopPay(externalSourceId),
-                billingDetails = billingDetails,
             )
         }
 

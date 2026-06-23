@@ -17,7 +17,6 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
-import com.stripe.android.shoppay.ShopPayActivityContract
 import com.stripe.android.testing.DummyActivityResultCaller
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -72,9 +71,6 @@ class ExtendedPaymentElementConfirmationOrderTest {
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
 
             assertThat(awaitRegisterCall().contract).isInstanceOf<LinkActivityContract>()
-            assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
-
-            assertThat(awaitRegisterCall().contract).isInstanceOf<ShopPayActivityContract>()
             assertThat(awaitNextRegisteredLauncher()).isInstanceOf<ActivityResultLauncher<*>>()
         }
     }

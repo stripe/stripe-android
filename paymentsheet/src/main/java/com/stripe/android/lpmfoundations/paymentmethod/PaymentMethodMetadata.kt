@@ -382,7 +382,6 @@ internal data class PaymentMethodMetadata(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkStateResult as? LinkState,
-                    isShopPayAvailable = configuration.shopPayConfiguration != null
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
@@ -453,7 +452,6 @@ internal data class PaymentMethodMetadata(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
                     linkState = null,
-                    isShopPayAvailable = false
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(

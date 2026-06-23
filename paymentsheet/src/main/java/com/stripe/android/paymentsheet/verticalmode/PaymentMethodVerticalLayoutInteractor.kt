@@ -401,7 +401,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 when (wallet) {
                     is WalletsState.GooglePay -> createGooglePayDisplayablePaymentMethod()
                     is WalletsState.Link -> createLinkDisplayablePaymentMethod(wallet)
-                    WalletsState.ShopPay -> createShopPayDisplayablePaymentMethod()
                 }
             } ?: emptyList()
     }
@@ -441,23 +440,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             subtitle = subtitle,
             onClick = {
                 updateSelection(PaymentSelection.Link(brand = link.linkBrand), false)
-                invokeRowSelectionCallback?.invoke()
-            },
-        )
-    }
-
-    private fun createShopPayDisplayablePaymentMethod(): DisplayablePaymentMethod {
-        return DisplayablePaymentMethod(
-            code = "shop_pay",
-            displayName = PaymentsCoreR.string.stripe_shop_pay.resolvableString,
-            iconResource = R.drawable.stripe_shop_pay_logo,
-            iconResourceNight = R.drawable.stripe_shop_pay_logo_white,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            iconRequiresTinting = false,
-            subtitle = null,
-            onClick = {
-                updateSelection(PaymentSelection.ShopPay, false)
                 invokeRowSelectionCallback?.invoke()
             },
         )
@@ -510,9 +492,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     }
                     is WalletsState.Link -> {
                         add(PaymentMethod.Type.Link.code)
-                    }
-                    WalletsState.ShopPay -> {
-                        add("shop_pay")
                     }
                 }
             }
@@ -644,7 +623,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
         is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
         is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
-        is PaymentSelection.ShopPay -> PaymentMethodVerticalLayoutInteractor.Selection.New("shop_pay")
         is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(
             code = paymentMethodCreateParams.typeCode,
             changeDetails = changeDetails(),
