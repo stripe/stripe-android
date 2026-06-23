@@ -1437,7 +1437,6 @@ class OnrampInteractorTest {
             add("  operation: configure")
             add("  app_id: ${RuntimeEnvironment.getApplication().packageName}")
             add("  mode: test")
-            add("  reason: app_attestation_unavailable")
             add("")
             add("Code: app_attestation_unavailable")
             add(
