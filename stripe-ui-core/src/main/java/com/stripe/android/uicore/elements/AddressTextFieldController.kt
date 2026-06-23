@@ -2,6 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -84,7 +85,7 @@ class AddressTextFieldController(
 
             val onClear = remember { { _inlineQuery.value = "" } }
 
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = modifier
                     .wrapContentSize(Alignment.TopStart)
                     .onSizeChanged { size ->
@@ -98,19 +99,12 @@ class AddressTextFieldController(
                 )
                 val predictionsState by inlinePredictionsState.collectAsState()
                 val isDarkTheme = isSystemInDarkTheme()
-                val attributionDrawable = remember(isDarkTheme) {
-                    getAttributionDrawable?.invoke(isDarkTheme)
-                }
-                val predictionSelected = remember {
-                    onInlinePredictionSelected ?: {}
-                }
-                val dismissed = remember { onInlineDismissed ?: {} }
                 InlineAddressPredictionsUI(
                     state = predictionsState,
-                    attributionDrawable = attributionDrawable,
+                    attributionDrawable = getAttributionDrawable?.invoke(isDarkTheme),
                     fieldWidthDp = fieldWidthDp,
-                    onPredictionSelected = predictionSelected,
-                    onDismiss = dismissed,
+                    onPredictionSelected = onInlinePredictionSelected ?: {},
+                    onDismiss = onInlineDismissed ?: {},
                     onClear = onClear,
                     onEnterManually = onInlineEnterManually,
                 )

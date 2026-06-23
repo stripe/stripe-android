@@ -2,7 +2,6 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.uicore.utils.collectAsState
@@ -84,6 +83,10 @@ class AutocompleteAddressController(
     }
 
     init {
+        if (config.isInlineAutocompleteEnabled) {
+            interactor.observeQueryChanges(inlineQuery, countryDropdownFieldController.rawFieldValue)
+        }
+
         interactor.register { event ->
             val currentValues = getCurrentValues()
 
@@ -160,6 +163,12 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
+        } else if (config.isInlineAutocompleteEnabled && (expandForm || values[IdentifierSpec.Line1] != null)) {
+            AddressInputMode.NoAutocomplete(
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
+            )
         } else if (expandForm || values[IdentifierSpec.Line1] != null) {
             AddressInputMode.AutocompleteExpanded(
                 googleApiKey = googlePlacesApiKey,
@@ -206,14 +215,6 @@ class AutocompleteAddressController(
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
         val controller by addressController.collectAsState()
-
-        if (config.isInlineAutocompleteEnabled) {
-            val query by inlineQuery.collectAsState()
-            val country by countryDropdownFieldController.rawFieldValue.collectAsState()
-            LaunchedEffect(query, country) {
-                interactor.onQueryChanged(query, country ?: "")
-            }
-        }
 
         AddressElementUI(
             enabled = enabled,
