@@ -470,6 +470,7 @@ workflows:
                 -no-snapshot
                 -no-audio
                 -no-window
+                -no-boot-anim
   start_cardscan_emulator:
     steps:
       - avd-manager@2:
