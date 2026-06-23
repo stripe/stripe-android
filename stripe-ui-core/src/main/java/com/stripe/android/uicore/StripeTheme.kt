@@ -1,8 +1,11 @@
 package com.stripe.android.uicore
 
 import android.content.Context
+import android.content.res.Configuration
 import android.content.res.Configuration.UI_MODE_NIGHT_MASK
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.content.res.Resources
 import android.graphics.Paint
 import android.graphics.Typeface
 import android.os.Build
@@ -11,6 +14,7 @@ import android.text.TextPaint
 import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.MetricAffectingSpan
+import android.view.ContextThemeWrapper
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
@@ -28,10 +32,12 @@ import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.PlatformTextStyle
@@ -193,6 +199,13 @@ data class FormInsets(
 enum class SectionStyle {
     Bordered,
     Borderless
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class ThemeMode {
+    Automatic,
+    AlwaysLight,
+    AlwaysDark,
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -496,7 +509,7 @@ val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInset
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun StripeTheme(
-    colors: StripeColors = StripeTheme.getColors(isSystemInDarkTheme()),
+    colors: StripeColors? = null,
     shapes: StripeShapes = StripeTheme.shapesMutable,
     typography: StripeTypography = StripeTheme.typographyMutable,
     sectionSpacing: Float? = StripeTheme.customSectionSpacing,
@@ -520,9 +533,36 @@ fun StripeTheme(
     }.getOrDefault(false)
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
+    val themeMode = StripeTheme.themeMode
+    val isDarkTheme = when (themeMode) {
+        ThemeMode.Automatic -> isSystemInDarkTheme()
+        ThemeMode.AlwaysLight -> false
+        ThemeMode.AlwaysDark -> true
+    }
+    val resolvedColors = colors ?: StripeTheme.getColors(isDarkTheme)
+    val baseContext = LocalContext.current
+    val themedContext = remember(baseContext, themeMode, isDarkTheme, inspectionMode) {
+        if (themeMode == ThemeMode.Automatic) {
+            baseContext
+        } else {
+            val uiMode = if (isDarkTheme) UI_MODE_NIGHT_YES else UI_MODE_NIGHT_NO
+            baseContext.withUiMode(
+                uiMode = uiMode,
+                inspectionMode = inspectionMode,
+            )
+        }
+    }
+    val themedConfiguration = remember(baseContext, themeMode, isDarkTheme, inspectionMode) {
+        if (themeMode == ThemeMode.Automatic) {
+            null
+        } else {
+            Configuration(themedContext.resources.configuration)
+        }
+    }
 
     CompositionLocalProvider(
-        LocalColors provides colors,
+        LocalContext provides themedContext,
+        LocalColors provides resolvedColors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
         LocalSectionSpacing provides sectionSpacing,
@@ -531,18 +571,34 @@ fun StripeTheme(
         LocalIconStyle provides iconStyle,
         LocalInspectionMode provides inspectionMode,
         LocalInstrumentationTest provides isInstrumentationTest,
-        LocalStripeImageLoader provides DefaultStripeImageLoader(LocalContext.current.applicationContext),
+        LocalStripeImageLoader provides DefaultStripeImageLoader(themedContext.applicationContext),
         LocalImageOptimizer provides StripeCdnImageOptimizer
     ) {
-        MaterialTheme(
-            colors = colors.materialColors,
-            typography = typography.toComposeTypography(),
-            shapes = shapes.toComposeShapes().material,
-        ) {
-            CompositionLocalProvider(
-                LocalTextStyle provides LocalTextStyle.current.toCompat(),
+        if (themedConfiguration != null) {
+            CompositionLocalProvider(LocalConfiguration provides themedConfiguration) {
+                MaterialTheme(
+                    colors = resolvedColors.materialColors,
+                    typography = typography.toComposeTypography(),
+                    shapes = shapes.toComposeShapes().material,
+                ) {
+                    CompositionLocalProvider(
+                        LocalTextStyle provides LocalTextStyle.current.toCompat(),
+                    ) {
+                        content()
+                    }
+                }
+            }
+        } else {
+            MaterialTheme(
+                colors = resolvedColors.materialColors,
+                typography = typography.toComposeTypography(),
+                shapes = shapes.toComposeShapes().material,
             ) {
-                content()
+                CompositionLocalProvider(
+                    LocalTextStyle provides LocalTextStyle.current.toCompat(),
+                ) {
+                    content()
+                }
             }
         }
     }
@@ -620,6 +676,8 @@ object StripeTheme {
     var colorsDarkMutable = StripeThemeDefaults.colorsDark
     var colorsLightMutable = StripeThemeDefaults.colorsLight
 
+    var themeMode: ThemeMode = ThemeMode.Automatic
+
     var shapesMutable = StripeThemeDefaults.shapes
 
     var typographyMutable = StripeThemeDefaults.typography
@@ -640,6 +698,31 @@ object StripeTheme {
 
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
+    }
+}
+
+private fun Context.withUiMode(uiMode: Int, inspectionMode: Boolean): Context {
+    if (uiMode == this.resources.configuration.uiMode and UI_MODE_NIGHT_MASK) {
+        return this
+    }
+    val config = Configuration(resources.configuration).apply {
+        this.uiMode = (this.uiMode and UI_MODE_NIGHT_MASK.inv()) or uiMode
+    }
+    return object : ContextThemeWrapper(this, theme) {
+        override fun getResources(): Resources? {
+            @Suppress("DEPRECATION")
+            if (inspectionMode) {
+                val baseResources = this@withUiMode.resources
+                return Resources(
+                    baseResources.assets,
+                    baseResources.displayMetrics,
+                    config,
+                )
+            }
+            return super.getResources()
+        }
+    }.apply {
+        applyOverrideConfiguration(config)
     }
 }
 

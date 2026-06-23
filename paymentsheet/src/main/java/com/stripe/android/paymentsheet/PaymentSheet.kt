@@ -1249,6 +1249,10 @@ class PaymentSheet internal constructor(
          */
         internal val colorsDark: Colors = Colors.defaultDark,
         /**
+         * Determines which color set Payment Element should use.
+         */
+        internal val themeMode: ThemeMode = ThemeMode.default,
+        /**
          * Describes the appearance of shapes.
          */
         internal val shapes: Shapes = Shapes.default,
@@ -1329,6 +1333,31 @@ class PaymentSheet internal constructor(
 
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
+        }
+
+        /**
+         * Determines which color set Payment Element should use.
+         */
+        @AppearanceAPIAdditionsPreview
+        enum class ThemeMode {
+            /**
+             * Use the system light or dark mode setting.
+             */
+            Automatic,
+
+            /**
+             * Always use the light color set.
+             */
+            AlwaysLight,
+
+            /**
+             * Always use the dark color set.
+             */
+            AlwaysDark;
+
+            internal companion object {
+                val default = Automatic
+            }
         }
 
         @Parcelize
@@ -2017,6 +2046,10 @@ class PaymentSheet internal constructor(
         class Builder {
             private var colorsLight = Colors.defaultLight
             private var colorsDark = Colors.defaultDark
+
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var themeMode: ThemeMode = ThemeMode.default
+
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
@@ -2041,6 +2074,11 @@ class PaymentSheet internal constructor(
 
             fun colorsDark(colors: Colors) = apply {
                 this.colorsDark = colors
+            }
+
+            @AppearanceAPIAdditionsPreview
+            fun themeMode(themeMode: ThemeMode) = apply {
+                this.themeMode = themeMode
             }
 
             fun shapes(shapes: Shapes) = apply {
@@ -2088,6 +2126,7 @@ class PaymentSheet internal constructor(
                 return Appearance(
                     colorsLight = colorsLight,
                     colorsDark = colorsDark,
+                    themeMode = themeMode,
                     shapes = shapes,
                     typography = typography,
                     primaryButton = primaryButton,
