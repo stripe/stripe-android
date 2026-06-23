@@ -238,11 +238,33 @@ workflows:
           inputs:
             - artifact_sources: .*
       - script@1:
+          title: Start logcat capture
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                adb logcat > /tmp/logcat.txt 2>&1 &
+                echo $! > /tmp/logcat.pid
+      - script@1:
           title: Execute Maestro tests
           inputs:
             - content: |-
                 #!/usr/bin/env bash
                 bash ./scripts/execute_maestro_tests.sh -m financial-connections -t $MAESTRO_TAGS
+      - script@1:
+          title: Stop logcat capture
+          is_always_run: true
+          is_skippable: true
+          inputs:
+            - content: |-
+                #!/usr/bin/env bash
+                kill "$(cat /tmp/logcat.pid)" 2>/dev/null || true
+      - deploy-to-bitrise-io@2:
+          title: Upload logcat on failure
+          run_if: '{{ getenv "BITRISE_BUILD_STATUS" | eq "1" }}'
+          inputs:
+            - deploy_path: /tmp/logcat.txt
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
       - script@1:
           title: Test results
           is_always_run: true
