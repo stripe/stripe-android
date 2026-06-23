@@ -23,7 +23,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
@@ -60,18 +59,13 @@ fun InlineAddressPredictionsUI(
         },
         properties = PopupProperties(focusable = false),
     ) {
-        PredictionsHeader(
-            loading = loading,
+        InlineAddressPredictionsContent(
+            state = state,
             attributionDrawable = attributionDrawable,
+            onPredictionSelected = onPredictionSelected,
             onClear = onClear,
+            onEnterManually = onEnterManually,
         )
-        if (results != null) {
-            PredictionsList(
-                results = results,
-                onPredictionSelected = onPredictionSelected,
-                onEnterManually = onEnterManually,
-            )
-        }
     }
 }
 
@@ -144,7 +138,7 @@ private fun PredictionsHeader(
             ) {
                 Text(
                     text = stringResource(R.string.stripe_address_suggestions),
-                    color = AttributionTextColor,
+                    color = MaterialTheme.stripeColors.subtitle,
                     style = MaterialTheme.typography.caption,
                     modifier = Modifier.padding(end = 4.dp, bottom = 3.dp),
                 )
@@ -219,8 +213,6 @@ private fun PredictionsList(
         }
     }
 }
-
-private val AttributionTextColor = Color(0xFF5E5E5E)
 
 private fun buildQueryRegex(query: String): Regex? {
     if (query.isBlank()) return null
