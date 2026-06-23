@@ -227,7 +227,7 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress sends address fields and updates checkoutSession on success`() =
-        runCreateWithStateScenario(checkoutSessionResponse = taxEnabledForShipping()) {
+        runCreateWithStateScenario {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
@@ -273,9 +273,7 @@ class CheckoutTest {
         }
 
     @Test
-    fun `updateShippingAddress returns failure on error response`() = runCreateWithStateScenario(
-        checkoutSessionResponse = taxEnabledForShipping(),
-    ) {
+    fun `updateShippingAddress returns failure on error response`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -292,9 +290,7 @@ class CheckoutTest {
     }
 
     @Test
-    fun `updateShippingAddress omits empty fields from request`() = runCreateWithStateScenario(
-        checkoutSessionResponse = taxEnabledForShipping(),
-    ) {
+    fun `updateShippingAddress omits empty fields from request`() = runCreateWithStateScenario {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[postal_code]", "80202"),
@@ -376,7 +372,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress stores address in internalState`() = runCreateWithStateScenario(
-        checkoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -442,7 +437,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress does not store address in internalState on failure`() = runCreateWithStateScenario(
-        checkoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -480,7 +474,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress stores phoneNumber in internalState`() = runCreateWithStateScenario(
-        checkoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -512,7 +505,6 @@ class CheckoutTest {
 
     @Test
     fun `updateShippingAddress does not store phoneNumber in internalState on failure`() = runCreateWithStateScenario(
-        checkoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -737,9 +729,7 @@ class CheckoutTest {
     }
 
     @Test
-    fun `concurrent calls to withInternalState are serialized`() = runCreateWithStateScenario(
-        checkoutSessionResponse = taxEnabledForShipping(),
-    ) {
+    fun `concurrent calls to withInternalState are serialized`() = runCreateWithStateScenario {
         // First call: applyPromotionCode hits the initial session ID with promotion_code param.
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
@@ -1200,7 +1190,7 @@ class CheckoutTest {
     }
 
     private fun runCreateWithStateScenario(
-        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        checkoutSessionResponse: CheckoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {

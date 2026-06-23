@@ -30,10 +30,6 @@ internal data class CheckoutSessionResponse(
     val automaticTaxAddressSource: String?,
 ) : StripeModel {
 
-    fun shouldSendTaxRegion(addressType: String): Boolean {
-        return automaticTaxEnabled && automaticTaxAddressSource == addressType
-    }
-
     @Parcelize
     data class SavedPaymentMethodsOfferSave(
         val enabled: Boolean,

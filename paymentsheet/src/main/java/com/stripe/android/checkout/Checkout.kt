@@ -528,7 +528,7 @@ class Checkout private constructor(
         mutation: InternalState.(Address.State) -> InternalState,
     ): Result<Unit> {
         val built = address.build()
-        return if (internalState.checkoutSessionResponse.shouldSendTaxRegion(addressType)) {
+        return if (shouldSendTaxRegion(addressType)) {
             withInternalState(
                 additionalStateMutations = { mutation(built) },
             ) { sessionId ->
@@ -537,6 +537,11 @@ class Checkout private constructor(
         } else {
             withLocalStateMutation { mutation(built) }
         }
+    }
+
+    private fun shouldSendTaxRegion(addressType: String): Boolean {
+        val response = internalState.checkoutSessionResponse
+        return response.automaticTaxEnabled && response.automaticTaxAddressSource == addressType
     }
 
     internal suspend fun updateCurrency(currency: String): Result<Unit> {
