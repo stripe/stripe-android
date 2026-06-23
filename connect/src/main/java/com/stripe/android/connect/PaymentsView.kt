@@ -63,7 +63,7 @@ class PaymentsProps {
     }
 
     @Parcelize
-    internal class State(
+    internal data class State(
         val defaultFilters: PaymentsListDefaultFilters.State?,
     ) : Parcelable
 
@@ -257,7 +257,7 @@ class PaymentsProps {
         }
 
         @Parcelize
-        internal class State(
+        internal data class State(
             val amount: AmountFilter?,
             val date: DateFilter?,
             val status: List<Status>?,
