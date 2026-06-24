@@ -22,7 +22,11 @@ tags:
     id: "consent_cta"
 # Select Down institution
 - extendedWaitUntil:
-    visible: "Down (Unscheduled)"
+    visible: "Select bank"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Down (Unscheduled)"
     timeout: 30000
 - tapOn: "Down (Unscheduled)"
 # Selecting another bank resets the flow
