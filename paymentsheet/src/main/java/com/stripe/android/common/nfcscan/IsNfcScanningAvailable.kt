@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan
 
+import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.common.nfcscan.security.IsDeviceSecureForNfc
 import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -16,7 +17,8 @@ internal interface IsNfcScanningAvailable {
 
 internal class DefaultIsNfcScanningAvailable @Inject constructor(
     val isDeviceSecureForNfc: IsDeviceSecureForNfc,
-    val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory
+    val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
+    val nfcHardwareDelegate: NfcHardwareDelegate,
 ) : IsNfcScanningAvailable {
     override fun get(
         elementsSession: ElementsSession,
@@ -24,6 +26,7 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
     ): Boolean {
         return enableNfcScanning.isEnabled &&
             !tapToAddAvailabilityFactory.isAvailable(elementsSession, customerMetadata) &&
-            isDeviceSecureForNfc.get()
+            isDeviceSecureForNfc.get() &&
+            nfcHardwareDelegate.isAvailable()
     }
 }
