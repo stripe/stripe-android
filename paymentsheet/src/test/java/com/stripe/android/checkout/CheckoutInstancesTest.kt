@@ -54,18 +54,6 @@ class CheckoutInstancesTest {
     }
 
     @Test
-    fun `remove clears instance for a key`() {
-        val checkout = createCheckout(key = "key1")
-        CheckoutInstances.clear()
-
-        CheckoutInstances.add("key1", checkout)
-        assertThat(CheckoutInstances["key1"]).isNotNull()
-
-        CheckoutInstances.remove("key1")
-        assertThat(CheckoutInstances["key1"]).isNull()
-    }
-
-    @Test
     fun `clear empties the map`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")

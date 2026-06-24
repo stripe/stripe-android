@@ -54,12 +54,6 @@ internal object CheckoutInstances {
 
     @VisibleForTesting
     @Synchronized
-    fun remove(key: String) {
-        instanceMap.remove(key)
-    }
-
-    @VisibleForTesting
-    @Synchronized
     fun clear() {
         instanceMap.clear()
     }
