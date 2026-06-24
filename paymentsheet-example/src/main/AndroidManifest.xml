@@ -61,6 +61,9 @@
             android:name="com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
+            android:name="com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
             android:name="com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity"
             android:theme="@style/AppTheme.NoActionBar"
             android:exported="true"
