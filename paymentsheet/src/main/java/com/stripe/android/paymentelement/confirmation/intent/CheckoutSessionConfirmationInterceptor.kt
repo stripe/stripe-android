@@ -143,9 +143,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private fun handleConfirmResponse(
         response: CheckoutSessionResponse,
     ): ConfirmationDefinition.Action<Args> {
-        CheckoutInstances[integrationMetadata.instancesKey].forEach { checkout ->
-            checkout.updateWithResponse(response)
-        }
+        CheckoutInstances[integrationMetadata.instancesKey]?.updateWithResponse(response)
 
         val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
             ?: run {
