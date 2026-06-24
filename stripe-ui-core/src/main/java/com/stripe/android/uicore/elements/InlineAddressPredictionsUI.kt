@@ -143,7 +143,7 @@ private fun PredictionsHeader(
                     modifier = Modifier.padding(end = 4.dp, bottom = 3.dp),
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.stripe_google_maps_logo),
+                    painter = painterResource(id = attributionDrawable),
                     contentDescription = stringResource(R.string.stripe_address_google_maps),
                     modifier = Modifier.height(18.dp),
                 )

@@ -16,7 +16,6 @@ import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -43,8 +42,7 @@ internal class InputAddressViewModel @Inject constructor(
     override val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
         _inlinePredictionsState
 
-    private var isChangedByPrediction = false
-    private var fetchJob: Job? = null
+    private var lastPredictionLine1: String? = null
 
     private val addressFormatParser = AddressFormatParser(args.config)
 
@@ -298,8 +296,9 @@ internal class InputAddressViewModel @Inject constructor(
                 .drop(1)
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
                 .collectLatest { (q, c) ->
-                    if (isChangedByPrediction) {
-                        isChangedByPrediction = false
+                    val lastPrediction = lastPredictionLine1
+                    if (lastPrediction != null && q == lastPrediction) {
+                        lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
@@ -307,10 +306,7 @@ internal class InputAddressViewModel @Inject constructor(
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
-                    fetchJob?.cancel()
-                    fetchJob = viewModelScope.launch {
-                        fetchPredictions(q, c)
-                    }
+                    fetchPredictions(q, c)
                 }
         }
     }
@@ -347,8 +343,6 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun onDismissed() {
-        fetchJob?.cancel()
-        fetchJob = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
@@ -357,7 +351,7 @@ internal class InputAddressViewModel @Inject constructor(
             placesClient?.fetchPlace(predictionId)?.fold(
                 onSuccess = { response ->
                     val address = response.place.transformGoogleToStripeAddress(context)
-                    isChangedByPrediction = true
+                    lastPredictionLine1 = address.line1
                     _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                     eventListener?.invoke(
                         AutocompleteAddressInteractor.Event.OnValues(
