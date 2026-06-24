@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.content.Context
 import androidx.annotation.VisibleForTesting
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -25,6 +25,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -33,7 +34,6 @@ internal class InputAddressViewModel @Inject constructor(
     val navigator: AddressElementNavigator,
     private val eventReporter: AddressLauncherEventReporter,
     private val placesClient: PlacesClientProxy?,
-    private val context: Context,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -356,7 +356,8 @@ internal class InputAddressViewModel @Inject constructor(
         viewModelScope.launch {
             placesClient?.fetchPlace(predictionId)?.fold(
                 onSuccess = { response ->
-                    val address = response.place.transformGoogleToStripeAddress(context)
+                    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+                    val address = response.place.transformGoogleToStripeAddress(locale)
                     isChangedByPrediction = true
                     _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                     eventListener?.invoke(
