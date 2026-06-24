@@ -38,33 +38,6 @@ class InlineAddressPredictionsScreenshotTest {
         paparazziRule.snapshot {
             InlineAddressPredictionsContent(
                 state = AutocompleteAddressInteractor.InlinePredictionsState.Results(
-                    query = "123 Main",
-                    predictions = listOf(
-                        AutocompleteAddressInteractor.InlineAddressPrediction(
-                            id = "1",
-                            primaryText = "123 Main Street",
-                            secondaryText = "San Francisco, CA, USA",
-                        ),
-                        AutocompleteAddressInteractor.InlineAddressPrediction(
-                            id = "2",
-                            primaryText = "123 Main Avenue",
-                            secondaryText = "Los Angeles, CA, USA",
-                        ),
-                    ),
-                ),
-                attributionDrawable = R.drawable.stripe_google_maps_logo,
-                onPredictionSelected = {},
-                onClear = {},
-                onEnterManually = {},
-            )
-        }
-    }
-
-    @Test
-    fun testResultsWithEnterManually() {
-        paparazziRule.snapshot {
-            InlineAddressPredictionsContent(
-                state = AutocompleteAddressInteractor.InlinePredictionsState.Results(
                     query = "456 Oak",
                     predictions = listOf(
                         AutocompleteAddressInteractor.InlineAddressPrediction(

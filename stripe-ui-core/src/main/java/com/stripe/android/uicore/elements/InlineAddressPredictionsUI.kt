@@ -140,12 +140,12 @@ private fun PredictionsHeader(
                     text = stringResource(R.string.stripe_address_suggestions),
                     color = MaterialTheme.stripeColors.subtitle,
                     style = MaterialTheme.typography.caption,
-                    modifier = Modifier.padding(end = 4.dp, bottom = 3.dp),
+                    modifier = Modifier.padding(end = 4.dp),
                 )
                 Image(
-                    painter = painterResource(id = R.drawable.stripe_google_maps_logo),
+                    painter = painterResource(id = attributionDrawable),
                     contentDescription = stringResource(R.string.stripe_address_google_maps),
-                    modifier = Modifier.height(18.dp),
+                    modifier = Modifier.height(18.dp).padding(top = 3.dp),
                 )
             }
         } else {

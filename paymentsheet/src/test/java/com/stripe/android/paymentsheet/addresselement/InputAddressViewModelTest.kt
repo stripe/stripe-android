@@ -1087,7 +1087,7 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `onPredictionSelected sets isChangedByPrediction to suppress next query`() = runTest {
+    fun `onPredictionSelected suppresses next query matching predicted line1`() = runTest {
         val fetchPlaceResponse = Result.success(
             FetchPlaceResponse(
                 Place(
