@@ -208,7 +208,8 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 autocompleteConfig = AutocompleteAddressInteractor.Config(
                                     googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
                                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                                    isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                                    isInlineAutocompleteEnabled =
+                                        FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
                                 )
                             ),
                             isLinkUI = true,
