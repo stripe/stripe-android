@@ -40,9 +40,16 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val mode = parseMode(json.optString(FIELD_MODE))
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
+        val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
+        val rawAddressSource = taxContext
+            ?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE)
+            ?.takeIf { it.isNotEmpty() }
+        val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
+        val automaticTaxAddressSource = rawAddressSource
+            ?.let { if (it.startsWith("session.")) it.removePrefix("session.") else it }
         val taxStatus = parseTaxStatusFromMeta(
             taxMeta = json.optJSONObject(FIELD_TAX_META),
-            taxContext = json.optJSONObject(FIELD_TAX_CONTEXT),
+            rawAddressSource = rawAddressSource,
         )
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
@@ -79,13 +86,6 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val adaptivePricingInfo = parseAdaptivePricingInfo(
             json.optJSONObject(FIELD_ADAPTIVE_PRICING_INFO)
         )
-
-        val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
-        val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
-        val automaticTaxAddressSource = taxContext
-            ?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE)
-            ?.takeIf { it.isNotEmpty() }
-            ?.let { if (it.startsWith("session.")) it.removePrefix("session.") else it }
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -129,13 +129,12 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
 
     private fun parseTaxStatusFromMeta(
         taxMeta: JSONObject?,
-        taxContext: JSONObject?,
+        rawAddressSource: String?,
     ): CheckoutSessionResponse.TaxStatus {
         if (taxMeta == null) return CheckoutSessionResponse.TaxStatus.UNKNOWN
         val metaStatus = taxMeta.optString(FIELD_STATUS)
         if (metaStatus == "requires_location_inputs") {
-            val addressSource = taxContext?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE) ?: ""
-            return if (addressSource == "session.shipping") {
+            return if (rawAddressSource == "session.shipping") {
                 CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
             } else {
                 CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
