@@ -50,6 +50,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Yes, update</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Log in or sign up</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Sign in or sign up</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Accept</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
@@ -98,6 +100,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Log out of Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Log out of %s</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Sign out of Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Sign out of %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->

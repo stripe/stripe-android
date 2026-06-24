@@ -28,9 +28,9 @@ internal data class LogoutMenuItem(
     private val linkBrand: LinkBrand,
 ) : LinkMenuItem {
     override val text = if (linkBrand == LinkBrand.Link) {
-        R.string.stripe_log_out.resolvableString
+        R.string.stripe_sign_out_link.resolvableString
     } else {
-        resolvableString(R.string.stripe_log_out_with_brand, linkBrand.brandName())
+        resolvableString(R.string.stripe_sign_out_with_brand, linkBrand.brandName())
     }
     override val testTag = LOGOUT_MENU_ROW_TAG
     override val isDestructive = true
