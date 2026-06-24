@@ -528,20 +528,18 @@ class Checkout private constructor(
         mutation: InternalState.(Address.State) -> InternalState,
     ): Result<Unit> {
         val built = address.build()
-        return if (shouldSendTaxRegion(addressType)) {
-            withInternalState(
-                additionalStateMutations = { mutation(built) },
-            ) { sessionId ->
-                component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
-            }
-        } else {
-            withLocalStateMutation { mutation(built) }
-        }
-    }
-
-    private fun shouldSendTaxRegion(addressType: String): Boolean {
         val response = internalState.checkoutSessionResponse
-        return response.automaticTaxEnabled && response.automaticTaxAddressSource == addressType
+        val shouldSendTaxRegion =
+            response.automaticTaxEnabled && response.automaticTaxAddressSource == addressType
+        return withInternalState(
+            additionalStateMutations = { mutation(built) },
+        ) { sessionId ->
+            if (shouldSendTaxRegion) {
+                component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+            } else {
+                Result.success(checkoutSessionResponse)
+            }
+        }
     }
 
     internal suspend fun updateCurrency(currency: String): Result<Unit> {
@@ -577,22 +575,7 @@ class Checkout private constructor(
         _checkoutSession.value = internalState.asCheckoutSession()
     }
 
-    private fun withLocalStateMutation(
-        mutation: InternalState.() -> InternalState,
-    ): Result<Unit> {
-        if (internalState.integrationLaunched) {
-            return Result.failure(
-                IllegalStateException(
-                    "Cannot mutate checkout session while a payment flow is presented."
-                )
-            )
-        }
-        internalState = internalState.mutation()
-        _checkoutSession.value = internalState.asCheckoutSession()
-        return Result.success(Unit)
-    }
-
-    private suspend fun withInternalState(
+private suspend fun withInternalState(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<Unit> {
