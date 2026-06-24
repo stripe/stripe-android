@@ -480,7 +480,11 @@ class Checkout private constructor(
     }
 
     /**
-     * Updates the shipping address and recalculates taxes.
+     * Sets the shipping address for this checkout.
+     *
+     * The address is stored locally and used when presenting payment UI. If automatic tax is
+     * enabled and the tax address source is shipping, the address is also sent to the server
+     * to compute updated tax amounts.
      *
      * @param name The recipient's name.
      * @param phoneNumber The recipient's phone number.
@@ -490,7 +494,7 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<Unit> = updateAddress("shipping", address) {
+    ): Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
         copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
     }
 
@@ -508,7 +512,11 @@ class Checkout private constructor(
     }
 
     /**
-     * Updates the billing address and recalculates taxes.
+     * Sets the billing address for this checkout.
+     *
+     * The address is stored locally and used when presenting payment UI. If automatic tax is
+     * enabled and the tax address source is billing, the address is also sent to the server
+     * to compute updated tax amounts.
      *
      * @param name The billing name.
      * @param phoneNumber The billing phone number.
@@ -518,19 +526,19 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<Unit> = updateAddress("billing", address) {
+    ): Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
         copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = it)
     }
 
     private suspend fun updateAddress(
-        addressType: String,
+        addressType: CheckoutSessionResponse.TaxAddressSource,
         address: Address,
         mutation: InternalState.(Address.State) -> InternalState,
     ): Result<Unit> {
         val built = address.build()
         val response = internalState.checkoutSessionResponse
         val shouldSendTaxRegion =
-            response.automaticTaxEnabled && response.automaticTaxAddressSource == addressType
+            response.automaticTaxEnabled && response.taxAddressSource == addressType
         return withInternalState(
             additionalStateMutations = { mutation(built) },
         ) { sessionId ->

@@ -278,7 +278,7 @@ internal class CreateCustomerMetadataTest {
                     shippingOptions = emptyList(),
                     adaptivePricingInfo = null,
                     automaticTaxEnabled = false,
-                    automaticTaxAddressSource = null,
+                    taxAddressSource = null,
                 ),
             )
         }

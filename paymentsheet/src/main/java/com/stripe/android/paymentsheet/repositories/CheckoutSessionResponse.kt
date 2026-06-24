@@ -27,8 +27,13 @@ internal data class CheckoutSessionResponse(
     val shippingOptions: List<ShippingRate>,
     val adaptivePricingInfo: AdaptivePricingInfo?,
     val automaticTaxEnabled: Boolean,
-    val automaticTaxAddressSource: String?,
+    val taxAddressSource: TaxAddressSource?,
 ) : StripeModel {
+
+    enum class TaxAddressSource {
+        SHIPPING,
+        BILLING,
+    }
 
     @Parcelize
     data class SavedPaymentMethodsOfferSave(

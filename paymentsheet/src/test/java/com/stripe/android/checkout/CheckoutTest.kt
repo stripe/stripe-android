@@ -43,13 +43,19 @@ class CheckoutTest {
 
     private fun taxEnabledForShipping() = CheckoutSessionResponseFactory.create(
         automaticTaxEnabled = true,
-        automaticTaxAddressSource = "shipping",
+        taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
     )
 
     private fun taxEnabledForBilling() = CheckoutSessionResponseFactory.create(
         automaticTaxEnabled = true,
-        automaticTaxAddressSource = "billing",
+        taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
     )
+
+    private val testAddress = Address()
+        .city("Denver")
+        .country("US")
+        .postalCode("80202")
+        .state("CO")
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -568,18 +574,12 @@ class CheckoutTest {
         runCreateWithStateScenario(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = false,
-                automaticTaxAddressSource = "shipping",
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
             ),
-            shouldValidateEvents = false,
         ) {
             checkoutSessionTurbine.awaitItem()
 
-            val address = Address()
-                .city("Denver")
-                .country("US")
-                .postalCode("80202")
-                .state("CO")
-            val result = checkout.updateShippingAddress(name = "John", address = address)
+            val result = checkout.updateShippingAddress(name = "John", address = testAddress)
             assertThat(result.isSuccess).isTrue()
 
             val state = checkout.internalState
@@ -591,20 +591,11 @@ class CheckoutTest {
     @Test
     fun `updateShippingAddress does not send tax_region when address source is billing`() =
         runCreateWithStateScenario(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                automaticTaxAddressSource = "billing",
-            ),
-            shouldValidateEvents = false,
+            checkoutSessionResponse = taxEnabledForBilling(),
         ) {
             checkoutSessionTurbine.awaitItem()
 
-            val address = Address()
-                .city("Denver")
-                .country("US")
-                .postalCode("80202")
-                .state("CO")
-            val result = checkout.updateShippingAddress(name = "John", address = address)
+            val result = checkout.updateShippingAddress(name = "John", address = testAddress)
             assertThat(result.isSuccess).isTrue()
 
             val state = checkout.internalState
@@ -617,18 +608,12 @@ class CheckoutTest {
         runCreateWithStateScenario(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 automaticTaxEnabled = false,
-                automaticTaxAddressSource = "billing",
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
             ),
-            shouldValidateEvents = false,
         ) {
             checkoutSessionTurbine.awaitItem()
 
-            val address = Address()
-                .city("Denver")
-                .country("US")
-                .postalCode("80202")
-                .state("CO")
-            val result = checkout.updateBillingAddress(name = "Jane", address = address)
+            val result = checkout.updateBillingAddress(name = "Jane", address = testAddress)
             assertThat(result.isSuccess).isTrue()
 
             val state = checkout.internalState
@@ -638,21 +623,10 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress does not send tax_region when address source is shipping`() =
-        runCreateWithStateScenario(
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                automaticTaxEnabled = true,
-                automaticTaxAddressSource = "shipping",
-            ),
-            shouldValidateEvents = false,
-        ) {
+        runCreateWithStateScenario {
             checkoutSessionTurbine.awaitItem()
 
-            val address = Address()
-                .city("Denver")
-                .country("US")
-                .postalCode("80202")
-                .state("CO")
-            val result = checkout.updateBillingAddress(name = "Jane", address = address)
+            val result = checkout.updateBillingAddress(name = "Jane", address = testAddress)
             assertThat(result.isSuccess).isTrue()
 
             val state = checkout.internalState
