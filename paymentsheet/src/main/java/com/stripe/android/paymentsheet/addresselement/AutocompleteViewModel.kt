@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -28,6 +29,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.R as StripeR
@@ -115,7 +117,8 @@ internal class AutocompleteViewModel @Inject constructor(
             )?.fold(
                 onSuccess = {
                     _loading.value = false
-                    val address = it.place.transformGoogleToStripeAddress(getApplication())
+                    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+                    val address = it.place.transformGoogleToStripeAddress(locale)
 
                     _event.emit(
                         Event.GoBack(

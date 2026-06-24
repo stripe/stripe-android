@@ -1,12 +1,7 @@
 package com.stripe.android.ui.core.elements.autocomplete.model
 
-import android.content.Context
-import android.os.Build
 import androidx.annotation.RestrictTo
 import java.util.Locale
-
-// Largely duplicated from
-// https://git.corp.stripe.com/stripe-internal/stripe-js-v3/blob/1c111621/src/elements/inner/autocomplete_suggestions/utils/transformGoogleToStripeAddress.ts#L248-L325
 
 internal data class AddressLine1(
     var streetNumber: String? = null,
@@ -51,7 +46,7 @@ internal fun Place.filter(type: Place.Type): AddressComponent? {
 }
 
 internal fun composeAddressLine1(
-    context: Context,
+    locale: Locale,
     addressLine1: AddressLine1,
     address: Address
 ): String {
@@ -62,7 +57,7 @@ internal fun composeAddressLine1(
 
     return if (countryCode == "JP") {
         val premise = address.addressLine2
-        composeJapaneseAddressLine1(context, addressLine1, locality, premise)
+        composeJapaneseAddressLine1(locale, addressLine1, locality, premise)
     } else if (streetNumber.isNotBlank() || streetName.isNotBlank()) {
         // Depending on the country we'll want either
         // "123 King Street" or "King Street 123"
@@ -77,7 +72,7 @@ internal fun composeAddressLine1(
 }
 
 internal fun composeJapaneseAddressLine1(
-    context: Context,
+    locale: Locale,
     addressLine1: AddressLine1,
     localityComponent: String?,
     premiseComponent: String?
@@ -93,12 +88,6 @@ internal fun composeJapaneseAddressLine1(
     val municipality = addressLine1.subLocalityLevel2
 
     val composite: String
-
-    val locale = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-        context.resources.configuration.locales.get(0)
-    } else {
-        context.resources.configuration.locale
-    }
 
     if (locale == Locale.JAPANESE) {
         // In Japanese, address line 1 components should be in this order:
@@ -180,7 +169,7 @@ internal fun Address.modifyStripeAddressByCountry(place: Place): Address {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Place.transformGoogleToStripeAddress(
-    context: Context
+    locale: Locale
 ): com.stripe.android.model.Address {
     var address = Address()
     val addressLine1 = AddressLine1()
@@ -250,7 +239,7 @@ fun Place.transformGoogleToStripeAddress(
         }
     }
 
-    address.addressLine1 = composeAddressLine1(context, addressLine1, address)
+    address.addressLine1 = composeAddressLine1(locale, addressLine1, address)
     address = address.modifyStripeAddressByCountry(this)
 
     return com.stripe.android.model.Address.Builder()
