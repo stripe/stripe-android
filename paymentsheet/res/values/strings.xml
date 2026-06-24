@@ -50,8 +50,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_email_suggestion_update">Yes, update</string>
   <!-- Title for a button that indicates a user can log in or sign up. -->
   <string name="stripe_link_log_in_or_sign_up">Log in or sign up</string>
-  <!-- Title for a button that indicates a user can sign in or sign up. -->
-  <string name="stripe_link_sign_in_or_sign_up">Sign in or sign up</string>
   <!-- Text displayed on a confirmation button on the CRS CARF declaration screen -->
   <string name="stripe_link_onramp_carf_declaration_accept_button_text">Accept</string>
   <!-- Text displayed on a cancel button on the CRS CARF declaration screen -->
@@ -70,6 +68,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Confirm your information</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Last 4 digits of SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Sign in or sign up</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Agree and continue</string>
   <!-- Title for the Link signup screen -->
@@ -100,10 +100,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out">Log out of Link</string>
   <!-- Title of the logout action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_log_out_with_brand">Log out of %s</string>
-  <!-- Title of the sign-out action. -->
-  <string name="stripe_sign_out_link">Sign out of Link</string>
-  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_sign_out_with_brand">Sign out of %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
@@ -269,8 +265,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_qrcode_lpm_confirm_payment">Confirm the payment in your bank or payment app within %s to complete the purchase.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Remove bank account ending in %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Shop Pay button</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Show menu</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Sign out of Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Sign out of %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Join Link</string>
   <!-- Title for the Link signup screen -->
