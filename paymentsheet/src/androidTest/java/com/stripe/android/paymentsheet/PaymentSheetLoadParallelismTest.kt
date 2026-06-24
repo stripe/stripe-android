@@ -10,6 +10,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -71,19 +72,14 @@ internal class PaymentSheetLoadParallelismTest {
         customerType = CustomerType.LegacyEK,
         linkEnabled = false,
         defaultEmail = false,
-        expectedRequestOrdering = RequestOrdering.Sequential(
-                requests = listOf(
-                    RequestOrdering.Parallel(
-                        requests = listOf(
-                            Request.ElementsSessionsWithEk,
-                            Request.FetchCards,
-                            Request.FetchSepaDebit,
-                            Request.FetchUsBank,
-                        )
-                    ),
-                    RequestOrdering.Singleton(request = Request.FetchCustomer)
-                )
-            ),
+        expectedRequestOrdering = RequestOrdering.Parallel(
+            requests = listOf(
+                Request.ElementsSessionsWithEk,
+                Request.FetchCards,
+                Request.FetchSepaDebit,
+                Request.FetchUsBank,
+            )
+        ),
     )
 
     @Test
@@ -207,8 +203,16 @@ internal class PaymentSheetLoadParallelismTest {
     ) {
         requests.forEach { request ->
             when (request) {
-                Request.ElementsSessionsWithCs -> enqueueElementsSessionWithCustomerSessionsRequest(linkEnabled)
-                Request.ElementsSessionsWithEk -> enqueueElementsSessionWithEphemeralKeyRequest(linkEnabled)
+                Request.ElementsSessionsWithCs -> enqueueElementsSession(
+                    "elements-sessions-requires_pm_with_ps_pi_cs.json",
+                    request = request,
+                    linkEnabled = linkEnabled,
+                )
+                Request.ElementsSessionsWithEk -> enqueueElementsSession(
+                    "elements-sessions-requires_payment_method.json",
+                    request = Request.ElementsSessionsWithEk,
+                    linkEnabled = linkEnabled,
+                )
                 Request.FetchCards -> enqueueFetchPaymentMethods(PaymentMethod.Type.Card, request)
                 Request.FetchSepaDebit -> enqueueFetchPaymentMethods(PaymentMethod.Type.SepaDebit, request)
                 Request.FetchUsBank -> enqueueFetchPaymentMethods(PaymentMethod.Type.USBankAccount, request)
@@ -218,7 +222,9 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun enqueueElementsSessionWithCustomerSessionsRequest(
+    private fun enqueueElementsSession(
+        bodyFile: String,
+        request: Request,
         linkEnabled: Boolean,
     ) {
         networkRule.enqueue(
@@ -226,42 +232,45 @@ internal class PaymentSheetLoadParallelismTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { _, response ->
-            recordArrival(Request.ElementsSessionsWithCs)
+            recordArrival(request)
             response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
             if (linkEnabled) {
-                response.testBodyFromFile("elements-sessions-requires_pm_with_ps_pi_cs.json") { json ->
-                    val linkSettings = json.optJSONObject("link_settings")
-                        ?: JSONObject()
-                    linkSettings.put("link_passthrough_mode_enabled", true)
-                    json.put("link_settings", linkSettings)
+                response.testBodyFromFile(bodyFile) { json ->
+                    enableLinkPassthroughMode(json)
+                    setPaymentMethodTypes(
+                        json, paymentMethodTypes = listOf(
+                            PaymentMethod.Type.Card,
+                            PaymentMethod.Type.Link
+                        )
+                    )
                 }
             } else {
-                response.testBodyFromFile("elements-sessions-requires_pm_with_ps_pi_cs.json")
+                response.testBodyFromFile(bodyFile) { json ->
+                    setPaymentMethodTypes(json, paymentMethodTypes = listOf(PaymentMethod.Type.Card))
+                }
             }
         }
     }
 
-    private fun enqueueElementsSessionWithEphemeralKeyRequest(
-        linkEnabled: Boolean,
+    private fun enableLinkPassthroughMode(json: JSONObject) {
+        val linkSettings = json.optJSONObject("link_settings")
+            ?: JSONObject()
+        linkSettings.put("link_passthrough_mode_enabled", true)
+        json.put("link_settings", linkSettings)
+    }
+
+    private fun setPaymentMethodTypes(
+        json: JSONObject,
+        paymentMethodTypes: List<PaymentMethod.Type>,
     ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { _, response ->
-            recordArrival(Request.ElementsSessionsWithEk)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            if (linkEnabled) {
-                response.testBodyFromFile( "elements-sessions-requires_payment_method.json") { json ->
-                    val linkSettings = json.optJSONObject("link_settings")
-                        ?: JSONObject()
-                    linkSettings.put("link_passthrough_mode_enabled", true)
-                    json.put("link_settings", linkSettings)
-                }
-            } else {
-                response.testBodyFromFile( "elements-sessions-requires_payment_method.json")
-            }
-        }
+        val paymentMethodsJson = JSONArray(paymentMethodTypes.map { it.code })
+        json.put("ordered_payment_method_types_and_wallets", "card")
+        val paymentMethodPreferences = json.getJSONObject("payment_method_preference")
+        val paymentIntent = paymentMethodPreferences.getJSONObject("payment_intent")
+        paymentIntent.put("payment_method_types", paymentMethodsJson)
+        paymentMethodPreferences.put("payment_intent", paymentIntent)
+        paymentMethodPreferences.put("ordered_payment_method_types", paymentMethodsJson)
+        json.put("payment_method_preference", paymentMethodPreferences)
     }
 
     private fun enqueueFetchPaymentMethods(
