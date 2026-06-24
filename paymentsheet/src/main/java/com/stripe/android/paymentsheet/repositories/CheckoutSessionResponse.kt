@@ -26,6 +26,7 @@ internal data class CheckoutSessionResponse(
     val lineItems: List<LineItem>,
     val shippingOptions: List<ShippingRate>,
     val adaptivePricingInfo: AdaptivePricingInfo?,
+    val businessName: String?,
 ) : StripeModel {
 
     @Parcelize

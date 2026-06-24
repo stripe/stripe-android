@@ -25,6 +25,7 @@ internal object CheckoutSessionResponseFactory {
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
         adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
+        businessName: String? = null,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
@@ -44,6 +45,7 @@ internal object CheckoutSessionResponseFactory {
             lineItems = lineItems,
             shippingOptions = shippingOptions,
             adaptivePricingInfo = adaptivePricingInfo,
+            businessName = businessName,
         )
     }
 }

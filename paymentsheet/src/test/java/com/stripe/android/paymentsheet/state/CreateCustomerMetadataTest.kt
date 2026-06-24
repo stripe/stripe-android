@@ -277,6 +277,7 @@ internal class CreateCustomerMetadataTest {
                     lineItems = emptyList(),
                     shippingOptions = emptyList(),
                     adaptivePricingInfo = null,
+                    businessName = null,
                 ),
             )
         }

@@ -6,17 +6,37 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.checkout.injection.CheckoutControllerComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.billingDetails
+import com.stripe.android.paymentsheet.model.darkThemeIconUrl
+import com.stripe.android.paymentsheet.model.drawableResourceId
+import com.stripe.android.paymentsheet.model.drawableResourceIdNight
+import com.stripe.android.paymentsheet.model.label
+import com.stripe.android.paymentsheet.model.lightThemeIconUrl
+import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.model.toPaymentSheetBillingDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
@@ -33,6 +53,17 @@ class CheckoutController(
     private val savedStateHandle: SavedStateHandle,
     private val resultCallback: ResultCallback,
 ) {
+
+    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+
+    private val component = DaggerCheckoutControllerComponent.factory().create(
+        application = application,
+        savedStateHandle = savedStateHandle,
+        coroutineScope = coroutineScope,
+    )
+
+    private val confirmationHandler: ConfirmationHandler =
+        component.confirmationHandlerFactory.create(coroutineScope)
 
     private val mutex = Mutex()
 
@@ -56,49 +87,100 @@ class CheckoutController(
             // TODO: Restore internal state from the provided State, populate StateFlows.
         }
 
+    init {
+        coroutineScope.launch {
+            confirmationHandler.state.collect { handlerState ->
+                when (handlerState) {
+                    is ConfirmationHandler.State.Idle,
+                    is ConfirmationHandler.State.Confirming -> Unit
+                    is ConfirmationHandler.State.Complete -> {
+                        resultCallback.onResult(handlerState.result.asCheckoutResult())
+                    }
+                }
+            }
+        }
+    }
+
     suspend fun configure(
         checkoutSessionClientSecret: String,
         configuration: Configuration = Configuration(),
     ): kotlin.Result<Unit> {
         val configurationState = configuration.build()
-        val component = DaggerCheckoutControllerComponent.factory().create(application)
         val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
         val adaptivePricingAllowed = configurationState.adaptivePricingAllowed
         return component.checkoutSessionRepository.init(
             sessionId = sessionId,
             adaptivePricingAllowed = adaptivePricingAllowed,
-        ).map { response ->
-            val flagImages = prefetchFlagImages(response, component)
+        ).mapCatching { response ->
+            val flagImages = prefetchFlagImages(response)
+            _checkoutSession.value = response.toCheckoutSession(flagImages)
+
+            val internalState = InternalState(
+                key = sessionId,
+                configuration = Checkout.Configuration().build(),
+                checkoutSessionResponse = response,
+                flagImages = flagImages,
+            )
+            val baseEmbeddedConfig = EmbeddedPaymentElement.Configuration.Builder(
+                merchantDisplayName = response.businessName.orEmpty()
+            ).defaultBillingDetails(PaymentSheet.BillingDetails(email = "example@stripe.com")).build()
+            val embeddedConfig = CheckoutConfigurationMerger.EmbeddedConfiguration(
+                baseEmbeddedConfig
+            ).forCheckoutSession(internalState)
+
+            val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = sessionId,
+                checkoutSessionResponse = response,
+            )
+            val loaderState = component.paymentElementLoader.load(
+                initializationMode = initializationMode,
+                integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
+                    isRowSelectionImmediateAction = false,
+                    configuration = embeddedConfig,
+                ),
+                metadata = PaymentElementLoader.Metadata(
+                    isReloadingAfterProcessDeath = false,
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow()
+
+            confirmationHandler.bootstrap(loaderState.paymentMethodMetadata)
+
             configuredState = ConfiguredState(
-                component = component,
                 sessionId = sessionId,
                 adaptivePricingAllowed = adaptivePricingAllowed,
                 flagImages = flagImages,
                 checkoutSessionResponse = response,
+                paymentMethodMetadata = loaderState.paymentMethodMetadata,
+                commonConfiguration = loaderState.config,
+                selection = loaderState.paymentSelection,
             )
-            _checkoutSession.value = response.toCheckoutSession(flagImages)
+
+            loaderState.paymentSelection?.let { selection ->
+                _paymentOption.value = buildPaymentOptionDisplayData(selection)
+            }
         }
     }
 
     suspend fun applyPromotionCode(promotionCode: String): kotlin.Result<Unit> {
-        return withMutation { state ->
-            state.component.checkoutSessionRepository.applyPromotionCode(
-                state.sessionId,
+        return withMutation { sessionId ->
+            component.checkoutSessionRepository.applyPromotionCode(
+                sessionId,
                 promotionCode.trim(),
             )
         }
     }
 
     suspend fun removePromotionCode(): kotlin.Result<Unit> {
-        return withMutation { state ->
-            state.component.checkoutSessionRepository.applyPromotionCode(state.sessionId, "")
+        return withMutation { sessionId ->
+            component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
         }
     }
 
     suspend fun updateLineItemQuantity(lineItemId: String, quantity: Int): kotlin.Result<Unit> {
-        return withMutation { state ->
-            state.component.checkoutSessionRepository.updateLineItemQuantity(
-                state.sessionId,
+        return withMutation { sessionId ->
+            component.checkoutSessionRepository.updateLineItemQuantity(
+                sessionId,
                 lineItemId,
                 quantity,
             )
@@ -106,8 +188,8 @@ class CheckoutController(
     }
 
     suspend fun selectShippingOption(id: String): kotlin.Result<Unit> {
-        return withMutation { state ->
-            state.component.checkoutSessionRepository.selectShippingRate(state.sessionId, id)
+        return withMutation { sessionId ->
+            component.checkoutSessionRepository.selectShippingRate(sessionId, id)
         }
     }
 
@@ -117,15 +199,15 @@ class CheckoutController(
         address: Address,
     ): kotlin.Result<Unit> {
         val built = address.build()
-        return withMutation { state ->
-            state.component.checkoutSessionRepository.updateTaxRegion(state.sessionId, built)
+        return withMutation { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
         }
     }
 
     suspend fun updateTaxId(type: String, value: String): kotlin.Result<Unit> {
-        return withMutation { state ->
-            state.component.checkoutSessionRepository.updateTaxId(
-                state.sessionId,
+        return withMutation { sessionId ->
+            component.checkoutSessionRepository.updateTaxId(
+                sessionId,
                 type.trim(),
                 value.trim(),
             )
@@ -138,17 +220,21 @@ class CheckoutController(
         address: Address,
     ): kotlin.Result<Unit> {
         val built = address.build()
-        return withMutation { state ->
-            state.component.checkoutSessionRepository.updateTaxRegion(state.sessionId, built)
+        return withMutation { sessionId ->
+            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
         }
     }
 
     suspend fun runServerUpdate(serverUpdate: suspend () -> kotlin.Result<Unit>): kotlin.Result<Unit> {
-        return withMutation { state ->
+        return withMutation { sessionId ->
             withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
                 onSuccess = {
-                    state.component.checkoutSessionRepository.init(
-                        sessionId = state.sessionId,
+                    val state = configuredState
+                        ?: return@fold kotlin.Result.failure(
+                            IllegalStateException("CheckoutController is not configured.")
+                        )
+                    component.checkoutSessionRepository.init(
+                        sessionId = sessionId,
                         adaptivePricingAllowed = state.adaptivePricingAllowed,
                     )
                 },
@@ -162,18 +248,78 @@ class CheckoutController(
     }
 
     fun destroy() {
-        // TODO: Clean up resources, cancel scopes, remove from instance tracking.
+        coroutineScope.cancel()
+        configuredState = null
+    }
+
+    internal fun registerConfirmationHandler(activity: ComponentActivity) {
+        confirmationHandler.register(activity, activity)
+    }
+
+    internal fun confirm() {
+        val state = configuredState ?: run {
+            resultCallback.onResult(Result.Failed(IllegalStateException("Not configured.")))
+            return
+        }
+        val selection = state.selection ?: run {
+            resultCallback.onResult(Result.Failed(IllegalStateException("No payment method selected.")))
+            return
+        }
+        val confirmationOption = selection.toConfirmationOption(
+            configuration = state.commonConfiguration,
+            linkConfiguration = state.paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
+        ) ?: run {
+            resultCallback.onResult(Result.Failed(IllegalStateException("Cannot confirm this selection.")))
+            return
+        }
+        coroutineScope.launch {
+            confirmationHandler.start(
+                ConfirmationHandler.Args(
+                    confirmationOption = confirmationOption,
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                )
+            )
+        }
+    }
+
+    internal fun updateSelection(selection: PaymentSelection?) {
+        val state = configuredState ?: return
+        state.selection = selection
+        _paymentOption.value = if (selection == null) null else buildPaymentOptionDisplayData(selection)
+    }
+
+    private fun buildPaymentOptionDisplayData(
+        selection: PaymentSelection,
+    ): PaymentElement.PaymentOptionDisplayData {
+        val metadata = configuredState?.paymentMethodMetadata
+            ?: error("Cannot build display data without metadata.")
+        return PaymentElement.PaymentOptionDisplayData(
+            imageLoader = {
+                component.cardArtDrawableLoader.load(selection)
+                    ?: component.iconLoader.load(
+                        drawableResourceId = selection.drawableResourceId,
+                        drawableResourceIdNight = selection.drawableResourceIdNight,
+                        lightThemeIconUrl = selection.lightThemeIconUrl,
+                        darkThemeIconUrl = selection.darkThemeIconUrl,
+                    )
+            },
+            label = selection.label(metadata.linkBrand).resolve(application),
+            billingDetails = selection.billingDetails?.toPaymentSheetBillingDetails(),
+            paymentMethodType = selection.paymentMethodType,
+            mandateText = null,
+        )
     }
 
     private suspend fun withMutation(
-        block: suspend (ConfiguredState) -> kotlin.Result<CheckoutSessionResponse>,
+        block: suspend (sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> {
         val state = configuredState
             ?: return kotlin.Result.failure(IllegalStateException("CheckoutController is not configured."))
         return mutex.withLock {
             _isLoading.value = true
             val result = runCatching {
-                block(state).getOrThrow()
+                block(state.sessionId).getOrThrow()
             }.map { response ->
                 state.checkoutSessionResponse = response
                 _checkoutSession.value = response.toCheckoutSession(state.flagImages)
@@ -185,7 +331,6 @@ class CheckoutController(
 
     private suspend fun prefetchFlagImages(
         response: CheckoutSessionResponse,
-        component: CheckoutControllerComponent,
     ): Map<String, Bitmap>? {
         val adaptivePricingInfo = response.adaptivePricingInfo ?: return null
         val localOption = adaptivePricingInfo.localCurrencyOptions.firstOrNull() ?: return null
@@ -212,12 +357,22 @@ class CheckoutController(
         return result.images
     }
 
+    private fun ConfirmationHandler.Result.asCheckoutResult(): Result {
+        return when (this) {
+            is ConfirmationHandler.Result.Succeeded -> Result.Completed()
+            is ConfirmationHandler.Result.Failed -> Result.Failed(cause)
+            is ConfirmationHandler.Result.Canceled -> Result.Canceled()
+        }
+    }
+
     private class ConfiguredState(
-        val component: CheckoutControllerComponent,
         val sessionId: String,
         val adaptivePricingAllowed: Boolean,
         val flagImages: Map<String, Bitmap>?,
         var checkoutSessionResponse: CheckoutSessionResponse,
+        val paymentMethodMetadata: PaymentMethodMetadata,
+        val commonConfiguration: CommonConfiguration,
+        var selection: PaymentSelection?,
     )
 
     // --- Result ---

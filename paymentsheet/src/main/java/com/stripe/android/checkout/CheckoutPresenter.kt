@@ -11,8 +11,12 @@ class CheckoutPresenter internal constructor(
     private val controller: CheckoutController,
 ) {
 
+    init {
+        controller.registerConfirmationHandler(activity)
+    }
+
     fun paymentElement(): PaymentElement {
-        return PaymentElement()
+        return PaymentElement(controller)
     }
 
     fun currencySelector(): CurrencySelector {
@@ -24,6 +28,6 @@ class CheckoutPresenter internal constructor(
     }
 
     fun confirm() {
-        // TODO: Trigger confirmation flow, deliver result to controller's ResultCallback.
+        controller.confirm()
     }
 }

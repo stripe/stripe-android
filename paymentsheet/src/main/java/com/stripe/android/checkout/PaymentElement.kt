@@ -15,7 +15,9 @@ import kotlinx.parcelize.Parcelize
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentElement internal constructor() {
+class PaymentElement internal constructor(
+    private val controller: CheckoutController,
+) {
 
     @Composable
     fun PaymentOptionsContent() {
@@ -27,7 +29,7 @@ class PaymentElement internal constructor() {
     }
 
     fun clearPaymentOption() {
-        // TODO: Clear the current payment option selection.
+        controller.updateSelection(null)
     }
 
     @Poko

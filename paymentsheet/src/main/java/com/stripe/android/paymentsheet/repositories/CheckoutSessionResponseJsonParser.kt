@@ -79,6 +79,8 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val adaptivePricingInfo = parseAdaptivePricingInfo(
             json.optJSONObject(FIELD_ADAPTIVE_PRICING_INFO)
         )
+        val businessName = json.optJSONObject(FIELD_ELEMENTS_SESSION)
+            ?.optString(FIELD_BUSINESS_NAME)?.takeIf { it.isNotEmpty() }
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -98,6 +100,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             lineItems = lineItems,
             shippingOptions = shippingOptions,
             adaptivePricingInfo = adaptivePricingInfo,
+            businessName = businessName,
         )
     }
 
@@ -553,4 +556,5 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_LOCAL_CURRENCY_OPTIONS = "local_currency_options"
     private const val FIELD_CONVERSION_MARKUP_BPS = "conversion_markup_bps"
     private const val FIELD_PRESENTMENT_EXCHANGE_RATE = "presentment_exchange_rate"
+    private const val FIELD_BUSINESS_NAME = "business_name"
 }
