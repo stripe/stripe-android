@@ -124,8 +124,7 @@ class Checkout private constructor(
          * Recreates a [Checkout] from a previously saved [State], such as after process death.
          *
          * If a live instance already exists for the same key, it is returned directly and the
-         * provided [state] is ignored. This ensures a single [Checkout] object per session key
-         * across Activity boundaries, so mutations are serialized and observable from all holders.
+         * provided [state] is ignored.
          */
         fun createWithState(
             context: Context,

@@ -38,8 +38,6 @@ class CheckoutInstancesTest {
         CheckoutInstances.clear()
     }
 
-    // --- Registry basics (single entry per key) ---
-
     @Test
     fun `get returns null for unknown key`() {
         assertThat(CheckoutInstances["unknown-key"]).isNull()
@@ -95,8 +93,6 @@ class CheckoutInstancesTest {
         assertThat(CheckoutInstances["key2"]).isSameInstanceAs(checkout2)
     }
 
-    // --- ensureNoMutationInFlight ---
-
     @Test
     fun `ensureNoMutationInFlight does not throw for unknown key`() {
         CheckoutInstances.ensureNoMutationInFlight("unknown-key")
@@ -132,8 +128,6 @@ class CheckoutInstancesTest {
         }
     }
 
-    // --- markIntegrationLaunched/Dismissed ---
-
     @Test
     fun `markIntegrationLaunched blocks mutations`() = runTest {
         val checkout = createCheckout(key = "key1")
@@ -161,8 +155,6 @@ class CheckoutInstancesTest {
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()).isNotInstanceOf(IllegalStateException::class.java)
     }
-
-    // --- Dedup behavior (createWithState) ---
 
     @Test
     fun `createWithState returns same instance when checkout exists for key`() {
@@ -300,8 +292,6 @@ class CheckoutInstancesTest {
             jobA.join()
         }
     }
-
-    // --- getOrCreate ---
 
     @Test
     fun `getOrCreate returns existing instance without calling factory`() {
