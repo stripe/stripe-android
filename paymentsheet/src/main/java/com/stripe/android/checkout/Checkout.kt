@@ -575,7 +575,7 @@ class Checkout private constructor(
         _checkoutSession.value = internalState.asCheckoutSession()
     }
 
-private suspend fun withInternalState(
+    private suspend fun withInternalState(
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<Unit> {
