@@ -25,12 +25,6 @@ internal object CheckoutInstances {
         return checkout
     }
 
-    @VisibleForTesting
-    @Synchronized
-    fun add(key: String, checkout: Checkout) {
-        instanceMap[key] = WeakReference(checkout)
-    }
-
     @Synchronized
     fun ensureNoMutationInFlight(key: String) {
         this[key]?.ensureNoMutationInFlight()

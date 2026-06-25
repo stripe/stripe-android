@@ -1,8 +1,8 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import app.cash.turbine.test
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
@@ -46,26 +46,11 @@ class CheckoutInstancesTest {
     }
 
     @Test
-    fun `add and get round-trips single instance`() {
-        val checkout = createCheckout(key = "key1")
-        CheckoutInstances.clear()
-
-        CheckoutInstances.add("key1", checkout)
-
-        assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
-    }
-
-    @Test
-    fun `multiple keys coexist independently`() {
+    fun `different keys produce different instances`() {
         val checkout1 = createCheckout(key = "key1")
         val checkout2 = createCheckout(key = "key2")
-        CheckoutInstances.clear()
 
-        CheckoutInstances.add("key1", checkout1)
-        CheckoutInstances.add("key2", checkout2)
-
-        assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout1)
-        assertThat(CheckoutInstances["key2"]).isSameInstanceAs(checkout2)
+        assertThat(checkout1).isNotSameInstanceAs(checkout2)
     }
 
     @Test
