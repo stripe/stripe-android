@@ -16,6 +16,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.StripeClient
+import com.stripe.android.payments.core.injection.StripeClientHolder
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutConfigurationMerger
 import com.stripe.android.checkout.CheckoutInstances
@@ -59,6 +61,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
     stateHelper: EmbeddedStateHelper,
+    private val stripeClientHolder: StripeClientHolder,
 ) {
 
     /**
@@ -84,7 +87,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
+        stripeClient: StripeClient? = null,
     ): ConfigureResult {
+        stripeClientHolder.stripeClient = stripeClient
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         return configurationCoordinator.configure(configuration, initializationMode)
     }
@@ -101,7 +106,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
     suspend fun configure(
         checkout: Checkout,
         configuration: Configuration,
+        stripeClient: StripeClient? = null,
     ): ConfigureResult {
+        stripeClientHolder.stripeClient = stripeClient
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         return configurationCoordinator.configure(
             configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
