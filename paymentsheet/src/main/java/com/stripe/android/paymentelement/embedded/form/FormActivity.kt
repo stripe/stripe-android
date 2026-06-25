@@ -17,6 +17,7 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetViewModel
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -36,8 +37,8 @@ internal class FormActivity : AppCompatActivity() {
         EmbeddedActivityArgs.fromIntent(intent)
     }
 
-    private val viewModel: FormActivityViewModel by viewModels {
-        FormActivityViewModel.Factory {
+    private val viewModel: EmbeddedSheetViewModel by viewModels {
+        EmbeddedSheetViewModel.Factory {
             requireNotNull(args)
         }
     }
