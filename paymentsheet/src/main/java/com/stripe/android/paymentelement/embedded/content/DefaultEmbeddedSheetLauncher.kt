@@ -11,13 +11,12 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
-import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
-import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -56,7 +55,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
-    embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
+    private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -75,10 +74,19 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
+            handleFormResult(result)
+        }
 
-            result.customerState?.let { customerStateHolder.setCustomerState(it) }
+    private val sheetActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
+        activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
+            sheetStateHolder.sheetIsOpen = false
+            handleManageResult(result)
+        }
 
-            if (result is FormResult.Complete) {
+    private fun handleFormResult(result: EmbeddedActivityResult) {
+        when (result) {
+            is EmbeddedActivityResult.Complete -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
                 selectionHolder.set(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
@@ -87,28 +95,30 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 } else {
                     result.selection?.let { rowSelectionImmediateActionHandler.invoke() }
                 }
-            } else if (result is FormResult.Cancelled) {
+            }
+            is EmbeddedActivityResult.Cancelled -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
                 embeddedResultCallbackHelper.setResult(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
+            is EmbeddedActivityResult.Error -> Unit
         }
+    }
 
-    private val sheetActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
-        activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
-            sheetStateHolder.sheetIsOpen = false
-            when (result) {
-                is EmbeddedSheetResult.Error -> Unit
-                is EmbeddedSheetResult.Cancelled -> Unit
-                is EmbeddedSheetResult.Complete -> {
-                    result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                    selectionHolder.set(result.selection)
-                    if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
-                        rowSelectionImmediateActionHandler.invoke()
-                    }
+    private fun handleManageResult(result: EmbeddedActivityResult) {
+        when (result) {
+            is EmbeddedActivityResult.Complete -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.set(result.selection)
+                if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
+                    rowSelectionImmediateActionHandler.invoke()
                 }
             }
+            is EmbeddedActivityResult.Cancelled -> Unit
+            is EmbeddedActivityResult.Error -> Unit
         }
+    }
 
     override fun launchForm(
         code: String,

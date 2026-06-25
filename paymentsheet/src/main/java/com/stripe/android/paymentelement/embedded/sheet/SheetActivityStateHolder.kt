@@ -9,8 +9,8 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -36,12 +36,12 @@ import javax.inject.Singleton
 
 internal interface SheetActivityStateHolder {
     val state: StateFlow<State>
-    val result: SharedFlow<FormResult>
+    val result: SharedFlow<EmbeddedActivityResult>
     fun updateMandate(mandateText: ResolvableString?)
     fun updatePrimaryButton(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?)
     fun updateError(error: ResolvableString?)
 
-    fun setResult(result: FormResult)
+    fun setResult(result: EmbeddedActivityResult)
 
     fun updateSavedPaymentSelectionToConfirm(selection: PaymentSelection.Saved?)
 
@@ -81,8 +81,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     )
     override val state: StateFlow<SheetActivityStateHolder.State> = _state
 
-    private val _result = MutableSharedFlow<FormResult>()
-    override val result: SharedFlow<FormResult> = _result
+    private val _result = MutableSharedFlow<EmbeddedActivityResult>()
+    override val result: SharedFlow<EmbeddedActivityResult> = _result
 
     private var usBankAccountFormPrimaryButtonUiState: PrimaryButton.UIState? = null
 
@@ -97,25 +97,28 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                         null
                     }
                     is TapToAddNextStep.ShowSavedPaymentMethods -> {
-                        FormResult.Complete(
+                        EmbeddedActivityResult.Complete(
                             selection = result.paymentSelection,
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
+                            shouldInvokeSelectionCallback = false,
                         )
                     }
                     TapToAddNextStep.Complete -> {
-                        FormResult.Complete(
+                        EmbeddedActivityResult.Complete(
                             selection = null,
                             hasBeenConfirmed = true,
-                            customerState = customerStateHolder.customer.value
+                            customerState = customerStateHolder.customer.value,
+                            shouldInvokeSelectionCallback = false,
                         )
                     }
                     is TapToAddNextStep.Continue -> {
                         customerStateHolder.addPaymentMethod(result.paymentSelection.paymentMethod)
-                        FormResult.Complete(
+                        EmbeddedActivityResult.Complete(
                             selection = result.paymentSelection,
                             hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value
+                            customerState = customerStateHolder.customer.value,
+                            shouldInvokeSelectionCallback = false,
                         )
                     }
                 }
@@ -145,7 +148,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
         }
     }
 
-    override fun setResult(result: FormResult) {
+    override fun setResult(result: EmbeddedActivityResult) {
         coroutineScope.launch {
             _result.emit(result)
         }

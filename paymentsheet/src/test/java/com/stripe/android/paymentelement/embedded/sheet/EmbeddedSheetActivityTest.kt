@@ -25,6 +25,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
@@ -78,7 +79,7 @@ internal class EmbeddedSheetActivityTest {
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isInstanceOf(EmbeddedSheetResult.Error::class.java)
+            assertThat(result).isInstanceOf(EmbeddedActivityResult.Error::class.java)
         }
     }
 
@@ -285,14 +286,14 @@ internal class EmbeddedSheetActivityTest {
     ) {
         fun assertCompletedResultSelection(paymentMethodId: String?) {
             val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
-            val savedSelection = (result as EmbeddedSheetResult.Complete).selection as PaymentSelection.Saved?
+            val savedSelection = (result as EmbeddedActivityResult.Complete).selection as PaymentSelection.Saved?
             assertThat(savedSelection?.paymentMethod?.id)
                 .isEqualTo(paymentMethodId)
         }
 
         fun completedResultPaymentMethods(): List<PaymentMethod> {
             val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
-            return (result as EmbeddedSheetResult.Complete).customerState!!.paymentMethods
+            return (result as EmbeddedActivityResult.Complete).customerState!!.paymentMethods
         }
     }
 }

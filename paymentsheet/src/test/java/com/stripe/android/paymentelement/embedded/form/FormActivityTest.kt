@@ -29,6 +29,7 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -68,7 +69,7 @@ internal class FormActivityTest {
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             val result = FormContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isInstanceOf(FormResult.Cancelled::class.java)
+            assertThat(result).isInstanceOf(EmbeddedActivityResult.Cancelled::class.java)
         }
     }
 
@@ -93,10 +94,11 @@ internal class FormActivityTest {
     fun `When SheetActivityStateHolder has result, activity finishes with that result`() = launch { scenario ->
         scenario.onActivity { activity ->
             activity.sheetActivityStateHolder.setResult(
-                FormResult.Complete(
+                EmbeddedActivityResult.Complete(
                     selection = null,
                     hasBeenConfirmed = true,
                     customerState = null,
+                    shouldInvokeSelectionCallback = false,
                 )
             )
         }
@@ -105,7 +107,7 @@ internal class FormActivityTest {
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = FormContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
-        assertThat(result).isInstanceOf<FormResult.Complete>()
+        assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
     }
 
     @Test

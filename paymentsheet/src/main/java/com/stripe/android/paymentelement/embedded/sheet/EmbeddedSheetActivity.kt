@@ -27,6 +27,7 @@ import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -205,7 +206,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         shouldInvokeSelectionCallback: Boolean,
         hasBeenConfirmed: Boolean = false,
     ) {
-        val result = EmbeddedSheetResult.Complete(
+        val result = EmbeddedActivityResult.Complete(
             selection = selectionHolder.selection.value,
             hasBeenConfirmed = hasBeenConfirmed,
             customerState = customerStateHolder.customer.value,
@@ -213,7 +214,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         )
         setResult(
             Activity.RESULT_OK,
-            EmbeddedSheetResult.toIntent(intent, result)
+            EmbeddedActivityResult.toIntent(intent, result)
         )
     }
 }

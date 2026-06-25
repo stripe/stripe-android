@@ -15,6 +15,7 @@ import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
@@ -75,7 +76,7 @@ internal class FormActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             sheetActivityStateHolder.result.collect {
-                setFormResult(it)
+                setActivityResult(it)
                 finish()
             }
         }
@@ -121,8 +122,8 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     private fun setCancelAndFinish() {
-        setFormResult(
-            FormResult.Cancelled(
+        setActivityResult(
+            EmbeddedActivityResult.Cancelled(
                 customerState = getCustomerState(),
             )
         )
@@ -153,10 +154,10 @@ internal class FormActivity : AppCompatActivity() {
         }
     }
 
-    private fun setFormResult(result: FormResult) {
+    private fun setActivityResult(result: EmbeddedActivityResult) {
         setResult(
             Activity.RESULT_OK,
-            FormResult.toIntent(intent, result)
+            EmbeddedActivityResult.toIntent(intent, result)
         )
     }
 }

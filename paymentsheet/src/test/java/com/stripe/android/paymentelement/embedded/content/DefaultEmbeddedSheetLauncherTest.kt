@@ -26,9 +26,8 @@ import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImm
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
-import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
-import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetResult
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -223,8 +222,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
-        val result = FormResult.Complete(null, true, customerState = null)
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val result = EmbeddedActivityResult.Complete(null, true, customerState = null, shouldInvokeSelectionCallback = false)
+        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -242,8 +241,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
-        val result = FormResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false, customerState = null)
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val result = EmbeddedActivityResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false, customerState = null, shouldInvokeSelectionCallback = false)
+        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -263,12 +262,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
             selectionHolder.set(selection)
 
-            val result = FormResult.Complete(
+            val result = EmbeddedActivityResult.Complete(
                 PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 false,
                 customerState = null,
+                shouldInvokeSelectionCallback = false,
             )
-            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+            val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
         }
@@ -284,12 +284,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
             val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
             selectionHolder.set(selection)
 
-            val result = FormResult.Complete(
+            val result = EmbeddedActivityResult.Complete(
                 PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
                 true,
                 customerState = null,
+                shouldInvokeSelectionCallback = false,
             )
-            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+            val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
             assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -303,8 +304,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary("test_code")
-        val result = FormResult.Cancelled(customerState = null)
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val result = EmbeddedActivityResult.Cancelled(customerState = null)
+        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
@@ -321,8 +322,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         ) {
             sheetStateHolder.sheetIsOpen = true
             selectionHolder.setTemporary("test_code")
-            val result = FormResult.Cancelled(customerState = null)
-            val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+            val result = EmbeddedActivityResult.Cancelled(customerState = null)
+            val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
             assertThat(callbackHelper.callbackTurbine.awaitItem())
@@ -333,12 +334,13 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `formActivityLauncher callback sets customer state when available on complete`() = testScenario {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val result = FormResult.Complete(
+        val result = EmbeddedActivityResult.Complete(
             customerState = createCustomerState(),
             selection = null,
             hasBeenConfirmed = false,
+            shouldInvokeSelectionCallback = false,
         )
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -347,10 +349,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `formActivityLauncher callback sets customer state when available on cancel`() = testScenario {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val result = FormResult.Cancelled(
+        val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(),
         )
-        val callback = formRegisterCall.callback.asCallbackFor<FormResult>()
+        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -406,14 +408,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        val result = EmbeddedSheetResult.Complete(
+        val result = EmbeddedActivityResult.Complete(
             customerState = customerState,
             selection = selection,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
         )
 
-        val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedSheetResult>()
+        val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
 
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -429,14 +431,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetStateHolder.sheetIsOpen = true
             val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            val result = EmbeddedSheetResult.Complete(
+            val result = EmbeddedActivityResult.Complete(
                 customerState = customerState,
                 selection = selection,
                 hasBeenConfirmed = false,
                 shouldInvokeSelectionCallback = true,
             )
 
-            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedSheetResult>()
+            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
             callback.onActivityResult(result)
         }
     }
@@ -449,14 +451,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetStateHolder.sheetIsOpen = true
             val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
             val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            val result = EmbeddedSheetResult.Complete(
+            val result = EmbeddedActivityResult.Complete(
                 customerState = customerState,
                 selection = selection,
                 hasBeenConfirmed = false,
                 shouldInvokeSelectionCallback = false,
             )
 
-            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedSheetResult>()
+            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
             callback.onActivityResult(result)
         }
     }
@@ -465,8 +467,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `manageSheetLauncher callback does not update state on error result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-        val result = EmbeddedSheetResult.Error
-        val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedSheetResult>()
+        val result = EmbeddedActivityResult.Error
+        val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
 
@@ -482,8 +484,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         ) {
             sheetStateHolder.sheetIsOpen = true
             customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
-            val result = EmbeddedSheetResult.Error
-            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedSheetResult>()
+            val result = EmbeddedActivityResult.Error
+            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
         }
