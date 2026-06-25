@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.StripeClient
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutConfigurationMerger
 import com.stripe.android.checkout.CheckoutInstances
@@ -220,6 +221,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
             private set
 
+        internal var stripeClient: StripeClient? = null
+            private set
+
         internal var rowSelectionBehavior: RowSelectionBehavior = RowSelectionBehavior.default()
 
         /**
@@ -262,6 +266,15 @@ class EmbeddedPaymentElement @Inject internal constructor(
          */
         fun rowSelectionBehavior(rowSelectionBehavior: RowSelectionBehavior) = apply {
             this.rowSelectionBehavior = rowSelectionBehavior
+        }
+
+        /**
+         * Overrides the publishable key used by this [EmbeddedPaymentElement] instance.
+         * When set, this takes precedence over the global [com.stripe.android.PaymentConfiguration]
+         * singleton for this instance only.
+         */
+        fun stripeClient(client: StripeClient) = apply {
+            this.stripeClient = client
         }
 
         @OptIn(SharedPaymentTokenSessionPreview::class)
@@ -821,12 +834,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
             lifecycleOwner: LifecycleOwner,
             paymentElementCallbackIdentifier: String,
             resultCallback: ResultCallback,
+            stripeClient: StripeClient? = null,
         ): EmbeddedPaymentElement {
             val viewModel = ViewModelProvider(
                 owner = viewModelStoreOwner,
                 factory = EmbeddedPaymentElementViewModel.Factory(
                     paymentElementCallbackIdentifier,
                     StatusBarCompat.color(activity),
+                    stripeClient,
                 )
             ).get(
                 key = "EmbeddedPaymentElementViewModel(instance = $paymentElementCallbackIdentifier)",

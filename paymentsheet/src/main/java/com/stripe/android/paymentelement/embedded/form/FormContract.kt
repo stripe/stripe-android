@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.os.BundleCompat
+import com.stripe.android.StripeClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -67,7 +68,8 @@ internal object FormContract : ActivityResultContract<FormContract.Args, FormRes
         val statusBarColor: Int?,
         val paymentSelection: PaymentSelection?,
         val customerState: CustomerState?,
-        val promotion: PaymentMethodMessagePromotion?
+        val promotion: PaymentMethodMessagePromotion?,
+        val stripeClient: StripeClient? = null,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeClient
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +26,10 @@ internal class FormActivityViewModel @Inject constructor(
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argSupplier()
+            val resolvedClient = args.stripeClient ?: run {
+                val config = PaymentConfiguration.getInstance(extras.requireApplication())
+                StripeClient(config.publishableKey, config.stripeAccountId)
+            }
             val component = DaggerFormActivityViewModelComponent.factory().build(
                 paymentMethodMetadata = args.paymentMethodMetadata,
                 selectedPaymentMethodCode = args.selectedPaymentMethodCode,
@@ -34,6 +40,7 @@ internal class FormActivityViewModel @Inject constructor(
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 savedStateHandle = extras.createSavedStateHandle(),
                 promotion = args.promotion,
+                stripeClient = resolvedClient,
             )
 
             component.selectionHolder.set(args.paymentSelection)

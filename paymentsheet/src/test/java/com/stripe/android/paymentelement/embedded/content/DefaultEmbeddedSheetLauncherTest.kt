@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.StripeClient
 import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
@@ -86,7 +87,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             statusBarColor = null,
             paymentSelection = null,
             customerState = customerState,
-            promotion = promotion
+            promotion = promotion,
+            stripeClient = StripeClient("pk_123"),
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -365,6 +367,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = PaymentSelection.GooglePay,
             customerState = customerState,
             promotion = null,
+            stripeClient = StripeClient("pk_123"),
         )
 
         sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay, state)
@@ -577,6 +580,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                 embeddedResultCallbackHelper = callbackHelper,
                 rowSelectionImmediateActionHandler = immediateActionHandler,
+                stripeClient = StripeClient("pk_123"),
             )
             val formRegisterCall = awaitRegisterCall()
             val manageRegisterCall = awaitRegisterCall()

@@ -54,6 +54,7 @@ fun rememberEmbeddedPaymentElement(
             lifecycleOwner = lifecycleOwner,
             viewModelStoreOwner = viewModelStoreOwner,
             resultCallback = onResult,
+            stripeClient = builder.stripeClient,
         )
     }
 

@@ -4,6 +4,7 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.StripeClient
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -56,6 +57,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
+    private val stripeClient: StripeClient,
 ) : EmbeddedSheetLauncher {
 
     init {
@@ -143,7 +145,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             statusBarColor = statusBarColor,
             paymentSelection = currentSelection,
             customerState = customerState,
-            promotion = promotion
+            promotion = promotion,
+            stripeClient = stripeClient,
         )
         formActivityLauncher.launch(args)
     }
@@ -177,6 +180,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selection = selection,
             customerState = customerState,
             promotion = null,
+            stripeClient = stripeClient,
         )
         sheetActivityLauncher.launch(args)
     }
