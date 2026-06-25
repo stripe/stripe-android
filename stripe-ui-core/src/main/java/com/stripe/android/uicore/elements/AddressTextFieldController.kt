@@ -29,11 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class AddressTextFieldController(
     label: ResolvableString,
     addressInputMode: AddressInputMode,
-    val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState>? = null,
-    private val onInlinePredictionSelected: ((String) -> Unit)? = null,
-    private val onInlineDismissed: (() -> Unit)? = null,
-    private val onInlineEnterManually: (() -> Unit)? = null,
-    private val getAttributionDrawable: ((Boolean) -> Int?)? = null,
+    private val inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
     private val _inlineQuery = MutableStateFlow("")
@@ -79,7 +75,7 @@ class AddressTextFieldController(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
-        if (inlinePredictionsState != null) {
+        if (inlineAutocompleteHandler != null) {
             var fieldWidthDp by remember { mutableStateOf(0.dp) }
             val density = LocalDensity.current
 
@@ -97,16 +93,18 @@ class AddressTextFieldController(
                     controller = this@AddressTextFieldController,
                     enabled = enabled,
                 )
-                val predictionsState by inlinePredictionsState.collectAsState()
+                val predictionsState by
+                    inlineAutocompleteHandler.predictionsState.collectAsState()
                 val isDarkTheme = isSystemInDarkTheme()
                 InlineAddressPredictionsUI(
                     state = predictionsState,
-                    attributionDrawable = getAttributionDrawable?.invoke(isDarkTheme),
+                    attributionDrawable = inlineAutocompleteHandler
+                        .getAttributionDrawable(isDarkTheme),
                     fieldWidthDp = fieldWidthDp,
-                    onPredictionSelected = onInlinePredictionSelected ?: {},
-                    onDismiss = onInlineDismissed ?: {},
+                    onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
+                    onDismiss = inlineAutocompleteHandler::onDismissed,
                     onClear = onClear,
-                    onEnterManually = onInlineEnterManually,
+                    onEnterManually = inlineAutocompleteHandler::onEnterManually,
                 )
             }
         } else {

@@ -31,14 +31,30 @@ class AutocompleteAddressController(
 
     private val config = interactor.autocompleteConfig
 
-    private val onInlinePredictionSelected: ((String) -> Unit)? =
-        if (config.isInlineAutocompleteEnabled) interactor::onPredictionSelected else null
-    private val onInlineDismissed: (() -> Unit)? =
-        if (config.isInlineAutocompleteEnabled) interactor::onDismissed else null
-    private val onInlineEnterManually: (() -> Unit)? =
-        if (config.isInlineAutocompleteEnabled) interactor::onEnterManuallyFromInline else null
-    private val inlineGetAttributionDrawable: ((Boolean) -> Int?)? =
-        if (config.isInlineAutocompleteEnabled) config.getAttributionDrawable else null
+    private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
+        if (config.isInlineAutocompleteEnabled) {
+            object : InlineAutocompleteHandler {
+                override val predictionsState = interactor.inlinePredictionsState
+
+                override fun onPredictionSelected(predictionId: String) {
+                    interactor.onPredictionSelected(predictionId)
+                }
+
+                override fun onDismissed() {
+                    interactor.onDismissed()
+                }
+
+                override fun onEnterManually() {
+                    interactor.onEnterManuallyFromInline()
+                }
+
+                override fun getAttributionDrawable(isDarkTheme: Boolean): Int? {
+                    return config.getAttributionDrawable?.invoke(isDarkTheme)
+                }
+            }
+        } else {
+            null
+        }
 
     private var expandForm = false
 
@@ -131,15 +147,7 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
-            inlinePredictionsState = if (config.isInlineAutocompleteEnabled) {
-                interactor.inlinePredictionsState
-            } else {
-                null
-            },
-            onInlinePredictionSelected = onInlinePredictionSelected,
-            onInlineDismissed = onInlineDismissed,
-            onInlineEnterManually = onInlineEnterManually,
-            getAttributionDrawable = inlineGetAttributionDrawable,
+            inlineAutocompleteHandler = inlineAutocompleteHandler,
         )
     }
 
