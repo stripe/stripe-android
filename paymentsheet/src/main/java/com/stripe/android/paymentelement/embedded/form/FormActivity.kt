@@ -14,6 +14,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
@@ -30,8 +31,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class FormActivity : AppCompatActivity() {
-    private val args: FormContract.Args? by lazy {
-        FormContract.Args.fromIntent(intent)
+    private val args: EmbeddedActivityArgs? by lazy {
+        EmbeddedActivityArgs.fromIntent(intent)
     }
 
     private val viewModel: FormActivityViewModel by viewModels {

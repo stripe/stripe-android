@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -70,7 +71,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         )
     }
 
-    private val formActivityLauncher: ActivityResultLauncher<FormContract.Args> =
+    private val formActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(FormContract) { result ->
             sheetStateHolder.sheetIsOpen = false
             selectionHolder.setTemporary(null)
@@ -93,7 +94,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             }
         }
 
-    private val sheetActivityLauncher: ActivityResultLauncher<EmbeddedSheetContract.Args> =
+    private val sheetActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
             sheetStateHolder.sheetIsOpen = false
             when (result) {
@@ -134,16 +135,16 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)
-        val args = FormContract.Args(
+        val args = EmbeddedActivityArgs(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             configuration = embeddedConfirmationState.configuration,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
-            paymentSelection = currentSelection,
+            selection = currentSelection,
             customerState = customerState,
-            promotion = promotion
+            promotion = promotion,
         )
         formActivityLauncher.launch(args)
     }
@@ -167,7 +168,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        val args = EmbeddedSheetContract.Args(
+        val args = EmbeddedActivityArgs(
             selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = customerState.paymentMethods.isNotEmpty(),

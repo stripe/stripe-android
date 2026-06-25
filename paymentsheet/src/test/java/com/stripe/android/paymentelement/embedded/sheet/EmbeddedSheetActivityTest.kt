@@ -24,6 +24,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
@@ -248,7 +249,7 @@ internal class EmbeddedSheetActivityTest {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
-                input = EmbeddedSheetContract.Args(
+                input = EmbeddedActivityArgs(
                     selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethods = paymentMethods.isNotEmpty(),

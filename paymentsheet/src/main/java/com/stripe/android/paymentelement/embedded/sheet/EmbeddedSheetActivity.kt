@@ -26,6 +26,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -42,8 +43,8 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class EmbeddedSheetActivity : AppCompatActivity() {
-    private val args: EmbeddedSheetContract.Args? by lazy {
-        EmbeddedSheetContract.Args.fromIntent(intent)
+    private val args: EmbeddedActivityArgs? by lazy {
+        EmbeddedActivityArgs.fromIntent(intent)
     }
 
     private val viewModel: EmbeddedSheetViewModel by viewModels {

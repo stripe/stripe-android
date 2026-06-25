@@ -23,6 +23,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.form.FormResult
@@ -77,16 +78,16 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 url = "https://www.test.com"
             )
         )
-        val expectedArgs = FormContract.Args(
+        val expectedArgs = EmbeddedActivityArgs(
             selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = false,
             configuration = state.configuration,
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
-            paymentSelection = null,
+            selection = null,
             customerState = customerState,
-            promotion = promotion
+            promotion = promotion,
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -119,8 +120,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(launchCall.selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -138,8 +139,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(launchCall.selection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
     }
 
     @Test
@@ -156,8 +157,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isNull()
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(launchCall.selection).isNull()
     }
 
     @Test
@@ -174,8 +175,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             customerState = createCustomerState(),
             promotion = null,
         )
-        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
-        assertThat(launchCall.paymentSelection).isNull()
+        val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
+        assertThat(launchCall.selection).isNull()
     }
 
     @Test
@@ -362,7 +363,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val state = EmbeddedConfirmationStateFixtures.defaultState()
-        val expectedArgs = EmbeddedSheetContract.Args(
+        val expectedArgs = EmbeddedActivityArgs(
             selectedPaymentMethodCode = "google_pay",
             paymentMethodMetadata = paymentMethodMetadata,
             hasSavedPaymentMethods = customerState.paymentMethods.isNotEmpty(),

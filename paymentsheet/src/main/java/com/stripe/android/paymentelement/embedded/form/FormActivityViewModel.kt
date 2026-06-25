@@ -6,6 +6,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
@@ -19,7 +20,7 @@ internal class FormActivityViewModel @Inject constructor(
     }
 
     class Factory(
-        private val argSupplier: () -> FormContract.Args
+        private val argSupplier: () -> EmbeddedActivityArgs
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -36,7 +37,7 @@ internal class FormActivityViewModel @Inject constructor(
                 promotion = args.promotion,
             )
 
-            component.selectionHolder.set(args.paymentSelection)
+            component.selectionHolder.set(args.selection)
             component.customerStateHolder.setCustomerState(args.customerState)
 
             return component.viewModel as T

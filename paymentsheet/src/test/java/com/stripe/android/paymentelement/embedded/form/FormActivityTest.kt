@@ -28,6 +28,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -145,16 +146,16 @@ internal class FormActivityTest {
         ActivityScenario.launchActivityForResult<FormActivity>(
             FormContract.createIntent(
                 context = applicationContext,
-                input = FormContract.Args(
+                input = EmbeddedActivityArgs(
                     selectedPaymentMethodCode = selectedPaymentMethodCode,
                     paymentMethodMetadata = paymentMethodMetadata,
                     hasSavedPaymentMethods = hasSavedPaymentMethods,
                     configuration = configuration,
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
-                    paymentSelection = null,
+                    selection = null,
                     customerState = createCustomerState(paymentMethods = emptyList()),
-                    promotion = null
+                    promotion = null,
                 ),
             )
         ).use { scenario ->
