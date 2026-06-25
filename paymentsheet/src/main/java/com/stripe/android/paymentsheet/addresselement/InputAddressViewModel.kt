@@ -89,7 +89,7 @@ internal class InputAddressViewModel @Inject constructor(
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
         getAttributionDrawable = if (isInlineAutocompleteEnabled) {
-            { isDarkTheme -> PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isDarkTheme) }
+            { _ -> com.stripe.android.uicore.R.drawable.stripe_google_maps_logo }
         } else {
             null
         },

@@ -171,7 +171,7 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled && (expandForm || values[IdentifierSpec.Line1] != null)) {
+        } else if (config.isInlineAutocompleteEnabled) {
             AddressInputMode.NoAutocomplete(
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,

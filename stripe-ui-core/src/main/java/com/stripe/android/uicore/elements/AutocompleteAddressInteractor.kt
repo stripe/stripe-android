@@ -44,8 +44,13 @@ interface AutocompleteAddressInteractor {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed interface InlinePredictionsState {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Idle : InlinePredictionsState
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data object Loading : InlinePredictionsState
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class Results(
             val query: String,
             val predictions: List<InlineAddressPrediction>,
