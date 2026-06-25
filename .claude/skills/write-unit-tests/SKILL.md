@@ -151,9 +151,94 @@ fun `state updates when data changes`() = runScenario {
 | Creating fakes | Invoke `create-fake` skill |
 | NetworkRule integration tests | Invoke `network-tests` skill |
 
+## Concurrency Testing with Real I/O
+
+When testing coroutines that involve real network I/O (NetworkRule/OkHttp), use `runTest` + `testScheduler.advanceUntilIdle()` + `async`/`await()`. Never use `Thread.sleep`.
+
+### Pattern: Assert state during a suspended network call
+
+```kotlin
+@Test
+fun `mutex is locked during mutation`() = runTest {
+    val holdResponse = CountDownLatch(1)
+    networkRule.checkoutUpdate { response ->
+        holdResponse.await()
+        response.setBody("{}")
+    }
+
+    val job = async { systemUnderTest.mutate() }
+    testScheduler.advanceUntilIdle()
+
+    // Coroutine is now suspended on the network call.
+    // Assert mid-flight state here.
+    assertThat(systemUnderTest.isLoading.value).isTrue()
+
+    holdResponse.countDown()
+    job.await()
+
+    // Assert post-completion state here.
+    assertThat(systemUnderTest.isLoading.value).isFalse()
+}
+```
+
+### Pattern: Assert mutations are queued (not parallel)
+
+```kotlin
+@Test
+fun `concurrent mutations are queued`() = runTest {
+    val holdFirstResponse = CountDownLatch(1)
+    val secondRequestArrived = CountDownLatch(1)
+
+    networkRule.enqueueFirst { response ->
+        holdFirstResponse.await()
+        response.setBody("{}")
+    }
+    networkRule.enqueueSecond { response ->
+        secondRequestArrived.countDown()
+        response.setBody("{}")
+    }
+
+    val jobB = async { systemUnderTest.mutateB() }
+    testScheduler.advanceUntilIdle()
+
+    val jobA = async { systemUnderTest.mutateA() }
+    testScheduler.advanceUntilIdle()
+
+    // Negative: A's request has NOT fired while B holds the lock
+    assertThat(secondRequestArrived.count).isEqualTo(1)
+
+    holdFirstResponse.countDown()
+    jobB.await()
+    jobA.await()
+
+    // Positive: A's request DID fire after B completed
+    assertThat(secondRequestArrived.count).isEqualTo(0)
+}
+```
+
+### Key rules
+
+| Do | Don't |
+|----|-------|
+| `async { }` + `await()` | `launch { }` + `join()` |
+| `testScheduler.advanceUntilIdle()` | `Thread.sleep(n)` |
+| `CountDownLatch` for sync points | Arbitrary timeouts as primary mechanism |
+| Assert both negative AND positive | Assert only one direction |
+
+**Why `async`/`await()` over `launch`/`join()`:** `await()` propagates exceptions. If the coroutine throws unexpectedly, the test fails with the real error instead of silently passing.
+
+**Why `advanceUntilIdle()` works:** It deterministically advances all coroutines on the test dispatcher to their next suspension point (mutex, network call). No timing dependency.
+
+**Why `await()` after latch release:** After `countDown()`, OkHttp processes the response on its own thread and delivers the continuation back to the test dispatcher. `await()` yields until that chain completes. `advanceUntilIdle()` alone may return before the continuation arrives.
+
+**Reference:** `CheckoutTest.kt` lines 730-752 for the canonical mid-flight assertion pattern.
+
 ## Common Mistakes
 
 - **Using mocks instead of fakes** — always create `FakeClassName` implementations
 - **Forgetting `ensureAllEventsConsumed()`** — runScenario handles this, but if using `runTest` directly, call it manually
 - **Testing implementation details** — test behavior (inputs → outputs), not internal method calls
 - **Missing edge cases** — null values, empty lists, blank strings, error paths
+- **Using `Thread.sleep` in tests** — use `testScheduler.advanceUntilIdle()` instead
+- **Testing stdlib behavior** — don't test that `HashMap.clear()` works
+- **Vacuous assertions** — assert the pre-condition exists before testing its removal
