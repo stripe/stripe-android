@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import app.cash.turbine.test
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -194,16 +195,20 @@ class CheckoutInstancesTest {
             response.setBody("""{"id": "cs_123", "line_items": [], "status": "open"}""")
         }
 
-        val job = async { checkoutB.removePromotionCode() }
-        testScheduler.advanceUntilIdle()
+        checkoutA.isLoading.test {
+            assertThat(awaitItem()).isFalse()
 
-        // A observes isLoading because it's the same instance as B
-        assertThat(checkoutA.isLoading.value).isTrue()
+            val job = async { checkoutB.removePromotionCode() }
+            testScheduler.advanceUntilIdle()
 
-        holdResponse.countDown()
-        job.await()
+            assertThat(awaitItem()).isTrue()
 
-        assertThat(checkoutA.isLoading.value).isFalse()
+            holdResponse.countDown()
+            job.await()
+
+            assertThat(awaitItem()).isFalse()
+        }
+
         assertThat(checkoutA.checkoutSession.value).isEqualTo(checkoutB.checkoutSession.value)
     }
 
