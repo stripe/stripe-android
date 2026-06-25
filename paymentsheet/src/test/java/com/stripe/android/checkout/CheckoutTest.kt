@@ -41,6 +41,22 @@ class CheckoutTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val networkRule = NetworkRule()
 
+    private fun taxEnabledForShipping() = CheckoutSessionResponseFactory.create(
+        automaticTaxEnabled = true,
+        taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+    )
+
+    private fun taxEnabledForBilling() = CheckoutSessionResponseFactory.create(
+        automaticTaxEnabled = true,
+        taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+    )
+
+    private val testAddress = Address()
+        .city("Denver")
+        .country("US")
+        .postalCode("80202")
+        .state("CO")
+
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
@@ -306,7 +322,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress sends address fields and updates checkoutSession on success`() =
-        runCreateWithStateScenario {
+        runCreateWithStateScenario(checkoutSessionResponse = taxEnabledForBilling()) {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
@@ -342,7 +358,9 @@ class CheckoutTest {
         }
 
     @Test
-    fun `updateBillingAddress returns failure on error response`() = runCreateWithStateScenario {
+    fun `updateBillingAddress returns failure on error response`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
+    ) {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -392,6 +410,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress stores address in internalState`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -442,6 +461,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress does not store address in internalState on failure`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -475,6 +495,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress stores phoneNumber in internalState`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -506,6 +527,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress does not store phoneNumber in internalState on failure`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -521,7 +543,9 @@ class CheckoutTest {
     }
 
     @Test
-    fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario {
+    fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
+    ) {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[postal_code]", "80202"),
@@ -544,6 +568,71 @@ class CheckoutTest {
         checkoutSessionTurbine.awaitItem()
         result.getOrThrow()
     }
+
+    @Test
+    fun `updateShippingAddress does not send tax_region when automatic_tax is disabled`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            ),
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateShippingAddress(name = "John", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.shippingName).isEqualTo("John")
+            assertThat(state.shippingAddress?.country).isEqualTo("US")
+            assertThat(state.shippingAddress?.postalCode).isEqualTo("80202")
+        }
+
+    @Test
+    fun `updateShippingAddress does not send tax_region when address source is billing`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = taxEnabledForBilling(),
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateShippingAddress(name = "John", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.shippingName).isEqualTo("John")
+            assertThat(state.shippingAddress?.country).isEqualTo("US")
+        }
+
+    @Test
+    fun `updateBillingAddress does not send tax_region when automatic_tax is disabled`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateBillingAddress(name = "Jane", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.billingName).isEqualTo("Jane")
+            assertThat(state.billingAddress?.country).isEqualTo("US")
+        }
+
+    @Test
+    fun `updateBillingAddress does not send tax_region when address source is shipping`() =
+        runCreateWithStateScenario {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateBillingAddress(name = "Jane", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.billingName).isEqualTo("Jane")
+            assertThat(state.billingAddress?.country).isEqualTo("US")
+        }
 
     @Test
     fun `updateTaxId sends type and value and updates checkoutSession on success`() = runCreateWithStateScenario {
@@ -1075,7 +1164,7 @@ class CheckoutTest {
     }
 
     private fun runCreateWithStateScenario(
-        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        checkoutSessionResponse: CheckoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {

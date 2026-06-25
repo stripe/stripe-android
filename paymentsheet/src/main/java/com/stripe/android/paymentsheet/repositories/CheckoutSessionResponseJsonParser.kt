@@ -40,9 +40,12 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val mode = parseMode(json.optString(FIELD_MODE))
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
+        val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
+        val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
+        val taxAddressSource = parseTaxAddressSource(taxContext)
         val taxStatus = parseTaxStatusFromMeta(
             taxMeta = json.optJSONObject(FIELD_TAX_META),
-            taxContext = json.optJSONObject(FIELD_TAX_CONTEXT),
+            taxAddressSource = taxAddressSource,
         )
         val amount = extractDueAmount(json) ?: return null
         val currency = json.optString(FIELD_CURRENCY).takeIf { it.isNotEmpty() } ?: return null
@@ -98,6 +101,8 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             lineItems = lineItems,
             shippingOptions = shippingOptions,
             adaptivePricingInfo = adaptivePricingInfo,
+            automaticTaxEnabled = automaticTaxEnabled,
+            taxAddressSource = taxAddressSource,
         )
     }
 
@@ -120,13 +125,12 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
 
     private fun parseTaxStatusFromMeta(
         taxMeta: JSONObject?,
-        taxContext: JSONObject?,
+        taxAddressSource: CheckoutSessionResponse.TaxAddressSource?,
     ): CheckoutSessionResponse.TaxStatus {
         if (taxMeta == null) return CheckoutSessionResponse.TaxStatus.UNKNOWN
         val metaStatus = taxMeta.optString(FIELD_STATUS)
         if (metaStatus == "requires_location_inputs") {
-            val addressSource = taxContext?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE) ?: ""
-            return if (addressSource == "session.shipping") {
+            return if (taxAddressSource == CheckoutSessionResponse.TaxAddressSource.SHIPPING) {
                 CheckoutSessionResponse.TaxStatus.REQUIRES_SHIPPING_ADDRESS
             } else {
                 CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
@@ -136,6 +140,20 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             return CheckoutSessionResponse.TaxStatus.READY
         }
         return CheckoutSessionResponse.TaxStatus.UNKNOWN
+    }
+
+    private fun parseTaxAddressSource(
+        taxContext: JSONObject?,
+    ): CheckoutSessionResponse.TaxAddressSource? {
+        val raw = taxContext?.optString(FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE)
+            ?.takeIf { it.isNotEmpty() }
+            ?.let { if (it.startsWith("session.")) it.removePrefix("session.") else it }
+            ?: return null
+        return when (raw) {
+            "shipping" -> CheckoutSessionResponse.TaxAddressSource.SHIPPING
+            "billing" -> CheckoutSessionResponse.TaxAddressSource.BILLING
+            else -> null
+        }
     }
 
     private fun parseElementsSessionParams(
@@ -505,6 +523,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_LIVE_MODE = "livemode"
     private const val FIELD_TAX_META = "tax_meta"
     private const val FIELD_TAX_CONTEXT = "tax_context"
+    private const val FIELD_AUTOMATIC_TAX_ENABLED = "automatic_tax_enabled"
     private const val FIELD_AUTOMATIC_TAX_ADDRESS_SOURCE = "automatic_tax_address_source"
     private const val FIELD_CURRENCY = "currency"
     private const val FIELD_CUSTOMER_EMAIL = "customer_email"

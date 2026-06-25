@@ -1205,4 +1205,69 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
     }
+
+    @Test
+    fun `parse automatic tax enabled and address source from tax_context`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax_context": {
+                    "automatic_tax_enabled": true,
+                    "automatic_tax_address_source": "session.billing"
+                },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isTrue()
+        assertThat(result?.taxAddressSource)
+            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+    }
+
+    @Test
+    fun `parse taxAddressSource is null when automatic_tax_enabled but address_source missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax_context": {
+                    "automatic_tax_enabled": true
+                },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isTrue()
+        assertThat(result?.taxAddressSource).isNull()
+    }
+
+    @Test
+    fun `parse defaults automaticTaxEnabled to false when tax_context is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isFalse()
+        assertThat(result?.taxAddressSource).isNull()
+    }
 }
