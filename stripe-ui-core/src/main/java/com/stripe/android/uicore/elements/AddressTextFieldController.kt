@@ -1,11 +1,23 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -17,6 +29,7 @@ import kotlinx.coroutines.flow.asStateFlow
 class AddressTextFieldController(
     label: ResolvableString,
     addressInputMode: AddressInputMode,
+    private val inlineAutocompleteHandler: InlineAutocompleteHandler? = null,
 ) : InputController, SectionFieldValidationController, SectionFieldComposable {
     private val _isValidating = MutableStateFlow(false)
     private val _inlineQuery = MutableStateFlow("")
@@ -62,7 +75,41 @@ class AddressTextFieldController(
         hiddenIdentifiers: Set<IdentifierSpec>,
         lastTextFieldIdentifier: IdentifierSpec?
     ) {
-        AddressTextFieldUI(controller = this, enabled = enabled, modifier = modifier)
+        if (inlineAutocompleteHandler != null) {
+            var fieldWidthDp by remember { mutableStateOf(0.dp) }
+            val density = LocalDensity.current
+
+            val onClear = remember { { _inlineQuery.value = "" } }
+
+            Box(
+                modifier = modifier
+                    .wrapContentSize(Alignment.TopStart)
+                    .onSizeChanged { size ->
+                        val newWidth = with(density) { size.width.toDp() }
+                        if (newWidth != fieldWidthDp) fieldWidthDp = newWidth
+                    }
+            ) {
+                AddressTextFieldUI(
+                    controller = this@AddressTextFieldController,
+                    enabled = enabled,
+                )
+                val predictionsState by
+                    inlineAutocompleteHandler.predictionsState.collectAsState()
+                val isDarkTheme = isSystemInDarkTheme()
+                InlineAddressPredictionsUI(
+                    state = predictionsState,
+                    attributionDrawable = inlineAutocompleteHandler
+                        .getAttributionDrawable(isDarkTheme),
+                    fieldWidthDp = fieldWidthDp,
+                    onPredictionSelected = inlineAutocompleteHandler::onPredictionSelected,
+                    onDismiss = inlineAutocompleteHandler::onDismissed,
+                    onClear = onClear,
+                    onEnterManually = inlineAutocompleteHandler::onEnterManually,
+                )
+            }
+        } else {
+            AddressTextFieldUI(controller = this, enabled = enabled, modifier = modifier)
+        }
     }
 
     fun launchAutocompleteScreen() {
