@@ -153,85 +153,80 @@ fun `state updates when data changes`() = runScenario {
 
 ## Concurrency Testing with Real I/O
 
-When testing coroutines that involve real network I/O (NetworkRule/OkHttp), use `runTest` + `testScheduler.advanceUntilIdle()` + `async`/`await()`. Never use `Thread.sleep`.
+When testing coroutines that involve real network I/O (NetworkRule/OkHttp), use `runTest` + `testScheduler.advanceUntilIdle()` + `async`/`await()`.
 
-### Pattern: Assert state during a suspended network call
+### Asserting StateFlow emission sequences (use Turbine)
+
+When you need to verify a StateFlow's transitions during an async operation, use Turbine's `.test { }` to assert the full sequence:
 
 ```kotlin
 @Test
-fun `mutex is locked during mutation`() = runTest {
+fun `loading state transitions during mutation`() = runTest {
     val holdResponse = CountDownLatch(1)
-    networkRule.checkoutUpdate { response ->
-        holdResponse.await()
+    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
+        holdResponse.await(10, TimeUnit.SECONDS)
         response.setBody("{}")
     }
 
-    val job = async { systemUnderTest.mutate() }
-    testScheduler.advanceUntilIdle()
+    systemUnderTest.isLoading.test {
+        assertThat(awaitItem()).isFalse()
 
-    // Coroutine is now suspended on the network call.
-    // Assert mid-flight state here.
-    assertThat(systemUnderTest.isLoading.value).isTrue()
+        val job = async { systemUnderTest.mutate() }
+        testScheduler.advanceUntilIdle()
 
-    holdResponse.countDown()
-    job.await()
+        assertThat(awaitItem()).isTrue()
 
-    // Assert post-completion state here.
-    assertThat(systemUnderTest.isLoading.value).isFalse()
+        holdResponse.countDown()
+        job.await()
+
+        assertThat(awaitItem()).isFalse()
+    }
 }
 ```
 
-### Pattern: Assert mutations are queued (not parallel)
+### Asserting operations are queued (use CountDownLatch)
+
+When you need to verify that concurrent operations are serialized by a mutex, use CountDownLatch to observe request ordering:
 
 ```kotlin
 @Test
-fun `concurrent mutations are queued`() = runTest {
+fun `concurrent operations are serialized by mutex`() = runTest {
     val holdFirstResponse = CountDownLatch(1)
     val secondRequestArrived = CountDownLatch(1)
 
-    networkRule.enqueueFirst { response ->
-        holdFirstResponse.await()
+    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
+        holdFirstResponse.await(10, TimeUnit.SECONDS)
         response.setBody("{}")
     }
-    networkRule.enqueueSecond { response ->
+    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
         secondRequestArrived.countDown()
         response.setBody("{}")
     }
 
-    val jobB = async { systemUnderTest.mutateB() }
+    val jobB = async { systemUnderTest.operationB() }
     testScheduler.advanceUntilIdle()
 
-    val jobA = async { systemUnderTest.mutateA() }
+    val jobA = async { systemUnderTest.operationA() }
     testScheduler.advanceUntilIdle()
 
-    // Negative: A's request has NOT fired while B holds the lock
-    assertThat(secondRequestArrived.count).isEqualTo(1)
+    assertThat(secondRequestArrived.count).isEqualTo(1) // A hasn't fired
 
     holdFirstResponse.countDown()
     jobB.await()
     jobA.await()
 
-    // Positive: A's request DID fire after B completed
-    assertThat(secondRequestArrived.count).isEqualTo(0)
+    assertThat(secondRequestArrived.count).isEqualTo(0) // A did fire
 }
 ```
 
-### Key rules
+### Rules
 
-| Do | Don't |
-|----|-------|
-| `async { }` + `await()` | `launch { }` + `join()` |
-| `testScheduler.advanceUntilIdle()` | `Thread.sleep(n)` |
-| `CountDownLatch` for sync points | Arbitrary timeouts as primary mechanism |
-| Assert both negative AND positive | Assert only one direction |
-
-**Why `async`/`await()` over `launch`/`join()`:** `await()` propagates exceptions. If the coroutine throws unexpectedly, the test fails with the real error instead of silently passing.
-
-**Why `advanceUntilIdle()` works:** It deterministically advances all coroutines on the test dispatcher to their next suspension point (mutex, network call). No timing dependency.
-
-**Why `await()` after latch release:** After `countDown()`, OkHttp processes the response on its own thread and delivers the continuation back to the test dispatcher. `await()` yields until that chain completes. `advanceUntilIdle()` alone may return before the continuation arrives.
-
-**Reference:** `CheckoutTest.kt` lines 730-752 for the canonical mid-flight assertion pattern.
+- `async` + `await()` over `launch` + `join()` — `await()` propagates exceptions
+- `testScheduler.advanceUntilIdle()` over `Thread.sleep` — deterministic, advances to suspension point
+- After releasing a latch, use `await()` (not `advanceUntilIdle()` alone) — OkHttp delivers continuations asynchronously
+- Always pass a timeout to `CountDownLatch.await()` inside mock handlers — prevents hangs
+- Assert both negative (didn't happen during hold) AND positive (did happen after release)
+- Turbine `.test { }` for StateFlow emission sequences; `CountDownLatch` for request ordering
 
 ## Common Mistakes
 
