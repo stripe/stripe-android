@@ -81,7 +81,7 @@ class CheckoutInstancesTest {
 
         networkRule.checkoutUpdate { response ->
             requestArrived.countDown()
-            holdResponse.await()
+            holdResponse.await(10, TimeUnit.SECONDS)
             response.setBody("{}")
         }
 
@@ -191,7 +191,7 @@ class CheckoutInstancesTest {
         val holdResponse = CountDownLatch(1)
 
         networkRule.checkoutUpdate { response ->
-            holdResponse.await()
+            holdResponse.await(10, TimeUnit.SECONDS)
             response.setBody("""{"id": "cs_123", "line_items": [], "status": "open"}""")
         }
 
@@ -224,7 +224,7 @@ class CheckoutInstancesTest {
         val secondRequestArrived = CountDownLatch(1)
 
         networkRule.checkoutUpdate { response ->
-            holdFirstResponse.await()
+            holdFirstResponse.await(10, TimeUnit.SECONDS)
             response.setBody("""{"id": "cs_123", "line_items": [], "status": "open"}""")
         }
 
