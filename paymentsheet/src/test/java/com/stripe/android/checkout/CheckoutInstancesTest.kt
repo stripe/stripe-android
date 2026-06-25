@@ -7,8 +7,8 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
