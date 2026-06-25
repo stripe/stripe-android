@@ -121,10 +121,7 @@ class Checkout private constructor(
         }
 
         /**
-         * Recreates a [Checkout] from a previously saved [State], such as after process death.
-         *
-         * If a live instance already exists for the same key, it is returned directly and the
-         * provided [state] is ignored.
+         * Returns the existing [Checkout] if one is still alive, or creates a new one from [state].
          */
         fun createWithState(
             context: Context,

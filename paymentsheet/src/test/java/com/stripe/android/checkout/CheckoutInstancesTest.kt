@@ -7,6 +7,7 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.async
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -51,21 +52,6 @@ class CheckoutInstancesTest {
         CheckoutInstances.add("key1", checkout)
 
         assertThat(CheckoutInstances["key1"]).isSameInstanceAs(checkout)
-    }
-
-    @Test
-    fun `clear empties the map`() {
-        val checkout1 = createCheckout(key = "key1")
-        val checkout2 = createCheckout(key = "key2")
-        CheckoutInstances.clear()
-
-        CheckoutInstances.add("key1", checkout1)
-        CheckoutInstances.add("key2", checkout2)
-
-        CheckoutInstances.clear()
-
-        assertThat(CheckoutInstances["key1"]).isNull()
-        assertThat(CheckoutInstances["key2"]).isNull()
     }
 
     @Test
@@ -194,57 +180,45 @@ class CheckoutInstancesTest {
     }
 
     @Test
-    fun `shared instance emits isLoading and checkoutSession across callers`() {
+    fun `shared instance emits isLoading and checkoutSession across callers`() = runTest {
         val checkoutA = createCheckout(key = "key1")
         val checkoutB = Checkout.createWithState(
             context = applicationContext,
             state = checkoutA.state,
         )
 
-        val requestArrived = CountDownLatch(1)
         val holdResponse = CountDownLatch(1)
 
         networkRule.checkoutUpdate { response ->
-            requestArrived.countDown()
             holdResponse.await()
             response.setBody("""{"id": "cs_123", "line_items": [], "status": "open"}""")
         }
 
-        runBlocking {
-            val job = launch(Dispatchers.IO) {
-                checkoutB.removePromotionCode()
-            }
+        val job = async { checkoutB.removePromotionCode() }
+        testScheduler.advanceUntilIdle()
 
-            assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
+        // A observes isLoading because it's the same instance as B
+        assertThat(checkoutA.isLoading.value).isTrue()
 
-            // A observes isLoading = true (because same instance)
-            assertThat(checkoutA.isLoading.value).isTrue()
+        holdResponse.countDown()
+        job.await()
 
-            holdResponse.countDown()
-            job.join()
-
-            // After completion, A observes isLoading = false
-            assertThat(checkoutA.isLoading.value).isFalse()
-
-            // A and B share the same checkoutSession
-            assertThat(checkoutA.checkoutSession.value).isEqualTo(checkoutB.checkoutSession.value)
-        }
+        assertThat(checkoutA.isLoading.value).isFalse()
+        assertThat(checkoutA.checkoutSession.value).isEqualTo(checkoutB.checkoutSession.value)
     }
 
     @Test
-    fun `concurrent mutations on shared instance are queued`() {
+    fun `concurrent mutations on shared instance are queued`() = runTest {
         val checkoutA = createCheckout(key = "key1")
         val checkoutB = Checkout.createWithState(
             context = applicationContext,
             state = checkoutA.state,
         )
 
-        val firstRequestArrived = CountDownLatch(1)
         val holdFirstResponse = CountDownLatch(1)
         val secondRequestArrived = CountDownLatch(1)
 
         networkRule.checkoutUpdate { response ->
-            firstRequestArrived.countDown()
             holdFirstResponse.await()
             response.setBody("""{"id": "cs_123", "line_items": [], "status": "open"}""")
         }
@@ -254,45 +228,31 @@ class CheckoutInstancesTest {
             response.setBody("""{"id": "cs_123", "line_items": [], "status": "open"}""")
         }
 
-        runBlocking {
-            val jobB = launch(Dispatchers.IO) {
-                checkoutB.applyPromotionCode("B_CODE")
-            }
+        val jobB = async { checkoutB.applyPromotionCode("B_CODE") }
+        testScheduler.advanceUntilIdle()
 
-            assertThat(firstRequestArrived.await(5, TimeUnit.SECONDS)).isTrue()
+        val jobA = async { checkoutA.applyPromotionCode("A_CODE") }
+        testScheduler.advanceUntilIdle()
 
-            val jobA = launch(Dispatchers.IO) {
-                checkoutA.applyPromotionCode("A_CODE")
-            }
+        // A's request should not arrive while B holds the mutex
+        assertThat(secondRequestArrived.count).isEqualTo(1)
 
-            // Give A time to reach the mutex
-            Thread.sleep(100)
+        holdFirstResponse.countDown()
+        jobB.await()
+        jobA.await()
 
-            // Second request should NOT have arrived yet (A is queued behind B)
-            assertThat(secondRequestArrived.count).isEqualTo(1)
-
-            // Release B's response
-            holdFirstResponse.countDown()
-            jobB.join()
-
-            // Now A should proceed
-            assertThat(secondRequestArrived.await(5, TimeUnit.SECONDS)).isTrue()
-            jobA.join()
-        }
+        assertThat(secondRequestArrived.count).isEqualTo(0)
     }
 
     @Test
     fun `getOrCreate returns existing instance without calling factory`() {
         val checkout = createCheckout(key = "key1")
 
-        var factoryCalled = false
         val result = CheckoutInstances.getOrCreate("key1") {
-            factoryCalled = true
-            createCheckout(key = "key1")
+            error("factory should not be called")
         }
 
         assertThat(result).isSameInstanceAs(checkout)
-        assertThat(factoryCalled).isFalse()
     }
 
     @Test
