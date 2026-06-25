@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -11,12 +12,18 @@ class CheckoutPresenter internal constructor(
     private val controller: CheckoutController,
 ) {
 
+    internal val sheetLauncher: EmbeddedSheetLauncher = CheckoutSheetLauncher(
+        activityResultCaller = activity,
+        lifecycleOwner = activity,
+        controller = controller,
+    )
+
     init {
         controller.registerConfirmationHandler(activity)
     }
 
     fun paymentElement(): PaymentElement {
-        return PaymentElement(controller)
+        return PaymentElement(controller, sheetLauncher)
     }
 
     fun currencySelector(): CurrencySelector {

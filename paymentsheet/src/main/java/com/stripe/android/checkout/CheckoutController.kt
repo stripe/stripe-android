@@ -6,13 +6,17 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.injection.CheckoutControllerComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -54,9 +58,9 @@ class CheckoutController(
     private val resultCallback: ResultCallback,
 ) {
 
-    private val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    internal val coroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
-    private val component = DaggerCheckoutControllerComponent.factory().create(
+    internal val component: CheckoutControllerComponent = DaggerCheckoutControllerComponent.factory().create(
         application = application,
         savedStateHandle = savedStateHandle,
         coroutineScope = coroutineScope,
@@ -68,6 +72,23 @@ class CheckoutController(
     private val mutex = Mutex()
 
     private var configuredState: ConfiguredState? = null
+
+    private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
+    internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata.asStateFlow()
+
+    private val _selectionFlow = MutableStateFlow<PaymentSelection?>(null)
+    internal val selectionFlow: StateFlow<PaymentSelection?> = _selectionFlow.asStateFlow()
+
+    private val _customerMetadata = MutableStateFlow<CustomerMetadata?>(null)
+
+    internal val customerStateHolder: CustomerStateHolder = DefaultCustomerStateHolder(
+        customerMetadata = _customerMetadata,
+        savedStateHandle = savedStateHandle,
+        selection = _selectionFlow,
+    )
+
+    internal var embeddedConfiguration: EmbeddedPaymentElement.Configuration? = null
+        private set
 
     private val _checkoutSession = MutableStateFlow<CheckoutSession?>(null)
     val checkoutSession: StateFlow<CheckoutSession?> = _checkoutSession.asStateFlow()
@@ -155,6 +176,12 @@ class CheckoutController(
                 commonConfiguration = loaderState.config,
                 selection = loaderState.paymentSelection,
             )
+
+            _paymentMethodMetadata.value = loaderState.paymentMethodMetadata
+            _customerMetadata.value = loaderState.paymentMethodMetadata.customerMetadata
+            _selectionFlow.value = loaderState.paymentSelection
+            embeddedConfiguration = embeddedConfig
+            customerStateHolder.setCustomerState(loaderState.customer)
 
             loaderState.paymentSelection?.let { selection ->
                 _paymentOption.value = buildPaymentOptionDisplayData(selection)
@@ -286,6 +313,7 @@ class CheckoutController(
     internal fun updateSelection(selection: PaymentSelection?) {
         val state = configuredState ?: return
         state.selection = selection
+        _selectionFlow.value = selection
         _paymentOption.value = if (selection == null) null else buildPaymentOptionDisplayData(selection)
     }
 

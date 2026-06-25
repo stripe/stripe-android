@@ -29,7 +29,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.CheckoutPresenter
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.checkout.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -42,11 +41,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         CheckoutControllerExampleViewModel.factory
     }
 
-    private lateinit var presenter: CheckoutPresenter
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        presenter = viewModel.controller.createPresenter(this)
+        val presenter = viewModel.controller.createPresenter(this)
+        val paymentElement = presenter.paymentElement()
 
         setContent {
             val status by viewModel.status.collectAsState()
@@ -65,6 +63,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
+                                paymentElement.PaymentOptionsContent()
                             }
                         }
                     }
@@ -74,7 +73,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                     PaymentOptionRow(configured?.paymentOption)
                     Spacer(modifier = Modifier.height(8.dp))
                     Button(
-                        onClick = { presenter.paymentElement().presentPaymentOptions() },
+                        onClick = { paymentElement.presentPaymentOptions() },
                         enabled = configured != null && !configured.isLoading,
                         modifier = Modifier.fillMaxWidth(),
                     ) {

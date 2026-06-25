@@ -39,12 +39,13 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
-import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
+import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
@@ -127,6 +128,9 @@ internal interface CheckoutControllerComponent {
     val iconLoader: PaymentSelection.IconLoader
     val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader
     val presenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory
+    val eventReporter: EventReporter
+    val embeddedFormHelperFactory: EmbeddedFormHelperFactory
+    val savedPaymentMethodRepository: SavedPaymentMethodRepository
 
     @Component.Factory
     interface Factory {
