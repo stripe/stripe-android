@@ -78,15 +78,18 @@ class Checkout private constructor(
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).map { response ->
                 val flagImages = prefetchFlagImages(context, response, component)
-                Checkout(
-                    internalState = InternalState(
-                        key = UUID.randomUUID().toString(),
-                        configuration = configurationState,
-                        checkoutSessionResponse = response,
-                        flagImages = flagImages,
-                    ),
-                    component = component,
-                )
+                val key = UUID.randomUUID().toString()
+                CheckoutInstances.getOrCreate(key) {
+                    Checkout(
+                        internalState = InternalState(
+                            key = key,
+                            configuration = configurationState,
+                            checkoutSessionResponse = response,
+                            flagImages = flagImages,
+                        ),
+                        component = component,
+                    )
+                }
             }
         }
 
@@ -410,10 +413,6 @@ class Checkout private constructor(
      * Whether a mutation is currently in progress.
      */
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    init {
-        CheckoutInstances.add(internalState.key, this)
-    }
 
     /**
      * Applies a promotion code to the checkout session.

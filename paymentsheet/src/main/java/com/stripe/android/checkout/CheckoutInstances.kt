@@ -17,15 +17,15 @@ internal object CheckoutInstances {
         return checkout
     }
 
-    // The factory runs under this lock. Checkout's init block calls add() which re-acquires the
-    // same monitor (reentrant). This is intentional: it keeps the check-then-create atomic so two
-    // concurrent callers cannot both create an instance for the same key.
     @Synchronized
     fun getOrCreate(key: String, factory: () -> Checkout): Checkout {
         this[key]?.let { return it }
-        return factory()
+        val checkout = factory()
+        instanceMap[key] = WeakReference(checkout)
+        return checkout
     }
 
+    @VisibleForTesting
     @Synchronized
     fun add(key: String, checkout: Checkout) {
         instanceMap[key] = WeakReference(checkout)
