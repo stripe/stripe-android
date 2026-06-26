@@ -36,6 +36,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration.Companion.seconds
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
@@ -397,6 +398,7 @@ class Checkout private constructor(
         }
 
     private val mutex = Mutex()
+    private val pendingMutations = AtomicInteger(0)
 
     private val _checkoutSession = MutableStateFlow(
         internalState.asCheckoutSession()
@@ -595,17 +597,25 @@ class Checkout private constructor(
                 )
             )
         }
-        // Run network requests with a mutex to ensure events are processed in order.
-        return mutex.withLock {
+        if (pendingMutations.incrementAndGet() == 1) {
             _isLoading.value = true
-            val result = runCatching {
-                internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
-            }.map { response ->
-                internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
-                _checkoutSession.value = internalState.asCheckoutSession()
+        }
+        return try {
+            // Run network requests with a mutex to ensure events are processed in order.
+            mutex.withLock {
+                val result = runCatching {
+                    internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
+                }.map { response ->
+                    internalState =
+                        internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
+                    _checkoutSession.value = internalState.asCheckoutSession()
+                }
+                result
             }
-            _isLoading.value = false
-            result
+        } finally {
+            if (pendingMutations.decrementAndGet() == 0) {
+                _isLoading.value = false
+            }
         }
     }
 
