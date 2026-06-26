@@ -998,6 +998,42 @@ class CheckoutTest {
     }
 
     @Test
+    fun `isLoading stays true while queued mutations are pending`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        val holdFirstResponse = CountDownLatch(1)
+
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            holdFirstResponse.await(10, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "20OFF"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        val job1 = async { checkout.applyPromotionCode("10OFF") }
+        val job2 = async { checkout.applyPromotionCode("20OFF") }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+
+        holdFirstResponse.countDown()
+        job1.await()
+        job2.await()
+
+        // isLoading should go directly from true to false with no intermediate flicker.
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `isLoading is false initially`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
