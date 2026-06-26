@@ -18,6 +18,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionLiveState
 import com.stripe.android.paymentelement.confirmation.intent.IntentConfirmationDefinition.Args
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
@@ -103,7 +104,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
             paymentMethodId = paymentMethod.id,
             clientAttributionMetadata = clientAttributionMetadata,
             returnUrl = returnUrl,
-            expectedAmount = intent.amount,
+            expectedAmount = integrationMetadata.currentCheckoutSessionLiveState()?.amount ?: intent.amount,
             savePaymentMethod = savePaymentMethod,
         )
         else -> ConfirmCheckoutSessionParams(

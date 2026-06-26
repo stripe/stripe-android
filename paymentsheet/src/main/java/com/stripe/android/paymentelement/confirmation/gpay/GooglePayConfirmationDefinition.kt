@@ -11,6 +11,7 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLaun
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionLiveState
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -81,6 +82,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     ) {
         val config = confirmationOption.config
         val intent = confirmationArgs.intent
+        val checkoutSessionLiveState = confirmationArgs.paymentMethodMetadata.currentCheckoutSessionLiveState()
         val googlePayLauncher = createGooglePayLauncher(
             factory = googlePayPaymentMethodLauncherFactory,
             activityLauncher = launcher,
@@ -89,10 +91,11 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         )
 
         googlePayLauncher.present(
-            currencyCode = intent.asPaymentIntent()?.currency
+            currencyCode = checkoutSessionLiveState?.currency
+                ?: intent.asPaymentIntent()?.currency
                 ?: config.merchantCurrencyCode.orEmpty(),
             amount = when (intent) {
-                is PaymentIntent -> intent.amount ?: 0L
+                is PaymentIntent -> checkoutSessionLiveState?.amount ?: intent.amount ?: 0L
                 is SetupIntent -> config.customAmount ?: 0L
             },
             transactionId = intent.id,
