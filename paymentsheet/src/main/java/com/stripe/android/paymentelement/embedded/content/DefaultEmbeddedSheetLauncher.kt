@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
@@ -59,29 +58,29 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
 ) : EmbeddedSheetLauncher {
 
+    private var lastLaunchMode: EmbeddedLaunchMode? = null
+
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
-                    formActivityLauncher.unregister()
-                    sheetActivityLauncher.unregister()
+                    activityLauncher.unregister()
                     super.onDestroy(owner)
                 }
             }
         )
     }
 
-    private val formActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
-        activityResultCaller.registerForActivityResult(FormContract) { result ->
-            sheetStateHolder.sheetIsOpen = false
-            selectionHolder.setTemporary(null)
-            handleFormResult(result)
-        }
-
-    private val sheetActivityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
+    private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
             sheetStateHolder.sheetIsOpen = false
-            handleManageResult(result)
+            when (lastLaunchMode) {
+                EmbeddedLaunchMode.Form -> {
+                    selectionHolder.setTemporary(null)
+                    handleFormResult(result)
+                }
+                EmbeddedLaunchMode.Manage, null -> handleManageResult(result)
+            }
         }
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
@@ -158,7 +157,8 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             promotion = promotion,
             launchMode = EmbeddedLaunchMode.Form,
         )
-        formActivityLauncher.launch(args)
+        lastLaunchMode = EmbeddedLaunchMode.Form
+        activityLauncher.launch(args)
     }
 
     override fun launchManage(
@@ -192,6 +192,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             promotion = null,
             launchMode = EmbeddedLaunchMode.Manage,
         )
-        sheetActivityLauncher.launch(args)
+        lastLaunchMode = EmbeddedLaunchMode.Manage
+        activityLauncher.launch(args)
     }
 }

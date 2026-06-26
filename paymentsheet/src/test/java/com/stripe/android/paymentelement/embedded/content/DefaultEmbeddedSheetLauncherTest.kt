@@ -27,7 +27,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormContract
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -225,7 +224,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         selectionHolder.set(selection)
 
         val result = EmbeddedActivityResult.Complete(null, true, customerState = null, shouldInvokeSelectionCallback = false)
-        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -244,7 +243,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         selectionHolder.set(selection)
 
         val result = EmbeddedActivityResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false, customerState = null, shouldInvokeSelectionCallback = false)
-        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -270,7 +269,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
             )
-            val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
         }
@@ -292,7 +291,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
             )
-            val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
             assertThat(callbackHelper.stateHelper.stateTurbine.awaitItem()).isNull()
@@ -307,7 +306,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary("test_code")
         val result = EmbeddedActivityResult.Cancelled(customerState = null)
-        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(selectionHolder.selection.value).isEqualTo(null)
@@ -325,7 +324,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetStateHolder.sheetIsOpen = true
             selectionHolder.setTemporary("test_code")
             val result = EmbeddedActivityResult.Cancelled(customerState = null)
-            val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
             assertThat(callbackHelper.callbackTurbine.awaitItem())
@@ -342,7 +341,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
         )
-        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -354,7 +353,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(),
         )
-        val callback = formRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -418,7 +417,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             shouldInvokeSelectionCallback = false,
         )
 
-        val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
         callback.onActivityResult(result)
 
         assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
@@ -441,7 +440,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 shouldInvokeSelectionCallback = true,
             )
 
-            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
             callback.onActivityResult(result)
         }
     }
@@ -461,7 +460,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 shouldInvokeSelectionCallback = false,
             )
 
-            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
             callback.onActivityResult(result)
         }
     }
@@ -471,7 +470,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetStateHolder.sheetIsOpen = true
         customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         val result = EmbeddedActivityResult.Error
-        val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
 
@@ -488,7 +487,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetStateHolder.sheetIsOpen = true
             customerStateHolder.setCustomerState(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
             val result = EmbeddedActivityResult.Error
-            val callback = manageRegisterCall.callback.asCallbackFor<EmbeddedActivityResult>()
+            val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
         }
@@ -562,14 +561,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `onDestroy unregisters launchers`() = testScenario {
+    fun `onDestroy unregisters launcher`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        val formUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
-        val manageUnregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
+        val unregisteredLauncher = dummyActivityResultCallerScenario.awaitNextUnregisteredLauncher()
 
-        assertThat(formUnregisteredLauncher).isEqualTo(formLauncher)
-        assertThat(manageUnregisteredLauncher).isEqualTo(manageLauncher)
+        assertThat(unregisteredLauncher).isEqualTo(launcher)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
     }
 
@@ -613,17 +610,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 embeddedResultCallbackHelper = callbackHelper,
                 rowSelectionImmediateActionHandler = immediateActionHandler,
             )
-            val formRegisterCall = awaitRegisterCall()
-            val manageRegisterCall = awaitRegisterCall()
+            val registerCall = awaitRegisterCall()
+            val launcher = awaitNextRegisteredLauncher()
 
-            val formLauncher = awaitNextRegisteredLauncher()
-            val manageLauncher = awaitNextRegisteredLauncher()
-
-            assertThat(formRegisterCall).isNotNull()
-            assertThat(manageRegisterCall).isNotNull()
-
-            assertThat(formRegisterCall.contract).isInstanceOf<FormContract>()
-            assertThat(manageRegisterCall.contract).isInstanceOf<EmbeddedSheetContract>()
+            assertThat(registerCall).isNotNull()
+            assertThat(registerCall.contract).isInstanceOf<EmbeddedSheetContract>()
 
             Scenario(
                 testScope = testScope,
@@ -631,10 +622,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 lifecycleOwner = lifecycleOwner,
                 customerStateHolder = customerStateHolder,
                 dummyActivityResultCallerScenario = this,
-                formRegisterCall = formRegisterCall,
-                manageRegisterCall = manageRegisterCall,
-                formLauncher = formLauncher,
-                manageLauncher = manageLauncher,
+                registerCall = registerCall,
+                launcher = launcher,
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
@@ -653,10 +642,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val lifecycleOwner: TestLifecycleOwner,
         val customerStateHolder: CustomerStateHolder,
         val dummyActivityResultCallerScenario: DummyActivityResultCaller.Scenario,
-        val formRegisterCall: RegisterCall<*, *>,
-        val manageRegisterCall: RegisterCall<*, *>,
-        val formLauncher: ActivityResultLauncher<*>,
-        val manageLauncher: ActivityResultLauncher<*>,
+        val registerCall: RegisterCall<*, *>,
+        val launcher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,

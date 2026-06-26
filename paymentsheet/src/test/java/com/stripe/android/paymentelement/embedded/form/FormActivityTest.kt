@@ -32,6 +32,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -70,7 +71,7 @@ internal class EmbeddedSheetActivityTest {
             Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
-            val result = FormContract.parseResult(0, activityScenario.result.resultData)
+            val result = EmbeddedSheetContract.parseResult(0, activityScenario.result.resultData)
             assertThat(result).isInstanceOf(EmbeddedActivityResult.Error::class.java)
         }
     }
@@ -108,7 +109,7 @@ internal class EmbeddedSheetActivityTest {
         onIdle()
 
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
-        val result = FormContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
+        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
     }
 
@@ -148,7 +149,7 @@ internal class EmbeddedSheetActivityTest {
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
         ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
-            FormContract.createIntent(
+            EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
                     selectedPaymentMethodCode = selectedPaymentMethodCode,
