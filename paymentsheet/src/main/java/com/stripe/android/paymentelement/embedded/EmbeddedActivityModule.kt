@@ -126,14 +126,20 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideEmbeddedNavigator(
+            launchMode: EmbeddedLaunchMode,
+            formScreen: EmbeddedNavigator.Screen.Form,
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
+            val initialScreen = when (launchMode) {
+                EmbeddedLaunchMode.Form -> formScreen
+                EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+            }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialScreen = initialManageScreenFactory.createInitialScreen(),
+                initialScreen = initialScreen,
             )
         }
 

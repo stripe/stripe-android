@@ -26,6 +26,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
@@ -263,6 +264,7 @@ internal class EmbeddedSheetActivityTest {
                         paymentMethods = paymentMethods,
                     ),
                     promotion = null,
+                    launchMode = EmbeddedLaunchMode.Manage,
                 ),
             )
         ).use { scenario ->

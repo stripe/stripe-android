@@ -21,6 +21,7 @@ internal data class EmbeddedActivityArgs(
     val selection: PaymentSelection?,
     val customerState: CustomerState?,
     val promotion: PaymentMethodMessagePromotion?,
+    val launchMode: EmbeddedLaunchMode,
 ) : Parcelable {
     companion object {
         internal const val EXTRA_ARGS: String = "extra_activity_args"

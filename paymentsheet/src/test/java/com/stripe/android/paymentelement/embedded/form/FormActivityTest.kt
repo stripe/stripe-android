@@ -30,6 +30,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -158,6 +159,7 @@ internal class FormActivityTest {
                     selection = null,
                     customerState = createCustomerState(paymentMethods = emptyList()),
                     promotion = null,
+                    launchMode = EmbeddedLaunchMode.Form,
                 ),
             )
         ).use { scenario ->

@@ -44,7 +44,7 @@ internal class FormActivity : AppCompatActivity() {
     }
 
     @Inject
-    lateinit var formScreen: EmbeddedNavigator.Screen.Form
+    lateinit var embeddedNavigator: EmbeddedNavigator
 
     @Inject
     lateinit var eventReporter: EventReporter
@@ -82,20 +82,25 @@ internal class FormActivity : AppCompatActivity() {
             }
         }
 
+        lifecycleScope.launch {
+            embeddedNavigator.result.collect {
+                setCancelAndFinish()
+            }
+        }
+
         setContent {
             StripeTheme {
-                FormSheetContent(
-                    formScreen = formScreen,
-                )
+                FormSheetContent()
             }
         }
     }
 
     @OptIn(ExperimentalMaterialApi::class)
     @Composable
-    private fun FormSheetContent(formScreen: EmbeddedNavigator.Screen.Form) {
+    private fun FormSheetContent() {
+        val screen by embeddedNavigator.screen.collectAsState()
         val bottomSheetState = rememberStripeBottomSheetState(
-            confirmValueChange = { !formScreen.isPerformingNetworkOperation() }
+            confirmValueChange = { !screen.isPerformingNetworkOperation() }
         )
         ElementsBottomSheetLayout(
             state = bottomSheetState,
@@ -104,18 +109,18 @@ internal class FormActivity : AppCompatActivity() {
             val scrollState = rememberScrollState()
             BottomSheetScaffold(
                 topBar = {
-                    val topBarState by remember(formScreen) {
-                        formScreen.topBarState()
+                    val topBarState by remember(screen) {
+                        screen.topBarState()
                     }.collectAsState()
                     PaymentSheetTopBar(
                         state = topBarState,
-                        canNavigateBack = false,
+                        canNavigateBack = embeddedNavigator.canGoBack,
                         isEnabled = true,
                         handleBackPressed = ::setCancelAndFinish,
                     )
                 },
                 content = {
-                    formScreen.Content()
+                    screen.Content()
                 },
                 scrollState = scrollState,
             )

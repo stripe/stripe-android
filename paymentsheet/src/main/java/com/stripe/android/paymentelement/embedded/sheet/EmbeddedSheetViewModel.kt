@@ -35,6 +35,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
                 application = extras.requireApplication(),
                 savedStateHandle = extras.createSavedStateHandle(),
                 promotion = args.promotion,
+                launchMode = args.launchMode,
             )
 
             component.customerStateHolder.setCustomerState(args.customerState)

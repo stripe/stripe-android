@@ -24,9 +24,10 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.FormContract
-import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetContract
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
@@ -87,6 +88,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = null,
             customerState = customerState,
             promotion = promotion,
+            launchMode = EmbeddedLaunchMode.Form,
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -375,6 +377,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = PaymentSelection.GooglePay,
             customerState = customerState,
             promotion = null,
+            launchMode = EmbeddedLaunchMode.Manage,
         )
 
         sheetLauncher.launchManage(

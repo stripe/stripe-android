@@ -12,6 +12,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedResultCallbackHelper
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -155,6 +156,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selection = currentSelection,
             customerState = customerState,
             promotion = promotion,
+            launchMode = EmbeddedLaunchMode.Form,
         )
         formActivityLauncher.launch(args)
     }
@@ -188,6 +190,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             selection = selection,
             customerState = customerState,
             promotion = null,
+            launchMode = EmbeddedLaunchMode.Manage,
         )
         sheetActivityLauncher.launch(args)
     }
