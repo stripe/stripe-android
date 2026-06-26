@@ -261,13 +261,6 @@ workflows:
                 adb logcat > /tmp/logcat.txt 2>&1 &
                 echo $! > /tmp/logcat.pid
       - script@1:
-          title: Set up emulator for Maestro tests
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                # Suppress ANR/crash dialogs that can interrupt Maestro test flows.
-                adb shell settings put global hide_error_dialogs 1
-      - script@1:
           title: Execute Maestro tests
           inputs:
             - content: |-
