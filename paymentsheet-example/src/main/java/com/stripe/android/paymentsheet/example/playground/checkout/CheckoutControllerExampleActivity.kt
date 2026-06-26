@@ -3,9 +3,11 @@
 package com.stripe.android.paymentsheet.example.playground.checkout
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,6 +36,7 @@ import com.stripe.android.checkout.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
+import kotlinx.coroutines.launch
 
 internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
@@ -45,6 +48,13 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val presenter = viewModel.controller.createPresenter(this)
         val paymentElement = presenter.paymentElement()
+
+        lifecycleScope.launch {
+            viewModel.sessionComplete.collect {
+                Toast.makeText(this@CheckoutControllerExampleActivity, "Payment complete!", Toast.LENGTH_LONG).show()
+                finish()
+            }
+        }
 
         setContent {
             val status by viewModel.status.collectAsState()

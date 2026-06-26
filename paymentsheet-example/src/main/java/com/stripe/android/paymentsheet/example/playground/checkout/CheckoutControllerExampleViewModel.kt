@@ -15,8 +15,11 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.checkout.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
@@ -28,6 +31,9 @@ internal class CheckoutControllerExampleViewModel(
 
     private val _status = MutableStateFlow<Status>(Status.Loading)
     val status: StateFlow<Status> = _status.asStateFlow()
+
+    private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
 
     val controller = CheckoutController(
         application = application,
@@ -44,6 +50,9 @@ internal class CheckoutControllerExampleViewModel(
         viewModelScope.launch {
             controller.checkoutSession.collect { session ->
                 updateConfiguredState { it.copy(checkoutSession = session) }
+                if (session?.status == CheckoutSession.Status.Complete) {
+                    _sessionComplete.tryEmit(Unit)
+                }
             }
         }
         viewModelScope.launch {
