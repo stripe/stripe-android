@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -43,6 +44,7 @@ class InlineAddressPredictionsScreenshotTest {
                         AutocompleteAddressInteractor.InlineAddressPrediction(
                             id = "1",
                             primaryText = "456 Oak Boulevard",
+                            formattedPrimaryText = AnnotatedString("456 Oak Boulevard"),
                             secondaryText = "Seattle, WA, USA",
                         ),
                     ),
@@ -65,6 +67,7 @@ class InlineAddressPredictionsScreenshotTest {
                         AutocompleteAddressInteractor.InlineAddressPrediction(
                             id = "1",
                             primaryText = "789 Elm Drive",
+                            formattedPrimaryText = AnnotatedString("789 Elm Drive"),
                             secondaryText = "Portland, OR, USA",
                         ),
                     ),
