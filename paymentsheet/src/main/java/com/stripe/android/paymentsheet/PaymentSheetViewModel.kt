@@ -36,6 +36,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.googlePayBillingAddressConfig
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
@@ -187,7 +188,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     merchantCountryCode = config.countryCode,
                     merchantName = this.config.merchantDisplayName,
                     isEmailRequired = args.config.billingDetailsCollectionConfiguration.collectsEmail,
-                    billingAddressConfig = args.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                    billingAddressConfig = paymentMethodMetadata.value?.googlePayBillingAddressConfig()
+                        ?: args.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
                     additionalEnabledNetworks = args.config.googlePay?.additionalEnabledNetworks ?: emptyList()
                 )
             }

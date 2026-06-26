@@ -29,6 +29,7 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
+import com.stripe.android.paymentelement.confirmation.googlePayBillingAddressParameters
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
@@ -124,6 +125,22 @@ internal interface WalletButtonsInteractor {
                 additionalEnabledNetworks = additionalEnabledNetworks
             )
 
+            constructor(
+                buttonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
+                billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
+                allowCreditCards: Boolean,
+                cardBrandFilter: CardBrandFilter,
+                cardFundingFilter: CardFundingFilter,
+                additionalEnabledNetworks: List<String>
+            ) : this(
+                googlePayButtonType = buttonType.asGooglePayButtonType,
+                billingAddressParameters = billingAddressParameters,
+                allowCreditCards = allowCreditCards,
+                cardBrandFilter = cardBrandFilter,
+                cardFundingFilter = cardFundingFilter,
+                additionalEnabledNetworks = additionalEnabledNetworks
+            )
+
             override fun createSelection(): PaymentSelection {
                 return PaymentSelection.GooglePay
             }
@@ -181,8 +198,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                             cardBrandAcceptance = configuration.cardBrandAcceptance,
                         ),
                         cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                        billingDetailsCollectionConfiguration = configuration
-                            .billingDetailsCollectionConfiguration,
+                        billingAddressParameters = paymentMethodMetadata.googlePayBillingAddressParameters(),
                         additionalEnabledNetworks = configuration.googlePay?.additionalEnabledNetworks.orEmpty()
                     ).takeIf {
                         walletsAllowedByMerchant.contains(WalletType.GooglePay)

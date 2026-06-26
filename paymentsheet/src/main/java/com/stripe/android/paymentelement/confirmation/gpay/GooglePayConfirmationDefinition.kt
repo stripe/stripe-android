@@ -17,6 +17,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionLiveState
 import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionTaxStatus
+import com.stripe.android.paymentelement.confirmation.googlePayBillingAddressConfig
 import com.stripe.android.paymentelement.confirmation.requiresGooglePayEmailCollection
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -181,7 +182,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
                     ?: config.merchantName,
                 isEmailRequired = confirmationArgs.paymentMethodMetadata.requiresGooglePayEmailCollection(),
-                billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                billingAddressConfig = confirmationArgs.paymentMethodMetadata.googlePayBillingAddressConfig(),
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
             readyCallback = {
