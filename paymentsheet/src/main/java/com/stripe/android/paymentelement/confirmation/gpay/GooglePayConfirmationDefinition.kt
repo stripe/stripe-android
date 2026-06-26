@@ -12,6 +12,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionLiveState
+import com.stripe.android.paymentelement.confirmation.requiresGooglePayEmailCollection
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs
@@ -160,7 +161,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 merchantCountryCode = config.merchantCountryCode,
                 merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
                     ?: config.merchantName,
-                isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
+                isEmailRequired = confirmationArgs.paymentMethodMetadata.requiresGooglePayEmailCollection(),
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
