@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -1029,6 +1030,46 @@ class CheckoutTest {
         job2.await()
 
         // isLoading should go directly from true to false with no intermediate flicker.
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `isLoading returns to false when queued mutation is cancelled`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        val holdFirstResponse = CountDownLatch(1)
+
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            holdFirstResponse.await(10, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        // No mock for "20OFF": NetworkRule fails unmatched requests, so if the cancelled
+        // mutation's network call fires, the test fails.
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        val job1 = async { checkout.applyPromotionCode("10OFF") }
+        val job2 = async { checkout.applyPromotionCode("20OFF") }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+
+        // Prove job2 has started and is suspended (waiting for the mutex), not just unstarted.
+        assertThat(job2.isActive).isTrue()
+
+        job2.cancelAndJoin()
+
+        // isLoading should still be true because job1 is in-flight.
+        assertThat(checkout.isLoading.value).isTrue()
+        isLoadingTurbine.expectNoEvents()
+
+        holdFirstResponse.countDown()
+        job1.await()
+
         assertThat(isLoadingTurbine.awaitItem()).isFalse()
         isLoadingTurbine.ensureAllEventsConsumed()
     }
