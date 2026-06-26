@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -30,6 +31,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
+    private val launchMode: EmbeddedLaunchMode,
 ) : SheetActivityConfirmationHelper {
 
     override fun confirm() {
@@ -48,6 +50,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            launchMode = launchMode,
                         )
                     )
                 }

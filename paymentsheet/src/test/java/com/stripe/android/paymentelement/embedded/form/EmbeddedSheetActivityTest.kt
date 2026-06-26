@@ -102,6 +102,7 @@ internal class EmbeddedSheetActivityTest {
                     hasBeenConfirmed = true,
                     customerState = null,
                     shouldInvokeSelectionCallback = false,
+                    launchMode = EmbeddedLaunchMode.Form,
                 )
             )
         }

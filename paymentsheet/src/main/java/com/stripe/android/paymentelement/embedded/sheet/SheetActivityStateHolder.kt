@@ -10,6 +10,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -68,6 +69,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val tapToAddHelper: TapToAddHelper,
     private val customerStateHolder: CustomerStateHolder,
+    private val launchMode: EmbeddedLaunchMode,
 ) : SheetActivityStateHolder {
     private val _state = MutableStateFlow(
         SheetActivityStateHolder.State(
@@ -102,6 +104,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            launchMode = launchMode,
                         )
                     }
                     TapToAddNextStep.Complete -> {
@@ -110,6 +113,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             hasBeenConfirmed = true,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            launchMode = launchMode,
                         )
                     }
                     is TapToAddNextStep.Continue -> {
@@ -119,6 +123,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            launchMode = launchMode,
                         )
                     }
                 }

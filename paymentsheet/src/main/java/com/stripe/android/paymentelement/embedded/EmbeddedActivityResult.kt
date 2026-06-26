@@ -10,21 +10,27 @@ import kotlinx.parcelize.Parcelize
 
 internal sealed interface EmbeddedActivityResult : Parcelable {
 
+    val launchMode: EmbeddedLaunchMode
+
     @Parcelize
     data class Complete(
         val selection: PaymentSelection?,
         val hasBeenConfirmed: Boolean,
         val customerState: CustomerState?,
         val shouldInvokeSelectionCallback: Boolean,
+        override val launchMode: EmbeddedLaunchMode,
     ) : EmbeddedActivityResult
 
     @Parcelize
     data class Cancelled(
         val customerState: CustomerState?,
+        override val launchMode: EmbeddedLaunchMode,
     ) : EmbeddedActivityResult
 
     @Parcelize
-    data object Error : EmbeddedActivityResult
+    data class Error(
+        override val launchMode: EmbeddedLaunchMode,
+    ) : EmbeddedActivityResult
 
     companion object {
         internal const val EXTRA_RESULT = ActivityStarter.Result.EXTRA
@@ -37,7 +43,7 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
             val result = intent?.extras?.let { bundle ->
                 BundleCompat.getParcelable(bundle, EXTRA_RESULT, EmbeddedActivityResult::class.java)
             }
-            return result ?: Error
+            return result ?: Error(launchMode = EmbeddedLaunchMode.Manage)
         }
     }
 }

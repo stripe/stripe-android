@@ -58,8 +58,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
 ) : EmbeddedSheetLauncher {
 
-    private var lastLaunchMode: EmbeddedLaunchMode? = null
-
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -74,12 +72,12 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
             sheetStateHolder.sheetIsOpen = false
-            when (lastLaunchMode) {
+            when (result.launchMode) {
                 EmbeddedLaunchMode.Form -> {
                     selectionHolder.setTemporary(null)
                     handleFormResult(result)
                 }
-                EmbeddedLaunchMode.Manage, null -> handleManageResult(result)
+                EmbeddedLaunchMode.Manage -> handleManageResult(result)
             }
         }
 
@@ -157,7 +155,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             promotion = promotion,
             launchMode = EmbeddedLaunchMode.Form,
         )
-        lastLaunchMode = EmbeddedLaunchMode.Form
         activityLauncher.launch(args)
     }
 
@@ -192,7 +189,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             promotion = null,
             launchMode = EmbeddedLaunchMode.Manage,
         )
-        lastLaunchMode = EmbeddedLaunchMode.Manage
         activityLauncher.launch(args)
     }
 }

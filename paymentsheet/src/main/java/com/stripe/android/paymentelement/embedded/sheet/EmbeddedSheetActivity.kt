@@ -206,7 +206,10 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         when (args?.launchMode) {
             EmbeddedLaunchMode.Form -> {
                 setActivityResult(
-                    EmbeddedActivityResult.Cancelled(customerState = customerStateHolder.customer.value)
+                    EmbeddedActivityResult.Cancelled(
+                        customerState = customerStateHolder.customer.value,
+                        launchMode = EmbeddedLaunchMode.Form,
+                    )
                 )
             }
             EmbeddedLaunchMode.Manage, null -> {
@@ -225,6 +228,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 hasBeenConfirmed = false,
                 customerState = customerStateHolder.customer.value,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
+                launchMode = args?.launchMode ?: EmbeddedLaunchMode.Manage,
             )
         )
     }
