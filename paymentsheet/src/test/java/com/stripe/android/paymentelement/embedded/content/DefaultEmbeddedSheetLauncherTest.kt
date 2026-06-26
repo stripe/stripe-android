@@ -538,7 +538,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `form cancellation handled correctly without prior launchForm call (simulates host recreation)`() = testScenario {
+    fun `form cancellation handled correctly without prior launchForm call`() = testScenario {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = null,
             launchMode = EmbeddedLaunchMode.Form,
