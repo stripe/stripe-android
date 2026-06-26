@@ -142,7 +142,11 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     ): GooglePayPaymentMethodLauncher.Result {
         val paymentDataJson = JSONObject(paymentData.toJson())
 
-        val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson, args.clientAttributionMetadata)
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayPaymentData = paymentDataJson,
+            clientAttributionMetadata = args.clientAttributionMetadata,
+            defaultBillingDetails = args.defaultBillingDetails,
+        )
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
             onSuccess = {

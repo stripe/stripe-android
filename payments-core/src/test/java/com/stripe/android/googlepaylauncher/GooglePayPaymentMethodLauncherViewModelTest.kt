@@ -100,6 +100,32 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentMethod() uses default billing email when Google Pay does not provide one`() = runTest {
+        val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(
+                defaultBillingDetails = PaymentMethod.BillingDetails(email = "checkout-session@example.com"),
+            ),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        viewModel.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS.toString()
+            )
+        )
+
+        val billingDetails = stripeRepository.getCreateParams()?.toParamMap()?.get("billing_details") as? Map<*, *>
+
+        assertThat(billingDetails?.get("email")).isEqualTo("checkout-session@example.com")
+    }
+
+    @Test
     fun `createTransactionInfo() with amount should create expected TransactionInfo`() {
         val transactionInfo = viewModel.createTransactionInfo(ARGS)
         assertThat(transactionInfo)

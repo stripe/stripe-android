@@ -1054,6 +1054,7 @@ constructor(
         fun createFromGooglePay(
             googlePayPaymentData: JSONObject,
             clientAttributionMetadata: ClientAttributionMetadata?,
+            defaultBillingDetails: PaymentMethod.BillingDetails? = null,
         ): PaymentMethodCreateParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
@@ -1065,10 +1066,10 @@ constructor(
                     attribution = setOfNotNull(token?.card?.tokenizationMethod?.toString())
                 ),
                 billingDetails = PaymentMethod.BillingDetails(
-                    address = googlePayResult.address,
-                    name = googlePayResult.name,
-                    email = googlePayResult.email,
-                    phone = googlePayResult.phoneNumber
+                    address = googlePayResult.address ?: defaultBillingDetails?.address,
+                    name = googlePayResult.name ?: defaultBillingDetails?.name,
+                    email = googlePayResult.email ?: defaultBillingDetails?.email,
+                    phone = googlePayResult.phoneNumber ?: defaultBillingDetails?.phone
                 ),
                 allowRedisplay = null,
                 metadata = null,

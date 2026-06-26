@@ -9,6 +9,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionLiveState
@@ -104,6 +105,9 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
             isElements = true,
             displayItems = config.displayItems,
+            defaultBillingDetails = checkoutSessionLiveState?.customerEmail
+                ?.takeIf { it.isNotBlank() }
+                ?.let { PaymentMethod.BillingDetails(email = it) },
         )
     }
 

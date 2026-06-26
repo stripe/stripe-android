@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutStateFactory
+import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -21,7 +22,11 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
@@ -89,6 +94,49 @@ class GooglePayCheckoutSessionEmailCollectionTest {
             val call = createGooglePayPaymentMethodLauncherCalls.awaitItem()
 
             assertThat(call.config.isEmailRequired).isFalse()
+        }
+    }
+
+    @Test
+    fun `launch passes checkout session email as fallback billing details when session email already exists`() = runTest {
+        val billingConfig = billingDetailsConfig(
+            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+        )
+
+        val metadata = createCheckoutSessionMetadata(
+            billingConfig = billingConfig,
+            customerEmail = "customer@example.com",
+        )
+
+        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
+            val definition = createDefinition(factory)
+
+            definition.launch(
+                launcher = FakeActivityResultLauncher(),
+                arguments = com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherArgs,
+                confirmationOption = confirmationOption(billingConfig),
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(paymentMethodMetadata = metadata),
+            )
+
+            createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+            val billingDetailsCaptor = argumentCaptor<com.stripe.android.model.PaymentMethod.BillingDetails>()
+
+            verify(googlePayLauncher).present(
+                currencyCode = any(),
+                amount = any(),
+                transactionId = anyOrNull(),
+                label = anyOrNull(),
+                clientAttributionMetadata = anyOrNull(),
+                isElements = any(),
+                publishableKey = anyOrNull(),
+                displayItems = any(),
+                defaultBillingDetails = billingDetailsCaptor.capture(),
+            )
+
+            assertThat(billingDetailsCaptor.firstValue.email).isEqualTo("customer@example.com")
         }
     }
 
