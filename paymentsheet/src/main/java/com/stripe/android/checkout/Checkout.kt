@@ -78,15 +78,18 @@ class Checkout private constructor(
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).map { response ->
                 val flagImages = prefetchFlagImages(context, response, component)
-                Checkout(
-                    internalState = InternalState(
-                        key = UUID.randomUUID().toString(),
-                        configuration = configurationState,
-                        checkoutSessionResponse = response,
-                        flagImages = flagImages,
-                    ),
-                    component = component,
-                )
+                val key = UUID.randomUUID().toString()
+                CheckoutInstances.getOrCreate(key) {
+                    Checkout(
+                        internalState = InternalState(
+                            key = key,
+                            configuration = configurationState,
+                            checkoutSessionResponse = response,
+                            flagImages = flagImages,
+                        ),
+                        component = component,
+                    )
+                }
             }
         }
 
@@ -121,18 +124,20 @@ class Checkout private constructor(
         }
 
         /**
-         * Recreates a [Checkout] from a previously saved [State], such as after process death.
+         * Returns the existing [Checkout] if one is still alive, or creates a new one from [state].
          */
         fun createWithState(
             context: Context,
             state: State,
         ): Checkout {
-            val application = context.applicationContext as Application
-            val component = DaggerCheckoutComponent.factory().create(application)
-            return Checkout(
-                internalState = state.internalState,
-                component = component,
-            )
+            return CheckoutInstances.getOrCreate(state.internalState.key) {
+                val application = context.applicationContext as Application
+                val component = DaggerCheckoutComponent.factory().create(application)
+                Checkout(
+                    internalState = state.internalState,
+                    component = component,
+                )
+            }
         }
     }
 
@@ -408,10 +413,6 @@ class Checkout private constructor(
      * Whether a mutation is currently in progress.
      */
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    init {
-        CheckoutInstances.add(internalState.key, this)
-    }
 
     /**
      * Applies a promotion code to the checkout session.

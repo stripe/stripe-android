@@ -199,7 +199,7 @@ class GooglePayDisplayItemsFactoryTest {
         lineItems: List<CheckoutSessionResponse.LineItem>,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
     ): List<GooglePayJsonFactory.DisplayItem> {
-        val checkout = Checkout.createWithState(
+        Checkout.createWithState(
             context = applicationContext,
             state = CheckoutStateFactory.create(
                 key = INSTANCES_KEY,
@@ -209,7 +209,6 @@ class GooglePayDisplayItemsFactoryTest {
                 ),
             ),
         )
-        CheckoutInstances.add(INSTANCES_KEY, checkout)
 
         val metadata = PaymentMethodMetadataFactory.create(
             integrationMetadata = IntegrationMetadata.CheckoutSession(
