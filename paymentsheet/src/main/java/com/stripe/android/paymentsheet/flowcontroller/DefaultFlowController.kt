@@ -47,6 +47,7 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
@@ -418,7 +419,12 @@ internal class DefaultFlowController @Inject internal constructor(
         result.linkAccountUpdate?.updateLinkAccount()
         viewModel.flowControllerStateComponent.linkInlineInteractor.onLinkResult()
         when (result) {
-            is LinkActivityResult.PaymentMethodObtained,
+            is LinkActivityResult.PaymentMethodObtained -> withCurrentState { state ->
+                confirmLinkPaymentMethodFromWalletButton(
+                    paymentMethod = result.paymentMethod,
+                    state = state,
+                )
+            }
             is LinkActivityResult.Failed -> Unit
             is LinkActivityResult.Canceled -> when (result.reason) {
                 // User pressed back in Link
@@ -448,6 +454,30 @@ internal class DefaultFlowController @Inject internal constructor(
                     )
                 )
             }
+        }
+    }
+
+    private fun confirmLinkPaymentMethodFromWalletButton(
+        paymentMethod: PaymentMethod,
+        state: State,
+    ) {
+        val paymentMethodMetadata = state.paymentSheetState.paymentMethodMetadata
+        val selection = Link(
+            brand = paymentMethodMetadata.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account),
+        )
+        viewModel.paymentSelection = selection
+        viewModel.state = state.copyPaymentSheetState(paymentSelection = selection)
+        viewModelScope.launch {
+            confirmationHandler.start(
+                arguments = ConfirmationHandler.Args(
+                    confirmationOption = PaymentMethodConfirmationOption.Saved(
+                        paymentMethod = paymentMethod,
+                        optionsParams = null,
+                        originatedFromWallet = true,
+                    ),
+                    paymentMethodMetadata = paymentMethodMetadata,
+                )
+            )
         }
     }
 
