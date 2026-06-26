@@ -21,10 +21,15 @@ internal object GooglePayDisplayItemsFactory {
         val items = mutableListOf<GooglePayJsonFactory.DisplayItem>()
 
         items += checkoutSession.lineItems.map { it.asDisplayItem() }
+        items += checkoutSession.totalSummary?.discountAmounts.orEmpty().map { it.asDisplayItem() }
 
-        checkoutSession.totalSummary?.let { summary ->
-            items += summary.discountAmounts.map { it.asDisplayItem() }
-            items += summary.taxAmounts.map { it.asDisplayItem() }
+        when (checkoutSession.tax.status) {
+            CheckoutSession.Tax.Status.RequiresBillingAddress -> {
+                items += pendingTaxDisplayItem()
+            }
+            else -> {
+                items += checkoutSession.totalSummary?.taxAmounts.orEmpty().map { it.asDisplayItem() }
+            }
         }
 
         return items
@@ -54,4 +59,15 @@ internal object GooglePayDisplayItemsFactory {
             price = amount,
         )
     }
+
+    private fun pendingTaxDisplayItem(): GooglePayJsonFactory.DisplayItem {
+        return GooglePayJsonFactory.DisplayItem(
+            label = PENDING_TAX_LABEL,
+            type = GooglePayJsonFactory.DisplayItem.Type.TAX,
+            price = 0L,
+            status = GooglePayJsonFactory.DisplayItem.Status.Pending,
+        )
+    }
+
+    private const val PENDING_TAX_LABEL = "Tax (pending)"
 }

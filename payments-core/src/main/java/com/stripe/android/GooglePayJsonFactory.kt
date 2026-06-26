@@ -283,19 +283,25 @@ class GooglePayJsonFactory internal constructor(
                 if (transactionInfo.displayItems.isNotEmpty()) {
                     val displayItemsArray = JSONArray()
                     for (item in transactionInfo.displayItems) {
-                        displayItemsArray.put(
-                            JSONObject()
-                                .put("label", item.label)
-                                .put("type", item.type.code)
-                                .put(
-                                    "price",
-                                    PayWithGoogleUtils.getPriceString(
-                                        item.price,
-                                        Currency.getInstance(
-                                            transactionInfo.currencyCode.uppercase()
-                                        )
+                        val displayItemJson = JSONObject()
+                            .put("label", item.label)
+                            .put("type", item.type.code)
+                            .put(
+                                "price",
+                                PayWithGoogleUtils.getPriceString(
+                                    item.price,
+                                    Currency.getInstance(
+                                        transactionInfo.currencyCode.uppercase()
                                     )
                                 )
+                            )
+
+                        if (item.status != DisplayItem.Status.Final) {
+                            displayItemJson.put("status", item.status.code)
+                        }
+
+                        displayItemsArray.put(
+                            displayItemJson
                         )
                     }
                     put("displayItems", displayItemsArray)
@@ -507,6 +513,7 @@ class GooglePayJsonFactory internal constructor(
         val label: String,
         val type: Type,
         val price: Long,
+        val status: Status = Status.Final,
     ) : Parcelable {
         /**
          * The type of display line item.
@@ -517,6 +524,15 @@ class GooglePayJsonFactory internal constructor(
             SUBTOTAL("SUBTOTAL"),
             TAX("TAX"),
             DISCOUNT("DISCOUNT"),
+        }
+
+        /**
+         * Whether the displayed amount is final or still pending.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Status(val code: String) {
+            Final("FINAL"),
+            Pending("PENDING"),
         }
     }
 

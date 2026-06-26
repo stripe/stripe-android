@@ -59,6 +59,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val isElements: Boolean = false,
         internal val publishableKey: String? = null,
         internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
+        internal val totalPriceStatus: GooglePayJsonFactory.TransactionInfo.TotalPriceStatus? = null,
         internal val defaultBillingDetails: PaymentMethod.BillingDetails? = null,
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)

@@ -158,6 +158,8 @@
   <string name="stripe_generic_decline">Your payment method was declined.</string>
   <!-- Label for the total price in Google Pay -->
   <string name="stripe_google_pay_total">Total</string>
+  <!-- Label for the total price in Google Pay when taxes are still pending -->
+  <string name="stripe_google_pay_total_before_taxes">%1$s (Before taxes)</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->
   <string name="stripe_insufficient_funds">Your card has insufficient funds.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->

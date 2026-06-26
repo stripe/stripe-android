@@ -2,8 +2,10 @@ package com.stripe.android.paymentelement.confirmation.gpay
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -12,7 +14,9 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionLiveState
+import com.stripe.android.paymentelement.confirmation.currentCheckoutSessionTaxStatus
 import com.stripe.android.paymentelement.confirmation.requiresGooglePayEmailCollection
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -76,6 +80,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         )
     }
 
+    @OptIn(CheckoutSessionPreview::class)
     override fun launch(
         launcher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         arguments: EmptyConfirmationLauncherArgs,
@@ -85,6 +90,15 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         val config = confirmationOption.config
         val intent = confirmationArgs.intent
         val checkoutSessionLiveState = confirmationArgs.paymentMethodMetadata.currentCheckoutSessionLiveState()
+        val totalPriceStatus = when (confirmationArgs.paymentMethodMetadata.currentCheckoutSessionTaxStatus()) {
+            CheckoutSession.Tax.Status.RequiresBillingAddress -> {
+                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
+            }
+            CheckoutSession.Tax.Status.Ready -> {
+                GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Final
+            }
+            else -> null
+        }
         val googlePayLauncher = createGooglePayLauncher(
             factory = googlePayPaymentMethodLauncherFactory,
             activityLauncher = launcher,
@@ -105,6 +119,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
             isElements = true,
             displayItems = config.displayItems,
+            totalPriceStatus = totalPriceStatus,
             defaultBillingDetails = checkoutSessionLiveState?.customerEmail
                 ?.takeIf { it.isNotBlank() }
                 ?.let { PaymentMethod.BillingDetails(email = it) },

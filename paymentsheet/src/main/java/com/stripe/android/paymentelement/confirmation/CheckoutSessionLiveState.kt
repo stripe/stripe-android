@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.checkout.CheckoutInstances
+import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -17,6 +18,12 @@ internal data class CheckoutSessionLiveState(
 internal fun PaymentMethodMetadata.currentCheckoutSessionLiveState(): CheckoutSessionLiveState? {
     val checkoutSession = integrationMetadata as? IntegrationMetadata.CheckoutSession ?: return null
     return checkoutSession.currentCheckoutSessionLiveState()
+}
+
+@OptIn(CheckoutSessionPreview::class)
+internal fun PaymentMethodMetadata.currentCheckoutSessionTaxStatus(): CheckoutSession.Tax.Status? {
+    val checkoutSession = integrationMetadata as? IntegrationMetadata.CheckoutSession ?: return null
+    return CheckoutInstances[checkoutSession.instancesKey]?.checkoutSession?.value?.tax?.status
 }
 
 internal fun PaymentMethodMetadata.requiresGooglePayEmailCollection(): Boolean {

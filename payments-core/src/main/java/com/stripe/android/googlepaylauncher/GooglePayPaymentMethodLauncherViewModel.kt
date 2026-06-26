@@ -85,11 +85,20 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         args: GooglePayPaymentMethodLauncherContractV2.Args
     ): GooglePayJsonFactory.TransactionInfo {
         // Google Pay requires totalPriceLabel when displayItems are present.
-        val label = args.label ?: if (args.displayItems.isNotEmpty()) {
+        val baseLabel = args.label ?: if (args.displayItems.isNotEmpty()) {
             context.getString(R.string.stripe_google_pay_total)
         } else {
             null
         }
+        val label = baseLabel?.let {
+            if (args.displayItems.hasPendingTax()) {
+                context.getString(R.string.stripe_google_pay_total_before_taxes, it)
+            } else {
+                it
+            }
+        }
+        val totalPriceStatus = args.totalPriceStatus
+            ?: GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated
         return if (shouldHidePrice(args)) {
             GooglePayJsonFactory.TransactionInfo(
                 currencyCode = args.currencyCode,
@@ -104,7 +113,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         } else {
             GooglePayJsonFactory.TransactionInfo(
                 currencyCode = args.currencyCode,
-                totalPriceStatus = GooglePayJsonFactory.TransactionInfo.TotalPriceStatus.Estimated,
+                totalPriceStatus = totalPriceStatus,
                 countryCode = args.config.merchantCountryCode,
                 transactionId = args.transactionId,
                 totalPrice = args.amount,
@@ -126,6 +135,13 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             args.config.merchantCountryCode.equals(Locale.US.country, ignoreCase = true) ||
                 args.config.merchantCountryCode.equals(Locale.CANADA.country, ignoreCase = true)
             ) && args.amount == 0L
+    }
+
+    private fun List<GooglePayJsonFactory.DisplayItem>.hasPendingTax(): Boolean {
+        return any { item ->
+            item.type == GooglePayJsonFactory.DisplayItem.Type.TAX &&
+                item.status == GooglePayJsonFactory.DisplayItem.Status.Pending
+        }
     }
 
     suspend fun loadPaymentData(): Task<PaymentData> {

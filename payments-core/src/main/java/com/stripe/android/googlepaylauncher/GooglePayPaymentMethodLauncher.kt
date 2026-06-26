@@ -260,6 +260,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         isElements: Boolean = false,
         publishableKey: String? = null,
         displayItems: List<com.stripe.android.GooglePayJsonFactory.DisplayItem> = emptyList(),
+        totalPriceStatus: com.stripe.android.GooglePayJsonFactory.TransactionInfo.TotalPriceStatus? = null,
         defaultBillingDetails: PaymentMethod.BillingDetails? = null,
     ) {
         check(skipReadyCheck || isReady) {
@@ -279,6 +280,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 isElements = isElements,
                 publishableKey = publishableKey,
                 displayItems = displayItems,
+                totalPriceStatus = totalPriceStatus,
                 defaultBillingDetails = defaultBillingDetails,
             )
         )
