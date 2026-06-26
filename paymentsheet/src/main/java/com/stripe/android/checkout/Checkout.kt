@@ -16,8 +16,10 @@ import com.stripe.android.checkout.Checkout.Companion.configure
 import com.stripe.android.checkout.Checkout.Companion.createWithState
 import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
@@ -382,6 +384,15 @@ class Checkout private constructor(
     internal var internalState: InternalState = internalState
         private set
 
+    private val logger = Logger.getInstance(BuildConfig.DEBUG)
+
+    init {
+        logCheckoutSessionAmount(
+            previousResponse = null,
+            updatedResponse = internalState.checkoutSessionResponse,
+        )
+    }
+
     /**
      * A serializable snapshot of this instance's current state. Can be saved and later passed to
      * [createWithState] to restore.
@@ -392,8 +403,10 @@ class Checkout private constructor(
         get() = State(internalState)
         set(value) {
             ensureNoMutationInFlight()
-            internalState = value.internalState
-            _checkoutSession.value = internalState.asCheckoutSession()
+            updateCheckoutSessionState(
+                updatedState = value.internalState,
+                changeSource = "state",
+            )
         }
 
     private val mutex = Mutex()
@@ -421,7 +434,7 @@ class Checkout private constructor(
      */
     suspend fun applyPromotionCode(
         promotionCode: String,
-    ): Result<Unit> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState(changeSource = "applyPromotionCode") { sessionId ->
         component.checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
     }
 
@@ -434,14 +447,14 @@ class Checkout private constructor(
     suspend fun updateLineItemQuantity(
         lineItemId: String,
         quantity: Int,
-    ): Result<Unit> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState(changeSource = "updateLineItemQuantity") { sessionId ->
         component.checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
     }
 
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
-    suspend fun removePromotionCode(): Result<Unit> = withInternalState { sessionId ->
+    suspend fun removePromotionCode(): Result<Unit> = withInternalState(changeSource = "removePromotionCode") { sessionId ->
         component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
     }
 
@@ -457,7 +470,7 @@ class Checkout private constructor(
      */
     suspend fun runServerUpdate(
         serverUpdate: suspend () -> Result<Unit>,
-    ): Result<Unit> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState(changeSource = "runServerUpdate") { sessionId ->
         withTimeout(SERVER_UPDATE_TIMEOUT_MS) { serverUpdate() }.fold(
             onSuccess = {
                 component.checkoutSessionRepository.init(
@@ -476,7 +489,7 @@ class Checkout private constructor(
      */
     suspend fun selectShippingOption(
         id: String,
-    ): Result<Unit> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState(changeSource = "selectShippingOption") { sessionId ->
         component.checkoutSessionRepository.selectShippingRate(sessionId, id)
     }
 
@@ -495,7 +508,11 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
+    ): Result<Unit> = updateAddress(
+        addressType = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+        address = address,
+        changeSource = "updateShippingAddress",
+    ) {
         copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
     }
 
@@ -508,7 +525,7 @@ class Checkout private constructor(
     suspend fun updateTaxId(
         type: String,
         value: String,
-    ): Result<Unit> = withInternalState { sessionId ->
+    ): Result<Unit> = withInternalState(changeSource = "updateTaxId") { sessionId ->
         component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
     }
 
@@ -527,13 +544,18 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
+    ): Result<Unit> = updateAddress(
+        addressType = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        address = address,
+        changeSource = "updateBillingAddress",
+    ) {
         copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = it)
     }
 
     private suspend fun updateAddress(
         addressType: CheckoutSessionResponse.TaxAddressSource,
         address: Address,
+        changeSource: String,
         mutation: InternalState.(Address.State) -> InternalState,
     ): Result<Unit> {
         val built = address.build()
@@ -541,6 +563,7 @@ class Checkout private constructor(
         val shouldSendTaxRegion =
             response.automaticTaxEnabled && response.taxAddressSource == addressType
         return withInternalState(
+            changeSource = changeSource,
             additionalStateMutations = { mutation(built) },
         ) { sessionId ->
             if (shouldSendTaxRegion) {
@@ -552,7 +575,7 @@ class Checkout private constructor(
     }
 
     internal suspend fun updateCurrency(currency: String): Result<Unit> {
-        val result = withInternalState { sessionId ->
+        val result = withInternalState(changeSource = "updateCurrency") { sessionId ->
             component.checkoutSessionRepository.updateCurrency(sessionId, currency)
         }
         result.onSuccess {
@@ -580,11 +603,14 @@ class Checkout private constructor(
     }
 
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
-        internalState = internalState.copy(checkoutSessionResponse = response)
-        _checkoutSession.value = internalState.asCheckoutSession()
+        updateCheckoutSessionState(
+            updatedState = internalState.copy(checkoutSessionResponse = response),
+            changeSource = "updateWithResponse",
+        )
     }
 
     private suspend fun withInternalState(
+        changeSource: String,
         additionalStateMutations: InternalState.() -> InternalState = { this },
         block: suspend InternalState.(sessionId: String) -> Result<CheckoutSessionResponse>,
     ): Result<Unit> {
@@ -601,11 +627,59 @@ class Checkout private constructor(
             val result = runCatching {
                 internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
             }.map { response ->
-                internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
-                _checkoutSession.value = internalState.asCheckoutSession()
+                updateCheckoutSessionState(
+                    updatedState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations(),
+                    changeSource = changeSource,
+                )
             }
             _isLoading.value = false
             result
+        }
+    }
+
+    private fun updateCheckoutSessionState(
+        updatedState: InternalState,
+        changeSource: String,
+    ) {
+        val previousResponse = internalState.checkoutSessionResponse
+        internalState = updatedState
+        _checkoutSession.value = updatedState.asCheckoutSession()
+        logCheckoutSessionAmount(
+            previousResponse = previousResponse,
+            updatedResponse = updatedState.checkoutSessionResponse,
+            changeSource = changeSource,
+        )
+    }
+
+    private fun logCheckoutSessionAmount(
+        previousResponse: CheckoutSessionResponse?,
+        updatedResponse: CheckoutSessionResponse,
+        changeSource: String? = null,
+    ) {
+        if (previousResponse == null) {
+            logger.debug(
+                "CheckoutSession amount initialized: " +
+                    "sessionId=${updatedResponse.id} " +
+                    "amount=${updatedResponse.amount} " +
+                    "currency=${updatedResponse.currency}"
+            )
+            return
+        }
+
+        if (
+            previousResponse.amount != updatedResponse.amount ||
+            previousResponse.currency != updatedResponse.currency
+        ) {
+            logger.debug(
+                "CheckoutSession amount updated: " +
+                    "source=$changeSource " +
+                    "previousSessionId=${previousResponse.id} " +
+                    "currentSessionId=${updatedResponse.id} " +
+                    "previousAmount=${previousResponse.amount} " +
+                    "previousCurrency=${previousResponse.currency} " +
+                    "currentAmount=${updatedResponse.amount} " +
+                    "currentCurrency=${updatedResponse.currency}"
+            )
         }
     }
 

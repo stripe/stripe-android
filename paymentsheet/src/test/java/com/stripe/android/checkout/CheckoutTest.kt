@@ -31,6 +31,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.shadows.ShadowLog
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -66,6 +67,27 @@ class CheckoutTest {
     @Test
     fun `createWithState produces Checkout with correct checkoutSession id`() = runCreateWithStateScenario {
         assertThat(checkoutSessionTurbine.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+    }
+
+    @Test
+    fun `createWithState logs initialized checkoutSession amount`() = runTest {
+        ShadowLog.clear()
+
+        Checkout.createWithState(
+            context = applicationContext,
+            state = CheckoutStateFactory.create(
+                key = "CheckoutTest_logging_init",
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                    id = "cs_test_logging_init",
+                    amount = 5099L,
+                    currency = "usd",
+                ),
+            ),
+        )
+
+        assertThat(checkoutAmountLogMessages()).containsExactly(
+            "CheckoutSession amount initialized: sessionId=cs_test_logging_init amount=5099 currency=usd"
+        )
     }
 
     @Test
@@ -783,6 +805,38 @@ class CheckoutTest {
     }
 
     @Test
+    fun `updateWithResponse logs updated checkoutSession amount when it changes`() = runCreateWithStateScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            amount = 1000L,
+            currency = "usd",
+        ),
+    ) {
+        checkoutSessionTurbine.awaitItem()
+        ShadowLog.clear()
+
+        checkout.updateWithResponse(
+            CheckoutSessionResponseFactory.create(
+                id = "cs_test_updated",
+                amount = 2000L,
+                currency = "eur",
+            )
+        )
+
+        checkoutSessionTurbine.awaitItem()
+
+        assertThat(checkoutAmountLogMessages()).containsExactly(
+            "CheckoutSession amount updated: " +
+                "source=updateWithResponse " +
+                "previousSessionId=cs_test_abc123 " +
+                "currentSessionId=cs_test_updated " +
+                "previousAmount=1000 " +
+                "previousCurrency=usd " +
+                "currentAmount=2000 " +
+                "currentCurrency=eur"
+        )
+    }
+
+    @Test
     fun `updateWithResponse updates internalState`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
@@ -953,6 +1007,37 @@ class CheckoutTest {
         assertThat(result.isFailure).isTrue()
 
         assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+    }
+
+    @Test
+    fun `applyPromotionCode logs updated checkoutSession amount when it changes`() = runCreateWithStateScenario(
+        checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+            amount = 5099L,
+            currency = "usd",
+        ),
+    ) {
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        checkoutSessionTurbine.awaitItem()
+        ShadowLog.clear()
+
+        checkout.applyPromotionCode("10OFF").getOrThrow()
+        checkoutSessionTurbine.awaitItem()
+
+        assertThat(checkoutAmountLogMessages()).containsExactly(
+            "CheckoutSession amount updated: " +
+                "source=applyPromotionCode " +
+                "previousSessionId=cs_test_abc123 " +
+                "currentSessionId=cs_test_abc123 " +
+                "previousAmount=5099 " +
+                "previousCurrency=usd " +
+                "currentAmount=4099 " +
+                "currentCurrency=usd"
+        )
     }
 
     @Test
@@ -1207,6 +1292,13 @@ class CheckoutTest {
             configuration = configuration,
         )
         block(result)
+    }
+
+    private fun checkoutAmountLogMessages(): List<String> {
+        return ShadowLog.getLogsForTag("StripeSdk")
+            .orEmpty()
+            .map { it.msg }
+            .filter { it.startsWith("CheckoutSession amount") }
     }
 
     private class Scenario(
