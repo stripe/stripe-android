@@ -53,6 +53,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -127,13 +128,13 @@ internal interface EmbeddedActivityModule {
         @Singleton
         fun provideEmbeddedNavigator(
             launchMode: EmbeddedLaunchMode,
-            formScreen: EmbeddedNavigator.Screen.Form,
+            formScreen: Lazy<EmbeddedNavigator.Screen.Form>,
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
             val initialScreen = when (launchMode) {
-                EmbeddedLaunchMode.Form -> formScreen
+                EmbeddedLaunchMode.Form -> formScreen.get()
                 EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
             }
             return EmbeddedNavigator(

@@ -393,7 +393,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
 
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()
 
@@ -453,7 +452,6 @@ internal class EmbeddedPaymentElementAnalyticsTest {
         testContext.consumePaymentOptionEvent("card", "4242")
         analyticEventRule.assertMatchesExpectedEvent(AnalyticEvent.PresentedSheet())
 
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_embedded_manage_savedpm_show")
         embeddedContentPage.clickViewMore()
 
