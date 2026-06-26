@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.PopupProperties
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.annotatedStringResource
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -168,6 +169,7 @@ private fun PredictionsList(
     onPredictionSelected: (String) -> Unit,
     onEnterManually: (() -> Unit)?,
 ) {
+    val queryRegex = remember(results.query) { buildQueryRegex(results.query) }
     Divider()
     results.predictions.forEach { prediction ->
         Column(
@@ -176,8 +178,11 @@ private fun PredictionsList(
                 .clickable { onPredictionSelected(prediction.id) }
                 .padding(vertical = 8.dp, horizontal = 16.dp),
         ) {
+            val boldText = remember(prediction.primaryText, queryRegex) {
+                applyBoldMatches(prediction.primaryText, queryRegex)
+            }
             Text(
-                text = prediction.formattedPrimaryText,
+                text = annotatedStringResource(text = boldText),
                 color = MaterialTheme.stripeColors.onComponent,
                 style = MaterialTheme.typography.body1,
             )
@@ -207,4 +212,19 @@ private fun PredictionsList(
             )
         }
     }
+}
+
+private fun buildQueryRegex(query: String): Regex? {
+    if (query.isBlank()) return null
+    val pattern = query.trim()
+        .split(" ")
+        .filter { it.isNotBlank() }
+        .joinToString("|") { Regex.escape(it) }
+    if (pattern.isEmpty()) return null
+    return pattern.toRegex(RegexOption.IGNORE_CASE)
+}
+
+private fun applyBoldMatches(primaryText: String, queryRegex: Regex?): String {
+    if (queryRegex == null) return primaryText
+    return queryRegex.replace(primaryText) { "<b>${it.value}</b>" }
 }

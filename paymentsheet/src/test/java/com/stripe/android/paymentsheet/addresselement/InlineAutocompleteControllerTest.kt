@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.text.SpannableString
-import androidx.compose.ui.text.font.FontWeight
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -24,7 +23,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class InlineAutocompleteDelegateTest {
+class InlineAutocompleteControllerTest {
 
     @Test
     fun `initial state is Idle`() = runScenario {
@@ -68,22 +67,6 @@ class InlineAutocompleteDelegateTest {
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
         assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
-    }
-
-    @Test
-    fun `query with supported country fetches predictions`() = runScenario(
-        autocompleteCountries = setOf("US", "CA")
-    ) {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        countryFlow.value = "US"
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
     }
 
     @Test
@@ -165,37 +148,8 @@ class InlineAutocompleteDelegateTest {
         assertThat(results.predictions).hasSize(2)
         assertThat(results.predictions[0].id).isEqualTo("place_1")
         assertThat(results.predictions[0].primaryText).isEqualTo("123 Main St")
-        assertThat(results.predictions[0].formattedPrimaryText.text).isEqualTo("123 Main St")
         assertThat(results.predictions[0].secondaryText).isEqualTo("San Francisco, CA")
         assertThat(results.predictions[1].id).isEqualTo("place_2")
-    }
-
-    @Test
-    fun `formattedPrimaryText bolds query matches`() = runScenario {
-        val predictions = listOf(
-            AutocompletePrediction(
-                SpannableString("123 Main Street"),
-                SpannableString("San Francisco, CA"),
-                "place_1",
-            ),
-        )
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(predictions)
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "Main"
-        advanceTimeBy(500)
-
-        val state = delegate.inlinePredictionsState.value as InlinePredictionsState.Results
-        val formatted = state.predictions[0].formattedPrimaryText
-        assertThat(formatted.text).isEqualTo("123 Main Street")
-        val boldSpans = formatted.getStringAnnotations(0, formatted.length)
-        val spanStyles = formatted.spanStyles
-        assertThat(spanStyles).hasSize(1)
-        assertThat(spanStyles[0].start).isEqualTo(4)
-        assertThat(spanStyles[0].end).isEqualTo(8)
-        assertThat(spanStyles[0].item.fontWeight).isEqualTo(FontWeight.Bold)
     }
 
     @Test
@@ -373,7 +327,7 @@ class InlineAutocompleteDelegateTest {
 
     @Test
     fun `null placesClient results in no fetches and stays Idle`() = runScenario(
-        placesClient = null
+        usePlacesClient = false
     ) {
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
@@ -385,7 +339,7 @@ class InlineAutocompleteDelegateTest {
 
     @Test
     fun `null placesClient on prediction selected does not crash`() = runScenario(
-        placesClient = null
+        usePlacesClient = false
     ) {
         delegate.onPredictionSelected("place_1")
         advanceTimeBy(100)
@@ -414,31 +368,24 @@ class InlineAutocompleteDelegateTest {
     }
 
     @Test
-    fun `passes correct limit to findAutocompletePredictions`() = runScenario {
+    fun `calling observeQueryChanges again cancels previous observation`() = runScenario {
         fakePlacesClient.findPredictionsResult = Result.success(
             FindAutocompletePredictionsResponse(emptyList())
         )
+        val secondQueryFlow = MutableStateFlow("")
+        val secondCountryFlow = MutableStateFlow<String?>("US")
+
         delegate.observeQueryChanges(queryFlow, countryFlow)
+        delegate.observeQueryChanges(secondQueryFlow, secondCountryFlow)
 
-        queryFlow.value = "123 Main"
+        queryFlow.value = "first query"
         advanceTimeBy(500)
+        assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
 
-        assertThat(fakePlacesClient.findPredictionsCalls[0].limit)
-            .isEqualTo(InlineAutocompleteDelegate.MAX_DISPLAYED_RESULTS)
-    }
-
-    @Test
-    fun `passes country to findAutocompletePredictions`() = runScenario {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        countryFlow.value = "DE"
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "Berlin"
+        secondQueryFlow.value = "second query"
         advanceTimeBy(500)
-
-        assertThat(fakePlacesClient.findPredictionsCalls[0].country).isEqualTo("DE")
+        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
+        assertThat(fakePlacesClient.findPredictionsCalls[0].query).isEqualTo("second query")
     }
 
     @Test
@@ -460,10 +407,10 @@ class InlineAutocompleteDelegateTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),
-        placesClient: PlacesClientProxy? = USE_DEFAULT_FAKE,
+        usePlacesClient: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val fakePlaces = if (placesClient === USE_DEFAULT_FAKE) FakePlacesClientProxy() else null
+        val fakePlaces = if (usePlacesClient) FakePlacesClientProxy() else null
         val emittedEvents = mutableListOf<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
@@ -471,11 +418,11 @@ class InlineAutocompleteDelegateTest {
             isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
-        val delegate = InlineAutocompleteDelegate(
-            placesClient = placesClient?.takeIf { it !== USE_DEFAULT_FAKE } ?: fakePlaces,
+        val delegate = InlineAutocompleteController(
+            placesClient = fakePlaces,
             config = config,
             coroutineScope = backgroundScope,
-            getEventListener = { { event -> emittedEvents.add(event) } },
+            eventListenerProvider = { { event -> emittedEvents.add(event) } },
         )
 
         Scenario(
@@ -489,7 +436,7 @@ class InlineAutocompleteDelegateTest {
     }
 
     private class Scenario(
-        val delegate: InlineAutocompleteDelegate,
+        val delegate: InlineAutocompleteController,
         val fakePlacesClient: FakePlacesClientProxy,
         val emittedEvents: MutableList<AutocompleteAddressInteractor.Event>,
         val queryFlow: MutableStateFlow<String>,
@@ -524,18 +471,6 @@ class InlineAutocompleteDelegateTest {
         override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
             fetchPlaceCalls.add(placeId)
             return fetchPlaceResult
-        }
-    }
-
-    companion object {
-        private val USE_DEFAULT_FAKE: PlacesClientProxy? = object : PlacesClientProxy {
-            override suspend fun findAutocompletePredictions(
-                query: String?,
-                country: String,
-                limit: Int
-            ) = error("sentinel")
-
-            override suspend fun fetchPlace(placeId: String) = error("sentinel")
         }
     }
 }

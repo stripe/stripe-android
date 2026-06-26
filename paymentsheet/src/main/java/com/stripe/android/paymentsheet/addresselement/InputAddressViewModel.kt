@@ -80,19 +80,19 @@ internal class InputAddressViewModel @Inject constructor(
         },
     )
 
-    private val inlineAutocompleteDelegate = if (isInlineAutocompleteEnabled) {
-        InlineAutocompleteDelegate(
+    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled) {
+        InlineAutocompleteController(
             placesClient = placesClient,
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
-            getEventListener = { eventListener },
+            eventListenerProvider = { eventListener },
         )
     } else {
         null
     }
 
     override val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
-        inlineAutocompleteDelegate?.inlinePredictionsState ?: MutableStateFlow(
+        inlineAutocompleteController?.inlinePredictionsState ?: MutableStateFlow(
             AutocompleteAddressInteractor.InlinePredictionsState.Idle
         )
 
@@ -291,15 +291,15 @@ internal class InputAddressViewModel @Inject constructor(
     }
 
     override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
-        inlineAutocompleteDelegate?.observeQueryChanges(query, country)
+        inlineAutocompleteController?.observeQueryChanges(query, country)
     }
 
     override fun onDismissed() {
-        inlineAutocompleteDelegate?.onDismissed()
+        inlineAutocompleteController?.onDismissed()
     }
 
     override fun onPredictionSelected(predictionId: String) {
-        inlineAutocompleteDelegate?.onPredictionSelected(predictionId)
+        inlineAutocompleteController?.onPredictionSelected(predictionId)
     }
 
     override fun onAutocomplete(country: String) {

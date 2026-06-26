@@ -1,11 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -23,11 +18,11 @@ import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-internal class InlineAutocompleteDelegate(
+internal class InlineAutocompleteController(
     private val placesClient: PlacesClientProxy?,
     private val config: AutocompleteAddressInteractor.Config,
     private val coroutineScope: CoroutineScope,
-    private val getEventListener: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
+    private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
 ) {
     private var lastPredictionLine1: String? = null
     private var observeJob: Job? = null
@@ -40,6 +35,7 @@ internal class InlineAutocompleteDelegate(
 
     @OptIn(FlowPreview::class)
     fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
+        if (placesClient == null) return
         observeJob?.cancel()
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
@@ -69,7 +65,7 @@ internal class InlineAutocompleteDelegate(
                     val address = response.place.transformGoogleToStripeAddress(locale)
                     lastPredictionLine1 = address.line1
                     _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                    getEventListener()?.invoke(
+                    eventListenerProvider()?.invoke(
                         AutocompleteAddressInteractor.Event.OnValues(
                             mapOf(
                                 IdentifierSpec.Line1 to address.line1,
@@ -100,23 +96,20 @@ internal class InlineAutocompleteDelegate(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        if (placesClient == null) return
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        val queryRegex = buildQueryRegex(query)
-        placesClient.findAutocompletePredictions(
+        val result = placesClient?.findAutocompletePredictions(
             query = query,
             country = country,
             limit = MAX_DISPLAYED_RESULTS,
-        ).fold(
+        ) ?: return
+        result.fold(
             onSuccess = { response ->
                 _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
                     query = query,
                     predictions = response.autocompletePredictions.map { prediction ->
-                        val primaryText = prediction.primaryText.toString()
                         AutocompleteAddressInteractor.InlineAddressPrediction(
                             id = prediction.placeId,
-                            primaryText = primaryText,
-                            formattedPrimaryText = buildFormattedText(primaryText, queryRegex),
+                            primaryText = prediction.primaryText.toString(),
                             secondaryText = prediction.secondaryText.toString(),
                         )
                     }
@@ -126,33 +119,6 @@ internal class InlineAutocompleteDelegate(
                 _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
             }
         )
-    }
-
-    private fun buildQueryRegex(query: String): Regex? {
-        if (query.isBlank()) return null
-        val pattern = query.trim()
-            .split(" ")
-            .filter { it.isNotBlank() }
-            .joinToString("|") { Regex.escape(it) }
-        if (pattern.isEmpty()) return null
-        return pattern.toRegex(RegexOption.IGNORE_CASE)
-    }
-
-    private fun buildFormattedText(text: String, queryRegex: Regex?): AnnotatedString {
-        if (queryRegex == null) return AnnotatedString(text)
-        return buildAnnotatedString {
-            var lastIndex = 0
-            queryRegex.findAll(text).forEach { match ->
-                append(text.substring(lastIndex, match.range.first))
-                withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
-                    append(match.value)
-                }
-                lastIndex = match.range.last + 1
-            }
-            if (lastIndex < text.length) {
-                append(text.substring(lastIndex))
-            }
-        }
     }
 
     companion object {

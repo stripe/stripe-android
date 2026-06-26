@@ -1,7 +1,6 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.ui.text.AnnotatedString
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -40,7 +39,6 @@ interface AutocompleteAddressInteractor {
     data class InlineAddressPrediction(
         val id: String,
         val primaryText: String,
-        val formattedPrimaryText: AnnotatedString,
         val secondaryText: String,
     )
 
