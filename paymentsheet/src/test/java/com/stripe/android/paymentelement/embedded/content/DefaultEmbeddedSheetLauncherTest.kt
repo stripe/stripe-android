@@ -74,8 +74,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             message = "Message",
             learnMore = PaymentMethodMessageLearnMore(
                 message = "Message",
-                url = "https://www.test.com"
-            )
+                url = "https://www.test.com",
+            ),
         )
         val expectedArgs = EmbeddedActivityArgs(
             selectedPaymentMethodCode = code,
@@ -223,7 +223,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
-        val result = EmbeddedActivityResult.Complete(null, true, customerState = null, shouldInvokeSelectionCallback = false)
+        val result = EmbeddedActivityResult.Complete(
+            selection = null,
+            hasBeenConfirmed = true,
+            customerState = null,
+            shouldInvokeSelectionCallback = false,
+        )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
@@ -242,7 +247,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         selectionHolder.set(selection)
 
-        val result = EmbeddedActivityResult.Complete(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION, false, customerState = null, shouldInvokeSelectionCallback = false)
+        val result = EmbeddedActivityResult.Complete(
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+            hasBeenConfirmed = false,
+            customerState = null,
+            shouldInvokeSelectionCallback = false,
+        )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
@@ -264,8 +274,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selectionHolder.set(selection)
 
             val result = EmbeddedActivityResult.Complete(
-                PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
-                false,
+                selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                hasBeenConfirmed = false,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
             )
@@ -286,8 +296,8 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selectionHolder.set(selection)
 
             val result = EmbeddedActivityResult.Complete(
-                PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
-                true,
+                selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
+                hasBeenConfirmed = true,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
             )
@@ -305,7 +315,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `formActivityLauncher callback does not update selection holder on non-complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         selectionHolder.setTemporary("test_code")
-        val result = EmbeddedActivityResult.Cancelled(customerState = null)
+        val result = EmbeddedActivityResult.Cancelled(
+            customerState = null,
+        )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
         callback.onActivityResult(result)
@@ -323,7 +335,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
         ) {
             sheetStateHolder.sheetIsOpen = true
             selectionHolder.setTemporary("test_code")
-            val result = EmbeddedActivityResult.Cancelled(customerState = null)
+            val result = EmbeddedActivityResult.Cancelled(
+            customerState = null,
+        )
             val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
             callback.onActivityResult(result)
