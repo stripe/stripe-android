@@ -28,6 +28,7 @@ import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -90,10 +91,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             sheetActivityStateHolder.result.collect {
-                setEmbeddedResult(
-                    shouldInvokeSelectionCallback = false,
-                    hasBeenConfirmed = true,
-                )
+                setActivityResult(it)
                 finish()
             }
         }
@@ -120,10 +118,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         )
         ElementsBottomSheetLayout(
             state = bottomSheetState,
-            onDismissed = {
-                setEmbeddedResult(shouldInvokeSelectionCallback = false)
-                finish()
-            }
+            onDismissed = ::dismissAndFinish,
         ) {
             var hasResult by remember { mutableStateOf(false) }
             if (!hasResult) {
@@ -133,8 +128,13 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 LaunchedEffect(Unit) {
                     embeddedNavigator.result.collect { result ->
                         hasResult = true
-                        setEmbeddedResult(shouldInvokeSelectionCallback = result == true)
-                        finish()
+                        when (args?.launchMode) {
+                            EmbeddedLaunchMode.Form -> dismissAndFinish()
+                            EmbeddedLaunchMode.Manage, null -> {
+                                setManageResult(shouldInvokeSelectionCallback = result == true)
+                                finish()
+                            }
+                        }
                     }
                 }
             }
@@ -202,16 +202,34 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         }
     }
 
-    private fun setEmbeddedResult(
+    private fun dismissAndFinish() {
+        when (args?.launchMode) {
+            EmbeddedLaunchMode.Form -> {
+                setActivityResult(
+                    EmbeddedActivityResult.Cancelled(customerState = customerStateHolder.customer.value)
+                )
+            }
+            EmbeddedLaunchMode.Manage, null -> {
+                setManageResult(shouldInvokeSelectionCallback = false)
+            }
+        }
+        finish()
+    }
+
+    private fun setManageResult(
         shouldInvokeSelectionCallback: Boolean,
-        hasBeenConfirmed: Boolean = false,
     ) {
-        val result = EmbeddedActivityResult.Complete(
-            selection = selectionHolder.selection.value,
-            hasBeenConfirmed = hasBeenConfirmed,
-            customerState = customerStateHolder.customer.value,
-            shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
+        setActivityResult(
+            EmbeddedActivityResult.Complete(
+                selection = selectionHolder.selection.value,
+                hasBeenConfirmed = false,
+                customerState = customerStateHolder.customer.value,
+                shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
+            )
         )
+    }
+
+    private fun setActivityResult(result: EmbeddedActivityResult) {
         setResult(
             Activity.RESULT_OK,
             EmbeddedActivityResult.toIntent(intent, result)

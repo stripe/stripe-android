@@ -41,7 +41,6 @@ internal interface EmbeddedSheetComponent {
     val customerStateHolder: CustomerStateHolder
 
     fun inject(activity: EmbeddedSheetActivity)
-    fun inject(activity: com.stripe.android.paymentelement.embedded.form.FormActivity)
 
     @Component.Factory
     interface Factory {

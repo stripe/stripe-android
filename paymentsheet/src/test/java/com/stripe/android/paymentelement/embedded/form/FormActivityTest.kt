@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedSheetActivity
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.ui.PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -44,9 +45,9 @@ import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
-internal class FormActivityTest {
+internal class EmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val composeTestRule = createAndroidComposeRule<FormActivity>()
+    private val composeTestRule = createAndroidComposeRule<EmbeddedSheetActivity>()
     private val networkRule = NetworkRule()
 
     private val formPage = FormPage(composeTestRule)
@@ -65,12 +66,12 @@ internal class FormActivityTest {
     @Test
     fun `when launched without args should finish with cancelled result`() {
         ActivityScenario.launchActivityForResult(
-            FormActivity::class.java,
+            EmbeddedSheetActivity::class.java,
             Bundle.EMPTY
         ).use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)
             val result = FormContract.parseResult(0, activityScenario.result.resultData)
-            assertThat(result).isInstanceOf(EmbeddedActivityResult.Cancelled::class.java)
+            assertThat(result).isInstanceOf(EmbeddedActivityResult.Error::class.java)
         }
     }
 
@@ -144,9 +145,9 @@ internal class FormActivityTest {
         hasSavedPaymentMethods: Boolean = false,
         configuration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        block: (ActivityScenario<FormActivity>) -> Unit,
+        block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
     ) {
-        ActivityScenario.launchActivityForResult<FormActivity>(
+        ActivityScenario.launchActivityForResult<EmbeddedSheetActivity>(
             FormContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
