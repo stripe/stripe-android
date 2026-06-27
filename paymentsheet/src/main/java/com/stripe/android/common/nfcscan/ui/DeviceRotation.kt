@@ -20,20 +20,24 @@ internal fun rememberDeviceRotation(): DeviceRotation {
     val context = LocalContext.current
 
     return remember(context) {
-        @Suppress("DEPRECATION")
-        val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            context.display
-        } else {
-            val windowManager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            windowManager.defaultDisplay
-        }
+        context.getDeviceRotation()
+    }
+}
 
-        when (display?.rotation) {
-            Surface.ROTATION_0 -> DeviceRotation.Portrait
-            Surface.ROTATION_90 -> DeviceRotation.LandscapeLeft
-            Surface.ROTATION_180 -> DeviceRotation.UpsideDown
-            Surface.ROTATION_270 -> DeviceRotation.LandscapeRight
-            else -> DeviceRotation.Portrait
-        }
+internal fun Context.getDeviceRotation(): DeviceRotation {
+    @Suppress("DEPRECATION")
+    val display = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        display
+    } else {
+        val windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        windowManager.defaultDisplay
+    }
+
+    return when (display?.rotation) {
+        Surface.ROTATION_0 -> DeviceRotation.Portrait
+        Surface.ROTATION_90 -> DeviceRotation.LandscapeLeft
+        Surface.ROTATION_180 -> DeviceRotation.UpsideDown
+        Surface.ROTATION_270 -> DeviceRotation.LandscapeRight
+        else -> DeviceRotation.Portrait
     }
 }

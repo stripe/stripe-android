@@ -44,7 +44,9 @@ internal fun NfcScanningLayout(
     deviceRotation: DeviceRotation,
     onClose: () -> Unit,
 ) {
-    val tapZone = rememberNormalizedTapZone(deviceRotation, tapZone)
+    val tapZone = remember(deviceRotation, tapZone) {
+        createNormalizedTapZone(deviceRotation, tapZone)
+    }
 
     Box(
         modifier = Modifier
