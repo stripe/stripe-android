@@ -33,12 +33,12 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.BankFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
-import com.stripe.android.paymentsheet.ui.MIN_LUMINANCE_FOR_LIGHT_ICON
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.paymentsheet.ui.getLinkIconArrow
 import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
+import com.stripe.android.uicore.MIN_LUMINANCE_FOR_LIGHT_COLORS
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.parcelize.IgnoredOnParcel
@@ -291,7 +291,7 @@ internal sealed class PaymentSelection : Parcelable {
          * Some users implement a custom dark mode and will pass dark colors into colors light.
          */
         private fun isCustomDarkTheme(): Boolean {
-            return StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
+            return StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_COLORS
         }
 
         suspend fun load(
