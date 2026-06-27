@@ -29,6 +29,7 @@ import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
 import com.stripe.android.view.CardFormViewTestActivity.Companion.VIEW_ID
+import kotlinx.coroutines.runBlocking
 import kotlinx.parcelize.Parcelize
 import org.junit.Before
 import org.junit.Rule
@@ -505,6 +506,91 @@ internal class CardFormViewTest {
         }
     }
 
+    @Test
+    fun `reportShown is called when card form attaches`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+        assertThat(analytics.awaitInteraction()).isNotNull()
+    }
+
+    @Test
+    fun `reportInteraction called when postal focus`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+
+        binding.postalCode.getParentOnFocusChangeListener()
+            .onFocusChange(binding.postalCode, true)
+
+        idleLooper()
+
+        repeat(2) { assertThat(analytics.awaitInteraction()).isNotNull() }
+    }
+
+    @Test
+    fun `reports form completed when form valid`() = runCardFormViewAnalyticsTest {
+        assertThat(analytics.awaitShown()).isNotNull()
+
+        binding.populate(
+            VISA_WITH_SPACES,
+            VALID_MONTH,
+            VALID_YEAR,
+            VALID_CVC,
+            VALID_US_ZIP,
+        )
+
+        idleLooper()
+
+        repeat(9) { assertThat(analytics.awaitInteraction()).isNotNull() }
+        assertThat(analytics.awaitFormCompleted()).isNotNull()
+    }
+
+    private data class AnalyticsScenario(
+        val analytics: RecordingCardElementAnalytics,
+        val cardFormView: CardFormView,
+        val binding: StripeCardFormViewBinding,
+    )
+
+    private fun runCardFormViewAnalyticsTest(
+        locale: Locale = Locale.US,
+        block: suspend AnalyticsScenario.() -> Unit,
+    ) {
+        val originalLocale = Locale.getDefault()
+        Locale.setDefault(locale)
+
+        ActivityScenario.launch<CardFormViewTestActivity>(
+            Intent(context, CardFormViewTestActivity::class.java).apply {
+                putExtra(
+                    "args",
+                    CardFormViewTestActivity.Args(
+                        isCbcEligible = false,
+                        borderless = false,
+                        useRecordingCardElementAnalytics = true,
+                    ),
+                )
+            }
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                runBlocking {
+                    val cardFormView = activity.findViewById<CardFormView>(VIEW_ID)
+                    val binding = StripeCardFormViewBinding.bind(cardFormView)
+                    val analytics = activity.recordingCardElementAnalytics
+
+                    idleLooper()
+
+                    block(
+                        AnalyticsScenario(
+                            analytics = analytics,
+                            cardFormView = cardFormView,
+                            binding = binding,
+                        )
+                    )
+
+                    analytics.ensureAllEventsConsumed()
+                }
+            }
+        }
+
+        Locale.setDefault(originalLocale)
+    }
+
     private fun StripeCardFormViewBinding.populate(
         visa: String,
         month: String,
@@ -571,6 +657,7 @@ internal class CardFormViewTestActivity : AppCompatActivity() {
     data class Args(
         val isCbcEligible: Boolean,
         val borderless: Boolean,
+        val useRecordingCardElementAnalytics: Boolean = false,
     ) : Parcelable
 
     private val args: Args by lazy {
@@ -578,13 +665,26 @@ internal class CardFormViewTestActivity : AppCompatActivity() {
         intent.getParcelableExtra("args")!!
     }
 
+    val recordingCardElementAnalytics = RecordingCardElementAnalytics()
+
     private val cardFormView: CardFormView by lazy {
         val style = if (args.borderless) "1" else "0"
         val attributes = Robolectric.buildAttributeSet()
             .addAttribute(R.attr.cardFormStyle, style)
             .build()
 
-        CardFormView(this, attributes).apply {
+        val view = if (args.useRecordingCardElementAnalytics) {
+            CardFormView(
+                context = this,
+                attrs = attributes,
+                defStyleAttr = 0,
+                cardElementAnalytics = recordingCardElementAnalytics,
+            )
+        } else {
+            CardFormView(this, attributes)
+        }
+
+        view.apply {
             id = VIEW_ID
 
             val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
