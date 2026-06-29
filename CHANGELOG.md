@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][13311](https://github.com/stripe/stripe-android/pull/13311) Fixed HUF currency amounts displaying incorrectly on Android 17.
+
 ## 23.11.0 - 2026-06-22
 
 ### CryptoOnramp
