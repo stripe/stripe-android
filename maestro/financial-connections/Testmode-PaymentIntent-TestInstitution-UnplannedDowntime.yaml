@@ -34,9 +34,13 @@ tags:
     visible: "Select another bank"
     timeout: 30000
 - tapOn: "Select another bank"
-# Assert flow correctly returns to institution picker
+# The retry path resets the picker to the top of the list.
 - extendedWaitUntil:
-    visible: "Down (Unscheduled)"
+    visible: "Select bank"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Down (Unscheduled)"
     timeout: 30000
 - tapOn: "Down (Unscheduled)"
 # Close flow from error page
