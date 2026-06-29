@@ -169,9 +169,9 @@ class InlineAutocompleteControllerTest {
         fakePlacesClient.findPredictionsResult = Result.success(
             FindAutocompletePredictionsResponse(emptyList())
         )
-        val states = mutableListOf<InlinePredictionsState>()
+        var stateBeforeFetch: InlinePredictionsState? = null
         fakePlacesClient.onBeforeFindPredictions = {
-            states.add(delegate.inlinePredictionsState.value)
+            stateBeforeFetch = delegate.inlinePredictionsState.value
         }
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
@@ -179,7 +179,7 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(states).contains(InlinePredictionsState.Loading)
+        assertThat(stateBeforeFetch).isEqualTo(InlinePredictionsState.Loading)
     }
 
     @Test
@@ -464,7 +464,7 @@ class InlineAutocompleteControllerTest {
 
         Scenario(
             delegate = delegate,
-            fakePlacesClient = fakePlaces ?: FakePlacesClientProxy(),
+            fakePlacesClientOrNull = fakePlaces,
             eventCalls = eventCalls,
             queryFlow = MutableStateFlow(""),
             countryFlow = MutableStateFlow("US"),
@@ -477,12 +477,15 @@ class InlineAutocompleteControllerTest {
 
     private class Scenario(
         val delegate: InlineAutocompleteController,
-        val fakePlacesClient: FakePlacesClientProxy,
+        private val fakePlacesClientOrNull: FakePlacesClientProxy?,
         val eventCalls: Turbine<AutocompleteAddressInteractor.Event>,
         val queryFlow: MutableStateFlow<String>,
         val countryFlow: MutableStateFlow<String?>,
         val testScope: TestScope,
     ) {
+        val fakePlacesClient: FakePlacesClientProxy
+            get() = requireNotNull(fakePlacesClientOrNull)
+
         fun advanceTimeBy(millis: Long) = testScope.advanceTimeBy(millis)
     }
 }
