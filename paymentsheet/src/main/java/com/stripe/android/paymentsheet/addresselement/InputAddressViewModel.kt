@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.annotation.VisibleForTesting
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -11,20 +10,14 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
-import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -35,14 +28,6 @@ internal class InputAddressViewModel @Inject constructor(
     private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
-
-    private val _inlinePredictionsState = MutableStateFlow<AutocompleteAddressInteractor.InlinePredictionsState>(
-        AutocompleteAddressInteractor.InlinePredictionsState.Idle
-    )
-    override val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
-        _inlinePredictionsState
-
-    private var lastPredictionLine1: String? = null
 
     private val addressFormatParser = AddressFormatParser(args.config)
 
@@ -94,6 +79,22 @@ internal class InputAddressViewModel @Inject constructor(
             null
         },
     )
+
+    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled) {
+        InlineAutocompleteController(
+            placesClient = placesClient,
+            config = autocompleteConfig,
+            coroutineScope = viewModelScope,
+            eventListenerProvider = { eventListener },
+        )
+    } else {
+        null
+    }
+
+    override val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
+        inlineAutocompleteController?.inlinePredictionsState ?: MutableStateFlow(
+            AutocompleteAddressInteractor.InlinePredictionsState.Idle
+        )
 
     val addressFormController = AddressFormController(
         initialValues = _collectedAddress.value?.toIdentifierMap() ?: emptyMap(),
@@ -289,88 +290,16 @@ internal class InputAddressViewModel @Inject constructor(
         }
     }
 
-    @OptIn(FlowPreview::class)
     override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
-        viewModelScope.launch {
-            combine(query, country) { q, c -> q to (c ?: "") }
-                .drop(1)
-                .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
-                .collectLatest { (q, c) ->
-                    if (q == lastPredictionLine1) {
-                        lastPredictionLine1 = null
-                        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                        return@collectLatest
-                    }
-                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
-                        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                        return@collectLatest
-                    }
-                    fetchPredictions(q, c)
-                }
-        }
-    }
-
-    private fun isCountrySupported(country: String): Boolean {
-        val supportedCountries = autocompleteConfig.autocompleteCountries
-        return supportedCountries.isEmpty() ||
-            supportedCountries.any { it.equals(country, ignoreCase = true) }
-    }
-
-    private suspend fun fetchPredictions(query: String, country: String) {
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        placesClient?.findAutocompletePredictions(
-            query = query,
-            country = country,
-            limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
-        )?.fold(
-            onSuccess = { response ->
-                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
-                    query = query,
-                    predictions = response.autocompletePredictions.map { prediction ->
-                        AutocompleteAddressInteractor.InlineAddressPrediction(
-                            id = prediction.placeId,
-                            primaryText = prediction.primaryText.toString(),
-                            secondaryText = prediction.secondaryText.toString(),
-                        )
-                    }
-                )
-            },
-            onFailure = {
-                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-            }
-        )
+        inlineAutocompleteController?.observeQueryChanges(query, country)
     }
 
     override fun onDismissed() {
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+        inlineAutocompleteController?.onDismissed()
     }
 
     override fun onPredictionSelected(predictionId: String) {
-        viewModelScope.launch {
-            placesClient?.fetchPlace(predictionId)?.fold(
-                onSuccess = { response ->
-                    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-                    val address = response.place.transformGoogleToStripeAddress(locale)
-                    lastPredictionLine1 = address.line1
-                    _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                    eventListener?.invoke(
-                        AutocompleteAddressInteractor.Event.OnValues(
-                            mapOf(
-                                IdentifierSpec.Line1 to address.line1,
-                                IdentifierSpec.Line2 to address.line2,
-                                IdentifierSpec.City to address.city,
-                                IdentifierSpec.State to address.state,
-                                IdentifierSpec.PostalCode to address.postalCode,
-                                IdentifierSpec.Country to address.country,
-                            )
-                        )
-                    )
-                },
-                onFailure = {
-                    _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                }
-            )
-        }
+        inlineAutocompleteController?.onPredictionSelected(predictionId)
     }
 
     override fun onAutocomplete(country: String) {
