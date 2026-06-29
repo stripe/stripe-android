@@ -188,6 +188,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     merchantName = this.config.merchantDisplayName,
                     isEmailRequired = args.config.billingDetailsCollectionConfiguration.collectsEmail,
                     billingAddressConfig = args.config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                    existingPaymentMethodRequired = config.environment == PaymentSheet.GooglePayConfiguration.Environment.Production,
                     additionalEnabledNetworks = args.config.googlePay?.additionalEnabledNetworks ?: emptyList()
                 )
             }
