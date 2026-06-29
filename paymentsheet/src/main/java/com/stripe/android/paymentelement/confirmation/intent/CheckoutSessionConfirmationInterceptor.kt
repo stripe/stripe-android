@@ -116,28 +116,29 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun confirmCheckoutSession(
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
-        try {
-            CheckoutInstances.ensureNoMutationInFlight(integrationMetadata.instancesKey)
+        return try {
+            CheckoutInstances.withConfirmation(integrationMetadata.instancesKey) {
+                checkoutSessionRepository.confirm(
+                    id = integrationMetadata.id,
+                    params = params,
+                ).fold(
+                    onSuccess = ::handleConfirmResponse,
+                    onFailure = { error ->
+                        ConfirmationDefinition.Action.Fail(
+                            cause = error,
+                            message = error.stripeErrorMessage(),
+                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                        )
+                    }
+                )
+            }
         } catch (e: IllegalStateException) {
-            return ConfirmationDefinition.Action.Fail(
+            ConfirmationDefinition.Action.Fail(
                 cause = e,
                 message = e.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
             )
         }
-        return checkoutSessionRepository.confirm(
-            id = integrationMetadata.id,
-            params = params,
-        ).fold(
-            onSuccess = ::handleConfirmResponse,
-            onFailure = { error ->
-                ConfirmationDefinition.Action.Fail(
-                    cause = error,
-                    message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
-        )
     }
 
     private fun handleConfirmResponse(
