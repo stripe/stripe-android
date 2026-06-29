@@ -91,7 +91,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(selectionHolder.temporarySelection.value).isNull()
-        sheetLauncher.launchForm(code, paymentMethodMetadata, false, state, customerState, promotion)
+        sheetLauncher.launchForm(
+            code = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            embeddedConfirmationState = state,
+            customerState = customerState,
+            promotion = promotion,
+        )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
         assertThat(launchCall).isEqualTo(expectedArgs)
         assertThat(sheetStateHolder.sheetIsOpen).isTrue()
@@ -105,12 +112,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         sheetLauncher.launchForm(
-            code,
-            paymentMethodMetadata,
-            false,
-            state,
-            createCustomerState(),
-            null,
+            code = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            embeddedConfirmationState = state,
+            customerState = createCustomerState(),
+            promotion = null,
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -124,12 +131,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         selectionHolder.set(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         sheetLauncher.launchForm(
-            code,
-            paymentMethodMetadata,
-            false,
-            state,
-            createCustomerState(),
-            null,
+            code = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            embeddedConfirmationState = state,
+            customerState = createCustomerState(),
+            promotion = null,
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -142,12 +149,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         selectionHolder.set(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         sheetLauncher.launchForm(
-            code,
-            paymentMethodMetadata,
-            false,
-            state,
-            createCustomerState(),
-            null,
+            code = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            embeddedConfirmationState = state,
+            customerState = createCustomerState(),
+            promotion = null,
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isNull()
@@ -160,12 +167,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         selectionHolder.set(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         sheetLauncher.launchForm(
-            code,
-            paymentMethodMetadata,
-            false,
-            state,
-            createCustomerState(),
-            null,
+            code = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            embeddedConfirmationState = state,
+            customerState = createCustomerState(),
+            promotion = null,
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as FormContract.Args
         assertThat(launchCall.paymentSelection).isNull()
@@ -177,12 +184,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
 
         sheetLauncher.launchForm(
-            code,
-            paymentMethodMetadata,
-            false,
-            null,
-            createCustomerState(),
-            null,
+            code = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            embeddedConfirmationState = null,
+            customerState = createCustomerState(),
+            promotion = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
         assertThat(loggedErrors.size).isEqualTo(1)
@@ -199,12 +206,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         sheetStateHolder.sheetIsOpen = true
         sheetLauncher.launchForm(
-            code,
-            paymentMethodMetadata,
-            false,
-            state,
-            createCustomerState(),
-            null,
+            code = code,
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = false,
+            embeddedConfirmationState = state,
+            customerState = createCustomerState(),
+            promotion = null,
         )
     }
 
@@ -367,7 +374,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
             promotion = null,
         )
 
-        sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay, state)
+        sheetLauncher.launchManage(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = PaymentSelection.GooglePay,
+            embeddedConfirmationState = state,
+        )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
         assertThat(launchCall).isEqualTo(expectedArgs)
@@ -380,7 +392,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         sheetStateHolder.sheetIsOpen = true
-        sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay, state)
+        sheetLauncher.launchManage(
+            paymentMethodMetadata = paymentMethodMetadata,
+            customerState = customerState,
+            selection = PaymentSelection.GooglePay,
+            embeddedConfirmationState = state,
+        )
     }
 
     @Test
@@ -489,7 +506,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
         )
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         val error = runCatching {
-            sheetLauncher.launchForm("card", paymentMethodMetadata, false, state, createCustomerState(), null)
+            sheetLauncher.launchForm(
+                code = "card",
+                paymentMethodMetadata = paymentMethodMetadata,
+                hasSavedPaymentMethods = false,
+                embeddedConfirmationState = state,
+                customerState = createCustomerState(),
+                promotion = null,
+            )
         }.exceptionOrNull()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
         assertThat(error).hasMessageThat()
@@ -517,7 +541,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val state = EmbeddedConfirmationStateFixtures.defaultState(paymentMethodMetadata)
         val error = runCatching {
-            sheetLauncher.launchManage(paymentMethodMetadata, customerState, PaymentSelection.GooglePay, state)
+            sheetLauncher.launchManage(
+                paymentMethodMetadata = paymentMethodMetadata,
+                customerState = customerState,
+                selection = PaymentSelection.GooglePay,
+                embeddedConfirmationState = state,
+            )
         }.exceptionOrNull()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
         assertThat(error).hasMessageThat()
