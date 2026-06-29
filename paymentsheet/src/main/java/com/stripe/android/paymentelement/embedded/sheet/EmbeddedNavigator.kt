@@ -5,8 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -165,6 +166,7 @@ internal class EmbeddedNavigator private constructor(
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
+            private val launchMode: EmbeddedLaunchMode,
         ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                     PaymentSheetTopBarState(
@@ -192,10 +194,12 @@ internal class EmbeddedNavigator private constructor(
                     },
                     onProcessingCompleted = {
                         sheetActivityStateHolder.setResult(
-                            FormResult.Complete(
+                            EmbeddedActivityResult.Complete(
                                 selection = null,
                                 hasBeenConfirmed = true,
                                 customerState = customerStateHolder.customer.value,
+                                shouldInvokeSelectionCallback = false,
+                                launchMode = launchMode,
                             )
                         )
                     },
