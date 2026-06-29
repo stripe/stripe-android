@@ -581,6 +581,34 @@ class Checkout private constructor(
         }
     }
 
+    /**
+     * Runs a confirmation [block] while holding the mutation queue, so that any mutations
+     * triggered during confirmation are serialized behind it instead of running concurrently.
+     *
+     * Fails fast with [IllegalStateException] if a mutation (or another confirmation) is already
+     * in flight: a confirmation may only be enqueued when the queue is empty.
+     */
+    internal suspend fun <T> withConfirmation(
+        block: suspend () -> T,
+    ): T {
+        if (!mutex.tryLock()) {
+            throw IllegalStateException(
+                "Cannot confirm while a checkout session mutation is in flight."
+            )
+        }
+        if (pendingMutations.incrementAndGet() == 1) {
+            _isLoading.value = true
+        }
+        return try {
+            block()
+        } finally {
+            if (pendingMutations.decrementAndGet() == 0) {
+                _isLoading.value = false
+            }
+            mutex.unlock()
+        }
+    }
+
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
         internalState = internalState.copy(checkoutSessionResponse = response)
         _checkoutSession.value = internalState.asCheckoutSession()

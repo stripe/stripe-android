@@ -30,6 +30,15 @@ internal object CheckoutInstances {
         this[key]?.ensureNoMutationInFlight()
     }
 
+    suspend fun <T> withConfirmation(key: String, block: suspend () -> T): T {
+        val checkout = this[key]
+        return if (checkout != null) {
+            checkout.withConfirmation(block)
+        } else {
+            block()
+        }
+    }
+
     @Synchronized
     fun markIntegrationLaunched(key: String) {
         this[key]?.markIntegrationLaunched()

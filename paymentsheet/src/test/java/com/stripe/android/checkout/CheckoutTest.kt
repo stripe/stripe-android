@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelAndJoin
@@ -1069,6 +1070,139 @@ class CheckoutTest {
 
         holdFirstResponse.countDown()
         job1.await()
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `mutation runs after withConfirmation completes`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        val holdConfirmation = CompletableDeferred<Unit>()
+        val confirmJob = async {
+            checkout.withConfirmation { holdConfirmation.await() }
+        }
+        testScheduler.advanceUntilIdle()
+
+        val mutationJob = async { checkout.applyPromotionCode("10OFF") }
+        testScheduler.advanceUntilIdle()
+
+        // Negative: the mutation is queued behind the in-flight confirmation.
+        assertThat(mutationJob.isActive).isTrue()
+
+        holdConfirmation.complete(Unit)
+        confirmJob.await()
+
+        // Positive: once confirmation releases the queue, the mutation runs.
+        val result = mutationJob.await()
+        assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `withConfirmation fails when a mutation is in flight`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        val holdResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate { response ->
+            holdResponse.await(10, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        // Start a mutation that holds the mutex (its network response is held open).
+        val mutationJob = async { checkout.applyPromotionCode("10OFF") }
+        testScheduler.advanceUntilIdle()
+
+        val error = runCatching {
+            checkout.withConfirmation { error("block should not run when a mutation is in flight") }
+        }.exceptionOrNull()
+
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(error).hasMessageThat()
+            .isEqualTo("Cannot confirm while a checkout session mutation is in flight.")
+
+        holdResponse.countDown()
+        mutationJob.await()
+    }
+
+    @Test
+    fun `withConfirmation fails a second confirmation while the first is in flight`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        val holdFirstConfirmation = CompletableDeferred<Unit>()
+        val firstConfirm = async {
+            checkout.withConfirmation { holdFirstConfirmation.await() }
+        }
+        testScheduler.advanceUntilIdle()
+
+        val error = runCatching {
+            checkout.withConfirmation { error("second confirmation should not run") }
+        }.exceptionOrNull()
+
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(error).hasMessageThat()
+            .isEqualTo("Cannot confirm while a checkout session mutation is in flight.")
+
+        holdFirstConfirmation.complete(Unit)
+        firstConfirm.await()
+    }
+
+    @Test
+    fun `isLoading is true during withConfirmation`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        val holdConfirmation = CompletableDeferred<Unit>()
+        val confirmJob = async {
+            checkout.withConfirmation { holdConfirmation.await() }
+        }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+
+        holdConfirmation.complete(Unit)
+        confirmJob.await()
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `isLoading stays true while a mutation is queued behind confirmation`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        val holdConfirmation = CompletableDeferred<Unit>()
+        val confirmJob = async {
+            checkout.withConfirmation { holdConfirmation.await() }
+        }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+
+        val mutationJob = async { checkout.applyPromotionCode("10OFF") }
+        testScheduler.advanceUntilIdle()
+
+        // No flicker: isLoading stays true while the mutation is queued behind confirmation.
+        isLoadingTurbine.expectNoEvents()
+
+        holdConfirmation.complete(Unit)
+        confirmJob.await()
+        mutationJob.await()
 
         assertThat(isLoadingTurbine.awaitItem()).isFalse()
         isLoadingTurbine.ensureAllEventsConsumed()
