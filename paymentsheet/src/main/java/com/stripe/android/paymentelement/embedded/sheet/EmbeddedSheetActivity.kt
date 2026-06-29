@@ -130,7 +130,15 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                         hasResult = true
                         when (args?.launchMode) {
                             EmbeddedLaunchMode.Form -> dismissAndFinish()
-                            EmbeddedLaunchMode.Manage, null -> {
+                            EmbeddedLaunchMode.Manage -> {
+                                setManageResult(shouldInvokeSelectionCallback = result == true)
+                                finish()
+                            }
+                            EmbeddedLaunchMode.PaymentOptions -> {
+                                setPaymentOptionsResult()
+                                finish()
+                            }
+                            null -> {
                                 setManageResult(shouldInvokeSelectionCallback = result == true)
                                 finish()
                             }
@@ -215,6 +223,9 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
             EmbeddedLaunchMode.Manage, null -> {
                 setManageResult(shouldInvokeSelectionCallback = false)
             }
+            EmbeddedLaunchMode.PaymentOptions -> {
+                setPaymentOptionsResult()
+            }
         }
         finish()
     }
@@ -229,6 +240,18 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 customerState = customerStateHolder.customer.value,
                 shouldInvokeSelectionCallback = shouldInvokeSelectionCallback,
                 launchMode = args?.launchMode ?: EmbeddedLaunchMode.Manage,
+            )
+        )
+    }
+
+    private fun setPaymentOptionsResult() {
+        setActivityResult(
+            EmbeddedActivityResult.Complete(
+                selection = selectionHolder.selection.value,
+                hasBeenConfirmed = false,
+                customerState = customerStateHolder.customer.value,
+                shouldInvokeSelectionCallback = false,
+                launchMode = EmbeddedLaunchMode.PaymentOptions,
             )
         )
     }

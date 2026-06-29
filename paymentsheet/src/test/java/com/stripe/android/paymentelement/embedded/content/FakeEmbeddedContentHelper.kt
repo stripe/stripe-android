@@ -45,6 +45,8 @@ internal class FakeEmbeddedContentHelper(
         testSheetLauncher = null
     }
 
+    override fun presentPaymentOptions() = Unit
+
     fun validate() {
         dataLoadedTurbine.ensureAllEventsConsumed()
         clearEmbeddedContentTurbine.ensureAllEventsConsumed()
