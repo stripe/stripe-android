@@ -22,7 +22,7 @@ tags:
     id: "consent_cta"
 # Select Down institution
 - extendedWaitUntil:
-    visible: "Select bank"
+    visible: "Search"
     timeout: 30000
 - scrollUntilVisible:
     element:
@@ -34,9 +34,9 @@ tags:
     visible: "Select another bank"
     timeout: 30000
 - tapOn: "Select another bank"
-# The retry path resets the picker to the top of the list.
+# The picker may reopen at the top of the list or stay near the prior position.
 - extendedWaitUntil:
-    visible: "Select bank"
+    visible: "Search"
     timeout: 30000
 - scrollUntilVisible:
     element:
