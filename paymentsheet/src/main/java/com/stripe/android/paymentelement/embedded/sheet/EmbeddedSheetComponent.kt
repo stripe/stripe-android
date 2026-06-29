@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
+import com.stripe.android.StripeClient
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -55,6 +56,7 @@ internal interface EmbeddedSheetComponent {
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
+            @BindsInstance stripeClient: StripeClient,
         ): EmbeddedSheetComponent
     }
 }
