@@ -40,14 +40,14 @@ internal class InlineAutocompleteController(
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
                 .drop(1)
-                .debounce(SEARCH_DEBOUNCE_MS)
+                .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
                 .collectLatest { (q, c) ->
                     if (q == lastPredictionLine1) {
                         lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
-                    if (q.length < MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
+                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
@@ -97,11 +97,11 @@ internal class InlineAutocompleteController(
 
     private suspend fun fetchPredictions(query: String, country: String) {
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        val result = placesClient?.findAutocompletePredictions(
+        val result = placesClient!!.findAutocompletePredictions(
             query = query,
             country = country,
-            limit = MAX_DISPLAYED_RESULTS,
-        ) ?: return
+            limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
+        )
         result.fold(
             onSuccess = { response ->
                 _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
@@ -119,11 +119,5 @@ internal class InlineAutocompleteController(
                 _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
             }
         )
-    }
-
-    companion object {
-        const val SEARCH_DEBOUNCE_MS = 400L
-        const val MAX_DISPLAYED_RESULTS = 4
-        const val MIN_CHARS_AUTOCOMPLETE = 2
     }
 }

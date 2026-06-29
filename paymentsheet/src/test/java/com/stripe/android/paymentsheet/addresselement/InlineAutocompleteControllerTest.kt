@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.text.SpannableString
+import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
@@ -38,7 +38,6 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
     }
 
     @Test
@@ -51,8 +50,8 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "ab"
         advanceTimeBy(500)
 
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
-        assertThat(fakePlacesClient.findPredictionsCalls[0].query).isEqualTo("ab")
+        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(call.query).isEqualTo("ab")
     }
 
     @Test
@@ -66,7 +65,6 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(500)
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
     }
 
     @Test
@@ -82,7 +80,7 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "Tokyo"
         advanceTimeBy(500)
 
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
     }
 
     @Test
@@ -98,7 +96,7 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
     }
 
     @Test
@@ -115,8 +113,8 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
-        assertThat(fakePlacesClient.findPredictionsCalls[0].query).isEqualTo("123 Main")
+        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(call.query).isEqualTo("123 Main")
     }
 
     @Test
@@ -141,6 +139,7 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "Main"
         advanceTimeBy(500)
 
+        fakePlacesClient.findPredictionsCalls.awaitItem()
         val state = delegate.inlinePredictionsState.value
         assertThat(state).isInstanceOf<InlinePredictionsState.Results>()
         val results = state as InlinePredictionsState.Results
@@ -148,7 +147,8 @@ class InlineAutocompleteControllerTest {
         assertThat(results.predictions).hasSize(2)
         assertThat(results.predictions[0].id).isEqualTo("place_1")
         assertThat(results.predictions[0].primaryText).isEqualTo("123 Main St")
-        assertThat(results.predictions[0].secondaryText).isEqualTo("San Francisco, CA")
+        assertThat(results.predictions[0].secondaryText)
+            .isEqualTo("San Francisco, CA")
         assertThat(results.predictions[1].id).isEqualTo("place_2")
     }
 
@@ -160,6 +160,7 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
+        fakePlacesClient.findPredictionsCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
     }
 
@@ -177,6 +178,7 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
+        fakePlacesClient.findPredictionsCalls.awaitItem()
         assertThat(states).contains(InlinePredictionsState.Loading)
     }
 
@@ -204,11 +206,13 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place_1")
         advanceTimeBy(100)
 
-        assertThat(fakePlacesClient.fetchPlaceCalls).containsExactly("place_1")
-        assertThat(emittedEvents).hasSize(1)
-        val event = emittedEvents[0]
-        assertThat(event).isInstanceOf<AutocompleteAddressInteractor.Event.OnValues>()
-        val values = (event as AutocompleteAddressInteractor.Event.OnValues).values
+        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem())
+            .isEqualTo("place_1")
+        val event = eventCalls.awaitItem()
+        assertThat(event)
+            .isInstanceOf<AutocompleteAddressInteractor.Event.OnValues>()
+        val values =
+            (event as AutocompleteAddressInteractor.Event.OnValues).values
         assertThat(values[IdentifierSpec.Line1]).isEqualTo("123 Main Street")
         assertThat(values[IdentifierSpec.City]).isEqualTo("San Francisco")
         assertThat(values[IdentifierSpec.State]).isEqualTo("CA")
@@ -225,81 +229,113 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place_1")
         advanceTimeBy(100)
 
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        eventCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
     }
 
     @Test
-    fun `onPredictionSelected with failed fetch resets to Idle without emitting event`() = runScenario {
-        fakePlacesClient.fetchPlaceResult = Result.failure(RuntimeException("Network error"))
+    fun `onPredictionSelected with failed fetch resets to Idle without emitting event`() =
+        runScenario {
+            fakePlacesClient.fetchPlaceResult =
+                Result.failure(RuntimeException("Network error"))
 
-        delegate.onPredictionSelected("place_1")
-        advanceTimeBy(100)
+            delegate.onPredictionSelected("place_1")
+            advanceTimeBy(100)
 
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(emittedEvents).isEmpty()
-    }
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            assertThat(delegate.inlinePredictionsState.value)
+                .isEqualTo(InlinePredictionsState.Idle)
+        }
 
     @Test
-    fun `onPredictionSelected suppresses next query matching predicted line1`() = runScenario {
-        fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(
-                Place(
-                    listOf(
-                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+    fun `onPredictionSelected suppresses next query matching predicted line1`() =
+        runScenario {
+            fakePlacesClient.fetchPlaceResult = Result.success(
+                FetchPlaceResponse(
+                    Place(
+                        listOf(
+                            AddressComponent(
+                                "123", "123",
+                                listOf(Place.Type.STREET_NUMBER.value)
+                            ),
+                            AddressComponent(
+                                "Main St", "Main Street",
+                                listOf(Place.Type.ROUTE.value)
+                            ),
+                            AddressComponent(
+                                "US", "United States",
+                                listOf(Place.Type.COUNTRY.value)
+                            ),
+                        )
                     )
                 )
             )
-        )
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
 
-        delegate.onPredictionSelected("place_1")
-        advanceTimeBy(100)
+            delegate.onPredictionSelected("place_1")
+            advanceTimeBy(100)
 
-        queryFlow.value = "123 Main Street"
-        advanceTimeBy(500)
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            eventCalls.awaitItem()
 
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
-    }
+            queryFlow.value = "123 Main Street"
+            advanceTimeBy(500)
+
+            assertThat(delegate.inlinePredictionsState.value)
+                .isEqualTo(InlinePredictionsState.Idle)
+        }
 
     @Test
-    fun `suppression only applies once - second matching query fetches normally`() = runScenario {
-        fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(
-                Place(
-                    listOf(
-                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+    fun `suppression only applies once - second matching query fetches normally`() =
+        runScenario {
+            fakePlacesClient.fetchPlaceResult = Result.success(
+                FetchPlaceResponse(
+                    Place(
+                        listOf(
+                            AddressComponent(
+                                "123", "123",
+                                listOf(Place.Type.STREET_NUMBER.value)
+                            ),
+                            AddressComponent(
+                                "Main St", "Main Street",
+                                listOf(Place.Type.ROUTE.value)
+                            ),
+                            AddressComponent(
+                                "US", "United States",
+                                listOf(Place.Type.COUNTRY.value)
+                            ),
+                        )
                     )
                 )
             )
-        )
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
 
-        delegate.onPredictionSelected("place_1")
-        advanceTimeBy(100)
+            delegate.onPredictionSelected("place_1")
+            advanceTimeBy(100)
 
-        // First matching query is suppressed
-        queryFlow.value = "123 Main Street"
-        advanceTimeBy(500)
-        assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            eventCalls.awaitItem()
 
-        // Second matching query fetches normally
-        queryFlow.value = "123 Main Street "
-        advanceTimeBy(500)
-        queryFlow.value = "123 Main Street"
-        advanceTimeBy(500)
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(2)
-    }
+            // First matching query is suppressed
+            queryFlow.value = "123 Main Street"
+            advanceTimeBy(500)
+
+            // Second matching query fetches normally
+            queryFlow.value = "123 Main Street "
+            advanceTimeBy(500)
+            fakePlacesClient.findPredictionsCalls.awaitItem()
+
+            queryFlow.value = "123 Main Street"
+            advanceTimeBy(500)
+            fakePlacesClient.findPredictionsCalls.awaitItem()
+        }
 
     @Test
     fun `onDismissed resets state to Idle`() = runScenario {
@@ -317,12 +353,14 @@ class InlineAutocompleteControllerTest {
         delegate.observeQueryChanges(queryFlow, countryFlow)
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value)
             .isInstanceOf<InlinePredictionsState.Results>()
 
         delegate.onDismissed()
 
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(delegate.inlinePredictionsState.value)
+            .isEqualTo(InlinePredictionsState.Idle)
     }
 
     @Test
@@ -345,7 +383,6 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(100)
 
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(emittedEvents).isEmpty()
     }
 
     @Test
@@ -360,33 +397,32 @@ class InlineAutocompleteControllerTest {
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
-        assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
 
         countryFlow.value = "US"
         advanceTimeBy(500)
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
+        fakePlacesClient.findPredictionsCalls.awaitItem()
     }
 
     @Test
-    fun `calling observeQueryChanges again cancels previous observation`() = runScenario {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        val secondQueryFlow = MutableStateFlow("")
-        val secondCountryFlow = MutableStateFlow<String?>("US")
+    fun `calling observeQueryChanges again cancels previous observation`() =
+        runScenario {
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            val secondQueryFlow = MutableStateFlow("")
+            val secondCountryFlow = MutableStateFlow<String?>("US")
 
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-        delegate.observeQueryChanges(secondQueryFlow, secondCountryFlow)
+            delegate.observeQueryChanges(queryFlow, countryFlow)
+            delegate.observeQueryChanges(secondQueryFlow, secondCountryFlow)
 
-        queryFlow.value = "first query"
-        advanceTimeBy(500)
-        assertThat(fakePlacesClient.findPredictionsCalls).isEmpty()
+            queryFlow.value = "first query"
+            advanceTimeBy(500)
 
-        secondQueryFlow.value = "second query"
-        advanceTimeBy(500)
-        assertThat(fakePlacesClient.findPredictionsCalls).hasSize(1)
-        assertThat(fakePlacesClient.findPredictionsCalls[0].query).isEqualTo("second query")
-    }
+            secondQueryFlow.value = "second query"
+            advanceTimeBy(500)
+            val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+            assertThat(call.query).isEqualTo("second query")
+        }
 
     @Test
     fun `null country flow value defaults to empty string`() = runScenario(
@@ -401,7 +437,8 @@ class InlineAutocompleteControllerTest {
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
-        assertThat(fakePlacesClient.findPredictionsCalls[0].country).isEqualTo("")
+        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(call.country).isEqualTo("")
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -411,7 +448,7 @@ class InlineAutocompleteControllerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val fakePlaces = if (usePlacesClient) FakePlacesClientProxy() else null
-        val emittedEvents = mutableListOf<AutocompleteAddressInteractor.Event>()
+        val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
             autocompleteCountries = autocompleteCountries,
@@ -422,55 +459,30 @@ class InlineAutocompleteControllerTest {
             placesClient = fakePlaces,
             config = config,
             coroutineScope = backgroundScope,
-            eventListenerProvider = { { event -> emittedEvents.add(event) } },
+            eventListenerProvider = { { event -> eventCalls.add(event) } },
         )
 
         Scenario(
             delegate = delegate,
             fakePlacesClient = fakePlaces ?: FakePlacesClientProxy(),
-            emittedEvents = emittedEvents,
+            eventCalls = eventCalls,
             queryFlow = MutableStateFlow(""),
             countryFlow = MutableStateFlow("US"),
             testScope = this,
         ).apply { block() }
+
+        fakePlaces?.ensureAllEventsConsumed()
+        eventCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val delegate: InlineAutocompleteController,
         val fakePlacesClient: FakePlacesClientProxy,
-        val emittedEvents: MutableList<AutocompleteAddressInteractor.Event>,
+        val eventCalls: Turbine<AutocompleteAddressInteractor.Event>,
         val queryFlow: MutableStateFlow<String>,
         val countryFlow: MutableStateFlow<String?>,
         val testScope: TestScope,
     ) {
         fun advanceTimeBy(millis: Long) = testScope.advanceTimeBy(millis)
-    }
-
-    private class FakePlacesClientProxy : PlacesClientProxy {
-        var findPredictionsResult: Result<FindAutocompletePredictionsResponse> =
-            Result.success(FindAutocompletePredictionsResponse(emptyList()))
-        var fetchPlaceResult: Result<FetchPlaceResponse> =
-            Result.success(FetchPlaceResponse(Place(emptyList())))
-        var onBeforeFindPredictions: (() -> Unit)? = null
-
-        data class FindPredictionsCall(val query: String?, val country: String, val limit: Int)
-
-        val findPredictionsCalls = mutableListOf<FindPredictionsCall>()
-        val fetchPlaceCalls = mutableListOf<String>()
-
-        override suspend fun findAutocompletePredictions(
-            query: String?,
-            country: String,
-            limit: Int
-        ): Result<FindAutocompletePredictionsResponse> {
-            onBeforeFindPredictions?.invoke()
-            findPredictionsCalls.add(FindPredictionsCall(query, country, limit))
-            return findPredictionsResult
-        }
-
-        override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
-            fetchPlaceCalls.add(placeId)
-            return fetchPlaceResult
-        }
     }
 }
