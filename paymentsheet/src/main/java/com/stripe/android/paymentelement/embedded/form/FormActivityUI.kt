@@ -2,7 +2,6 @@ package com.stripe.android.paymentelement.embedded.form
 
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -44,30 +43,28 @@ internal fun FormScreenContent(
     DismissKeyboardOnProcessing(interactorState.isProcessing)
 
     EventReporterProvider(eventReporter) {
-        Column {
-            if (state.savedPaymentSelectionToConfirm == null) {
-                VerticalModeFormUI(
-                    interactor = interactor,
-                    showsWalletHeader = false
-                )
-            } else {
-                SavedPaymentMethodConfirmUI(
-                    savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
-                        initialSelection = state.savedPaymentSelectionToConfirm,
-                        updateSelection = updateSelection,
-                    ),
-                )
-            }
-            USBankAccountMandate(state)
-            FormActivityError(state)
-            Spacer(Modifier.height(40.dp))
-            FormActivityPrimaryButton(
-                state = state,
-                onClick = onClick,
-                onProcessingCompleted = onProcessingCompleted,
+        if (state.savedPaymentSelectionToConfirm == null) {
+            VerticalModeFormUI(
+                interactor = interactor,
+                showsWalletHeader = false
             )
-            PaymentSheetContentPadding()
+        } else {
+            SavedPaymentMethodConfirmUI(
+                savedPaymentMethodConfirmInteractor = savedPaymentMethodConfirmInteractorFactory.create(
+                    initialSelection = state.savedPaymentSelectionToConfirm,
+                    updateSelection = updateSelection,
+                ),
+            )
         }
+        USBankAccountMandate(state)
+        FormActivityError(state)
+        Spacer(Modifier.height(40.dp))
+        FormActivityPrimaryButton(
+            state = state,
+            onClick = onClick,
+            onProcessingCompleted = onProcessingCompleted,
+        )
+        PaymentSheetContentPadding()
     }
 }
 
