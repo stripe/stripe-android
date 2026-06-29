@@ -1,6 +1,5 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -129,10 +128,8 @@ internal class EmbeddedNavigator private constructor(
 
             @Composable
             override fun Content() {
-                Column {
-                    ManageScreenUI(interactor = interactor)
-                    PaymentSheetContentPadding(subtractingExtraPadding = 12.dp)
-                }
+                ManageScreenUI(interactor = interactor)
+                PaymentSheetContentPadding(subtractingExtraPadding = 12.dp)
             }
 
             override fun close() {
@@ -155,10 +152,8 @@ internal class EmbeddedNavigator private constructor(
 
             @Composable
             override fun Content() {
-                Column {
-                    UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
-                    PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
-                }
+                UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
+                PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
             }
         }
 

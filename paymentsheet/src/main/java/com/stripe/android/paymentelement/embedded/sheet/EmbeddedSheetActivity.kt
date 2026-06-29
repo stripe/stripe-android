@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -172,7 +173,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                     )
                 }
 
-                Box(modifier = Modifier.animateContentSize()) {
+                Column(modifier = Modifier.animateContentSize()) {
                     screen.Content()
                 }
             },
