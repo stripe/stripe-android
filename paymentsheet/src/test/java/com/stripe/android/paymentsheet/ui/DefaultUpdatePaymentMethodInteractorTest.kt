@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -695,6 +696,58 @@ class DefaultUpdatePaymentMethodInteractorTest {
         interactor.cardParamsUpdateAction(CardBrand.Visa)
 
         interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
+    }
+
+    @Test
+    fun `edit card payload uses null billingDetails when saved PM has no billing details`() {
+        val cardWithNoBillingDetails = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            billingDetails = null
+        ).toDisplayableSavedPaymentMethod()
+
+        runScenario(
+            displayableSavedPaymentMethod = cardWithNoBillingDetails,
+            canUpdateFullPaymentMethodDetails = true,
+            addressCollectionMode = AddressCollectionMode.Automatic,
+        ) {
+            val payload = interactor.editCardDetailsInteractor.state.value.payload
+            assertThat(payload.billingDetails).isNull()
+        }
+    }
+
+    @Test
+    fun `edit card payload uses null billingDetails when saved PM has billing details with null address`() {
+        val cardWithNullAddress = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            billingDetails = PaymentMethod.BillingDetails(address = null)
+        ).toDisplayableSavedPaymentMethod()
+
+        runScenario(
+            displayableSavedPaymentMethod = cardWithNullAddress,
+            canUpdateFullPaymentMethodDetails = true,
+            addressCollectionMode = AddressCollectionMode.Automatic,
+        ) {
+            val payload = interactor.editCardDetailsInteractor.state.value.payload
+            assertThat(payload.billingDetails?.address).isNull()
+        }
+    }
+
+    @Test
+    fun `edit card payload uses saved billing details when saved PM has billing details`() {
+        val billingDetails = PaymentMethod.BillingDetails(
+            address = Address(country = "CA", postalCode = "H0H 0H0")
+        )
+        val cardWithBillingDetails = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            billingDetails = billingDetails
+        ).toDisplayableSavedPaymentMethod()
+
+        runScenario(
+            displayableSavedPaymentMethod = cardWithBillingDetails,
+            canUpdateFullPaymentMethodDetails = true,
+            addressCollectionMode = AddressCollectionMode.Automatic,
+        ) {
+            val payload = interactor.editCardDetailsInteractor.state.value.payload
+            assertThat(payload.billingDetails?.address?.country).isEqualTo("CA")
+            assertThat(payload.billingDetails?.address?.postalCode).isEqualTo("H0H 0H0")
+        }
     }
 
     private val notImplemented: () -> Nothing = { throw AssertionError("Not implemented") }

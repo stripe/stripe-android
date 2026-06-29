@@ -20,6 +20,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
@@ -3696,6 +3697,71 @@ class CustomerSheetViewModelTest {
 
     private fun InternalCustomerSheetResult?.asCanceled(): InternalCustomerSheetResult.Canceled {
         return this as InternalCustomerSheetResult.Canceled
+    }
+
+    @Test
+    fun `edit screen does not use defaultBillingDetails when saved PM has no billing details`() = runTest(testDispatcher) {
+        val cardWithNoBillingDetails = CARD_PAYMENT_METHOD.copy(billingDetails = null)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(cardWithNoBillingDetails),
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(country = "GB")
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(
+                    cardWithNoBillingDetails.toDisplayableSavedPaymentMethod()
+                )
+            )
+
+            val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
+            val payload = editViewState.updatePaymentMethodInteractor.editCardDetailsInteractor.state.value.payload
+            assertThat(payload.billingDetails).isNull()
+        }
+    }
+
+    @Test
+    fun `edit screen uses saved billing details when saved PM has billing details`() = runTest(testDispatcher) {
+        val cardWithBillingDetails = CARD_PAYMENT_METHOD.copy(
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(country = "CA", postalCode = "H0H 0H0")
+            )
+        )
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            customerPaymentMethods = listOf(cardWithBillingDetails),
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                defaultBillingDetails = PaymentSheet.BillingDetails(
+                    address = PaymentSheet.Address(country = "GB")
+                ),
+            ),
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnModifyItem(
+                    cardWithBillingDetails.toDisplayableSavedPaymentMethod()
+                )
+            )
+
+            val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
+            val payload = editViewState.updatePaymentMethodInteractor.editCardDetailsInteractor.state.value.payload
+            assertThat(payload.billingDetails?.address?.country).isEqualTo("CA")
+            assertThat(payload.billingDetails?.address?.postalCode).isEqualTo("H0H 0H0")
+        }
     }
 
     private fun PaymentSelection?.asSaved(): PaymentSelection.Saved {
