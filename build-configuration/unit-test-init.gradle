@@ -8,8 +8,8 @@ allprojects {
             return
         }
 
-        load.cases.each { testCase ->
-            task.filter.excludeTestsMatching("${testCase.className}.${testCase.testCaseName}")
-        }
+        // load.cases.each { testCase ->
+        //     task.filter.excludeTestsMatching("${testCase.className}.${testCase.testCaseName}")
+        // }
     }
 }
