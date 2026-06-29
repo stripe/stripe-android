@@ -10,4 +10,7 @@ internal sealed interface EmbeddedLaunchMode : Parcelable {
 
     @Parcelize
     data object Manage : EmbeddedLaunchMode
+
+    @Parcelize
+    data object PaymentOptions : EmbeddedLaunchMode
 }

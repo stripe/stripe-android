@@ -34,6 +34,7 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConf
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
@@ -127,12 +128,14 @@ internal interface EmbeddedActivityModule {
             launchMode: EmbeddedLaunchMode,
             formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
             initialManageScreenFactory: InitialManageScreenFactory,
+            initialPaymentOptionsScreenFactory: InitialPaymentOptionsScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
             val initialScreen = when (launchMode) {
                 is EmbeddedLaunchMode.Form -> formScreenFactory.create(launchMode)
                 is EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+                is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,

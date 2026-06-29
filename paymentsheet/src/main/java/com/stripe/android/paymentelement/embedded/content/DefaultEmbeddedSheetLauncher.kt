@@ -41,6 +41,13 @@ internal interface EmbeddedSheetLauncher {
         selection: PaymentSelection?,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
     )
+
+    fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+    )
 }
 
 @EmbeddedPaymentElementScope
@@ -56,6 +63,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
 ) : EmbeddedSheetLauncher {
+
+    private var pendingFormCode: String? = null
+    private var lastPaymentMethodMetadata: PaymentMethodMetadata? = null
+    private var lastEmbeddedConfirmationState: EmbeddedConfirmationStateHolder.State? = null
 
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -77,6 +88,10 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     handleFormResult(result)
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
+                is EmbeddedLaunchMode.PaymentOptions -> {
+                    handlePaymentOptionsResult(result)
+                    launchPendingFormIfNeeded()
+                }
             }
         }
 
@@ -99,6 +114,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
+            is EmbeddedActivityResult.FormRequested -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
     }
@@ -113,8 +129,41 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 }
             }
             is EmbeddedActivityResult.Cancelled -> Unit
+            is EmbeddedActivityResult.FormRequested -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
+    }
+
+    private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
+        when (result) {
+            is EmbeddedActivityResult.Complete -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.set(result.selection)
+            }
+            is EmbeddedActivityResult.FormRequested -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                pendingFormCode = result.code
+            }
+            is EmbeddedActivityResult.Cancelled -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+            }
+            is EmbeddedActivityResult.Error -> Unit
+        }
+    }
+
+    private fun launchPendingFormIfNeeded() {
+        val code = pendingFormCode ?: return
+        pendingFormCode = null
+        val metadata = lastPaymentMethodMetadata ?: return
+        val confirmationState = lastEmbeddedConfirmationState
+        launchForm(
+            code = code,
+            paymentMethodMetadata = metadata,
+            hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any { it.type?.code == code },
+            embeddedConfirmationState = confirmationState,
+            customerState = customerStateHolder.customer.value,
+            promotion = null,
+        )
     }
 
     override fun launchForm(
@@ -182,6 +231,42 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.Manage,
+        )
+        activityLauncher.launch(args)
+    }
+
+    override fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+    ) {
+        val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
+        if (checkoutSession != null) {
+            CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+            CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+        }
+        if (embeddedConfirmationState == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+            )
+            return
+        }
+        if (sheetStateHolder.sheetIsOpen) return
+        sheetStateHolder.sheetIsOpen = true
+        lastPaymentMethodMetadata = paymentMethodMetadata
+        lastEmbeddedConfirmationState = embeddedConfirmationState
+        val args = EmbeddedActivityArgs(
+            selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = customerState?.paymentMethods?.isNotEmpty() == true,
+            configuration = embeddedConfirmationState.configuration,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            statusBarColor = statusBarColor,
+            selection = selection,
+            customerState = customerState,
+            promotion = null,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)
     }
