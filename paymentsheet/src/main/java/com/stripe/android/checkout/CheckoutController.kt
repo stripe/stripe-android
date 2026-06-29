@@ -26,14 +26,8 @@ class CheckoutController @Inject internal constructor(
     resultCallback: ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
-    val checkoutSession: StateFlow<CheckoutSession?> =
-        MutableStateFlow<CheckoutSession?>(null).asStateFlow()
-
-    val isLoading: StateFlow<Boolean> =
-        MutableStateFlow(false).asStateFlow()
-
-    val paymentOption: StateFlow<PaymentElement.PaymentOptionDisplayData?> =
-        MutableStateFlow<PaymentElement.PaymentOptionDisplayData?>(null).asStateFlow()
+    private val _checkoutSession = MutableStateFlow<CheckoutSession?>(null)
+    val checkoutSession: StateFlow<CheckoutSession?> = _checkoutSession.asStateFlow()
 
     suspend fun configure(
         checkoutSessionClientSecret: String,
@@ -99,8 +93,15 @@ class CheckoutController @Inject internal constructor(
     class Builder(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
-        private val resultCallback: ResultCallback,
     ) {
+        private var resultCallback: ResultCallback = ResultCallback {}
+
+        fun resultCallback(
+            resultCallback: ResultCallback
+        ): Builder = apply {
+            this.resultCallback = resultCallback
+        }
+
         fun build(): CheckoutController {
             val component = DaggerCheckoutControllerComponent.factory().create(
                 application = application,
