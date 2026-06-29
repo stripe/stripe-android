@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">I-save ang aking impormasyon para sa mas mabilis na pag-checkout sa %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">Gumawa ng account na may Link para sa mas mabilis na pag-checkout sa web</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Lumikha ng account sa %s para sa mas mabilis na pag-checkout sa buong web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Credit</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">I-save ang iyong impormasyon ng pagbabayad sa Link, at ligtas na mag-check out nang 1-click sa mga site na suportado ng Link.</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">Magbayad nang mas mabilis kahit saan tinatanggap ang Link.</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">Magbayad nang mas mabilis kung saan tinatanggap ang %s.</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %s at <link>Link</link> (tingnan ang <terms>Mga Tuntunin</terms> at <privacy>Privacy</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap gamit ang %s at <link>Link</link> Ayon sa Link <terms>mga tuntunin</terms> at <privacy>privacy</privacy>.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Sa pagpapatuloy, sumasang-ayon kang i-save ang iyong impormasyon para sa mga pagbili sa hinaharap sa %1$s at <link>%2$s</link> alinsunod sa<terms>mga tuntunin</terms> at <privacy>pagkapribado</privacy> ng %2$s.]]></string>
   <!-- Error message displayed when updating a card fails. -->

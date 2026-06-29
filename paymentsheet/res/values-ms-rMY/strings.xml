@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Simpan maklumat saya untuk pembayaran yang lebih pantas dengan %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">Buat akaun dengan Link untuk proses bayar dan keluar lebih pantas di seluruh web</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Buat akaun dengan %s untuk pembayaran yang lebih pantas merentas web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">Kredit %1$s</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Simpan maklumat pembayaran anda dengan Link, serta bayar dan keluar dengan sekali klik secara selamat di laman yang disokong oleh Link.</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">Bayar dengan lebih pantas di mana-mana sahaja Link diterima.</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">Bayar lebih pantas di mana-mana sahaja %s diterima.</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Dengan meneruskan, anda bersetuju untuk menyimpan maklumat anda bagi pembelian masa hadapan dengan %s dan <link>Link</link> (lihat <terms>Terma</terms> Dan <privacy>Privasi</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Dengan meneruskan, anda bersetuju untuk menyimpan maklumat anda bagi pembelian masa hadapan dengan %s dan <link>Link</link> menurut <terms>terma</terms> Dan <privacy>privasi</privacy> Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Dengan meneruskan, anda bersetuju untuk menyimpan maklumat anda untuk pembelian masa hadapan dengan %1$s dan <link>%2$s</link> mengikut %2$s <terms>terma</terms> dan <privacy>privasi</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->

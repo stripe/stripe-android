@@ -281,14 +281,10 @@ private fun ColumnScope.SignUpHeader(linkBrand: LinkBrand) {
         color = LinkTheme.colors.textPrimary
     )
     Text(
-        text = if (linkBrand == LinkBrand.Link) {
-            stringResource(R.string.stripe_link_sign_up_message_v2)
-        } else {
-            stringResource(
-                R.string.stripe_link_sign_up_message_v2_with_brand,
-                linkBrand.brandName(),
-            )
-        },
+        text = stringResource(
+            R.string.stripe_link_sign_up_message_v2_with_brand,
+            linkBrand.brandName(),
+        ),
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp, bottom = 30.dp),

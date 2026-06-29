@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Adataim mentése a gyorsabb fizetéshez a következővel: %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">Hozzon létre egy fiókot a Link segítségével a gyorsabb fizetéshez az interneten</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Hozzon létre egy számlát a következővel: %s a gyorsabb fizetéshez az interneten</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$sHitel</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Mentse fizetési adatait a Linkbe, hogy biztonságosan fizessen egy kattintással a Link által támogatott oldalakon.</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">Gyorsabban fizethet mindenhol, ahol a Linket elfogadják.</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">Gyorsabban fizethet mindenhol, ahol a(z) %s elfogadott.</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>a Linknél</link> (lásd a <terms>feltételeket</terms> és az <privacy>adatvédelmi szabályzatot).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[A folytatással Ön beleegyezik abba, hogy adatait elmenti a jövőbeni vásárlásokhoz itt: %s és <link>a Linknél</link> a Link <terms>feltételei</terms> és <privacy>adatvédelmi szabályzata</privacy> szerint.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Ha folytatja, azzal hozzájárul az adatainak mentéséhez a jövőbeni vásárlásokhoz itt: %1$s és <link>%2$s</link> a %2$s <terms>feltételeknek</terms> és az <privacy>adatvédelmi szabályzatnak</privacy> megfelelően.]]></string>
   <!-- Error message displayed when updating a card fails. -->

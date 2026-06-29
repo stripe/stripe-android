@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Lưu thông tin của tôi để thanh toán nhanh hơn với %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">Tạo tài khoản bằng Link để thanh toán nhanh hơn trên web</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Tạo tài khoản bằng %s để thanh toán nhanh hơn trên web</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Ghi có</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Lưu thông tin thanh toán với Link và thanh toán an toàn bằng 1 cú nhấp chuột trên các trang web có hỗ trợ Link.</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">Thanh toán nhanh hơn ở mọi nơi chấp nhận Link.</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">Thanh toán nhanh hơn ở mọi nơi chấp nhận %s.</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Bằng cách tiếp tục, bạn đồng ý lưu thông tin của mình cho các giao dịch mua trong tương lai với %s và <link>Link</link> (xem <terms>Điều khoản</terms> và <privacy>Quyền riêng tư</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Bằng cách tiếp tục, bạn đồng ý lưu thông tin của mình cho các giao dịch mua trong tương lai với %s và <link>Link</link> theo <terms>điều khoản</terms> và <privacy>quyền riêng tư</privacy> của Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Bằng việc tiếp tục, bạn đồng ý lưu thông tin của mình cho các giao dịch mua trong tương lai với %1$s và <link>%2$s</link> theo <terms>điều khoản</terms> và <privacy>quyền riêng tư</privacy> của %2$s.]]></string>
   <!-- Error message displayed when updating a card fails. -->

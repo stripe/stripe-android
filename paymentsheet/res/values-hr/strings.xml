@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Spremi moje podatke za brže izvršenje plaćanja s %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">Stvaranje računa s pomoću Linka za brže izvršenje plaćanja na mreži</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Izradite račun s %s za brže izvršenje plaćanja na mreži</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s Kreditna kartica</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Spremite svoje podatke o plaćanju pomoću Linka i sigurno platite jednim klikom na stranicama koje podržavaju Link.</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">Plaćajte brže svugdje gdje je Link prihvaćen.</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">Plaćajte brže svugdje gdje se prihvaća %s.</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Nastavkom pristajete spremiti svoje podatke za buduće kupnje uz %s i <link>Link</link> (pogledajte <terms>Uvjeti</terms> i <privacy>Privatnost</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Nastavkom pristajete spremiti svoje podatke za buduće kupnje uz %s i <link>Link</link> prema <terms>uvjetima</terms> i <privacy>privatnosti</privacy> značajke Link.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Nastavkom se slažete da ćete spremiti svoje podatke za buduće kupnje s %1$s i <link>%2$s</link> prema %2$s <terms>uvjetima</terms> i <privacy>privatnosti</privacy>.]]></string>
   <!-- Error message displayed when updating a card fails. -->

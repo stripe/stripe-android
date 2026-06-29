@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">%s로 체크아웃을 빠르게 진행하기 위해 내 정보 저장</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">Link 계정을 생성하여 웹 전반에서 더 빠르게 체크아웃하세요</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">%s 계정을 생성하여 웹 전반에서 더 빠르게 체크아웃하세요</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 신용</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Link에서 결제 정보를 저장하고 Link 지원 사이트에서 원클릭으로 안전하게 체크아웃하십시오.</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">Link가 허용되는 모든 곳에서 더 빠르게 결제하십시오.</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">%s가 허용되는 모든 곳에서 더 빠르게 결제하십시오.</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> (<terms>약관</terms> 및 <privacy>개인정보 보호</privacy> 참조)에 저장하는 데 동의하시는 것입니다.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[계속 진행하시면, 향후 구매 시 사용하기 위해 귀하의 정보를 %s 및 <link>Link</link> 에 Link <terms>약관</terms> 및 <privacy>개인정보 보호</privacy>에 따라 저장하시는 데 동의하시는 것입니다.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[계속 진행하시면, %2$s의 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 따라 향후 %1$s 및 <link>%2$s</link>에서 구매 시 귀하의 정보를 저장하는 데 동의하는 것으로 간주됩니다.]]></string>
   <!-- Error message displayed when updating a card fails. -->

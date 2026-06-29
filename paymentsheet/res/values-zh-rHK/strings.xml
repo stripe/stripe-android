@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">儲存資訊，以便透過 %s 更快結賬</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">使用 Link 建立帳戶，以便在網站上更快結帳</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">透過 %s 建立賬戶，網上各處享受更快捷的結賬體驗</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">%1$s 信用卡</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">用 Link 儲存您的支付資訊，並在支援 Link 的網站上一鍵安全結賬。</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">在接受 Link 的任何地方可以更快速支付。</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">在任何接受 %s 的地方享受更快捷的付款體驗。</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來透過 %s 和 <link>Link</link> 進行購物（請參閱<terms>條款</terms>與<privacy>隱私政策</privacy>）。]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[繼續即表示您同意儲存您的個人資料，以便將來根據 <link>Link</link> <terms>條款</terms>與<privacy>私隱政策</privacy> 透過 %s 和 Link 購物]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[繼續操作即表示您同意按照 %2$s 的 <terms>條款</terms> 和 <privacy>隱私政策</privacy>，為供未來在 %1$s 和 <link>%2$s</link> 購物時使用而儲存您的資訊。]]></string>
   <!-- Error message displayed when updating a card fails. -->
