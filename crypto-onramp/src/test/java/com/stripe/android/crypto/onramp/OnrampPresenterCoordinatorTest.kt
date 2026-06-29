@@ -119,7 +119,8 @@ class OnrampPresenterCoordinatorTest {
                 activity = any(),
                 presentPaymentMethodsCallback = any(),
                 authenticationCallback = any(),
-                authorizeCallback = any()
+                authorizeCallback = any(),
+                presentCallback = any()
             )
         ).thenReturn(linkPresenter)
 

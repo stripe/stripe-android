@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeActivityResultRegistry
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,16 +34,19 @@ internal class LinkControllerCoordinatorTest {
     private val presentPaymentMethodsResultFlow = MutableSharedFlow<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
     private val authorizeResultFlow = MutableSharedFlow<LinkController.AuthorizeResult>()
+    private val presentResultFlow = MutableSharedFlow<LinkController.PresentResult>()
 
     private val viewModel: LinkControllerInteractor = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { authenticationResultFlow } doReturn authenticationResultFlow
         on { authorizeResultFlow } doReturn authorizeResultFlow
+        on { presentResultFlow } doReturn presentResultFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResults = mutableListOf<LinkController.AuthenticationResult>()
     private val authorizeResults = mutableListOf<LinkController.AuthorizeResult>()
+    private val presentResults = mutableListOf<LinkController.PresentResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
@@ -62,6 +66,7 @@ internal class LinkControllerCoordinatorTest {
             selectedPaymentMethodCallback = { presentPaymentMethodsResults.add(it) },
             authenticationCallback = { authenticationResults.add(it) },
             authorizeCallback = { authorizeResults.add(it) },
+            presentCallback = { presentResults.add(it) },
         )
     }
 
@@ -169,5 +174,28 @@ internal class LinkControllerCoordinatorTest {
         lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
         presentPaymentMethodsResultFlow.emit(LinkController.PresentPaymentMethodsResult.Canceled)
         assertThat(presentPaymentMethodsResults).containsExactly(LinkController.PresentPaymentMethodsResult.Canceled)
+    }
+
+    @Test
+    fun `presentResultFlow emissions are forwarded to presentCallback`() = runTest {
+        lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
+        createCoordinator()
+
+        val result = LinkController.PresentResult.Canceled
+        presentResultFlow.emit(result)
+
+        assertThat(presentResults).containsExactly(result)
+    }
+
+    @Test
+    fun `presentResultFlow completed result is forwarded to presentCallback`() = runTest {
+        lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
+        createCoordinator()
+
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val result = LinkController.PresentResult.Completed(paymentMethod)
+        presentResultFlow.emit(result)
+
+        assertThat(presentResults).containsExactly(result)
     }
 }

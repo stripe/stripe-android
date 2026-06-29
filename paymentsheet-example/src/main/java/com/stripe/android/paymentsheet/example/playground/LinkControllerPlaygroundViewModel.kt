@@ -17,7 +17,7 @@ internal class LinkControllerPlaygroundViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    private val linkController = LinkController.create(application, savedStateHandle)
+    private val linkController = LinkController.Builder(application, savedStateHandle).build()
     private var linkControllerPresenter: LinkController.Presenter? = null
 
     val status = MutableStateFlow<StatusMessage?>(null)
@@ -30,10 +30,16 @@ internal class LinkControllerPlaygroundViewModel(
             presentPaymentMethodsCallback = this::onLinkControllerPresentPaymentMethod,
             authenticationCallback = this::onLinkControllerAuthentication,
             authorizeCallback = this::onLinkControllerAuthorization,
+            presentCallback = this::onLinkControllerPresent,
         )
         activity.lifecycleScope.launch {
             linkController.state(activity).collect { controllerState ->
                 state.update { it.copy(controllerState = controllerState) }
+            }
+        }
+        viewModelScope.launch {
+            linkController.paymentMethodPreview.collect { preview ->
+                state.update { it.copy(selectedPaymentMethodPreview = preview) }
             }
         }
     }
@@ -55,6 +61,22 @@ internal class LinkControllerPlaygroundViewModel(
 
     private fun onLinkControllerPresentPaymentMethod(result: LinkController.PresentPaymentMethodsResult) {
         state.update { it.copy(presentPaymentMethodsResult = result) }
+    }
+
+    private fun onLinkControllerPresent(result: LinkController.PresentResult) {
+        state.update { it.copy(presentResult = result) }
+    }
+
+    fun onPresentClick(
+        email: String,
+        phoneNumber: String?,
+        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+    ) {
+        linkControllerPresenter?.present(
+            email = email,
+            phoneNumber = phoneNumber,
+            filterPaymentMethodTypes = paymentMethodTypes,
+        )
     }
 
     fun onLookupClick(email: String) {
@@ -90,10 +112,10 @@ internal class LinkControllerPlaygroundViewModel(
         }
     }
 
-    fun onPaymentMethodClick(email: String, paymentMethodType: LinkController.PaymentMethodType?) {
+    fun onPaymentMethodClick(email: String, paymentMethodTypes: List<LinkController.PaymentMethodType>?) {
         linkControllerPresenter?.presentPaymentMethodsForOnramp(
             email = email.takeIf { it.isNotBlank() },
-            paymentMethodType = paymentMethodType,
+            paymentMethodTypes = paymentMethodTypes,
         )
     }
 

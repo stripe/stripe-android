@@ -37,8 +37,15 @@ class LinkController @Inject internal constructor(
     private val presenterComponentFactory: LinkControllerPresenterComponent.Factory
 ) {
     /**
+     * A preview of the currently selected Link payment method, or null if none is selected.
+     */
+    val paymentMethodPreview: StateFlow<PaymentMethodPreview?> =
+        interactor.selectedPaymentMethodPreview
+
+    /**
      * The current [State] of the Link controller.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun state(context: Context): StateFlow<State> = interactor.state(context)
 
     /**
@@ -110,17 +117,36 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Creates a [Presenter] for use with [Presenter.present].
+     *
+     * @param activity The [ComponentActivity] that will host the Link UI.
+     * @param presentCallback Callback to receive results from [Presenter.present].
+     */
+    fun createPresenter(
+        activity: ComponentActivity,
+        presentCallback: PresentCallback,
+    ): Presenter = createPresenter(
+        activity = activity,
+        presentPaymentMethodsCallback = {},
+        authenticationCallback = {},
+        authorizeCallback = {},
+        presentCallback = presentCallback,
+    )
+
+    /**
      * Creates a [Presenter] for the Link controller that can present user-interactive flows.
      *
      * @param activity The [ComponentActivity] that will host the Link UI.
      * @param presentPaymentMethodsCallback Callback to receive results from presenting payment methods.
      * @param authenticationCallback Callback to receive results from authentication flows.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun createPresenter(
         activity: ComponentActivity,
         presentPaymentMethodsCallback: PresentPaymentMethodsCallback,
         authenticationCallback: AuthenticationCallback,
         authorizeCallback: AuthorizeCallback,
+        presentCallback: PresentCallback = PresentCallback {},
     ): Presenter {
         return presenterComponentFactory
             .build(
@@ -130,6 +156,7 @@ class LinkController @Inject internal constructor(
                 presentPaymentMethodsCallback = presentPaymentMethodsCallback,
                 authenticationCallback = authenticationCallback,
                 authorizeCallback = authorizeCallback,
+                presentCallback = presentCallback,
             )
             .presenter
     }
@@ -315,14 +342,8 @@ class LinkController @Inject internal constructor(
     class State
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     constructor(
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val elementsSessionId: String? = null,
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val internalLinkAccount: LinkAccount? = null,
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @field:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val merchantLogoUrl: String? = null,
         val selectedPaymentMethodPreview: PaymentMethodPreview? = null,
         val createdPaymentMethod: PaymentMethod? = null,
@@ -330,6 +351,7 @@ class LinkController @Inject internal constructor(
         /**
          * Whether the Link consumer account is verified. Null if no account is loaded.
          */
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val isConsumerVerified: Boolean?
             get() = internalLinkAccount?.sessionState?.let { it == SessionState.LoggedIn }
     }
@@ -346,6 +368,31 @@ class LinkController @Inject internal constructor(
         private val interactor: LinkControllerInteractor,
     ) {
         /**
+         * Present the full Link flow — consumer lookup, authentication, payment method selection,
+         * and payment method creation — in a single call. The result is delivered through the
+         * [PresentCallback] provided to [createPresenter].
+         *
+         * If a presentation is already in progress, this call will be ignored.
+         *
+         * @param email The email address to use for the Link flow.
+         * @param phoneNumber Optional phone number to pre-fill during sign-up, in E.164 format.
+         * @param filterPaymentMethodTypes Optional list of payment method type to restrict
+         * selection to. If null, all supported types are shown.
+         */
+        fun present(
+            email: String,
+            phoneNumber: String? = null,
+            filterPaymentMethodTypes: List<PaymentMethodType>? = null,
+        ) {
+            interactor.presentFull(
+                launcher = coordinator.linkActivityResultLauncher,
+                email = email,
+                phoneNumber = phoneNumber,
+                paymentMethodTypes = filterPaymentMethodTypes,
+            )
+        }
+
+        /**
          * Present the Link payment methods selection screen.
          *
          * This will launch the Link activity where users can select from their saved payment methods
@@ -358,25 +405,26 @@ class LinkController @Inject internal constructor(
          * matches an existing Link account, the account's payment methods will be available for selection.
          * If null, the user will need to sign in or create a Link account.
          */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun presentPaymentMethods(
             email: String?,
         ) {
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
-                paymentMethodType = null,
+                paymentMethodTypes = null,
             )
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun presentPaymentMethodsForOnramp(
             email: String?,
-            paymentMethodType: PaymentMethodType?
+            paymentMethodTypes: List<PaymentMethodType>?
         ) {
             interactor.presentPaymentMethods(
                 launcher = coordinator.linkActivityResultLauncher,
                 email = email,
-                paymentMethodType = paymentMethodType,
+                paymentMethodTypes = paymentMethodTypes,
             )
         }
 
@@ -545,6 +593,37 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Result of [Presenter.present].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    sealed interface PresentResult {
+
+        /**
+         * The user completed the Link flow and a payment method was created.
+         *
+         * @param paymentMethod The [PaymentMethod] created from the selected Link payment method.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Completed internal constructor(val paymentMethod: PaymentMethod) : PresentResult
+
+        /**
+         * The user canceled the Link flow.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data object Canceled : PresentResult
+
+        /**
+         * An error occurred during the Link flow.
+         *
+         * @param error The error that occurred.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Poko
+        class Failed internal constructor(val error: Throwable) : PresentResult
+    }
+
+    /**
      * Result of creating a payment method from a selected Link payment method.
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -702,6 +781,14 @@ class LinkController @Inject internal constructor(
     }
 
     /**
+     * Callback for receiving results from [Presenter.present].
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun interface PresentCallback {
+        fun onPresentResult(result: PresentResult)
+    }
+
+    /**
      * [CRYPTO ONRAMP ONLY] Callback for receiving results from [Presenter.authenticate] and
      * [Presenter.authenticateExistingConsumer].
      */
@@ -764,7 +851,7 @@ class LinkController @Inject internal constructor(
     /**
      * Preview information for a Link payment method.
      *
-     * @param iconRes An image representing a payment method; e.g. the VISA logo.
+     * @param imageLoader A suspending function that loads an image representing a payment method; e.g. the VISA logo.
      * @param label The main label text (e.g., "Link").
      * @param sublabel Additional descriptive text (e.g., "Visa •••• 4242").
      */
@@ -808,6 +895,31 @@ class LinkController @Inject internal constructor(
 
                 return details.toPreview(context = context, iconLoader = iconLoader)
             }
+        }
+    }
+
+    /**
+     * Builder for creating a [LinkController] instance.
+     *
+     * @param application The application context.
+     * @param savedStateHandle The [SavedStateHandle] for persisting state across process death.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Builder(
+        private val application: Application,
+        private val savedStateHandle: SavedStateHandle,
+    ) {
+        /**
+         * Build the [LinkController] instance.
+         *
+         * @return A new [LinkController] configured with the specified settings.
+         */
+        fun build(): LinkController {
+            return create(
+                application = application,
+                savedStateHandle = savedStateHandle,
+                requestSurface = RequestSurface.PaymentElement,
+            )
         }
     }
 
