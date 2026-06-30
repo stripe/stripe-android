@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp.example.ui
 
 import android.util.Log
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -11,6 +12,7 @@ import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -20,6 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.stripe.android.crypto.onramp.example.INITIALIZATION_FAILURE_ALERT_MESSAGE_TAG
+import com.stripe.android.crypto.onramp.example.INITIALIZATION_FAILURE_ALERT_TAG
+import com.stripe.android.crypto.onramp.example.INITIALIZATION_FAILURE_ALERT_TITLE_TAG
 import com.stripe.android.crypto.onramp.example.OnrampViewModel
 import com.stripe.android.crypto.onramp.example.SNACKBAR_TAG
 import com.stripe.android.crypto.onramp.example.SNACKBAR_TEXT_TAG
@@ -41,6 +46,8 @@ internal fun OnrampApp(
 ) {
     val showAddressModal by viewModel.updateAddressEvent.collectAsStateWithLifecycle()
     val message by viewModel.message.collectAsStateWithLifecycle()
+    val initializationFailureAlert by viewModel.initializationFailureAlert
+        .collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val sheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden
@@ -66,6 +73,30 @@ internal fun OnrampApp(
     }
 
     OnrampExampleTheme {
+        initializationFailureAlert?.let { alert ->
+            AlertDialog(
+                modifier = Modifier.testTag(INITIALIZATION_FAILURE_ALERT_TAG),
+                onDismissRequest = viewModel::clearInitializationFailureAlert,
+                title = {
+                    Text(
+                        text = alert.title,
+                        modifier = Modifier.testTag(INITIALIZATION_FAILURE_ALERT_TITLE_TAG)
+                    )
+                },
+                text = {
+                    Text(
+                        text = alert.message,
+                        modifier = Modifier.testTag(INITIALIZATION_FAILURE_ALERT_MESSAGE_TAG)
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = viewModel::clearInitializationFailureAlert) {
+                        Text("OK")
+                    }
+                }
+            )
+        }
+
         Scaffold(
             topBar = {
                 TopAppBar(

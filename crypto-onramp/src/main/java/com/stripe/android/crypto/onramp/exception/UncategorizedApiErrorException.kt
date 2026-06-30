@@ -7,21 +7,28 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
  */
 @ExperimentalCryptoOnramp
 class UncategorizedApiErrorException internal constructor(
-    context: APIErrorContext,
-    sdkVersions: List<SDKVersion>,
+    apiErrorContext: APIErrorContext,
+    diagnosticContext: DiagnosticContext,
     userMessage: String,
 ) : CryptoOnrampApiException(
-    context = context,
-    sdkVersions = sdkVersions,
+    apiErrorContext = apiErrorContext,
     userMessage = userMessage,
-    developerMessage = CryptoOnrampErrorRenderer.renderGenericApiDeveloperMessage(
-        context = context,
-        code = context.code(fallback = UNCATEGORIZED_API_ERROR_CODE),
-        sdkVersions = sdkVersions,
+    developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
+        summary = apiErrorContext.apiErrorMessage ?: "Stripe API request failed.",
+        code = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE),
+        nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
+        docUrl = apiErrorContext.docUrl,
+        sdkVersions = diagnosticContext.sdkVersions,
+        requestContext = CryptoOnrampErrorRenderer.requestContextLines(
+            diagnosticContext = diagnosticContext,
+            reason = apiErrorContext.reason,
+            requestId = apiErrorContext.requestId,
+            apiErrorType = apiErrorContext.apiErrorType,
+        ),
     ),
 ) {
     override val code: String
-        get() = context.code(fallback = UNCATEGORIZED_API_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE)
 }
 
 private const val UNCATEGORIZED_API_ERROR_CODE = "uncategorized_api_error"

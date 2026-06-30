@@ -1,44 +1,13 @@
 package com.stripe.android.crypto.onramp.exception
 
 internal object CryptoOnrampErrorRenderer {
-    fun renderGenericApiDeveloperMessage(
-        context: APIErrorContext,
-        code: String,
-        sdkVersions: List<SDKVersion>,
-    ): String {
-        return renderApiDeveloperMessage(
-            context = context,
-            summary = context.apiErrorMessage ?: "Stripe API request failed.",
-            code = code,
-            nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
-            sdkVersions = sdkVersions,
-        )
-    }
-
-    fun renderApiDeveloperMessage(
-        context: APIErrorContext,
+    fun renderDeveloperMessage(
         summary: String,
-        code: String,
-        nextStep: String,
-        sdkVersions: List<SDKVersion>,
-    ): String {
-        return renderDeveloperMessage(
-            summary = summary,
-            requestContext = requestContextLines(context),
-            code = code,
-            nextStep = nextStep,
-            docUrl = context.docUrl,
-            sdkVersions = sdkVersions,
-        )
-    }
-
-    private fun renderDeveloperMessage(
-        summary: String,
-        requestContext: List<String>,
         code: String,
         nextStep: String,
         docUrl: String?,
         sdkVersions: List<SDKVersion>,
+        requestContext: List<String> = emptyList(),
     ): String {
         val footer = buildList {
             add("Code: $code")
@@ -61,21 +30,24 @@ internal object CryptoOnrampErrorRenderer {
         }.joinToString(separator = "\n")
     }
 
+    fun requestContextLines(
+        diagnosticContext: DiagnosticContext,
+        reason: String? = null,
+        requestId: String? = null,
+        apiErrorType: String? = null,
+    ): List<String> {
+        return listOfNotNull(
+            "operation: ${diagnosticContext.operation}",
+            "app_id: ${diagnosticContext.appPackageName}",
+            diagnosticContext.mode?.let { "mode: $it" },
+            reason?.let { "reason: $it" },
+            requestId?.let { "request_id: $it" },
+            apiErrorType?.let { "type: $it" },
+        )
+    }
+
     private fun sdkVersionDescription(sdkVersions: List<SDKVersion>): String {
         val normalizedSdkVersions = sdkVersions.ifEmpty { listOf(SDKVersion.stripeAndroid) }
         return normalizedSdkVersions.joinToString(separator = ", ") { it.debugDescription }
-    }
-
-    private fun requestContextLines(
-        context: APIErrorContext,
-    ): List<String> {
-        return listOfNotNull(
-            "operation: ${context.operation}",
-            "app_id: ${context.appPackageName}",
-            context.mode?.let { "mode: $it" },
-            context.reason?.let { "reason: $it" },
-            context.requestId?.let { "request_id: $it" },
-            context.apiErrorType?.let { "type: $it" },
-        )
     }
 }

@@ -7,34 +7,33 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 /**
  * Base exception type for Crypto Onramp failures that originate from a Stripe API error payload.
  *
- * [context] preserves the original API-facing fields and request debugging metadata.
+ * [apiErrorContext] preserves the original API-facing fields.
  *
  * `message` is safe to display directly to app users. Use [developerMessage] for richer
  * diagnostics.
  */
 @ExperimentalCryptoOnramp
 abstract class CryptoOnrampApiException internal constructor(
-    val context: APIErrorContext,
-    final override val sdkVersions: List<SDKVersion>,
+    val apiErrorContext: APIErrorContext,
     final override val userMessage: String,
     final override val developerMessage: String,
 ) : StripeException(
-    stripeError = context.underlyingError.stripeError,
-    requestId = context.underlyingError.requestId,
-    statusCode = context.underlyingError.statusCode,
-    cause = context.underlyingError,
+    stripeError = apiErrorContext.underlyingError.stripeError,
+    requestId = apiErrorContext.underlyingError.requestId,
+    statusCode = apiErrorContext.underlyingError.statusCode,
+    cause = apiErrorContext.underlyingError,
     message = userMessage,
 ),
 StripeCryptoOnrampError {
     final override val docUrl: String?
-        get() = context.docUrl
+        get() = apiErrorContext.docUrl
 
     final override val underlyingError: StripeException
-        get() = context.underlyingError
+        get() = apiErrorContext.underlyingError
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun analyticsValue(): String {
-        return context.underlyingError.analyticsValue()
+        return apiErrorContext.underlyingError.analyticsValue()
     }
 }
 
@@ -43,18 +42,6 @@ data class APIErrorContext(
      * The raw backend reason, when present.
      */
     val reason: String?,
-    /**
-     * The Crypto Onramp operation that failed.
-     */
-    val operation: String,
-    /**
-     * The Android application package name used for the request.
-     */
-    val appPackageName: String,
-    /**
-     * The Stripe mode inferred from the publishable key, when available.
-     */
-    val mode: String?,
     /**
      * The raw backend error code, when present.
      */
@@ -90,3 +77,22 @@ data class APIErrorContext(
 internal fun APIErrorContext.code(fallback: String): String {
     return apiErrorCode ?: fallback
 }
+
+internal data class DiagnosticContext(
+    /**
+     * SDK versions that participated in this operation.
+     */
+    val sdkVersions: List<SDKVersion>,
+    /**
+     * The Crypto Onramp operation that failed.
+     */
+    val operation: String,
+    /**
+     * The Android application package name used for the request.
+     */
+    val appPackageName: String,
+    /**
+     * The Stripe mode inferred from the publishable key, when available.
+     */
+    val mode: String?,
+)
