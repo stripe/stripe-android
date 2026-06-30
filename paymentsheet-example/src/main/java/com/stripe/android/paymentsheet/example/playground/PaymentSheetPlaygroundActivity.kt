@@ -647,6 +647,16 @@ internal class PaymentSheetPlaygroundActivity :
         ) {
             Text("Checkout")
         }
+
+        if (isTwoStep) {
+            Button(
+                onClick = { embeddedPaymentElement.presentPaymentOptions() },
+                enabled = hasConfigured,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Present Payment Options")
+            }
+        }
     }
 
     @Composable
