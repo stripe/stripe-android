@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Ikkonferma l-informazzjoni tiegħek</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">L-aħħar 4 ċifri tal-SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Idħol jew irreġistra</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Aqbel u kompli</string>
   <!-- Title for the Link signup screen -->
@@ -261,8 +263,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_qrcode_lpm_confirm_payment">Ikkonferma l-pagament fil-bank jew fl-app tal-pagament tiegħek fi żmien %s biex tlesti x-xiri.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Neħħi l-kont tal-bank li jispiċċa b\'%s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Buttuna ta\' Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Uri l-menù</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Oħroġ minn Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Oħroġ minn %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Ingħaqad ma\' Link</string>
   <!-- Title for the Link signup screen -->

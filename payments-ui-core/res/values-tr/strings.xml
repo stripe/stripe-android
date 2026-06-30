@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Ödeme bilgilerini gelecekteki satın almalar için %s işletmesine kaydet</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Kartı tara</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Taranan kartı temizleyin</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Ödeme bilgilerinizi sağlayarak ve bu ödemeyi onaylayarak, (A) %s ve ödeme hizmeti sağlayıcımız Stripe\'a hesabınızdan ödeme tahsilatı yapması için bankanıza talimatlar göndermesi ve (B) bankanıza bu talimatlara uygun olarak hesabınızdan ödeme tahsilatı yapması için yetki verirsiniz. Haklarınızın bir parçası olarak, bankanızla yaptığınız sözleşmenin hüküm ve koşulları uyarınca bankanızdan geri ödeme alma hakkına sahipsiniz. Geri ödeme, hesabınızdan ödeme tahsilatı yapıldığı tarihten itibaren 8 hafta içinde talep edilmelidir. Haklarınız, bankanızdan alabileceğiniz bir hesap özetinde açıklanmaktadır. Tahakkuk etmeden 2 gün öncesine kadar gelecekteki ödeme tahsilatları için bildirim almayı da kabul edersiniz.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

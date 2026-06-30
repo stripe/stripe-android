@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">确认您的信息</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">社会保障号码 (SSN) 最后 4 位</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">登录或注册</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">同意并继续</string>
   <!-- Title for the Link signup screen -->
@@ -261,8 +263,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_qrcode_lpm_confirm_payment">请在 %s 内通过您的银行或支付应用确认付款，以完成购买。</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">移除尾号为 %s 的银行账户</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Shop Pay 按钮</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">显示菜单</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">退出 Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">退出 %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">加入 Link</string>
   <!-- Title for the Link signup screen -->

@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Label for a button that lets the user skip address autocomplete and type their address manually -->
+  <string name="stripe_address_enter_manually">Įveskite adresą rankiniu būdu</string>
+  <!-- Content description for Google Maps logo in address predictions -->
+  <string name="stripe_address_google_maps">„Google Maps“</string>
   <!-- Caption for Address field on address form -->
   <string name="stripe_address_label_address">Adresas</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
@@ -44,6 +48,8 @@
   <string name="stripe_address_postal_code_invalid">Jūsų pašto kodas yra netinkamas.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Paieška</string>
+  <!-- Label shown before the Google Maps logo in inline address predictions -->
+  <string name="stripe_address_suggestions">Pasiūlymus teikia</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->
   <string name="stripe_address_zip_invalid">Jūsų pašto kodas yra netinkamas.</string>
   <!-- Error text indicating the zip/postal code is invalid, used for addresses of unknown country -->

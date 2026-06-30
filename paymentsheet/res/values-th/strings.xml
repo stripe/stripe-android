@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">ยืนยันข้อมูลของคุณ</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">เลข 4 หลักสุดท้ายของ SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">เข้าสู่ระบบหรือลงทะเบียน</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">ยอมรับและดำเนินการต่อ</string>
   <!-- Title for the Link signup screen -->
@@ -259,8 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">ตั้งเป็นวิธีการชำระเงินเริ่มต้น</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">ลบบัญชีธนาคารที่ลงท้ายด้วย %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">ปุ่ม Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">แสดงเมนู</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">ออกจากระบบ Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">ออกจากระบบ %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">สมัครใช้ Link</string>
   <!-- Title for the Link signup screen -->

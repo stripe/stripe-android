@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Potrdite svoje podatke</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Zadnje 4 števke SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Vpišite se ali se prijavite</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Strinjam se in nadaljuj</string>
   <!-- Title for the Link signup screen -->
@@ -261,8 +263,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_qrcode_lpm_confirm_payment">Za dokončanje nakupa potrdite plačilo v svoji banki ali aplikaciji za plačevanje v roku %s.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Odstranite bančni račun, ki se konča s števkami %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Gumb Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Pokaži meni</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Odjavite se iz Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Odjavite se iz %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Pridružite se storitvi Link</string>
   <!-- Title for the Link signup screen -->

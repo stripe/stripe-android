@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Salvează detaliile de plată în %s pentru achiziții viitoare</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Scanare card</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Ștergeți cardul scanat</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Prin furnizarea informațiilor dvs. privind plata și confirmarea acestei plăți, autorizați (A) %s și Stripe, furnizorul nostru de servicii de plată, să trimită instrucțiuni băncii dvs. pentru a vă debita contul și pentru ca (B) banca dvs. să facă acest lucru în conformitate cu instrucțiunile respective. Conform drepturilor dvs., aveți dreptul la o rambursare din partea băncii dvs. în conformitate cu termenii și condițiile acordului dvs. cu aceasta. O rambursare trebuie revendicată în termen de opt săptămâni de la data debitării contului. Drepturile dvs. sunt explicate într-o declarație pe care o puteți obține de la bancă. Sunteți de acord să primiți notificări pentru debitări viitoare cu până la două zile înainte de efectuarea acestora.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

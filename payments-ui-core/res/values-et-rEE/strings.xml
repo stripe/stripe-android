@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Salvesta makseandmed %s tulevaste ostude jaoks</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skanni kaart</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Eemalda skannitud kaart</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Makseteabe esitamise ja käesoleva makse kinnitamisega volitatate (A) ettevõtet %s ja Stripe\'i, meie makseteenuse osutajat, saatma teie panka juhiseid teie konto debiteerimiseks ning (B) oma panka nende juhiste alusel teie kontot debiteerima. Vastavalt teie õigustele, pangaga sõlmitud lepingule ja panga üldtingimustele on teil õigus saada pangalt tagasimakset. Tagasimakse taotlus tuleb esitada 8 nädala jooksul alates teie konto debiteerimise kuupäevast. Teie õigusi selgitatakse avalduses, mille saate oma pangast. Nõustute saama teavitusi tulevaste debiteerimiste kohta kaks päeva enne nende toimumist.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

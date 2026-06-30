@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Xác nhận thông tin của bạn</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 chữ số cuối của SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Đăng nhập hoặc đăng ký</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Đồng ý và tiếp tục</string>
   <!-- Title for the Link signup screen -->
@@ -259,8 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">Đặt làm phương thức thanh toán mặc định</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Gỡ bỏ tài khoản ngân hàng có đuôi là %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Nút Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Hiển thị trình đơn</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Đăng xuất khỏi Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Đăng xuất khỏi %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Tham gia Link</string>
   <!-- Title for the Link signup screen -->

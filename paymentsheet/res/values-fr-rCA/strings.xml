@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Confirmez vos informations</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 derniers chiffres du numéro de sécurité sociale</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Connectez-vous ou inscrivez-vous</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Accepter et continuer</string>
   <!-- Title for the Link signup screen -->
@@ -261,8 +263,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_qrcode_lpm_confirm_payment">Veuillez confirmer le paiement dans votre application bancaire ou de paiement sous %s pour effectuer l’achat.</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Supprimer le compte bancaire se terminant par %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Bouton Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Afficher le menu</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Déconnectez-vous de Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Déconnectez-vous de %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Rejoindre Link</string>
   <!-- Title for the Link signup screen -->

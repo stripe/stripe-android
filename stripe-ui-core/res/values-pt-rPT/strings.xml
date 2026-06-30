@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- Label for a button that lets the user skip address autocomplete and type their address manually -->
+  <string name="stripe_address_enter_manually">Introduzir endereço manualmente</string>
+  <!-- Content description for Google Maps logo in address predictions -->
+  <string name="stripe_address_google_maps">Google Maps</string>
   <!-- Caption for Address field on address form -->
   <string name="stripe_address_label_address">Endereço</string>
   <!-- Label for input requesting address line 2, used for international addresses -->
@@ -46,6 +50,8 @@
   <string name="stripe_address_postal_code_invalid">O seu código postal é inválido.</string>
   <!-- Title of a button with a 🔍 (magnifying glass) icon that starts a search when tapped -->
   <string name="stripe_address_search_content_description">Pesquisar</string>
+  <!-- Label shown before the Google Maps logo in inline address predictions -->
+  <string name="stripe_address_suggestions">Sugestões fornecidas por</string>
   <!-- Error message for when ZIP code in form is incomplete (US only) -->
   <string name="stripe_address_zip_incomplete">O seu código postal está incompleto.</string>
   <!-- Error text indicating zip code is invalid, used for US addresses -->

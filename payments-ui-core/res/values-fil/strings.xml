@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">I-save ang mga detalye ng pababayad sa %s para sa mga pagbili sa hinaharap</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">I-scan ang kard</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">I-clear ang na-scan na card</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Sa pagbibigay ng iyong impormasyon ng pagbabayad at pagkukupirma sa bayad na ito, pinapayagan mo ang (A) %s at ang Stripe, ang ating payment service provider, na magpadala ng mga tagubilin sa iyong bangko para i-debit ang iyong account at (B) ang iyong bangko na i-debit ang iyong account ayon sa mga naturang tuntunin. Bilang bahagi ng iyong mga karapatan, maaari kang makakuha ng refund mula sa iyong bangko sa ilalim ng mga takda at kundisyon ng iyong kasunduan sa iyong bangko. Ang refund ay dapat hingin sa loob ng 8 linggo mula sa petsa na na-debit ang iyong account. Ang iyong mga karapatan ay naipaliwanag sa isang pahayag na maari mong makuha sa iyong bangko. Pumapayag ka na makatanggap ng mga abiso ukol sa mga debit sa hinaharap ng hanggang 2 na araw bago sila maganap.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
