@@ -1,5 +1,7 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -10,6 +12,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
@@ -222,6 +225,8 @@ internal class EmbeddedNavigator private constructor(
         class PaymentOptions(
             private val interactor: PaymentMethodVerticalLayoutInteractor,
             private val isLiveMode: Boolean,
+            private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val onContinueClick: () -> Unit,
         ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarState(
@@ -242,8 +247,15 @@ internal class EmbeddedNavigator private constructor(
             override fun Content() {
                 PaymentMethodVerticalLayoutUI(
                     interactor = interactor,
-                    modifier= Modifier.padding(StripeTheme.getOuterFormInsets()),
+                    modifier = Modifier.padding(StripeTheme.getOuterFormInsets()),
                 )
+                Spacer(Modifier.height(40.dp))
+                val state by sheetActivityState.collectAsState()
+                FormActivityPrimaryButton(
+                    state = state,
+                    onClick = onContinueClick,
+                )
+                PaymentSheetContentPadding()
             }
         }
     }
