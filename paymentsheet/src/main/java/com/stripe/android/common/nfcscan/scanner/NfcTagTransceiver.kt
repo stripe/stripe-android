@@ -1,7 +1,6 @@
 package com.stripe.android.common.nfcscan.scanner
 
 import android.nfc.Tag
-import android.nfc.tech.IsoDep
 import java.io.IOException
 import javax.inject.Inject
 import kotlin.jvm.Throws
@@ -21,31 +20,22 @@ internal interface NfcTagTransceiver {
     }
 }
 
-internal class IsoNfcTagTransceiver(
-    private val isoDep: IsoDep,
-) : NfcTagTransceiver {
+internal class IsoNfcTagTransceiver : NfcTagTransceiver {
     override fun open() {
-        isoDep.timeout = TIMEOUT_MS
-        isoDep.connect()
+        // Do nothing
     }
 
     override fun transceive(data: ByteArray): ByteArray {
-        return isoDep.transceive(data)
+        return ByteArray(0x00)
     }
 
     override fun close() {
-        isoDep.close()
+        // Do nothing
     }
 
     class Factory @Inject constructor() : NfcTagTransceiver.Factory {
         override fun create(tag: Tag): NfcTagTransceiver? {
-            return IsoDep.get(tag)?.let {
-                IsoNfcTagTransceiver(it)
-            }
+            return null
         }
-    }
-
-    private companion object {
-        const val TIMEOUT_MS = 5000
     }
 }
