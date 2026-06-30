@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
-import com.stripe.android.checkout.CheckoutConfirmationBlockedException
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
@@ -133,7 +132,11 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     }
                 )
             }
-        } catch (e: CheckoutConfirmationBlockedException) {
+        } catch (e: IllegalStateException) {
+            // withConfirmation throws when the queue precondition fails (a payment flow is
+            // presented, or a mutation/confirmation is already in flight). Repository/confirm
+            // failures arrive as Result.failure and are mapped to Payment above, so they do not
+            // reach here.
             ConfirmationDefinition.Action.Fail(
                 cause = e,
                 message = e.stripeErrorMessage(),
