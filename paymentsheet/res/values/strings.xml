@@ -303,6 +303,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_card_added_title">Card added</string>
   <!-- Button label for a button that launches a flow for tapping a card on the device -->
   <string name="stripe_tap_to_add_card_button_label">Tap to add</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind phone</string>
   <!-- Error message shown in Tap to Add when the card the user tapped was declined. -->
   <string name="stripe_tap_to_add_card_declined_error_title">Card declined</string>
   <!-- Error message shown to the user to try tapping their card again as their next action. -->
