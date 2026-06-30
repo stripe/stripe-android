@@ -37,7 +37,9 @@ class StripeConnectRedirectActivity : Activity() {
             //  - intent flags FLAG_ACTIVITY_SINGLE_TOP and FLAG_ACTIVITY_CLEAR_TOP
             // With the task cleared, the activity finishes in `onNewIntent()`
             try {
-                val customTabsIntent = CustomTabsIntent.Builder().build()
+                val customTabsIntent = CustomTabsIntent.Builder()
+                        .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+                        .build()
                 CustomTabsClient.getPackageName(this, null)?.let { browserPackage ->
                     customTabsIntent.intent.setPackage(browserPackage)
                 }
