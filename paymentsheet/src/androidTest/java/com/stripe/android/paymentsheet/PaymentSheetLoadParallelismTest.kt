@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +41,11 @@ internal class PaymentSheetLoadParallelismTest {
 
     companion object {
         private const val REQUEST_TIMEOUT_SECONDS = 10L
+    }
+
+    @After
+    fun releaseRequests() {
+        requestTracker.releaseAll()
     }
 
     @Test
@@ -165,24 +171,20 @@ internal class PaymentSheetLoadParallelismTest {
             linkEnabled = linkEnabled,
         )
 
-        try {
-            testContext.presentPaymentSheet {
-                presentWithPaymentIntent(
-                    paymentIntentClientSecret = "pi_example_secret_example",
-                    configuration = buildConfiguration(
-                        customerType = customerType,
-                        defaultEmail = defaultEmail,
-                    ),
-                )
-            }
-
-            assertRequestOrdering(expectedRequestOrdering)
-            page.waitForCardForm()
-
-            testContext.markTestSucceeded()
-        } finally {
-            requestTracker.releaseAll()
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = buildConfiguration(
+                    customerType = customerType,
+                    defaultEmail = defaultEmail,
+                ),
+            )
         }
+
+        assertParallelismForConfig(expectedRequestOrdering)
+        page.waitForCardForm()
+
+        testContext.markTestSucceeded()
     }
 
     private fun enqueueLoadResponses(
@@ -345,7 +347,7 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun assertRequestOrdering(
+    private fun assertParallelismForConfig(
         requestOrdering: RequestOrdering,
     ) {
         when (requestOrdering) {
@@ -368,7 +370,7 @@ internal class PaymentSheetLoadParallelismTest {
         requestOrdering: RequestOrdering.Sequential,
     ) {
         requestOrdering.requests.forEach { nestedRequestOrdering ->
-            assertRequestOrdering(nestedRequestOrdering)
+            assertParallelismForConfig(nestedRequestOrdering)
         }
     }
 
@@ -455,7 +457,6 @@ internal class PaymentSheetLoadParallelismTest {
             awaitWithTimeout(
                 latch = state(request).started,
                 description = "request '$request' to start",
-                timeoutSeconds = REQUEST_TIMEOUT_SECONDS,
             )
         }
 
@@ -474,7 +475,6 @@ internal class PaymentSheetLoadParallelismTest {
             awaitWithTimeout(
                 latch = state(request).finished,
                 description = "request '$request' to finish",
-                timeoutSeconds = REQUEST_TIMEOUT_SECONDS,
             )
         }
 
@@ -527,12 +527,11 @@ internal class PaymentSheetLoadParallelismTest {
         private fun awaitWithTimeout(
             latch: CountDownLatch,
             description: String,
-            timeoutSeconds: Long,
         ) {
             awaitUntil(
                 latch = latch,
                 description = description,
-                deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(timeoutSeconds),
+                deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(REQUEST_TIMEOUT_SECONDS),
             )
         }
 
