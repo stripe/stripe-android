@@ -1111,10 +1111,12 @@ class CheckoutTest {
     ) {
         checkout.markIntegrationLaunched()
 
+        var blockRan = false
         val error = runCatching {
-            checkout.withConfirmation { error("block should not run when a payment flow is presented") }
+            checkout.withConfirmation { blockRan = true }
         }.exceptionOrNull()
 
+        assertThat(blockRan).isFalse()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
         assertThat(error).hasMessageThat()
             .isEqualTo("Cannot confirm checkout session while a payment flow is presented.")
@@ -1134,10 +1136,12 @@ class CheckoutTest {
         val mutationJob = async { checkout.applyPromotionCode("10OFF") }
         testScheduler.advanceUntilIdle()
 
+        var blockRan = false
         val error = runCatching {
-            checkout.withConfirmation { error("block should not run when a mutation is in flight") }
+            checkout.withConfirmation { blockRan = true }
         }.exceptionOrNull()
 
+        assertThat(blockRan).isFalse()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
         assertThat(error).hasMessageThat()
             .isEqualTo("Cannot confirm while a checkout session mutation is in flight.")
@@ -1156,10 +1160,12 @@ class CheckoutTest {
         }
         testScheduler.advanceUntilIdle()
 
+        var secondBlockRan = false
         val error = runCatching {
-            checkout.withConfirmation { error("second confirmation should not run") }
+            checkout.withConfirmation { secondBlockRan = true }
         }.exceptionOrNull()
 
+        assertThat(secondBlockRan).isFalse()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
         assertThat(error).hasMessageThat()
             .isEqualTo("Cannot confirm while a checkout session mutation is in flight.")
