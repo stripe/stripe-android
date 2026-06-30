@@ -436,7 +436,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
         assertThat(failAction.cause.message)
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+            .isEqualTo("Cannot confirm while a checkout session mutation is in flight.")
         assertThat(failAction.errorType)
             .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
 
@@ -470,7 +470,7 @@ class CheckoutSessionConfirmationInterceptorTest {
         val failAction = result as ConfirmationDefinition.Action.Fail
         assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
         assertThat(failAction.cause.message)
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
+            .isEqualTo("Cannot confirm while a checkout session mutation is in flight.")
         assertThat(failAction.errorType)
             .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
 

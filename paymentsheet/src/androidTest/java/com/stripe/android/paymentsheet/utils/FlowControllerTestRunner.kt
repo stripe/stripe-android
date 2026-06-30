@@ -1,9 +1,13 @@
 package com.stripe.android.paymentsheet.utils
 
+import android.app.Activity
+import android.app.Application
+import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.remember
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -37,6 +41,44 @@ internal class FlowControllerTestRunnerContext(
             flowController.block()
         }
         activityLaunchObserver.awaitLaunch()
+    }
+
+    /**
+     * Starts observing the destruction of [PaymentOptionsActivity], returning a handle whose
+     * [PaymentOptionsActivityDestroyHandle.await] blocks until it is destroyed.
+     *
+     * Call this BEFORE the action that dismisses the options sheet (e.g. clicking the primary
+     * button), then [PaymentOptionsActivityDestroyHandle.await] before
+     * [PaymentSheet.FlowController.confirm]. This makes the confirm run after the sheet is gone —
+     * mirroring real usage, where the merchant confirms as a separate action once the options
+     * sheet has been dismissed. Registering after the dismissal could miss the destroy event.
+     */
+    fun observePaymentOptionsActivityDestroyed(): PaymentOptionsActivityDestroyHandle {
+        val destroyed = CountDownLatch(1)
+        val application = ApplicationProvider.getApplicationContext<Application>()
+        val callbacks = object : Application.ActivityLifecycleCallbacks {
+            override fun onActivityDestroyed(activity: Activity) {
+                if (activity is PaymentOptionsActivity) {
+                    destroyed.countDown()
+                    application.unregisterActivityLifecycleCallbacks(this)
+                }
+            }
+
+            override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+            override fun onActivityStarted(activity: Activity) = Unit
+            override fun onActivityResumed(activity: Activity) = Unit
+            override fun onActivityPaused(activity: Activity) = Unit
+            override fun onActivityStopped(activity: Activity) = Unit
+            override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+        }
+        application.registerActivityLifecycleCallbacks(callbacks)
+        return PaymentOptionsActivityDestroyHandle(destroyed)
+    }
+
+    internal class PaymentOptionsActivityDestroyHandle(private val destroyed: CountDownLatch) {
+        fun await() {
+            assertThat(destroyed.await(5, TimeUnit.SECONDS)).isTrue()
+        }
     }
 
     suspend fun consumePaymentOptionEventForFlowController(paymentMethodType: String, label: String) {
