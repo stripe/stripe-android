@@ -22,7 +22,7 @@ tags:
     id: "consent_cta"
 # Select Down institution
 - extendedWaitUntil:
-    visible: "Select bank"
+    visible: "Search"
     timeout: 30000
 - scrollUntilVisible:
     element:
@@ -34,9 +34,13 @@ tags:
     visible: "Select another bank"
     timeout: 30000
 - tapOn: "Select another bank"
-# Assert flow correctly returns to institution picker
+# The picker may reopen at the top of the list or stay near the prior position.
 - extendedWaitUntil:
-    visible: "Down (Unscheduled)"
+    visible: "Search"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      text: "Down (Unscheduled)"
     timeout: 30000
 - tapOn: "Down (Unscheduled)"
 # Close flow from error page
