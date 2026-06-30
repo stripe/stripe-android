@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import com.stripe.android.checkout.CheckoutConfirmationBlockedException
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
@@ -132,7 +133,7 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                     }
                 )
             }
-        } catch (e: IllegalStateException) {
+        } catch (e: CheckoutConfirmationBlockedException) {
             ConfirmationDefinition.Action.Fail(
                 cause = e,
                 message = e.stripeErrorMessage(),

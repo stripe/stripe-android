@@ -18,9 +18,9 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancelAndJoin
@@ -1103,6 +1103,21 @@ class CheckoutTest {
         // Positive: once confirmation releases the queue, the mutation runs.
         val result = mutationJob.await()
         assertThat(result.isSuccess).isTrue()
+    }
+
+    @Test
+    fun `withConfirmation fails when integrationLaunched is true`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        checkout.markIntegrationLaunched()
+
+        val error = runCatching {
+            checkout.withConfirmation { error("block should not run when a payment flow is presented") }
+        }.exceptionOrNull()
+
+        assertThat(error).isInstanceOf(IllegalStateException::class.java)
+        assertThat(error).hasMessageThat()
+            .isEqualTo("Cannot confirm checkout session while a payment flow is presented.")
     }
 
     @Test

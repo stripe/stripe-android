@@ -585,14 +585,27 @@ class Checkout private constructor(
      * Runs a confirmation [block] while holding the mutation queue, so that any mutations
      * triggered during confirmation are serialized behind it instead of running concurrently.
      *
-     * Fails fast with [IllegalStateException] if a mutation (or another confirmation) is already
-     * in flight: a confirmation may only be enqueued when the queue is empty.
+     * Fails fast with [CheckoutConfirmationBlockedException] if a payment flow is presented, or
+     * if a mutation (or another confirmation) is already in flight: a confirmation may only be
+     * enqueued when the queue is empty.
      */
     internal suspend fun <T> withConfirmation(
         block: suspend () -> T,
     ): T {
+        // Confirmation is blocked while a payment flow is presented, just like mutations
+        // (see withInternalState). Omitting this guard would allow a confirm to run on top of
+        // a presented sheet.
+        if (internalState.integrationLaunched) {
+            throw CheckoutConfirmationBlockedException(
+                "Cannot confirm checkout session while a payment flow is presented."
+            )
+        }
+        // A confirmation may only be enqueued when the queue is empty. tryLock atomically
+        // checks-and-acquires, so there is no check-then-acquire race. Unlike mutations a
+        // confirmation never waits for the lock (it fails fast instead), so it is always the
+        // 0 -> 1 transition and we increment the pending counter only after acquiring.
         if (!mutex.tryLock()) {
-            throw IllegalStateException(
+            throw CheckoutConfirmationBlockedException(
                 "Cannot confirm while a checkout session mutation is in flight."
             )
         }
@@ -694,3 +707,11 @@ class Checkout private constructor(
         }
     }
 }
+
+/**
+ * Thrown by [Checkout.withConfirmation] when a confirmation cannot be enqueued: either a payment
+ * flow is presented, or a mutation/confirmation is already in flight. Distinct from other
+ * [IllegalStateException]s so callers can map only the queue-precondition failure without
+ * miscategorizing exceptions thrown from inside the confirmation itself.
+ */
+internal class CheckoutConfirmationBlockedException(message: String) : IllegalStateException(message)
