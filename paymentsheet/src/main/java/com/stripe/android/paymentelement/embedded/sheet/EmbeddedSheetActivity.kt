@@ -131,7 +131,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                         when (args?.launchMode) {
                             is EmbeddedLaunchMode.Form -> dismissAndFinish()
                             is EmbeddedLaunchMode.PaymentOptions -> {
-                                setPaymentOptionsResult()
+                                setCancelledPaymentOptionsResult()
                                 finish()
                             }
                             is EmbeddedLaunchMode.Manage, null -> {
@@ -223,7 +223,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 setManageResult(shouldInvokeSelectionCallback = false)
             }
             EmbeddedLaunchMode.PaymentOptions -> {
-                setPaymentOptionsResult()
+                setCancelledPaymentOptionsResult()
             }
         }
         finish()
@@ -243,13 +243,10 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         )
     }
 
-    private fun setPaymentOptionsResult() {
+    private fun setCancelledPaymentOptionsResult() {
         setActivityResult(
-            EmbeddedActivityResult.Complete(
-                selection = selectionHolder.selection.value,
-                hasBeenConfirmed = false,
+            EmbeddedActivityResult.Cancelled(
                 customerState = customerStateHolder.customer.value,
-                shouldInvokeSelectionCallback = false,
                 launchMode = EmbeddedLaunchMode.PaymentOptions,
             )
         )
