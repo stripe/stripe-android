@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
-import java.io.IOException
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
@@ -47,15 +46,7 @@ internal class DefaultNfcCardScanner @Inject constructor(
             viewModelScope.launch(workContext) {
                 _state.emit(NfcCardScanner.State.Scanning)
 
-                try {
-                    transceiver.open()
-                } catch (e: SecurityException) {
-                    _state.emit(NfcCardScanner.State.Failed(e))
-                    return@launch
-                } catch (e: IOException) {
-                    _state.emit(NfcCardScanner.State.Failed(e))
-                    return@launch
-                }
+                transceiver.open()
 
                 cardReader.readCard(transceiver).fold(
                     onSuccess = { cardData ->
@@ -66,13 +57,7 @@ internal class DefaultNfcCardScanner @Inject constructor(
                     },
                 )
 
-                try {
-                    transceiver.close()
-                } catch (_: SecurityException) {
-                    // ignore close failures
-                } catch (_: IOException) {
-                    // ignore close failures
-                }
+                transceiver.close()
             }
         }
     }
