@@ -16,10 +16,10 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -159,7 +159,7 @@ internal class EmbeddedNavigator private constructor(
         }
 
         class Form @Inject constructor(
-            private val formInteractor: DefaultVerticalModeFormInteractor,
+            private val formInteractor: VerticalModeFormInteractor,
             private val eventReporter: EventReporter,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
