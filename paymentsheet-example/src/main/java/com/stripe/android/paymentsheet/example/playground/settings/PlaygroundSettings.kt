@@ -9,6 +9,7 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeClient
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
@@ -179,6 +180,7 @@ internal class PlaygroundSettings private constructor(
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, embeddedConfigurationData)
             }
+            builder.stripeClient(StripeClient("pk_123"))
             return builder.build()
         }
 

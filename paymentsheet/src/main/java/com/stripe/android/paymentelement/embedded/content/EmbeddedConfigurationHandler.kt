@@ -112,6 +112,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         return coalescingOrchestrator.get()
     }
 
+    // TODO: Include stripeClient in cache key once StripeClient is threaded through to Arguments
     @Parcelize
     data class Arguments(
         val initializationMode: PaymentElementLoader.InitializationMode,

@@ -28,6 +28,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.StripeClient
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent

@@ -16,6 +16,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.StripeClient
+import com.stripe.android.payments.core.injection.StripeClientHolder
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutConfigurationMerger
 import com.stripe.android.checkout.CheckoutInstances
@@ -59,6 +61,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
     stateHelper: EmbeddedStateHelper,
+    private val stripeClientHolder: StripeClientHolder,
 ) {
 
     /**
@@ -85,6 +88,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
+        stripeClientHolder.stripeClient = configuration.stripeClient
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         return configurationCoordinator.configure(configuration, initializationMode)
     }
@@ -101,7 +105,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
     suspend fun configure(
         checkout: Checkout,
         configuration: Configuration,
+        stripeClient: StripeClient? = null,
     ): ConfigureResult {
+        stripeClientHolder.stripeClient = stripeClient
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         return configurationCoordinator.configure(
             configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
@@ -305,6 +311,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val stripeClient: StripeClient? = null
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -342,6 +349,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var stripeClient: StripeClient? = null
+
+            fun stripeClient(stripeClient: StripeClient?) = apply { this.stripeClient = stripeClient }
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -602,6 +612,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                stripeClient = stripeClient
             )
         }
 
