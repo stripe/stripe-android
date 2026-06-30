@@ -582,8 +582,8 @@ class Checkout private constructor(
     }
 
     /**
-     * Runs a confirmation [block] while holding the mutation queue, so that any mutations
-     * triggered during confirmation are serialized behind it instead of running concurrently.
+     * Runs a confirmation [block] while holding the mutation queue. A mutation triggered during
+     * confirmation waits until the confirmation completes, so the two never overlap.
      *
      * Fails fast with [CheckoutConfirmationBlockedException] if a payment flow is presented, or
      * if a mutation (or another confirmation) is already in flight: a confirmation may only be

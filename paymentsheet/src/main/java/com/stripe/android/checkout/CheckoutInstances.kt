@@ -35,6 +35,12 @@ internal object CheckoutInstances {
         return if (checkout != null) {
             checkout.withConfirmation(block)
         } else {
+            // No live instance for this key. Instances are held by WeakReference, and an
+            // in-flight mutation keeps its Checkout strongly reachable (it is the receiver of
+            // the suspending mutation call), so a missing instance means no mutation can be in
+            // flight. There is therefore nothing to serialize against, and running the
+            // confirmation directly is safe — and avoids failing a legitimate payment just
+            // because the merchant's Checkout reference was garbage collected.
             block()
         }
     }
