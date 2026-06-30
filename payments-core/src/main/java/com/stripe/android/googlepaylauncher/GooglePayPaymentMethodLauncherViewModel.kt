@@ -129,7 +129,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
     }
 
     suspend fun loadPaymentData(): Task<PaymentData> {
-        check(isReadyToPay()) {
+        check(args.config.environment == GooglePayEnvironment.Test || isReadyToPay()) {
             "Google Pay is unavailable."
         }
         return paymentsClient.loadPaymentData(

@@ -36,7 +36,7 @@ class DefaultGooglePayRepositoryFactory @Inject constructor(
             appContext,
             environment,
             GooglePayJsonFactory.BillingAddressParameters(),
-            existingPaymentMethodRequired = true,
+            existingPaymentMethodRequired = environment == GooglePayEnvironment.Production,
             allowCreditCards = true,
             errorReporter = errorReporter,
             logger = logger,
