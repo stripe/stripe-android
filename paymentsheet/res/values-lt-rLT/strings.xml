@@ -32,7 +32,6 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_inline_sign_up_header_default_opt_in_with_brand">Įrašyti informaciją, kad būtų galima greičiau atsiskaityti su %s</string>
   <!-- Label for a checkbox that when checked allows the payment information
 to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_toggle">Sukurkite paskyrą naudodami „Link”, kad galėtumėte greičiau atsiskaityti žiniatinklyje</string>
   <string name="stripe_inline_sign_up_toggle_with_brand">Sukurkite %s paskyrą, kad galėtumėte greičiau atlikti užsakymą visame tinkle</string>
   <!-- Label a credit funding source. E.g. in english 'Visa Credit', or in german 'Visa-Kreditkarte' -->
   <string name="stripe_link_card_type_credit">„%1$s“ kredito</string>
@@ -75,7 +74,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Label describing the benefit of signing up for Link. -->
   <string name="stripe_link_sign_up_message">Išsaugokite savo mokėjimų informaciją naudodami \"Link\" ir saugiai atsiskaitykite vienu spustelėjimu \"Link\" palaikomose svetainėse.</string>
   <!-- Subtitle for the Link signup screen -->
-  <string name="stripe_link_sign_up_message_v2">Mokėkite greičiau visur, kur priimama „Link“.</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_link_sign_up_message_v2_with_brand">Mokėti greičiau visur, kur priimama %s.</string>
   <!-- Legal text shown when creating a Link account. -->
@@ -153,7 +151,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v2"><![CDATA[Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkimams naudojant %s ir <link>„Link“</link> (žr. <terms>Sąlygos</terms> ir <privacy>Privatumo politika</privacy>).]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[Tęsdami sutinkate išsaugoti savo informaciją būsimiems pirkimams naudojant %s ir <link>„Link“</link> pagal „Link“ <terms>Sąlygas</terms> ir <privacy>Privatumo politiką</privacy>.]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[Tęsdami sutinkate, kad laikantis %2$s <terms>sąlygų</terms> ir <privacy>privatumo politikos</privacy> jūsų duomenys būtų išsaugoti būsimų pirkimų su %1$s ir <link>%2$s</link> svetainėse tikslais.]]></string>
   <!-- Error message displayed when updating a card fails. -->
