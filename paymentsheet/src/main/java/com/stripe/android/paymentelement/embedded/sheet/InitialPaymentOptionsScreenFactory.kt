@@ -39,12 +39,25 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val updateScreenInteractorFactory: EmbeddedUpdateScreenInteractorFactory,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val sheetActivityStateHolder: SheetActivityStateHolder,
+    private val formScreenFactory: EmbeddedFormScreenFactory,
 ) {
     fun createInitialScreen(): EmbeddedNavigator.Screen.PaymentOptions {
         val interactor = createInteractor()
         return EmbeddedNavigator.Screen.PaymentOptions(
             interactor = interactor,
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
+            sheetActivityState = sheetActivityStateHolder.state,
+            onContinueClick = {
+                sheetActivityStateHolder.setResult(
+                    EmbeddedActivityResult.Complete(
+                        selection = selectionHolder.selection.value,
+                        hasBeenConfirmed = false,
+                        customerState = customerStateHolder.customer.value,
+                        shouldInvokeSelectionCallback = false,
+                        launchMode = EmbeddedLaunchMode.PaymentOptions,
+                    )
+                )
+            },
         )
     }
 
@@ -71,13 +84,8 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             transitionToManageScreen = ::navigateToManageScreen,
             transitionToFormScreen = { code ->
-                sheetActivityStateHolder.setResult(
-                    EmbeddedActivityResult.FormRequested(
-                        code = code,
-                        customerState = customerStateHolder.customer.value,
-                        launchMode = EmbeddedLaunchMode.PaymentOptions,
-                    )
-                )
+                val formScreen = formScreenFactory.createFormScreen(code)
+                embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.GoToScreen(formScreen))
             },
             paymentMethods = customerStateHolder.paymentMethods,
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
@@ -101,17 +109,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             shouldUpdateVerticalModeSelection = { paymentMethodCode ->
                 shouldUpdateSelection(formHelper, paymentMethodCode)
             },
-            invokeRowSelectionCallback = {
-                sheetActivityStateHolder.setResult(
-                    EmbeddedActivityResult.Complete(
-                        selection = selectionHolder.selection.value,
-                        hasBeenConfirmed = false,
-                        customerState = customerStateHolder.customer.value,
-                        shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.PaymentOptions,
-                    )
-                )
-            },
+            invokeRowSelectionCallback = null,
             displaysMandatesInFormScreen = false,
             onInitiallyDisplayedPaymentMethodVisibilitySnapshot = { visiblePaymentMethods, hiddenPaymentMethods ->
                 eventReporter.onInitiallyDisplayedPaymentMethodVisibilitySnapshot(

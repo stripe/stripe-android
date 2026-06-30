@@ -25,6 +25,8 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
+import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
+import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
@@ -70,6 +72,11 @@ internal interface EmbeddedActivityModule {
     fun bindsEmbeddedUpdateScreenInteractorFactory(
         factory: DefaultEmbeddedUpdateScreenInteractorFactory
     ): EmbeddedUpdateScreenInteractorFactory
+
+    @Binds
+    fun bindsEmbeddedFormScreenFactory(
+        factory: DefaultEmbeddedFormScreenFactory
+    ): EmbeddedFormScreenFactory
 
     @Binds
     fun bindsCardAccountRangeRepositoryFactory(

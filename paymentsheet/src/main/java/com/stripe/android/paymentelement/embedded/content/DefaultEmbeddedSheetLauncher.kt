@@ -139,6 +139,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
                 selectionHolder.set(result.selection)
+                if (result.hasBeenConfirmed) {
+                    embeddedResultCallbackHelper.setResult(
+                        EmbeddedPaymentElement.Result.Completed()
+                    )
+                }
             }
             is EmbeddedActivityResult.FormRequested -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
