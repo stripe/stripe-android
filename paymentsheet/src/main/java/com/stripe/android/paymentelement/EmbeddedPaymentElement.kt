@@ -87,9 +87,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
     suspend fun configure(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
-        stripeClient: StripeClient? = null,
     ): ConfigureResult {
-        stripeClientHolder.stripeClient = stripeClient
+        stripeClientHolder.stripeClient = configuration.stripeClient
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         return configurationCoordinator.configure(configuration, initializationMode)
     }
@@ -312,6 +311,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val stripeClient: StripeClient? = null
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -349,6 +349,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var stripeClient: StripeClient? = null
+
+            fun stripeClient(stripeClient: StripeClient?) = apply { this.stripeClient = stripeClient }
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -609,6 +612,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                stripeClient = stripeClient
             )
         }
 
