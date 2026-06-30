@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">귀하의 정보 확인</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN의 마지막 4자리</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">로그인 또는 등록</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">동의하고 계속</string>
   <!-- Title for the Link signup screen -->
@@ -259,8 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">기본 결제 방식으로 설정</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">%s(으)로 끝나는 은행 계좌 제거</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Shop Pay 버튼</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">메뉴 표시</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Link에서 로그아웃</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">%s에서 로그아웃</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Link 가입</string>
   <!-- Title for the Link signup screen -->

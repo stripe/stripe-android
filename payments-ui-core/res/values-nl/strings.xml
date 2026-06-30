@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Betaalgegevens opslaan naar %s voor toekomstige aankopen</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Betaalkaart scannen</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Wis gescande betaalkaart</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Door je betaalgegevens op te geven en deze betaling te bevestigen geef je toestemming aan (A) %s en Stripe, onze betaaldienstverlener, een opdracht te sturen aan je bank om je rekening te debiteren en aan (B) je bank om je rekening te debiteren conform deze opdracht. Je hebt het recht op terugbetaling door je bank conform de met je bank overeengekomen voorwaarden. Een verzoek tot terugbetaling moet worden ingediend binnen 8 weken vanaf de datum waarop je rekening is gedebiteerd. Je rechten worden uitgelegd in een verklaring die je kunt opvragen bij je bank. Je stemt ermee in dat je minstens 2 dagen voor de uitvoering van toekomstige debiteringen hierover op de hoogte wordt gesteld.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

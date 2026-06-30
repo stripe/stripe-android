@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Erfa\' d-dettalji tal-pagamenti f\'%s għax-xirjiet tal-ġejjieni</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skennja l-karta</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Ħassar il-karta skennjata</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Meta tagħti l-informazzjoni tal-pagament tiegħek u tikkonferma dan il-pagament, tkun qed tawtorizza lil (A) %s u lil Stripe, l-operatur tas-servizz tal-pagamenti tagħna, biex jibagħtu struzzjonijiet lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek u (B) lill-bank tiegħek biex jieħu l-fondi mill-kont tiegħek skont dawn l-istruzzjonijiet. Bħala parti mid-drittijiet tiegħek, inti għandek dritt għall-ħlas lura mill-bank tiegħek skont ir-regoli u l-kundizzjonijiet tal-ftehim tiegħek mal-bank tiegħek. Ħlas lura għandu jintalab fi żmien 8 ġimgħat, li jibdew jgħoddu mid-data li fiha l-fondi jittieħdu mill-kont tiegħek. Il-jeddijiet tiegħek imfissra fi stqarrija li tista\' tikseb mingħand il-bank tiegħek. Int taqbel li, sa jumejn qabel, tikseb tagħrif kull darba li l-fondi jkunu se jittieħdu mill-kont tiegħek.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

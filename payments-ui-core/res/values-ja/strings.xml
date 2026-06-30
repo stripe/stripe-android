@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">今後の購入のために %s に決済情報を保存する</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">カードをスキャン</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">スキャンしたカードをクリア</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">支払い情報を提供し、この支払いを確定することで、お客様は (A) %s および決済サービスプロバイダーである Stripe がお客様の銀行に口座引き落としの指図を送り、(B) 銀行がこの指図に従ってお客様の口座から引き落としを行うことを承認することになります。お客様の権利の一部として、銀行との契約条件に基づき、お客様は銀行からの返金を受ける権利を有します。返金は口座の引き落とし日から 8 週間以内に請求する必要があります。お客様の権利は、銀行から得られる明細書内で説明されています。お客様は今後の引き落としに関する通知を引き落としの実行日の 2 日前までに受け取ることに同意するものとします。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

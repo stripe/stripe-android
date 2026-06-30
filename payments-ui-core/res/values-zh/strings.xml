@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">将支付详情保存到 %s 以备将来购物时使用</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">扫描卡</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">清除已扫描的卡片</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">提供您的支付方式并确认该付款即表示您授权 (A) %s 与我们的支付服务商 Stripe 向您的银行发送对您的账户进行扣款的指令以及 (B) 您的银行按照这些指令对您的账户进行扣款。根据您与您的银行协议的条款和条件，您有权从您的银行得到退款。退款必须在 8 周内申请，从您的账户被扣款之日起算。您的权利在对账单上有解释，可从您的银行获取。您同意提前 2 天接收后续扣款的通知。</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

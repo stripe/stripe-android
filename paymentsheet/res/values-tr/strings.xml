@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Bilgilerinizi onaylayın</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN\'nin son 4 hanesi</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Oturum açın veya kaydolun</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Kabul et ve devam et</string>
   <!-- Title for the Link signup screen -->
@@ -259,8 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">Varsayılan ödeme yöntemi olarak ayarla</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">%s ile biten banka hesabını kaldır</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Mağaza Ödemesi düğmesi</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Menüyü göster</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Link oturumunu kapatın</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">%s oturumunu kapatın</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Link\'e katıl</string>
   <!-- Title for the Link signup screen -->

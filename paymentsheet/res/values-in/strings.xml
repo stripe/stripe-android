@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Konfirmasikan informasi Anda</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 angka terakhir SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Masuk atau mendaftar</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Setuju dan lanjutkan</string>
   <!-- Title for the Link signup screen -->
@@ -259,8 +261,14 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_pm_set_as_default">Atur sebagai metode pembayaran default</string>
   <!-- Description of a saved bank account. E.g. 'Bank account ending in 4242' -->
   <string name="stripe_remove_bank_account_ending_in">Hapus rekening bank yang berakhiran dengan %s</string>
+  <!-- Accessibility description for a button that launches Shop Pay. -->
+  <string name="stripe_shop_pay_button_description">Tombol Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Tampilkan menu</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Keluar dari Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Keluar dari %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Bergabunglah dengan Link</string>
   <!-- Title for the Link signup screen -->
