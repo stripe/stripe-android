@@ -46,8 +46,8 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -162,7 +162,7 @@ internal interface EmbeddedActivityModule {
         @Singleton
         fun provideFormInteractor(
             interactorFactory: EmbeddedFormInteractorFactory
-        ): DefaultVerticalModeFormInteractor = interactorFactory.create()
+        ): VerticalModeFormInteractor = interactorFactory.create()
 
         @Provides
         @Singleton

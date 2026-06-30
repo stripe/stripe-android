@@ -18,9 +18,9 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.DismissKeyboardOnProcessing
 import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmUI
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.StripeTheme
@@ -30,7 +30,7 @@ import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
 internal fun FormScreenContent(
-    interactor: DefaultVerticalModeFormInteractor,
+    interactor: VerticalModeFormInteractor,
     eventReporter: EventReporter,
     onClick: () -> Unit,
     onProcessingCompleted: () -> Unit,
