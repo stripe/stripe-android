@@ -592,9 +592,9 @@ class Checkout private constructor(
     internal suspend fun <T> withConfirmation(
         block: suspend () -> T,
     ): T {
-        // Confirmation is blocked while a payment flow is presented, just like mutations
-        // (see withInternalState). Omitting this guard would allow a confirm to run on top of
-        // a presented sheet.
+        // Confirmation, like mutations, is blocked while a payment flow is presented. The
+        // integration is marked dismissed when the presenting sheet returns its result (e.g.
+        // DefaultFlowController.onPaymentOptionResult), which precedes the confirm() call.
         if (internalState.integrationLaunched) {
             throw IllegalStateException(
                 "Cannot confirm checkout session while a payment flow is presented."
