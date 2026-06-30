@@ -139,15 +139,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
                 message = e.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
             )
-        } catch (e: IllegalStateException) {
-            // Any other IllegalStateException originates from the confirmation itself, not the
-            // queue precondition, so it is a payment failure. CancellationException is not an
-            // IllegalStateException, so coroutine cancellation still propagates.
-            ConfirmationDefinition.Action.Fail(
-                cause = e,
-                message = e.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-            )
         }
     }
 
