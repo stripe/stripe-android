@@ -190,6 +190,7 @@ internal class LinkActivityViewModel @Inject constructor(
                 linkBrand = linkConfiguration.effectiveLinkBrand(linkAccount),
             )
         }
+
     }
 
     fun moveToWeb(error: Throwable) {
@@ -264,13 +265,22 @@ internal class LinkActivityViewModel @Inject constructor(
         viewModelScope.launch {
             linkAccountManager.logOut()
         }
-        linkAccountHolder.set(LinkAccountUpdate.Value(null, LoggedOut))
         if (linkScreenState.value is ScreenState.VerificationDialog) {
-            linkAccountHolder.set(LinkAccountUpdate.Value(null))
+            clearAccountAfterChangeEmail(loggedOut = false)
             _linkScreenState.value = ScreenState.FullScreen(initialDestination = LinkScreen.SignUp)
         } else {
+            clearAccountAfterChangeEmail(loggedOut = true)
             navigate(LinkScreen.SignUp, clearStack = true)
         }
+    }
+
+    private fun clearAccountAfterChangeEmail(loggedOut: Boolean) {
+        linkAccountHolder.set(
+            LinkAccountUpdate.Value(
+                account = null,
+                lastUpdateReason = if (loggedOut) LoggedOut else null,
+            )
+        )
     }
 
     fun unregisterActivity() {
