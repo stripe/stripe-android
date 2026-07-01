@@ -73,11 +73,7 @@ internal class InputAddressViewModel @Inject constructor(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
-        getAttributionDrawable = if (isInlineAutocompleteEnabled) {
-            { _ -> com.stripe.android.uicore.R.drawable.stripe_google_maps_logo }
-        } else {
-            null
-        },
+        getAttributionDrawable = if (isInlineAutocompleteEnabled) AUTOCOMPLETE_ATTRIBUTION_DRAWABLE else null,
     )
 
     private val inlineAutocompleteController = if (isInlineAutocompleteEnabled) {

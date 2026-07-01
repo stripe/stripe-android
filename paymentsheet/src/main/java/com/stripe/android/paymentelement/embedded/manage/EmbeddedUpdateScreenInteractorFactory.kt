@@ -83,6 +83,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             onUpdateSuccess = {
                 embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
+            autocompleteAddressInteractorFactory = null,
         )
     }
 }

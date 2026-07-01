@@ -172,6 +172,16 @@ class AutocompleteAddressControllerTest {
     )
 
     @Test
+    fun `Element does not use inline autocomplete if Places is not available`() = noAutocompleteTest(
+        autocompleteConfig = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = "123",
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = false,
+            isInlineAutocompleteEnabled = true,
+        ),
+    )
+
+    @Test
     fun `Element does not use autocomplete if autocomplete country not supported`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",

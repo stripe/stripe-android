@@ -51,6 +51,7 @@ internal class UpdateCardScreenshotTest(
                         billingDetailsCollectionConfiguration = testCase.billingDetailsCollectionConfiguration,
                         onBrandChoiceChanged = {},
                         onCardUpdateParamsChanged = {},
+                        autocompleteAddressInteractorFactory = null,
                     ).apply {
                         if (testCase.validate) {
                             handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)

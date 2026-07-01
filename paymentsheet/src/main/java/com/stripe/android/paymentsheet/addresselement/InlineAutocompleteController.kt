@@ -26,6 +26,7 @@ internal class InlineAutocompleteController(
 ) {
     private var lastPredictionLine1: String? = null
     private var observeJob: Job? = null
+    private var selectionJob: Job? = null
 
     private val _inlinePredictionsState = MutableStateFlow<AutocompleteAddressInteractor.InlinePredictionsState>(
         AutocompleteAddressInteractor.InlinePredictionsState.Idle
@@ -58,7 +59,8 @@ internal class InlineAutocompleteController(
 
     fun onPredictionSelected(predictionId: String) {
         if (placesClient == null) return
-        coroutineScope.launch {
+        selectionJob?.cancel()
+        selectionJob = coroutineScope.launch {
             placesClient.fetchPlace(predictionId).fold(
                 onSuccess = { response ->
                     val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
@@ -86,7 +88,13 @@ internal class InlineAutocompleteController(
     }
 
     fun onDismissed() {
+        selectionJob?.cancel()
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+    }
+
+    fun dispose() {
+        observeJob?.cancel()
+        selectionJob?.cancel()
     }
 
     private fun isCountrySupported(country: String): Boolean {
@@ -96,8 +104,9 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
+        val client = placesClient ?: return
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        val result = placesClient!!.findAutocompletePredictions(
+        val result = client.findAutocompletePredictions(
             query = query,
             country = country,
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,

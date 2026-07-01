@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -124,6 +125,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val onUpdateSuccess: () -> Unit,
     val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
@@ -196,7 +198,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 name = CollectionMode.Never,
                 allowedCountries = allowedBillingCountries,
             ),
-            requiresModification = true
+            requiresModification = true,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
 
@@ -224,7 +227,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 name = CollectionMode.Never,
                 allowedCountries = allowedBillingCountries,
             ),
-            requiresModification = true
+            requiresModification = true,
+            autocompleteAddressInteractorFactory = null,
         )
     }
 

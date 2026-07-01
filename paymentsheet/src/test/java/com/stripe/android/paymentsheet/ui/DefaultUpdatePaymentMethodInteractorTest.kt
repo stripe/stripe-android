@@ -739,6 +739,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
             removeMessage = null,
             allowedBillingCountries = allowedBillingCountries,
+            autocompleteAddressInteractorFactory = null,
         )
 
         TestParams(
