@@ -106,6 +106,21 @@ class DefaultSheetActivityStateHolderTest {
     }
 
     @Test
+    fun `PaymentOptions mode always uses continue label regardless of formSheetAction`() {
+        testScenario(
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+        ) {
+            stateHolder.state.test {
+                val state = awaitItem()
+                assertThat(state.primaryButtonLabel).isEqualTo(
+                    resolvableString(R.string.stripe_continue_button_label)
+                )
+                assertThat(state.shouldDisplayLockIcon).isFalse()
+            }
+        }
+    }
+
+    @Test
     fun `state updates isEnabled when selection is set`() = testScenario {
         stateHolder.state.test {
             assertThat(awaitItem().isEnabled).isFalse()
@@ -435,6 +450,7 @@ class DefaultSheetActivityStateHolderTest {
         config: EmbeddedPaymentElement.Configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
         tapToAddHelper: FakeTapToAddHelper = FakeTapToAddHelper.noOp(),
         customerStateHolder: FakeCustomerStateHolder = FakeCustomerStateHolder(),
+        launchMode: EmbeddedLaunchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
@@ -451,7 +467,7 @@ class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
-            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            launchMode = launchMode,
         )
 
         Scenario(
