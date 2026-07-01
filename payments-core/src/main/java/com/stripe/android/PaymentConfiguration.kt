@@ -8,11 +8,16 @@ import com.stripe.android.core.ApiKeyValidator
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
+/**
+ * Creates a [PaymentConfiguration] for per-instance use (e.g. passing to
+ * [EmbeddedPaymentElement.Configuration.Builder.paymentConfiguration]).
+ *
+ * Unlike [PaymentConfiguration.init], this constructor does not write to SharedPreferences
+ * and does not affect the global singleton returned by [PaymentConfiguration.getInstance].
+ */
 @Parcelize
 @Poko
-class PaymentConfiguration
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-constructor(
+class PaymentConfiguration constructor(
     val publishableKey: String,
     val stripeAccountId: String? = null
 ) : Parcelable {

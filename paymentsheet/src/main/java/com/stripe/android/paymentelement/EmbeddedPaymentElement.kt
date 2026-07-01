@@ -15,7 +15,9 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.payments.core.injection.PaymentConfigurationHolder
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutConfigurationMerger
 import com.stripe.android.checkout.CheckoutInstances
@@ -59,6 +61,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
     stateHelper: EmbeddedStateHelper,
+    private val paymentConfigurationHolder: PaymentConfigurationHolder,
 ) {
 
     /**
@@ -85,6 +88,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
+        paymentConfigurationHolder.paymentConfiguration = configuration.paymentConfiguration
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         return configurationCoordinator.configure(configuration, initializationMode)
     }
@@ -102,6 +106,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ): ConfigureResult {
+        paymentConfigurationHolder.paymentConfiguration = configuration.paymentConfiguration
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         return configurationCoordinator.configure(
             configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
@@ -305,6 +310,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val paymentConfiguration: PaymentConfiguration? = null,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -342,6 +348,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var paymentConfiguration: PaymentConfiguration? = null
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -578,6 +585,16 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            /**
+             * An optional [PaymentConfiguration] for this payment session. When set, overrides the
+             * global [PaymentConfiguration] singleton for all network requests made by this
+             * [EmbeddedPaymentElement] instance. When not set, defaults to the value from
+             * [PaymentConfiguration.getInstance].
+             */
+            fun paymentConfiguration(paymentConfiguration: PaymentConfiguration) = apply {
+                this.paymentConfiguration = paymentConfiguration
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -602,6 +619,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                paymentConfiguration = paymentConfiguration,
             )
         }
 
@@ -633,6 +651,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .userOverrideCountry(userOverrideCountry)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
+                paymentConfiguration?.let { paymentConfiguration(it) }
             }
     }
 

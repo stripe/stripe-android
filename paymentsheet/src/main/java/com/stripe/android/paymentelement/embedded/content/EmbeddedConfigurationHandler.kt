@@ -112,6 +112,10 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         return coalescingOrchestrator.get()
     }
 
+    // TODO: paymentConfiguration is not included in the Arguments cache key (CommonConfiguration
+    // doesn't carry it). Calling configure() twice with the same initializationMode/configuration
+    // but a different PaymentConfiguration will return the cached result without re-loading.
+    // Fix by adding paymentConfiguration: PaymentConfiguration? to Arguments.
     @Parcelize
     data class Arguments(
         val initializationMode: PaymentElementLoader.InitializationMode,

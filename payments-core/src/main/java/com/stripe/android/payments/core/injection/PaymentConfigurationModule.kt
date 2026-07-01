@@ -1,6 +1,5 @@
 package com.stripe.android.payments.core.injection
 
-import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -14,8 +13,10 @@ import javax.inject.Provider
 @Module
 class PaymentConfigurationModule {
     @Provides
-    fun providePaymentConfiguration(context: Context): PaymentConfiguration {
-        return PaymentConfiguration.getInstance(context)
+    fun providePaymentConfiguration(
+        holder: PaymentConfigurationHolder,
+    ): PaymentConfiguration {
+        return holder.get()
     }
 
     @Provides
