@@ -383,6 +383,10 @@ workflows:
           title: Export CardScan instrumentation test results
           inputs:
             - test_title: CardScan instrumentation tests
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
   build-paymentsheet-e2e:
     before_run:
       - prepare_all
