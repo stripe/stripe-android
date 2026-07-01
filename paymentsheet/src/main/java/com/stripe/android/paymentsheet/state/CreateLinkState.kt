@@ -140,7 +140,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             add(LinkDisabledReason.BillingDetailsCollection)
         }
 
-        if (initializationMode.shouldDisableWalletsForAutomaticTaxBilling) {
+        if (initializationMode.shouldDisableWalletsForAutomaticTaxBilling()) {
             add(LinkDisabledReason.AutomaticTaxBillingAddress)
         }
     }
