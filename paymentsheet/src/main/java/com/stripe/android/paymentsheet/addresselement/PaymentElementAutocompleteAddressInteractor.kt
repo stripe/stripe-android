@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import kotlinx.coroutines.CoroutineScope
 
 internal class PaymentElementAutocompleteAddressInteractor(
     private val launcher: AutocompleteLauncher,
@@ -42,8 +44,26 @@ internal class PaymentElementAutocompleteAddressInteractor(
     class Factory(
         private val launcher: AutocompleteLauncher,
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
+        private val inlineDependencies: InlineAutocompleteDependencies?,
     ) : AutocompleteAddressInteractor.Factory {
+        // The factory outlives individual forms (it is held for the whole sheet), so it disposes the
+        // previously-created inline interactor before building a new one. Only one address form is
+        // live at a time in this flow, so the prior controller's long-running query collector would
+        // otherwise leak on the shared coroutine scope across form re-creations.
+        private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
+
         override fun create(): AutocompleteAddressInteractor {
+            activeInlineInteractor?.dispose()
+            activeInlineInteractor = null
+
+            val dependencies = inlineDependencies
+            if (dependencies != null) {
+                return BillingInlineAutocompleteAddressInteractor(
+                    placesClient = dependencies.placesClient,
+                    autocompleteConfig = autocompleteConfig,
+                    coroutineScope = dependencies.coroutineScope,
+                ).also { activeInlineInteractor = it }
+            }
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
                 autocompleteConfig = autocompleteConfig,
@@ -51,3 +71,8 @@ internal class PaymentElementAutocompleteAddressInteractor(
         }
     }
 }
+
+internal data class InlineAutocompleteDependencies(
+    val placesClient: PlacesClientProxy,
+    val coroutineScope: CoroutineScope,
+)
