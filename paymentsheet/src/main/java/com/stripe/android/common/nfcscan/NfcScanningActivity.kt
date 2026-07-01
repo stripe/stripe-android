@@ -24,6 +24,8 @@ internal class NfcScanningActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        viewModel.register(this)
+
         lifecycleScope.launch {
             viewModel.result.collectLatest { result ->
                 finishWithResult(result)
