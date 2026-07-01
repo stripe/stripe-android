@@ -53,6 +53,7 @@ internal class FakeBaseSheetViewModel private constructor(
     mode = EventReporter.Mode.Complete,
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
     customViewModelScope = customViewModelScope,
+    placesClient = null,
 ) {
     companion object {
         fun create(

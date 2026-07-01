@@ -5,11 +5,13 @@ import android.content.Context
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -53,4 +55,16 @@ internal class PaymentOptionsViewModelModule {
     ): PaymentMethodMessagePromotionsHelper {
         return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, eventReporter)
     }
+
+    @Provides
+    fun providePlacesClient(
+        application: Application,
+        args: PaymentOptionContract.Args,
+        errorReporter: ErrorReporter,
+    ): PlacesClientProxy? = createInlineAutocompletePlacesClient(
+        context = application,
+        googlePlacesApiKey = args.configuration.googlePlacesApiKey,
+        errorReporter = errorReporter,
+        isPlacesAvailable = { cachedIsPlacesAvailable },
+    )
 }
