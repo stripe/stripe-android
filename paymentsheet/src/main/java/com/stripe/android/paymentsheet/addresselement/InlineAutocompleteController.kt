@@ -92,10 +92,6 @@ internal class InlineAutocompleteController(
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 
-    /**
-     * Cancels all running coroutines. Call when the owning form is discarded so the
-     * long-running [observeQueryChanges] collector does not outlive it on a shared scope.
-     */
     fun dispose() {
         observeJob?.cancel()
         selectionJob?.cancel()
@@ -108,8 +104,9 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
+        val client = placesClient ?: return
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        val result = placesClient!!.findAutocompletePredictions(
+        val result = client.findAutocompletePredictions(
             query = query,
             country = country,
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,

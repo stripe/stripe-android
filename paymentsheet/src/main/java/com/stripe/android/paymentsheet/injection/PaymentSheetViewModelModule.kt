@@ -58,5 +58,6 @@ internal class PaymentSheetViewModelModule {
         context = appContext,
         googlePlacesApiKey = starterArgs.config.googlePlacesApiKey,
         errorReporter = errorReporter,
+        isPlacesAvailable = { cachedIsPlacesAvailable },
     )
 }

@@ -165,8 +165,6 @@ internal interface EditCardDetailsInteractor {
          *       Depending on this configuration, the interactor may or may not collect billing details.
          * @param onBrandChoiceChanged Callback invoked when the card brand choice changes.
          * @param onCardUpdateParamsChanged Callback invoked when the card update parameters change.
-         * @param autocompleteAddressInteractorFactory Optional factory for inline address autocomplete.
-         *        If null, inline address autocomplete is not used.
          */
         fun create(
             coroutineScope: CoroutineScope,

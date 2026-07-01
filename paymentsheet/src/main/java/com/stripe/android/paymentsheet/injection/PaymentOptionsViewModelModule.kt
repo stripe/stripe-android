@@ -65,5 +65,6 @@ internal class PaymentOptionsViewModelModule {
         context = application,
         googlePlacesApiKey = args.configuration.googlePlacesApiKey,
         errorReporter = errorReporter,
+        isPlacesAvailable = { cachedIsPlacesAvailable },
     )
 }

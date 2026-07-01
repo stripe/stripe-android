@@ -31,7 +31,6 @@ class AutocompleteAddressController(
 
     private val config = interactor.autocompleteConfig
 
-    // Inline autocomplete requires both the feature flag and an available Places SDK.
     private val inlineAutocompleteActive =
         config.isInlineAutocompleteEnabled && config.isPlacesAvailable
 

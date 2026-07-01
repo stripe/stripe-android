@@ -91,7 +91,7 @@ internal abstract class BaseSheetViewModel(
                 googlePlacesApiKey = config.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
-                getAttributionDrawable = AUTOCOMPLETE_ATTRIBUTION_DRAWABLE,
+                getAttributionDrawable = if (placesClient != null) AUTOCOMPLETE_ATTRIBUTION_DRAWABLE else null,
             ),
             inlineDependencies = placesClient?.let { client ->
                 InlineAutocompleteDependencies(
