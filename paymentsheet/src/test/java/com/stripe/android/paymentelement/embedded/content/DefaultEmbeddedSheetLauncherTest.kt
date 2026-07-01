@@ -737,6 +737,44 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
+    fun `paymentOptionsResult cancelled clears stale saved selection`() = testScenario {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+        selectionHolder.set(savedSelection)
+        customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
+
+        sheetStateHolder.sheetIsOpen = true
+        val result = EmbeddedActivityResult.Cancelled(
+            customerState = createCustomerState(paymentMethods = emptyList()),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        assertThat(selectionHolder.selection.value).isNull()
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `paymentOptionsResult cancelled preserves valid saved selection`() = testScenario {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        val savedSelection = PaymentSelection.Saved(paymentMethod)
+        selectionHolder.set(savedSelection)
+        customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
+
+        sheetStateHolder.sheetIsOpen = true
+        val result = EmbeddedActivityResult.Cancelled(
+            customerState = createCustomerState(paymentMethods = listOf(paymentMethod)),
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        assertThat(selectionHolder.selection.value).isEqualTo(savedSelection)
+        assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
     fun `onDestroy unregisters launcher`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)

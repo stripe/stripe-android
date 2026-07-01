@@ -139,8 +139,20 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             }
             is EmbeddedActivityResult.Cancelled -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                clearStaleSelection()
             }
             is EmbeddedActivityResult.Error -> Unit
+        }
+    }
+
+    private fun clearStaleSelection() {
+        val currentSelection = selectionHolder.selection.value
+        if (currentSelection is PaymentSelection.Saved) {
+            val paymentMethodId = currentSelection.paymentMethod.id
+            val stillExists = customerStateHolder.paymentMethods.value.any { it.id == paymentMethodId }
+            if (!stillExists) {
+                selectionHolder.set(null)
+            }
         }
     }
 
