@@ -82,7 +82,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
-            configuration = configuration
+            configuration = configuration,
+            initializationMode = initializationMode,
         )
 
         val isLinkDisabled = linkDisabledReasons.isNotEmpty()
@@ -114,6 +115,7 @@ internal class DefaultCreateLinkState @Inject constructor(
     private fun getLinkDisabledReasons(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): List<LinkDisabledReason> = buildList {
         if (!elementsSession.isLinkEnabled) {
             add(LinkDisabledReason.NotSupportedInElementsSession)
@@ -138,7 +140,7 @@ internal class DefaultCreateLinkState @Inject constructor(
             add(LinkDisabledReason.BillingDetailsCollection)
         }
 
-        if (elementsSession.disableWalletsForAutomaticTaxBilling) {
+        if (initializationMode.shouldDisableWalletsForAutomaticTaxBilling) {
             add(LinkDisabledReason.AutomaticTaxBillingAddress)
         }
     }

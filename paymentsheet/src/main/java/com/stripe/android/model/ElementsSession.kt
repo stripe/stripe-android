@@ -28,9 +28,6 @@ internal data class ElementsSession(
     val elementsSessionConfigId: String?,
     val accountId: String?,
     val merchantId: String?,
-    // Default is intentional: this is a transient Checkout Session-derived flag and keeps
-    // non-CheckoutSession parsing/fallback construction unchanged.
-    val disableWalletsForAutomaticTaxBilling: Boolean = false,
 ) : StripeModel {
 
     val linkBrand: LinkBrand

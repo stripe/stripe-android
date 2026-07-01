@@ -6,19 +6,21 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
@@ -82,16 +84,22 @@ internal class DefaultCreateLinkStateTest {
         )
 
     @Test
-    fun `link is disabled when disableWalletsForAutomaticTaxBilling is true`() = runTest {
+    fun `link is disabled when checkout session should disable wallets for automatic tax billing`() = runTest {
         val createLinkState = createLinkStateFactory()
-        val elementsSession = createElementsSession().copy(
-            disableWalletsForAutomaticTaxBilling = true,
+        val elementsSession = createElementsSession()
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                elementsSession = elementsSession,
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
         )
 
         val result = createLinkState(
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
-            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            initializationMode = initializationMode,
             customerMetadata = null,
             clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
         )

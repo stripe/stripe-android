@@ -27,43 +27,13 @@ internal class CheckoutSessionLoaderTest {
     }
 
     @Test
-    fun `sets disableWalletsForAutomaticTaxBilling when auto tax enabled and tax source is billing`() {
+    fun `returns elements session without checkout tax policy mutations`() {
         val response = CHECKOUT_SESSION_RESPONSE.copy(
             automaticTaxEnabled = true,
             taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
         val result = createLoader()(initMode(response))
-        assertThat(result.disableWalletsForAutomaticTaxBilling).isTrue()
-    }
-
-    @Test
-    fun `does not set disableWalletsForAutomaticTaxBilling when auto tax disabled`() {
-        val response = CHECKOUT_SESSION_RESPONSE.copy(
-            automaticTaxEnabled = false,
-            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
-        )
-        val result = createLoader()(initMode(response))
-        assertThat(result.disableWalletsForAutomaticTaxBilling).isFalse()
-    }
-
-    @Test
-    fun `does not set disableWalletsForAutomaticTaxBilling when tax source is shipping`() {
-        val response = CHECKOUT_SESSION_RESPONSE.copy(
-            automaticTaxEnabled = true,
-            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
-        )
-        val result = createLoader()(initMode(response))
-        assertThat(result.disableWalletsForAutomaticTaxBilling).isFalse()
-    }
-
-    @Test
-    fun `does not set disableWalletsForAutomaticTaxBilling when tax source is null`() {
-        val response = CHECKOUT_SESSION_RESPONSE.copy(
-            automaticTaxEnabled = true,
-            taxAddressSource = null,
-        )
-        val result = createLoader()(initMode(response))
-        assertThat(result.disableWalletsForAutomaticTaxBilling).isFalse()
+        assertThat(result).isEqualTo(response.elementsSession)
     }
 
     private fun createLoader(): CheckoutSessionLoader {

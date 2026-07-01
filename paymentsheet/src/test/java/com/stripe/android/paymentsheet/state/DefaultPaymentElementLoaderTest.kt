@@ -365,19 +365,27 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
-    fun `load with disableWalletsForAutomaticTaxBilling should disable google pay`() = runScenario {
+    fun `load with checkout session automatic tax billing should disable google pay`() = runScenario {
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             isGooglePayReady = true,
-            disableWalletsForAutomaticTaxBilling = true,
+        )
+        val checkoutSessionResponse = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
         )
 
         assertThat(
             loader.load(
-                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
-                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = "DefaultPaymentElementLoaderTest",
+                    checkoutSessionResponse = checkoutSessionResponse,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                    .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
+                    .build(),
                 metadata = PaymentElementLoader.Metadata(
                     initializedViaCompose = false,
                 ),
@@ -4835,7 +4843,6 @@ internal class DefaultPaymentElementLoaderTest {
         logFcLiteExperiment: LogFcLiteExperiment = FakeLogFcLiteExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
-        disableWalletsForAutomaticTaxBilling: Boolean = false,
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = stripeIntent,
             error = error,
@@ -4846,7 +4853,6 @@ internal class DefaultPaymentElementLoaderTest {
             cardBrandChoice = cardBrandChoice,
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
-            disableWalletsForAutomaticTaxBilling = disableWalletsForAutomaticTaxBilling,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
@@ -5027,6 +5033,9 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createCheckoutSessionResponse(
         canDetachPaymentMethod: Boolean,
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        automaticTaxEnabled: Boolean = false,
+        taxAddressSource: CheckoutSessionResponse.TaxAddressSource? = null,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
             id = DEFAULT_CHECKOUT_SESSION_ID,
@@ -5034,7 +5043,7 @@ internal class DefaultPaymentElementLoaderTest {
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                stripeIntent = stripeIntent,
                 merchantCountry = null,
                 isGooglePayEnabled = true,
                 sessionsError = null,
@@ -5057,6 +5066,8 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = canDetachPaymentMethod,
             ),
+            automaticTaxEnabled = automaticTaxEnabled,
+            taxAddressSource = taxAddressSource,
         )
     }
 

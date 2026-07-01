@@ -312,7 +312,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         fetchPaymentMethodMessaging(elementsSession)
 
-        val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
+        val isGooglePayReady = isGooglePayReady(
+            configuration = configuration,
+            elementsSession = elementsSession,
+            initializationMode = initializationMode,
+            isGooglePaySupportedByConfiguration = isGooglePaySupportedByConfiguration,
+        )
 
         val savedSelection = async {
             retrieveSavedSelection(
@@ -597,9 +602,10 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        initializationMode: PaymentElementLoader.InitializationMode,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
-        if (elementsSession.disableWalletsForAutomaticTaxBilling) {
+        if (initializationMode.shouldDisableWalletsForAutomaticTaxBilling) {
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay is disabled because automatic tax with billing address source is enabled."
             )
