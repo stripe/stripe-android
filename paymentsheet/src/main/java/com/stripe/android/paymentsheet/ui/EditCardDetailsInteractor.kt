@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.SectionFieldElement
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -164,6 +165,8 @@ internal interface EditCardDetailsInteractor {
          *       Depending on this configuration, the interactor may or may not collect billing details.
          * @param onBrandChoiceChanged Callback invoked when the card brand choice changes.
          * @param onCardUpdateParamsChanged Callback invoked when the card update parameters change.
+         * @param autocompleteAddressInteractorFactory Optional factory for inline address autocomplete.
+         *        If null, inline address autocomplete is not used.
          */
         fun create(
             coroutineScope: CoroutineScope,
@@ -172,7 +175,8 @@ internal interface EditCardDetailsInteractor {
             payload: EditCardPayload,
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
             onBrandChoiceChanged: CardBrandCallback,
-            onCardUpdateParamsChanged: CardUpdateParamsCallback
+            onCardUpdateParamsChanged: CardUpdateParamsCallback,
+            autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         ): EditCardDetailsInteractor
     }
 }
@@ -187,7 +191,8 @@ internal class DefaultEditCardDetailsInteractor(
     private val requiresModification: Boolean,
     private val coroutineScope: CoroutineScope,
     private val onBrandChoiceChanged: CardBrandCallback,
-    private val onCardUpdateParamsChanged: CardUpdateParamsCallback
+    private val onCardUpdateParamsChanged: CardUpdateParamsCallback,
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : EditCardDetailsInteractor {
     private val cardDetailsEntry = MutableStateFlow(
         value = cardEditConfiguration?.buildDefaultCardEntry()
@@ -356,6 +361,7 @@ internal class DefaultEditCardDetailsInteractor(
             collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
             collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
             allowedBillingCountries = billingDetailsCollectionConfiguration.allowedBillingCountries,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
 
@@ -388,7 +394,8 @@ internal class DefaultEditCardDetailsInteractor(
             payload: EditCardPayload,
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
             onBrandChoiceChanged: CardBrandCallback,
-            onCardUpdateParamsChanged: CardUpdateParamsCallback
+            onCardUpdateParamsChanged: CardUpdateParamsCallback,
+            autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
         ): EditCardDetailsInteractor {
             return DefaultEditCardDetailsInteractor(
                 payload = payload,
@@ -397,7 +404,8 @@ internal class DefaultEditCardDetailsInteractor(
                 coroutineScope = coroutineScope,
                 onBrandChoiceChanged = onBrandChoiceChanged,
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,
-                requiresModification = requiresModification
+                requiresModification = requiresModification,
+                autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
             )
         }
     }

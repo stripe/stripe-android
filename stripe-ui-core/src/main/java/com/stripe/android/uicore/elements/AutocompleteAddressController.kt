@@ -31,8 +31,12 @@ class AutocompleteAddressController(
 
     private val config = interactor.autocompleteConfig
 
+    // Inline autocomplete requires both the feature flag and an available Places SDK.
+    private val inlineAutocompleteActive =
+        config.isInlineAutocompleteEnabled && config.isPlacesAvailable
+
     private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
-        if (config.isInlineAutocompleteEnabled) {
+        if (inlineAutocompleteActive) {
             object : InlineAutocompleteHandler {
                 override val predictionsState = interactor.inlinePredictionsState
 
@@ -99,7 +103,7 @@ class AutocompleteAddressController(
     }
 
     init {
-        if (config.isInlineAutocompleteEnabled) {
+        if (inlineAutocompleteActive) {
             interactor.observeQueryChanges(inlineQuery, countryDropdownFieldController.rawFieldValue)
         }
 
@@ -163,7 +167,7 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled && !expandForm && values[IdentifierSpec.Line1] == null) {
+        } else if (inlineAutocompleteActive && !expandForm && values[IdentifierSpec.Line1] == null) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,

@@ -14,6 +14,7 @@ internal class FakePlacesClientProxy(
         Result.success(FetchPlaceResponse(Place(emptyList()))),
 ) : PlacesClientProxy {
     var onBeforeFindPredictions: (() -> Unit)? = null
+    var onBeforeFetchPlace: (suspend () -> Unit)? = null
 
     data class FindPredictionsCall(
         val query: String?,
@@ -39,6 +40,7 @@ internal class FakePlacesClientProxy(
 
     override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
         _fetchPlaceCalls.add(placeId)
+        onBeforeFetchPlace?.invoke()
         return fetchPlaceResult
     }
 
