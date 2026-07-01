@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded.manage
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -23,6 +24,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val savedPaymentMethodMutator: SavedPaymentMethodMutator,
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
+    private val launchMode: EmbeddedLaunchMode,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
         return DefaultManageScreenInteractor(
@@ -36,9 +38,14 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                 val savedPmSelection = PaymentSelection.Saved(it.paymentMethod)
                 selectionHolder.set(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
-                embeddedNavigatorProvider.get().performAction(
-                    EmbeddedNavigator.Action.Close(shouldInvokeRowSelectionCallback = true)
-                )
+                val action = when (launchMode) {
+                    EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
+                    EmbeddedLaunchMode.Manage,
+                    EmbeddedLaunchMode.Form -> EmbeddedNavigator.Action.Close(
+                        shouldInvokeRowSelectionCallback = true
+                    )
+                }
+                embeddedNavigatorProvider.get().performAction(action)
             },
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             navigateBack = {

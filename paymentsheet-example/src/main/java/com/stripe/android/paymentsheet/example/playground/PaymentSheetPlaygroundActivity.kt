@@ -590,6 +590,7 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
+    @Suppress("LongMethod")
     fun EmbeddedUi(
         playgroundState: PlaygroundState.Payment,
     ) {
@@ -646,6 +647,16 @@ internal class PaymentSheetPlaygroundActivity :
                 .testTag(CHECKOUT_TEST_TAG),
         ) {
             Text("Checkout")
+        }
+
+        if (isTwoStep) {
+            Button(
+                onClick = { embeddedPaymentElement.presentPaymentOptions() },
+                enabled = hasConfigured,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Present Payment Options")
+            }
         }
     }
 

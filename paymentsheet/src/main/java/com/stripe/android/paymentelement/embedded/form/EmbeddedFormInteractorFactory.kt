@@ -24,8 +24,6 @@ import javax.inject.Inject
 
 internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val paymentMethodMetadata: PaymentMethodMetadata,
-    private val paymentMethodCode: PaymentMethodCode,
-    private val hasSavedPaymentMethods: Boolean,
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -34,7 +32,10 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) {
-    fun create(): DefaultVerticalModeFormInteractor {
+    fun create(
+        paymentMethodCode: PaymentMethodCode,
+        hasSavedPaymentMethods: Boolean
+    ): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,

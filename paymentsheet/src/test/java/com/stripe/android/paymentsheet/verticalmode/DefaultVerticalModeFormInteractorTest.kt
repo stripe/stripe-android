@@ -274,8 +274,6 @@ internal class DefaultVerticalModeFormInteractorTest {
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
-            paymentMethodCode = "card",
-            hasSavedPaymentMethods = hasSavedPaymentMethods,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
@@ -283,7 +281,10 @@ internal class DefaultVerticalModeFormInteractorTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
-        ).create()
+        ).create(
+            paymentMethodCode = "card",
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+        )
 
         val formElements = setAsDefaultInteractor.state.value.formUiElements
 
@@ -329,8 +330,6 @@ internal class DefaultVerticalModeFormInteractorTest {
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
-            paymentMethodCode = selectedPaymentMethodCode,
-            hasSavedPaymentMethods = false,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
@@ -338,7 +337,10 @@ internal class DefaultVerticalModeFormInteractorTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
-        ).create()
+        ).create(
+            paymentMethodCode = selectedPaymentMethodCode,
+            hasSavedPaymentMethods = false,
+        )
         block(setAsDefaultInteractor.state.value.formUiElements)
     }
 

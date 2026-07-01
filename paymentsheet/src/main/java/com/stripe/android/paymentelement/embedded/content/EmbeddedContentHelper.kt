@@ -63,6 +63,8 @@ internal interface EmbeddedContentHelper {
     fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
 
     fun clearSheetLauncher()
+
+    fun presentPaymentOptions()
 }
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -164,6 +166,29 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     override fun clearSheetLauncher() {
         sheetLauncher = null
+    }
+
+    override fun presentPaymentOptions() {
+        val state = state.value
+        if (state == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED
+            )
+            return
+        }
+        val launcher = sheetLauncher
+        if (launcher == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NO_LAUNCHER
+            )
+            return
+        }
+        launcher.launchPaymentOptions(
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            customerState = customerStateHolder.customer.value,
+            selection = selectionHolder.selection.value,
+            embeddedConfirmationState = confirmationStateHolder.state,
+        )
     }
 
     private fun createWalletButtonsInteractor(

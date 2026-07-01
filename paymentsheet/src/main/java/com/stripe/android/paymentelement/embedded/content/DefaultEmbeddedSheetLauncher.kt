@@ -42,6 +42,13 @@ internal interface EmbeddedSheetLauncher {
         selection: PaymentSelection?,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
     )
+
+    fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+    )
 }
 
 @EmbeddedPaymentElementScope
@@ -78,6 +85,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     handleFormResult(result)
                 }
                 EmbeddedLaunchMode.Manage -> handleManageResult(result)
+                EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
             }
         }
 
@@ -115,6 +123,36 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             }
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
+        }
+    }
+
+    private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
+        when (result) {
+            is EmbeddedActivityResult.Complete -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.set(result.selection)
+                if (result.hasBeenConfirmed) {
+                    embeddedResultCallbackHelper.setResult(
+                        EmbeddedPaymentElement.Result.Completed()
+                    )
+                }
+            }
+            is EmbeddedActivityResult.Cancelled -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                clearStaleSelection()
+            }
+            is EmbeddedActivityResult.Error -> Unit
+        }
+    }
+
+    private fun clearStaleSelection() {
+        val currentSelection = selectionHolder.selection.value
+        if (currentSelection is PaymentSelection.Saved) {
+            val paymentMethodId = currentSelection.paymentMethod.id
+            val stillExists = customerStateHolder.paymentMethods.value.any { it.id == paymentMethodId }
+            if (!stillExists) {
+                selectionHolder.set(null)
+            }
         }
     }
 
@@ -188,6 +226,40 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.Manage,
+        )
+        activityLauncher.launch(args)
+    }
+
+    override fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+    ) {
+        val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
+        if (checkoutSession != null) {
+            CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+            CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+        }
+        if (embeddedConfirmationState == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+            )
+            return
+        }
+        if (sheetStateHolder.sheetIsOpen) return
+        sheetStateHolder.sheetIsOpen = true
+        val args = EmbeddedActivityArgs(
+            selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
+            paymentMethodMetadata = paymentMethodMetadata,
+            hasSavedPaymentMethods = customerState?.paymentMethods?.isNotEmpty() == true,
+            configuration = embeddedConfirmationState.configuration,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            statusBarColor = statusBarColor,
+            selection = selection,
+            customerState = customerState,
+            promotion = null,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)
     }

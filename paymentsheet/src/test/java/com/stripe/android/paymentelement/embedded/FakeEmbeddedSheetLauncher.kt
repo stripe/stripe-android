@@ -27,4 +27,13 @@ internal class FakeEmbeddedSheetLauncher : EmbeddedSheetLauncher {
     ) {
         error("Not expected.")
     }
+
+    override fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+    ) {
+        error("Not expected.")
+    }
 }
