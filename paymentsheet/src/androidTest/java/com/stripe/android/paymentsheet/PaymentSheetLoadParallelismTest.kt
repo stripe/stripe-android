@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -12,11 +11,12 @@ import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.json.JSONArray
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import java.util.Collections
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -37,26 +37,15 @@ internal class PaymentSheetLoadParallelismTest {
 
     private val networkRule = testRules.networkRule
     private val page: PaymentSheetPage = PaymentSheetPage(testRules.compose)
-
-    private val requestLog: MutableList<RequestEvent> =
-        Collections.synchronizedList(mutableListOf())
-
-    private data class RequestEvent(val request: Request, val arrivalNanos: Long)
+    private lateinit var requestTracker: RequestTracker
 
     companion object {
-        /**
-         * The body delay applied to each mock response. If requests are truly parallel, they
-         * should all arrive at the mock server within a small window of each other regardless
-         * of this delay. If they are serial, subsequent requests won't arrive until at least
-         * DELAY_MS after the previous response.
-         */
-        private const val DELAY_MS = 100L
+        private const val REQUEST_TIMEOUT_SECONDS = 10L
+    }
 
-        /**
-         * Maximum allowed time gap (in ms) between requests that should arrive concurrently.
-         * This is generous to accommodate CI variability.
-         */
-        private const val PARALLEL_TOLERANCE_MS = 80L
+    @After
+    fun releaseRequests() {
+        requestTracker.releaseAll()
     }
 
     @Test
@@ -175,6 +164,8 @@ internal class PaymentSheetLoadParallelismTest {
         resultCallback = ::expectNoResult,
         successTimeoutSeconds = 15L,
     ) { testContext ->
+        requestTracker = RequestTracker(expectedRequestOrdering.allRequests())
+
         enqueueLoadResponses(
             requests = expectedRequestOrdering.allRequests(),
             linkEnabled = linkEnabled,
@@ -190,9 +181,8 @@ internal class PaymentSheetLoadParallelismTest {
             )
         }
 
-        page.waitForCardForm()
-
         assertParallelismForConfig(expectedRequestOrdering)
+        page.waitForCardForm()
 
         testContext.markTestSucceeded()
     }
@@ -232,21 +222,21 @@ internal class PaymentSheetLoadParallelismTest {
             method("GET"),
             path("/v1/elements/sessions"),
         ) { _, response ->
-            recordArrival(request)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            if (linkEnabled) {
-                response.testBodyFromFile(bodyFile) { json ->
-                    enableLinkPassthroughMode(json)
-                    setPaymentMethodTypes(
-                        json, paymentMethodTypes = listOf(
-                            PaymentMethod.Type.Card,
-                            PaymentMethod.Type.Link
+            enqueueTrackedResponse(request) {
+                if (linkEnabled) {
+                    response.testBodyFromFile(bodyFile) { json ->
+                        enableLinkPassthroughMode(json)
+                        setPaymentMethodTypes(
+                            json, paymentMethodTypes = listOf(
+                                PaymentMethod.Type.Card,
+                                PaymentMethod.Type.Link
+                            )
                         )
-                    )
-                }
-            } else {
-                response.testBodyFromFile(bodyFile) { json ->
-                    setPaymentMethodTypes(json, paymentMethodTypes = listOf(PaymentMethod.Type.Card))
+                    }
+                } else {
+                    response.testBodyFromFile(bodyFile) { json ->
+                        setPaymentMethodTypes(json, paymentMethodTypes = listOf(PaymentMethod.Type.Card))
+                    }
                 }
             }
         }
@@ -283,11 +273,11 @@ internal class PaymentSheetLoadParallelismTest {
             path("/v1/payment_methods"),
             query("type", type.code),
         ) { _, response ->
-            recordArrival(request)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            response.setBody(
-                """{"object":"list","data":[],"has_more":false,"url":"/v1/payment_methods"}"""
-            )
+            enqueueTrackedResponse(request) {
+                response.setBody(
+                    """{"object":"list","data":[],"has_more":false,"url":"/v1/payment_methods"}"""
+                )
+            }
         }
     }
 
@@ -297,11 +287,11 @@ internal class PaymentSheetLoadParallelismTest {
             method("GET"),
             path("/v1/customers/cus_1"),
         ) { _, response ->
-            recordArrival(Request.FetchCustomer)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            response.setBody(
-                """{"id":"cus_1","object":"customer","email":null,"name":null}"""
-            )
+            enqueueTrackedResponse(Request.FetchCustomer) {
+                response.setBody(
+                    """{"id":"cus_1","object":"customer","email":null,"name":null}"""
+                )
+            }
         }
     }
 
@@ -310,9 +300,9 @@ internal class PaymentSheetLoadParallelismTest {
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
         ) { _, response ->
-            recordArrival(Request.LinkAccountLookup)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            response.setBody("""{"exists":"false"}""")
+            enqueueTrackedResponse(Request.LinkAccountLookup) {
+                response.setBody("""{"exists":"false"}""")
+            }
         }
     }
 
@@ -343,65 +333,67 @@ internal class PaymentSheetLoadParallelismTest {
         )
     }
 
+    private fun enqueueTrackedResponse(
+        request: Request,
+        block: () -> Unit,
+    ) {
+        requestTracker.recordStarted(request)
+        requestTracker.awaitRelease(request)
+
+        try {
+            block()
+        } finally {
+            requestTracker.recordFinished(request)
+        }
+    }
+
     private fun assertParallelismForConfig(
         requestOrdering: RequestOrdering,
     ) {
         when (requestOrdering) {
             is RequestOrdering.Parallel -> assertParallelRequests(requestOrdering)
             is RequestOrdering.Sequential -> assertSequentialRequests(requestOrdering)
-            is RequestOrdering.Singleton -> {} // The fact that the network request occurred is enough for these.
+            is RequestOrdering.Singleton -> assertSingletonRequest(requestOrdering)
         }
+    }
+
+    private fun assertSingletonRequest(
+        requestOrdering: RequestOrdering.Singleton,
+    ) {
+        requestTracker.awaitStarted(requestOrdering.request)
+        assertNoOtherRequestsInProgress(setOf(requestOrdering.request))
+        requestTracker.release(requestOrdering.request)
+        requestTracker.awaitFinished(requestOrdering.request)
     }
 
     private fun assertSequentialRequests(
         requestOrdering: RequestOrdering.Sequential,
     ) {
-        if (requestOrdering.requests.size < 2) {
-            return
-        }
-
-        (0..<requestOrdering.requests.size - 1).forEach { idx ->
-            val firstRequest = requestOrdering.requests[idx].firstRequest()
-            val secondRequest = requestOrdering.requests[idx + 1].firstRequest()
-            val firstArrival = findArrival(firstRequest)
-            val secondArrival = findArrival(secondRequest)
-            val deltaMs = (secondArrival - firstArrival) / 1_000_000
-            if (deltaMs < DELAY_MS - 20) {
-                throw AssertionError(
-                    "$secondRequest was expected to be ${DELAY_MS - 20}ms after $firstRequest but was $deltaMs"
-                )
-            }
-            assertThat(deltaMs).isAtLeast(DELAY_MS - 20)
+        requestOrdering.requests.forEach { nestedRequestOrdering ->
+            assertParallelismForConfig(nestedRequestOrdering)
         }
     }
 
-    private fun recordArrival(request: Request) {
-        requestLog.add(RequestEvent(request, System.nanoTime()))
-    }
+    private fun assertNoOtherRequestsInProgress(
+        currentRequests: Set<Request>,
+    ) {
+        val inProgressRequests = requestTracker.inProgressRequestsExcluding(currentRequests)
 
-    private fun findArrival(request: Request): Long {
-        val event = requestLog.firstOrNull { it.request == request }
-            ?: throw AssertionError("Expected request '$request' to have been recorded")
-        return event.arrivalNanos
-    }
-
-    /**
-     * Asserts that all requests with the given labels arrived at the mock server within
-     * [PARALLEL_TOLERANCE_MS] of each other, indicating they were fired in parallel.
-     */
-    private fun assertParallelRequests(parallelRequests: RequestOrdering.Parallel) {
-        val arrivals = parallelRequests.requests.map { request -> findArrival(request) }
-
-        val minArrival = arrivals.min()
-        val maxArrival = arrivals.max()
-        val spreadMs = (maxArrival - minArrival) / 1_000_000
-
-        if (spreadMs > PARALLEL_TOLERANCE_MS) {
+        if (inProgressRequests.isNotEmpty()) {
             throw AssertionError(
-                "Requests (${parallelRequests.requests.joinToString { it.name }}) should arrive concurrently. " +
-                    "Spread was ${spreadMs}ms, max allowed is ${PARALLEL_TOLERANCE_MS}ms."
+                "Requests (${inProgressRequests.joinToString { it.name }}) were in progress outside the " +
+                    "current request group (${currentRequests.joinToString { it.name }})."
             )
         }
+    }
+
+    private fun assertParallelRequests(
+        parallelRequests: RequestOrdering.Parallel,
+    ) {
+        requestTracker.awaitStarted(parallelRequests.requests)
+        assertNoOtherRequestsInProgress(parallelRequests.requests.toSet())
+        requestTracker.release(parallelRequests.requests)
+        requestTracker.awaitFinished(parallelRequests.requests)
     }
 
     private enum class Request {
@@ -429,9 +421,144 @@ internal class PaymentSheetLoadParallelismTest {
                 is Singleton -> listOf(this.request)
             }
         }
+    }
 
-        fun firstRequest(): Request {
-            return this.allRequests()[0]
+    private class RequestTracker(
+        requests: List<Request>,
+    ) {
+        private val requestStates: Map<Request, RequestState>
+
+        init {
+            require(requests.size == requests.toSet().size) {
+                "Each request must only be tracked once. Requests: ${requests.joinToString()}"
+            }
+
+            requestStates = requests.associateWith { RequestState() }
+        }
+
+        fun recordStarted(request: Request) {
+            state(request).started.countDown()
+        }
+
+        fun recordFinished(request: Request) {
+            state(request).finished.countDown()
+        }
+
+        fun awaitRelease(request: Request) {
+            try {
+                state(request).releaseResponse.await()
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                throw AssertionError("Interrupted while waiting for response for '$request' to be released.", e)
+            }
+        }
+
+        fun awaitStarted(request: Request) {
+            awaitWithTimeout(
+                latch = state(request).started,
+                description = "request '$request' to start",
+            )
+        }
+
+        fun awaitStarted(requests: List<Request>) {
+            val deadlineNanos = deadlineFromNow()
+            requests.forEach { request ->
+                awaitUntil(
+                    latch = state(request).started,
+                    description = "request '$request' to start",
+                    deadlineNanos = deadlineNanos,
+                )
+            }
+        }
+
+        fun awaitFinished(request: Request) {
+            awaitWithTimeout(
+                latch = state(request).finished,
+                description = "request '$request' to finish",
+            )
+        }
+
+        fun awaitFinished(requests: List<Request>) {
+            val deadlineNanos = deadlineFromNow()
+            requests.forEach { request ->
+                awaitUntil(
+                    latch = state(request).finished,
+                    description = "request '$request' to finish",
+                    deadlineNanos = deadlineNanos,
+                )
+            }
+        }
+
+        fun release(request: Request) {
+            state(request).releaseResponse.countDown()
+        }
+
+        fun release(requests: List<Request>) {
+            requests.forEach(::release)
+        }
+
+        fun releaseAll() {
+            requestStates.values.forEach { requestState ->
+                requestState.releaseResponse.countDown()
+            }
+        }
+
+        fun inProgressRequestsExcluding(requests: Set<Request>): List<Request> {
+            return requestStates.keys.filter { request ->
+                request !in requests && isInProgress(request)
+            }
+        }
+
+        private fun state(request: Request): RequestState {
+            return requireNotNull(requestStates[request]) {
+                "Request '$request' was not registered with the tracker"
+            }
+        }
+
+        private fun isInProgress(request: Request): Boolean {
+            val requestState = state(request)
+            return requestState.started.count == 0L && requestState.finished.count != 0L
+        }
+
+        private fun deadlineFromNow(): Long {
+            return System.nanoTime() + TimeUnit.SECONDS.toNanos(REQUEST_TIMEOUT_SECONDS)
+        }
+
+        private fun awaitWithTimeout(
+            latch: CountDownLatch,
+            description: String,
+        ) {
+            awaitUntil(
+                latch = latch,
+                description = description,
+                deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(REQUEST_TIMEOUT_SECONDS),
+            )
+        }
+
+        private fun awaitUntil(
+            latch: CountDownLatch,
+            description: String,
+            deadlineNanos: Long,
+        ) {
+            val remainingNanos = deadlineNanos - System.nanoTime()
+            if (remainingNanos <= 0) {
+                throw AssertionError("Timed out waiting for $description.")
+            }
+
+            try {
+                if (!latch.await(remainingNanos, TimeUnit.NANOSECONDS)) {
+                    throw AssertionError("Timed out waiting for $description.")
+                }
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                throw AssertionError("Interrupted while waiting for $description.", e)
+            }
         }
     }
+
+    private data class RequestState(
+        val started: CountDownLatch = CountDownLatch(1),
+        val releaseResponse: CountDownLatch = CountDownLatch(1),
+        val finished: CountDownLatch = CountDownLatch(1),
+    )
 }
