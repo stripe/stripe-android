@@ -39,7 +39,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
-import javax.inject.Inject
 
 internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
@@ -170,7 +169,7 @@ internal class EmbeddedNavigator private constructor(
             }
         }
 
-        class Form @Inject constructor(
+        class Form(
             private val formInteractor: VerticalModeFormInteractor,
             private val eventReporter: EventReporter,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
