@@ -190,7 +190,6 @@ internal class LinkActivityViewModel @Inject constructor(
                 linkBrand = linkConfiguration.effectiveLinkBrand(linkAccount),
             )
         }
-
     }
 
     fun moveToWeb(error: Throwable) {
