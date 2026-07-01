@@ -65,10 +65,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
     private val embeddedResultCallbackHelper: EmbeddedResultCallbackHelper,
 ) : EmbeddedSheetLauncher {
 
-    private var pendingFormCode: String? = null
-    private var lastPaymentMethodMetadata: PaymentMethodMetadata? = null
-    private var lastEmbeddedConfirmationState: EmbeddedConfirmationStateHolder.State? = null
-
     init {
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
@@ -89,10 +85,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     handleFormResult(result)
                 }
                 EmbeddedLaunchMode.Manage -> handleManageResult(result)
-                EmbeddedLaunchMode.PaymentOptions -> {
-                    handlePaymentOptionsResult(result)
-                    launchPendingFormIfNeeded()
-                }
+                EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
             }
         }
 
@@ -115,7 +108,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     EmbeddedPaymentElement.Result.Canceled()
                 )
             }
-            is EmbeddedActivityResult.FormRequested -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
     }
@@ -130,7 +122,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                 }
             }
             is EmbeddedActivityResult.Cancelled -> Unit
-            is EmbeddedActivityResult.FormRequested -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
     }
@@ -146,30 +137,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
                     )
                 }
             }
-            is EmbeddedActivityResult.FormRequested -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                pendingFormCode = result.code
-            }
             is EmbeddedActivityResult.Cancelled -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
             }
             is EmbeddedActivityResult.Error -> Unit
         }
-    }
-
-    private fun launchPendingFormIfNeeded() {
-        val code = pendingFormCode ?: return
-        pendingFormCode = null
-        val metadata = lastPaymentMethodMetadata ?: return
-        val confirmationState = lastEmbeddedConfirmationState
-        launchForm(
-            code = code,
-            paymentMethodMetadata = metadata,
-            hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any { it.type?.code == code },
-            embeddedConfirmationState = confirmationState,
-            customerState = customerStateHolder.customer.value,
-            promotion = null,
-        )
     }
 
     override fun launchForm(
@@ -265,8 +237,6 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        lastPaymentMethodMetadata = paymentMethodMetadata
-        lastEmbeddedConfirmationState = embeddedConfirmationState
         val args = EmbeddedActivityArgs(
             selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
             paymentMethodMetadata = paymentMethodMetadata,

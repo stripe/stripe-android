@@ -737,36 +737,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
     }
 
     @Test
-    fun `paymentOptionsResult callback stores pending form code on FormRequested result`() = testScenario {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
-        sheetLauncher.launchPaymentOptions(
-            paymentMethodMetadata = paymentMethodMetadata,
-            customerState = null,
-            selection = null,
-            embeddedConfirmationState = state,
-        )
-        dummyActivityResultCallerScenario.awaitLaunchCall()
-
-        val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val result = EmbeddedActivityResult.FormRequested(
-            code = "card",
-            customerState = customerState,
-            launchMode = EmbeddedLaunchMode.PaymentOptions,
-        )
-
-        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
-        callback.onActivityResult(result)
-
-        assertThat(customerStateHolder.customer.value).isEqualTo(customerState)
-        // The pending form should have been launched as a follow-up
-        val formLaunchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
-        assertThat(formLaunchCall.launchMode).isEqualTo(EmbeddedLaunchMode.Form)
-        assertThat(formLaunchCall.selectedPaymentMethodCode).isEqualTo("card")
-        assertThat(sheetStateHolder.sheetIsOpen).isTrue()
-    }
-
-    @Test
     fun `onDestroy unregisters launcher`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)

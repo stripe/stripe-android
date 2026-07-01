@@ -28,13 +28,6 @@ internal sealed interface EmbeddedActivityResult : Parcelable {
     ) : EmbeddedActivityResult
 
     @Parcelize
-    data class FormRequested(
-        val code: String,
-        val customerState: CustomerState?,
-        override val launchMode: EmbeddedLaunchMode,
-    ) : EmbeddedActivityResult
-
-    @Parcelize
     data class Error(
         override val launchMode: EmbeddedLaunchMode,
     ) : EmbeddedActivityResult
