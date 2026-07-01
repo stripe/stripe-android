@@ -142,7 +142,8 @@ internal fun UpdateCardScreenBodyPreview() {
                     onBrandChoiceChanged = {},
                     onCardUpdateParamsChanged = {},
                     billingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
-                    requiresModification = true
+                    requiresModification = true,
+                    autocompleteAddressInteractorFactory = null,
                 ),
                 state = UpdateCardScreenState(
                     paymentDetailsId = "card_id_1234",

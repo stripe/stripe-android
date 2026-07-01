@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.SectionElement
@@ -25,7 +26,8 @@ internal class BillingDetailsForm(
     private val nameCollection: NameCollection,
     private val collectEmail: Boolean,
     private val collectPhone: Boolean,
-    allowedBillingCountries: Set<String>
+    allowedBillingCountries: Set<String>,
+    autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) {
     val nameElement: SimpleTextElement? = if (nameCollection == NameCollection.OutsideBillingDetailsForm) {
         SimpleTextElement(
@@ -53,7 +55,7 @@ internal class BillingDetailsForm(
             collectPhone = collectPhone,
         ),
         rawValuesMap = rawAddressValues(billingDetails),
-        autocompleteAddressInteractorFactory = null,
+        autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         shouldHideCountryOnNoAddressCollection = false,
     )
 
