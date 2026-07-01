@@ -23,6 +23,7 @@ internal class FakeElementsSessionRepository(
         ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true,
     ),
     private val experimentsData: ElementsSession.ExperimentsData? = null,
+    private val disableWalletsForAutomaticTaxBilling: Boolean = false,
 ) : ElementsSessionRepository {
     data class Params(
         val initializationMode: PaymentElementLoader.InitializationMode,
@@ -78,6 +79,7 @@ internal class FakeElementsSessionRepository(
                     elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                     accountId = "acct_1SGP1sPvdtoA7EjP",
                     merchantId = "acct_1SGP1sPvdtoA7EjP",
+                    disableWalletsForAutomaticTaxBilling = disableWalletsForAutomaticTaxBilling,
                 )
             )
         }

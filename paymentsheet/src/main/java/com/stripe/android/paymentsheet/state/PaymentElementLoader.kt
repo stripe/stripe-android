@@ -599,6 +599,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         elementsSession: ElementsSession,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
+        if (elementsSession.disableWalletsForAutomaticTaxBilling) {
+            userFacingLogger.logWarningWithoutPii(
+                "Google Pay is disabled because automatic tax with billing address source is enabled."
+            )
+            return false
+        }
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay is not enabled for this session."

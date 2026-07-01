@@ -137,6 +137,10 @@ internal class DefaultCreateLinkState @Inject constructor(
             // Extra billing details collection isn't currently supported in the web flow.
             add(LinkDisabledReason.BillingDetailsCollection)
         }
+
+        if (elementsSession.disableWalletsForAutomaticTaxBilling) {
+            add(LinkDisabledReason.AutomaticTaxBillingAddress)
+        }
     }
 
     private fun getLinkSignupDisabledReasons(

@@ -6,6 +6,7 @@ import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
@@ -79,6 +80,27 @@ internal class DefaultCreateLinkStateTest {
             ),
             isLinkInlineSignupAvailableForSavedPaymentMethods = true,
         )
+
+    @Test
+    fun `link is disabled when disableWalletsForAutomaticTaxBilling is true`() = runTest {
+        val createLinkState = createLinkStateFactory()
+        val elementsSession = createElementsSession().copy(
+            disableWalletsForAutomaticTaxBilling = true,
+        )
+
+        val result = createLinkState(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = PAYMENT_INTENT_INIT_MODE,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        assertThat(result).isInstanceOf<LinkDisabledState>()
+        val disabledState = result as LinkDisabledState
+        assertThat(disabledState.linkDisabledReasons)
+            .contains(LinkDisabledReason.AutomaticTaxBillingAddress)
+    }
 
     private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
         flags: Map<ElementsSession.Flag, Boolean>,
