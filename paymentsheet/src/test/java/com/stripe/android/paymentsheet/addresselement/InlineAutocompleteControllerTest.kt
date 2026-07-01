@@ -12,6 +12,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor.InlinePredictionsState
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
@@ -249,6 +250,29 @@ class InlineAutocompleteControllerTest {
         }
 
     @Test
+    fun `onDismissed cancels an in-flight prediction selection`() = runScenario {
+        val fetchGate = CompletableDeferred<Unit>()
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            FetchPlaceResponse(Place(emptyList()))
+        )
+        fakePlacesClient.onBeforeFetchPlace = { fetchGate.await() }
+
+        delegate.onPredictionSelected("place_1")
+        advanceTimeBy(100)
+
+        // The selection is suspended in fetchPlace; dismissing must cancel it.
+        delegate.onDismissed()
+
+        // Releasing the gate must not produce an OnValues event, since the job was cancelled.
+        fetchGate.complete(Unit)
+        advanceTimeBy(100)
+
+        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem()).isEqualTo("place_1")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        eventCalls.expectNoEvents()
+    }
+
+    @Test
     fun `onPredictionSelected suppresses next query matching predicted line1`() =
         runScenario {
             fakePlacesClient.fetchPlaceResult = Result.success(
@@ -423,6 +447,21 @@ class InlineAutocompleteControllerTest {
             val call = fakePlacesClient.findPredictionsCalls.awaitItem()
             assertThat(call.query).isEqualTo("second query")
         }
+
+    @Test
+    fun `dispose cancels query observation`() = runScenario {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        delegate.dispose()
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        fakePlacesClient.findPredictionsCalls.expectNoEvents()
+    }
 
     @Test
     fun `null country flow value defaults to empty string`() = runScenario(
