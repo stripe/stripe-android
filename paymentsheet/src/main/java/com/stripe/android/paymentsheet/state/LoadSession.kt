@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.state
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.paymentsheet.model.SavedSelection
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import javax.inject.Inject
 
@@ -16,18 +15,8 @@ internal class CheckoutSessionLoader @Inject constructor() {
     operator fun invoke(
         initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession,
     ): ElementsSession {
-        val elementsSession = initializationMode.checkoutSessionResponse.elementsSession
+        return initializationMode.checkoutSessionResponse.elementsSession
             ?: throw IllegalStateException("CheckoutSession init response missing elements_session")
-
-        val checkoutResponse = initializationMode.checkoutSessionResponse
-        val disableWallets = checkoutResponse.automaticTaxEnabled &&
-            checkoutResponse.taxAddressSource == CheckoutSessionResponse.TaxAddressSource.BILLING
-
-        return if (disableWallets) {
-            elementsSession.copy(disableWalletsForAutomaticTaxBilling = true)
-        } else {
-            elementsSession
-        }
     }
 }
 
