@@ -26,6 +26,16 @@ internal class CheckoutSessionLoaderTest {
         }
     }
 
+    @Test
+    fun `returns elements session without checkout tax policy mutations`() {
+        val response = CHECKOUT_SESSION_RESPONSE.copy(
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+        val result = createLoader()(initMode(response))
+        assertThat(result).isEqualTo(response.elementsSession)
+    }
+
     private fun createLoader(): CheckoutSessionLoader {
         return CheckoutSessionLoader()
     }
