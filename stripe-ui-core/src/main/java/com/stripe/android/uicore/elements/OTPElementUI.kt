@@ -225,10 +225,11 @@ private fun OTPInputBox(
     BasicTextField(
         value = value,
         onValueChange = { newValue ->
-            val stringChangedSinceLastInvocation = lastTextValue != newValue
+            val prevLastTextValue = lastTextValue
+            val stringChangedSinceLastInvocation = prevLastTextValue != newValue
             lastTextValue = newValue
 
-            if (stringChangedSinceLastInvocation || newValue.length == 1) {
+            if (stringChangedSinceLastInvocation || (newValue.length == 1 && newValue != value)) {
                 // If the OTPInputBox already has a value, it would be the first character of it.text
                 // remove it before passing it to the controller.
                 val newValue =
@@ -237,11 +238,14 @@ private fun OTPInputBox(
                     } else {
                         newValue
                     }
-                val inputLength = element.controller.onValueChanged(index, newValue)
-                if (inputLength > 0) {
-                    focusRequesters.requestFocusSafely(
-                        minOf(index + inputLength, focusRequesters.lastIndex)
-                    )
+                val isSpuriousImeFlush = newValue.isEmpty() && prevLastTextValue.length > 1
+                if (!isSpuriousImeFlush) {
+                    val inputLength = element.controller.onValueChanged(index, newValue)
+                    if (inputLength > 0) {
+                        focusRequesters.requestFocusSafely(
+                            minOf(index + inputLength, focusRequesters.lastIndex)
+                        )
+                    }
                 }
             }
         },
