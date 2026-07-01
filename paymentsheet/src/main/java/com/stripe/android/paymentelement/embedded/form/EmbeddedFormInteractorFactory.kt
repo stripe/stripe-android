@@ -32,7 +32,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) {
-    fun create(code: PaymentMethodCode, hasSavedPaymentMethods: Boolean): DefaultVerticalModeFormInteractor {
+    fun create(paymentMethodCode: PaymentMethodCode, hasSavedPaymentMethods: Boolean): DefaultVerticalModeFormInteractor {
         val formHelper = embeddedFormHelperFactory.create(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
@@ -45,7 +45,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
 
         val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(
             paymentMethodMetadata = paymentMethodMetadata,
-            selectedPaymentMethodCode = code,
+            selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
             setSelection = embeddedSelectionHolder::set,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
@@ -58,27 +58,27 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
         )
 
-        val formType = formHelper.formTypeForCode(code)
-        val formArguments = formHelper.createFormArguments(code)
+        val formType = formHelper.formTypeForCode(paymentMethodCode)
+        val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
             embeddedSelectionHolder.set(
                 formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
                     paymentMethod = requireNotNull(
-                        paymentMethodMetadata.supportedPaymentMethodForCode(code = code)
+                        paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
                     ),
                     paymentMethodMetadata = paymentMethodMetadata,
                 )
             )
         }
         return DefaultVerticalModeFormInteractor(
-            selectedPaymentMethodCode = code,
+            selectedPaymentMethodCode = paymentMethodCode,
             formArguments = formArguments,
-            formElements = formHelper.formElementsForCode(code),
+            formElements = formHelper.formElementsForCode(paymentMethodCode),
             onFormFieldValuesChanged = formHelper::onFormFieldValuesChanged,
             usBankAccountArguments = usBankAccountFormArguments,
             reportFieldInteraction = eventReporter::onPaymentMethodFormInteraction,
             headerInformation = paymentMethodMetadata.formHeaderInformationForCode(
-                code = code,
+                code = paymentMethodCode,
                 customerHasSavedPaymentMethods = hasSavedPaymentMethods
             ),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
