@@ -27,6 +27,7 @@ android {
 dependencies {
     implementation libs.androidx.browser
     implementation libs.dagger
+    implementation libs.okhttp
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization

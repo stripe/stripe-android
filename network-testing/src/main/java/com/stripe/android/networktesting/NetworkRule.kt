@@ -5,19 +5,15 @@ import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.ConnectionFactory
-import com.stripe.android.core.networking.StripeRequest
 import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import org.json.JSONException
 import org.json.JSONObject
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
-import java.io.OutputStream
-import java.net.HttpURLConnection
-import java.net.URL
-import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLSocketFactory
 import kotlin.time.Duration
 
@@ -94,6 +90,8 @@ private class NetworkStatement(
     private val mockWebServer: TestMockWebServer,
     private val hostsToTrack: Set<String>,
 ) : Statement() {
+    private var originalOkHttpClient: OkHttpClient? = null
+
     override fun evaluate() {
         try {
             if (
@@ -112,71 +110,48 @@ private class NetworkStatement(
     }
 
     private fun setup() {
-        ConnectionFactory.Default.connectionOpener = NetworkRuleConnectionOpener()
+        originalOkHttpClient = ConnectionFactory.Default.okHttpClient
+        val trustManager = mockWebServer.clientTrustManager()
+        val socketFactory = mockWebServer.clientSocketFactory()
+        val mockBaseUrl = mockWebServer.baseUrl
+
+        ConnectionFactory.Default.okHttpClient = ConnectionFactory.Default.buildDefaultClient()
+            .newBuilder()
+            .sslSocketFactory(socketFactory, trustManager)
+            .hostnameVerifier { _, _ -> true }
+            .addInterceptor { chain ->
+                val originalRequest = chain.request()
+                val requestHost = originalRequest.url.host
+
+                if (!hostsToTrack.contains(requestHost)) {
+                    throw RequestNotFoundException(
+                        "Test request attempted to reach a non test endpoint. " +
+                            "Url: ${originalRequest.url}"
+                    )
+                }
+
+                val redirectedUrl = originalRequest.url.newBuilder()
+                    .scheme(mockBaseUrl.scheme)
+                    .host(mockBaseUrl.host)
+                    .port(mockBaseUrl.port)
+                    .build()
+
+                val redirectedRequest = originalRequest.newBuilder()
+                    .url(redirectedUrl)
+                    .header("original-host", requestHost)
+                    .build()
+
+                chain.proceed(redirectedRequest)
+            }
+            .build()
     }
 
     private fun tearDown() {
         mockWebServer.dispatcher.clear()
-        ConnectionFactory.Default.connectionOpener = ConnectionFactory.ConnectionOpener.Default
-    }
-
-    inner class NetworkRuleConnectionOpener : ConnectionFactory.ConnectionOpener {
-        override fun open(
-            request: StripeRequest,
-            callback: HttpURLConnection.(request: StripeRequest) -> Unit
-        ): HttpsURLConnection {
-            val requestHost = request.url.hostFromUrl()
-            if (!hostsToTrack.contains(requestHost)) {
-                throw RequestNotFoundException(
-                    "Test request attempted to reach a non test endpoint. " +
-                        "Url: ${request.url}"
-                )
-            }
-
-            val delegatingRequest = DelegatingStripeRequest(
-                request,
-                request.url.replace(
-                    "https://$requestHost",
-                    mockWebServer.baseUrl.toString().removeSuffix("/")
-                )
-            )
-            return (URL(delegatingRequest.url).openConnection() as HttpsURLConnection).apply {
-                sslSocketFactory = mockWebServer.clientSocketFactory()
-                callback(delegatingRequest)
-            }
+        originalOkHttpClient?.let {
+            ConnectionFactory.Default.okHttpClient = it
         }
-    }
-}
-
-private class DelegatingStripeRequest(
-    private val original: StripeRequest,
-    private val testUrl: String,
-) : StripeRequest() {
-
-    private val originalHost: String = original.url.hostFromUrl()
-
-    override val method: Method
-        get() = original.method
-
-    override val mimeType: MimeType
-        get() = original.mimeType
-
-    override val retryResponseCodes: Iterable<Int>
-        get() = original.retryResponseCodes
-
-    override val url: String
-        get() = testUrl
-
-    override val headers: Map<String, String>
-        get() = original.headers.plus(Pair("original-host", originalHost))
-
-    override var postHeaders: Map<String, String>? = original.postHeaders
-
-    override val shouldCache: Boolean
-        get() = original.shouldCache
-
-    override fun writePostBody(outputStream: OutputStream) {
-        original.writePostBody(outputStream)
+        originalOkHttpClient = null
     }
 }
 

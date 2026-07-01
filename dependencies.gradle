@@ -178,6 +178,7 @@ ext.libs = [
         lint                                : "com.android.tools.lint:lint-api:${versions.lint}",
         lintChecks                          : "com.android.tools.lint:lint-checks:${versions.lint}",
         leakCanary                          : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
+        okhttp                              : "com.squareup.okhttp3:okhttp:${versions.okhttp}",
         loggingInterceptor                  : "com.squareup.okhttp3:logging-interceptor:${versions.okhttp}",
         material                            : "com.google.android.material:material:${versions.material}",
         moshiKotlinCodegen                  : "com.squareup.moshi:moshi-kotlin-codegen:${versions.moshi}",
