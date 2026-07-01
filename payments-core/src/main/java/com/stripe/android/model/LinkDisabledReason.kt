@@ -25,5 +25,10 @@ enum class LinkDisabledReason(val value: String) {
     /**
      * Billing details collection is requested and native Link isn't available.
      */
-    BillingDetailsCollection("billing_details_collection")
+    BillingDetailsCollection("billing_details_collection"),
+
+    /**
+     * Automatic tax is enabled with billing address as the tax source.
+     */
+    AutomaticTaxBillingAddress("automatic_tax_billing_address")
 }

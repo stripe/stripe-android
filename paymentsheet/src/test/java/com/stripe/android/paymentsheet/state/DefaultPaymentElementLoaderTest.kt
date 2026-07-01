@@ -365,6 +365,32 @@ internal class DefaultPaymentElementLoaderTest {
     }
 
     @Test
+    fun `load with disableWalletsForAutomaticTaxBilling should disable google pay`() = runScenario {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            disableWalletsForAutomaticTaxBilling = true,
+        )
+
+        assertThat(
+            loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                    clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+                ),
+                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow().paymentMethodMetadata.isGooglePayReady
+        ).isFalse()
+
+        consumeLoadingEvents()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `Should default to first payment method if customer has payment methods`() = runScenario {
         prefsRepository.setSavedSelection(null)
 
@@ -4809,6 +4835,7 @@ internal class DefaultPaymentElementLoaderTest {
         logFcLiteExperiment: LogFcLiteExperiment = FakeLogFcLiteExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
+        disableWalletsForAutomaticTaxBilling: Boolean = false,
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = stripeIntent,
             error = error,
@@ -4819,6 +4846,7 @@ internal class DefaultPaymentElementLoaderTest {
             cardBrandChoice = cardBrandChoice,
             customPaymentMethods = customPaymentMethods,
             externalPaymentMethodData = externalPaymentMethodData,
+            disableWalletsForAutomaticTaxBilling = disableWalletsForAutomaticTaxBilling,
         ),
         userFacingLogger: FakeUserFacingLogger = FakeUserFacingLogger(),
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
