@@ -366,9 +366,11 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `load with checkout session automatic tax billing should disable google pay`() = runScenario {
+        val userFacingLogger = FakeUserFacingLogger()
         val loader = createPaymentElementLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
             isGooglePayReady = true,
+            userFacingLogger = userFacingLogger,
         )
         val checkoutSessionResponse = createCheckoutSessionResponse(
             canDetachPaymentMethod = true,
@@ -391,6 +393,54 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow().paymentMethodMetadata.isGooglePayReady
         ).isFalse()
+
+        assertThat(userFacingLogger.getLoggedMessages())
+            .contains(
+                "Google Pay is disabled because automatic tax is configured to use the billing address."
+            )
+
+        consumeLoadingEvents()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load with checkout session automatic tax billing and no google pay config logs missing config`() = runScenario {
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            userFacingLogger = userFacingLogger,
+        )
+        val checkoutSessionResponse = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+
+        assertThat(
+            loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = "DefaultPaymentElementLoaderTest",
+                    checkoutSessionResponse = checkoutSessionResponse,
+                ),
+                PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                    .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
+                    .build(),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow().paymentMethodMetadata.isGooglePayReady
+        ).isFalse()
+
+        assertThat(userFacingLogger.getLoggedMessages())
+            .contains("GooglePayConfiguration is not set.")
+        assertThat(userFacingLogger.getLoggedMessages())
+            .doesNotContain(
+                "Google Pay is disabled because automatic tax is configured to use the billing address."
+            )
 
         consumeLoadingEvents()
 
