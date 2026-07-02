@@ -839,7 +839,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canUpdateCardPaymentMethodDetails = true,
+        canUpdateCardExpiryAndBillingDetails = true,
         canUpdateCardBrandChoice = true,
     )
 

@@ -34,14 +34,14 @@ class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiab
                 "cardExpired=${params.cardExpired}",
             params.expectedResult,
             displayableSavedPaymentMethod.isModifiable(
-                canUpdateCardPaymentMethodDetails = params.canUpdatePaymentMethod,
+                canUpdateCardExpiryAndBillingDetails = params.canUpdatePaymentMethod,
                 canUpdateCardBrandChoice = params.canUpdateCardBrandChoice,
             )
         )
 
         assertThat(
             displayableSavedPaymentMethod.isModifiable(
-                canUpdateCardPaymentMethodDetails = params.canUpdatePaymentMethod,
+                canUpdateCardExpiryAndBillingDetails = params.canUpdatePaymentMethod,
                 canUpdateCardBrandChoice = params.canUpdateCardBrandChoice,
             )
         )
@@ -49,7 +49,7 @@ class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiab
 
         assertThat(
             paymentMethod.isModifiable(
-                canUpdateCardPaymentMethodDetails = params.canUpdatePaymentMethod,
+                canUpdateCardExpiryAndBillingDetails = params.canUpdatePaymentMethod,
                 canUpdateCardBrandChoice = params.canUpdateCardBrandChoice,
                 isCbcEligible = params.isCbcEligible,
             )
@@ -60,7 +60,7 @@ class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiab
     fun `isModifiable returns false for non-card payment methods`() {
         assertThat(
             PaymentMethodFixtures.LINK_PAYMENT_METHOD.isModifiable(
-                canUpdateCardPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 canUpdateCardBrandChoice = true,
                 isCbcEligible = true,
             )

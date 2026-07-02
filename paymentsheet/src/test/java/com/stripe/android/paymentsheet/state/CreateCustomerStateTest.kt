@@ -272,7 +272,7 @@ internal class CreateCustomerStateTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             canRemoveLastPaymentMethod = true,
-            canUpdateCardPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
             canUpdateCardBrandChoice = true,
         )
 
@@ -283,7 +283,7 @@ internal class CreateCustomerStateTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         )
 

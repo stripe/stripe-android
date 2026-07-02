@@ -294,7 +294,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         )
 
@@ -305,7 +305,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         )
     }

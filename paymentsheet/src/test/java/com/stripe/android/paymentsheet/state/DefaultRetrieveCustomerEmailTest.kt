@@ -157,7 +157,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
             canRemoveLastPaymentMethod = false,
-            canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         )
 
@@ -168,7 +168,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         )
 

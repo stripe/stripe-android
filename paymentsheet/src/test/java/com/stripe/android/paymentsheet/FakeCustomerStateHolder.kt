@@ -20,7 +20,7 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
     override val canRemove: StateFlow<Boolean>
         get() = stateFlowOf(false)
 
-    override val canUpdateCardPaymentMethodDetails: StateFlow<Boolean>
+    override val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>
         get() = stateFlowOf(false)
 
     override val canUpdateCardBrandChoice: StateFlow<Boolean>

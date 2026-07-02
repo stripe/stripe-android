@@ -48,8 +48,8 @@ internal class DefaultCustomerStateHolder(
         } ?: false
     }
 
-    override val canUpdateCardPaymentMethodDetails: StateFlow<Boolean> = customerMetadata.mapAsStateFlow {
-        it?.canUpdateCardPaymentMethodDetails ?: false
+    override val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean> = customerMetadata.mapAsStateFlow {
+        it?.canUpdateCardExpiryAndBillingDetails ?: false
     }
 
     override val canUpdateCardBrandChoice: StateFlow<Boolean> = customerMetadata.mapAsStateFlow {

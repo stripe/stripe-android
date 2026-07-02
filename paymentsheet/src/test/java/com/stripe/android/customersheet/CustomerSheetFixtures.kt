@@ -103,7 +103,7 @@ internal object CustomerSheetFixtures {
             permissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
-                canUpdateCardPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
             ),
             defaultPaymentMethodId = null,
             customerId = customer?.session?.customerId ?: "unused_for_customer_adapter_data_source",
