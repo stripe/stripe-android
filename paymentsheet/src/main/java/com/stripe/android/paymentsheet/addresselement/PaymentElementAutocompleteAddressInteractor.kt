@@ -40,35 +40,30 @@ internal class PaymentElementAutocompleteAddressInteractor(
             eventListener?.invoke(it)
         }
     }
+}
 
-    class Factory(
-        private val launcher: AutocompleteLauncher,
-        private val autocompleteConfig: AutocompleteAddressInteractor.Config,
-        private val inlineDependencies: InlineAutocompleteDependencies?,
-    ) : AutocompleteAddressInteractor.Factory {
-        // The factory outlives individual forms (it is held for the whole sheet), so it disposes the
-        // previously-created inline interactor before building a new one. Only one address form is
-        // live at a time in this flow, so the prior controller's long-running query collector would
-        // otherwise leak on the shared coroutine scope across form re-creations.
-        private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
-
-        override fun create(): AutocompleteAddressInteractor {
-            activeInlineInteractor?.dispose()
-            activeInlineInteractor = null
-
-            val dependencies = inlineDependencies
-            if (dependencies != null) {
-                return BillingInlineAutocompleteAddressInteractor(
-                    placesClient = dependencies.placesClient,
-                    autocompleteConfig = autocompleteConfig,
-                    coroutineScope = dependencies.coroutineScope,
-                ).also { activeInlineInteractor = it }
-            }
-            return PaymentElementAutocompleteAddressInteractor(
-                launcher = launcher,
+internal class PaymentElementAutocompleteAddressInteractorFactory(
+    private val launcher: AutocompleteLauncher,
+    private val autocompleteConfig: AutocompleteAddressInteractor.Config,
+    private val inlineDependencies: InlineAutocompleteDependencies?,
+) : AutocompleteAddressInteractor.Factory {
+    override fun create(): AutocompleteAddressInteractor {
+        val dependencies = inlineDependencies
+        if (dependencies != null && autocompleteConfig.isInlineAutocompleteEnabled) {
+            // The shared factory can be reused while an existing form is still on screen. The
+            // form/controller that created an inline interactor owns its lifecycle and disposes it
+            // when that controller goes away; disposing previous interactors here can tear down the
+            // active dropdown observer during unrelated form-model rebuilds.
+            return BillingInlineAutocompleteAddressInteractor(
+                placesClient = dependencies.placesClient,
                 autocompleteConfig = autocompleteConfig,
+                coroutineScope = dependencies.coroutineScope,
             )
         }
+        return PaymentElementAutocompleteAddressInteractor(
+            launcher = launcher,
+            autocompleteConfig = autocompleteConfig,
+        )
     }
 }
 

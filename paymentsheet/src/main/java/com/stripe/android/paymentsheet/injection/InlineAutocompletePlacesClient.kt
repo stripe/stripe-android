@@ -6,9 +6,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
-
-internal val cachedIsPlacesAvailable: Boolean by lazy { DefaultIsPlacesAvailable()() }
 
 internal fun createInlineAutocompletePlacesClient(
     context: Context,

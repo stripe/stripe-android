@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -40,7 +39,6 @@ internal class InlineAutocompleteController(
         observeJob?.cancel()
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
-                .drop(1)
                 .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
                 .collectLatest { (q, c) ->
                     if (q == lastPredictionLine1) {

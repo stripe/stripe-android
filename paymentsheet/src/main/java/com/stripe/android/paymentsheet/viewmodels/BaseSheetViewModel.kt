@@ -23,7 +23,7 @@ import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNT
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.InlineAutocompleteDependencies
-import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractorFactory
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -84,8 +84,8 @@ internal abstract class BaseSheetViewModel(
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
 
-    val autocompleteAddressInteractorFactory: PaymentElementAutocompleteAddressInteractor.Factory =
-        PaymentElementAutocompleteAddressInteractor.Factory(
+    val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory =
+        PaymentElementAutocompleteAddressInteractorFactory(
             launcher = autocompleteLauncher,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = config.googlePlacesApiKey,
