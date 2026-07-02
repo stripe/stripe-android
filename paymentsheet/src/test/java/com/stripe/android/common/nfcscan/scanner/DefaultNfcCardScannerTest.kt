@@ -12,6 +12,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
+import java.io.IOException
 
 internal class DefaultNfcCardScannerTest {
     private val dispatcher = UnconfinedTestDispatcher()
@@ -92,6 +93,59 @@ internal class DefaultNfcCardScannerTest {
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+    }
+
+    @Test
+    fun `start emits Failed when transceiver open fails`() = runScenario(
+        openException = IOException("open failed"),
+    ) {
+        scanner.state.test {
+            scanner.start(activity)
+
+            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
+            startCall.onTagDiscovered.invoke(tag)
+
+            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
+            val failedState = awaitItem() as NfcCardScanner.State.Failed
+            assertThat(failedState.error).isInstanceOf(IOException::class.java)
+            assertThat(failedState.error.message).isEqualTo("open failed")
+        }
+
+        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+
+        val transceiver = requireNotNull(fakeTransceiver)
+
+        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `start emits Failed when transceiver close fails`() = runScenario(
+        cardData = ScannedCardData(
+            cardNumber = "4242424242424242",
+            expirationMonth = 12,
+            expirationYear = 2030,
+        ),
+        closeException = IOException("close failed"),
+    ) {
+        scanner.state.test {
+            scanner.start(activity)
+
+            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
+            startCall.onTagDiscovered.invoke(tag)
+
+            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
+            val failedState = awaitItem() as NfcCardScanner.State.Failed
+            assertThat(failedState.error).isInstanceOf(IOException::class.java)
+            assertThat(failedState.error.message).isEqualTo("close failed")
+        }
+
+        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+
+        val transceiver = requireNotNull(fakeTransceiver)
+
+        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
+        assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
+        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
     }
 
     private fun runScenario(
