@@ -38,10 +38,6 @@ sealed class PaymentOptionsItem {
         val displayName = displayableSavedPaymentMethod.displayName
         val paymentMethod = displayableSavedPaymentMethod.paymentMethod
 
-        fun isModifiable(canUpdateFullPaymentMethodDetails: Boolean): Boolean {
-            return displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
-        }
-
         override val isEnabledDuringEditing: Boolean = true
     }
 
