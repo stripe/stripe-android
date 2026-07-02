@@ -570,6 +570,7 @@ internal class PaymentOptionsActivityTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                placesClient = null,
             )
         }
 

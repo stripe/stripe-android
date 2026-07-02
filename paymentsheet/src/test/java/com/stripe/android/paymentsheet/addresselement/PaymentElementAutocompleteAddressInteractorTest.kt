@@ -5,8 +5,10 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -183,13 +185,88 @@ class PaymentElementAutocompleteAddressInteractorTest {
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
-            autocompleteConfig = config
+            autocompleteConfig = config,
+            inlineDependencies = null,
         )
 
         val interactor = factory.create()
 
         assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
         assertThat(interactor.autocompleteConfig).isEqualTo(config)
+    }
+
+    @Test
+    fun `Factory creates inline interactor when inline enabled with places client and scope`() = test { scenario ->
+        val config = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = "test-key",
+            autocompleteCountries = setOf("US"),
+            isInlineAutocompleteEnabled = true,
+        )
+
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
+            launcher = scenario.launcher,
+            autocompleteConfig = config,
+            inlineDependencies = InlineAutocompleteDependencies(
+                placesClient = FakePlacesClientProxy(),
+                coroutineScope = this,
+            ),
+        )
+
+        val interactor = factory.create()
+
+        assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
+        assertThat(interactor.autocompleteConfig).isEqualTo(config)
+    }
+
+    @Test
+    fun `Factory disposes previously created inline interactor on next create`() = test { scenario ->
+        val config = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = "test-key",
+            autocompleteCountries = setOf("US"),
+            isInlineAutocompleteEnabled = true,
+        )
+        val fakePlaces = FakePlacesClientProxy()
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
+            launcher = scenario.launcher,
+            autocompleteConfig = config,
+            inlineDependencies = InlineAutocompleteDependencies(
+                placesClient = fakePlaces,
+                coroutineScope = this,
+            ),
+        )
+        val queryFlow = MutableStateFlow("")
+        val countryFlow = MutableStateFlow<String?>("US")
+
+        val first = factory.create()
+        first.observeQueryChanges(queryFlow, countryFlow)
+
+        // Building a new interactor must dispose the previous one's query observation.
+        factory.create()
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        fakePlaces.findPredictionsCalls.expectNoEvents()
+        fakePlaces.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Factory falls back to launcher when inline enabled but no dependencies`() = test { scenario ->
+        val config = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = "test-key",
+            autocompleteCountries = setOf("US"),
+            isInlineAutocompleteEnabled = true,
+        )
+
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
+            launcher = scenario.launcher,
+            autocompleteConfig = config,
+            inlineDependencies = null,
+        )
+
+        val interactor = factory.create()
+
+        assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
     }
 
     @Test

@@ -175,6 +175,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = null,
             )
         }
     }
@@ -226,7 +227,8 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = null,
             )
         }
     }
