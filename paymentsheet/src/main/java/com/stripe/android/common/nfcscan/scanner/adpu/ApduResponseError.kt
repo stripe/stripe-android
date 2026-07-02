@@ -1,0 +1,14 @@
+package com.stripe.android.common.nfcscan.scanner.adpu
+
+internal sealed class ApduResponseError(override val message: String?) : Throwable() {
+    class TooShort : ApduResponseError("ADPU response is too short! Needs at least two bytes!")
+
+    data class Command(
+        val sw1: Byte,
+        val sw2: Byte,
+    ) : ApduResponseError("APDU error: SW1=$sw1, SW2=$sw2")
+
+    class Parsing(
+        val data: ByteArray
+    ) : ApduResponseError("Failed to parse response data: ${data.toHexString()}")
+}

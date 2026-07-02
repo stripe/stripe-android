@@ -47,6 +47,10 @@ enum class CardBrand(
      * The rendering order in the card details cell
      */
     private val renderingOrder: Int,
+    /**
+     * The known application identifier prefix on the credit card chip used when processing card present transactions
+     */
+    private val applicationIdentifierPrefix: String? = null,
 ) {
     Visa(
         "visa",
@@ -56,7 +60,8 @@ enum class CardBrand(
         partialPatterns = mapOf(
             1 to Pattern.compile("^4$")
         ),
-        renderingOrder = 1
+        renderingOrder = 1,
+        applicationIdentifierPrefix = "A000000003",
     ),
 
     MasterCard(
@@ -71,7 +76,8 @@ enum class CardBrand(
             1 to Pattern.compile("^2|5|6$"),
             2 to Pattern.compile("^(22|23|24|25|26|27|50|51|52|53|54|55|56|57|58|59|67)$")
         ),
-        renderingOrder = 2
+        renderingOrder = 2,
+        applicationIdentifierPrefix = "A000000004",
     ),
 
     AmericanExpress(
@@ -85,7 +91,8 @@ enum class CardBrand(
         partialPatterns = mapOf(
             1 to Pattern.compile("^3$")
         ),
-        renderingOrder = 3
+        renderingOrder = 3,
+        applicationIdentifierPrefix = "A000000025",
     ),
 
     Discover(
@@ -96,7 +103,8 @@ enum class CardBrand(
         partialPatterns = mapOf(
             1 to Pattern.compile("^6$")
         ),
-        renderingOrder = 4
+        renderingOrder = 4,
+        applicationIdentifierPrefix = "A000000152",
     ),
 
     /**
@@ -114,7 +122,8 @@ enum class CardBrand(
             2 to Pattern.compile("^(35)$"),
             3 to Pattern.compile("^(35[2-8])$")
         ),
-        renderingOrder = 5
+        renderingOrder = 5,
+        applicationIdentifierPrefix = "A000000065",
     ),
 
     /**
@@ -135,7 +144,8 @@ enum class CardBrand(
         variantMaxLength = mapOf(
             Pattern.compile("^(36)[0-9]*$") to 14
         ),
-        renderingOrder = 6
+        renderingOrder = 6,
+        applicationIdentifierPrefix = "A000000152",
     ),
 
     UnionPay(
@@ -146,7 +156,8 @@ enum class CardBrand(
         partialPatterns = mapOf(
             1 to Pattern.compile("^6|8$")
         ),
-        renderingOrder = 7
+        renderingOrder = 7,
+        applicationIdentifierPrefix = "A000000333",
     ),
 
     CartesBancaires(
@@ -255,6 +266,13 @@ enum class CardBrand(
     }
 
     companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isSupportedCardPresentApplication(prefix: String): Boolean {
+            return entries.any { cardBrand ->
+                cardBrand.applicationIdentifierPrefix == prefix
+            }
+        }
+
         /**
          * @param cardNumber a card number
          * @return the [CardBrand] that matches the [cardNumber]'s prefix, if one is found;
