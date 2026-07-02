@@ -231,7 +231,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             autocompleteConfig = config,
             inlineDependencies = InlineAutocompleteDependencies(
                 placesClient = fakePlaces,
-                coroutineScope = this,
+                coroutineScope = backgroundScope,
             ),
         )
         val queryFlow = MutableStateFlow("")
