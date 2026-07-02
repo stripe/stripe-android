@@ -92,12 +92,19 @@ internal class CheckoutSessionRepository @Inject constructor(
         sessionId: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
-    ): Result<CheckoutSessionResponse> = executePost(
-        url = updateUrl(sessionId),
-        params = buildMap {
+    ): Result<CheckoutSessionResponse> {
+        val updateParams = params.toParamMap()
+        if (updateParams.hasUnsupportedCheckoutSessionUpdateParams()) {
+            return Result.failure(
+                IllegalArgumentException(
+                    "Checkout sessions support updating card expiry and billing details only."
+                )
+            )
+        }
+
+        val checkoutSessionUpdateParams = buildMap {
             put("payment_method_to_update[payment_method_id]", paymentMethodId)
 
-            val updateParams = params.toParamMap()
             putNestedParams(
                 prefix = "payment_method_to_update[billing_details]",
                 params = updateParams["billing_details"] as? Map<*, *>,
@@ -105,8 +112,26 @@ internal class CheckoutSessionRepository @Inject constructor(
             putExpiryDetails(updateParams["card"] as? Map<*, *>)
 
             put("elements_session_client[is_aggregation_expected]", "true")
-        },
-    )
+        }
+
+        val hasSupportedUpdateParams = checkoutSessionUpdateParams.keys.any {
+            it.startsWith("payment_method_to_update[billing_details]") ||
+                it.startsWith("payment_method_to_update[expiry_details]")
+        }
+
+        return if (hasSupportedUpdateParams) {
+            executePost(
+                url = updateUrl(sessionId),
+                params = checkoutSessionUpdateParams,
+            )
+        } else {
+            Result.failure(
+                IllegalArgumentException(
+                    "Checkout sessions support updating card expiry and billing details only."
+                )
+            )
+        }
+    }
 
     suspend fun applyPromotionCode(
         sessionId: String,
@@ -225,4 +250,12 @@ private fun MutableMap<String, Any>.putExpiryDetails(cardParams: Map<*, *>?) {
         put("payment_method_to_update[expiry_details][exp_month]", expiryMonth)
         put("payment_method_to_update[expiry_details][exp_year]", expiryYear)
     }
+}
+
+private fun Map<String, Any>.hasUnsupportedCheckoutSessionUpdateParams(): Boolean {
+    val unsupportedTopLevelParams = keys - setOf("billing_details", "card")
+    val cardParams = this["card"] as? Map<*, *>
+    val unsupportedCardParams = cardParams?.keys.orEmpty() - setOf("exp_month", "exp_year")
+
+    return unsupportedTopLevelParams.isNotEmpty() || unsupportedCardParams.isNotEmpty()
 }

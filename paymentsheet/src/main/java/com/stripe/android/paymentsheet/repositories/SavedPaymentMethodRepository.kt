@@ -78,9 +78,9 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
                 params = params,
-            ).map { response ->
+            ).mapCatching { response ->
                 response.customer?.paymentMethods?.firstOrNull { it.id == paymentMethodId }
-                    ?: PaymentMethod.Builder().setId(paymentMethodId).build()
+                    ?: error("Checkout session update response did not include updated payment method.")
             }
         }
         is CustomerMetadata.CustomerSession -> {

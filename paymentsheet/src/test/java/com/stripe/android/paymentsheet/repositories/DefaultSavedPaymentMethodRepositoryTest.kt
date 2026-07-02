@@ -109,7 +109,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             bodyPart("payment_method_to_update[billing_details][name]", "Jane Doe"),
             bodyPart("payment_method_to_update[billing_details][address][postal_code]", "94111"),
         ) { response ->
-            response.testBodyFromFile("checkout-session-init.json")
+            response.setBody(checkoutSessionUpdateResponse())
         }
 
         val result = repository.updatePaymentMethod(
@@ -127,6 +127,70 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+        assertThat(result.getOrThrow().billingDetails?.name).isEqualTo("Jane Doe")
+        assertThat(result.getOrThrow().card?.expiryYear).isEqualTo(2030)
+    }
+
+    @Test
+    fun `update fails for checkout session when response omits updated payment method`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(
+                expiryMonth = 12,
+                expiryYear = 2030,
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .contains("did not include updated payment method")
+    }
+
+    @Test
+    fun `update fails for checkout session when params only update card brand`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(
+                networks = PaymentMethodUpdateParams.Card.Networks(preferred = "visa"),
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .contains("card expiry and billing details only")
+    }
+
+    @Test
+    fun `update fails for checkout session when params include card brand`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(
+                expiryMonth = 12,
+                expiryYear = 2030,
+                networks = PaymentMethodUpdateParams.Card.Networks(preferred = "visa"),
+            ),
+        )
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .contains("card expiry and billing details only")
     }
 
     @Test
@@ -328,5 +392,46 @@ class DefaultSavedPaymentMethodRepositoryTest {
             canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         )
+
+        private fun checkoutSessionUpdateResponse(): String {
+            return """
+                {
+                  "session_id": "cs_123",
+                  "ui_mode": "custom",
+                  "currency": "usd",
+                  "total_summary": {
+                    "due": 5099
+                  },
+                  "customer": {
+                    "id": "cus_123",
+                    "can_detach_payment_method": true,
+                    "payment_methods": [
+                      {
+                        "id": "pm_123",
+                        "object": "payment_method",
+                        "billing_details": {
+                          "address": {
+                            "postal_code": "94111"
+                          },
+                          "email": null,
+                          "name": "Jane Doe",
+                          "phone": null
+                        },
+                        "card": {
+                          "brand": "visa",
+                          "exp_month": 12,
+                          "exp_year": 2030,
+                          "last4": "4242"
+                        },
+                        "created": 1712554485,
+                        "customer": "cus_123",
+                        "livemode": false,
+                        "type": "card"
+                      }
+                    ]
+                  }
+                }
+            """.trimIndent()
+        }
     }
 }
