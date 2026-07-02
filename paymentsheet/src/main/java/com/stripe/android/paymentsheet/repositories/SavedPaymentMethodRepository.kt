@@ -74,7 +74,17 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
-            Result.failure(NotImplementedError("Checkout sessions do not support updating payment methods"))
+            val card = params as? PaymentMethodUpdateParams.Card
+            checkoutSessionRepository.updatePaymentMethod(
+                sessionId = customerMetadata.sessionId,
+                paymentMethodId = paymentMethodId,
+                billingDetails = card?.billingDetails,
+                expiryMonth = card?.expiryMonth,
+                expiryYear = card?.expiryYear,
+            ).map { response ->
+                response.customer?.paymentMethods?.firstOrNull { it.id == paymentMethodId }
+                    ?: PaymentMethod.Builder().setId(paymentMethodId).build()
+            }
         }
         is CustomerMetadata.CustomerSession -> {
             customerRepository.updatePaymentMethod(

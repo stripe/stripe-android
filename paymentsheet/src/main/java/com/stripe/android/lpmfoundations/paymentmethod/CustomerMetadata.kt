@@ -58,8 +58,8 @@ internal sealed class CustomerMetadata : Parcelable {
         // When removal is permitted, CheckoutSession doesn't restrict removing the last one.
         override val canRemoveLastPaymentMethod: Boolean get() = true
 
-        // CheckoutSession card detail updates are wired in a separate change.
-        override val canUpdateCardExpiryAndBillingDetails: Boolean get() = false
+        // CheckoutSession supports updating saved card expiry and billing details.
+        override val canUpdateCardExpiryAndBillingDetails: Boolean get() = true
 
         // CheckoutSession doesn't support updating preferred card networks.
         override val canUpdateCardBrandChoice: Boolean get() = false

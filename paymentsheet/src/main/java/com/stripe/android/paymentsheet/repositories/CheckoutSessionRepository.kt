@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import java.util.TimeZone
 import java.util.UUID
@@ -85,6 +86,46 @@ internal class CheckoutSessionRepository @Inject constructor(
         params = mapOf(
             "payment_method_to_detach" to paymentMethodId,
         ),
+    )
+
+    suspend fun updatePaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+        billingDetails: PaymentMethod.BillingDetails?,
+        expiryMonth: Int?,
+        expiryYear: Int?,
+    ): Result<CheckoutSessionResponse> = executePost(
+        url = updateUrl(sessionId),
+        params = buildMap {
+            put("payment_method_to_update[payment_method_id]", paymentMethodId)
+
+            billingDetails?.let { bd ->
+                putIfNotEmpty("payment_method_to_update[billing_details][name]", bd.name)
+                putIfNotEmpty("payment_method_to_update[billing_details][email]", bd.email)
+                putIfNotEmpty("payment_method_to_update[billing_details][phone]", bd.phone)
+                bd.address?.let { addr ->
+                    putIfNotEmpty("payment_method_to_update[billing_details][address][line1]", addr.line1)
+                    putIfNotEmpty("payment_method_to_update[billing_details][address][line2]", addr.line2)
+                    putIfNotEmpty("payment_method_to_update[billing_details][address][city]", addr.city)
+                    putIfNotEmpty("payment_method_to_update[billing_details][address][state]", addr.state)
+                    putIfNotEmpty(
+                        "payment_method_to_update[billing_details][address][postal_code]",
+                        addr.postalCode
+                    )
+                    putIfNotEmpty(
+                        "payment_method_to_update[billing_details][address][country]",
+                        addr.country
+                    )
+                }
+            }
+
+            if (expiryMonth != null && expiryYear != null) {
+                put("payment_method_to_update[expiry_details][exp_month]", expiryMonth.toString())
+                put("payment_method_to_update[expiry_details][exp_year]", expiryYear.toString())
+            }
+
+            put("elements_session_client[is_aggregation_expected]", "true")
+        },
     )
 
     suspend fun applyPromotionCode(

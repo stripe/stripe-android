@@ -96,17 +96,32 @@ class DefaultSavedPaymentMethodRepositoryTest {
     }
 
     @Test
-    fun `update fails for checkout session`() = runScenario(
+    fun `update routes to checkout session repository when customer is CheckoutSession`() = runScenario(
         customerMetadata = CHECKOUT_SESSION_METADATA,
     ) {
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
+            bodyPart("payment_method_to_update[expiry_details][exp_month]", "12"),
+            bodyPart("payment_method_to_update[expiry_details][exp_year]", "2030"),
+            bodyPart("payment_method_to_update[billing_details][name]", "Jane Doe"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-init.json")
+        }
+
         val result = repository.updatePaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
-            params = PaymentMethodUpdateParams.createCard(),
+            params = PaymentMethodUpdateParams.createCard(
+                expiryMonth = 12,
+                expiryYear = 2030,
+                billingDetails = PaymentMethod.BillingDetails(name = "Jane Doe"),
+            ),
         )
 
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(NotImplementedError::class.java)
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_123")
     }
 
     @Test
