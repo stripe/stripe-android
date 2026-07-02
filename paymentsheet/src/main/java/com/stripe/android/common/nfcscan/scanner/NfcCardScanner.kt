@@ -46,18 +46,23 @@ internal class DefaultNfcCardScanner @Inject constructor(
             viewModelScope.launch(workContext) {
                 _state.emit(NfcCardScanner.State.Scanning)
 
-                transceiver.open()
+                runCatching {
+                    transceiver.open()
 
-                cardReader.readCard(transceiver).fold(
+                    try {
+                        cardReader.readCard(transceiver)
+                            .getOrThrow()
+                    } finally {
+                        transceiver.close()
+                    }
+                }.fold(
                     onSuccess = { cardData ->
                         _state.emit(NfcCardScanner.State.Complete(cardData))
                     },
-                    onFailure = {
-                        _state.emit(NfcCardScanner.State.Failed(it))
-                    },
+                    onFailure = { error ->
+                        _state.emit(NfcCardScanner.State.Failed(error))
+                    }
                 )
-
-                transceiver.close()
             }
         }
     }
