@@ -8,6 +8,10 @@ NEXT_VERSION_BUMP: MINOR
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+* [ADDED] Added `getWalletOwnershipChallenge(walletAddress, network)` to `OnrampCoordinator` to create a short-lived challenge for EU Travel Rule wallet ownership verification.
+* [ADDED] Added `submitWalletOwnershipSignature(challengeId, signature)` to `OnrampCoordinator` to verify wallet ownership by submitting a signature over the challenge message.
+* [ADDED] Added `WalletOwnershipChallenge` and `ConsumerWallet` public model types.
+* [ADDED] Added `OnrampGetWalletOwnershipChallengeResult` and `OnrampSubmitWalletOwnershipSignatureResult` result types.
 
 ## 23.11.1 - 2026-06-30
 
