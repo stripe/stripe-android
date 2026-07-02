@@ -165,7 +165,7 @@ internal class DefaultPaymentElementLoaderTest {
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = true,
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardPaymentMethodDetails = false,
                     clientAttributionMetadata = ClientAttributionMetadata(
                         elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,
                         paymentIntentCreationFlow = PaymentIntentCreationFlow.Standard,
@@ -2766,7 +2766,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateCardPaymentMethodDetails)
                 .isEqualTo(true)
 
             consumeLoadingEvents()
@@ -2817,7 +2817,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateCardPaymentMethodDetails)
                 .isEqualTo(true)
 
             consumeLoadingEvents()
@@ -2868,7 +2868,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateCardPaymentMethodDetails)
                 .isEqualTo(true)
 
             consumeLoadingEvents()
@@ -2919,7 +2919,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateCardPaymentMethodDetails)
                 .isEqualTo(true)
 
             consumeLoadingEvents()
@@ -2929,7 +2929,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `customer session should have canUpdateFullPaymentMethodDetails permission enabled`() =
+    fun `customer session should have canUpdateCardPaymentMethodDetails permission enabled`() =
         runScenario {
             val loader = createPaymentElementLoader(
                 customer = createElementsSessionCustomer(
@@ -2970,7 +2970,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null))
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateCardPaymentMethodDetails)
                 .isEqualTo(true)
 
             consumeLoadingEvents()
@@ -3004,7 +3004,7 @@ internal class DefaultPaymentElementLoaderTest {
                 .isEqualTo(PaymentMethodSaveConsentBehavior.Legacy)
             assertThat(state.paymentMethodMetadata.customerMetadata?.canRemoveLastPaymentMethod)
                 .isEqualTo(true)
-            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateFullPaymentMethodDetails)
+            assertThat(state.paymentMethodMetadata.customerMetadata?.canUpdateCardPaymentMethodDetails)
                 .isEqualTo(false)
 
             consumeLoadingEvents()

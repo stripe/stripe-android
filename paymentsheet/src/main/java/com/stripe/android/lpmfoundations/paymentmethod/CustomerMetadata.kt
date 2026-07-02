@@ -13,7 +13,7 @@ internal sealed class CustomerMetadata : Parcelable {
     abstract val removePaymentMethod: PaymentMethodRemovePermission
     abstract val saveConsent: PaymentMethodSaveConsentBehavior
     abstract val canRemoveLastPaymentMethod: Boolean
-    abstract val canUpdateFullPaymentMethodDetails: Boolean
+    abstract val canUpdateCardPaymentMethodDetails: Boolean
 
     val canRemovePaymentMethods: Boolean
         get() = removePaymentMethod == PaymentMethodRemovePermission.Full ||
@@ -27,7 +27,7 @@ internal sealed class CustomerMetadata : Parcelable {
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
-        override val canUpdateFullPaymentMethodDetails: Boolean,
+        override val canUpdateCardPaymentMethodDetails: Boolean,
     ) : CustomerMetadata()
 
     @Parcelize
@@ -39,7 +39,7 @@ internal sealed class CustomerMetadata : Parcelable {
         override val removePaymentMethod: PaymentMethodRemovePermission,
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
-        override val canUpdateFullPaymentMethodDetails: Boolean,
+        override val canUpdateCardPaymentMethodDetails: Boolean,
     ) : CustomerMetadata()
 
     @Parcelize
@@ -55,8 +55,8 @@ internal sealed class CustomerMetadata : Parcelable {
         // When removal is permitted, CheckoutSession doesn't restrict removing the last one.
         override val canRemoveLastPaymentMethod: Boolean get() = true
 
-        // CheckoutSession doesn't support updating full payment method details.
-        override val canUpdateFullPaymentMethodDetails: Boolean get() = false
+        // CheckoutSession card detail updates are wired in a separate change.
+        override val canUpdateCardPaymentMethodDetails: Boolean get() = false
     }
 
     companion object {
@@ -112,7 +112,7 @@ internal sealed class CustomerMetadata : Parcelable {
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                 // Should always be enabled when using `customer_session`
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardPaymentMethodDetails = true,
             )
         }
 
@@ -143,7 +143,7 @@ internal sealed class CustomerMetadata : Parcelable {
                  * sessions.
                  */
                 canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardPaymentMethodDetails = false,
             )
         }
 
@@ -158,8 +158,8 @@ internal sealed class CustomerMetadata : Parcelable {
             val removePaymentMethod = customerSheetSession.permissions.removePaymentMethod
             val saveConsent = customerSheetSession.paymentMethodSaveConsentBehavior
             val canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod
-            val canUpdateFullPaymentMethodDetails =
-                customerSheetSession.permissions.canUpdateFullPaymentMethodDetails
+            val canUpdateCardPaymentMethodDetails =
+                customerSheetSession.permissions.canUpdateCardPaymentMethodDetails
 
             return if (customerSessionClientSecret != null) {
                 CustomerSession(
@@ -170,7 +170,7 @@ internal sealed class CustomerMetadata : Parcelable {
                     removePaymentMethod = removePaymentMethod,
                     saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
                 )
             } else {
                 LegacyEphemeralKey(
@@ -180,7 +180,7 @@ internal sealed class CustomerMetadata : Parcelable {
                     removePaymentMethod = removePaymentMethod,
                     saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
                 )
             }
         }

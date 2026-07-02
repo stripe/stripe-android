@@ -839,7 +839,7 @@ class DefaultAnalyticsMetadataFactoryTest {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canUpdateFullPaymentMethodDetails = true,
+        canUpdateCardPaymentMethodDetails = true,
     )
 
     private fun createElementsSessionCustomer(): ElementsSession.Customer {

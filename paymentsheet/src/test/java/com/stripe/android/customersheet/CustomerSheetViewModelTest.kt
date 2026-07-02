@@ -520,7 +520,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardPaymentMethodDetails = false,
             )
         )
         viewModel.viewState.test {
@@ -553,14 +553,14 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When canUpdateFullPaymentMethodDetails=true, showEditMenu should be true`() = runTest(testDispatcher) {
+    fun `When canUpdateCardPaymentMethodDetails=true, showEditMenu should be true`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardPaymentMethodDetails = true,
             )
         )
         viewModel.viewState.test {
@@ -576,14 +576,14 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When canUpdateFullPaymentMethodDetails=false, showEditMenu should be false`() = runTest(testDispatcher) {
+    fun `When canUpdateCardPaymentMethodDetails=false, showEditMenu should be false`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardPaymentMethodDetails = false,
             )
         )
         viewModel.viewState.test {
@@ -598,7 +598,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When canUpdateFullPaymentMethodDetails=false, card is cbc eligible, showEditMenu should be true`() =
+    fun `When canUpdateCardPaymentMethodDetails=false, card is cbc eligible, showEditMenu should be true`() =
         runTest(testDispatcher) {
             val viewModel = createViewModel(
                 workContext = testDispatcher,
@@ -606,7 +606,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardPaymentMethodDetails = false,
                 ),
                 cbcEligibility = CardBrandChoiceEligibility.Eligible(
                     preferredNetworks = listOf(CardBrand.CartesBancaires)
@@ -2911,7 +2911,7 @@ class CustomerSheetViewModelTest {
                 permissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardPaymentMethodDetails = false,
                 )
             )
 
@@ -3051,7 +3051,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardPaymentMethodDetails = true,
             ),
         )
 
@@ -3070,7 +3070,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false
+                canUpdateCardPaymentMethodDetails = false
             ),
         )
 
@@ -3089,7 +3089,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Partial,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardPaymentMethodDetails = true,
             ),
         )
 
@@ -3112,7 +3112,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = true,
+                    canUpdateCardPaymentMethodDetails = true,
                 ),
             )
 
@@ -3132,7 +3132,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardPaymentMethodDetails = false,
                 ),
             )
 
@@ -3155,7 +3155,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = true,
+                    canUpdateCardPaymentMethodDetails = true,
                 ),
             )
 
@@ -3642,7 +3642,7 @@ class CustomerSheetViewModelTest {
         permissions: CustomerPermissions = CustomerPermissions(
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardPaymentMethodDetails = true,
         )
     ): CustomerSheetViewModel {
         return createViewModel(

@@ -99,7 +99,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         }
 
         val showCardDetailsCannotBeChanged = interactor.isExpiredCard.not() &&
-            (interactor.isModifiablePaymentMethod.not() || interactor.canUpdateFullPaymentMethodDetails.not())
+            (interactor.isModifiablePaymentMethod.not() || interactor.canUpdateCardPaymentMethodDetails.not())
         if (showCardDetailsCannotBeChanged) {
             DetailsCannotBeChangedText(interactor, shouldShowCardBrandDropdown, context)
         }
@@ -356,7 +356,7 @@ private fun PreviewUpdatePaymentMethodUI() {
         interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = false,
             canRemove = true,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardPaymentMethodDetails = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
             allowedBillingCountries = emptySet(),

@@ -326,7 +326,7 @@ internal class CustomerMetadataTest {
             permissions = CustomerPermissions(
                 removePaymentMethod = removePermission,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true
+                canUpdateCardPaymentMethodDetails = true
             ),
             defaultPaymentMethodId = null,
             customerId = "unused_for_customer_adapter_data_source",
