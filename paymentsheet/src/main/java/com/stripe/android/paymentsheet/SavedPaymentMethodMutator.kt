@@ -95,7 +95,9 @@ internal class SavedPaymentMethodMutator(
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            item.isModifiable(customerStateHolder.canUpdateFullPaymentMethodDetails.value)
+            item.displayableSavedPaymentMethod.isModifiable(
+                customerStateHolder.canUpdateFullPaymentMethodDetails.value
+            )
         }
     }
 

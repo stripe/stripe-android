@@ -14,14 +14,15 @@ class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiab
 
     @Test
     fun `test isModifiable logic`() {
+        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                networks = PaymentMethod.Card.Networks(params.availableNetworks),
+                expiryYear = if (params.cardExpired) 2005 else 2099
+            )
+        )
         val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
             displayName = "unused".resolvableString,
-            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-                card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
-                    networks = PaymentMethod.Card.Networks(params.availableNetworks),
-                    expiryYear = if (params.cardExpired) 2005 else 2099
-                )
-            ),
+            paymentMethod = paymentMethod,
             isCbcEligible = params.isCbcEligible,
         )
 
@@ -37,6 +38,23 @@ class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiab
 
         assertThat(displayableSavedPaymentMethod.isModifiable(params.canUpdatePaymentMethod))
             .isEqualTo(params.expectedResult)
+
+        assertThat(
+            paymentMethod.isModifiable(
+                canUpdateFullPaymentMethodDetails = params.canUpdatePaymentMethod,
+                isCbcEligible = params.isCbcEligible,
+            )
+        ).isEqualTo(params.expectedResult)
+    }
+
+    @Test
+    fun `isModifiable returns false for non-card payment methods`() {
+        assertThat(
+            PaymentMethodFixtures.LINK_PAYMENT_METHOD.isModifiable(
+                canUpdateFullPaymentMethodDetails = true,
+                isCbcEligible = true,
+            )
+        ).isFalse()
     }
 
     data class IsModifiableParams(

@@ -133,8 +133,10 @@ class PaymentOptionsStateFactoryTest {
             defaultPaymentMethodId = null,
         )
 
+        val displayableSavedPaymentMethod = (state.items.last() as PaymentOptionsItem.SavedPaymentMethod)
+            .displayableSavedPaymentMethod
         assertThat(
-            (state.items.last() as PaymentOptionsItem.SavedPaymentMethod).isModifiable(canUpdatePaymentMethod)
+            displayableSavedPaymentMethod.isModifiable(canUpdatePaymentMethod)
         ).isEqualTo(expectedResult)
     }
 
