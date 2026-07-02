@@ -36,10 +36,12 @@ internal interface UpdatePaymentMethodInteractor {
     val isExpiredCard: Boolean
     val isModifiablePaymentMethod: Boolean
     val hasValidBrandChoices: Boolean
+    val shouldShowCardBrandDropdown: Boolean
     val shouldShowSetAsDefaultCheckbox: Boolean
     val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
     val canUpdateCardPaymentMethodDetails: Boolean
+    val canUpdateCardBrandChoice: Boolean
     val addressCollectionMode: AddressCollectionMode
     val allowedBillingCountries: Set<String>
     val editCardDetailsInteractor: EditCardDetailsInteractor
@@ -115,6 +117,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val addressCollectionMode: AddressCollectionMode,
     override val allowedBillingCountries: Set<String>,
     override val canUpdateCardPaymentMethodDetails: Boolean,
+    override val canUpdateCardBrandChoice: Boolean,
     override val removeMessage: ResolvableString?,
     val isDefaultPaymentMethod: Boolean,
     override val shouldShowSetAsDefaultCheckbox: Boolean,
@@ -140,7 +143,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val isModifiablePaymentMethod: Boolean
-        get() = displayableSavedPaymentMethod.isModifiable(canUpdateCardPaymentMethodDetails)
+        get() = displayableSavedPaymentMethod.isModifiable(
+            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+        )
+    override val shouldShowCardBrandDropdown: Boolean
+        get() = isModifiablePaymentMethod && canUpdateCardBrandChoice && displayableSavedPaymentMethod.canChangeCbc()
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
         isLiveMode = isLiveMode,
@@ -175,11 +183,14 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private fun createEditCardDetailsInteractorForCard(
         savedPaymentMethodCard: SavedPaymentMethod.Card,
     ): EditCardDetailsInteractor {
-        val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateCardPaymentMethodDetails)
+        val isModifiable = displayableSavedPaymentMethod.isModifiable(
+            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+        )
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
         val cardEditConfiguration = CardEditConfiguration(
             cardBrandFilter = cardBrandFilter,
-            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+            isCbcModifiable = isModifiable && canUpdateCardBrandChoice && displayableSavedPaymentMethod.canChangeCbc(),
             areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateCardPaymentMethodDetails,
         )
         return editCardDetailsInteractorFactory.create(

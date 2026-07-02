@@ -17,6 +17,7 @@ internal object PaymentMethodMetadataFixtures {
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
         canUpdateCardPaymentMethodDetails = false,
+        canUpdateCardBrandChoice = true,
     )
 
     internal val DEFAULT_CUSTOMER_INTEGRATION_METADATA = IntegrationMetadata.CustomerSheet(
@@ -39,6 +40,7 @@ internal object PaymentMethodMetadataFixtures {
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
         canUpdateCardPaymentMethodDetails = false,
+        canUpdateCardBrandChoice = true,
     )
 
     internal fun getDefaultCustomerMetadata(

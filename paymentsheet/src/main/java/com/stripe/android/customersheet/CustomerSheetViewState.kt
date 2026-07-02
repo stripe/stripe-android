@@ -144,10 +144,11 @@ internal sealed class CustomerSheetViewState(
 internal fun isModifiable(
     paymentMethod: PaymentMethod,
     cbcEligibility: CardBrandChoiceEligibility,
-    canUpdateCardPaymentMethodDetails: Boolean
+    canUpdateCardPaymentMethodDetails: Boolean,
 ): Boolean {
     return paymentMethod.isModifiable(
         canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+        canUpdateCardBrandChoice = true,
         isCbcEligible = cbcEligibility is CardBrandChoiceEligibility.Eligible,
     )
 }

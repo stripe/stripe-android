@@ -23,6 +23,9 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
     override val canUpdateCardPaymentMethodDetails: StateFlow<Boolean>
         get() = stateFlowOf(false)
 
+    override val canUpdateCardBrandChoice: StateFlow<Boolean>
+        get() = stateFlowOf(false)
+
     val setCustomerStateCalls = Turbine<CustomerState?>()
 
     val setDefaultPaymentMethodCalls = Turbine<PaymentMethod?>()

@@ -136,7 +136,10 @@ class PaymentOptionsStateFactoryTest {
         val displayableSavedPaymentMethod = (state.items.last() as PaymentOptionsItem.SavedPaymentMethod)
             .displayableSavedPaymentMethod
         assertThat(
-            displayableSavedPaymentMethod.isModifiable(canUpdatePaymentMethod)
+            displayableSavedPaymentMethod.isModifiable(
+                canUpdateCardPaymentMethodDetails = canUpdatePaymentMethod,
+                canUpdateCardBrandChoice = true,
+            )
         ).isEqualTo(expectedResult)
     }
 

@@ -21,6 +21,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val isExpiredCard: Boolean = false,
     override val isModifiablePaymentMethod: Boolean = false,
     override val hasValidBrandChoices: Boolean = true,
+    override val shouldShowCardBrandDropdown: Boolean = false,
     override val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     override val shouldShowSetAsDefaultCheckbox: Boolean = false,
     override val shouldShowSaveButton: Boolean = false,
@@ -37,6 +38,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
     override val canUpdateCardPaymentMethodDetails: Boolean = false,
+    override val canUpdateCardBrandChoice: Boolean,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
@@ -45,13 +47,17 @@ internal class FakeUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
-        val isModifiable =
-            displayableSavedPaymentMethod.isModifiable(canUpdateCardPaymentMethodDetails)
+        val isModifiable = displayableSavedPaymentMethod.isModifiable(
+            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+        )
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
             cardEditConfiguration = CardEditConfiguration(
                 cardBrandFilter = cardBrandFilter,
-                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+                isCbcModifiable = isModifiable &&
+                    canUpdateCardBrandChoice &&
+                    displayableSavedPaymentMethod.canChangeCbc(),
                 areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateCardPaymentMethodDetails
             ),
             requiresModification = true,

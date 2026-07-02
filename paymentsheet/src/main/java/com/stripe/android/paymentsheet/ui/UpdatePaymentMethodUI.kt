@@ -47,8 +47,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     val context = LocalContext.current
     val horizontalPadding = StripeTheme.getOuterFormInsets()
     val state by interactor.state.collectAsState()
-    val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
-        interactor.displayableSavedPaymentMethod.canChangeCbc()
+    val shouldShowCardBrandDropdown = interactor.shouldShowCardBrandDropdown
 
     Column(
         modifier = modifier
@@ -357,6 +356,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             isLiveMode = false,
             canRemove = true,
             canUpdateCardPaymentMethodDetails = true,
+            canUpdateCardBrandChoice = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
             allowedBillingCountries = emptySet(),

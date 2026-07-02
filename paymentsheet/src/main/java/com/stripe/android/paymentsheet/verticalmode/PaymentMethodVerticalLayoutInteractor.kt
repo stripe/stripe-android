@@ -104,6 +104,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val canRemove: StateFlow<Boolean>,
     private val walletsState: StateFlow<WalletsState?>,
     private val canUpdateCardPaymentMethodDetails: StateFlow<Boolean>,
+    private val canUpdateCardBrandChoice: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -179,6 +180,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 },
                 walletsState = viewModel.walletsState,
                 canUpdateCardPaymentMethodDetails = viewModel.customerStateHolder.canUpdateCardPaymentMethodDetails,
+                canUpdateCardBrandChoice = viewModel.customerStateHolder.canUpdateCardBrandChoice,
                 isCurrentScreen = isCurrentScreen,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
@@ -242,12 +244,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         displayedSavedPaymentMethod,
         canRemove,
         canUpdateCardPaymentMethodDetails,
-    ) { paymentMethods, displayedSavedPaymentMethod, canRemove, canUpdateCardPaymentMethodDetails ->
+        canUpdateCardBrandChoice,
+    ) { paymentMethods,
+        displayedSavedPaymentMethod,
+        canRemove,
+        canUpdateCardPaymentMethodDetails,
+        canUpdateCardBrandChoice ->
         getAvailableSavedPaymentMethodAction(
             paymentMethods = paymentMethods,
             savedPaymentMethod = displayedSavedPaymentMethod,
             canRemove = canRemove,
             canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardBrandChoice = canUpdateCardBrandChoice,
         )
     }
 
@@ -504,6 +512,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canRemove: Boolean,
         canUpdateCardPaymentMethodDetails: Boolean,
+        canUpdateCardBrandChoice: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         if (paymentMethods == null || savedPaymentMethod == null) {
             return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -516,6 +525,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     canRemove = canRemove,
                     savedPaymentMethod = savedPaymentMethod,
                     canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                    canUpdateCardBrandChoice = canUpdateCardBrandChoice,
                 )
             }
             else ->
@@ -527,8 +537,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canUpdateCardPaymentMethodDetails: Boolean,
+        canUpdateCardBrandChoice: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable(canUpdateCardPaymentMethodDetails) == true || canRemove) {
+        return if (savedPaymentMethod?.isModifiable(
+                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+            ) == true || canRemove
+        ) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE

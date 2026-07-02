@@ -226,7 +226,8 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             useDefaultBillingDetails = useDefaultBillingDetails,
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
             addressCollectionMode = addressCollectionMode,
-            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails
+            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardBrandChoice = true,
         ).apply {
             if (validating) {
                 editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)
