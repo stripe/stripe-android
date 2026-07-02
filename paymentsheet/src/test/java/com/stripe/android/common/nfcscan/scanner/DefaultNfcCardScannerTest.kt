@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.hardware.FakeNfcHardwareDelegate
 import com.stripe.android.testing.CoroutineTestRule
+import java.io.IOException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -92,6 +93,134 @@ internal class DefaultNfcCardScannerTest {
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+    }
+
+    @Test
+    fun `start emits Failed when transceiver open fails`() = runScenario(
+        openException = IOException("open failed"),
+    ) {
+        scanner.state.test {
+            scanner.start(activity)
+
+            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
+            startCall.onTagDiscovered.invoke(tag)
+
+            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
+            val failedState = awaitItem() as NfcCardScanner.State.Failed
+            assertThat(failedState.error).isInstanceOf(IOException::class.java)
+            assertThat(failedState.error.message).isEqualTo("open failed")
+        }
+
+        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+
+        val transceiver = requireNotNull(fakeTransceiver)
+
+        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `start emits Failed when transceiver open throws SecurityException`() = runScenario(
+        openException = SecurityException("nfc permission denied"),
+    ) {
+        scanner.state.test {
+            scanner.start(activity)
+
+            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
+            startCall.onTagDiscovered.invoke(tag)
+
+            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
+            val failedState = awaitItem() as NfcCardScanner.State.Failed
+            assertThat(failedState.error).isInstanceOf(SecurityException::class.java)
+            assertThat(failedState.error.message).isEqualTo("nfc permission denied")
+        }
+
+        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+        assertThat(requireNotNull(fakeTransceiver).openCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `start emits Failed when transceiver close fails`() = runScenario(
+        cardData = ScannedCardData(
+            cardNumber = "4242424242424242",
+            expirationMonth = 12,
+            expirationYear = 2030,
+        ),
+        closeException = IOException("close failed"),
+    ) {
+        scanner.state.test {
+            scanner.start(activity)
+
+            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
+            startCall.onTagDiscovered.invoke(tag)
+
+            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
+            val failedState = awaitItem() as NfcCardScanner.State.Failed
+            assertThat(failedState.error).isInstanceOf(IOException::class.java)
+            assertThat(failedState.error.message).isEqualTo("close failed")
+        }
+
+        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+
+        val transceiver = requireNotNull(fakeTransceiver)
+
+        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
+        assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
+        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `start passes activity to hardware delegate`() = runScenario {
+        scanner.start(activity)
+
+        val startCall = fakeHardwareDelegate.startCalls.awaitItem()
+
+        assertThat(startCall.activity).isEqualTo(activity)
+    }
+
+    @Test
+    fun `start does not emit state before tag is discovered`() = runScenario {
+        scanner.state.test {
+            scanner.start(activity)
+
+            fakeHardwareDelegate.startCalls.awaitItem()
+
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `start handles multiple tag discoveries`() = runScenario(
+        cardData = ScannedCardData(
+            cardNumber = "4242424242424242",
+            expirationMonth = 12,
+            expirationYear = 2030,
+        ),
+    ) {
+        scanner.state.test {
+            scanner.start(activity)
+
+            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
+
+            startCall.onTagDiscovered.invoke(tag)
+            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
+            assertThat(awaitItem()).isInstanceOf(NfcCardScanner.State.Complete::class.java)
+
+            startCall.onTagDiscovered.invoke(tag)
+            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
+            assertThat(awaitItem()).isInstanceOf(NfcCardScanner.State.Complete::class.java)
+        }
+
+        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
+
+        val transceiver = requireNotNull(fakeTransceiver)
+
+        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
+        assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
+        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
+        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
+        assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
+        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
     }
 
     private fun runScenario(
