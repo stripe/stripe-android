@@ -57,6 +57,7 @@ internal class InitialManageScreenFactoryTest {
                 FakeUpdatePaymentMethodInteractor(
                     displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                     canRemove = customerStateHolder.canRemove.value,
+                    canUpdateCardBrandChoice = true,
                     isExpiredCard = false,
                     isModifiablePaymentMethod = true,
                     viewActionRecorder = ViewActionRecorder(),

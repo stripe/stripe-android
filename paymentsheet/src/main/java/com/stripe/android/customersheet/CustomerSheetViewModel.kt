@@ -571,6 +571,7 @@ internal class CustomerSheetViewModel(
                     isLiveMode = isLiveMode,
                     canRemove = customerState.canRemove,
                     canUpdateCardPaymentMethodDetails = customerState.canUpdateCardPaymentMethodDetails,
+                    canUpdateCardBrandChoice = true,
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
                     allowedBillingCountries =
@@ -1275,11 +1276,14 @@ internal class CustomerSheetViewModel(
         }
 
         val canUpdateCardPaymentMethodDetails = permissions.canUpdateCardPaymentMethodDetails
-
         val cbcEligibility = metadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible
 
         val canEdit = canRemove || paymentMethods.any { method ->
-            isModifiable(method, cbcEligibility, canUpdateCardPaymentMethodDetails)
+            isModifiable(
+                paymentMethod = method,
+                cbcEligibility = cbcEligibility,
+                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            )
         }
 
         val canShowSavedPaymentMethods = paymentMethods.isNotEmpty() || shouldShowGooglePay(metadata)

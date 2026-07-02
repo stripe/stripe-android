@@ -1,15 +1,16 @@
 package com.stripe.android.paymentsheet
 
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.Truth.assertWithMessage
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @RunWith(Parameterized::class)
-class SavedPaymentMethodEditabilityTest(private val params: IsModifiableParams) {
+class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiableParams) {
 
     @Test
     fun `test isModifiable logic`() {
@@ -19,23 +20,56 @@ class SavedPaymentMethodEditabilityTest(private val params: IsModifiableParams) 
                 expiryYear = if (params.cardExpired) 2005 else 2099
             )
         )
+        val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
+            displayName = "unused".resolvableString,
+            paymentMethod = paymentMethod,
+            isCbcEligible = params.isCbcEligible,
+        )
 
-        assertWithMessage(
-            "Expected isModifiable for parameters: " +
+        assertEquals(
+            "Expected isModifiable to be ${params.expectedResult} for parameters: " +
                 "canUpdatePaymentMethod=${params.canUpdatePaymentMethod}, " +
                 "isCbcEligible=${params.isCbcEligible}, " +
                 "availableNetworks=${params.availableNetworks}, " +
-                "cardExpired=${params.cardExpired}"
-        ).that(
+                "cardExpired=${params.cardExpired}",
+            params.expectedResult,
+            displayableSavedPaymentMethod.isModifiable(
+                canUpdateCardPaymentMethodDetails = params.canUpdatePaymentMethod,
+                canUpdateCardBrandChoice = params.canUpdateCardBrandChoice,
+            )
+        )
+
+        assertThat(
+            displayableSavedPaymentMethod.isModifiable(
+                canUpdateCardPaymentMethodDetails = params.canUpdatePaymentMethod,
+                canUpdateCardBrandChoice = params.canUpdateCardBrandChoice,
+            )
+        )
+            .isEqualTo(params.expectedResult)
+
+        assertThat(
             paymentMethod.isModifiable(
-                canUpdateFullPaymentMethodDetails = params.canUpdatePaymentMethod,
+                canUpdateCardPaymentMethodDetails = params.canUpdatePaymentMethod,
+                canUpdateCardBrandChoice = params.canUpdateCardBrandChoice,
                 isCbcEligible = params.isCbcEligible,
             )
         ).isEqualTo(params.expectedResult)
     }
 
+    @Test
+    fun `isModifiable returns false for non-card payment methods`() {
+        assertThat(
+            PaymentMethodFixtures.LINK_PAYMENT_METHOD.isModifiable(
+                canUpdateCardPaymentMethodDetails = true,
+                canUpdateCardBrandChoice = true,
+                isCbcEligible = true,
+            )
+        ).isFalse()
+    }
+
     data class IsModifiableParams(
         val canUpdatePaymentMethod: Boolean = false,
+        val canUpdateCardBrandChoice: Boolean,
         val isCbcEligible: Boolean = false,
         val availableNetworks: Set<String> = setOf("visa"),
         val cardExpired: Boolean = false,
@@ -48,115 +82,57 @@ class SavedPaymentMethodEditabilityTest(private val params: IsModifiableParams) 
         fun testCases() = listOf(
             IsModifiableParams(
                 canUpdatePaymentMethod = true,
-                isCbcEligible = false,
-                availableNetworks = setOf("visa"),
-                cardExpired = false,
+                canUpdateCardBrandChoice = true,
                 expectedResult = true
             ),
             IsModifiableParams(
                 canUpdatePaymentMethod = true,
-                isCbcEligible = false,
-                availableNetworks = setOf("visa"),
+                canUpdateCardBrandChoice = true,
                 cardExpired = true,
                 expectedResult = true
             ),
             IsModifiableParams(
                 canUpdatePaymentMethod = true,
+                canUpdateCardBrandChoice = true,
                 isCbcEligible = true,
                 availableNetworks = setOf("visa", "mastercard"),
                 cardExpired = false,
                 expectedResult = true
             ),
             IsModifiableParams(
-                canUpdatePaymentMethod = false,
+                canUpdateCardBrandChoice = true,
                 isCbcEligible = true,
                 availableNetworks = setOf("visa", "cartes_bancaires"),
-                cardExpired = false,
                 expectedResult = true
             ),
             IsModifiableParams(
-                canUpdatePaymentMethod = false,
-                isCbcEligible = false,
-                availableNetworks = setOf("visa", "cartes_bancaires"),
-                cardExpired = false,
-                expectedResult = false
-            ),
-            IsModifiableParams(
-                canUpdatePaymentMethod = false,
+                canUpdateCardBrandChoice = false,
                 isCbcEligible = true,
-                availableNetworks = setOf("visa"),
-                cardExpired = false,
+                availableNetworks = setOf("visa", "cartes_bancaires"),
                 expectedResult = false
             ),
             IsModifiableParams(
-                canUpdatePaymentMethod = false,
+                canUpdateCardBrandChoice = true,
+                availableNetworks = setOf("visa", "cartes_bancaires"),
+                expectedResult = false
+            ),
+            IsModifiableParams(
+                canUpdateCardBrandChoice = true,
+                isCbcEligible = true,
+                expectedResult = false
+            ),
+            IsModifiableParams(
+                canUpdateCardBrandChoice = true,
                 isCbcEligible = true,
                 availableNetworks = setOf("visa", "cartes_bancaires"),
                 cardExpired = true,
                 expectedResult = false
             ),
             IsModifiableParams(
-                canUpdatePaymentMethod = false,
-                isCbcEligible = false,
-                availableNetworks = setOf("visa"),
+                canUpdateCardBrandChoice = true,
                 cardExpired = true,
                 expectedResult = false
             )
         )
-    }
-}
-
-class SavedPaymentMethodEditabilityStandaloneTest {
-    @Test
-    fun `canChangeCbc returns false for single network card when cbc eligible`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
-                networks = PaymentMethod.Card.Networks(setOf("visa"))
-            )
-        )
-
-        assertThat(paymentMethod.canChangeCbc(isCbcEligible = true)).isFalse()
-    }
-
-    @Test
-    fun `canChangeCbc returns false for multiple network card when cbc not eligible`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
-                networks = PaymentMethod.Card.Networks(setOf("visa", "cartes_bancaires"))
-            )
-        )
-
-        assertThat(paymentMethod.canChangeCbc(isCbcEligible = false)).isFalse()
-    }
-
-    @Test
-    fun `canChangeCbc returns true for multiple network card when cbc eligible`() {
-        val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-            card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
-                networks = PaymentMethod.Card.Networks(setOf("visa", "cartes_bancaires"))
-            )
-        )
-
-        assertThat(paymentMethod.canChangeCbc(isCbcEligible = true)).isTrue()
-    }
-
-    @Test
-    fun `canChangeCbc returns false for non-card payment methods`() {
-        assertThat(PaymentMethodFixtures.US_BANK_ACCOUNT.canChangeCbc(isCbcEligible = true)).isFalse()
-    }
-
-    @Test
-    fun `isModifiable returns false for non-card payment methods`() {
-        listOf(
-            PaymentMethodFixtures.LINK_PAYMENT_METHOD,
-            PaymentMethodFixtures.US_BANK_ACCOUNT,
-        ).forEach { paymentMethod ->
-            assertThat(
-                paymentMethod.isModifiable(
-                    canUpdateFullPaymentMethodDetails = true,
-                    isCbcEligible = true,
-                )
-            ).isFalse()
-        }
     }
 }

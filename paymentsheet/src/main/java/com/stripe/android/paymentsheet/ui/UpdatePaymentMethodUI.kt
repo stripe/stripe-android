@@ -31,7 +31,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.SavedPaymentMethod
-import com.stripe.android.paymentsheet.canChangeCbc
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
@@ -48,10 +47,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     val context = LocalContext.current
     val horizontalPadding = StripeTheme.getOuterFormInsets()
     val state by interactor.state.collectAsState()
-    val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
-        interactor.displayableSavedPaymentMethod.paymentMethod.canChangeCbc(
-            interactor.displayableSavedPaymentMethod.isCbcEligible
-        )
+    val shouldShowCardBrandDropdown = interactor.shouldShowCardBrandDropdown
 
     Column(
         modifier = modifier
@@ -360,6 +356,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             isLiveMode = false,
             canRemove = true,
             canUpdateCardPaymentMethodDetails = true,
+            canUpdateCardBrandChoice = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
             allowedBillingCountries = emptySet(),

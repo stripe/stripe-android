@@ -18,6 +18,19 @@ import org.junit.Test
 internal class CustomerMetadataTest {
 
     @Test
+    fun `CheckoutSession should support card details but not card brand updates`() {
+        val metadata = CustomerMetadata.CheckoutSession(
+            sessionId = "cs_123",
+            customerId = "cus_123",
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+        )
+
+        assertThat(metadata.canUpdateCardPaymentMethodDetails).isTrue()
+        assertThat(metadata.canUpdateCardBrandChoice).isFalse()
+    }
+
+    @Test
     fun `Should create 'Permissions' for customer session properly with permissions disabled`() {
         customerSessionPermissionsTest(
             paymentElementDisabled = true,

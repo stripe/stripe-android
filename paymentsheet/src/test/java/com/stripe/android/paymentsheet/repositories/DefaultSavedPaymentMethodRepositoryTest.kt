@@ -295,6 +295,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
             canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardBrandChoice = true,
         )
 
         private val LEGACY_METADATA = CustomerMetadata.LegacyEphemeralKey(
@@ -305,7 +306,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
             canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardBrandChoice = true,
         )
-
     }
 }

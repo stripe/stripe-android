@@ -92,11 +92,14 @@ internal class SavedPaymentMethodMutator(
 
     val canEdit: StateFlow<Boolean> = combineAsStateFlow(
         customerStateHolder.canRemove,
-        paymentOptionsItems
-    ) { canRemove, items ->
+        paymentOptionsItems,
+        customerStateHolder.canUpdateCardPaymentMethodDetails,
+        customerStateHolder.canUpdateCardBrandChoice,
+    ) { canRemove, items, canUpdateCardPaymentMethodDetails, canUpdateCardBrandChoice ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
             item.displayableSavedPaymentMethod.isModifiable(
-                customerStateHolder.canUpdateCardPaymentMethodDetails.value
+                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                canUpdateCardBrandChoice = canUpdateCardBrandChoice,
             )
         }
     }
@@ -379,6 +382,7 @@ internal class SavedPaymentMethodMutator(
                             canRemove = canRemove,
                             canUpdateCardPaymentMethodDetails = viewModel.customerStateHolder
                                 .canUpdateCardPaymentMethodDetails.value,
+                            canUpdateCardBrandChoice = viewModel.customerStateHolder.canUpdateCardBrandChoice.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,

@@ -23,6 +23,8 @@ internal interface CustomerStateHolder {
 
     val canUpdateCardPaymentMethodDetails: StateFlow<Boolean>
 
+    val canUpdateCardBrandChoice: StateFlow<Boolean>
+
     fun setCustomerState(customerState: CustomerState?)
 
     fun setDefaultPaymentMethod(paymentMethod: PaymentMethod?)

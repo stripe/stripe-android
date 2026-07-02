@@ -52,6 +52,10 @@ internal class DefaultCustomerStateHolder(
         it?.canUpdateCardPaymentMethodDetails ?: false
     }
 
+    override val canUpdateCardBrandChoice: StateFlow<Boolean> = customerMetadata.mapAsStateFlow {
+        it?.canUpdateCardBrandChoice ?: false
+    }
+
     override fun setCustomerState(customerState: CustomerState?) {
         savedStateHandle[SAVED_CUSTOMER] = customerState
 
