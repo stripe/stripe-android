@@ -89,7 +89,7 @@ internal class ApduCommandTest {
     }
 
     @Test
-    fun `transceiveWith returns Parsing error when response data cannot be parsed`() {
+    fun `transceiveWith returns Invalid error when response data cannot be parsed`() {
         val responseData = tlv(tag = 0x4F, value = byteArrayOf(0x01))
 
         test(
@@ -98,7 +98,30 @@ internal class ApduCommandTest {
             val command = TestApduCommand(response = null)
             val result = command.transceiveWith(transceiver)
 
-            assertThat(result.exceptionOrNull()).isInstanceOf<ApduResponseError.Parsing>()
+            val error = result.exceptionOrNull()
+            assertThat(error).isInstanceOf<ApduResponseError.Invalid>()
+            assertThat((error as ApduResponseError.Invalid).data.contentEquals(responseData)).isTrue()
+            assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `transceiveWith returns Parsing error when tlv data is malformed`() {
+        val malformedResponseData = byteArrayOf(0x4F, 0x05, 0x01)
+
+        test(
+            transceiveResult = apduSuccessResponse(malformedResponseData)
+        ) {
+            val command = TestApduCommand(response = "parsed")
+            val result = command.transceiveWith(transceiver)
+
+            val error = result.exceptionOrNull()
+            assertThat(error).isInstanceOf<ApduResponseError.Parsing>()
+
+            val parsingError = error as ApduResponseError.Parsing
+            assertThat(parsingError.data.contentEquals(malformedResponseData)).isTrue()
+            assertThat(parsingError.cause).isInstanceOf<IndexOutOfBoundsException>()
+
             assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
         }
     }

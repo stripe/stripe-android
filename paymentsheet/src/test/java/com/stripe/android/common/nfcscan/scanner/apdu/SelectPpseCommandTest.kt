@@ -48,11 +48,11 @@ internal class SelectPpseCommandTest {
     }
 
     @Test
-    fun `transceiveWith returns Parsing error when tlv contains no AID`() = test(
+    fun `transceiveWith returns Invalid error when tlv contains no AID`() = test(
         transceiveResult = apduSuccessResponse(tlv(tag = 0x50, value = byteArrayOf(0x56, 0x49, 0x53, 0x41))),
     ) {
         val result = SelectPpseCommand.transceiveWith(transceiver)
-        assertThat(result.exceptionOrNull()).isInstanceOf<ApduResponseError.Parsing>()
+        assertThat(result.exceptionOrNull()).isInstanceOf<ApduResponseError.Invalid>()
         assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
     }
 

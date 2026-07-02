@@ -4,10 +4,14 @@ package com.stripe.android.common.nfcscan.scanner.apdu
  * Converts unparsed Tag-Length-Value encoded data into a readable map keyed by the key.
  */
 internal object TlvParser {
-    fun parse(data: ByteArray): Map<String, ByteArray> {
+    fun parse(data: ByteArray): Result<Map<String, ByteArray>> {
         val nodes = mutableMapOf<String, ByteArray>()
-        parseInto(data, nodes)
-        return nodes
+
+        return runCatching {
+            parseInto(data, nodes)
+        }.map {
+            nodes.toMap()
+        }
     }
 
     /*

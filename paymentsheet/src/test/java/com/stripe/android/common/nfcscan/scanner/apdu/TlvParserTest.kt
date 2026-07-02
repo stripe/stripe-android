@@ -1,12 +1,16 @@
 package com.stripe.android.common.nfcscan.scanner.apdu
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.isInstanceOf
 import org.junit.Test
 
 internal class TlvParserTest {
     @Test
     fun `parse returns empty map for empty data`() {
-        assertThat(TlvParser.parse(byteArrayOf())).isEmpty()
+        val result = TlvParser.parse(byteArrayOf())
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()).isEmpty()
     }
 
     @Test
@@ -15,8 +19,11 @@ internal class TlvParserTest {
 
         val result = TlvParser.parse(tlv(tag = 0x4F, value = value))
 
-        assertThat(result).containsKey("4F")
-        assertThat(result.getValue("4F").contentEquals(value)).isTrue()
+        assertThat(result.isSuccess).isTrue()
+
+        val tlvMap = result.getOrThrow()
+        assertThat(tlvMap).containsKey("4F")
+        assertThat(tlvMap.getValue("4F").contentEquals(value)).isTrue()
     }
 
     @Test
@@ -27,10 +34,13 @@ internal class TlvParserTest {
 
         val result = TlvParser.parse(data)
 
-        assertThat(result).containsKey("4F")
-        assertThat(result.getValue("4F").contentEquals(aid)).isTrue()
-        assertThat(result).containsKey("50")
-        assertThat(result.getValue("50").contentEquals(label)).isTrue()
+        assertThat(result.isSuccess).isTrue()
+
+        val tlvMap = result.getOrThrow()
+        assertThat(tlvMap).containsKey("4F")
+        assertThat(tlvMap.getValue("4F").contentEquals(aid)).isTrue()
+        assertThat(tlvMap).containsKey("50")
+        assertThat(tlvMap.getValue("50").contentEquals(label)).isTrue()
     }
 
     @Test
@@ -39,8 +49,11 @@ internal class TlvParserTest {
 
         val result = TlvParser.parse(tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = value))
 
-        assertThat(result).containsKey("9F38")
-        assertThat(result.getValue("9F38").contentEquals(value)).isTrue()
+        assertThat(result.isSuccess).isTrue()
+
+        val tlvMap = result.getOrThrow()
+        assertThat(tlvMap).containsKey("9F38")
+        assertThat(tlvMap.getValue("9F38").contentEquals(value)).isTrue()
     }
 
     @Test
@@ -49,8 +62,11 @@ internal class TlvParserTest {
 
         val result = TlvParser.parse(tlv(tag = 0x4F, value = value))
 
-        assertThat(result).containsKey("4F")
-        assertThat(result.getValue("4F").contentEquals(value)).isTrue()
+        assertThat(result.isSuccess).isTrue()
+
+        val tlvMap = result.getOrThrow()
+        assertThat(tlvMap).containsKey("4F")
+        assertThat(tlvMap.getValue("4F").contentEquals(value)).isTrue()
     }
 
     @Test
@@ -61,9 +77,22 @@ internal class TlvParserTest {
 
         val result = TlvParser.parse(data)
 
-        assertThat(result).containsKey("6F")
-        assertThat(result.getValue("6F").contentEquals(fci)).isTrue()
-        assertThat(result).containsKey("4F")
-        assertThat(result.getValue("4F").contentEquals(aid)).isTrue()
+        assertThat(result.isSuccess).isTrue()
+
+        val tlvMap = result.getOrThrow()
+        assertThat(tlvMap).containsKey("6F")
+        assertThat(tlvMap.getValue("6F").contentEquals(fci)).isTrue()
+        assertThat(tlvMap).containsKey("4F")
+        assertThat(tlvMap.getValue("4F").contentEquals(aid)).isTrue()
+    }
+
+    @Test
+    fun `parse returns failure for malformed tlv data`() {
+        val malformedData = byteArrayOf(0x4F, 0x05, 0x01)
+
+        val result = TlvParser.parse(malformedData)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf<IndexOutOfBoundsException>()
     }
 }

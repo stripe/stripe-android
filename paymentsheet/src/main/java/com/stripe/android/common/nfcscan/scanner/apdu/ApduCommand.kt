@@ -81,10 +81,16 @@ internal abstract class ApduCommand<TResponseData> {
 
         val rawData = rawResponse.copyOfRange(0, rawResponse.size - 2)
 
-        val responseData = responseData(TlvParser.parse(rawData))
-            ?: return Result.failure(ApduResponseError.Parsing(rawData))
-
-        return Result.success(responseData)
+        return TlvParser.parse(rawData).fold(
+            onSuccess = { tlv ->
+                responseData(tlv)?.let { responseData ->
+                    Result.success(responseData)
+                } ?: Result.failure(ApduResponseError.Invalid(rawData))
+            },
+            onFailure = { cause ->
+                Result.failure(ApduResponseError.Parsing(rawData, cause))
+            }
+        )
     }
 
     private fun buildData(dataLengthByte: Byte?, dataArray: ByteArray?): ByteArray {
