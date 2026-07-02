@@ -18,7 +18,7 @@ import org.junit.Test
 internal class CustomerMetadataTest {
 
     @Test
-    fun `CheckoutSession should support card details but not card brand updates`() {
+    fun `CheckoutSession should not support card details or card brand updates`() {
         val metadata = CustomerMetadata.CheckoutSession(
             sessionId = "cs_123",
             customerId = "cus_123",
@@ -26,7 +26,7 @@ internal class CustomerMetadataTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         )
 
-        assertThat(metadata.canUpdateCardPaymentMethodDetails).isTrue()
+        assertThat(metadata.canUpdateCardPaymentMethodDetails).isFalse()
         assertThat(metadata.canUpdateCardBrandChoice).isFalse()
     }
 
