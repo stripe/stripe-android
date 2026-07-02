@@ -74,13 +74,10 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
-            val card = params as? PaymentMethodUpdateParams.Card
             checkoutSessionRepository.updatePaymentMethod(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
-                billingDetails = card?.billingDetails,
-                expiryMonth = card?.expiryMonth,
-                expiryYear = card?.expiryYear,
+                params = params,
             ).map { response ->
                 response.customer?.paymentMethods?.firstOrNull { it.id == paymentMethodId }
                     ?: PaymentMethod.Builder().setId(paymentMethodId).build()

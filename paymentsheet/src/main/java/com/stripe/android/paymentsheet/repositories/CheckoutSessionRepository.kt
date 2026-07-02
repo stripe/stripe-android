@@ -9,7 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import java.util.TimeZone
 import java.util.UUID
@@ -91,38 +91,18 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun updatePaymentMethod(
         sessionId: String,
         paymentMethodId: String,
-        billingDetails: PaymentMethod.BillingDetails?,
-        expiryMonth: Int?,
-        expiryYear: Int?,
+        params: PaymentMethodUpdateParams,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = buildMap {
             put("payment_method_to_update[payment_method_id]", paymentMethodId)
 
-            billingDetails?.let { bd ->
-                putIfNotEmpty("payment_method_to_update[billing_details][name]", bd.name)
-                putIfNotEmpty("payment_method_to_update[billing_details][email]", bd.email)
-                putIfNotEmpty("payment_method_to_update[billing_details][phone]", bd.phone)
-                bd.address?.let { addr ->
-                    putIfNotEmpty("payment_method_to_update[billing_details][address][line1]", addr.line1)
-                    putIfNotEmpty("payment_method_to_update[billing_details][address][line2]", addr.line2)
-                    putIfNotEmpty("payment_method_to_update[billing_details][address][city]", addr.city)
-                    putIfNotEmpty("payment_method_to_update[billing_details][address][state]", addr.state)
-                    putIfNotEmpty(
-                        "payment_method_to_update[billing_details][address][postal_code]",
-                        addr.postalCode
-                    )
-                    putIfNotEmpty(
-                        "payment_method_to_update[billing_details][address][country]",
-                        addr.country
-                    )
-                }
-            }
-
-            if (expiryMonth != null && expiryYear != null) {
-                put("payment_method_to_update[expiry_details][exp_month]", expiryMonth.toString())
-                put("payment_method_to_update[expiry_details][exp_year]", expiryYear.toString())
-            }
+            val updateParams = params.toParamMap()
+            putNestedParams(
+                prefix = "payment_method_to_update[billing_details]",
+                params = updateParams["billing_details"] as? Map<*, *>,
+            )
+            putExpiryDetails(updateParams["card"] as? Map<*, *>)
 
             put("elements_session_client[is_aggregation_expected]", "true")
         },
@@ -218,5 +198,31 @@ internal class CheckoutSessionRepository @Inject constructor(
 private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {
     if (!value.isNullOrEmpty()) {
         put(key, value)
+    }
+}
+
+private fun MutableMap<String, Any>.putNestedParams(
+    prefix: String,
+    params: Map<*, *>?,
+) {
+    params?.forEach { (key, value) ->
+        if (key is String && value != null) {
+            val paramKey = "$prefix[$key]"
+            if (value is Map<*, *>) {
+                putNestedParams(paramKey, value)
+            } else {
+                put(paramKey, value)
+            }
+        }
+    }
+}
+
+private fun MutableMap<String, Any>.putExpiryDetails(cardParams: Map<*, *>?) {
+    val expiryMonth = cardParams?.get("exp_month")
+    val expiryYear = cardParams?.get("exp_year")
+
+    if (expiryMonth != null && expiryYear != null) {
+        put("payment_method_to_update[expiry_details][exp_month]", expiryMonth)
+        put("payment_method_to_update[expiry_details][exp_year]", expiryYear)
     }
 }

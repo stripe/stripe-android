@@ -5,6 +5,7 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networktesting.NetworkRule
@@ -106,6 +107,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             bodyPart("payment_method_to_update[expiry_details][exp_month]", "12"),
             bodyPart("payment_method_to_update[expiry_details][exp_year]", "2030"),
             bodyPart("payment_method_to_update[billing_details][name]", "Jane Doe"),
+            bodyPart("payment_method_to_update[billing_details][address][postal_code]", "94111"),
         ) { response ->
             response.testBodyFromFile("checkout-session-init.json")
         }
@@ -116,7 +118,10 @@ class DefaultSavedPaymentMethodRepositoryTest {
             params = PaymentMethodUpdateParams.createCard(
                 expiryMonth = 12,
                 expiryYear = 2030,
-                billingDetails = PaymentMethod.BillingDetails(name = "Jane Doe"),
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = "Jane Doe",
+                    address = Address(postalCode = "94111"),
+                ),
             ),
         )
 
