@@ -267,9 +267,11 @@ enum class CardBrand(
 
     companion object {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun isSupportedCardPresentApplication(prefix: String): Boolean {
+        fun isSupportedCardPresentApplication(value: String): Boolean {
             return entries.any { cardBrand ->
-                cardBrand.applicationIdentifierPrefix == prefix
+                cardBrand.applicationIdentifierPrefix?.let {
+                    value.startsWith(it)
+                } ?: false
             }
         }
 

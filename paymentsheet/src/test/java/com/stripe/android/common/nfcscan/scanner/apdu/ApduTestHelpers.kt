@@ -1,4 +1,4 @@
-package com.stripe.android.common.nfcscan.scanner.adpu
+package com.stripe.android.common.nfcscan.scanner.apdu
 
 internal fun tlv(tag: Byte, value: ByteArray): ByteArray {
     return byteArrayOf(tag) + encodeLength(value.size) + value

@@ -1,4 +1,4 @@
-package com.stripe.android.common.nfcscan.scanner.adpu
+package com.stripe.android.common.nfcscan.scanner.apdu
 
 import com.stripe.android.common.nfcscan.scanner.NfcTagTransceiver
 
@@ -88,9 +88,6 @@ internal abstract class ApduCommand<TResponseData> {
     }
 
     private fun buildData(dataLengthByte: Byte?, dataArray: ByteArray?): ByteArray {
-        val dataLengthByte = dataLengthByte
-        val dataArray = dataArray
-
         return if (dataLengthByte != null && dataArray != null) {
             byteArrayOf(dataLengthByte) + dataArray
         } else {

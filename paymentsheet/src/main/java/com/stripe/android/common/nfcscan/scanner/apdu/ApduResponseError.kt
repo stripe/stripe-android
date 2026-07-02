@@ -1,7 +1,7 @@
-package com.stripe.android.common.nfcscan.scanner.adpu
+package com.stripe.android.common.nfcscan.scanner.apdu
 
 internal sealed class ApduResponseError(override val message: String?) : Throwable() {
-    class TooShort : ApduResponseError("ADPU response is too short! Needs at least two bytes!")
+    class TooShort : ApduResponseError("APDU response is too short! Needs at least two bytes!")
 
     data class Command(
         val sw1: Byte,

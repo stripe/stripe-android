@@ -1,4 +1,4 @@
-package com.stripe.android.common.nfcscan.scanner.adpu
+package com.stripe.android.common.nfcscan.scanner.apdu
 
 /**
  * Converts unparsed Tag-Length-Value encoded data into a readable map keyed by the key.

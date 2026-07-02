@@ -1,6 +1,6 @@
 package com.stripe.android.common.nfcscan.scanner
 
-import com.stripe.android.common.nfcscan.scanner.adpu.SelectPpseCommand
+import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
 import com.stripe.android.core.injection.IOContext
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

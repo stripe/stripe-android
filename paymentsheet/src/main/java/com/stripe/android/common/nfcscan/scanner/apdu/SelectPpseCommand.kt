@@ -1,4 +1,4 @@
-package com.stripe.android.common.nfcscan.scanner.adpu
+package com.stripe.android.common.nfcscan.scanner.apdu
 
 import com.stripe.android.model.CardBrand
 
