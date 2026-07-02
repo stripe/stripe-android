@@ -659,6 +659,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             ),
             onBrandChoiceChanged = onBrandChoiceChanged,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+            autocompleteAddressInteractorFactory = null,
         )
     }
 }
