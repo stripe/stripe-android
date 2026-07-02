@@ -59,7 +59,7 @@ internal object PaymentMethodMetadataFactory {
         saveConsent: PaymentMethodSaveConsentBehavior =
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateCardPaymentMethodDetails: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -105,7 +105,7 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                        canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
                         canUpdateCardBrandChoice = true,
                     )
                 } else {
@@ -116,7 +116,7 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                        canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
                         canUpdateCardBrandChoice = true,
                     )
                 }

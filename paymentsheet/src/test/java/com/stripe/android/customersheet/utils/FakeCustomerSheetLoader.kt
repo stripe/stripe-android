@@ -38,7 +38,7 @@ internal class FakeCustomerSheetLoader(
     private val permissions: CustomerPermissions = CustomerPermissions(
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         canRemoveLastPaymentMethod = true,
-        canUpdateCardPaymentMethodDetails = true,
+        canUpdateCardExpiryAndBillingDetails = true,
     ),
     private val isPaymentMethodSyncDefaultEnabled: Boolean = false,
     private val passiveCaptchaParams: PassiveCaptchaParams? = null,

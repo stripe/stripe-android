@@ -93,12 +93,12 @@ internal class SavedPaymentMethodMutator(
     val canEdit: StateFlow<Boolean> = combineAsStateFlow(
         customerStateHolder.canRemove,
         paymentOptionsItems,
-        customerStateHolder.canUpdateCardPaymentMethodDetails,
+        customerStateHolder.canUpdateCardExpiryAndBillingDetails,
         customerStateHolder.canUpdateCardBrandChoice,
-    ) { canRemove, items, canUpdateCardPaymentMethodDetails, canUpdateCardBrandChoice ->
+    ) { canRemove, items, canUpdateCardExpiryAndBillingDetails, canUpdateCardBrandChoice ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
             item.displayableSavedPaymentMethod.isModifiable(
-                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
                 canUpdateCardBrandChoice = canUpdateCardBrandChoice,
             )
         }
@@ -380,8 +380,8 @@ internal class SavedPaymentMethodMutator(
                         DefaultUpdatePaymentMethodInteractor(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            canUpdateCardPaymentMethodDetails = viewModel.customerStateHolder
-                                .canUpdateCardPaymentMethodDetails.value,
+                            canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
+                                .canUpdateCardExpiryAndBillingDetails.value,
                             canUpdateCardBrandChoice = viewModel.customerStateHolder.canUpdateCardBrandChoice.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),

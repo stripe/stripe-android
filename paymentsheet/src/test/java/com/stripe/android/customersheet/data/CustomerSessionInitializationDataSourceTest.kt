@@ -124,7 +124,7 @@ class CustomerSessionInitializationDataSourceTest {
     }
 
     @Test
-    fun `on load, canUpdateCardPaymentMethodDetails should be enabled`() = runTest {
+    fun `on load, canUpdateCardExpiryAndBillingDetails should be enabled`() = runTest {
         val dataSource = createInitializationDataSource(
             elementsSessionManager = FakeCustomerSessionElementsSessionManager(
                 customerSheetComponent = ElementsSession.Customer.Components.CustomerSheet.Disabled,
@@ -134,7 +134,7 @@ class CustomerSessionInitializationDataSourceTest {
         val result = dataSource.loadCustomerSheetSession(createConfiguration())
         val customerSheetSession = result.asSuccess().value
 
-        assertThat(customerSheetSession.permissions.canUpdateCardPaymentMethodDetails).isTrue()
+        assertThat(customerSheetSession.permissions.canUpdateCardExpiryAndBillingDetails).isTrue()
     }
 
     @Test

@@ -157,7 +157,7 @@ internal class CustomerSheetViewModel(
             permissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateCardPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
             ),
             metadata = null,
         )
@@ -570,7 +570,7 @@ internal class CustomerSheetViewModel(
                 updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                     isLiveMode = isLiveMode,
                     canRemove = customerState.canRemove,
-                    canUpdateCardPaymentMethodDetails = customerState.canUpdateCardPaymentMethodDetails,
+                    canUpdateCardExpiryAndBillingDetails = customerState.canUpdateCardExpiryAndBillingDetails,
                     canUpdateCardBrandChoice = true,
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
@@ -1275,14 +1275,14 @@ internal class CustomerSheetViewModel(
             else -> permissions.canRemovePaymentMethods
         }
 
-        val canUpdateCardPaymentMethodDetails = permissions.canUpdateCardPaymentMethodDetails
+        val canUpdateCardExpiryAndBillingDetails = permissions.canUpdateCardExpiryAndBillingDetails
         val cbcEligibility = metadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible
 
         val canEdit = canRemove || paymentMethods.any { method ->
             isModifiable(
                 paymentMethod = method,
                 cbcEligibility = cbcEligibility,
-                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
             )
         }
 

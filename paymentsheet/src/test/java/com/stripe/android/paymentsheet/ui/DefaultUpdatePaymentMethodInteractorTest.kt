@@ -551,12 +551,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanUpdateCardPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanUpdateCardExpiryAndBillingDetails() {
         val displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
             .toDisplayableSavedPaymentMethod()
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            canUpdateCardPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
             canUpdateCardBrandChoice = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
@@ -572,7 +572,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             .toDisplayableSavedPaymentMethod()
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            canUpdateCardPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
             canUpdateCardBrandChoice = false,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
@@ -583,12 +583,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanNotUpdateCardPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanNotUpdateCardExpiryAndBillingDetails() {
         val displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
             .toDisplayableSavedPaymentMethod()
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
@@ -599,9 +599,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanUpdateCardPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanUpdateCardExpiryAndBillingDetails() {
         runScenario(
-            canUpdateCardPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
             canUpdateCardBrandChoice = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
@@ -612,9 +612,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanNotUpdateCardPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanNotUpdateCardExpiryAndBillingDetails() {
         runScenario(
-            canUpdateCardPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
             canUpdateCardBrandChoice = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
@@ -772,7 +772,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
-        canUpdateCardPaymentMethodDetails: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
         canUpdateCardBrandChoice: Boolean,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         allowedBillingCountries: Set<String> = setOf("US", "CA"),
@@ -785,7 +785,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
-            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
             canUpdateCardBrandChoice = canUpdateCardBrandChoice,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             addressCollectionMode = addressCollectionMode,

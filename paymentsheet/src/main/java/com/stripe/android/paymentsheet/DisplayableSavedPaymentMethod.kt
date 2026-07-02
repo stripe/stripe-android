@@ -32,11 +32,11 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     }
 
     fun isModifiable(
-        canUpdateCardPaymentMethodDetails: Boolean,
+        canUpdateCardExpiryAndBillingDetails: Boolean,
         canUpdateCardBrandChoice: Boolean,
     ): Boolean {
         return paymentMethod.isModifiable(
-            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
             canUpdateCardBrandChoice = canUpdateCardBrandChoice,
             isCbcEligible = isCbcEligible,
         )

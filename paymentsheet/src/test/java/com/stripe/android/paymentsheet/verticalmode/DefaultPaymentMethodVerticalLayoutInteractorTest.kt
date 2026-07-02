@@ -1812,7 +1812,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         formTypeForCode: (code: String) -> FormHelper.FormType = { FormHelper.FormType.Empty },
         initialPaymentMethods: List<PaymentMethod> = emptyList(),
         initialMostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
-        canUpdateCardPaymentMethodDetails: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
         canUpdateCardBrandChoice: Boolean = true,
         shouldUpdateVerticalModeSelection: (String?) -> Boolean = { paymentMethodCode ->
             val requiresFormScreen = paymentMethodCode != null &&
@@ -1865,7 +1865,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
             canRemove = canRemove,
             walletsState = walletsState,
-            canUpdateCardPaymentMethodDetails = stateFlowOf(canUpdateCardPaymentMethodDetails),
+            canUpdateCardExpiryAndBillingDetails = stateFlowOf(canUpdateCardExpiryAndBillingDetails),
             canUpdateCardBrandChoice = stateFlowOf(canUpdateCardBrandChoice),
             updateSelection = { paymentSelection, isFormScreen ->
                 selection.value = paymentSelection

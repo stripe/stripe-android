@@ -103,7 +103,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val canRemove: StateFlow<Boolean>,
     private val walletsState: StateFlow<WalletsState?>,
-    private val canUpdateCardPaymentMethodDetails: StateFlow<Boolean>,
+    private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
     private val canUpdateCardBrandChoice: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
@@ -179,7 +179,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     }
                 },
                 walletsState = viewModel.walletsState,
-                canUpdateCardPaymentMethodDetails = viewModel.customerStateHolder.canUpdateCardPaymentMethodDetails,
+                canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
+                    .canUpdateCardExpiryAndBillingDetails,
                 canUpdateCardBrandChoice = viewModel.customerStateHolder.canUpdateCardBrandChoice,
                 isCurrentScreen = isCurrentScreen,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
@@ -243,18 +244,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods,
         displayedSavedPaymentMethod,
         canRemove,
-        canUpdateCardPaymentMethodDetails,
+        canUpdateCardExpiryAndBillingDetails,
         canUpdateCardBrandChoice,
     ) { paymentMethods,
         displayedSavedPaymentMethod,
         canRemove,
-        canUpdateCardPaymentMethodDetails,
+        canUpdateCardExpiryAndBillingDetails,
         canUpdateCardBrandChoice ->
         getAvailableSavedPaymentMethodAction(
             paymentMethods = paymentMethods,
             savedPaymentMethod = displayedSavedPaymentMethod,
             canRemove = canRemove,
-            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
             canUpdateCardBrandChoice = canUpdateCardBrandChoice,
         )
     }
@@ -511,7 +512,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canRemove: Boolean,
-        canUpdateCardPaymentMethodDetails: Boolean,
+        canUpdateCardExpiryAndBillingDetails: Boolean,
         canUpdateCardBrandChoice: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         if (paymentMethods == null || savedPaymentMethod == null) {
@@ -524,7 +525,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 getSavedPaymentMethodActionForOnePaymentMethod(
                     canRemove = canRemove,
                     savedPaymentMethod = savedPaymentMethod,
-                    canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                    canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
                     canUpdateCardBrandChoice = canUpdateCardBrandChoice,
                 )
             }
@@ -536,11 +537,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getSavedPaymentMethodActionForOnePaymentMethod(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
-        canUpdateCardPaymentMethodDetails: Boolean,
+        canUpdateCardExpiryAndBillingDetails: Boolean,
         canUpdateCardBrandChoice: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         return if (savedPaymentMethod?.isModifiable(
-                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
                 canUpdateCardBrandChoice = canUpdateCardBrandChoice,
             ) == true || canRemove
         ) {

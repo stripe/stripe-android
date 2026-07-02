@@ -376,7 +376,7 @@ internal class CustomerSheetScreenshotTest {
     ): CustomerSheetViewState {
         return CustomerSheetViewState.UpdatePaymentMethod(
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
-                canUpdateCardPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
                 canUpdateCardBrandChoice = true,
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },

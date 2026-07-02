@@ -16,7 +16,7 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canUpdateCardPaymentMethodDetails = false,
+        canUpdateCardExpiryAndBillingDetails = false,
         canUpdateCardBrandChoice = true,
     )
 
@@ -39,7 +39,7 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod = PaymentMethodRemovePermission.Full,
         saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod = true,
-        canUpdateCardPaymentMethodDetails = false,
+        canUpdateCardExpiryAndBillingDetails = false,
         canUpdateCardBrandChoice = true,
     )
 
@@ -49,7 +49,7 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateCardPaymentMethodDetails: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
     ): CustomerMetadata? {
         return if (hasCustomerConfiguration) {
             DEFAULT_CUSTOMER_METADATA.copy(
@@ -57,7 +57,7 @@ internal object PaymentMethodMetadataFixtures {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
             )
         } else {
             null
@@ -70,7 +70,7 @@ internal object PaymentMethodMetadataFixtures {
         removePaymentMethod: PaymentMethodRemovePermission = PaymentMethodRemovePermission.Full,
         saveConsent: PaymentMethodSaveConsentBehavior = PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateCardPaymentMethodDetails: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
     ): StateFlow<CustomerMetadata?> {
         return stateFlowOf(
             getDefaultCustomerMetadata(
@@ -79,7 +79,7 @@ internal object PaymentMethodMetadataFixtures {
                 removePaymentMethod = removePaymentMethod,
                 saveConsent = saveConsent,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
             )
         )
     }

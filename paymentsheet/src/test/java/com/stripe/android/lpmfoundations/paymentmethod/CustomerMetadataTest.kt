@@ -18,7 +18,7 @@ import org.junit.Test
 internal class CustomerMetadataTest {
 
     @Test
-    fun `CheckoutSession should not support card details or card brand updates`() {
+    fun `CheckoutSession should not support card expiry and billing details or card brand updates`() {
         val metadata = CustomerMetadata.CheckoutSession(
             sessionId = "cs_123",
             customerId = "cus_123",
@@ -26,7 +26,7 @@ internal class CustomerMetadataTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         )
 
-        assertThat(metadata.canUpdateCardPaymentMethodDetails).isFalse()
+        assertThat(metadata.canUpdateCardExpiryAndBillingDetails).isFalse()
         assertThat(metadata.canUpdateCardBrandChoice).isFalse()
     }
 
@@ -339,7 +339,7 @@ internal class CustomerMetadataTest {
             permissions = CustomerPermissions(
                 removePaymentMethod = removePermission,
                 canRemoveLastPaymentMethod = true,
-                canUpdateCardPaymentMethodDetails = true
+                canUpdateCardExpiryAndBillingDetails = true
             ),
             defaultPaymentMethodId = null,
             customerId = "unused_for_customer_adapter_data_source",

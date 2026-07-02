@@ -137,7 +137,7 @@ class PaymentOptionsStateFactoryTest {
             .displayableSavedPaymentMethod
         assertThat(
             displayableSavedPaymentMethod.isModifiable(
-                canUpdateCardPaymentMethodDetails = canUpdatePaymentMethod,
+                canUpdateCardExpiryAndBillingDetails = canUpdatePaymentMethod,
                 canUpdateCardBrandChoice = true,
             )
         ).isEqualTo(expectedResult)
