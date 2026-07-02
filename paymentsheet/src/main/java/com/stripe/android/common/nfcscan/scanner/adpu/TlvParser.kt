@@ -1,5 +1,8 @@
 package com.stripe.android.common.nfcscan.scanner.adpu
 
+/**
+ * Converts unparsed Tag-Length-Value encoded data into a readable map keyed by the key.
+ */
 internal object TlvParser {
     fun parse(data: ByteArray): Map<String, ByteArray> {
         val nodes = mutableMapOf<String, ByteArray>()
@@ -7,10 +10,17 @@ internal object TlvParser {
         return nodes
     }
 
+    /*
+     * Recursively parses TLV-encoded data and populates nodes with tag-value pairs. Constructed tags
+     * are parsed recursively to extract nested TLV data.
+     */
     private fun parseInto(data: ByteArray, nodes: MutableMap<String, ByteArray>) {
         var offset = 0
 
         while (offset < data.size) {
+            /*
+             * Get the tag for the data
+             */
             val tagByte = data[offset]
             val tagInt = tagByte.asInt()
             var tag = formatAsMinimumTwoCharacters(tagInt)
@@ -22,9 +32,16 @@ internal object TlvParser {
             }
             offset++
 
+            /*
+             * Get the length of the data
+             */
             val lengthByte = data[offset++].asInt()
             var valueLength = lengthByte
 
+            /*
+             * Some data might be long enough that its length cannot be represented in one byte. In that case, parse
+             * out the multibyte length.
+             */
             if (lengthByte > MULTI_BYTE_LENGTH_INDICATOR) {
                 val numberOfLengthBytes = lengthByte and NUMBER_OF_LENGTH_BYTES_MASK
                 valueLength = 0
@@ -33,6 +50,9 @@ internal object TlvParser {
                 }
             }
 
+            /*
+             * Get the value data for this tag using the length retrieved above
+             */
             val value = data.copyOfRange(offset, offset + valueLength)
             nodes[tag] = value
 
