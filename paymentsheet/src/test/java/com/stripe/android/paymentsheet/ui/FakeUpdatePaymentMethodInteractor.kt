@@ -9,8 +9,6 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
-import com.stripe.android.paymentsheet.canChangeCbc
-import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,7 +36,7 @@ internal class FakeUpdatePaymentMethodInteractor(
         isSaveButtonEnabled = false,
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
-    override val canUpdateFullPaymentMethodDetails: Boolean = false,
+    override val canUpdateCardPaymentMethodDetails: Boolean = false,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
@@ -47,18 +45,14 @@ internal class FakeUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
-        val isModifiable = displayableSavedPaymentMethod.paymentMethod.isModifiable(
-            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
-            isCbcEligible = displayableSavedPaymentMethod.isCbcEligible,
-        )
+        val isModifiable =
+            displayableSavedPaymentMethod.isModifiable(canUpdateCardPaymentMethodDetails)
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
             cardEditConfiguration = CardEditConfiguration(
                 cardBrandFilter = cardBrandFilter,
-                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.paymentMethod.canChangeCbc(
-                    displayableSavedPaymentMethod.isCbcEligible
-                ),
-                areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails
+                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+                areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateCardPaymentMethodDetails
             ),
             requiresModification = true,
             payload = EditCardPayload.create(

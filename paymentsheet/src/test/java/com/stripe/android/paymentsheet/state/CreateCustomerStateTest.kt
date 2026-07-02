@@ -272,7 +272,7 @@ internal class CreateCustomerStateTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Enabled,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardPaymentMethodDetails = true,
         )
 
         val LEGACY_EK_METADATA = CustomerMetadata.LegacyEphemeralKey(
@@ -282,7 +282,7 @@ internal class CreateCustomerStateTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardPaymentMethodDetails = false,
         )
 
         fun createElementsSessionCustomer(

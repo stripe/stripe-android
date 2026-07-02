@@ -21,7 +21,7 @@ internal interface CustomerStateHolder {
 
     val canRemove: StateFlow<Boolean>
 
-    val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>
+    val canUpdateCardPaymentMethodDetails: StateFlow<Boolean>
 
     fun setCustomerState(customerState: CustomerState?)
 

@@ -95,10 +95,8 @@ internal class SavedPaymentMethodMutator(
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            val displayableSavedPaymentMethod = item.displayableSavedPaymentMethod
-            displayableSavedPaymentMethod.paymentMethod.isModifiable(
-                canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails.value,
-                isCbcEligible = displayableSavedPaymentMethod.isCbcEligible,
+            item.displayableSavedPaymentMethod.isModifiable(
+                customerStateHolder.canUpdateCardPaymentMethodDetails.value
             )
         }
     }
@@ -379,8 +377,8 @@ internal class SavedPaymentMethodMutator(
                         DefaultUpdatePaymentMethodInteractor(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder
-                                .canUpdateFullPaymentMethodDetails.value,
+                            canUpdateCardPaymentMethodDetails = viewModel.customerStateHolder
+                                .canUpdateCardPaymentMethodDetails.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,

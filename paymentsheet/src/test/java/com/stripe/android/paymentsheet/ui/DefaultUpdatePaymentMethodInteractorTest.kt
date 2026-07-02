@@ -516,12 +516,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanUpdateFullPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanUpdateCardPaymentMethodDetails() {
         val displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
             .toDisplayableSavedPaymentMethod()
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            canUpdateFullPaymentMethodDetails = true
+            canUpdateCardPaymentMethodDetails = true
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isTrue()
@@ -531,12 +531,12 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanNotUpdateFullPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcEligible_andCanNotUpdateCardPaymentMethodDetails() {
         val displayableSavedPaymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
             .toDisplayableSavedPaymentMethod()
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
-            canUpdateFullPaymentMethodDetails = false
+            canUpdateCardPaymentMethodDetails = false
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isTrue()
@@ -546,9 +546,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanUpdateFullPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanUpdateCardPaymentMethodDetails() {
         runScenario(
-            canUpdateFullPaymentMethodDetails = true
+            canUpdateCardPaymentMethodDetails = true
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
@@ -558,9 +558,9 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
-    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanNotUpdateFullPaymentMethodDetails() {
+    fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanNotUpdateCardPaymentMethodDetails() {
         runScenario(
-            canUpdateFullPaymentMethodDetails = false
+            canUpdateCardPaymentMethodDetails = false
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
@@ -711,7 +711,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         onSetDefaultPaymentMethod: (PaymentMethod) -> Result<Unit> = { _ -> notImplemented() },
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
+        canUpdateCardPaymentMethodDetails: Boolean = false,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         allowedBillingCountries: Set<String> = setOf("US", "CA"),
         editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
@@ -723,7 +723,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = isLiveMode,
             canRemove = canRemove,
-            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             addressCollectionMode = addressCollectionMode,
             removeExecutor = onRemovePaymentMethod,

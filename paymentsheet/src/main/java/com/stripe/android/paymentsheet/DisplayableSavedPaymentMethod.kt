@@ -27,6 +27,17 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             SavedPaymentMethod.Unexpected -> false
         }
 
+    fun canChangeCbc(): Boolean {
+        return paymentMethod.canChangeCbc(isCbcEligible)
+    }
+
+    fun isModifiable(canUpdateCardPaymentMethodDetails: Boolean): Boolean {
+        return paymentMethod.isModifiable(
+            canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
+            isCbcEligible = isCbcEligible,
+        )
+    }
+
     fun getDescription() = when (savedPaymentMethod) {
         is SavedPaymentMethod.Card -> {
             resolvableString(

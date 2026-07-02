@@ -59,7 +59,7 @@ internal object PaymentMethodMetadataFactory {
         saveConsent: PaymentMethodSaveConsentBehavior =
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
+        canUpdateCardPaymentMethodDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -105,7 +105,7 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                        canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
                     )
                 } else {
                     CustomerMetadata.LegacyEphemeralKey(
@@ -115,7 +115,7 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                        canUpdateCardPaymentMethodDetails = canUpdateCardPaymentMethodDetails,
                     )
                 }
             } else {

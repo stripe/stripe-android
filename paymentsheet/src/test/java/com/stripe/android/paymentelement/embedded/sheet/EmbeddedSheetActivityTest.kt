@@ -214,7 +214,7 @@ internal class EmbeddedSheetActivityTest {
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardPaymentMethodDetails = false,
                 integrationMetadata = IntegrationMetadata.CheckoutSession(
                     id = "cs_test",
                     instancesKey = CheckoutStateFactory.DEFAULT_KEY,
@@ -242,7 +242,7 @@ internal class EmbeddedSheetActivityTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardPaymentMethodDetails = false,
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,
