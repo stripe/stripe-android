@@ -24,6 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultEditCardDetailsInteractorTest {
@@ -372,6 +373,30 @@ internal class DefaultEditCardDetailsInteractorTest {
         assertThat(cardUpdateParams).isNotNull()
         assertThat(cardUpdateParams?.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(cardUpdateParams?.billingDetails).isNull()
+    }
+
+    @Test
+    fun whenBillingDetailsIsNullThenInitialCountryIsLocaleDefault() = runTest {
+        val savedLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+        try {
+            val handler = handler(
+                addressCollectionMode = AddressCollectionMode.Automatic,
+                billingDetails = null,
+            )
+
+            val billingDetailsForm = handler.uiState.billingDetailsForm
+            assertThat(billingDetailsForm).isNotNull()
+
+            billingDetailsForm!!.formFieldsState.test {
+                val formState = awaitItem()
+                // When there are no saved billing details, the country should default to the
+                // device locale, not to any merchant-configured defaultBillingDetails value.
+                assertThat(formState.country?.value).isEqualTo("US")
+            }
+        } finally {
+            Locale.setDefault(savedLocale)
+        }
     }
 
     @Test

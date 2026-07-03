@@ -10,6 +10,7 @@ import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
+import com.stripe.android.model.Address
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
@@ -70,6 +71,7 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
+import java.util.Locale
 import kotlin.coroutines.coroutineContext
 import kotlin.test.assertFailsWith
 import com.stripe.android.ui.core.R as UiCoreR
@@ -2809,6 +2811,97 @@ class CustomerSheetViewModelTest {
                 source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
                 selectedBrand = CardBrand.Visa
             )
+        }
+    }
+
+    @Test
+    fun `Edit screen uses locale country when saved card has no billing details, not merchant defaultBillingDetails`() = runTest(testDispatcher) {
+        val savedLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+        try {
+            val cardWithNoBillingDetails = CARD_PAYMENT_METHOD.copy(billingDetails = null)
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerPaymentMethods = listOf(cardWithNoBillingDetails),
+                configuration = CustomerSheet.Configuration.builder("Example")
+                    .defaultBillingDetails(
+                        PaymentSheet.BillingDetails(
+                            address = PaymentSheet.Address(country = "CA")
+                        )
+                    )
+                    .build(),
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+                viewModel.handleViewAction(
+                    CustomerSheetViewAction.OnModifyItem(
+                        cardWithNoBillingDetails.toDisplayableSavedPaymentMethod()
+                    )
+                )
+
+                val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
+                val billingDetailsForm = editViewState.updatePaymentMethodInteractor
+                    .editCardDetailsInteractor
+                    .state.value
+                    .billingDetailsForm
+
+                assertThat(billingDetailsForm).isNotNull()
+
+                billingDetailsForm!!.formFieldsState.test {
+                    val formState = awaitItem()
+                    // Country should be the locale default (US), not the merchant-configured default (CA)
+                    assertThat(formState.country?.value).isEqualTo("US")
+                }
+            }
+        } finally {
+            Locale.setDefault(savedLocale)
+        }
+    }
+
+    @Test
+    fun `Edit screen shows real saved billing country from the payment method`() = runTest(testDispatcher) {
+        val savedLocale = Locale.getDefault()
+        Locale.setDefault(Locale.US)
+        try {
+            val cardWithSavedBillingCountry = CARD_PAYMENT_METHOD.copy(
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = Address(country = "CA")
+                )
+            )
+
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerPaymentMethods = listOf(cardWithSavedBillingCountry),
+            )
+
+            viewModel.viewState.test {
+                assertThat(awaitItem()).isInstanceOf<SelectPaymentMethod>()
+
+                viewModel.handleViewAction(
+                    CustomerSheetViewAction.OnModifyItem(
+                        cardWithSavedBillingCountry.toDisplayableSavedPaymentMethod()
+                    )
+                )
+
+                val editViewState = awaitViewState<CustomerSheetViewState.UpdatePaymentMethod>()
+                val billingDetailsForm = editViewState.updatePaymentMethodInteractor
+                    .editCardDetailsInteractor
+                    .state.value
+                    .billingDetailsForm
+
+                assertThat(billingDetailsForm).isNotNull()
+
+                billingDetailsForm!!.formFieldsState.test {
+                    val formState = awaitItem()
+                    // Country should be the saved billing country (CA), not the locale default (US)
+                    assertThat(formState.country?.value).isEqualTo("CA")
+                }
+            }
+        } finally {
+            Locale.setDefault(savedLocale)
         }
     }
 
