@@ -14,6 +14,7 @@ internal interface NfcCardReader {
 
 internal class ApduCardReader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
+    private val cardDataParser: NfcCardDataParser,
 ) : NfcCardReader {
     override suspend fun readCard(
         transceiver: NfcTagTransceiver
@@ -35,7 +36,8 @@ internal class ApduCardReader @Inject constructor(
                 }
             }
 
-            throw IllegalStateException("Could not parse card data from NFC tag")
+            cardDataParser.parse(records)
+                ?: throw IllegalStateException("Could not parse card data from NFC tag")
         }
     }
 
