@@ -111,6 +111,7 @@ internal class DefaultTapToAddConnectionManager(
             }
 
             initializeIfNeeded()
+            initializeIfNeeded()
 
             return terminal().supportsReadersOfType(
                 deviceType = DeviceType.TAP_TO_PAY_DEVICE,
