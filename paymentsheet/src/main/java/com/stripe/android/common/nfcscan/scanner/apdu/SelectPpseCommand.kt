@@ -3,7 +3,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 import com.stripe.android.model.CardBrand
 
 /**
- * An APDU command for selecting the first payment application on the credit card chip
+ * An APDU command for retrieving the payment application on the credit card chip
  */
 internal data object SelectPpseCommand : ApduCommand<ApplicationIdentifier>() {
     /*
