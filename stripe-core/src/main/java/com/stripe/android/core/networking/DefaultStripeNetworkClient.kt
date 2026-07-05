@@ -2,6 +2,7 @@ package com.stripe.android.core.networking
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.core.net.toUri
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import kotlinx.coroutines.Dispatchers
@@ -74,17 +75,17 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
 
     private fun <BodyType> parseResponse(
         connection: StripeConnection<BodyType>,
-        baseUrl: String?
+        url: String,
     ): StripeResponse<BodyType> =
         runCatching {
             val stripeResponse = connection.response
             logger.info(stripeResponse.toString())
             stripeResponse
         }.getOrElse { error ->
-            logger.error("Exception while making Stripe API request", error)
+            logger.error("Exception while making Stripe API request to ${url.toUri().path}", error)
 
             throw when (error) {
-                is IOException -> APIConnectionException.create(error, baseUrl)
+                is IOException -> APIConnectionException.create(error, url)
                 else -> error
             }
         }
