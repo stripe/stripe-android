@@ -100,6 +100,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
             isElements = true,
             displayItems = config.displayItems,
+            billingEmailOverride = config.billingEmailOverride,
         )
     }
 

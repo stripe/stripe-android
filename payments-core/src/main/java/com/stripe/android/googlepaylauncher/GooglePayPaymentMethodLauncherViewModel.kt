@@ -20,6 +20,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.injection.DaggerGooglePayPaymentMethodLauncherViewModelFactoryComponent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -144,7 +145,21 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
 
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson, args.clientAttributionMetadata)
 
-        return stripeRepository.createPaymentMethod(params, requestOptions).fold(
+        val finalParams = if (args.billingEmailOverride != null && params.billingDetails?.email == null) {
+            val existingBillingDetails = params.billingDetails
+            params.copy(
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = existingBillingDetails?.address,
+                    email = args.billingEmailOverride,
+                    name = existingBillingDetails?.name,
+                    phone = existingBillingDetails?.phone,
+                )
+            )
+        } else {
+            params
+        }
+
+        return stripeRepository.createPaymentMethod(finalParams, requestOptions).fold(
             onSuccess = {
                 GooglePayPaymentMethodLauncher.Result.Completed(it)
             },
