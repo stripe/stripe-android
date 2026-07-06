@@ -187,17 +187,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private fun createEditCardDetailsInteractorForCard(
         savedPaymentMethodCard: SavedPaymentMethod.Card,
     ): EditCardDetailsInteractor {
-        val isModifiable = displayableSavedPaymentMethod.paymentMethod.isModifiable(
-            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-            canChangeCbc = canChangeCbc,
-        )
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
         val cardEditConfiguration = CardEditConfiguration(
             cardBrandFilter = cardBrandFilter,
-            isCbcModifiable = isModifiable &&
-                canChangeCbc &&
-                displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks(),
-            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateCardExpiryAndBillingDetails,
+            isCbcModifiable = shouldShowCardBrandDropdown,
+            areExpiryDateAndAddressModificationSupported =
+                isModifiablePaymentMethod && canUpdateCardExpiryAndBillingDetails,
         )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
