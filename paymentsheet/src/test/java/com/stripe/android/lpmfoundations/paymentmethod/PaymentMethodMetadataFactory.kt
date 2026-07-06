@@ -106,7 +106,6 @@ internal object PaymentMethodMetadataFactory {
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                         canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-                        canUpdateCardBrandChoice = true,
                     )
                 } else {
                     CustomerMetadata.LegacyEphemeralKey(
@@ -117,7 +116,6 @@ internal object PaymentMethodMetadataFactory {
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                         canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-                        canUpdateCardBrandChoice = true,
                     )
                 }
             } else {

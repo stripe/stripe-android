@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import junit.framework.TestCase.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
@@ -20,19 +19,6 @@ class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiab
             )
         )
 
-        assertEquals(
-            "Expected isModifiable to be ${params.expectedResult} for parameters: " +
-                "canUpdatePaymentMethod=${params.canUpdatePaymentMethod}, " +
-                "canChangeCbc=${params.canChangeCbc}, " +
-                "availableNetworks=${params.availableNetworks}, " +
-                "cardExpired=${params.cardExpired}",
-            params.expectedResult,
-            paymentMethod.isModifiable(
-                canUpdateCardExpiryAndBillingDetails = params.canUpdatePaymentMethod,
-                canChangeCbc = params.canChangeCbc,
-            )
-        )
-
         assertThat(
             paymentMethod.isModifiable(
                 canUpdateCardExpiryAndBillingDetails = params.canUpdatePaymentMethod,
@@ -43,12 +29,62 @@ class DisplayableSavedPaymentMethodModifiableTest(private val params: IsModifiab
 
     @Test
     fun `isModifiable returns false for non-card payment methods`() {
-        assertThat(
-            PaymentMethodFixtures.LINK_PAYMENT_METHOD.isModifiable(
-                canUpdateCardExpiryAndBillingDetails = true,
-                canChangeCbc = true,
+        listOf(
+            PaymentMethodFixtures.LINK_PAYMENT_METHOD,
+            PaymentMethodFixtures.US_BANK_ACCOUNT,
+        ).forEach { paymentMethod ->
+            assertThat(
+                paymentMethod.isModifiable(
+                    canUpdateCardExpiryAndBillingDetails = true,
+                    canChangeCbc = true,
+                )
+            ).isFalse()
+        }
+    }
+
+    @Test
+    fun `isExpired returns false when expiry date is missing`() {
+        listOf(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                expiryMonth = null,
+                expiryYear = 2099,
+            ),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                expiryMonth = 12,
+                expiryYear = null,
+            ),
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                expiryMonth = null,
+                expiryYear = null,
             )
-        ).isFalse()
+        ).forEach { card ->
+            assertThat(card?.isExpired()).isFalse()
+        }
+    }
+
+    @Test
+    fun `isModifiable allows cbc updates when expiry date is missing`() {
+        listOf(
+            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.card?.copy(
+                expiryMonth = null,
+                expiryYear = 2099,
+            ),
+            PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.card?.copy(
+                expiryMonth = 12,
+                expiryYear = null,
+            )
+        ).forEach { card ->
+            val paymentMethod = PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.copy(
+                card = card,
+            )
+
+            assertThat(
+                paymentMethod.isModifiable(
+                    canUpdateCardExpiryAndBillingDetails = false,
+                    canChangeCbc = true,
+                )
+            ).isTrue()
+        }
     }
 
     data class IsModifiableParams(

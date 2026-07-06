@@ -54,7 +54,6 @@ class UpdatePaymentMethodUIScreenshotTest {
             shouldShowSetAsDefaultCheckbox = false,
             shouldShowSaveButton = true,
             setAsDefaultCheckboxEnabled = false,
-            canChangeCbc = true,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = null,
                 status = status,

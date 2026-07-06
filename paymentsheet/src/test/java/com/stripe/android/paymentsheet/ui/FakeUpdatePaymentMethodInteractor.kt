@@ -7,10 +7,10 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.hasMultipleNetworks
-import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.hasMultipleNetworks
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -40,7 +40,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     ),
     override val setAsDefaultCheckboxEnabled: Boolean = true,
     override val canUpdateCardExpiryAndBillingDetails: Boolean = false,
-    override val canChangeCbc: Boolean,
+    override val canChangeCbc: Boolean = true,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {

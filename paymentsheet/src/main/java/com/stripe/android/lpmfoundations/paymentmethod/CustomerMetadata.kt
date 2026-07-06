@@ -29,8 +29,9 @@ internal sealed class CustomerMetadata : Parcelable {
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
         override val canUpdateCardExpiryAndBillingDetails: Boolean,
-        override val canUpdateCardBrandChoice: Boolean,
-    ) : CustomerMetadata()
+    ) : CustomerMetadata() {
+        override val canUpdateCardBrandChoice: Boolean get() = true
+    }
 
     @Parcelize
     data class CustomerSession(
@@ -42,8 +43,9 @@ internal sealed class CustomerMetadata : Parcelable {
         override val saveConsent: PaymentMethodSaveConsentBehavior,
         override val canRemoveLastPaymentMethod: Boolean,
         override val canUpdateCardExpiryAndBillingDetails: Boolean,
-        override val canUpdateCardBrandChoice: Boolean,
-    ) : CustomerMetadata()
+    ) : CustomerMetadata() {
+        override val canUpdateCardBrandChoice: Boolean get() = true
+    }
 
     @Parcelize
     data class CheckoutSession(
@@ -119,7 +121,6 @@ internal sealed class CustomerMetadata : Parcelable {
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                 // Should always be enabled when using `customer_session`
                 canUpdateCardExpiryAndBillingDetails = true,
-                canUpdateCardBrandChoice = true,
             )
         }
 
@@ -151,7 +152,6 @@ internal sealed class CustomerMetadata : Parcelable {
                  */
                 canRemoveLastPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
                 canUpdateCardExpiryAndBillingDetails = false,
-                canUpdateCardBrandChoice = true,
             )
         }
 
@@ -179,7 +179,6 @@ internal sealed class CustomerMetadata : Parcelable {
                     saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-                    canUpdateCardBrandChoice = true,
                 )
             } else {
                 LegacyEphemeralKey(
@@ -190,7 +189,6 @@ internal sealed class CustomerMetadata : Parcelable {
                     saveConsent = saveConsent,
                     canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
                     canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-                    canUpdateCardBrandChoice = true,
                 )
             }
         }

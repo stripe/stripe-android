@@ -2681,8 +2681,7 @@ class CustomerSheetViewModelTest {
                     )
                 )
 
-                val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
-
+                awaitViewState<SelectPaymentMethod>()
             }
         }
 

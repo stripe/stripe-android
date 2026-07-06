@@ -20,6 +20,8 @@ internal fun PaymentMethod.hasMultipleNetworks(): Boolean {
 internal fun PaymentMethod.Card.isExpired(): Boolean {
     val cardExpiryMonth = expiryMonth
     val cardExpiryYear = expiryYear
+    // If the card's expiration dates are missing, we can't conclude that it is expired, so we don't want to
+    // show the user an expired card error.
     return cardExpiryMonth != null && cardExpiryYear != null &&
         !DateUtils.isExpiryDataValid(
             expiryMonth = cardExpiryMonth,

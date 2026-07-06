@@ -217,7 +217,6 @@ class DefaultPaymentMethodFilterTest {
                     saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                     canRemoveLastPaymentMethod = false,
                     canUpdateCardExpiryAndBillingDetails = false,
-                    canUpdateCardBrandChoice = true,
                 ),
                 remoteDefaultPaymentMethodId = remoteDefaultPaymentMethodId,
                 localSavedSelection = CompletableDeferred(localSavedSelection),

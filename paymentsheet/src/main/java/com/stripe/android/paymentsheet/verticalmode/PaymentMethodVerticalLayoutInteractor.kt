@@ -14,11 +14,11 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
-import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata

@@ -10,13 +10,13 @@ import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.hasMultipleNetworks
-import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
+import com.stripe.android.paymentsheet.hasMultipleNetworks
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -150,7 +150,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
             canChangeCbc = canChangeCbc,
         )
     override val shouldShowCardBrandDropdown: Boolean
-        get() = isModifiablePaymentMethod && canChangeCbc && displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks()
+        get() = isModifiablePaymentMethod &&
+            canChangeCbc &&
+            displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks()
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
         isLiveMode = isLiveMode,
@@ -192,7 +194,9 @@ internal class DefaultUpdatePaymentMethodInteractor(
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
         val cardEditConfiguration = CardEditConfiguration(
             cardBrandFilter = cardBrandFilter,
-            isCbcModifiable = isModifiable && canChangeCbc && displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks(),
+            isCbcModifiable = isModifiable &&
+                canChangeCbc &&
+                displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks(),
             areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateCardExpiryAndBillingDetails,
         )
         return editCardDetailsInteractorFactory.create(
