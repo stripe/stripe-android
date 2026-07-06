@@ -25,6 +25,7 @@ import com.stripe.android.paymentelement.confirmation.utils.sellerBusinessName
 import com.stripe.android.payments.financialconnections.GetFinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.state.PaymentElementLoader.InitializationMode.WalletsDisabledReason
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -82,7 +83,8 @@ internal class DefaultCreateLinkState @Inject constructor(
     ): LinkStateResult {
         val linkDisabledReasons = getLinkDisabledReasons(
             elementsSession = elementsSession,
-            configuration = configuration
+            configuration = configuration,
+            initializationMode = initializationMode,
         )
 
         val isLinkDisabled = linkDisabledReasons.isNotEmpty()
@@ -114,6 +116,7 @@ internal class DefaultCreateLinkState @Inject constructor(
     private fun getLinkDisabledReasons(
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
+        initializationMode: PaymentElementLoader.InitializationMode,
     ): List<LinkDisabledReason> = buildList {
         if (!elementsSession.isLinkEnabled) {
             add(LinkDisabledReason.NotSupportedInElementsSession)
@@ -136,6 +139,13 @@ internal class DefaultCreateLinkState @Inject constructor(
         if (collectsExtraBillingDetails && useWebLink) {
             // Extra billing details collection isn't currently supported in the web flow.
             add(LinkDisabledReason.BillingDetailsCollection)
+        }
+
+        when (initializationMode.walletsDisabledReason()) {
+            WalletsDisabledReason.AutomaticTaxBillingAddress -> {
+                add(LinkDisabledReason.AutomaticTaxBillingAddress)
+            }
+            null -> Unit
         }
     }
 
