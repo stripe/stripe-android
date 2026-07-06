@@ -11,11 +11,11 @@ import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.json.JSONArray
 import org.json.JSONObject
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
+import java.io.Closeable
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -37,15 +37,9 @@ internal class PaymentSheetLoadParallelismTest {
 
     private val networkRule = testRules.networkRule
     private val page: PaymentSheetPage = PaymentSheetPage(testRules.compose)
-    private lateinit var requestTracker: RequestTracker
 
     companion object {
         private const val REQUEST_TIMEOUT_SECONDS = 10L
-    }
-
-    @After
-    fun releaseRequests() {
-        requestTracker.releaseAll()
     }
 
     @Test
@@ -164,30 +158,30 @@ internal class PaymentSheetLoadParallelismTest {
         resultCallback = ::expectNoResult,
         successTimeoutSeconds = 15L,
     ) { testContext ->
-        requestTracker = RequestTracker(expectedRequestOrdering.allRequests())
-
-        enqueueLoadResponses(
-            requests = expectedRequestOrdering.allRequests(),
-            linkEnabled = linkEnabled,
-        )
-
-        testContext.presentPaymentSheet {
-            presentWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = buildConfiguration(
-                    customerType = customerType,
-                    defaultEmail = defaultEmail,
-                ),
+        runScenario(expectedRequestOrdering) {
+            enqueueLoadResponses(
+                requests = expectedRequestOrdering.allRequests(),
+                linkEnabled = linkEnabled,
             )
+
+            testContext.presentPaymentSheet {
+                presentWithPaymentIntent(
+                    paymentIntentClientSecret = "pi_example_secret_example",
+                    configuration = buildConfiguration(
+                        customerType = customerType,
+                        defaultEmail = defaultEmail,
+                    ),
+                )
+            }
+
+            assertParallelismForConfig(expectedRequestOrdering)
+            page.waitForCardForm()
+
+            testContext.markTestSucceeded()
         }
-
-        assertParallelismForConfig(expectedRequestOrdering)
-        page.waitForCardForm()
-
-        testContext.markTestSucceeded()
     }
 
-    private fun enqueueLoadResponses(
+    private fun Scenario.enqueueLoadResponses(
         requests: List<Request>,
         linkEnabled: Boolean,
     ) {
@@ -212,7 +206,7 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun enqueueElementsSession(
+    private fun Scenario.enqueueElementsSession(
         bodyFile: String,
         request: Request,
         linkEnabled: Boolean,
@@ -263,7 +257,7 @@ internal class PaymentSheetLoadParallelismTest {
         json.put("payment_method_preference", paymentMethodPreferences)
     }
 
-    private fun enqueueFetchPaymentMethods(
+    private fun Scenario.enqueueFetchPaymentMethods(
         type: PaymentMethod.Type,
         request: Request,
     ) {
@@ -281,7 +275,7 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun enqueueFetchCustomer() {
+    private fun Scenario.enqueueFetchCustomer() {
         networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
@@ -295,7 +289,7 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun enqueueLinkAccountLookup() {
+    private fun Scenario.enqueueLinkAccountLookup() {
         networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
@@ -333,7 +327,7 @@ internal class PaymentSheetLoadParallelismTest {
         )
     }
 
-    private fun enqueueTrackedResponse(
+    private fun Scenario.enqueueTrackedResponse(
         request: Request,
         block: () -> Unit,
     ) {
@@ -347,7 +341,7 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun assertParallelismForConfig(
+    private fun Scenario.assertParallelismForConfig(
         requestOrdering: RequestOrdering,
     ) {
         when (requestOrdering) {
@@ -357,7 +351,7 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun assertSingletonRequest(
+    private fun Scenario.assertSingletonRequest(
         requestOrdering: RequestOrdering.Singleton,
     ) {
         requestTracker.awaitStarted(requestOrdering.request)
@@ -366,7 +360,7 @@ internal class PaymentSheetLoadParallelismTest {
         requestTracker.awaitFinished(requestOrdering.request)
     }
 
-    private fun assertSequentialRequests(
+    private fun Scenario.assertSequentialRequests(
         requestOrdering: RequestOrdering.Sequential,
     ) {
         requestOrdering.requests.forEach { nestedRequestOrdering ->
@@ -374,7 +368,7 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun assertNoOtherRequestsInProgress(
+    private fun Scenario.assertNoOtherRequestsInProgress(
         currentRequests: Set<Request>,
     ) {
         val inProgressRequests = requestTracker.inProgressRequestsExcluding(currentRequests)
@@ -387,13 +381,20 @@ internal class PaymentSheetLoadParallelismTest {
         }
     }
 
-    private fun assertParallelRequests(
+    private fun Scenario.assertParallelRequests(
         parallelRequests: RequestOrdering.Parallel,
     ) {
         requestTracker.awaitStarted(parallelRequests.requests)
         assertNoOtherRequestsInProgress(parallelRequests.requests.toSet())
         requestTracker.release(parallelRequests.requests)
         requestTracker.awaitFinished(parallelRequests.requests)
+    }
+
+    private fun runScenario(
+        expectedRequestOrdering: RequestOrdering,
+        block: Scenario.() -> Unit,
+    ) {
+        Scenario(expectedRequestOrdering).use(block)
     }
 
     private enum class Request {
@@ -420,6 +421,16 @@ internal class PaymentSheetLoadParallelismTest {
                 is Sequential -> this.requests.map { it.allRequests() }.flatten()
                 is Singleton -> listOf(this.request)
             }
+        }
+    }
+
+    private class Scenario(
+        expectedRequestOrdering: RequestOrdering,
+    ) : Closeable {
+        val requestTracker = RequestTracker(expectedRequestOrdering.allRequests())
+
+        override fun close() {
+            requestTracker.cleanup()
         }
     }
 
@@ -503,9 +514,32 @@ internal class PaymentSheetLoadParallelismTest {
             }
         }
 
+        fun cleanup() {
+            releaseAll()
+
+            try {
+                awaitFinished(requestStates.keys.toList())
+            } catch (e: AssertionError) {
+                throw AssertionError(
+                    "Unfinished requests at the end of the scenario: ${unfinishedRequests().joinToString()}. ${e.message}"
+                )
+            }
+
+            validateNoUnfinishedRequests()
+        }
+
         fun inProgressRequestsExcluding(requests: Set<Request>): List<Request> {
             return requestStates.keys.filter { request ->
                 request !in requests && isInProgress(request)
+            }
+        }
+
+        fun validateNoUnfinishedRequests() {
+            val unfinishedRequests = unfinishedRequests()
+            if (unfinishedRequests.isNotEmpty()) {
+                throw AssertionError(
+                    "Unfinished requests at the end of the scenario: ${unfinishedRequests.joinToString()}."
+                )
             }
         }
 
@@ -518,6 +552,16 @@ internal class PaymentSheetLoadParallelismTest {
         private fun isInProgress(request: Request): Boolean {
             val requestState = state(request)
             return requestState.started.count == 0L && requestState.finished.count != 0L
+        }
+
+        private fun unfinishedRequests(): List<String> {
+            return requestStates.mapNotNull { (request, requestState) ->
+                when {
+                    requestState.finished.count == 0L -> null
+                    requestState.started.count == 0L -> "${request.name} (in progress)"
+                    else -> "${request.name} (not started)"
+                }
+            }
         }
 
         private fun deadlineFromNow(): Long {
