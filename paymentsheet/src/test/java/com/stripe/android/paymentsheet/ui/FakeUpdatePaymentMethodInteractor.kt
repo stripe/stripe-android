@@ -9,6 +9,8 @@ import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.ViewActionRecorder
+import com.stripe.android.paymentsheet.canChangeCbc
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -45,13 +47,17 @@ internal class FakeUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val editCardDetailsInteractor: EditCardDetailsInteractor by lazy {
-        val isModifiable =
-            displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
+        val isModifiable = displayableSavedPaymentMethod.paymentMethod.isModifiable(
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+            isCbcEligible = displayableSavedPaymentMethod.isCbcEligible,
+        )
         editCardDetailsInteractorFactory.create(
             coroutineScope = TestScope(),
             cardEditConfiguration = CardEditConfiguration(
                 cardBrandFilter = cardBrandFilter,
-                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
+                isCbcModifiable = isModifiable && displayableSavedPaymentMethod.paymentMethod.canChangeCbc(
+                    displayableSavedPaymentMethod.isCbcEligible
+                ),
                 areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails
             ),
             requiresModification = true,

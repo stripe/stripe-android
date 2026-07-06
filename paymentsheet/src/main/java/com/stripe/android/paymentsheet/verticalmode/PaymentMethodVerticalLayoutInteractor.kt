@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
@@ -528,7 +529,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canUpdateFullPaymentMethodDetails: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable(canUpdateFullPaymentMethodDetails) == true || canRemove) {
+        val canUpdatePaymentMethod = savedPaymentMethod?.paymentMethod?.isModifiable(
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+            isCbcEligible = savedPaymentMethod.isCbcEligible,
+        ) == true
+        return if (canUpdatePaymentMethod || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
