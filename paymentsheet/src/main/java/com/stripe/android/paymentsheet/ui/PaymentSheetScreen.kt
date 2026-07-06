@@ -41,7 +41,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
@@ -79,10 +78,10 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.Mandate
+import com.stripe.android.uicore.LocalStripeIsDarkTheme
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getOuterFormInsets
-import com.stripe.android.uicore.isSystemDarkTheme
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.coroutines.delay
@@ -512,7 +511,7 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
         mutableStateOf<PrimaryButton?>(null)
     }
 
-    val context = LocalContext.current
+    val isDark = LocalStripeIsDarkTheme.current
 
     Box {
         AndroidViewBinding(
@@ -523,12 +522,13 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel) {
                 primaryButton.setAppearanceConfiguration(
                     StripeTheme.primaryButtonStyle,
                     tintList = ColorStateList.valueOf(
-                        if (context.isSystemDarkTheme()) {
+                        if (isDark) {
                             viewModel.config.appearance.primaryButton.colorsDark.background
                         } else {
                             viewModel.config.appearance.primaryButton.colorsLight.background
-                        } ?: StripeTheme.primaryButtonStyle.getBackgroundColor(context)
-                    )
+                        } ?: StripeTheme.primaryButtonStyle.getBackgroundColor(isDark)
+                    ),
+                    isDark = isDark,
                 )
                 binding
             },

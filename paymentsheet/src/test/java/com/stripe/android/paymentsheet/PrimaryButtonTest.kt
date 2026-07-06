@@ -48,7 +48,11 @@ class PrimaryButtonTest {
 
     @Test
     fun `onFinishingState() should clear any tint and restore onReadyState()`() {
-        primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
+        primaryButton.setAppearanceConfiguration(
+            StripeThemeDefaults.primaryButtonStyle,
+            ColorStateList.valueOf(Color.BLACK),
+            isDark = false,
+        )
         primaryButton.updateState(
             PrimaryButton.State.FinishProcessing({})
         )
@@ -62,7 +66,11 @@ class PrimaryButtonTest {
 
     @Test
     fun `onStartProcessing() and onFinishingState() should make button not clickable`() {
-        primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))
+        primaryButton.setAppearanceConfiguration(
+            StripeThemeDefaults.primaryButtonStyle,
+            ColorStateList.valueOf(Color.BLACK),
+            isDark = false,
+        )
         primaryButton.updateState(
             PrimaryButton.State.StartProcessing
         )

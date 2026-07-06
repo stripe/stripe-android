@@ -470,6 +470,16 @@ fun StripeTypography.toComposeTypography(): Typography {
 }
 
 val LocalColors = staticCompositionLocalOf { StripeTheme.getColors(false) }
+
+/**
+ * The effective light/dark flag for the current Stripe UI subtree. Provided by [StripeTheme] from
+ * the value it used to pick [LocalColors], so descendants can resolve appearance-dependent colors
+ * and drawables without re-deriving dark mode from the device (which would ignore a merchant-forced
+ * appearance). Prefer this over `isSystemInDarkTheme()` inside Stripe payment UI.
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val LocalStripeIsDarkTheme = staticCompositionLocalOf { StripeTheme.nightModeOverride ?: false }
+
 val LocalShapes = staticCompositionLocalOf { StripeTheme.shapesMutable }
 val LocalTypography = staticCompositionLocalOf { StripeTheme.typographyMutable }
 
@@ -496,7 +506,8 @@ val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInset
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun StripeTheme(
-    colors: StripeColors = StripeTheme.getColors(isSystemInDarkTheme()),
+    isDarkTheme: Boolean = StripeTheme.isDarkTheme(isSystemInDarkTheme()),
+    colors: StripeColors = StripeTheme.getColors(isDarkTheme),
     shapes: StripeShapes = StripeTheme.shapesMutable,
     typography: StripeTypography = StripeTheme.typographyMutable,
     sectionSpacing: Float? = StripeTheme.customSectionSpacing,
@@ -522,6 +533,7 @@ fun StripeTheme(
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
 
     CompositionLocalProvider(
+        LocalStripeIsDarkTheme provides isDarkTheme,
         LocalColors provides colors,
         LocalShapes provides shapes,
         LocalTypography provides typography,
@@ -638,15 +650,35 @@ object StripeTheme {
 
     var verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding
 
+    /**
+     * Overrides the device's light/dark setting for Stripe payment UI when non-null.
+     *
+     * `null` follows the system setting, `false` forces light, and `true` forces dark. This is set
+     * from the merchant-configured [StripeTheme] state (see PaymentSheet's user interface style) so
+     * that a forced appearance is honored consistently by Compose colors, the primary button, and
+     * the payment method icons, regardless of the device's night mode.
+     */
+    var nightModeOverride: Boolean? = null
+
     fun getColors(isDark: Boolean): StripeColors {
         return if (isDark) colorsDarkMutable else colorsLightMutable
+    }
+
+    /**
+     * Resolves the effective dark-theme flag, honoring [nightModeOverride] when set and otherwise
+     * falling back to [systemInDarkTheme] (the device setting).
+     */
+    fun isDarkTheme(systemInDarkTheme: Boolean): Boolean {
+        return nightModeOverride ?: systemInDarkTheme
     }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun Context.isSystemDarkTheme(): Boolean {
-    return resources.configuration.uiMode and
-        UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES
+    return StripeTheme.nightModeOverride ?: (
+        resources.configuration.uiMode and
+            UI_MODE_NIGHT_MASK == UI_MODE_NIGHT_YES
+        )
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -717,45 +749,60 @@ fun Color.shouldUseDarkDynamicColor(): Boolean {
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonStyle.getBackgroundColor(context: Context): Int {
-    val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsDark else colorsLight).background.toArgb()
-}
+fun PrimaryButtonStyle.getBackgroundColor(context: Context): Int =
+    getBackgroundColor(context.isSystemDarkTheme())
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonStyle.getSuccessBackgroundColor(context: Context): Int {
-    val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsDark else colorsLight).successBackground.toArgb()
-}
+fun PrimaryButtonStyle.getBackgroundColor(isDark: Boolean): Int =
+    (if (isDark) colorsDark else colorsLight).background.toArgb()
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonStyle.getOnBackgroundColor(context: Context): Int {
-    val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsDark else colorsLight).onBackground.toArgb()
-}
+fun PrimaryButtonStyle.getSuccessBackgroundColor(context: Context): Int =
+    getSuccessBackgroundColor(context.isSystemDarkTheme())
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonStyle.getOnSuccessBackgroundColor(context: Context): Int {
-    val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsDark else colorsLight).onSuccessBackground.toArgb()
-}
+fun PrimaryButtonStyle.getSuccessBackgroundColor(isDark: Boolean): Int =
+    (if (isDark) colorsDark else colorsLight).successBackground.toArgb()
 
 @ColorInt
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int {
-    val isDark = context.isSystemDarkTheme()
-    return (if (isDark) colorsDark else colorsLight).border.toArgb()
-}
+fun PrimaryButtonStyle.getOnBackgroundColor(context: Context): Int =
+    getOnBackgroundColor(context.isSystemDarkTheme())
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getOnBackgroundColor(isDark: Boolean): Int =
+    (if (isDark) colorsDark else colorsLight).onBackground.toArgb()
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getOnSuccessBackgroundColor(context: Context): Int =
+    getOnSuccessBackgroundColor(context.isSystemDarkTheme())
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getOnSuccessBackgroundColor(isDark: Boolean): Int =
+    (if (isDark) colorsDark else colorsLight).onSuccessBackground.toArgb()
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getBorderStrokeColor(context: Context): Int =
+    getBorderStrokeColor(context.isSystemDarkTheme())
+
+@ColorInt
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun PrimaryButtonStyle.getBorderStrokeColor(isDark: Boolean): Int =
+    (if (isDark) colorsDark else colorsLight).border.toArgb()
 
 @Composable
 @ReadOnlyComposable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun PrimaryButtonStyle.getComposeTextStyle(): TextStyle {
     val baseStyle = MaterialTheme.typography.h5.copy(
-        color = (if (isSystemInDarkTheme()) colorsDark else colorsLight).onBackground,
+        color = (if (LocalStripeIsDarkTheme.current) colorsDark else colorsLight).onBackground,
         fontSize = typography.fontSize
     )
     return if (typography.fontFamily != null) {

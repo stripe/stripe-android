@@ -11,20 +11,32 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentSelectionIconLoaderTest {
 
     private val workingUrl = "working url"
     private val brokenUrl = "broken url"
+    private val lightUrl = "light url"
+    private val darkUrl = "dark url"
     private val simpleBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+    private val lightBitmap = Bitmap.createBitmap(11, 11, Bitmap.Config.ARGB_8888)
+    private val darkBitmap = Bitmap.createBitmap(22, 22, Bitmap.Config.ARGB_8888)
     private val testDispatcher = StandardTestDispatcher()
+
+    @After
+    fun tearDown() {
+        StripeTheme.nightModeOverride = null
+    }
 
     @Test
     fun loadPaymentOptionWithIconUrl_usesIconFromUrl() = runScenario(
@@ -69,9 +81,58 @@ internal class PaymentSelectionIconLoaderTest {
         assertThat(drawable.current).isEqualTo(PaymentSelection.IconLoader.emptyDrawable)
     }
 
+    @Test
+    fun forcedDarkAppearance_usesDarkThemeIconUrl() {
+        StripeTheme.nightModeOverride = true
+
+        runScenario(iconUrl = lightUrl, darkIconUrl = darkUrl, iconRes = LINK_REF) {
+            assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(darkBitmap)
+        }
+    }
+
+    @Test
+    fun forcedLightAppearance_usesLightThemeIconUrl() {
+        StripeTheme.nightModeOverride = false
+
+        runScenario(iconUrl = lightUrl, darkIconUrl = darkUrl, iconRes = LINK_REF) {
+            assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(lightBitmap)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun forcedLightAppearance_onDarkDevice_usesLightThemeIconUrl() {
+        StripeTheme.nightModeOverride = false
+
+        runScenario(iconUrl = lightUrl, darkIconUrl = darkUrl, iconRes = LINK_REF) {
+            assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(lightBitmap)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun automaticAppearance_onDarkDevice_usesDarkThemeIconUrl() {
+        StripeTheme.nightModeOverride = null
+
+        runScenario(iconUrl = lightUrl, darkIconUrl = darkUrl, iconRes = LINK_REF) {
+            assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(darkBitmap)
+        }
+    }
+
+    @Test
+    @Config(qualifiers = "night")
+    fun forcedLightAppearance_onDarkDevice_resolvesResourceDrawable() {
+        StripeTheme.nightModeOverride = false
+
+        runScenario(iconUrl = null, darkIconUrl = null, iconRes = LINK_REF) {
+            assertThat(drawable.current).isInstanceOf<VectorDrawable>()
+        }
+    }
+
     private fun runScenario(
         iconUrl: String?,
         iconRes: Int?,
+        darkIconUrl: String? = null,
         block: Scenario.() -> Unit,
     ) = runTest(testDispatcher) {
         val drawable = PaymentSelection.IconLoader(
@@ -80,13 +141,15 @@ internal class PaymentSelectionIconLoaderTest {
                 loadResultByUrl = mapOf(
                     workingUrl to Result.success(simpleBitmap),
                     brokenUrl to Result.failure(Throwable()),
+                    lightUrl to Result.success(lightBitmap),
+                    darkUrl to Result.success(darkBitmap),
                 ),
             ),
         ).load(
             drawableResourceId = iconRes ?: 0,
             drawableResourceIdNight = null,
             lightThemeIconUrl = iconUrl,
-            darkThemeIconUrl = null,
+            darkThemeIconUrl = darkIconUrl,
         )
         advanceUntilIdle()
         Scenario(drawable = drawable).apply { block() }
@@ -95,4 +158,8 @@ internal class PaymentSelectionIconLoaderTest {
     private class Scenario(
         val drawable: Drawable
     )
+
+    private companion object {
+        val LINK_REF = R.drawable.stripe_ic_paymentsheet_link_ref
+    }
 }

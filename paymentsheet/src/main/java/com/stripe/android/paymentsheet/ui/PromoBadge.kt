@@ -18,6 +18,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.uicore.LocalStripeIsDarkTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getOnSuccessBackgroundColor
 import com.stripe.android.uicore.getSuccessBackgroundColor
@@ -33,9 +34,10 @@ internal fun PromoBadge(
 ) {
     // TODO(tillh-stripe): Revisit how we want the badge text to scale in tiny mode
     FixedTextSize(fixed = tinyMode) {
+        val isDark = LocalStripeIsDarkTheme.current
         val backgroundColor = if (eligible) {
             Color(
-                color = StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(LocalContext.current),
+                color = StripeThemeDefaults.primaryButtonStyle.getSuccessBackgroundColor(isDark),
             )
         } else {
             MaterialTheme.stripeColors.componentBorder
@@ -43,7 +45,7 @@ internal fun PromoBadge(
 
         val foregroundColor = if (eligible) {
             Color(
-                color = StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(LocalContext.current),
+                color = StripeThemeDefaults.primaryButtonStyle.getOnSuccessBackgroundColor(isDark),
             )
         } else {
             MaterialTheme.stripeColors.onComponent

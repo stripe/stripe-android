@@ -1269,6 +1269,11 @@ class PaymentSheet internal constructor(
          */
         internal val iconStyle: IconStyle = IconStyle.default,
         internal val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
+        /**
+         * Controls whether Payment Element follows the device's light/dark setting or is forced to
+         * a fixed light or dark appearance.
+         */
+        internal val style: UserInterfaceStyle = UserInterfaceStyle.default,
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -2016,6 +2021,9 @@ class PaymentSheet internal constructor(
             @OptIn(AppearanceAPIAdditionsPreview::class)
             private var iconStyle: IconStyle = IconStyle.default
 
+            @OptIn(AppearanceAPIAdditionsPreview::class)
+            private var style: UserInterfaceStyle = UserInterfaceStyle.default
+
             private var verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding
 
             private var embeddedAppearance: Embedded =
@@ -2065,6 +2073,11 @@ class PaymentSheet internal constructor(
             }
 
             @AppearanceAPIAdditionsPreview
+            fun style(style: UserInterfaceStyle) = apply {
+                this.style = style
+            }
+
+            @AppearanceAPIAdditionsPreview
             fun verticalModeRowPadding(verticalModeRowPaddingDp: Float) = apply {
                 this.verticalModeRowPadding = verticalModeRowPaddingDp
             }
@@ -2083,6 +2096,7 @@ class PaymentSheet internal constructor(
                     textFieldInsets = textFieldInsets,
                     iconStyle = iconStyle,
                     verticalModeRowPadding = verticalModeRowPadding,
+                    style = style,
                 )
             }
         }
@@ -2697,6 +2711,40 @@ class PaymentSheet internal constructor(
 
         internal companion object {
             val default = Filled
+        }
+    }
+
+    /**
+     * Style options for the light/dark appearance of Payment Element.
+     *
+     * By default, Payment Element follows the device's system light/dark setting, choosing between
+     * [Appearance.colorsLight] and [Appearance.colorsDark] accordingly. Use [AlwaysLight] or
+     * [AlwaysDark] to force a fixed appearance regardless of the device setting — for example, to
+     * always present a light payment sheet inside an app that is otherwise dark.
+     *
+     * This also controls which variant of the payment method icons (including the icon returned by
+     * [PaymentOption.icon]) is used, so forcing an appearance keeps those icons visible against your
+     * chosen background.
+     */
+    @AppearanceAPIAdditionsPreview
+    enum class UserInterfaceStyle {
+        /**
+         * Follow the device's system light/dark setting (the default).
+         */
+        Automatic,
+
+        /**
+         * Always use [Appearance.colorsLight], regardless of the device's system setting.
+         */
+        AlwaysLight,
+
+        /**
+         * Always use [Appearance.colorsDark], regardless of the device's system setting.
+         */
+        AlwaysDark;
+
+        internal companion object {
+            val default = Automatic
         }
     }
 

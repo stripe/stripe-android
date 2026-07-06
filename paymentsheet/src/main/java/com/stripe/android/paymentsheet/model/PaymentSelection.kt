@@ -282,9 +282,11 @@ internal sealed class PaymentSelection : Parcelable {
         private val imageLoader: StripeImageLoader,
     ) {
         private fun isDarkTheme(): Boolean {
-            return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES ||
-                isCustomDarkTheme()
+            return StripeTheme.nightModeOverride ?: (
+                resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
+                    Configuration.UI_MODE_NIGHT_YES ||
+                    isCustomDarkTheme()
+                )
         }
 
         /**
@@ -294,17 +296,42 @@ internal sealed class PaymentSelection : Parcelable {
             return StripeTheme.colorsLightMutable.component.luminance() < MIN_LUMINANCE_FOR_LIGHT_ICON
         }
 
+        /**
+         * Returns [resources] with its night [Configuration] forced to match a merchant-configured
+         * light/dark appearance ([StripeTheme.nightModeOverride])
+         */
+        private fun resolvedResources(): Resources {
+            val forcedDark = StripeTheme.nightModeOverride ?: return resources
+            val currentlyDark = resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
+                Configuration.UI_MODE_NIGHT_YES
+            if (forcedDark == currentlyDark) {
+                return resources
+            }
+            val nightModeFlag = if (forcedDark) {
+                Configuration.UI_MODE_NIGHT_YES
+            } else {
+                Configuration.UI_MODE_NIGHT_NO
+            }
+            val config = Configuration(resources.configuration).apply {
+                uiMode = (uiMode and Configuration.UI_MODE_NIGHT_MASK.inv()) or nightModeFlag
+            }
+            @Suppress("DEPRECATION")
+            return Resources(resources.assets, resources.displayMetrics, config)
+        }
+
         suspend fun load(
             @DrawableRes drawableResourceId: Int,
             @DrawableRes drawableResourceIdNight: Int?,
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
         ): Drawable {
+            val themedResources = resolvedResources()
+
             fun loadResource(): Drawable {
                 @Suppress("DEPRECATION")
                 return runCatching {
                     ResourcesCompat.getDrawable(
-                        resources,
+                        themedResources,
                         if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
                         null
                     )
@@ -313,7 +340,7 @@ internal sealed class PaymentSelection : Parcelable {
 
             suspend fun loadIcon(url: String): Drawable {
                 return imageLoader.load(url).getOrNull()?.let {
-                    BitmapDrawable(resources, it)
+                    BitmapDrawable(themedResources, it)
                 } ?: loadResource()
             }
 

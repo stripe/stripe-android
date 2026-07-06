@@ -103,18 +103,19 @@ internal class PrimaryButton @JvmOverloads constructor(
 
     fun setAppearanceConfiguration(
         primaryButtonStyle: PrimaryButtonStyle,
-        tintList: ColorStateList?
+        tintList: ColorStateList?,
+        isDark: Boolean,
     ) {
         cornerRadius = context.convertDpToPx(primaryButtonStyle.shape.cornerRadius.dp)
         borderStrokeWidth = context.convertDpToPx(primaryButtonStyle.shape.borderStrokeWidth.dp)
-        borderStrokeColor = primaryButtonStyle.getBorderStrokeColor(context)
+        borderStrokeColor = primaryButtonStyle.getBorderStrokeColor(isDark)
         viewBinding.lockIcon.imageTintList = ColorStateList.valueOf(
-            primaryButtonStyle.getOnBackgroundColor(context)
+            primaryButtonStyle.getOnBackgroundColor(isDark)
         )
         defaultTintList = tintList
         backgroundTintList = tintList
-        finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(context)
-        finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(context)
+        finishedBackgroundColor = primaryButtonStyle.getSuccessBackgroundColor(isDark)
+        finishedOnBackgroundColor = primaryButtonStyle.getOnSuccessBackgroundColor(isDark)
         layoutParams?.height = context.convertDpToPx(primaryButtonStyle.shape.height.dp).toInt()
     }
 

@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -49,6 +48,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.TestModeBadge
 import com.stripe.android.ui.core.elements.H4Text
+import com.stripe.android.uicore.LocalStripeIsDarkTheme
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.Placeholder
 import com.stripe.android.uicore.elements.SectionCard
@@ -122,7 +122,7 @@ internal fun CvcRecollectionField(
     cvcState: CvcState,
     onValueChanged: (String) -> Unit
 ) {
-    val backgroundColor = if (isSystemInDarkTheme()) {
+    val backgroundColor = if (LocalStripeIsDarkTheme.current) {
         Color.White.copy(alpha = 0.075f)
     } else {
         Color.Black.copy(alpha = 0.075f)

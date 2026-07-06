@@ -119,6 +119,25 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         PaymentSheet.IconStyle.Filled -> IconStyle.Filled
         PaymentSheet.IconStyle.Outlined -> IconStyle.Outlined
     }
+
+    StripeTheme.nightModeOverride = when (style) {
+        PaymentSheet.UserInterfaceStyle.Automatic -> null
+        PaymentSheet.UserInterfaceStyle.AlwaysLight -> false
+        PaymentSheet.UserInterfaceStyle.AlwaysDark -> true
+    }
+}
+
+/**
+ * Resolves the effective dark-theme flag for this appearance, honoring a merchant-forced
+ * [PaymentSheet.UserInterfaceStyle] and otherwise following [systemInDarkTheme] (the device setting).
+ */
+@OptIn(AppearanceAPIAdditionsPreview::class)
+internal fun PaymentSheet.Appearance.resolveIsDark(systemInDarkTheme: Boolean): Boolean {
+    return when (style) {
+        PaymentSheet.UserInterfaceStyle.Automatic -> systemInDarkTheme
+        PaymentSheet.UserInterfaceStyle.AlwaysLight -> false
+        PaymentSheet.UserInterfaceStyle.AlwaysDark -> true
+    }
 }
 
 internal val WalletType.configType: PaymentSheet.WalletButtonsConfiguration.Wallet

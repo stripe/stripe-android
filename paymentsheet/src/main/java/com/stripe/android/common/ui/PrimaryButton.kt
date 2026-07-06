@@ -23,10 +23,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.LocalStripeIsDarkTheme
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.getBorderStrokeColor
@@ -47,12 +47,12 @@ internal fun PrimaryButton(
 ) {
     // We need to use PaymentsTheme.primaryButtonStyle instead of MaterialTheme
     // because of the rules API for primary button.
-    val context = LocalContext.current
-    val background = Color(StripeTheme.primaryButtonStyle.getBackgroundColor(context))
-    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
+    val isDark = LocalStripeIsDarkTheme.current
+    val background = Color(StripeTheme.primaryButtonStyle.getBackgroundColor(isDark))
+    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(isDark))
     val borderStroke = BorderStroke(
         StripeTheme.primaryButtonStyle.shape.borderStrokeWidth.dp,
-        Color(StripeTheme.primaryButtonStyle.getBorderStrokeColor(context))
+        Color(StripeTheme.primaryButtonStyle.getBorderStrokeColor(isDark))
     )
     val shape = RoundedCornerShape(
         StripeTheme.primaryButtonStyle.shape.cornerRadius.dp
@@ -109,8 +109,8 @@ private fun PrimaryButtonContent(
     isLoading: Boolean,
     displayLockIcon: Boolean,
 ) {
-    val context = LocalContext.current
-    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(context))
+    val isDark = LocalStripeIsDarkTheme.current
+    val onBackground = Color(StripeTheme.primaryButtonStyle.getOnBackgroundColor(isDark))
 
     BoxWithConstraints(contentAlignment = Alignment.CenterStart) {
         Text(

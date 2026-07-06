@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.ZeroCornerSize
 import androidx.compose.foundation.text.KeyboardActions
@@ -13,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.text.input.VisualTransformation
+import com.stripe.android.uicore.LocalStripeIsDarkTheme
 import com.stripe.android.uicore.LocalTextFieldInsets
 import com.stripe.android.uicore.elements.FieldDisplayState
 import com.stripe.android.uicore.elements.TextFieldColors
@@ -73,7 +73,7 @@ private fun Label(
 
 @Composable
 private fun disabledBackgroundColor(): Color {
-    return if (isSystemInDarkTheme()) {
+    return if (LocalStripeIsDarkTheme.current) {
         Color.White.copy(alpha = 0.04f)
     } else {
         Color.Black.copy(alpha = 0.04f)
