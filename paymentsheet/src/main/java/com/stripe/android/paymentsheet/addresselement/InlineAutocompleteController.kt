@@ -47,6 +47,7 @@ internal class InlineAutocompleteController(
                         return@collectLatest
                     }
                     if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
+                        lastPredictionLine1 = null
                         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                         return@collectLatest
                     }
@@ -63,7 +64,7 @@ internal class InlineAutocompleteController(
                 onSuccess = { response ->
                     val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
                     val address = response.place.transformGoogleToStripeAddress(locale)
-                    lastPredictionLine1 = address.line1
+                    address.line1?.let { lastPredictionLine1 = it }
                     _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                     eventListenerProvider()?.invoke(
                         AutocompleteAddressInteractor.Event.OnValues(
@@ -87,6 +88,7 @@ internal class InlineAutocompleteController(
 
     fun onDismissed() {
         selectionJob?.cancel()
+        lastPredictionLine1 = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
     }
 

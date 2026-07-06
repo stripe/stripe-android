@@ -183,10 +183,11 @@ class PaymentElementAutocompleteAddressInteractorTest {
             autocompleteCountries = setOf("US")
         )
 
-        val factory = PaymentElementAutocompleteAddressInteractorFactory(
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            inlineDependencies = null,
+            placesClient = null,
+            coroutineScope = this,
         )
 
         val interactor = factory.create()
@@ -203,13 +204,11 @@ class PaymentElementAutocompleteAddressInteractorTest {
             isInlineAutocompleteEnabled = true,
         )
 
-        val factory = PaymentElementAutocompleteAddressInteractorFactory(
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            inlineDependencies = InlineAutocompleteDependencies(
-                placesClient = FakePlacesClientProxy(),
-                coroutineScope = this,
-            ),
+            placesClient = FakePlacesClientProxy(),
+            coroutineScope = this,
         )
 
         val interactor = factory.create()
@@ -226,13 +225,11 @@ class PaymentElementAutocompleteAddressInteractorTest {
             isInlineAutocompleteEnabled = true,
         )
         val fakePlaces = FakePlacesClientProxy()
-        val factory = PaymentElementAutocompleteAddressInteractorFactory(
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            inlineDependencies = InlineAutocompleteDependencies(
-                placesClient = fakePlaces,
-                coroutineScope = backgroundScope,
-            ),
+            placesClient = fakePlaces,
+            coroutineScope = backgroundScope,
         )
         val queryFlow = MutableStateFlow("")
         val countryFlow = MutableStateFlow<String?>("US")
@@ -254,17 +251,18 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory falls back to launcher when inline enabled but no dependencies`() = test { scenario ->
+    fun `Factory falls back to launcher when inline enabled but placesClient is null`() = test { scenario ->
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
             isInlineAutocompleteEnabled = true,
         )
 
-        val factory = PaymentElementAutocompleteAddressInteractorFactory(
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            inlineDependencies = null,
+            placesClient = null,
+            coroutineScope = this,
         )
 
         val interactor = factory.create()

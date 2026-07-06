@@ -22,8 +22,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.addresselement.AUTOCOMPLETE_DEFAULT_COUNTRIES
 import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceContext
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
-import com.stripe.android.paymentsheet.addresselement.InlineAutocompleteDependencies
-import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractorFactory
+import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -85,7 +84,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory =
-        PaymentElementAutocompleteAddressInteractorFactory(
+        PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = autocompleteLauncher,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = config.googlePlacesApiKey,
@@ -94,12 +93,8 @@ internal abstract class BaseSheetViewModel(
                 getAttributionDrawable =
                     if (placesClient != null) { _ -> R.drawable.stripe_google_maps_logo } else null,
             ),
-            inlineDependencies = placesClient?.let { client ->
-                InlineAutocompleteDependencies(
-                    placesClient = client,
-                    coroutineScope = viewModelScope,
-                )
-            },
+            placesClient = placesClient,
+            coroutineScope = viewModelScope,
         )
 
     internal val validationRequested = MutableSharedFlow<Unit>()

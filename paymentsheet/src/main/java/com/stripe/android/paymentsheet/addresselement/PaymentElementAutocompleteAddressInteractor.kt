@@ -40,34 +40,25 @@ internal class PaymentElementAutocompleteAddressInteractor(
             eventListener?.invoke(it)
         }
     }
-}
 
-internal class PaymentElementAutocompleteAddressInteractorFactory(
-    private val launcher: AutocompleteLauncher,
-    private val autocompleteConfig: AutocompleteAddressInteractor.Config,
-    private val inlineDependencies: InlineAutocompleteDependencies?,
-) : AutocompleteAddressInteractor.Factory {
-    override fun create(): AutocompleteAddressInteractor {
-        val dependencies = inlineDependencies
-        if (dependencies != null && autocompleteConfig.isInlineAutocompleteEnabled) {
-            // The shared factory can be reused while an existing form is still on screen. The
-            // form/controller that created an inline interactor owns its lifecycle and disposes it
-            // when that controller goes away; disposing previous interactors here can tear down the
-            // active dropdown observer during unrelated form-model rebuilds.
-            return BillingInlineAutocompleteAddressInteractor(
-                placesClient = dependencies.placesClient,
+    class Factory(
+        private val launcher: AutocompleteLauncher,
+        private val autocompleteConfig: AutocompleteAddressInteractor.Config,
+        private val placesClient: PlacesClientProxy?,
+        private val coroutineScope: CoroutineScope,
+    ) : AutocompleteAddressInteractor.Factory {
+        override fun create(): AutocompleteAddressInteractor {
+            if (placesClient != null && autocompleteConfig.isInlineAutocompleteEnabled) {
+                return BillingInlineAutocompleteAddressInteractor(
+                    placesClient = placesClient,
+                    autocompleteConfig = autocompleteConfig,
+                    coroutineScope = coroutineScope,
+                )
+            }
+            return PaymentElementAutocompleteAddressInteractor(
+                launcher = launcher,
                 autocompleteConfig = autocompleteConfig,
-                coroutineScope = dependencies.coroutineScope,
             )
         }
-        return PaymentElementAutocompleteAddressInteractor(
-            launcher = launcher,
-            autocompleteConfig = autocompleteConfig,
-        )
     }
 }
-
-internal data class InlineAutocompleteDependencies(
-    val placesClient: PlacesClientProxy,
-    val coroutineScope: CoroutineScope,
-)

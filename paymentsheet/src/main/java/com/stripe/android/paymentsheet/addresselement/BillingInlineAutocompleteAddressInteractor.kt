@@ -43,8 +43,4 @@ internal class BillingInlineAutocompleteAddressInteractor(
     override fun onEnterManuallyFromInline() {
         eventListener?.invoke(AutocompleteAddressInteractor.Event.OnExpandForm(null))
     }
-
-    fun dispose() {
-        inlineController.dispose()
-    }
 }
