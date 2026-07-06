@@ -1,6 +1,5 @@
 package com.stripe.android.common.nfcscan.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -17,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -26,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
 
 private val CoilCircleSize = 200.dp
-private val CoilIconSize = 96.dp
 private val TopTextOffset = (-55).dp
 private val ShadowElevation = 8.dp
 
@@ -59,7 +56,7 @@ internal fun NfcCoil(
                 .background(color = MaterialTheme.colors.primary, shape = CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            NfcCoilIcon(modifier = Modifier.size(CoilIconSize))
+            NfcCoilAnimatedInterior(Modifier.fillMaxSize())
         }
 
         if (!shouldRenderTextAboveCoil) {
@@ -69,34 +66,6 @@ internal fun NfcCoil(
                     .offsetWithGap(30.dp)
             )
         }
-    }
-}
-
-@Composable
-private fun NfcCoilIcon(
-    modifier: Modifier = Modifier,
-) {
-    Box(modifier = modifier) {
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_circle),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_bar1),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_bar2),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize(),
-        )
-        Image(
-            painter = painterResource(R.drawable.stripe_ic_material_nfc_coil_bar3),
-            contentDescription = null,
-            modifier = Modifier.fillMaxSize()
-        )
     }
 }
 
