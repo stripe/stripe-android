@@ -133,6 +133,12 @@ private fun AppearancePicker(
                     updateAppearance = updateAppearance,
                 )
             }
+            CustomizationCard("User Interface Style") {
+                UserInterfaceStyle(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
+                )
+            }
             CustomizationCard("Colors") {
                 Colors(
                     currentAppearance = currentAppearance,
@@ -255,6 +261,22 @@ private fun Icons(
         updateAppearance(
             currentAppearance.copy(
                 iconStyle = it
+            )
+        )
+    }
+}
+
+@Composable
+private fun UserInterfaceStyle(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
+) {
+    UserInterfaceStyleDropDown(
+        style = currentAppearance.userInterfaceStyle,
+    ) {
+        updateAppearance(
+            currentAppearance.copy(
+                userInterfaceStyle = it
             )
         )
     }
@@ -1336,6 +1358,46 @@ private fun IconStyleDropDown(
                     onClick = {
                         expanded = false
                         onIconStyleSelected(it)
+                    }
+                ) {
+                    Text(it.name)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun UserInterfaceStyleDropDown(
+    style: AppearanceStore.State.UserInterfaceStyle,
+    onStyleSelected: (AppearanceStore.State.UserInterfaceStyle) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = BASE_PADDING)
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = "Style: $style",
+            fontSize = BASE_FONT_SIZE,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            AppearanceStore.State.UserInterfaceStyle.entries.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onStyleSelected(it)
                     }
                 ) {
                     Text(it.name)

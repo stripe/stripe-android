@@ -37,6 +37,7 @@ internal object AppearanceStore {
         val textFieldInsets: Insets = Insets.Default,
         val verticalModeRowPadding: Float = StripeThemeDefaults.verticalModeRowPadding,
         val iconStyle: IconStyle = IconStyle.Filled,
+        val userInterfaceStyle: UserInterfaceStyle = UserInterfaceStyle.Automatic,
     ) {
         @OptIn(AppearanceAPIAdditionsPreview::class)
         fun toPaymentSheetAppearance(): PaymentSheet.Appearance {
@@ -62,6 +63,7 @@ internal object AppearanceStore {
                     }
                 }
                 .iconStyle(iconStyle.toPaymentSheetIconStyle())
+                .style(userInterfaceStyle.toPaymentSheetStyle())
                 .build()
         }
 
@@ -271,6 +273,21 @@ internal object AppearanceStore {
                 return when (this) {
                     Filled -> PaymentSheet.IconStyle.Filled
                     Outlined -> PaymentSheet.IconStyle.Outlined
+                }
+            }
+        }
+
+        @OptIn(AppearanceAPIAdditionsPreview::class)
+        enum class UserInterfaceStyle {
+            Automatic,
+            AlwaysLight,
+            AlwaysDark;
+
+            fun toPaymentSheetStyle(): PaymentSheet.UserInterfaceStyle {
+                return when (this) {
+                    Automatic -> PaymentSheet.UserInterfaceStyle.Automatic
+                    AlwaysLight -> PaymentSheet.UserInterfaceStyle.AlwaysLight
+                    AlwaysDark -> PaymentSheet.UserInterfaceStyle.AlwaysDark
                 }
             }
         }
