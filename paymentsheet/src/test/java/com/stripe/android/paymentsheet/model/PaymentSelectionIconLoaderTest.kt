@@ -129,10 +129,35 @@ internal class PaymentSelectionIconLoaderTest {
         }
     }
 
+    @Test
+    @Config(qualifiers = "night")
+    fun forcedDarkOverrideLight_onDarkDevice_usesLightThemeIconUrl() {
+        runScenario(iconUrl = lightUrl, darkIconUrl = darkUrl, iconRes = LINK_REF, forcedDarkOverride = false) {
+            assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(lightBitmap)
+        }
+    }
+
+    @Test
+    fun forcedDarkOverrideDark_onLightDevice_usesDarkThemeIconUrl() {
+        runScenario(iconUrl = lightUrl, darkIconUrl = darkUrl, iconRes = LINK_REF, forcedDarkOverride = true) {
+            assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(darkBitmap)
+        }
+    }
+
+    @Test
+    fun forcedDarkOverride_takesPrecedenceOverGlobal() {
+        StripeTheme.nightModeOverride = true
+
+        runScenario(iconUrl = lightUrl, darkIconUrl = darkUrl, iconRes = LINK_REF, forcedDarkOverride = false) {
+            assertThat((drawable.current as BitmapDrawable).bitmap).isEqualTo(lightBitmap)
+        }
+    }
+
     private fun runScenario(
         iconUrl: String?,
         iconRes: Int?,
         darkIconUrl: String? = null,
+        forcedDarkOverride: Boolean? = null,
         block: Scenario.() -> Unit,
     ) = runTest(testDispatcher) {
         val drawable = PaymentSelection.IconLoader(
@@ -150,6 +175,7 @@ internal class PaymentSelectionIconLoaderTest {
             drawableResourceIdNight = null,
             lightThemeIconUrl = iconUrl,
             darkThemeIconUrl = darkIconUrl,
+            forcedDarkOverride = forcedDarkOverride,
         )
         advanceUntilIdle()
         Scenario(drawable = drawable).apply { block() }

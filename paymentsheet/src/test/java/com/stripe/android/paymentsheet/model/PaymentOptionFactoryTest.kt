@@ -33,7 +33,7 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with GooglePay should return expected object`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.GooglePay, null)
+        val paymentOption = factory.create(PaymentSelection.GooglePay, null, forcedDarkOverride = null)
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
         assertThat(paymentOption.label).isEqualTo("Google Pay")
         assertThat(paymentOption.paymentMethodType).isEqualTo("google_pay")
@@ -50,6 +50,7 @@ class PaymentOptionFactoryTest {
                 )
             ),
             null,
+            forcedDarkOverride = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
@@ -69,6 +70,7 @@ class PaymentOptionFactoryTest {
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
             ),
             null,
+            forcedDarkOverride = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
@@ -95,6 +97,7 @@ class PaymentOptionFactoryTest {
                 )
             ),
             null,
+            forcedDarkOverride = null,
         )
         assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa_ref)
         assertThat(paymentOption.label).isEqualTo("···· 4242")
@@ -113,7 +116,7 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null)
+        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, forcedDarkOverride = null)
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
     }
@@ -128,7 +131,7 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null)
+        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, forcedDarkOverride = null)
 
         assertThat(paymentOption.billingDetails).isNull()
     }
@@ -149,6 +152,7 @@ class PaymentOptionFactoryTest {
                 darkThemeIconUrl = null
             ),
             null,
+            forcedDarkOverride = null,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -157,7 +161,7 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with Google Pay should not include billing details`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.GooglePay, null)
+        val paymentOption = factory.create(PaymentSelection.GooglePay, null, forcedDarkOverride = null)
 
         assertThat(paymentOption.billingDetails).isNull()
     }
@@ -165,7 +169,11 @@ class PaymentOptionFactoryTest {
     @Test
     fun `create() with Link should not include billing details`() {
         val factory = createFactory()
-        val paymentOption = factory.create(PaymentSelection.Link(brand = LinkBrand.Link), null)
+        val paymentOption = factory.create(
+            PaymentSelection.Link(brand = LinkBrand.Link),
+            null,
+            forcedDarkOverride = null,
+        )
 
         assertThat(paymentOption.billingDetails).isNull()
     }
@@ -182,6 +190,7 @@ class PaymentOptionFactoryTest {
                 darkThemeIconUrl = null,
             ),
             null,
+            forcedDarkOverride = null,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -200,6 +209,7 @@ class PaymentOptionFactoryTest {
                 darkThemeIconUrl = null,
             ),
             null,
+            forcedDarkOverride = null,
         )
 
         assertThat(paymentOption.billingDetails).isEqualTo(PAYMENT_SHEET_BILLING_DETAILS)
@@ -221,7 +231,7 @@ class PaymentOptionFactoryTest {
             .setCard(PaymentMethod.Card(last4 = "4242", brand = CardBrand.Visa, displayBrand = "visa"))
             .build()
 
-        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null)
+        val paymentOption = factory.create(PaymentSelection.Saved(paymentMethod), null, forcedDarkOverride = null)
 
         assertThat(paymentOption.billingDetails).isEqualTo(
             PaymentSheet.BillingDetails(
@@ -247,7 +257,11 @@ class PaymentOptionFactoryTest {
             cardArtDrawableLoader = { cardArtDrawable },
         )
 
-        val option = factory.create(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD), null)
+        val option = factory.create(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            null,
+            forcedDarkOverride = null,
+        )
         val icon = option.icon()
 
         assertThat(icon.current).isEqualTo(cardArtDrawable)
@@ -259,7 +273,11 @@ class PaymentOptionFactoryTest {
             cardArtDrawableLoader = { null },
         )
 
-        val option = factory.create(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD), null)
+        val option = factory.create(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            null,
+            forcedDarkOverride = null,
+        )
         val icon = option.icon()
 
         assertThat(icon.current).isNotInstanceOf(ShapeDrawable::class.java)

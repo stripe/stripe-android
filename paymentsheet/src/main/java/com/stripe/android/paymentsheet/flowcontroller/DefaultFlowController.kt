@@ -71,6 +71,7 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
 import com.stripe.android.paymentsheet.model.isLink
+import com.stripe.android.paymentsheet.nightModeOverride
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkDisabledState
@@ -271,7 +272,11 @@ internal class DefaultFlowController @Inject internal constructor(
             val linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.effectiveLinkBrand(
                 linkAccountHolder.linkAccountInfo.value.account
             )
-            paymentOptionFactory.create(it, linkBrand)
+            paymentOptionFactory.create(
+                it,
+                linkBrand,
+                forcedDarkOverride = viewModel.state?.config?.appearance?.nightModeOverride(),
+            )
         }
     }
 
@@ -443,7 +448,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(selection, effectiveBrand),
+                        paymentOption = paymentOptionFactory.create(
+                            selection,
+                            effectiveBrand,
+                            forcedDarkOverride = viewModel.state?.config?.appearance?.nightModeOverride(),
+                        ),
                         didCancel = false,
                     )
                 )
@@ -503,7 +512,11 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentOption = newSelection?.let {
                 val linkBrand = viewModel.state?.linkConfiguration
                     ?.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
-                paymentOptionFactory.create(it, linkBrand)
+                paymentOptionFactory.create(
+                it,
+                linkBrand,
+                forcedDarkOverride = viewModel.state?.config?.appearance?.nightModeOverride(),
+            )
             }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
@@ -646,7 +659,11 @@ internal class DefaultFlowController @Inject internal constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         val paymentOption = paymentSelection?.let {
             val linkBrand = viewModel.state?.linkConfiguration?.effectiveLinkBrand(linkAccount)
-            paymentOptionFactory.create(it, linkBrand)
+            paymentOptionFactory.create(
+                it,
+                linkBrand,
+                forcedDarkOverride = viewModel.state?.config?.appearance?.nightModeOverride(),
+            )
         }
 
         paymentOptionResultCallback.onPaymentOptionResult(

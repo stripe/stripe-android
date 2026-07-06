@@ -281,8 +281,8 @@ internal sealed class PaymentSelection : Parcelable {
         private val resources: Resources,
         private val imageLoader: StripeImageLoader,
     ) {
-        private fun isDarkTheme(): Boolean {
-            return StripeTheme.nightModeOverride ?: (
+        private fun isDarkTheme(forcedDarkOverride: Boolean?): Boolean {
+            return forcedDarkOverride ?: StripeTheme.nightModeOverride ?: (
                 resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
                     Configuration.UI_MODE_NIGHT_YES ||
                     isCustomDarkTheme()
@@ -297,11 +297,13 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         /**
-         * Returns [resources] with its night [Configuration] forced to match a merchant-configured
-         * light/dark appearance ([StripeTheme.nightModeOverride])
+         * Returns [resources] with its night [Configuration] forced to match the resolved light/dark
+         * appearance. [forcedDarkOverride] (baked in from the configured appearance at creation) takes
+         * precedence over the global [StripeTheme.nightModeOverride]; when neither is set the original
+         * [resources] are returned unchanged.
          */
-        private fun resolvedResources(): Resources {
-            val forcedDark = StripeTheme.nightModeOverride ?: return resources
+        private fun resolvedResources(forcedDarkOverride: Boolean?): Resources {
+            val forcedDark = forcedDarkOverride ?: StripeTheme.nightModeOverride ?: return resources
             val currentlyDark = resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
                 Configuration.UI_MODE_NIGHT_YES
             if (forcedDark == currentlyDark) {
@@ -324,15 +326,17 @@ internal sealed class PaymentSelection : Parcelable {
             @DrawableRes drawableResourceIdNight: Int?,
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
+            forcedDarkOverride: Boolean?,
         ): Drawable {
-            val themedResources = resolvedResources()
+            val isDark = isDarkTheme(forcedDarkOverride)
+            val themedResources = resolvedResources(forcedDarkOverride)
 
             fun loadResource(): Drawable {
                 @Suppress("DEPRECATION")
                 return runCatching {
                     ResourcesCompat.getDrawable(
                         themedResources,
-                        if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
+                        if (!isDark) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
                         null
                     )
                 }.getOrNull() ?: emptyDrawable
@@ -346,7 +350,7 @@ internal sealed class PaymentSelection : Parcelable {
 
             // If the payment option has an icon URL, we prefer it.
             // Some payment options don't have an icon URL, and are loaded locally via resource.
-            return if (isDarkTheme() && darkThemeIconUrl != null) {
+            return if (isDark && darkThemeIconUrl != null) {
                 loadIcon(darkThemeIconUrl)
             } else if (lightThemeIconUrl != null) {
                 loadIcon(lightThemeIconUrl)
