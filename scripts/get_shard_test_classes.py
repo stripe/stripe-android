@@ -39,15 +39,14 @@ def class_names_from_test_files(test_directory, test_file_names):
     return class_names
 
 
-def get_all_test_class_names():
-    directory = 'paymentsheet-example/src/androidTest/java/'
-    _, kotlin_file_names = run_fast_scandir(directory, [".kt"])
+def get_all_test_class_names(test_directory):
+    _, kotlin_file_names = run_fast_scandir(test_directory, [".kt"])
     test_file_names = test_files_from_kotlin_files(kotlin_file_names)
-    return sorted(class_names_from_test_files(directory, test_file_names))
+    return sorted(class_names_from_test_files(test_directory, test_file_names))
 
 
-def get_shard_classes(shard_index, num_shards):
-    all_classes = get_all_test_class_names()
+def get_shard_classes(test_directory, shard_index, num_shards):
+    all_classes = get_all_test_class_names(test_directory)
     return [c for i, c in enumerate(all_classes) if i % num_shards == shard_index]
 
 
@@ -55,9 +54,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Get test classes for a given shard.")
     parser.add_argument("--shard-index", type=int, required=True)
     parser.add_argument("--num-shards", type=int, required=True)
+    parser.add_argument(
+        "--test-directory",
+        default="paymentsheet-example/src/androidTest/java/",
+        help="Directory containing android instrumentation test sources",
+    )
     args = parser.parse_args()
 
-    classes = get_shard_classes(args.shard_index, args.num_shards)
+    if not os.path.isdir(args.test_directory):
+        print(f"Test directory not found: {args.test_directory}", file=sys.stderr)
+        sys.exit(1)
+
+    classes = get_shard_classes(args.test_directory, args.shard_index, args.num_shards)
     if not classes:
         print("No test classes found for shard", args.shard_index, file=sys.stderr)
         sys.exit(1)

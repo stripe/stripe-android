@@ -17,7 +17,11 @@ pipelines:
       check: { }
       test: { }
       run-instrumentation-tests: { }
-      run-paymentsheet-instrumentation-tests: { }
+      build-paymentsheet-instrumentation-tests: { }
+      run-paymentsheet-instrumentation-tests:
+        parallel: 2
+        depends_on:
+          - build-paymentsheet-instrumentation-tests
       run-financial-connections-instrumentation-tests: { }
       run-connections-e2e-payments-tests-on-push: { }
       run-connections-e2e-token-tests-on-push: { }
@@ -316,6 +320,15 @@ workflows:
           title: Export instrumentation test results
           inputs:
             - test_title: Instrumentation tests
+  build-paymentsheet-instrumentation-tests:
+    before_run:
+      - prepare_all
+    steps:
+      - script@1:
+          title: Compile PaymentSheet instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew :paymentsheet:assembleDebugAndroidTest
   run-paymentsheet-instrumentation-tests:
     before_run:
       - prepare_all
@@ -326,11 +339,17 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=6 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+            - content: |-
+                #!/usr/bin/env bash
+                set -euo pipefail
+                envman add --key PAYMENTSHEET_INSTRUMENTATION_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 2 --test-directory paymentsheet/src/androidTest/java/)
+
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -Pandroid.experimental.androidTest.numManagedDeviceShards=4 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=4 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet:pixel2api33DebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet instrumentation test results
           inputs:
-            - test_title: PaymentSheet instrumentation tests
+            - test_title: "PaymentSheet instrumentation tests (shard $PAYMENTSHEET_INSTRUMENTATION_SHARD_DISPLAY)"
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android
@@ -410,7 +429,7 @@ workflows:
                 #!/usr/bin/env bash
                 set -euo pipefail
                 envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 5)
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 5 --test-directory paymentsheet-example/src/androidTest/java/)
 
                 ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
