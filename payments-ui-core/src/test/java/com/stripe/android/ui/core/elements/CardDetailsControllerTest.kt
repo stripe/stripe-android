@@ -15,10 +15,12 @@ import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FieldValidationMessageComparator
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -116,7 +118,7 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
+            ScannedCardDetails.Unvalidated(
                 cardNumber = "5555555555554444",
                 expirationYear = 2044,
                 expirationMonth = 4,
@@ -151,7 +153,7 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
+            ScannedCardDetails.Unvalidated(
                 cardNumber = "5555555555554444",
                 expirationYear = 2044,
                 expirationMonth = 4,
@@ -186,7 +188,7 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
+            ScannedCardDetails.Unvalidated(
                 cardNumber = "5555555555554444",
                 expirationYear = 2009,
                 expirationMonth = 12,
@@ -206,7 +208,7 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
+            ScannedCardDetails.Unvalidated(
                 cardNumber = "5555555555554444",
                 expirationYear = 2029,
                 expirationMonth = 1,
@@ -215,6 +217,44 @@ class CardDetailsControllerTest {
 
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
             .isEqualTo("0129")
+    }
+
+    @Test
+    fun `When validated scanned card, card data is applied and fields have card pill & cvc`() = runTest {
+        val cardController = cardDetailsController()
+        idleLooper()
+
+        cardController.fields.test {
+            val before = awaitItem()
+            assertThat(before).hasSize(2)
+            assertThat(before[0]).isSameInstanceAs(cardController.numberElement)
+            assertThat(before[1]).isInstanceOf(RowElement::class.java)
+
+            cardController.onScannedCard(
+                ScannedCardDetails.Validated(
+                    cardNumber = "4242424242424242",
+                    expirationYear = 2030,
+                    expirationMonth = 6,
+                )
+            )
+            idleLooper()
+
+            val after = awaitItem()
+            assertThat(after).hasSize(2)
+            assertThat(after[0]).isInstanceOf<CardPillElement>()
+
+            val cardPillElement = after[0] as CardPillElement
+
+            assertThat(cardPillElement.controller.cardNumber).isEqualTo("4242424242424242")
+            assertThat(after[1]).isSameInstanceAs(cardController.cvcElement)
+            ensureAllEventsConsumed()
+        }
+
+        assertThat(cardController.numberElement.controller.rawFieldValue.value)
+            .isEqualTo("4242424242424242")
+        assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
+            .isEqualTo("0630")
+        assertThat(cardController.cvcElement.controller.rawFieldValue.value).isEqualTo("")
     }
 
     @Test
@@ -237,7 +277,7 @@ class CardDetailsControllerTest {
         idleLooper()
 
         cardController.onScannedCard(
-            ScannedCardDetails(
+            ScannedCardDetails.Unvalidated(
                 cardNumber = "5555555555554444",
                 expirationYear = null,
                 expirationMonth = null,

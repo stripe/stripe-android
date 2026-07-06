@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Spremi podatke za plaćanja poduzeću %s za buduće kupnje</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Skeniraj karticu</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Obrišite skeniranu karticu</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Unošenjem vaših podataka o plaćanju, ovlašćujete (A) %s i Stripe, našeg davatelja usluga platnog prometa, da vašoj banci pošalje upute za terećenje vašeg računa, i (B) vašu banku za terećenje vašeg računa u skladu s tim uputama. U sklopu vaših prava, imate pravo na povrat novca od svoje banke prema uvjetima i odredbama ugovora s bankom. Povrat novca mora se zatražiti u roku od 8 tjedana počevši od datuma terećenja vašeg računa. Vaša prava objašnjena su u izjavi koju možete dobiti od svoje banke. Slažete se s primanjem obavijesti o budućim terećenjima do 2 dana prije njihova izvršenja.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

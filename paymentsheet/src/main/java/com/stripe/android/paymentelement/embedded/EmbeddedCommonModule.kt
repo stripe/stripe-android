@@ -1,8 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.common.nfcscan.DefaultIsNfcScanningAvailable
-import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
+import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
@@ -57,6 +56,7 @@ import kotlin.coroutines.CoroutineContext
         PaymentConfigurationModule::class,
         StripeNetworkClientModule::class,
         PaymentOptionCardArtModule::class,
+        NfcScanningAvailabilityModule::class,
     ],
 )
 internal interface EmbeddedCommonModule {
@@ -83,11 +83,6 @@ internal interface EmbeddedCommonModule {
     fun bindsPaymentAnalyticsRequestFactory(
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
-
-    @Binds
-    fun bindsIsNfcScanningAvailable(
-        isNfcScanningAvailable: DefaultIsNfcScanningAvailable,
-    ): IsNfcScanningAvailable
 
     companion object {
         @Provides

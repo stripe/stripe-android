@@ -606,13 +606,11 @@ class DefaultEventReporterTest {
                     billingAddressParameters = null,
                     additionalEnabledNetworks = emptyList()
                 ),
-                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = true,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
-                onShopPayPressed = {},
                 cardFundingFilter = DefaultCardFundingFilter,
                 cardBrandFilter = DefaultCardBrandFilter
             )
@@ -668,13 +666,11 @@ class DefaultEventReporterTest {
                     billingAddressParameters = null,
                     additionalEnabledNetworks = emptyList()
                 ),
-                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = false,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
-                onShopPayPressed = {},
                 cardFundingFilter = DefaultCardFundingFilter,
                 cardBrandFilter = DefaultCardBrandFilter
             )
@@ -693,52 +689,6 @@ class DefaultEventReporterTest {
             assertThat(request.params).containsEntry("payment_method_layout", "horizontal")
             assertThat(request.params).containsEntry("example_from_test", true)
         }
-
-    @Test
-    fun `onShopPayWebViewLoadAttempt fires event`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewLoadAttempt()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_load_attempt")
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
-    fun `onShopPayWebViewConfirmSuccess fires event`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewConfirmSuccess()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_confirm_success")
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
-    fun `onShopPayWebViewCancelled fires event with didReceiveECEClick true`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewCancelled(didReceiveECEClick = true)
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_cancelled")
-        assertThat(request.params).containsEntry("did_receive_ece_click", true)
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
-    fun `onShopPayWebViewCancelled fires event with didReceiveECEClick false`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewCancelled(didReceiveECEClick = false)
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_cancelled")
-        assertThat(request.params).containsEntry("did_receive_ece_click", false)
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
 
     @Test
     fun `onCardScanStarted fires event`() = runScenario {

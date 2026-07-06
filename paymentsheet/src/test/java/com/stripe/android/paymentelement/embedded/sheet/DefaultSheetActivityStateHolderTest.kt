@@ -16,9 +16,10 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
-import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.form.confirmationStateComplete
@@ -327,10 +328,12 @@ class DefaultSheetActivityStateHolderTest {
                 )
 
                 assertThat(awaitItem()).isEqualTo(
-                    FormResult.Complete(
+                    EmbeddedActivityResult.Complete(
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        shouldInvokeSelectionCallback = false,
+                        launchMode = EmbeddedLaunchMode.Form,
                     )
                 )
             }
@@ -349,10 +352,12 @@ class DefaultSheetActivityStateHolderTest {
                 tapToAddHelper.emitNextStep(TapToAddNextStep.Complete)
 
                 assertThat(awaitItem()).isEqualTo(
-                    FormResult.Complete(
+                    EmbeddedActivityResult.Complete(
                         selection = null,
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
+                        shouldInvokeSelectionCallback = false,
+                        launchMode = EmbeddedLaunchMode.Form,
                     )
                 )
             }
@@ -377,10 +382,12 @@ class DefaultSheetActivityStateHolderTest {
                 )
 
                 assertThat(awaitItem()).isEqualTo(
-                    FormResult.Complete(
+                    EmbeddedActivityResult.Complete(
                         selection = expectedSelection,
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
+                        shouldInvokeSelectionCallback = false,
+                        launchMode = EmbeddedLaunchMode.Form,
                     )
                 )
             }
@@ -443,6 +450,7 @@ class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
+            launchMode = EmbeddedLaunchMode.Form,
         )
 
         Scenario(

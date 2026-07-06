@@ -36,6 +36,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
 import kotlinx.parcelize.Parcelize
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.Duration.Companion.seconds
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
@@ -78,15 +79,18 @@ class Checkout private constructor(
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).map { response ->
                 val flagImages = prefetchFlagImages(context, response, component)
-                Checkout(
-                    internalState = InternalState(
-                        key = UUID.randomUUID().toString(),
-                        configuration = configurationState,
-                        checkoutSessionResponse = response,
-                        flagImages = flagImages,
-                    ),
-                    component = component,
-                )
+                val key = UUID.randomUUID().toString()
+                CheckoutInstances.getOrCreate(key) {
+                    Checkout(
+                        internalState = InternalState(
+                            key = key,
+                            configuration = configurationState,
+                            checkoutSessionResponse = response,
+                            flagImages = flagImages,
+                        ),
+                        component = component,
+                    )
+                }
             }
         }
 
@@ -121,18 +125,20 @@ class Checkout private constructor(
         }
 
         /**
-         * Recreates a [Checkout] from a previously saved [State], such as after process death.
+         * Returns the existing [Checkout] if one is still alive, or creates a new one from [state].
          */
         fun createWithState(
             context: Context,
             state: State,
         ): Checkout {
-            val application = context.applicationContext as Application
-            val component = DaggerCheckoutComponent.factory().create(application)
-            return Checkout(
-                internalState = state.internalState,
-                component = component,
-            )
+            return CheckoutInstances.getOrCreate(state.internalState.key) {
+                val application = context.applicationContext as Application
+                val component = DaggerCheckoutComponent.factory().create(application)
+                Checkout(
+                    internalState = state.internalState,
+                    component = component,
+                )
+            }
         }
     }
 
@@ -392,6 +398,7 @@ class Checkout private constructor(
         }
 
     private val mutex = Mutex()
+    private val pendingMutations = AtomicInteger(0)
 
     private val _checkoutSession = MutableStateFlow(
         internalState.asCheckoutSession()
@@ -408,10 +415,6 @@ class Checkout private constructor(
      * Whether a mutation is currently in progress.
      */
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
-
-    init {
-        CheckoutInstances.add(internalState.key, this)
-    }
 
     /**
      * Applies a promotion code to the checkout session.
@@ -480,7 +483,11 @@ class Checkout private constructor(
     }
 
     /**
-     * Updates the shipping address and recalculates taxes.
+     * Sets the shipping address for this checkout.
+     *
+     * The address is stored locally and used when presenting payment UI. If automatic tax is
+     * enabled and the tax address source is shipping, the address is also sent to the server
+     * to compute updated tax amounts.
      *
      * @param name The recipient's name.
      * @param phoneNumber The recipient's phone number.
@@ -490,15 +497,8 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<Unit> {
-        val built = address.build()
-        return withInternalState(
-            additionalStateMutations = {
-                copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = built)
-            },
-        ) { sessionId ->
-            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
-        }
+    ): Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
+        copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
     }
 
     /**
@@ -515,7 +515,11 @@ class Checkout private constructor(
     }
 
     /**
-     * Updates the billing address and recalculates taxes.
+     * Sets the billing address for this checkout.
+     *
+     * The address is stored locally and used when presenting payment UI. If automatic tax is
+     * enabled and the tax address source is billing, the address is also sent to the server
+     * to compute updated tax amounts.
      *
      * @param name The billing name.
      * @param phoneNumber The billing phone number.
@@ -525,14 +529,27 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
+    ): Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
+        copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = it)
+    }
+
+    private suspend fun updateAddress(
+        addressType: CheckoutSessionResponse.TaxAddressSource,
+        address: Address,
+        mutation: InternalState.(Address.State) -> InternalState,
     ): Result<Unit> {
         val built = address.build()
+        val response = internalState.checkoutSessionResponse
+        val shouldSendTaxRegion =
+            response.automaticTaxEnabled && response.taxAddressSource == addressType
         return withInternalState(
-            additionalStateMutations = {
-                copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = built)
-            },
+            additionalStateMutations = { mutation(built) },
         ) { sessionId ->
-            component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+            if (shouldSendTaxRegion) {
+                component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+            } else {
+                Result.success(checkoutSessionResponse)
+            }
         }
     }
 
@@ -580,17 +597,25 @@ class Checkout private constructor(
                 )
             )
         }
-        // Run network requests with a mutex to ensure events are processed in order.
-        return mutex.withLock {
+        if (pendingMutations.incrementAndGet() == 1) {
             _isLoading.value = true
-            val result = runCatching {
-                internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
-            }.map { response ->
-                internalState = internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
-                _checkoutSession.value = internalState.asCheckoutSession()
+        }
+        return try {
+            // Run network requests with a mutex to ensure events are processed in order.
+            mutex.withLock {
+                val result = runCatching {
+                    internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
+                }.map { response ->
+                    internalState =
+                        internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
+                    _checkoutSession.value = internalState.asCheckoutSession()
+                }
+                result
             }
-            _isLoading.value = false
-            result
+        } finally {
+            if (pendingMutations.decrementAndGet() == 0) {
+                _isLoading.value = false
+            }
         }
     }
 

@@ -14,7 +14,7 @@ internal object GooglePayDisplayItemsFactory {
         val checkoutSessionMetadata = paymentMethodMetadata.integrationMetadata
             as? IntegrationMetadata.CheckoutSession ?: return emptyList()
 
-        val checkout = CheckoutInstances[checkoutSessionMetadata.instancesKey].firstOrNull()
+        val checkout = CheckoutInstances[checkoutSessionMetadata.instancesKey]
             ?: return emptyList()
 
         val checkoutSession = checkout.checkoutSession.value

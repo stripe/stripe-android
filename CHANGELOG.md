@@ -3,6 +3,17 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.11.1 - 2026-06-30
+
+### PaymentSheet
+* [FIXED][13311](https://github.com/stripe/stripe-android/pull/13311) Fixed HUF currency amounts displaying incorrectly on Android 17.
+
+## 23.11.0 - 2026-06-22
+
+### CryptoOnramp
+* [CHANGED] Renamed the EU attestation presentation API from `presentCrsCarfDeclaration()` to `presentUserAttestation()`, `crsCarfDeclarationCallback` to `userAttestationCallback`, and renamed `OnrampCrsCarfDeclarationResult` to `OnrampUserAttestationResult`.
+* [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+
 ## 23.10.1 - 2026-06-15
 
 ### AddressElement

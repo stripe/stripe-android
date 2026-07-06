@@ -4,7 +4,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
@@ -59,8 +58,6 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
 
     override fun fetchPromotionsAsync(intent: StripeIntent) {
-        if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
-
         eventReporter.onPaymentMethodMessagePromotionsFetchBegin()
         promotionsDeferred?.cancel()
         promotionsDeferred = null
@@ -82,8 +79,6 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata,
     ): PaymentMethodMessagePromotion? {
-        if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return null
-
         val variant = metadata.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
         ] ?: return null
@@ -107,12 +102,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     }
 
     override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
-        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
-            if (promotionsDeferred?.isCompleted == true) {
-                promotionsDeferred?.getCompleted()?.getOrNull()?.promotions
-            } else {
-                null
-            }
+        return if (promotionsDeferred?.isCompleted == true) {
+            promotionsDeferred?.getCompleted()?.getOrNull()?.promotions
         } else {
             null
         }
@@ -141,8 +132,6 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
         code: PaymentMethodCode,
         metadata: PaymentMethodMetadata
     ): PaymentMethodMessagePromotion? {
-        if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return null
-
         val variant = metadata.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
         ] ?: return null
@@ -161,13 +150,7 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
         reportPromotionDisplayedInternal(code, metadata, eventReporter)
     }
 
-    override fun getPromotions(): List<PaymentMethodMessagePromotion>? {
-        return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled) {
-            promotions
-        } else {
-            null
-        }
-    }
+    override fun getPromotions(): List<PaymentMethodMessagePromotion>? = promotions
 
     override fun getPromotionProvider(
         code: PaymentMethodCode,
@@ -229,7 +212,7 @@ private fun PaymentMethodMessagePromotionsHelper.getPromotionProviderInternal(
         ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
     ]
 
-    return if (FeatureFlags.paymentMethodMessagePromotions.isEnabled && variant == "treatment") {
+    return if (variant == "treatment") {
         { getPromotionIfAvailableForCode(code, metadata) }
     } else {
         null
@@ -241,8 +224,6 @@ private fun PaymentMethodMessagePromotionsHelper.reportPromotionDisplayedInterna
     metadata: PaymentMethodMetadata,
     eventReporter: EventReporter
 ) {
-    if (!FeatureFlags.paymentMethodMessagePromotions.isEnabled) return
-
     if (!PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(code)) return
 
     val variant = metadata.experimentsData?.experimentAssignments[

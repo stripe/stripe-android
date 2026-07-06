@@ -24,7 +24,7 @@ class CardScanAction(
             onResult = { result ->
                 (result as? CardScanResult.Completed)?.scannedCard?.let { scannedCard ->
                     onScannedCard(
-                        ScannedCardDetails(
+                        ScannedCardDetails.Unvalidated(
                             cardNumber = scannedCard.pan,
                             expirationYear = scannedCard.expirationYear,
                             expirationMonth = scannedCard.expirationMonth,

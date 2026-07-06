@@ -3,7 +3,7 @@ package com.stripe.android.paymentelement
 /**
  * Handler interface for intercepting wallet button clicks.
  *
- * This handler is invoked when a user taps on a wallet button (e.g., Google Pay, Link, Shop Pay)
+ * This handler is invoked when a user taps on a wallet button (e.g., Google Pay, Link)
  * in the PaymentSheet or FlowController. The handler can be used to perform custom logic
  * and optionally handle the wallet button action.
  */

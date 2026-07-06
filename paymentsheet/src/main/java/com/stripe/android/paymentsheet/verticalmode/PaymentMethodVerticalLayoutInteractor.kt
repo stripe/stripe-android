@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.mandateTextFromPaymentMethodMetadata
@@ -401,7 +402,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 when (wallet) {
                     is WalletsState.GooglePay -> createGooglePayDisplayablePaymentMethod()
                     is WalletsState.Link -> createLinkDisplayablePaymentMethod(wallet)
-                    WalletsState.ShopPay -> createShopPayDisplayablePaymentMethod()
                 }
             } ?: emptyList()
     }
@@ -441,23 +441,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             subtitle = subtitle,
             onClick = {
                 updateSelection(PaymentSelection.Link(brand = link.linkBrand), false)
-                invokeRowSelectionCallback?.invoke()
-            },
-        )
-    }
-
-    private fun createShopPayDisplayablePaymentMethod(): DisplayablePaymentMethod {
-        return DisplayablePaymentMethod(
-            code = "shop_pay",
-            displayName = PaymentsCoreR.string.stripe_shop_pay.resolvableString,
-            iconResource = R.drawable.stripe_shop_pay_logo,
-            iconResourceNight = R.drawable.stripe_shop_pay_logo_white,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            iconRequiresTinting = false,
-            subtitle = null,
-            onClick = {
-                updateSelection(PaymentSelection.ShopPay, false)
                 invokeRowSelectionCallback?.invoke()
             },
         )
@@ -511,9 +494,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     is WalletsState.Link -> {
                         add(PaymentMethod.Type.Link.code)
                     }
-                    WalletsState.ShopPay -> {
-                        add("shop_pay")
-                    }
                 }
             }
             addAll(currentDisplayablePaymentMethodCodes)
@@ -549,7 +529,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canUpdateFullPaymentMethodDetails: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable(canUpdateFullPaymentMethodDetails) == true || canRemove) {
+        val canUpdatePaymentMethod = savedPaymentMethod?.paymentMethod?.isModifiable(
+            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+            isCbcEligible = savedPaymentMethod.isCbcEligible,
+        ) == true
+        return if (canUpdatePaymentMethod || canRemove) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -644,7 +628,6 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         is PaymentSelection.Saved -> PaymentMethodVerticalLayoutInteractor.Selection.Saved
         is PaymentSelection.GooglePay -> PaymentMethodVerticalLayoutInteractor.Selection.New("google_pay")
         is PaymentSelection.Link -> PaymentMethodVerticalLayoutInteractor.Selection.New("link")
-        is PaymentSelection.ShopPay -> PaymentMethodVerticalLayoutInteractor.Selection.New("shop_pay")
         is PaymentSelection.New -> PaymentMethodVerticalLayoutInteractor.Selection.New(
             code = paymentMethodCreateParams.typeCode,
             changeDetails = changeDetails(),

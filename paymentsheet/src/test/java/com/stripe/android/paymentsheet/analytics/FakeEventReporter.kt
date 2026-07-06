@@ -280,15 +280,6 @@ internal class FakeEventReporter : EventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
     }
 
-    override fun onShopPayWebViewLoadAttempt() {
-    }
-
-    override fun onShopPayWebViewConfirmSuccess() {
-    }
-
-    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
-    }
-
     override fun onPaymentMethodMessagePromotionsFetchBegin() {
         _pmmPromotionsFetched.add(Unit)
     }

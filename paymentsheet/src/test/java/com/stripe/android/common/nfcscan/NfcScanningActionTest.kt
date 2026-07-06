@@ -70,7 +70,7 @@ internal class NfcScanningActionTest {
         resultDispatcher(launch.requestCode, Activity.RESULT_OK, intent)
 
         assertThat(onScannedCalls.awaitItem().scannedCardDetails).isEqualTo(
-            ScannedCardDetails(
+            ScannedCardDetails.Validated(
                 cardNumber = "4111111111111111",
                 expirationYear = 2030,
                 expirationMonth = 9,

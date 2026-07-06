@@ -47,7 +47,7 @@ echo "test_environment: $test_environment"
 echo "MAESTRO_TAGS: $MAESTRO_TAGS"
 echo "MODULE: $MODULE"
 
-export MAESTRO_VERSION=1.38.1
+export MAESTRO_VERSION=2.6.1
 
 # Retry mechanism for Maestro installation
 MAX_RETRIES=5

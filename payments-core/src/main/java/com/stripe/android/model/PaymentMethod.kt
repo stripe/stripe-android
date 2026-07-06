@@ -484,14 +484,6 @@ constructor(
             // This allows time for the intent to transition to its terminal state.
             afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
-        ShopPay(
-            code = "shop_pay",
-            isReusable = false,
-            isVoucher = false,
-            requiresMandate = false,
-            requiresMandateForPaymentIntent = false,
-            hasDelayedSettlement = false,
-        ),
         PayNow(
             "paynow",
             isReusable = false,

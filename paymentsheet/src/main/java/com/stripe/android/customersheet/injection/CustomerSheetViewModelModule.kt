@@ -5,8 +5,7 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
-import com.stripe.android.common.nfcscan.DefaultIsNfcScanningAvailable
-import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
+import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -47,7 +46,13 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
-@Module(includes = [PaymentConfigurationModule::class, StripeNetworkClientModule::class])
+@Module(
+    includes = [
+        PaymentConfigurationModule::class,
+        StripeNetworkClientModule::class,
+        NfcScanningAvailabilityModule::class,
+    ]
+)
 internal interface CustomerSheetViewModelModule {
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
@@ -81,11 +86,6 @@ internal interface CustomerSheetViewModelModule {
     fun bindsTapToAddAvailabilityFactory(
         tapToAddAvailabilityFactory: TapToAddAvailabilityFactoryForCustomerSheet
     ): TapToAddAvailabilityFactory
-
-    @Binds
-    fun bindsIsNfcScanningAvailable(
-        isNfcScanningAvailable: DefaultIsNfcScanningAvailable
-    ): IsNfcScanningAvailable
 
     @Suppress("TooManyFunctions")
     companion object {

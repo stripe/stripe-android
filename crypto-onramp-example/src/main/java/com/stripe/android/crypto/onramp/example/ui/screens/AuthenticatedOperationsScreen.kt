@@ -40,7 +40,7 @@ internal fun AuthenticatedOperationsScreen(
     onCollectKyc: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
     onStartVerification: () -> Unit,
-    onShowCrsCarfDeclaration: () -> Unit,
+    onShowUserAttestation: () -> Unit,
     onCollectPayment: (PaymentMethodSelection) -> Unit,
     onCreatePaymentToken: () -> Unit,
     onCreateSession: () -> Unit,
@@ -172,7 +172,7 @@ internal fun AuthenticatedOperationsScreen(
 
         VerificationSection(
             onStartVerification = onStartVerification,
-            onShowCrsCarfDeclaration = onShowCrsCarfDeclaration
+            onShowUserAttestation = onShowUserAttestation
         )
         PaymentSection(
             googlePayIsReady = uiState.googlePayIsReady,

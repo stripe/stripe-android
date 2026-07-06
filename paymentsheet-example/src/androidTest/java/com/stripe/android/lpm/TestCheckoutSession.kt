@@ -15,7 +15,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * E2E test for checkout session integration with the playground.
+ * E2E test for checkout session integration with the playground via FlowController.
  *
  * Tests the vanilla checkout flow with a new card payment method using
  * the checkout session API (/v1/payment_pages/{cs_id}/init and /confirm).
@@ -34,21 +34,21 @@ internal class TestCheckoutSession : BasePlaygroundTest() {
     }
 
     /**
-     * Test a successful card payment with checkout session.
+     * Test a successful card payment with checkout session via FlowController.
      *
      * Flow:
      * 1. Playground creates checkout session on backend
-     * 2. PaymentSheet is presented with checkout session client secret
+     * 2. FlowController is configured with checkout session
      * 3. Init API is called (/v1/payment_pages/{cs_id}/init)
-     * 4. User fills out card details
-     * 5. User taps "Pay"
+     * 4. User fills out card details and selects payment method
+     * 5. User taps "Buy"
      * 6. Payment method is created
      * 7. Confirm API is called (/v1/payment_pages/{cs_id}/confirm)
      * 8. Payment completes successfully
      */
     @Test
     fun testCardPaymentWithCheckoutSession() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustomAndBuy(
             testParameters.copy(
                 saveForFutureUseCheckboxVisible = true,
             ),
@@ -60,7 +60,7 @@ internal class TestCheckoutSession : BasePlaygroundTest() {
 
     @Test
     fun testCardSetupWithCheckoutSession() {
-        testDriver.confirmNewOrGuestComplete(
+        testDriver.confirmCustomAndBuy(
             testParameters.copyPlaygroundSettings { settings ->
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },

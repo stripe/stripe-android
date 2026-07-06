@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -145,10 +146,8 @@ internal fun isModifiable(
     cbcEligibility: CardBrandChoiceEligibility,
     canUpdateFullPaymentMethodDetails: Boolean
 ): Boolean {
-    if (canUpdateFullPaymentMethodDetails && paymentMethod.card != null) return true
-    val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
-        available.size > 1
-    } ?: false
-
-    return cbcEligibility is CardBrandChoiceEligibility.Eligible && hasMultipleNetworks
+    return paymentMethod.isModifiable(
+        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+        isCbcEligible = cbcEligibility is CardBrandChoiceEligibility.Eligible,
+    )
 }

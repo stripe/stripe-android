@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Guardar los datos de pago en %s para futuras compras</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Escanear tarjeta</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Borra la tarjeta escaneada</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Al facilitarnos la información del pago y al confirmar este pago, autorizas a (A) %s y a Stripe, nuestro proveedor de servicios de pago, a enviar instrucciones a tu banco para adeudar tu cuenta y (B) a tu banco para efectuar los adeudos en tu cuenta siguiendo dichas instrucciones. Como parte de tus derechos, estás legitimado al rembolso por parte de tu banco en los términos y condiciones del contrato suscrito con este. La solicitud del reembolso deberá efectuarse dentro de las ocho semanas posteriores a la fecha de adeudo en cuenta. Tus derechos se explican en una declaración que puedes obtener en tu banco. Aceptas recibir notificaciones sobre próximos adeudos con hasta dos días de antelación a que estos ocurran.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

@@ -345,7 +345,7 @@ internal fun WalletOwnershipSection(
 @Composable
 internal fun VerificationSection(
     onStartVerification: () -> Unit,
-    onShowCrsCarfDeclaration: () -> Unit
+    onShowUserAttestation: () -> Unit
 ) {
     Text(
         text = "Verification",
@@ -363,12 +363,12 @@ internal fun VerificationSection(
     }
 
     Button(
-        onClick = onShowCrsCarfDeclaration,
+        onClick = onShowUserAttestation,
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 24.dp)
     ) {
-        Text("CRS CARF Declaration")
+        Text("User Attestation")
     }
 }
 

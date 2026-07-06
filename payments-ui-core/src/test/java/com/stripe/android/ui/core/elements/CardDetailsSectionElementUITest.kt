@@ -4,10 +4,13 @@ import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -33,6 +36,36 @@ internal class CardDetailsSectionElementUITest {
         }
     }
 
+    @Test
+    fun `section header hides while scanned card pill is shown and returns after clear`() {
+        runScenario(cardDetailsAction = null) {
+            val cardInformation = context.getString(
+                R.string.stripe_paymentsheet_add_payment_method_card_information
+            )
+            val clearScannedCard = context.getString(
+                R.string.stripe_scanned_card_pill_clear_content_description
+            )
+
+            composeTestRule.onNodeWithText(cardInformation).assertExists()
+
+            controller.onScannedCard(
+                ScannedCardDetails.Validated(
+                    cardNumber = "4242424242424242",
+                    expirationYear = 2030,
+                    expirationMonth = 6,
+                )
+            )
+            composeTestRule.waitForIdle()
+
+            composeTestRule.onNodeWithText(cardInformation).assertDoesNotExist()
+
+            composeTestRule.onNodeWithContentDescription(clearScannedCard).performClick()
+            composeTestRule.waitForIdle()
+
+            composeTestRule.onNodeWithText(cardInformation).assertExists()
+        }
+    }
+
     private class FakeCardDetailsAction(
         private val contentText: String,
     ) : CardDetailsAction {
@@ -42,10 +75,8 @@ internal class CardDetailsSectionElementUITest {
         }
     }
 
-    private class Scenario
-
     private fun runScenario(
-        cardDetailsAction: CardDetailsAction,
+        cardDetailsAction: CardDetailsAction?,
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val controller = CardDetailsSectionController(
@@ -70,6 +101,10 @@ internal class CardDetailsSectionElementUITest {
             }
         }
 
-        Scenario().block()
+        Scenario(controller).block()
     }
+
+    private data class Scenario(
+        val controller: CardDetailsSectionController,
+    )
 }

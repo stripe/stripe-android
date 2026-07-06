@@ -151,9 +151,89 @@ fun `state updates when data changes`() = runScenario {
 | Creating fakes | Invoke `create-fake` skill |
 | NetworkRule integration tests | Invoke `network-tests` skill |
 
+## Concurrency Testing with Real I/O
+
+When testing coroutines that involve real network I/O (NetworkRule/OkHttp), use `runTest` + `testScheduler.advanceUntilIdle()` + `async`/`await()`.
+
+### Asserting StateFlow emission sequences (use Turbine)
+
+When you need to verify a StateFlow's transitions during an async operation, use Turbine's `.test { }` to assert the full sequence:
+
+```kotlin
+@Test
+fun `loading state transitions during mutation`() = runTest {
+    val holdResponse = CountDownLatch(1)
+    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
+        holdResponse.await(10, TimeUnit.SECONDS)
+        response.setBody("{}")
+    }
+
+    systemUnderTest.isLoading.test {
+        assertThat(awaitItem()).isFalse()
+
+        val job = async { systemUnderTest.mutate() }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(awaitItem()).isTrue()
+
+        holdResponse.countDown()
+        job.await()
+
+        assertThat(awaitItem()).isFalse()
+    }
+}
+```
+
+### Asserting operations are queued (use CountDownLatch)
+
+When you need to verify that concurrent operations are serialized by a mutex, use CountDownLatch to observe request ordering:
+
+```kotlin
+@Test
+fun `concurrent operations are serialized by mutex`() = runTest {
+    val holdFirstResponse = CountDownLatch(1)
+    val secondRequestArrived = CountDownLatch(1)
+
+    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
+        holdFirstResponse.await(10, TimeUnit.SECONDS)
+        response.setBody("{}")
+    }
+    networkRule.enqueue(host("api.stripe.com"), method("POST"), path("/v1/...")) { response ->
+        secondRequestArrived.countDown()
+        response.setBody("{}")
+    }
+
+    val jobB = async { systemUnderTest.operationB() }
+    testScheduler.advanceUntilIdle()
+
+    val jobA = async { systemUnderTest.operationA() }
+    testScheduler.advanceUntilIdle()
+
+    assertThat(secondRequestArrived.count).isEqualTo(1) // A hasn't fired
+
+    holdFirstResponse.countDown()
+    jobB.await()
+    jobA.await()
+
+    assertThat(secondRequestArrived.count).isEqualTo(0) // A did fire
+}
+```
+
+### Rules
+
+- `async` + `await()` over `launch` + `join()` — `await()` propagates exceptions
+- `testScheduler.advanceUntilIdle()` over `Thread.sleep` — deterministic, advances to suspension point
+- After releasing a latch, use `await()` (not `advanceUntilIdle()` alone) — OkHttp delivers continuations asynchronously
+- Always pass a timeout to `CountDownLatch.await()` inside mock handlers — prevents hangs
+- Assert both negative (didn't happen during hold) AND positive (did happen after release)
+- Turbine `.test { }` for StateFlow emission sequences; `CountDownLatch` for request ordering
+
 ## Common Mistakes
 
 - **Using mocks instead of fakes** — always create `FakeClassName` implementations
 - **Forgetting `ensureAllEventsConsumed()`** — runScenario handles this, but if using `runTest` directly, call it manually
 - **Testing implementation details** — test behavior (inputs → outputs), not internal method calls
 - **Missing edge cases** — null values, empty lists, blank strings, error paths
+- **Using `Thread.sleep` in tests** — use `testScheduler.advanceUntilIdle()` instead
+- **Testing stdlib behavior** — don't test that `HashMap.clear()` works
+- **Vacuous assertions** — assert the pre-condition exists before testing its removal

@@ -5,7 +5,10 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.crypto.onramp.R
 import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
+import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
 
+@Suppress("LongMethod")
 internal fun Throwable.toCryptoOnrampError(
     context: Context,
     operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
@@ -14,16 +17,41 @@ internal fun Throwable.toCryptoOnrampError(
 ): Throwable {
     if (this is StripeCryptoOnrampError) return this
 
-    val stripeException = this as? StripeException ?: return this
-    val stripeError = stripeException.stripeError ?: return this
-    val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
-    val sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions
-
-    val apiErrorContext = APIErrorContext(
-        reason = stripeError.extraFields?.get(FIELD_REASON),
+    val diagnosticContext = DiagnosticContext(
+        sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
         operation = operation.value,
         appPackageName = context.packageName,
         mode = publishableKey.toMode(),
+    )
+
+    if (this is LinkAppAttestationException) {
+        val apiBackedAttestationError = cause
+            ?.toCryptoOnrampErrorIfAppAttestationApiError(
+                context = context,
+                operation = operation,
+                publishableKey = publishableKey,
+                additionalSdkVersions = additionalSdkVersions,
+            )
+
+        return apiBackedAttestationError ?: toAppAttestationUnavailableError(
+            context = context,
+            diagnosticContext = diagnosticContext,
+        )
+    }
+
+    if (this is LinkUnavailableException) {
+        return toAppAttestationUnavailableError(
+            context = context,
+            diagnosticContext = diagnosticContext,
+        )
+    }
+
+    val stripeException = this as? StripeException ?: return this
+    val stripeError = stripeException.stripeError ?: return this
+    val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
+
+    val apiErrorContext = APIErrorContext(
+        reason = stripeError.extraFields?.get(FIELD_REASON),
         apiErrorCode = stripeError.code,
         apiErrorType = stripeException.apiErrorType(),
         apiErrorMessage = stripeError.message,
@@ -34,21 +62,55 @@ internal fun Throwable.toCryptoOnrampError(
 
     return if (stripeError.isAppAttestationError()) {
         AppAttestationException(
-            context = apiErrorContext,
-            sdkVersions = sdkVersions,
+            apiErrorContext = apiErrorContext,
+            diagnosticContext = diagnosticContext,
             userMessage = context.getString(
                 R.string.stripe_onramp_app_attestation_default_user_message,
             ),
         )
     } else {
         UncategorizedApiErrorException(
-            context = apiErrorContext,
-            sdkVersions = sdkVersions,
+            apiErrorContext = apiErrorContext,
+            diagnosticContext = diagnosticContext,
             userMessage = context.getString(
                 R.string.stripe_onramp_default_api_error_user_message,
             ),
         )
     }
+}
+
+private fun Throwable.toCryptoOnrampErrorIfAppAttestationApiError(
+    context: Context,
+    operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
+    publishableKey: String?,
+    additionalSdkVersions: List<SDKVersion>,
+): Throwable? {
+    val stripeException = this as? StripeException ?: return null
+    val stripeError = stripeException.stripeError ?: return null
+
+    return if (stripeError.isAppAttestationError()) {
+        toCryptoOnrampError(
+            context = context,
+            operation = operation,
+            publishableKey = publishableKey,
+            additionalSdkVersions = additionalSdkVersions,
+        )
+    } else {
+        null
+    }
+}
+
+private fun Throwable.toAppAttestationUnavailableError(
+    context: Context,
+    diagnosticContext: DiagnosticContext,
+): AppAttestationUnavailableException {
+    return AppAttestationUnavailableException(
+        underlyingError = this,
+        diagnosticContext = diagnosticContext,
+        userMessage = context.getString(
+            R.string.stripe_onramp_app_attestation_unavailable_user_message,
+        ),
+    )
 }
 
 private fun StripeError.isAppAttestationError(): Boolean {

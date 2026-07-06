@@ -31,6 +31,34 @@ class AutocompleteAddressController(
 
     private val config = interactor.autocompleteConfig
 
+    private val inlineAutocompleteActive =
+        config.isInlineAutocompleteEnabled && config.isPlacesAvailable
+
+    private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
+        if (inlineAutocompleteActive) {
+            object : InlineAutocompleteHandler {
+                override val predictionsState = interactor.inlinePredictionsState
+
+                override fun onPredictionSelected(predictionId: String) {
+                    interactor.onPredictionSelected(predictionId)
+                }
+
+                override fun onDismissed() {
+                    interactor.onDismissed()
+                }
+
+                override fun onEnterManually() {
+                    interactor.onEnterManuallyFromInline()
+                }
+
+                override fun getAttributionDrawable(isDarkTheme: Boolean): Int? {
+                    return config.getAttributionDrawable?.invoke(isDarkTheme)
+                }
+            }
+        } else {
+            null
+        }
+
     private var expandForm = false
 
     private val isValidating = MutableStateFlow(false)
@@ -65,11 +93,19 @@ class AutocompleteAddressController(
         it.addressController
     }
 
+    private val inlineQuery: StateFlow<String> = addressElementFlow.flatMapLatestAsStateFlow {
+        it.inlineQuery
+    }
+
     override val validationMessage: StateFlow<FieldValidationMessage?> = addressController.flatMapLatestAsStateFlow {
         it.validationMessage
     }
 
     init {
+        if (inlineAutocompleteActive) {
+            interactor.observeQueryChanges(inlineQuery, countryDropdownFieldController.rawFieldValue)
+        }
+
         interactor.register { event ->
             val currentValues = getCurrentValues()
 
@@ -114,6 +150,7 @@ class AutocompleteAddressController(
             shippingValuesMap = shippingValuesMap,
             isPlacesAvailable = config.isPlacesAvailable,
             hideCountry = hideCountry,
+            inlineAutocompleteHandler = inlineAutocompleteHandler,
         )
     }
 
@@ -129,10 +166,16 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled) {
+        } else if (inlineAutocompleteActive && !expandForm && values[IdentifierSpec.Line1] == null) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
+                phoneNumberConfig = phoneNumberConfig,
+                nameConfig = nameConfig,
+                emailConfig = emailConfig,
+            )
+        } else if (config.isInlineAutocompleteEnabled) {
+            AddressInputMode.NoAutocomplete(
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,

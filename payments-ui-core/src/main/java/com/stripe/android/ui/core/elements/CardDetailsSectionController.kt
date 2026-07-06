@@ -9,6 +9,7 @@ import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionFieldValidationController
+import com.stripe.android.uicore.utils.mapAsStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionController(
@@ -20,7 +21,6 @@ class CardDetailsSectionController(
     cardFundingFilter: CardFundingFilter = DefaultCardFundingFilter,
     val cardDetailsAction: CardDetailsAction? = null,
 ) : SectionFieldValidationController {
-
     internal val cardDetailsElement = CardDetailsElement(
         IdentifierSpec.Generic("card_detail"),
         cardAccountRangeRepositoryFactory,
@@ -31,13 +31,17 @@ class CardDetailsSectionController(
         cardFundingFilter,
     )
 
+    internal val shouldHideHeader = cardDetailsElement.controller.cardPillElement.mapAsStateFlow { element ->
+        element != null
+    }
+
     override val validationMessage = cardDetailsElement.controller.validationMessage
 
     override fun onValidationStateChanged(isValidating: Boolean) {
         cardDetailsElement.onValidationStateChanged(isValidating)
     }
 
-    internal fun onScannedCard(scannedCardDetails: ScannedCardDetails) {
+    fun onScannedCard(scannedCardDetails: ScannedCardDetails) {
         cardDetailsElement.controller.onScannedCard(scannedCardDetails)
     }
 }

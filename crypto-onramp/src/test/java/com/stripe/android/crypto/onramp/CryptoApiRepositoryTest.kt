@@ -381,7 +381,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testRetrieveCrsCarfDeclarationSucceeds() {
+    fun testRetrieveUserAttestationSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -397,7 +397,7 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.retrieveCrsCarfDeclaration(
+            val result = cryptoApiRepository.retrieveUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -416,7 +416,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testConfirmCrsCarfDeclarationSucceeds() {
+    fun testConfirmUserAttestationSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -427,7 +427,7 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.confirmCrsCarfDeclaration(
+            val result = cryptoApiRepository.confirmUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 

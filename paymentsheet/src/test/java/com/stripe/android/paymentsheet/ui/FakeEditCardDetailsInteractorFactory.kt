@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
 
 internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.Factory {
@@ -17,7 +18,8 @@ internal class FakeEditCardDetailsInteractorFactory : EditCardDetailsInteractor.
         payload: EditCardPayload,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         onBrandChoiceChanged: CardBrandCallback,
-        onCardUpdateParamsChanged: CardUpdateParamsCallback
+        onCardUpdateParamsChanged: CardUpdateParamsCallback,
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     ): EditCardDetailsInteractor {
         this.onCardUpdateParamsChanged = onCardUpdateParamsChanged
         this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration

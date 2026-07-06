@@ -1,6 +1,8 @@
 package com.stripe.android.common.nfcscan
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.hardware.FakeNfcHardwareDelegate
+import com.stripe.android.common.nfcscan.security.FakeIsDeviceSecureForNfc
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ElementsSession
@@ -26,7 +28,9 @@ internal class IsNfcScanningAvailableTest {
         FeatureFlags.enableNfcScanning.setEnabled(false)
 
         val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
+            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
             tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
+            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
         )
 
         assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
@@ -37,18 +41,48 @@ internal class IsNfcScanningAvailableTest {
         FeatureFlags.enableNfcScanning.setEnabled(true)
 
         val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
+            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
             tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = true),
+            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
         )
 
         assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
     }
 
     @Test
-    fun `IsNfcScanningAvailableForPaymentElement returns true when NFC flag on and tap to add unavailable`() {
+    fun `IsNfcScanningAvailableForPaymentElement returns false when device is not sure`() {
         FeatureFlags.enableNfcScanning.setEnabled(true)
 
         val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
+            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
             tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
+            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
+        )
+
+        assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
+    }
+
+    @Test
+    fun `IsNfcScanningAvailableForPaymentElement returns false when NFC hardware is unavailable`() {
+        FeatureFlags.enableNfcScanning.setEnabled(true)
+
+        val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
+            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
+            tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
+            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = false),
+        )
+
+        assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
+    }
+
+    @Test
+    fun `IsNfcScanningAvailableForPaymentElement returns true when flag on, TTA off, and NFC enabled & secure`() {
+        FeatureFlags.enableNfcScanning.setEnabled(true)
+
+        val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
+            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
+            tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
+            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
         )
 
         assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isTrue()

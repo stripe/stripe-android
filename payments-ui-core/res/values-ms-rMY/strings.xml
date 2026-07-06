@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Simpan butiran pembayaran di %s untuk pembelian yang akan datang</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Imbas kad</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Kosongkan kad yang diimbas</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Dengan memberikan maklumat pembayaran anda dan mengesahkan pembayaran ini, anda mengizinkan (A) %s dan Stripe, iaitu penyedia khidmat pembayaran kami, untuk menghantar arahan kepada bank untuk mendebitkan akaun anda dan (B) bank anda untuk mendebitkan akaun anda menurut arahan tersebut. Sebagai sebahagian daripada hak anda, anda layak mendapat bayaran balik daripada bank menurut terma dan syarat perjanjian dengan bank anda. Bayaran balik mesti dituntut dalam tempoh 8 minggu mulai tarikh akaun anda didebitkan. Hak anda dijelaskan dalam pernyataan yang boleh anda dapatkan daripada bank anda. Anda bersetuju untuk menerima pemberitahuan bagi debit masa hadapan sehingga 2 hari sebelum debit tersebut dibuat.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

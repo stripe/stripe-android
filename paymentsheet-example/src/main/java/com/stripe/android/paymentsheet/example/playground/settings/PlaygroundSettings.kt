@@ -586,7 +586,6 @@ internal class PlaygroundSettings private constructor(
                 allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList() +
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
-            ShopPaySettingsDefinition,
             LinkControllerAllowUserEmailEditsSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
             FeatureFlagSettingsDefinition(
@@ -596,8 +595,9 @@ internal class PlaygroundSettings private constructor(
             TermsDisplaySettingsDefinition,
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions),
             FeatureFlagSettingsDefinition(FeatureFlags.enableNfcScanning),
+            FeatureFlagSettingsDefinition(FeatureFlags.disableNfcScanningSecurity),
+            FeatureFlagSettingsDefinition(FeatureFlags.inlineAddressAutocompleteEnabled),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

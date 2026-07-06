@@ -8,31 +8,36 @@ import java.lang.ref.WeakReference
 
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutInstances {
-    private val instanceMap = mutableMapOf<String, MutableList<WeakReference<Checkout>>>()
+    private val instanceMap = mutableMapOf<String, WeakReference<Checkout>>()
 
-    operator fun get(key: String): List<Checkout> {
-        val refs = instanceMap[key] ?: return emptyList()
-        val live = refs.mapNotNull { it.get() }
-        if (live.isEmpty()) {
-            instanceMap.remove(key)
-        } else if (live.size != refs.size) {
-            // Prune stale references
-            refs.clear()
-            refs.addAll(live.map { WeakReference(it) })
-        }
-        return live
+    @Synchronized
+    operator fun get(key: String): Checkout? {
+        val checkout = instanceMap[key]?.get()
+        if (checkout == null) instanceMap.remove(key)
+        return checkout
     }
 
+    @Synchronized
+    fun getOrCreate(key: String, factory: () -> Checkout): Checkout {
+        this[key]?.let { return it }
+        val checkout = factory()
+        instanceMap[key] = WeakReference(checkout)
+        return checkout
+    }
+
+    @Synchronized
     fun ensureNoMutationInFlight(key: String) {
-        this[key].forEach { it.ensureNoMutationInFlight() }
+        this[key]?.ensureNoMutationInFlight()
     }
 
+    @Synchronized
     fun markIntegrationLaunched(key: String) {
-        this[key].forEach { it.markIntegrationLaunched() }
+        this[key]?.markIntegrationLaunched()
     }
 
+    @Synchronized
     fun markIntegrationDismissed(key: String) {
-        this[key].forEach { it.markIntegrationDismissed() }
+        this[key]?.markIntegrationDismissed()
     }
 
     fun markIntegrationDismissed(paymentMethodMetadata: PaymentMethodMetadata?) {
@@ -41,16 +46,8 @@ internal object CheckoutInstances {
         markIntegrationDismissed(checkoutSession.instancesKey)
     }
 
-    fun add(key: String, checkout: Checkout) {
-        val refs = instanceMap.getOrPut(key) { mutableListOf() }
-        refs.add(WeakReference(checkout))
-    }
-
-    fun remove(key: String) {
-        instanceMap.remove(key)
-    }
-
     @VisibleForTesting
+    @Synchronized
     fun clear() {
         instanceMap.clear()
     }

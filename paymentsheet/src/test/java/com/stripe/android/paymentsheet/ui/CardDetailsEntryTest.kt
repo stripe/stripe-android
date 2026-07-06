@@ -166,6 +166,23 @@ internal class CardDetailsEntryTest {
     }
 
     @Test
+    fun `toUpdateParams() should treat CardBrand Unknown as null preferred network`() {
+        val cardBrandChoice = CardBrandChoice(CardBrand.Unknown, true)
+        val cardDetailsEntry = createEntry(
+            cardBrandChoice = cardBrandChoice,
+            expMonth = 12,
+            expYear = 2030
+        )
+
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
+
+        assertThat(params.cardBrand).isNull()
+        assertThat(params.expiryMonth).isEqualTo(12)
+        assertThat(params.expiryYear).isEqualTo(2030)
+        assertThat(params.billingDetails).isEqualTo(BILLING_DETAILS_FORM_DETAILS)
+    }
+
+    @Test
     fun `toUpdateParams() should correctly convert to CardUpdateParams`() {
         val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
         val cardDetailsEntry = createEntry(

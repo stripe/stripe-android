@@ -25,6 +25,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.EXPIRED_CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -621,6 +622,32 @@ class CustomerSheetViewModelTest {
                 viewState = awaitViewState()
                 assertThat(viewState.isEditing).isTrue()
                 assertThat(viewState.topBarState {}.showEditMenu).isTrue()
+            }
+        }
+
+    @Test
+    fun `When canUpdateFullPaymentMethodDetails=false, expired card is cbc eligible, showEditMenu should be false`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerPaymentMethods = listOf(EXPIRED_CARD_PAYMENT_METHOD),
+                customerPermissions = CustomerPermissions(
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
+                    canRemoveLastPaymentMethod = false,
+                    canUpdateFullPaymentMethodDetails = false,
+                ),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires)
+                ),
+            )
+            viewModel.viewState.test {
+                val viewState = awaitViewState<SelectPaymentMethod>()
+                assertThat(viewState.isEditing).isFalse()
+                assertThat(viewState.topBarState {}.showEditMenu).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+                ensureAllEventsConsumed()
             }
         }
 

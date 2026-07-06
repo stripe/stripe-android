@@ -114,7 +114,7 @@ internal interface EventReporter : CardScanEventsReporter {
     fun onAnalyticsEvent(event: AnalyticsEvent)
 
     /**
-     * The customer has tapped a wallet button (e.g. Google Pay, Link, Shop Pay).
+     * The customer has tapped a wallet button (e.g. Google Pay, Link).
      */
     fun onWalletButtonTapped(walletType: String)
 
@@ -257,21 +257,6 @@ internal interface EventReporter : CardScanEventsReporter {
     )
 
     fun onTapToAddAttemptWithUnsupportedDevice()
-
-    /**
-     * Shop Pay webView loading has been attempted.
-     */
-    fun onShopPayWebViewLoadAttempt()
-
-    /**
-     * Shop Pay webView payment confirmation has succeeded.
-     */
-    fun onShopPayWebViewConfirmSuccess()
-
-    /**
-     * Shop Pay webView has been cancelled by the user.
-     */
-    fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean)
 
     /**
      * Promotions fetched from PMM API.

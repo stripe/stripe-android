@@ -1109,14 +1109,15 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parse tax status ready`() {
+    fun `parse tax status ready when tax_meta status is complete`() {
         val json = JSONObject(
             """
             {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
-                "tax": { "status": "ready" },
+                "tax_meta": { "computation_type": "automatic", "status": "complete" },
+                "tax_context": { "automatic_tax_address_source": "session.billing" },
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
             }
             """.trimIndent()
@@ -1128,14 +1129,15 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parse tax status requires_shipping_address`() {
+    fun `parse tax status requires_shipping_address when address source is shipping`() {
         val json = JSONObject(
             """
             {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
-                "tax": { "status": "requires_shipping_address" },
+                "tax_meta": { "computation_type": "automatic", "status": "requires_location_inputs" },
+                "tax_context": { "automatic_tax_address_source": "session.shipping" },
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
             }
             """.trimIndent()
@@ -1147,14 +1149,15 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parse tax status requires_billing_address`() {
+    fun `parse tax status requires_billing_address when address source is billing`() {
         val json = JSONObject(
             """
             {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
-                "tax": { "status": "requires_billing_address" },
+                "tax_meta": { "computation_type": "automatic", "status": "requires_location_inputs" },
+                "tax_context": { "automatic_tax_address_source": "session.billing" },
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
             }
             """.trimIndent()
@@ -1166,14 +1169,33 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parse tax status unknown for unrecognized value`() {
+    fun `parse tax status defaults to billing for unrecognized address source`() {
         val json = JSONObject(
             """
             {
                 "session_id": "cs_test_123",
                 "ui_mode": "custom",
                 "currency": "usd",
-                "tax": { "status": "something_new" },
+                "tax_meta": { "computation_type": "automatic", "status": "requires_location_inputs" },
+                "tax_context": { "automatic_tax_address_source": "something_new" },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS)
+    }
+
+    @Test
+    fun `parse tax status defaults to unknown when tax_meta is missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
                 "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
             }
             """.trimIndent()
@@ -1185,7 +1207,53 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
-    fun `parse tax status defaults to unknown when tax object is missing`() {
+    fun `parse automatic tax enabled and address source from tax_context`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax_context": {
+                    "automatic_tax_enabled": true,
+                    "automatic_tax_address_source": "session.billing"
+                },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isTrue()
+        assertThat(result?.taxAddressSource)
+            .isEqualTo(CheckoutSessionResponse.TaxAddressSource.BILLING)
+    }
+
+    @Test
+    fun `parse taxAddressSource is null when automatic_tax_enabled but address_source missing`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "tax_context": {
+                    "automatic_tax_enabled": true
+                },
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.automaticTaxEnabled).isTrue()
+        assertThat(result?.taxAddressSource).isNull()
+    }
+
+    @Test
+    fun `parse defaults automaticTaxEnabled to false when tax_context is missing`() {
         val json = JSONObject(
             """
             {
@@ -1199,6 +1267,7 @@ class CheckoutSessionResponseJsonParserTest {
         val result = CheckoutSessionResponseJsonParser.parse(json)
 
         assertThat(result).isNotNull()
-        assertThat(result?.taxStatus).isEqualTo(CheckoutSessionResponse.TaxStatus.UNKNOWN)
+        assertThat(result?.automaticTaxEnabled).isFalse()
+        assertThat(result?.taxAddressSource).isNull()
     }
 }
