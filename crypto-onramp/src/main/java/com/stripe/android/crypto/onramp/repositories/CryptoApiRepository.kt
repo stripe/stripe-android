@@ -17,8 +17,6 @@ import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclarationResponse
 import com.stripe.android.crypto.onramp.model.CryptoConsumerWallet
 import com.stripe.android.crypto.onramp.model.CryptoConsumerWalletResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
@@ -34,12 +32,12 @@ import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.UserAttestation
+import com.stripe.android.crypto.onramp.model.UserAttestationResponse
 import com.stripe.android.crypto.onramp.model.WalletOwnershipChallenge
 import com.stripe.android.crypto.onramp.model.WalletOwnershipChallengeRequestParams
 import com.stripe.android.crypto.onramp.model.WalletOwnershipChallengeResponse
 import com.stripe.android.crypto.onramp.model.WalletOwnershipVerificationRequestParams
-import com.stripe.android.crypto.onramp.model.UserAttestation
-import com.stripe.android.crypto.onramp.model.UserAttestationResponse
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirements
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirementsResponse

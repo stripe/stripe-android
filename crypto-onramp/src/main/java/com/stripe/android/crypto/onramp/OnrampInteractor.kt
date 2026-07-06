@@ -29,7 +29,6 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
