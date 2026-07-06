@@ -60,22 +60,43 @@ internal fun Throwable.toCryptoOnrampError(
         underlyingError = stripeException,
     )
 
-    return if (stripeError.isAppAttestationError()) {
-        AppAttestationException(
-            apiErrorContext = apiErrorContext,
-            diagnosticContext = diagnosticContext,
-            userMessage = context.getString(
-                R.string.stripe_onramp_app_attestation_default_user_message,
-            ),
-        )
-    } else {
-        UncategorizedApiErrorException(
-            apiErrorContext = apiErrorContext,
-            diagnosticContext = diagnosticContext,
-            userMessage = context.getString(
-                R.string.stripe_onramp_default_api_error_user_message,
-            ),
-        )
+    return when {
+        stripeError.isAppAttestationError() -> {
+            AppAttestationException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_app_attestation_default_user_message,
+                ),
+            )
+        }
+        stripeError.isWalletNotFoundError() -> {
+            WalletNotFoundApiErrorException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_wallet_not_found_user_message,
+                ),
+            )
+        }
+        stripeError.isUnsupportedNetworkError() -> {
+            UnsupportedNetworkApiErrorException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_unsupported_network_user_message,
+                ),
+            )
+        }
+        else -> {
+            UncategorizedApiErrorException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_default_api_error_user_message,
+                ),
+            )
+        }
     }
 }
 
@@ -115,6 +136,14 @@ private fun Throwable.toAppAttestationUnavailableError(
 
 private fun StripeError.isAppAttestationError(): Boolean {
     return code == APP_ATTESTATION_ERROR_CODE
+}
+
+private fun StripeError.isWalletNotFoundError(): Boolean {
+    return code == CRYPTO_ONRAMP_WALLET_NOT_FOUND_ERROR_CODE
+}
+
+private fun StripeError.isUnsupportedNetworkError(): Boolean {
+    return code == CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE
 }
 
 private fun StripeException.apiErrorType(): String? {

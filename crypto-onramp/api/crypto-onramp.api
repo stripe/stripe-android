@@ -134,6 +134,16 @@ public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiEr
 	public fun getCode ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/crypto/onramp/exception/UnsupportedNetworkApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/WalletNotFoundApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipVerificationRequiredException : java/lang/IllegalStateException {
 	public static final field $stable I
 	public static final field CODE Ljava/lang/String;

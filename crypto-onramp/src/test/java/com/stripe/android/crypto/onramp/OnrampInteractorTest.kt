@@ -21,6 +21,8 @@ import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
+import com.stripe.android.crypto.onramp.exception.UnsupportedNetworkApiErrorException
+import com.stripe.android.crypto.onramp.exception.WalletNotFoundApiErrorException
 import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoConsumerWallet
@@ -317,6 +319,100 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.WalletOwnershipVerified(CryptoNetwork.Ethereum)
         )
+    }
+
+    @Test
+    fun testGetWalletOwnershipChallengeMapsWalletNotFoundError() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val backendError = InvalidRequestException(
+            stripeError = StripeError(
+                type = "invalid_request_error",
+                code = "crypto_onramp_wallet_not_found",
+                message = "The wallet was not found for the authenticated consumer.",
+            ),
+            requestId = "req_wallet_not_found",
+            statusCode = 400,
+        )
+        whenever(cryptoApiRepository.getWalletOwnershipChallenge(any(), any(), any()))
+            .thenReturn(Result.failure(backendError))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.getWalletOwnershipChallenge(
+            walletAddress = "0x1234567890abcdef",
+            network = CryptoNetwork.Ethereum
+        )
+
+        assertThat(result).isInstanceOf(OnrampGetWalletOwnershipChallengeResult.Failed::class.java)
+
+        val error = (result as OnrampGetWalletOwnershipChallengeResult.Failed).error
+        assertThat(error).isInstanceOf(WalletNotFoundApiErrorException::class.java)
+
+        val walletNotFoundError = error as WalletNotFoundApiErrorException
+        assertThat(walletNotFoundError.userMessage)
+            .isEqualTo("This wallet couldn't be found. Please choose or add a wallet and try again.")
+        assertThat(walletNotFoundError.message)
+            .isEqualTo("This wallet couldn't be found. Please choose or add a wallet and try again.")
+        assertThat(walletNotFoundError.code).isEqualTo("crypto_onramp_wallet_not_found")
+        assertThat(walletNotFoundError.underlyingError).isSameInstanceAs(backendError)
+        assertThat(walletNotFoundError.developerMessage)
+            .contains("The wallet was not found for the authenticated consumer.")
+        assertThat(walletNotFoundError.developerMessage).contains("Code: crypto_onramp_wallet_not_found")
+        assertThat(walletNotFoundError.developerMessage)
+            .contains("Next step: Use a wallet registered to the authenticated consumer")
+        assertThat(walletNotFoundError.developerMessage).contains("operation: get_wallet_ownership_challenge")
+        assertThat(walletNotFoundError.developerMessage).contains("request_id: req_wallet_not_found")
+        assertThat(walletNotFoundError.developerMessage).contains("type: invalid_request_error")
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureMapsUnsupportedNetworkError() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val backendError = InvalidRequestException(
+            stripeError = StripeError(
+                type = "invalid_request_error",
+                code = "crypto_onramp_unsupported_network",
+                message = "The wallet network is not supported for this operation.",
+            ),
+            requestId = "req_unsupported_network",
+            statusCode = 400,
+        )
+        whenever(cryptoApiRepository.submitWalletOwnershipSignature(any(), any(), any()))
+            .thenReturn(Result.failure(backendError))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.submitWalletOwnershipSignature(
+            challengeId = "woc_123",
+            signature = "0xsignature"
+        )
+
+        assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
+
+        val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
+        assertThat(error).isInstanceOf(UnsupportedNetworkApiErrorException::class.java)
+
+        val unsupportedNetworkError = error as UnsupportedNetworkApiErrorException
+        assertThat(unsupportedNetworkError.userMessage)
+            .isEqualTo("This wallet network isn't supported. Please choose a different network.")
+        assertThat(unsupportedNetworkError.message)
+            .isEqualTo("This wallet network isn't supported. Please choose a different network.")
+        assertThat(unsupportedNetworkError.code).isEqualTo("crypto_onramp_unsupported_network")
+        assertThat(unsupportedNetworkError.underlyingError).isSameInstanceAs(backendError)
+        assertThat(unsupportedNetworkError.developerMessage)
+            .contains("The wallet network is not supported for this operation.")
+        assertThat(unsupportedNetworkError.developerMessage)
+            .contains("Code: crypto_onramp_unsupported_network")
+        assertThat(unsupportedNetworkError.developerMessage)
+            .contains("Next step: Use a network supported by Crypto Onramp")
+        assertThat(unsupportedNetworkError.developerMessage)
+            .contains("operation: submit_wallet_ownership_signature")
+        assertThat(unsupportedNetworkError.developerMessage).contains("request_id: req_unsupported_network")
+        assertThat(unsupportedNetworkError.developerMessage).contains("type: invalid_request_error")
     }
 
     @Test
@@ -1558,6 +1654,10 @@ class OnrampInteractorTest {
                 "or contact the developer if the issue persists.",
         appAttestationUnavailableUserMessage: String =
             "This app couldn't be verified. Contact the app developer for help.",
+        walletNotFoundUserMessage: String =
+            "This wallet couldn't be found. Please choose or add a wallet and try again.",
+        unsupportedNetworkUserMessage: String =
+            "This wallet network isn't supported. Please choose a different network.",
     ): Application {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
@@ -1569,6 +1669,10 @@ class OnrampInteractorTest {
                 defaultAppAttestationUserMessage
             on { getString(R.string.stripe_onramp_app_attestation_unavailable_user_message) } doReturn
                 appAttestationUnavailableUserMessage
+            on { getString(R.string.stripe_onramp_wallet_not_found_user_message) } doReturn
+                walletNotFoundUserMessage
+            on { getString(R.string.stripe_onramp_unsupported_network_user_message) } doReturn
+                unsupportedNetworkUserMessage
         }
     }
 
