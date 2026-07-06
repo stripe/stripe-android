@@ -34,7 +34,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails.value,
-            canUpdateCardBrandChoice = customerStateHolder.canUpdateCardBrandChoice.value,
+            canChangeCbc = customerStateHolder.canChangeCbc.value,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             addressCollectionMode = paymentMethodMetadata.billingDetailsCollectionConfiguration.address,

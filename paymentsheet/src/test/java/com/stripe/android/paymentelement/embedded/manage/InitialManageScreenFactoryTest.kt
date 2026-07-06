@@ -49,6 +49,7 @@ internal class InitialManageScreenFactoryTest {
             customerMetadata = stateFlowOf(
                 PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         )
         val factory = InitialManageScreenFactory(
             customerStateHolder = customerStateHolder,
@@ -57,7 +58,7 @@ internal class InitialManageScreenFactoryTest {
                 FakeUpdatePaymentMethodInteractor(
                     displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                     canRemove = customerStateHolder.canRemove.value,
-                    canUpdateCardBrandChoice = true,
+                    canChangeCbc = true,
                     isExpiredCard = false,
                     isModifiablePaymentMethod = true,
                     viewActionRecorder = ViewActionRecorder(),

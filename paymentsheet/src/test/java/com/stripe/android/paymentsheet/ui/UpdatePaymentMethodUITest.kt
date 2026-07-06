@@ -339,7 +339,7 @@ class UpdatePaymentMethodUITest {
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             shouldShowSaveButton = shouldShowSaveButton,
             setAsDefaultCheckboxEnabled = setAsDefaultCheckboxEnabled,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,

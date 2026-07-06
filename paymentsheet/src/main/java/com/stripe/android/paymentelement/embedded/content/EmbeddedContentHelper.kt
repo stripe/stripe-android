@@ -253,7 +253,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             mostRecentlySelectedSavedPaymentMethod = customerStateHolder.mostRecentlySelectedSavedPaymentMethod,
             canRemove = customerStateHolder.canRemove,
             canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails,
-            canUpdateCardBrandChoice = customerStateHolder.canUpdateCardBrandChoice,
+            canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = walletsState,
             updateSelection = { updatedSelection, requiresConfirmation ->
                 setSelection(updatedSelection)

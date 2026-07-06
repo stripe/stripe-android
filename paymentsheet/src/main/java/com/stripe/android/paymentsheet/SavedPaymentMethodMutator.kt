@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -84,7 +83,6 @@ internal class SavedPaymentMethodMutator(
             linkBrand = effectiveLinkBrand,
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = { paymentMethodMetadataFlow.value?.displayNameForCode(it).orEmpty() },
-            isCbcEligible = { paymentMethodMetadataFlow.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible },
         )
     }
 
@@ -94,12 +92,12 @@ internal class SavedPaymentMethodMutator(
         customerStateHolder.canRemove,
         paymentOptionsItems,
         customerStateHolder.canUpdateCardExpiryAndBillingDetails,
-        customerStateHolder.canUpdateCardBrandChoice,
-    ) { canRemove, items, canUpdateCardExpiryAndBillingDetails, canUpdateCardBrandChoice ->
+        customerStateHolder.canChangeCbc,
+    ) { canRemove, items, canUpdateCardExpiryAndBillingDetails, canChangeCbc ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            item.displayableSavedPaymentMethod.isModifiable(
+            item.displayableSavedPaymentMethod.paymentMethod.isModifiable(
                 canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-                canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+                canChangeCbc = canChangeCbc,
             )
         }
     }
@@ -382,7 +380,7 @@ internal class SavedPaymentMethodMutator(
                             canRemove = canRemove,
                             canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
                                 .canUpdateCardExpiryAndBillingDetails.value,
-                            canUpdateCardBrandChoice = viewModel.customerStateHolder.canUpdateCardBrandChoice.value,
+                            canChangeCbc = viewModel.customerStateHolder.canChangeCbc.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,

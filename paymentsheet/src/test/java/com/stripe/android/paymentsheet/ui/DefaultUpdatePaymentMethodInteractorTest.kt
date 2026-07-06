@@ -47,7 +47,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = true,
             displayableSavedPaymentMethod = paymentMethod,
             onRemovePaymentMethod = ::onRemovePaymentMethod,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
 
@@ -58,7 +58,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     @Test
     fun creatingInteractorInLiveMode_setsTopBarStateCorrectly() = runScenario(
         isLiveMode = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.topBarState.showTestModeLabel).isFalse()
     }
@@ -66,7 +66,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     @Test
     fun creatingInteractorInTestMode_setsTopBarStateCorrectly() = runScenario(
         isLiveMode = false,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.topBarState.showTestModeLabel).isTrue()
     }
@@ -84,7 +84,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             canRemove = true,
             displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
             onRemovePaymentMethod = ::onRemovePaymentMethod,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.RemovePaymentMethod)
 
@@ -100,7 +100,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .EXPIRED_CARD_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod(),
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.state.test {
                 assertThat(awaitItem().error).isEqualTo(
@@ -116,7 +116,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .EXPIRED_CARD_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod(),
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             assertThat(interactor.isModifiablePaymentMethod).isFalse()
         }
@@ -126,7 +126,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun nonExpiredCard_hasNoInitialError() {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.state.test {
                 assertThat(awaitItem().error).isNull()
@@ -140,7 +140,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod(),
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             assertThat(interactor.isModifiablePaymentMethod).isTrue()
         }
@@ -152,7 +152,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             displayableSavedPaymentMethod =
             PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.cardParamsUpdateAction(CardBrand.Visa)
 
@@ -176,7 +176,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 updatedPaymentMethod = paymentMethod
                 Result.success(paymentMethod)
             },
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.cardParamsUpdateAction(CardBrand.CartesBancaires)
 
@@ -220,7 +220,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             displayableSavedPaymentMethod = initialPaymentMethod.toDisplayableSavedPaymentMethod(),
             updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
@@ -243,7 +243,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
                 .toDisplayableSavedPaymentMethod(),
             updatePaymentMethodExecutor = ::updatePaymentMethodExecutor,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.cardParamsUpdateAction(CardBrand.CartesBancaires)
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
@@ -262,7 +262,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod =
         PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD.toDisplayableSavedPaymentMethod(),
         shouldShowSetAsDefaultCheckbox = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
     }
@@ -271,7 +271,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun setAsDefaultCheckbox_shownForCards() = runScenario(
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         shouldShowSetAsDefaultCheckbox = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
     }
@@ -280,7 +280,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun setAsDefaultCheckbox_shownForUsBankAccount() = runScenario(
         displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod(),
         shouldShowSetAsDefaultCheckbox = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSetAsDefaultCheckbox).isTrue()
     }
@@ -290,7 +290,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         shouldShowSetAsDefaultCheckbox = true,
         isDefaultPaymentMethod = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSaveButton).isFalse()
     }
@@ -302,7 +302,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             .toDisplayableSavedPaymentMethod(),
         shouldShowSetAsDefaultCheckbox = true,
         isDefaultPaymentMethod = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSaveButton).isTrue()
     }
@@ -314,7 +314,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             .toDisplayableSavedPaymentMethod(),
         shouldShowSetAsDefaultCheckbox = true,
         isDefaultPaymentMethod = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         interactor.state.test {
             assertThat(awaitItem().isSaveButtonEnabled).isFalse()
@@ -332,7 +332,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         shouldShowSetAsDefaultCheckbox = true,
         isDefaultPaymentMethod = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         interactor.state.test {
             assertThat(awaitItem().setAsDefaultCheckboxChecked).isTrue()
@@ -344,7 +344,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         shouldShowSetAsDefaultCheckbox = true,
         isDefaultPaymentMethod = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.setAsDefaultCheckboxEnabled).isFalse()
     }
@@ -354,7 +354,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         shouldShowSetAsDefaultCheckbox = true,
         isDefaultPaymentMethod = false,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.setAsDefaultCheckboxEnabled).isTrue()
     }
@@ -362,7 +362,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     @Test
     fun setAsDefaultCheckboxChangedViewAction_updatesState() = runScenario(
         shouldShowSetAsDefaultCheckbox = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         val expectedInitialCheckedValue = false
         val expectedUpdatedCheckedValue = true
@@ -389,7 +389,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
         }
@@ -400,7 +400,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.handleViewAction(
                 UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
@@ -418,7 +418,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun setAsDefault_failure_displaysErrorMessage() = runScenario(
         shouldShowSetAsDefaultCheckbox = true,
         onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         interactor.handleViewAction(
             UpdatePaymentMethodInteractor.ViewAction.SetAsDefaultCheckboxChanged(
@@ -444,7 +444,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.success(Unit) },
             updatePaymentMethodExecutor = { _, _ -> Result.failure(expectedError) },
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
@@ -463,7 +463,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
             updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
@@ -482,7 +482,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             shouldShowSetAsDefaultCheckbox = true,
             onSetDefaultPaymentMethod = { Result.failure(IllegalStateException("Fake error")) },
             updatePaymentMethodExecutor = { _, _ -> Result.failure(IllegalStateException("Fake error")) },
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             updateCardAndDefaultPaymentMethod(interactor)
 
@@ -497,7 +497,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         displayableSavedPaymentMethod = PaymentMethodFixtures
             .CARD_WITH_NETWORKS_PAYMENT_METHOD
             .toDisplayableSavedPaymentMethod(),
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSaveButton).isTrue()
     }
@@ -506,7 +506,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun shouldShowSaveButton_whenSetAsDefaultCheckboxShown() = runScenario(
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         shouldShowSetAsDefaultCheckbox = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSaveButton).isTrue()
     }
@@ -517,7 +517,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             .CARD_WITH_NETWORKS_PAYMENT_METHOD
             .toDisplayableSavedPaymentMethod(),
         shouldShowSetAsDefaultCheckbox = true,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSaveButton).isTrue()
     }
@@ -526,7 +526,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun shouldNotShowSaveButton_whenNothingIsChangeable() = runScenario(
         displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
         shouldShowSetAsDefaultCheckbox = false,
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.shouldShowSaveButton).isFalse()
     }
@@ -536,7 +536,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         isDefaultPaymentMethod = true,
         onSetDefaultPaymentMethod = { _ -> notImplemented() },
         updatePaymentMethodExecutor = { _, _ -> notImplemented() },
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         interactor.handleViewAction(UpdatePaymentMethodInteractor.ViewAction.SaveButtonPressed)
 
@@ -545,7 +545,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
 
     @Test
     fun shouldCreateEditCardInteractor_whenPaymentMethodIsCard() = runScenario(
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         assertThat(interactor.editCardDetailsInteractor).isNotNull()
     }
@@ -557,7 +557,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             canUpdateCardExpiryAndBillingDetails = true,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isTrue()
@@ -573,7 +573,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             canUpdateCardExpiryAndBillingDetails = true,
-            canUpdateCardBrandChoice = false,
+            canChangeCbc = false,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
@@ -589,7 +589,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         runScenario(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             canUpdateCardExpiryAndBillingDetails = false,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isTrue()
@@ -602,7 +602,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanUpdateCardExpiryAndBillingDetails() {
         runScenario(
             canUpdateCardExpiryAndBillingDetails = true,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
@@ -615,7 +615,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     fun shouldCreateEditCardInteractorCorrectly_whenCbcIneligible_andCanNotUpdateCardExpiryAndBillingDetails() {
         runScenario(
             canUpdateCardExpiryAndBillingDetails = false,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             val state = interactor.editCardDetailsInteractor.state.value
             assertThat(state.cardDetailsState?.shouldShowCardBrandDropdown).isFalse()
@@ -627,7 +627,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
     @Test
     fun shouldNotCreateEditCardInteractor_whenPaymentMethodIsNotCard() = runScenario(
         displayableSavedPaymentMethod = PaymentMethodFixtures.US_BANK_ACCOUNT.toDisplayableSavedPaymentMethod(),
-        canUpdateCardBrandChoice = true,
+        canChangeCbc = true,
     ) {
         val exception = assertThrows(IllegalArgumentException::class.java) {
             interactor.editCardDetailsInteractor
@@ -642,7 +642,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
         runScenario(
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             interactor.editCardDetailsInteractor
             editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
@@ -658,7 +658,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         val editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory()
         runScenario(
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             editCardDetailsInteractorFactory.onCardUpdateParamsChanged?.invoke(
                 CardUpdateParams(cardBrand = CardBrand.Visa)
@@ -677,7 +677,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             addressCollectionMode = AddressCollectionMode.Full,
             allowedBillingCountries = setOf("us", "CA"),
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
 
@@ -704,7 +704,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             addressCollectionMode = AddressCollectionMode.Full,
             allowedBillingCountries = setOf("us", "CA"),
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             assertThat(interactor.editCardDetailsInteractor.state.value).isNotNull()
 
@@ -730,7 +730,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             addressCollectionMode = AddressCollectionMode.Full,
             allowedBillingCountries = setOf("us", "CA"),
             editCardDetailsInteractorFactory = FakeEditCardDetailsInteractorFactory(),
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ) {
             assertThat(interactor.editCardDetailsInteractor).isInstanceOf<FakeEditCardDetailsInteractor>()
 
@@ -773,7 +773,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         shouldShowSetAsDefaultCheckbox: Boolean = false,
         isDefaultPaymentMethod: Boolean = false,
         canUpdateCardExpiryAndBillingDetails: Boolean = false,
-        canUpdateCardBrandChoice: Boolean,
+        canChangeCbc: Boolean,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Automatic,
         allowedBillingCountries: Set<String> = setOf("US", "CA"),
         editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
@@ -786,7 +786,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             isLiveMode = isLiveMode,
             canRemove = canRemove,
             canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-            canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+            canChangeCbc = canChangeCbc,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             addressCollectionMode = addressCollectionMode,
             removeExecutor = onRemovePaymentMethod,

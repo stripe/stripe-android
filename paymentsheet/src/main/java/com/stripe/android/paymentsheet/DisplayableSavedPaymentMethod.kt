@@ -10,7 +10,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
     val displayName: ResolvableString,
     val paymentMethod: PaymentMethod,
     val savedPaymentMethod: SavedPaymentMethod,
-    val isCbcEligible: Boolean = false,
     val shouldShowDefaultBadge: Boolean = false,
 ) {
     val isCard: Boolean
@@ -26,21 +25,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             is SavedPaymentMethod.USBankAccount,
             SavedPaymentMethod.Unexpected -> false
         }
-
-    fun canChangeCbc(): Boolean {
-        return paymentMethod.canChangeCbc(isCbcEligible)
-    }
-
-    fun isModifiable(
-        canUpdateCardExpiryAndBillingDetails: Boolean,
-        canUpdateCardBrandChoice: Boolean,
-    ): Boolean {
-        return paymentMethod.isModifiable(
-            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-            canUpdateCardBrandChoice = canUpdateCardBrandChoice,
-            isCbcEligible = isCbcEligible,
-        )
-    }
 
     fun getDescription() = when (savedPaymentMethod) {
         is SavedPaymentMethod.Card -> {
@@ -116,7 +100,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
         fun create(
             displayName: ResolvableString,
             paymentMethod: PaymentMethod,
-            isCbcEligible: Boolean = false,
             shouldShowDefaultBadge: Boolean = false,
         ): DisplayableSavedPaymentMethod {
             val savedPaymentMethod = when (paymentMethod.type) {
@@ -145,7 +128,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                 displayName = displayName,
                 paymentMethod = paymentMethod,
                 savedPaymentMethod = savedPaymentMethod ?: SavedPaymentMethod.Unexpected,
-                isCbcEligible = isCbcEligible,
                 shouldShowDefaultBadge = shouldShowDefaultBadge,
             )
         }

@@ -23,7 +23,7 @@ internal interface CustomerStateHolder {
 
     val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>
 
-    val canUpdateCardBrandChoice: StateFlow<Boolean>
+    val canChangeCbc: StateFlow<Boolean>
 
     fun setCustomerState(customerState: CustomerState?)
 

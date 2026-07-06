@@ -227,7 +227,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
             addressCollectionMode = addressCollectionMode,
             canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
         ).apply {
             if (validating) {
                 editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)

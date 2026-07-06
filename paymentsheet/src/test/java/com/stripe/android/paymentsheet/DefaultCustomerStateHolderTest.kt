@@ -483,6 +483,7 @@ internal class DefaultCustomerStateHolderTest {
 
         val customerStateHolder = DefaultCustomerStateHolder(
             customerMetadata = customerMetadata,
+            paymentMethodMetadataFlow = stateFlowOf(null),
             savedStateHandle = savedStateHandle,
             selection = selection,
         )

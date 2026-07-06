@@ -40,7 +40,7 @@ internal class EmbeddedNavigatorTest {
             assertThat(navigator.canGoBack).isFalse()
 
             val newScreen = EmbeddedNavigator.Screen.ManageUpdate(
-                FakeUpdatePaymentMethodInteractor(canUpdateCardBrandChoice = true)
+                FakeUpdatePaymentMethodInteractor(canChangeCbc = true)
             )
             navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
@@ -66,7 +66,7 @@ internal class EmbeddedNavigatorTest {
             assertThat(awaitItem()).isEqualTo(initialScreen)
 
             val newScreen = EmbeddedNavigator.Screen.ManageUpdate(
-                FakeUpdatePaymentMethodInteractor(canUpdateCardBrandChoice = true)
+                FakeUpdatePaymentMethodInteractor(canChangeCbc = true)
             )
             navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
@@ -141,7 +141,7 @@ internal class EmbeddedNavigatorTest {
     @Test
     fun `Close while on ManageUpdate calls onHideEditablePaymentOption`() = testScenario {
         val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(
-            FakeUpdatePaymentMethodInteractor(canUpdateCardBrandChoice = true)
+            FakeUpdatePaymentMethodInteractor(canChangeCbc = true)
         )
         navigator.screen.test {
             assertThat(awaitItem()).isEqualTo(initialScreen)
@@ -161,7 +161,7 @@ internal class EmbeddedNavigatorTest {
             coroutineScope = this,
             eventReporter = eventReporter,
             initialScreen = EmbeddedNavigator.Screen.ManageUpdate(
-                FakeUpdatePaymentMethodInteractor(canUpdateCardBrandChoice = true)
+                FakeUpdatePaymentMethodInteractor(canChangeCbc = true)
             ),
         )
         assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
@@ -222,7 +222,7 @@ internal class EmbeddedNavigatorTest {
 
     @Test
     fun `ManageUpdate topBarState returns interactor topBarState`() {
-        val interactor = FakeUpdatePaymentMethodInteractor(canUpdateCardBrandChoice = true)
+        val interactor = FakeUpdatePaymentMethodInteractor(canChangeCbc = true)
         val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
 
         val topBarState = screen.topBarState().value
@@ -231,7 +231,7 @@ internal class EmbeddedNavigatorTest {
 
     @Test
     fun `ManageUpdate title returns interactor screenTitle`() {
-        val interactor = FakeUpdatePaymentMethodInteractor(canUpdateCardBrandChoice = true)
+        val interactor = FakeUpdatePaymentMethodInteractor(canChangeCbc = true)
         val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
 
         val title = screen.title().value
@@ -241,7 +241,7 @@ internal class EmbeddedNavigatorTest {
     @Test
     fun `ManageUpdate isPerformingNetworkOperation when idle returns false`() {
         val interactor = FakeUpdatePaymentMethodInteractor(
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = null,
                 status = UpdatePaymentMethodInteractor.Status.Idle,
@@ -256,7 +256,7 @@ internal class EmbeddedNavigatorTest {
     @Test
     fun `ManageUpdate isPerformingNetworkOperation when updating returns true`() {
         val interactor = FakeUpdatePaymentMethodInteractor(
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = null,
                 status = UpdatePaymentMethodInteractor.Status.Updating,

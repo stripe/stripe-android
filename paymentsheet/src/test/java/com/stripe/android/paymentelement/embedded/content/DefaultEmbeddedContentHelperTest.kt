@@ -174,6 +174,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 customerMetadata = stateFlowOf(
                     PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
                 ),
+                paymentMethodMetadataFlow = stateFlowOf(null),
             ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,

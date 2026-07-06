@@ -211,7 +211,6 @@ internal class CustomerSheetViewModel(
             isEditing = userCanEditAndIsEditing,
             isProcessing = selectionConfirmationState.isConfirming,
             errorMessage = selectionConfirmationState.error,
-            isCbcEligible = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             canEdit = customerState.canEdit,
             mandateText = paymentSelection?.mandateText(
                 merchantName = configuration.merchantDisplayName,
@@ -571,7 +570,7 @@ internal class CustomerSheetViewModel(
                     isLiveMode = isLiveMode,
                     canRemove = customerState.canRemove,
                     canUpdateCardExpiryAndBillingDetails = customerState.canUpdateCardExpiryAndBillingDetails,
-                    canUpdateCardBrandChoice = true,
+                    canChangeCbc = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
                     allowedBillingCountries =
@@ -1281,8 +1280,8 @@ internal class CustomerSheetViewModel(
         val canEdit = canRemove || paymentMethods.any { method ->
             isModifiable(
                 paymentMethod = method,
-                cbcEligibility = cbcEligibility,
                 canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                canChangeCbc = cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
         }
 

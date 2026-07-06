@@ -912,6 +912,7 @@ class SavedPaymentMethodMutatorTest {
             selection = MutableStateFlow(null),
             customerMetadata =
             stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         )
         runScenario(
             customerStateHolder = customerStateHolder,
@@ -956,6 +957,7 @@ class SavedPaymentMethodMutatorTest {
                 paymentMethodMetadata?.customerMetadata
                     ?: PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         ),
         block: suspend Scenario.() -> Unit
     ) {

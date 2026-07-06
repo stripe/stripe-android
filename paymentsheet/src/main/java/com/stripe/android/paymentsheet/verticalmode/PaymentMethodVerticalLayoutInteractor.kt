@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.code
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
@@ -104,7 +105,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val canRemove: StateFlow<Boolean>,
     private val walletsState: StateFlow<WalletsState?>,
     private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
-    private val canUpdateCardBrandChoice: StateFlow<Boolean>,
+    private val canChangeCbc: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -181,7 +182,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 walletsState = viewModel.walletsState,
                 canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
                     .canUpdateCardExpiryAndBillingDetails,
-                canUpdateCardBrandChoice = viewModel.customerStateHolder.canUpdateCardBrandChoice,
+                canChangeCbc = viewModel.customerStateHolder.canChangeCbc,
                 isCurrentScreen = isCurrentScreen,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
@@ -245,18 +246,18 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         displayedSavedPaymentMethod,
         canRemove,
         canUpdateCardExpiryAndBillingDetails,
-        canUpdateCardBrandChoice,
+        canChangeCbc,
     ) { paymentMethods,
         displayedSavedPaymentMethod,
         canRemove,
         canUpdateCardExpiryAndBillingDetails,
-        canUpdateCardBrandChoice ->
+        canChangeCbc ->
         getAvailableSavedPaymentMethodAction(
             paymentMethods = paymentMethods,
             savedPaymentMethod = displayedSavedPaymentMethod,
             canRemove = canRemove,
             canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-            canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+            canChangeCbc = canChangeCbc,
         )
     }
 
@@ -513,7 +514,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canRemove: Boolean,
         canUpdateCardExpiryAndBillingDetails: Boolean,
-        canUpdateCardBrandChoice: Boolean,
+        canChangeCbc: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         if (paymentMethods == null || savedPaymentMethod == null) {
             return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -526,7 +527,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     canRemove = canRemove,
                     savedPaymentMethod = savedPaymentMethod,
                     canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-                    canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+                    canChangeCbc = canChangeCbc,
                 )
             }
             else ->
@@ -538,11 +539,11 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canUpdateCardExpiryAndBillingDetails: Boolean,
-        canUpdateCardBrandChoice: Boolean,
+        canChangeCbc: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        return if (savedPaymentMethod?.isModifiable(
+        return if (savedPaymentMethod?.paymentMethod?.isModifiable(
                 canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-                canUpdateCardBrandChoice = canUpdateCardBrandChoice,
+                canChangeCbc = canChangeCbc,
             ) == true || canRemove
         ) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
