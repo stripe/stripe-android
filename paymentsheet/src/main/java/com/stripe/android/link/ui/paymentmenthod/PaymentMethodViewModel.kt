@@ -212,7 +212,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                         FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
                                 ),
                                 placesClient = null,
-                                coroutineScope = parentComponent.viewModel.viewModelScope,
+                                coroutineScope = null,
                             ),
                             isLinkUI = true,
                         ),

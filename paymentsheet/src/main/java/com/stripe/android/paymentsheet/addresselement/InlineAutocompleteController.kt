@@ -64,7 +64,7 @@ internal class InlineAutocompleteController(
                 onSuccess = { response ->
                     val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
                     val address = response.place.transformGoogleToStripeAddress(locale)
-                    address.line1?.let { lastPredictionLine1 = it }
+                    lastPredictionLine1 = address.line1
                     _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
                     eventListenerProvider()?.invoke(
                         AutocompleteAddressInteractor.Event.OnValues(

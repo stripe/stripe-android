@@ -201,6 +201,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
 
@@ -218,10 +219,11 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory does not dispose previously created inline interactor on next create`() = test { scenario ->
+    fun `Factory disposes previously created inline interactor on next create`() = test { scenario ->
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
         val fakePlaces = FakePlacesClientProxy()
@@ -237,16 +239,13 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val first = factory.create()
         first.observeQueryChanges(queryFlow, countryFlow)
 
-        // Building a new interactor must not tear down the previous controller's observation,
-        // because the shared factory can be reused while the original form is still on screen.
+        // Creating a new interactor disposes the previous one, so its observation is cancelled.
         factory.create()
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
-        val call = fakePlaces.findPredictionsCalls.awaitItem()
-        assertThat(call.query).isEqualTo("123 Main")
-        assertThat(call.country).isEqualTo("US")
+        // No predictions are fetched because the first interactor was disposed.
         fakePlaces.ensureAllEventsConsumed()
     }
 
@@ -255,6 +254,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test-key",
             autocompleteCountries = setOf("US"),
+            isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
 

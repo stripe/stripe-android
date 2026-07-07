@@ -89,6 +89,27 @@ class AddressTextFieldControllerTest {
         }
     }
 
+    @Test
+    fun `predictions dropdown is hidden when state is idle`() {
+        assertThat(
+            shouldShowPredictionsDropdown(
+                AutocompleteAddressInteractor.InlinePredictionsState.Idle
+            )
+        ).isFalse()
+    }
+
+    @Test
+    fun `predictions dropdown remains shown when results are empty`() {
+        assertThat(
+            shouldShowPredictionsDropdown(
+                AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = "123 Main",
+                    predictions = emptyList()
+                )
+            )
+        ).isTrue()
+    }
+
     private fun createAddressController(isInlineAutocompleteEnabled: Boolean = false): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),

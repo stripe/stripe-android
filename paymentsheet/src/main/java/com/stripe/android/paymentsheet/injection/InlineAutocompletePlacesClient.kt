@@ -11,10 +11,10 @@ internal fun createInlineAutocompletePlacesClient(
     context: Context,
     googlePlacesApiKey: String?,
     errorReporter: ErrorReporter,
-    isPlacesAvailable: () -> Boolean,
+    isPlacesAvailable: Boolean,
 ): PlacesClientProxy? {
     if (!FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled) return null
-    if (!isPlacesAvailable()) return null
+    if (!isPlacesAvailable) return null
     val apiKey = googlePlacesApiKey ?: return null
     return LazyPlacesClientProxy {
         PlacesClientProxy.create(

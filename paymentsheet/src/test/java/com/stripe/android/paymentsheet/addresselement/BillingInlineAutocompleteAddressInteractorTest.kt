@@ -13,11 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-// The detailed inline autocomplete behavior (predictions, debouncing, selection,
-// suppression, dismissal) is tested in InlineAutocompleteControllerTest. These tests
-// cover only the wrapper-specific behavior: the two methods this interactor implements
-// directly (onAutocomplete, onEnterManuallyFromInline) and that the registered event
-// listener is wired into the controller.
+// Wrapper-specific behavior only — controller logic is tested in InlineAutocompleteControllerTest.
 @RunWith(RobolectricTestRunner::class)
 class BillingInlineAutocompleteAddressInteractorTest {
 

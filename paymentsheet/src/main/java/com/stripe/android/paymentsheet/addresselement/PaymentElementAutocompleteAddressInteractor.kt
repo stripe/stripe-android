@@ -45,15 +45,18 @@ internal class PaymentElementAutocompleteAddressInteractor(
         private val launcher: AutocompleteLauncher,
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
         private val placesClient: PlacesClientProxy?,
-        private val coroutineScope: CoroutineScope,
+        private val coroutineScope: CoroutineScope?,
     ) : AutocompleteAddressInteractor.Factory {
+        private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
+
         override fun create(): AutocompleteAddressInteractor {
-            if (placesClient != null && autocompleteConfig.isInlineAutocompleteEnabled) {
+            if (placesClient != null && coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
+                activeInlineInteractor?.dispose()
                 return BillingInlineAutocompleteAddressInteractor(
                     placesClient = placesClient,
                     autocompleteConfig = autocompleteConfig,
                     coroutineScope = coroutineScope,
-                )
+                ).also { activeInlineInteractor = it }
             }
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,

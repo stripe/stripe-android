@@ -32,7 +32,6 @@ interface AutocompleteAddressInteractor {
         val autocompleteCountries: Set<String>,
         val isPlacesAvailable: Boolean = DefaultIsPlacesAvailable().invoke(),
         val isInlineAutocompleteEnabled: Boolean = false,
-        val getAttributionDrawable: ((isDarkTheme: Boolean) -> Int?)? = null,
     )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
