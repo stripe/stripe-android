@@ -427,6 +427,8 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
+        resultCountDownLatch = testParameters.countDownLatch()
+
         selectors.playgroundBuyButton.waitForEnabled()
         selectors.playgroundBuyButton.click()
 
@@ -443,6 +445,13 @@ internal class PlaygroundTestDriver(
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+
+        // Confirmation must actually succeed. Without this the test passes even when the backend
+        // rejects the payment (e.g. a customer_email mismatch surfaces as a failure result here).
+        resultCountDownLatch?.let {
+            assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
+        }
+        assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
 
         teardown()
     }
