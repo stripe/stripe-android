@@ -48,6 +48,10 @@ import com.stripe.android.paymentsheet.example.playground.activity.CustomPayment
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutSessionAutomaticTaxSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerEmailSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -389,6 +393,50 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         // Skips the full screen payment animation in `PaymentSheet`
+        while (currentActivity !is PaymentSheetPlaygroundActivity) {
+            composeTestRule.mainClock.advanceTimeByFrame()
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        teardown()
+    }
+
+    fun confirmGooglePayWithCheckoutSession(
+        merchant: Merchant,
+        customerEmail: String,
+    ) {
+        setup(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[MerchantSettingsDefinition] = merchant
+                settings[CustomerSettingsDefinition] = CustomerType.GUEST
+                settings.updateConfigurationData {
+                    it.copy(integrationType = PlaygroundConfigurationData.IntegrationType.FlowController)
+                }
+                settings[InitializationTypeSettingsDefinition] = InitializationType.CheckoutSession
+                settings[CheckoutSessionAutomaticTaxSettingsDefinition] = false
+                settings[CustomerEmailSettingsDefinition] = customerEmail
+            }
+        )
+
+        launchCustom(clickMultiStep = false)
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        selectors.playgroundBuyButton.waitForEnabled()
+        selectors.playgroundBuyButton.click()
+
+        composeTestRule.waitForIdle()
+
+        selectors.googlePaySheet.waitFor()
+        selectors.googlePayCheckoutButton.click()
+
+        composeTestRule.waitForIdle()
+
         while (currentActivity !is PaymentSheetPlaygroundActivity) {
             composeTestRule.mainClock.advanceTimeByFrame()
         }

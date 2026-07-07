@@ -139,6 +139,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 cardFundingFilter = cardFundingFilter,
                 displayItems = displayItems,
+                billingEmailFallback = configuration.defaultBillingDetails?.email,
             ),
         )
     }
