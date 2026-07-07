@@ -6,7 +6,7 @@ import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
  * Indicates that the submitted signature does not prove control of the wallet.
  */
 @ExperimentalCryptoOnramp
-class InvalidWalletOwnershipSignatureApiErrorException internal constructor(
+class InvalidWalletOwnershipSignatureApiException internal constructor(
     apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,

@@ -3,10 +3,10 @@ package com.stripe.android.crypto.onramp.exception
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Indicates that the wallet ownership challenge expired before the signature was submitted.
+ * Indicates that Crypto Onramp does not support the requested wallet network for this operation.
  */
 @ExperimentalCryptoOnramp
-class WalletOwnershipChallengeExpiredApiErrorException internal constructor(
+class UnsupportedNetworkApiException internal constructor(
     apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,
@@ -15,9 +15,9 @@ class WalletOwnershipChallengeExpiredApiErrorException internal constructor(
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = apiErrorContext.apiErrorMessage
-            ?: "Wallet ownership verification failed: the challenge has expired.",
-        code = apiErrorContext.code(fallback = WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE),
-        nextStep = "Request a new wallet ownership challenge and submit a fresh signature before it expires.",
+            ?: "Crypto Onramp doesn't support this wallet network for the requested operation.",
+        code = apiErrorContext.code(fallback = CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE),
+        nextStep = "Use a network supported by Crypto Onramp for this operation, then retry the request.",
         docUrl = apiErrorContext.docUrl,
         sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
@@ -29,7 +29,7 @@ class WalletOwnershipChallengeExpiredApiErrorException internal constructor(
     ),
 ) {
     override val code: String
-        get() = apiErrorContext.code(fallback = WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE)
 }
 
-internal const val WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE = "crypto_onramp_wallet_ownership_challenge_expired"
+internal const val CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE = "crypto_onramp_unsupported_network"

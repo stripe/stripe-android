@@ -14,18 +14,18 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.AppAttestationException
 import com.stripe.android.crypto.onramp.exception.AppAttestationUnavailableException
 import com.stripe.android.crypto.onramp.exception.CryptoOnrampApiException
-import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipChallengeApiErrorException
-import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipSignatureApiErrorException
+import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipChallengeApiException
+import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipSignatureApiException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.exception.SDKVersion
-import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
-import com.stripe.android.crypto.onramp.exception.UnsupportedNetworkApiErrorException
-import com.stripe.android.crypto.onramp.exception.WalletNotFoundApiErrorException
-import com.stripe.android.crypto.onramp.exception.WalletOwnershipChallengeExpiredApiErrorException
+import com.stripe.android.crypto.onramp.exception.UncategorizedApiException
+import com.stripe.android.crypto.onramp.exception.UnsupportedNetworkApiException
+import com.stripe.android.crypto.onramp.exception.WalletNotFoundApiException
+import com.stripe.android.crypto.onramp.exception.WalletOwnershipChallengeExpiredApiException
 import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoConsumerWallet
@@ -350,9 +350,9 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
 
         val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
-        assertThat(error).isInstanceOf(InvalidWalletOwnershipSignatureApiErrorException::class.java)
+        assertThat(error).isInstanceOf(InvalidWalletOwnershipSignatureApiException::class.java)
 
-        val signatureError = error as InvalidWalletOwnershipSignatureApiErrorException
+        val signatureError = error as InvalidWalletOwnershipSignatureApiException
         assertThat(signatureError.userMessage)
             .isEqualTo("We couldn't verify ownership of this wallet. Please try again.")
         assertThat(signatureError.message)
@@ -395,9 +395,9 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
 
         val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
-        assertThat(error).isInstanceOf(WalletOwnershipChallengeExpiredApiErrorException::class.java)
+        assertThat(error).isInstanceOf(WalletOwnershipChallengeExpiredApiException::class.java)
 
-        val expiredError = error as WalletOwnershipChallengeExpiredApiErrorException
+        val expiredError = error as WalletOwnershipChallengeExpiredApiException
         assertThat(expiredError.userMessage)
             .isEqualTo("This wallet verification request expired. Please try again.")
         assertThat(expiredError.message)
@@ -439,9 +439,9 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
 
         val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
-        assertThat(error).isInstanceOf(InvalidWalletOwnershipChallengeApiErrorException::class.java)
+        assertThat(error).isInstanceOf(InvalidWalletOwnershipChallengeApiException::class.java)
 
-        val challengeError = error as InvalidWalletOwnershipChallengeApiErrorException
+        val challengeError = error as InvalidWalletOwnershipChallengeApiException
         assertThat(challengeError.userMessage)
             .isEqualTo("This wallet verification request is no longer valid. Please try again.")
         assertThat(challengeError.message)
@@ -483,9 +483,9 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampGetWalletOwnershipChallengeResult.Failed::class.java)
 
         val error = (result as OnrampGetWalletOwnershipChallengeResult.Failed).error
-        assertThat(error).isInstanceOf(WalletNotFoundApiErrorException::class.java)
+        assertThat(error).isInstanceOf(WalletNotFoundApiException::class.java)
 
-        val walletNotFoundError = error as WalletNotFoundApiErrorException
+        val walletNotFoundError = error as WalletNotFoundApiException
         assertThat(walletNotFoundError.userMessage)
             .isEqualTo("This wallet couldn't be found. Please choose or add a wallet and try again.")
         assertThat(walletNotFoundError.message)
@@ -529,9 +529,9 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
 
         val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
-        assertThat(error).isInstanceOf(UnsupportedNetworkApiErrorException::class.java)
+        assertThat(error).isInstanceOf(UnsupportedNetworkApiException::class.java)
 
-        val unsupportedNetworkError = error as UnsupportedNetworkApiErrorException
+        val unsupportedNetworkError = error as UnsupportedNetworkApiException
         assertThat(unsupportedNetworkError.userMessage)
             .isEqualTo("This wallet network isn't supported. Please choose a different network.")
         assertThat(unsupportedNetworkError.message)
@@ -668,9 +668,9 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
 
         val error = (result as OnrampHasLinkAccountResult.Failed).error
-        assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
+        assertThat(error).isInstanceOf(UncategorizedApiException::class.java)
 
-        val apiError = error as UncategorizedApiErrorException
+        val apiError = error as UncategorizedApiException
         assertThat(apiError.underlyingError.stripeError?.extraFields?.get("reason"))
             .isEqualTo("email_blocked")
         assertThat(apiError.underlyingError.stripeError?.extraFields?.get("user_message"))
@@ -741,7 +741,7 @@ class OnrampInteractorTest {
     }
 
     @Test
-    fun uncategorizedApiErrorExceptionFallsBackToSafeUserMessage() = runTest {
+    fun uncategorizedApiExceptionFallsBackToSafeUserMessage() = runTest {
         val application = mock<Application> {
             on { packageName } doReturn "com.example.app"
             on { getString(any()) } doReturn "Something went wrong. Please try again later."
@@ -776,9 +776,9 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampHasLinkAccountResult.Failed::class.java)
 
         val error = (result as OnrampHasLinkAccountResult.Failed).error
-        assertThat(error).isInstanceOf(UncategorizedApiErrorException::class.java)
+        assertThat(error).isInstanceOf(UncategorizedApiException::class.java)
 
-        val apiError = error as UncategorizedApiErrorException
+        val apiError = error as UncategorizedApiException
         assertThat(apiError.userMessage).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.message).isEqualTo("Something went wrong. Please try again later.")
         assertThat(apiError.code).isEqualTo("uncategorized_api_error")

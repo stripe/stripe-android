@@ -3,10 +3,10 @@ package com.stripe.android.crypto.onramp.exception
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Indicates that the wallet ownership challenge is invalid for this verification attempt.
+ * Indicates that Crypto Onramp could not find the requested wallet for the authenticated consumer.
  */
 @ExperimentalCryptoOnramp
-class InvalidWalletOwnershipChallengeApiErrorException internal constructor(
+class WalletNotFoundApiException internal constructor(
     apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,
@@ -15,11 +15,10 @@ class InvalidWalletOwnershipChallengeApiErrorException internal constructor(
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = apiErrorContext.apiErrorMessage
-            ?: "Wallet ownership verification failed: the challenge is invalid, already consumed, missing, " +
-            "or not associated with the authenticated consumer.",
-        code = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE),
-        nextStep = "Request a new challenge for the registered wallet and authenticated consumer, then submit " +
-            "that challenge ID with its signature.",
+            ?: "Crypto Onramp couldn't find the wallet for the authenticated consumer.",
+        code = apiErrorContext.code(fallback = CRYPTO_ONRAMP_WALLET_NOT_FOUND_ERROR_CODE),
+        nextStep = "Use a wallet registered to the authenticated consumer, or register the wallet " +
+            "before retrying the request.",
         docUrl = apiErrorContext.docUrl,
         sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
@@ -31,7 +30,7 @@ class InvalidWalletOwnershipChallengeApiErrorException internal constructor(
     ),
 ) {
     override val code: String
-        get() = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = CRYPTO_ONRAMP_WALLET_NOT_FOUND_ERROR_CODE)
 }
 
-internal const val INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE = "crypto_onramp_invalid_wallet_ownership_challenge"
+internal const val CRYPTO_ONRAMP_WALLET_NOT_FOUND_ERROR_CODE = "crypto_onramp_wallet_not_found"
