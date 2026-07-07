@@ -1,4 +1,4 @@
 -dontwarn io.grpc.internal.**
 
 # Ideally we could only keep the contracts that are used, but there isn't a way to do that.
--keep class * extends androidx.activity.result.contract.ActivityResultContract
+-keep class com.stripe.android.** extends androidx.activity.result.contract.ActivityResultContract
