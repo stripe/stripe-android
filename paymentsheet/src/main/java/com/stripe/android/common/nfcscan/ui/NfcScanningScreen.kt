@@ -14,11 +14,8 @@ import androidx.compose.foundation.layout.safeContent
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.BiasAlignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.nfcscan.NfcScanningViewAction
@@ -70,34 +67,6 @@ internal fun NfcScanningLayout(
 }
 
 @Composable
-private fun NfcCoilLayout(
-    status: NfcScanningStatus,
-    tapZone: TapZone,
-    deviceRotation: DeviceRotation,
-    onSuccessShown: () -> Unit,
-) {
-    val shouldRenderTextAboveCoil = rememberOrientationValues(
-        deviceRotation = deviceRotation,
-        onPortrait = { tapZone.yBias > 0.75 },
-        onLandscape = { tapZone.yBias > 0.6 },
-    )
-
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = BiasAlignment(
-            horizontalBias = tapZone.xBias * 2 - 1,
-            verticalBias = tapZone.yBias * 2 - 1,
-        ),
-    ) {
-        NfcCoil(
-            status = status,
-            shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
-            onSuccessShown = onSuccessShown,
-        )
-    }
-}
-
-@Composable
 private fun BoxScope.CloseButtonLayout(
     canShow: Boolean,
     tapZone: TapZone,
@@ -134,25 +103,6 @@ private fun BoxScope.CloseButtonLayout(
             exit = fadeOut()
         ) {
             NfcCloseButton(onClose)
-        }
-    }
-}
-
-@Composable
-private fun <T> rememberOrientationValues(
-    deviceRotation: DeviceRotation,
-    onPortrait: () -> T,
-    onLandscape: () -> T
-): T {
-    val onPortrait by rememberUpdatedState(onPortrait)
-    val onLandscape by rememberUpdatedState(onLandscape)
-
-    return remember(deviceRotation) {
-        when (deviceRotation) {
-            DeviceRotation.Portrait,
-            DeviceRotation.UpsideDown -> onPortrait()
-            DeviceRotation.LandscapeLeft,
-            DeviceRotation.LandscapeRight -> onLandscape()
         }
     }
 }
