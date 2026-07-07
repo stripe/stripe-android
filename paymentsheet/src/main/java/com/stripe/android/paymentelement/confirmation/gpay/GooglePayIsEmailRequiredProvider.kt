@@ -12,16 +12,18 @@ import com.stripe.android.paymentsheet.PaymentSheet
 internal object GooglePayIsEmailRequiredProvider {
 
     fun get(paymentMethodMetadata: PaymentMethodMetadata, configuration: CommonConfiguration): Boolean {
+        val billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration
         val checkoutSessionMetadata = paymentMethodMetadata.integrationMetadata
-            as? IntegrationMetadata.CheckoutSession ?: return false
+            as? IntegrationMetadata.CheckoutSession
+            ?: return billingDetailsCollectionConfiguration.collectsEmail
 
         val checkout = CheckoutInstances[checkoutSessionMetadata.instancesKey]
-            ?: return false
+            ?: return billingDetailsCollectionConfiguration.collectsEmail
 
         val checkoutSession = checkout.checkoutSession.value
 
-        return collectEmailForCheckoutSession(checkoutSession, configuration.billingDetailsCollectionConfiguration) ||
-            configuration.billingDetailsCollectionConfiguration.collectsEmail
+        return collectEmailForCheckoutSession(checkoutSession, billingDetailsCollectionConfiguration) ||
+            billingDetailsCollectionConfiguration.collectsEmail
     }
 
     private fun collectEmailForCheckoutSession(

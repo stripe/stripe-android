@@ -323,6 +323,7 @@ class GooglePayConfirmationDefinitionTest {
                         address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
                     ),
                     cardBrandFilter = FakeCardBrandFilter,
+                    isEmailRequired = true,
                 )
             ),
             merchantNameShouldBe = "Another merchant Inc.",

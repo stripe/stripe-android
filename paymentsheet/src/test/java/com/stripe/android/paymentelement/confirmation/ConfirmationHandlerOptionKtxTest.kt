@@ -390,6 +390,56 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
+    fun `On Google Pay selection, should return expected option with email required`() {
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+            googlePayIsEmailRequired = true,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.isEmailRequired
+        ).isTrue()
+    }
+
+    @Test
+    fun `On Google Pay selection, should use billing configuration for email required by default`() {
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.isEmailRequired
+        ).isTrue()
+    }
+
+    @Test
     fun `On Link selection but with no configuration, should return null`() {
         assertThat(
             PaymentSelection.Link(brand = LinkBrand.Link).toConfirmationOption(
