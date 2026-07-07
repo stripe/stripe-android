@@ -362,6 +362,145 @@ class InlineAutocompleteControllerTest {
         }
 
     @Test
+    fun `onDismissed clears suppression - typing previously-selected address fetches normally`() =
+        runScenario {
+            fakePlacesClient.fetchPlaceResult = Result.success(
+                FetchPlaceResponse(
+                    Place(
+                        listOf(
+                            AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
+                            AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
+                            AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+                        )
+                    )
+                )
+            )
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
+
+            delegate.onPredictionSelected("place_1")
+            advanceTimeBy(100)
+
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            eventCalls.awaitItem()
+
+            delegate.onDismissed()
+
+            queryFlow.value = "123 Main Street"
+            advanceTimeBy(500)
+
+            fakePlacesClient.findPredictionsCalls.awaitItem()
+        }
+
+    @Test
+    fun `query dropping below minimum chars clears suppression - re-typing fetches normally`() =
+        runScenario {
+            fakePlacesClient.fetchPlaceResult = Result.success(
+                FetchPlaceResponse(
+                    Place(
+                        listOf(
+                            AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
+                            AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
+                            AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+                        )
+                    )
+                )
+            )
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
+
+            delegate.onPredictionSelected("place_1")
+            advanceTimeBy(100)
+
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            eventCalls.awaitItem()
+
+            // Query drops below the minimum — suppression guard should be cleared.
+            queryFlow.value = "1"
+            advanceTimeBy(500)
+
+            queryFlow.value = "123 Main Street"
+            advanceTimeBy(500)
+
+            fakePlacesClient.findPredictionsCalls.awaitItem()
+        }
+
+    @Test
+    fun `prediction selected with null line1 does not block subsequent fetches`() =
+        runScenario {
+            // Place with no street components produces null line1 — no suppression is set.
+            fakePlacesClient.fetchPlaceResult = Result.success(
+                FetchPlaceResponse(Place(emptyList()))
+            )
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
+
+            delegate.onPredictionSelected("place_1")
+            advanceTimeBy(100)
+
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            eventCalls.awaitItem()
+
+            // lastPredictionLine1 was not set, so the next query must still fetch predictions.
+            queryFlow.value = "123 Main"
+            advanceTimeBy(500)
+
+            fakePlacesClient.findPredictionsCalls.awaitItem()
+        }
+
+    @Test
+    fun `null line1 after prior non-null selection does not leave stale suppression`() =
+        runScenario {
+            // First selection: place with line1="123 Main St" — sets lastPredictionLine1.
+            fakePlacesClient.fetchPlaceResult = Result.success(
+                FetchPlaceResponse(
+                    Place(
+                        listOf(
+                            AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
+                            AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
+                            AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+                        )
+                    )
+                )
+            )
+            fakePlacesClient.findPredictionsResult = Result.success(
+                FindAutocompletePredictionsResponse(emptyList())
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
+
+            delegate.onPredictionSelected("place_1")
+            advanceTimeBy(100)
+
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            eventCalls.awaitItem()
+
+            // Second selection: place with no street components → line1 is null.
+            // This must clear lastPredictionLine1 so the previous value doesn't
+            // suppress a future fetch for "123 Main St".
+            fakePlacesClient.fetchPlaceResult = Result.success(
+                FetchPlaceResponse(Place(emptyList()))
+            )
+
+            delegate.onPredictionSelected("place_2")
+            advanceTimeBy(100)
+
+            fakePlacesClient.fetchPlaceCalls.awaitItem()
+            eventCalls.awaitItem()
+
+            // Typing "123 Main St" must now fetch predictions — not be suppressed.
+            queryFlow.value = "123 Main St"
+            advanceTimeBy(500)
+
+            fakePlacesClient.findPredictionsCalls.awaitItem()
+        }
+
+    @Test
     fun `onDismissed resets state to Idle`() = runScenario {
         fakePlacesClient.findPredictionsResult = Result.success(
             FindAutocompletePredictionsResponse(

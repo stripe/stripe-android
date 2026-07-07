@@ -9,6 +9,7 @@ import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.FakeTapZoneResolver
 import com.stripe.android.common.nfcscan.tapzone.TapZone
+import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -31,7 +32,10 @@ internal class NfcScanningViewModelTest {
         tapZone = TapZone(xBias = 0.3f, yBias = 0.7f),
     ) {
         assertThat(viewModel.viewState.value).isEqualTo(
-            NfcScanningViewState(tapZone = TapZone(xBias = 0.3f, yBias = 0.7f)),
+            NfcScanningViewState(
+                tapZone = TapZone(xBias = 0.3f, yBias = 0.7f),
+                status = NfcScanningStatus.Idle,
+            ),
         )
     }
 
@@ -54,7 +58,35 @@ internal class NfcScanningViewModelTest {
     }
 
     @Test
-    fun `card scanner Complete state emits Complete result`() = runScenario {
+    fun `card scanner in scanning status updates the view model state to scanning`() = runScenario {
+        viewModel.viewState.test {
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
+            scannerState.emit(NfcCardScanner.State.Scanning)
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
+        }
+    }
+
+    @Test
+    fun `card scanner in scanned status updates the view model state to scanned`() = runScenario {
+        viewModel.viewState.test {
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
+
+            scannerState.emit(
+                NfcCardScanner.State.Complete(
+                    ScannedCardData(
+                        cardNumber = "4242424242424242",
+                        expirationMonth = 12,
+                        expirationYear = 2030,
+                    ),
+                ),
+            )
+
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanned)
+        }
+    }
+
+    @Test
+    fun `card scanner Complete state emits Complete result after success animation`() = runScenario {
         viewModel.result.test {
             scannerState.emit(
                 NfcCardScanner.State.Complete(
@@ -65,6 +97,10 @@ internal class NfcScanningViewModelTest {
                     ),
                 ),
             )
+
+            expectNoEvents()
+
+            viewModel.handleViewAction(NfcScanningViewAction.SuccessShown)
 
             assertThat(awaitItem()).isEqualTo(
                 NfcScanningContract.Result.Complete(

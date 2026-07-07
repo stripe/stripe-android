@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import com.stripe.android.uicore.R
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
@@ -52,7 +53,7 @@ class AutocompleteAddressController(
                 }
 
                 override fun getAttributionDrawable(isDarkTheme: Boolean): Int? {
-                    return config.getAttributionDrawable?.invoke(isDarkTheme)
+                    return R.drawable.stripe_google_maps_logo
                 }
             }
         } else {

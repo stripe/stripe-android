@@ -143,6 +143,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 cardFundingFilter = cardFundingFilter,
                 displayItems = displayItems,
                 isEmailRequired = isEmailRequired,
+                billingEmailFallback = configuration.defaultBillingDetails?.email,
             ),
         )
     }

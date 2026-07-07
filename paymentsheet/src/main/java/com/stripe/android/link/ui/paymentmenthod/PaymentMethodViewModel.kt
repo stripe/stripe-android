@@ -210,7 +210,9 @@ internal class PaymentMethodViewModel @Inject constructor(
                                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                                     isInlineAutocompleteEnabled =
                                         FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
-                                )
+                                ),
+                                placesClient = null,
+                                coroutineScope = null,
                             ),
                             isLinkUI = true,
                         ),

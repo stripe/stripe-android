@@ -3,6 +3,9 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutConfigurationMerger
+import com.stripe.android.checkout.InternalState
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -24,6 +27,8 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
@@ -35,6 +40,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -387,6 +393,41 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(
             confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
         ).isEmpty()
+    }
+
+    @OptIn(CheckoutSessionPreview::class)
+    @Test
+    fun `On Google Pay selection, customerEmail from response flows through merger to billingEmailFallback`() {
+        val response = CheckoutSessionResponseFactory.create(
+            customerEmail = "checkout@example.com",
+        )
+        val state = InternalState(
+            key = "test",
+            configuration = Checkout.Configuration().build(),
+            checkoutSessionResponse = response,
+            flagImages = null,
+        )
+        val mergedConfig = CheckoutConfigurationMerger.EmbeddedConfiguration(
+            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").apply {
+                googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+            }.build()
+        ).forCheckoutSession(state).asCommonConfiguration()
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = mergedConfig,
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.billingEmailFallback
+        ).isEqualTo("checkout@example.com")
     }
 
     @Test
