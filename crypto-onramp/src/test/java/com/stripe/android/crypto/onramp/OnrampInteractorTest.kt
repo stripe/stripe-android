@@ -34,6 +34,8 @@ import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
+import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
+import com.stripe.android.crypto.onramp.model.PaymentMethodType
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
@@ -54,6 +56,7 @@ import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.samsungpay.SamsungPayPaymentMethodLauncher
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
@@ -406,6 +409,107 @@ class OnrampInteractorTest {
         assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.CryptoPaymentTokenCreated(null))
+    }
+
+    @Test
+    fun testCreateCryptoPaymentTokenForSamsungPayIsSuccessful() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
+
+        val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
+        doReturn("pk_platform_123").whenever(mockPlatformSettings).publishableKey
+        whenever(
+            cryptoApiRepository.getPlatformSettings(
+                cryptoCustomerId = eq("cpt_123"),
+                countryHint = anyOrNull()
+            )
+        ).thenReturn(Result.success(mockPlatformSettings))
+
+        val createPaymentTokenResponse = CreatePaymentTokenResponse(id = "crypto_token_123")
+        whenever(
+            cryptoApiRepository.createPaymentToken(cryptoCustomerId = any(), paymentMethod = any())
+        ).thenReturn(Result.success(createPaymentTokenResponse))
+
+        val paymentMethod = PaymentMethod(
+            id = "pm_samsung_123456789",
+            created = 1550757934255L,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
+            customerId = "cus_AQsHpvKfKwJDrF",
+            code = "card"
+        )
+
+        interactor.onCollectPaymentMethod(PaymentMethodType.SamsungPay)
+        interactor.handleSamsungPayPaymentResult(
+            SamsungPayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        val result = interactor.createCryptoPaymentToken()
+        assertThat(result).isInstanceOf(OnrampCreateCryptoPaymentTokenResult.Completed::class.java)
+
+        verify(cryptoApiRepository).createPaymentToken(
+            cryptoCustomerId = "cpt_123",
+            paymentMethod = "pm_samsung_123456789"
+        )
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.CryptoPaymentTokenCreated(PaymentMethodType.SamsungPay)
+        )
+    }
+
+    @Test
+    fun testHandleSamsungPayPaymentResultCompleted() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val paymentMethod = PaymentMethod(
+            id = "pm_samsung_123456789",
+            created = 1550757934255L,
+            liveMode = false,
+            type = PaymentMethod.Type.Card,
+            customerId = "cus_AQsHpvKfKwJDrF",
+            code = "card"
+        )
+
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayPaymentMethodLauncher.Result.Completed(paymentMethod)
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Completed::class.java)
+        val completed = result as OnrampCollectPaymentMethodResult.Completed
+        assertThat(completed.displayData.label).isEqualTo("Samsung Pay")
+        assertThat(completed.displayData.type).isEqualTo(PaymentMethodDisplayData.Type.SamsungPay)
+        assertThat(completed.kycInfo).isNull()
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(PaymentMethodType.SamsungPay)
+        )
+    }
+
+    @Test
+    fun testHandleSamsungPayPaymentResultFailed() = runTest {
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        val error = RuntimeException("Samsung Pay failed")
+
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayPaymentMethodLauncher.Result.Failed(
+                error = error,
+                errorCode = SamsungPayPaymentMethodLauncher.INTERNAL_ERROR
+            )
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Failed::class.java)
+        val failed = result as OnrampCollectPaymentMethodResult.Failed
+        assertThat(failed.error).isSameInstanceAs(error)
+    }
+
+    @Test
+    fun testHandleSamsungPayPaymentResultCanceled() = runTest {
+        val result = interactor.handleSamsungPayPaymentResult(
+            SamsungPayPaymentMethodLauncher.Result.Canceled
+        )
+
+        assertThat(result).isInstanceOf(OnrampCollectPaymentMethodResult.Cancelled::class.java)
     }
 
     @Test

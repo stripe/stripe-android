@@ -56,7 +56,9 @@ import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.samsungpay.SamsungPayPaymentMethodLauncher
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -537,6 +539,7 @@ internal class OnrampInteractor @Inject constructor(
                         }
                     }
                     is SelectedPaymentSource.GooglePay -> selected.paymentMethodId
+                    is SelectedPaymentSource.SamsungPay -> selected.paymentMethodId
                 }
 
                 cryptoApiRepository.createPaymentToken(
@@ -717,6 +720,27 @@ internal class OnrampInteractor @Inject constructor(
             OnrampCollectPaymentMethodResult.Cancelled()
     }
 
+    fun handleSamsungPayPaymentResult(
+        result: SamsungPayPaymentMethodLauncher.Result
+    ): OnrampCollectPaymentMethodResult = when (result) {
+        is SamsungPayPaymentMethodLauncher.Result.Completed -> {
+            handleSamsungPayPaymentMethod(result.paymentMethod) { displayData ->
+                OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo = null)
+            }
+        }
+        is SamsungPayPaymentMethodLauncher.Result.Failed -> {
+            analyticsService?.track(
+                OnrampAnalyticsEvent.ErrorOccurred(
+                    operation = OnrampAnalyticsEvent.ErrorOccurred.Operation.CollectPaymentMethod,
+                    error = result.error,
+                )
+            )
+            OnrampCollectPaymentMethodResult.Failed(result.error)
+        }
+        is SamsungPayPaymentMethodLauncher.Result.Canceled ->
+            OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
     private fun handleGooglePayPaymentMethod(
         paymentMethod: PaymentMethod,
         buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
@@ -738,6 +762,27 @@ internal class OnrampInteractor @Inject constructor(
         return buildResult(googlePayDisplayData(paymentMethod))
     }
 
+    private fun handleSamsungPayPaymentMethod(
+        paymentMethod: PaymentMethod,
+        buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
+    ): OnrampCollectPaymentMethodResult {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                paymentMethodType = PaymentMethodType.SamsungPay
+            )
+        )
+
+        _state.update { state ->
+            state.copy(
+                selectedPaymentSource = SelectedPaymentSource.SamsungPay(
+                    paymentMethod.id
+                )
+            )
+        }
+
+        return buildResult(samsungPayDisplayData(paymentMethod))
+    }
+
     private fun googlePayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
         return PaymentMethodDisplayData(
             imageLoader = {
@@ -749,6 +794,20 @@ internal class OnrampInteractor @Inject constructor(
             label = "Google Pay",
             sublabel = paymentMethod.card?.last4,
             type = PaymentMethodDisplayData.Type.GooglePay
+        )
+    }
+
+    private fun samsungPayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
+        return PaymentMethodDisplayData(
+            imageLoader = {
+                ContextCompat.getDrawable(
+                    application,
+                    PaymentSheetR.drawable.stripe_ic_samsung_pay_compact
+                )!!
+            },
+            label = "Samsung Pay",
+            sublabel = paymentMethod.card?.last4,
+            type = PaymentMethodDisplayData.Type.SamsungPay
         )
     }
 
@@ -1126,6 +1185,12 @@ internal sealed interface SelectedPaymentSource {
         val paymentMethodId: String
     ) : SelectedPaymentSource {
         override val analyticsValue: String = "google_pay"
+    }
+
+    data class SamsungPay(
+        val paymentMethodId: String
+    ) : SelectedPaymentSource {
+        override val analyticsValue: String = "samsung_pay"
     }
 }
 

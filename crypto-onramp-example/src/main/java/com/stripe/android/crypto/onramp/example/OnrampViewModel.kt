@@ -78,6 +78,7 @@ internal class OnrampViewModel(
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
+        .samsungPayIsReadyCallback(callback = ::samsungPayIsReady)
         .crsCarfDeclarationCallback(callback = ::onCrsCarfDeclarationResult)
 
     val onrampCoordinator: OnrampCoordinator =
@@ -162,6 +163,11 @@ internal class OnrampViewModel(
                             isPhoneNumberRequired = false
                         ),
                         existingPaymentMethodRequired = false
+                    )
+                )
+                .samsungPayConfig(
+                    OnrampConfiguration.SamsungPayConfig(
+                        serviceId = "716e0e5ea6c64b47b467fe"
                     )
                 )
 
@@ -694,7 +700,10 @@ internal class OnrampViewModel(
             PaymentMethodDisplayData.Type.BankAccount -> {
                 currentState.settlementSpeed
             }
-            PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay, null -> {
+            PaymentMethodDisplayData.Type.Card,
+            PaymentMethodDisplayData.Type.GooglePay,
+            PaymentMethodDisplayData.Type.SamsungPay,
+            null -> {
                 SettlementSpeed.INSTANT
             }
         }
@@ -920,6 +929,14 @@ internal class OnrampViewModel(
         }
     }
 
+    private fun samsungPayIsReady(isReady: Boolean) {
+        _uiState.update {
+            it.copy(
+                samsungPayIsReady = isReady
+            )
+        }
+    }
+
     private val userDataKey = "onramp_user_data"
 
     private fun saveUserData(userData: OnrampUserData) {
@@ -1058,6 +1075,7 @@ data class OnrampUiState(
     val loadingMessage: String? = null,
     val settlementSpeed: SettlementSpeed = SettlementSpeed.INSTANT,
     val googlePayIsReady: Boolean = false,
+    val samsungPayIsReady: Boolean = false,
     val kycFirstName: String = "",
     val kycLastName: String = "",
     val kycBirthCountry: String = "",

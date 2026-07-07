@@ -823,7 +823,9 @@ private fun AuthenticatedOperationsScreen(
 
         state.selectedPaymentData?.let {
             when (it.type) {
-                PaymentMethodDisplayData.Type.Card, PaymentMethodDisplayData.Type.GooglePay -> { }
+                PaymentMethodDisplayData.Type.Card,
+                PaymentMethodDisplayData.Type.GooglePay,
+                PaymentMethodDisplayData.Type.SamsungPay -> { }
                 PaymentMethodDisplayData.Type.BankAccount -> {
                     Text(
                         text = "Settlement Speed",
@@ -1072,6 +1074,22 @@ private fun AuthenticatedOperationsScreen(
                 val selection = PaymentMethodSelection.GooglePay(
                     currencyCode = "USD",
                     amount = 0L
+                )
+                onCollectPayment(selection)
+            },
+        )
+
+        SamsungPayButton(
+            enabled = state.samsungPayIsReady,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(48.dp)
+                .padding(bottom = 8.dp),
+            onClick = {
+                val selection = PaymentMethodSelection.SamsungPay(
+                    currencyCode = "USD",
+                    amount = 0L,
+                    orderNumber = state.onrampSession?.id ?: "onramp-example"
                 )
                 onCollectPayment(selection)
             },
@@ -1485,6 +1503,48 @@ fun GooglePayButton(
             Spacer(Modifier.width(8.dp))
 
             Text("Google Pay")
+        }
+    }
+}
+
+@Composable
+fun SamsungPayButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    val isDark = MaterialTheme.colors.isLight.not()
+
+    val background = if (isDark) Color.White else Color.Black
+    val content = if (isDark) Color.Black else Color.White
+
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(8.dp),
+        colors = ButtonDefaults.buttonColors(
+            backgroundColor = background,
+            contentColor = content
+        ),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(48.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Image(
+                painter = painterResource(
+                    com.stripe.android.paymentsheet.R.drawable.stripe_ic_samsung_pay
+                ),
+                contentDescription = null,
+                modifier = Modifier.height(24.dp)
+            )
+
+            Spacer(Modifier.width(8.dp))
+
+            Text("Samsung Pay")
         }
     }
 }

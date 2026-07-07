@@ -10,6 +10,7 @@ dependencies {
     implementation project(':stripe-core')
     implementation project(':payments-core')
     implementation project(":paymentsheet")
+    implementation project(":samsung-pay")
     implementation project(":stripe-ui-core")
     implementation project(":payments-ui-core")
     implementation project(":identity")

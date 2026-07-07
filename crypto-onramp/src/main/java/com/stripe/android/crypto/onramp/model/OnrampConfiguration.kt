@@ -12,6 +12,7 @@ import com.stripe.android.link.LinkAppearance
  * @property appearance Appearance settings for the PaymentSheet UI.
  * @property cryptoCustomerId The unique customer ID for crypto onramp.
  * @property googlePayConfig The configuration for Google Pay, if Google Pay is supported by the merchant.
+ * @property samsungPayConfig The configuration for Samsung Pay, if Samsung Pay is supported by the merchant.
  */
 @ExperimentalCryptoOnramp
 class OnrampConfiguration {
@@ -20,6 +21,7 @@ class OnrampConfiguration {
     private var appearance: LinkAppearance? = null
     private var cryptoCustomerId: String? = null
     private var googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
+    private var samsungPayConfig: SamsungPayConfig? = null
 
     /**
      * Sets the display name of the merchant.
@@ -57,12 +59,34 @@ class OnrampConfiguration {
         this.googlePayConfig = googlePayConfig
     }
 
+    /**
+     * Sets the Samsung Pay configuration to use if Samsung Pay is supported by the merchant.
+     */
+    fun samsungPayConfig(config: SamsungPayConfig) = apply {
+        this.samsungPayConfig = config
+    }
+
+    /**
+     * Samsung Pay configuration for Onramp.
+     *
+     * @param serviceId Samsung Pay service ID for the merchant.
+     * @param merchantId Optional merchant ID override. Defaults to [merchantDisplayName].
+     * @param merchantName Optional merchant name override. Defaults to [merchantDisplayName].
+     */
+    @ExperimentalCryptoOnramp
+    class SamsungPayConfig(
+        internal val serviceId: String,
+        internal val merchantId: String? = null,
+        internal val merchantName: String? = null
+    )
+
     internal class State(
         val merchantDisplayName: String,
         val publishableKey: String,
         val appearance: LinkAppearance,
         val cryptoCustomerId: String? = null,
-        val googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null
+        val googlePayConfig: GooglePayPaymentMethodLauncher.Config? = null,
+        val samsungPayConfig: SamsungPayConfig? = null
     )
 
     internal fun build(): State {
@@ -75,7 +99,8 @@ class OnrampConfiguration {
             },
             appearance = appearance ?: LinkAppearance(),
             cryptoCustomerId = cryptoCustomerId,
-            googlePayConfig = googlePayConfig
+            googlePayConfig = googlePayConfig,
+            samsungPayConfig = samsungPayConfig
         )
     }
 }

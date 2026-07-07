@@ -159,6 +159,7 @@ public final class com/stripe/android/crypto/onramp/model/OnrampCallbacks {
 	public final fun crsCarfDeclarationCallback (Lcom/stripe/android/crypto/onramp/model/OnrampCrsCarfDeclarationCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun googlePayIsReadyCallback (Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun onrampSessionClientSecretProvider (Lkotlin/jvm/functions/Function2;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
+	public final fun samsungPayIsReadyCallback (Lkotlin/jvm/functions/Function1;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun verifyIdentityCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyIdentityCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 	public final fun verifyKycCallback (Lcom/stripe/android/crypto/onramp/model/OnrampVerifyKycCallback;)Lcom/stripe/android/crypto/onramp/model/OnrampCallbacks;
 }
@@ -214,6 +215,13 @@ public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration {
 	public final fun googlePayConfig (Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun merchantDisplayName (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
 	public final fun publishableKey (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+	public final fun samsungPayConfig (Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration$SamsungPayConfig;)Lcom/stripe/android/crypto/onramp/model/OnrampConfiguration;
+}
+
+public final class com/stripe/android/crypto/onramp/model/OnrampConfiguration$SamsungPayConfig {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public abstract interface class com/stripe/android/crypto/onramp/model/OnrampConfigurationResult {
@@ -424,6 +432,7 @@ public final class com/stripe/android/crypto/onramp/model/PaymentMethodDisplayDa
 	public static final field BankAccount Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
 	public static final field Card Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
 	public static final field GooglePay Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
+	public static final field SamsungPay Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
 	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/PaymentMethodDisplayData$Type;
@@ -458,11 +467,18 @@ public final class com/stripe/android/crypto/onramp/model/PaymentMethodSelection
 	public fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
 }
 
+public final class com/stripe/android/crypto/onramp/model/PaymentMethodSelection$SamsungPay : com/stripe/android/crypto/onramp/model/PaymentMethodSelection {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;JLjava/lang/String;)V
+	public fun getType ()Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+}
+
 public final class com/stripe/android/crypto/onramp/model/PaymentMethodType : java/lang/Enum {
 	public static final field BankAccount Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
 	public static final field Card Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
 	public static final field CardAndBankAccount Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
 	public static final field GooglePay Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
+	public static final field SamsungPay Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;
 	public static fun values ()[Lcom/stripe/android/crypto/onramp/model/PaymentMethodType;

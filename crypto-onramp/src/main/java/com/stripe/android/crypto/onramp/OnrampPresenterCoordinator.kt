@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.exception.PaymentFailedException
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
+import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
@@ -33,9 +34,11 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.payments.samsungpay.SamsungPayPaymentMethodLauncher
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.payments.samsungpay.Config as SamsungPayLauncherConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.distinctUntilChangedBy
 import kotlinx.coroutines.launch
@@ -87,6 +90,15 @@ internal class OnrampPresenterCoordinator @Inject constructor(
             readyCallback = ::handleGooglePayIsReady,
             cardBrandFilter = DefaultCardBrandFilter,
             cardFundingFilter = DefaultCardFundingFilter
+        )
+    }
+
+    private val samsungPayPaymentMethodLauncher: SamsungPayPaymentMethodLauncher? = samsungPayConfig()?.let {
+        SamsungPayPaymentMethodLauncher(
+            activity = activity,
+            config = it,
+            readyCallback = ::handleSamsungPayIsReady,
+            resultCallback = ::handleSamsungPayPaymentSelection
         )
     }
 
@@ -227,6 +239,13 @@ internal class OnrampPresenterCoordinator @Inject constructor(
                     )
                 }
             }
+            is PaymentMethodSelection.SamsungPay -> {
+                samsungPayPaymentMethodLauncher?.present(
+                    currencyCode = selection.currencyCode,
+                    amount = selection.amount,
+                    orderNumber = selection.orderNumber
+                )
+            }
         }
     }
 
@@ -330,6 +349,11 @@ internal class OnrampPresenterCoordinator @Inject constructor(
     private fun googlePayConfig(): GooglePayPaymentMethodLauncher.Config? =
         interactor.state.value.configurationState?.googlePayConfig
 
+    private fun samsungPayConfig(): SamsungPayLauncherConfig? =
+        interactor.state.value.configurationState?.let { configuration ->
+            configuration.samsungPayConfig?.toLauncherConfig(configuration.merchantDisplayName)
+        }
+
     private fun clientEmail(): String? =
         interactor.state.value.linkControllerState?.internalLinkAccount?.email
 
@@ -381,11 +405,35 @@ internal class OnrampPresenterCoordinator @Inject constructor(
         }
     }
 
+    private fun handleSamsungPayPaymentSelection(result: SamsungPayPaymentMethodLauncher.Result) {
+        coroutineScope.launch {
+            onrampCallbacksState.collectPaymentCallback.onResult(
+                interactor.handleSamsungPayPaymentResult(result)
+            )
+        }
+    }
+
     private fun handleGooglePayIsReady(isReady: Boolean) {
         coroutineScope.launch {
             onrampCallbacksState.googlePayIsReadyCallback?.let { it(isReady) }
         }
     }
+
+    private fun handleSamsungPayIsReady(isReady: Boolean) {
+        coroutineScope.launch {
+            onrampCallbacksState.samsungPayIsReadyCallback?.let { it(isReady) }
+        }
+    }
+}
+
+private fun OnrampConfiguration.SamsungPayConfig.toLauncherConfig(
+    merchantDisplayName: String
+): SamsungPayLauncherConfig {
+    return SamsungPayLauncherConfig(
+        serviceId = serviceId,
+        merchantId = merchantId ?: merchantDisplayName,
+        merchantName = merchantName ?: merchantDisplayName
+    )
 }
 
 private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType? =
@@ -394,4 +442,5 @@ private fun PaymentMethodType.toLinkType(): LinkController.PaymentMethodType? =
         PaymentMethodType.BankAccount -> LinkController.PaymentMethodType.BankAccount
         PaymentMethodType.CardAndBankAccount -> null
         PaymentMethodType.GooglePay -> error("Google Pay is not supported in LinkController")
+        PaymentMethodType.SamsungPay -> error("Samsung Pay is not supported in LinkController")
     }

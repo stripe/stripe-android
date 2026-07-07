@@ -22,6 +22,7 @@ class OnrampCallbacks {
     private var crsCarfDeclarationCallback: OnrampCrsCarfDeclarationCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
     private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
+    private var samsungPayIsReadyCallback: ((Boolean) -> Unit)? = null
 
     /**
      * Callback invoked when signaling the result of verifying the user's identity.
@@ -87,6 +88,16 @@ class OnrampCallbacks {
         this.googlePayIsReadyCallback = callback
     }
 
+    /**
+     * Callback invoked with the result of checking whether Samsung Pay is ready.
+     * This may be called more than once, and should update the UI to reflect the availability
+     * of Samsung Pay as a payment method.
+     * Only applicable if the merchant has provided a Samsung Pay configuration in OnrampConfiguration.
+     */
+    fun samsungPayIsReadyCallback(callback: (Boolean) -> Unit) = apply {
+        this.samsungPayIsReadyCallback = callback
+    }
+
     internal class State(
         val verifyIdentityCallback: OnrampVerifyIdentityCallback,
         val verifyKycCallback: OnrampVerifyKycCallback,
@@ -95,7 +106,8 @@ class OnrampCallbacks {
         val checkoutCallback: OnrampCheckoutCallback,
         val crsCarfDeclarationCallback: OnrampCrsCarfDeclarationCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
-        val googlePayIsReadyCallback: ((Boolean) -> Unit)?
+        val googlePayIsReadyCallback: ((Boolean) -> Unit)?,
+        val samsungPayIsReadyCallback: ((Boolean) -> Unit)?
     )
 
     internal fun build(): State {
@@ -119,7 +131,8 @@ class OnrampCallbacks {
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {
                 "onrampSessionClientSecretProvider must be not null"
             },
-            googlePayIsReadyCallback = googlePayIsReadyCallback
+            googlePayIsReadyCallback = googlePayIsReadyCallback,
+            samsungPayIsReadyCallback = samsungPayIsReadyCallback
         )
     }
 }
