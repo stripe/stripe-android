@@ -1,7 +1,10 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: PATCH
+NEXT_VERSION_BUMP: MINOR
 ## XX.XX.XX - 20XX-XX-XX
+
+### CryptoOnramp
+* [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
 
 ## 23.11.1 - 2026-06-30
 
@@ -12,7 +15,6 @@ NEXT_VERSION_BUMP: PATCH
 
 ### CryptoOnramp
 * [CHANGED] Renamed the EU attestation presentation API from `presentCrsCarfDeclaration()` to `presentUserAttestation()`, `crsCarfDeclarationCallback` to `userAttestationCallback`, and renamed `OnrampCrsCarfDeclarationResult` to `OnrampUserAttestationResult`.
-* [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
 
 ## 23.10.1 - 2026-06-15
 
