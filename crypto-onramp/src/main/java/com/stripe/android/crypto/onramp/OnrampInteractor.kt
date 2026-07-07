@@ -16,6 +16,7 @@ import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -28,6 +29,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -36,6 +38,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersRe
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
@@ -292,6 +295,70 @@ internal class OnrampInteractor @Inject constructor(
             )
             trackError(Operation.RegisterWalletAddress, error)
             OnrampRegisterWalletAddressResult.Failed(error)
+        }
+    }
+
+    suspend fun getWalletOwnershipChallenge(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampGetWalletOwnershipChallengeResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            val result = cryptoApiRepository.getWalletOwnershipChallenge(
+                walletAddress = walletAddress,
+                network = network,
+                consumerSessionClientSecret = secret
+            )
+            result.fold(
+                onSuccess = { challenge ->
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletOwnershipChallengeRetrieved(network))
+                    OnrampGetWalletOwnershipChallengeResult.Completed(challenge)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.GetWalletOwnershipChallenge, error)
+                    trackError(Operation.GetWalletOwnershipChallenge, mappedError)
+                    OnrampGetWalletOwnershipChallengeResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.GetWalletOwnershipChallenge,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.GetWalletOwnershipChallenge, error)
+            OnrampGetWalletOwnershipChallengeResult.Failed(error)
+        }
+    }
+
+    suspend fun submitWalletOwnershipSignature(
+        challengeId: String,
+        signature: String
+    ): OnrampSubmitWalletOwnershipSignatureResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            val result = cryptoApiRepository.submitWalletOwnershipSignature(
+                challengeId = challengeId,
+                signature = signature,
+                consumerSessionClientSecret = secret
+            )
+            result.fold(
+                onSuccess = { consumerWallet ->
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletOwnershipVerified(consumerWallet.network))
+                    OnrampSubmitWalletOwnershipSignatureResult.Completed(consumerWallet)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.SubmitWalletOwnershipSignature, error)
+                    trackError(Operation.SubmitWalletOwnershipSignature, mappedError)
+                    OnrampSubmitWalletOwnershipSignatureResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.SubmitWalletOwnershipSignature,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.SubmitWalletOwnershipSignature, error)
+            OnrampSubmitWalletOwnershipSignatureResult.Failed(error)
         }
     }
 
@@ -978,10 +1045,26 @@ internal class OnrampInteractor @Inject constructor(
         )
             // Retrieve and return the PaymentIntent using the special publishable key
             .flatMapCatching { onrampSession ->
-                cryptoApiRepository.retrievePaymentIntent(
-                    clientSecret = onrampSession.paymentIntentClientSecret,
-                    publishableKey = platformApiKey
-                )
+                val transactionDetails = onrampSession.transactionDetails
+                when {
+                    transactionDetails?.lastError == WALLET_OWNERSHIP_VERIFICATION_REQUIRED -> {
+                        Result.failure(
+                            WalletOwnershipVerificationRequiredException(
+                                walletAddress = transactionDetails.walletAddress,
+                                network = transactionDetails.destinationCryptoNetwork,
+                            )
+                        )
+                    }
+                    onrampSession.paymentIntentClientSecret != null -> {
+                        cryptoApiRepository.retrievePaymentIntent(
+                            clientSecret = onrampSession.paymentIntentClientSecret,
+                            publishableKey = platformApiKey
+                        )
+                    }
+                    else -> {
+                        Result.failure(PaymentFailedException())
+                    }
+                }
             }
     }
 
@@ -1070,6 +1153,7 @@ internal class OnrampInteractor @Inject constructor(
 
 private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
 private const val KEY_LAUNCHED_NEXT_ACTION = "onramp_launched_next_action"
+private const val WALLET_OWNERSHIP_VERIFICATION_REQUIRED = "wallet_ownership_verification_required"
 
 @Parcelize
 private data class PendingCheckout(

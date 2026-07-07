@@ -815,6 +815,148 @@ class CryptoApiRepositoryTest {
         }
     }
 
+    @Test
+    fun testGetWalletOwnershipChallengeSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "challenge_id": "woc_123",
+                        "wallet_address": "0x1234567890abcdef",
+                        "network": "ethereum",
+                        "message": "Sign this message",
+                        "expires_at": "2026-06-16T12:00:00Z"
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.getWalletOwnershipChallenge(
+                walletAddress = "0x1234567890abcdef",
+                network = CryptoNetwork.Ethereum,
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet_ownership_challenge")
+
+            val params = apiRequest.params!!
+            assertThat(params["wallet_address"]).isEqualTo("0x1234567890abcdef")
+            assertThat(params["network"]).isEqualTo("ethereum")
+            assertThat(params["credentials"]).isEqualTo(
+                mapOf("consumer_session_client_secret" to "test-secret")
+            )
+
+            val challenge = result.getOrThrow()
+            assertThat(challenge.challengeId).isEqualTo("woc_123")
+            assertThat(challenge.walletAddress).isEqualTo("0x1234567890abcdef")
+            assertThat(challenge.network).isEqualTo(CryptoNetwork.Ethereum)
+            assertThat(challenge.message).isEqualTo("Sign this message")
+            assertThat(challenge.expiresAt).isEqualTo("2026-06-16T12:00:00Z")
+        }
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "id": "ccw_123",
+                        "object": "crypto.consumer_wallet",
+                        "livemode": false,
+                        "wallet_address": "0x1234567890abcdef",
+                        "network": "ethereum",
+                        "verified_ownership": true
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.submitWalletOwnershipSignature(
+                challengeId = "woc_123",
+                signature = "0xsignature",
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet_ownership_verification")
+
+            val params = apiRequest.params!!
+            assertThat(params["challenge_id"]).isEqualTo("woc_123")
+            assertThat(params["signature"]).isEqualTo("0xsignature")
+            assertThat(params["credentials"]).isEqualTo(
+                mapOf("consumer_session_client_secret" to "test-secret")
+            )
+
+            val consumerWallet = result.getOrThrow()
+            assertThat(consumerWallet.id).isEqualTo("ccw_123")
+            assertThat(consumerWallet.isLiveMode).isFalse()
+            assertThat(consumerWallet.walletAddress).isEqualTo("0x1234567890abcdef")
+            assertThat(consumerWallet.network).isEqualTo(CryptoNetwork.Ethereum)
+            assertThat(consumerWallet.verifiedOwnership).isTrue()
+        }
+    }
+
+    @Test
+    fun testGetOnrampSessionParsesTransactionDetailsLastError() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "id": "cos_123",
+                        "client_secret": "cos_123_secret_456",
+                        "transaction_details": {
+                            "wallet_address": "0x1234567890abcdef",
+                            "destination_network": "ethereum",
+                            "last_error": "wallet_ownership_verification_required"
+                        }
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.getOnrampSession(
+                sessionId = "cos_123",
+                sessionClientSecret = "cos_123_secret_456"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/onramp_session")
+            assertThat(apiRequest.params).containsExactly(
+                "crypto_onramp_session", "cos_123",
+                "client_secret", "cos_123_secret_456"
+            )
+
+            val transactionDetails = result.getOrThrow().transactionDetails!!
+            assertThat(transactionDetails.walletAddress).isEqualTo("0x1234567890abcdef")
+            assertThat(transactionDetails.destinationNetwork).isEqualTo("ethereum")
+            assertThat(transactionDetails.destinationCryptoNetwork).isEqualTo(CryptoNetwork.Ethereum)
+            assertThat(transactionDetails.lastError).isEqualTo("wallet_ownership_verification_required")
+        }
+    }
+
     private fun assertKycCollectionRequest(apiRequest: ApiRequest) {
         assertThat(apiRequest.baseUrl)
             .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")
