@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
@@ -43,6 +44,7 @@ import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.PossibleBrands
 import com.stripe.android.model.RadarSession
+import com.stripe.android.model.SamsungPayTokenParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceParams
@@ -1382,6 +1384,78 @@ class Stripe internal constructor(
         return runBlocking {
             createTokenOrThrow(
                 tokenParams = cardParams,
+                stripeAccountId = stripeAccountId,
+                idempotencyKey = idempotencyKey,
+            )
+        }
+    }
+
+    /**
+     * Create a Samsung Pay token asynchronously.
+     *
+     * `POST /v1/tokens`
+     *
+     * @param token the serialized payment credential
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @UiThread
+    @JvmOverloads
+    fun createSamsungPayToken(
+        token: String,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<Token>
+    ) {
+        createToken(
+            tokenParams = SamsungPayTokenParams(token),
+            stripeAccountId = stripeAccountId,
+            idempotencyKey = idempotencyKey,
+            callback = callback,
+        )
+    }
+
+    /**
+     * Blocking method to create a Samsung Pay token. Do not call this on the UI thread
+     * or your app will crash.
+     *
+     * `POST /v1/tokens`
+     *
+     * @param token the serialized payment credential
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     *
+     * @return a [Token] that can be used for this card
+     *
+     * @throws AuthenticationException failure to properly authenticate yourself (check your key)
+     * @throws InvalidRequestException your request has invalid parameters
+     * @throws APIConnectionException failure to connect to Stripe's API
+     * @throws CardException the card cannot be charged for some reason
+     * @throws APIException any other type of problem (for instance, a temporary issue with
+     * Stripe's servers)
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Throws(
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        CardException::class,
+        APIException::class
+    )
+    @WorkerThread
+    @JvmOverloads
+    fun createSamsungPayTokenSynchronous(
+        token: String,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId
+    ): Token {
+        return runBlocking {
+            createTokenOrThrow(
+                tokenParams = SamsungPayTokenParams(token),
                 stripeAccountId = stripeAccountId,
                 idempotencyKey = idempotencyKey,
             )

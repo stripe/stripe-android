@@ -51,6 +51,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures.BILLING_DETAIL
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.SamsungPayTokenParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.SourceFixtures
@@ -1629,6 +1630,36 @@ internal class StripeApiRepositoryTest {
                 productUsage = "CardInputView",
             )
         }
+
+    @Test
+    fun createSamsungPayToken_sendsCorrectParams() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            TokenFixtures.CARD_TOKEN_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>())).thenReturn(stripeResponse)
+
+        val token = "{\"method\":\"3DS\"}"
+        create().createToken(
+            SamsungPayTokenParams(token),
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val apiRequest = apiRequestArgumentCaptor.firstValue
+        assertThat(apiRequest.params?.get("card"))
+            .isEqualTo(
+                mapOf(
+                    "wallet" to mapOf(
+                        "type" to "samsung_pay",
+                        "samsung_pay" to mapOf(
+                            "token" to token
+                        )
+                    )
+                )
+            )
+    }
 
     @Test
     fun createBankToken_shouldNotPopulateProductUsage() = runTest {
