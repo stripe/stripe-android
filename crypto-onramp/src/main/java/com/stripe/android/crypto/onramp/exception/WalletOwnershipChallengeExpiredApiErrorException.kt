@@ -32,4 +32,4 @@ class WalletOwnershipChallengeExpiredApiErrorException internal constructor(
         get() = apiErrorContext.code(fallback = WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE)
 }
 
-internal const val WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE = "wallet_ownership_challenge_expired"
+internal const val WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE = "crypto_onramp_wallet_ownership_challenge_expired"

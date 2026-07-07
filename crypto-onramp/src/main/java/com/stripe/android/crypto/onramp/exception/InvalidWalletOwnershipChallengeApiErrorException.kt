@@ -34,4 +34,4 @@ class InvalidWalletOwnershipChallengeApiErrorException internal constructor(
         get() = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE)
 }
 
-internal const val INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE = "invalid_wallet_ownership_challenge"
+internal const val INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE = "crypto_onramp_invalid_wallet_ownership_challenge"

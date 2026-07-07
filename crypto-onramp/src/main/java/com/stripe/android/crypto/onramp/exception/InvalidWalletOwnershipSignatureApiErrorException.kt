@@ -33,4 +33,4 @@ class InvalidWalletOwnershipSignatureApiErrorException internal constructor(
         get() = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE)
 }
 
-internal const val INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE = "invalid_wallet_ownership_signature"
+internal const val INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE = "crypto_onramp_invalid_wallet_ownership_signature"

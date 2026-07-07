@@ -330,7 +330,7 @@ class OnrampInteractorTest {
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
-                code = "invalid_wallet_ownership_signature",
+                code = "crypto_onramp_invalid_wallet_ownership_signature",
                 message = "The submitted signature does not prove ownership of the registered wallet.",
             ),
             requestId = "req_invalid_signature",
@@ -357,11 +357,11 @@ class OnrampInteractorTest {
             .isEqualTo("We couldn't verify ownership of this wallet. Please try again.")
         assertThat(signatureError.message)
             .isEqualTo("We couldn't verify ownership of this wallet. Please try again.")
-        assertThat(signatureError.code).isEqualTo("invalid_wallet_ownership_signature")
+        assertThat(signatureError.code).isEqualTo("crypto_onramp_invalid_wallet_ownership_signature")
         assertThat(signatureError.underlyingError).isSameInstanceAs(backendError)
         assertThat(signatureError.developerMessage)
             .contains("The submitted signature does not prove ownership of the registered wallet.")
-        assertThat(signatureError.developerMessage).contains("Code: invalid_wallet_ownership_signature")
+        assertThat(signatureError.developerMessage).contains("Code: crypto_onramp_invalid_wallet_ownership_signature")
         assertThat(signatureError.developerMessage).contains("Next step: Sign the exact challenge message")
         assertThat(signatureError.developerMessage).contains("operation: submit_wallet_ownership_signature")
         assertThat(signatureError.developerMessage).contains("request_id: req_invalid_signature")
@@ -375,7 +375,7 @@ class OnrampInteractorTest {
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
-                code = "wallet_ownership_challenge_expired",
+                code = "crypto_onramp_wallet_ownership_challenge_expired",
                 message = "The wallet ownership challenge has expired.",
             ),
             requestId = "req_expired_challenge",
@@ -402,10 +402,10 @@ class OnrampInteractorTest {
             .isEqualTo("This wallet verification request expired. Please try again.")
         assertThat(expiredError.message)
             .isEqualTo("This wallet verification request expired. Please try again.")
-        assertThat(expiredError.code).isEqualTo("wallet_ownership_challenge_expired")
+        assertThat(expiredError.code).isEqualTo("crypto_onramp_wallet_ownership_challenge_expired")
         assertThat(expiredError.underlyingError).isSameInstanceAs(backendError)
         assertThat(expiredError.developerMessage).contains("The wallet ownership challenge has expired.")
-        assertThat(expiredError.developerMessage).contains("Code: wallet_ownership_challenge_expired")
+        assertThat(expiredError.developerMessage).contains("Code: crypto_onramp_wallet_ownership_challenge_expired")
         assertThat(expiredError.developerMessage).contains("Next step: Request a new wallet ownership challenge")
         assertThat(expiredError.developerMessage).contains("operation: submit_wallet_ownership_signature")
         assertThat(expiredError.developerMessage).contains("request_id: req_expired_challenge")
@@ -419,7 +419,7 @@ class OnrampInteractorTest {
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
-                code = "invalid_wallet_ownership_challenge",
+                code = "crypto_onramp_invalid_wallet_ownership_challenge",
                 message = "The wallet ownership challenge is invalid.",
             ),
             requestId = "req_invalid_challenge",
@@ -446,10 +446,10 @@ class OnrampInteractorTest {
             .isEqualTo("This wallet verification request is no longer valid. Please try again.")
         assertThat(challengeError.message)
             .isEqualTo("This wallet verification request is no longer valid. Please try again.")
-        assertThat(challengeError.code).isEqualTo("invalid_wallet_ownership_challenge")
+        assertThat(challengeError.code).isEqualTo("crypto_onramp_invalid_wallet_ownership_challenge")
         assertThat(challengeError.underlyingError).isSameInstanceAs(backendError)
         assertThat(challengeError.developerMessage).contains("The wallet ownership challenge is invalid.")
-        assertThat(challengeError.developerMessage).contains("Code: invalid_wallet_ownership_challenge")
+        assertThat(challengeError.developerMessage).contains("Code: crypto_onramp_invalid_wallet_ownership_challenge")
         assertThat(challengeError.developerMessage).contains("Next step: Request a new challenge")
         assertThat(challengeError.developerMessage).contains("operation: submit_wallet_ownership_signature")
         assertThat(challengeError.developerMessage).contains("request_id: req_invalid_challenge")
