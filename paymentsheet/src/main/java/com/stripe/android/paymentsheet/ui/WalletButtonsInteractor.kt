@@ -329,7 +329,6 @@ internal class DefaultWalletButtonsInteractor constructor(
             cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
             googlePayDisplayItems = GooglePayDisplayItemsFactory.create(arguments.paymentMethodMetadata),
             googlePayIsEmailRequired = GooglePayIsEmailRequiredProvider.get(
-                paymentMethodMetadata = arguments.paymentMethodMetadata,
                 configuration = arguments.configuration,
             ),
         ) ?: return null
