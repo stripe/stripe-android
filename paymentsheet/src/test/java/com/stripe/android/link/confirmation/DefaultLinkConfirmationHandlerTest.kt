@@ -24,6 +24,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.Dispatchers
@@ -86,6 +87,130 @@ internal class DefaultLinkConfirmationHandlerTest {
             allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
         )
     }
+
+    @Test
+    fun `checkout session confirmation uses Link account email when customer email is unavailable`() =
+        runTest(dispatcher) {
+            val configuration = checkoutSessionConfiguration(customerEmail = null)
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration
+            )
+            val linkAccount = linkAccount(email = "link@example.com")
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                )
+            )
+
+            val result = handler.confirm(
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                linkAccount = linkAccount,
+                cvc = CVC,
+                billingPhone = null
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+            confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+                configuration = configuration,
+                linkAccount = linkAccount,
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                cvc = CVC,
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = Address(
+                        postalCode = "12312",
+                        country = "US",
+                    ),
+                    email = "link@example.com",
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+            )
+        }
+
+    @Test
+    fun `checkout session confirmation uses customer email over Link account email`() = runTest(dispatcher) {
+        val configuration = checkoutSessionConfiguration(customerEmail = "customer@example.com")
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration
+        )
+        val linkAccount = linkAccount(email = "link@example.com")
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+            )
+        )
+
+        val result = handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = linkAccount,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(result).isEqualTo(Result.Succeeded)
+        confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+            configuration = configuration,
+            linkAccount = linkAccount,
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            cvc = CVC,
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    postalCode = "12312",
+                    country = "US",
+                ),
+                email = "customer@example.com",
+            ),
+            allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+        )
+    }
+
+    @Test
+    fun `checkout session confirmation omits Link account email when email collection is never`() =
+        runTest(dispatcher) {
+            val configuration = checkoutSessionConfiguration(
+                customerEmail = null,
+                emailCollectionMode = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+            )
+            val confirmationHandler = FakeConfirmationHandler()
+            val handler = createHandler(
+                confirmationHandler = confirmationHandler,
+                configuration = configuration
+            )
+            val linkAccount = linkAccount(email = "link@example.com")
+
+            confirmationHandler.awaitResultTurbine.add(
+                item = ConfirmationHandler.Result.Succeeded(
+                    intent = configuration.stripeIntent,
+                )
+            )
+
+            val result = handler.confirm(
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                linkAccount = linkAccount,
+                cvc = CVC,
+                billingPhone = null
+            )
+
+            assertThat(result).isEqualTo(Result.Succeeded)
+            confirmationHandler.startTurbine.awaitItem().assertConfirmationArgs(
+                configuration = configuration,
+                linkAccount = linkAccount,
+                paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+                cvc = CVC,
+                billingDetails = PaymentMethod.BillingDetails(
+                    address = Address(
+                        postalCode = "12312",
+                        country = "US",
+                    ),
+                ),
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+            )
+        }
 
     @Test
     fun `successful confirmation yields success result with setup intent`() = runTest(dispatcher) {
@@ -731,6 +856,29 @@ internal class DefaultLinkConfirmationHandlerTest {
         val optionsCard = option.optionsParams as? PaymentMethodOptionsParams.Card
         assertThat(optionsCard?.cvc).isEqualTo(cvc)
         assertThat(paymentMethodMetadata.shippingDetails).isEqualTo(configuration.shippingDetails)
+    }
+
+    private fun checkoutSessionConfiguration(
+        customerEmail: String?,
+        emailCollectionMode: PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode =
+            PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic,
+    ): LinkConfiguration {
+        return TestFactory.LINK_CONFIGURATION.copy(
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = customerEmail),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                email = emailCollectionMode,
+                attachDefaultsToPaymentMethod = true,
+            ),
+            clientAttributionMetadata = TestFactory.LINK_CONFIGURATION.clientAttributionMetadata.copy(
+                checkoutSessionId = "checkout_session",
+            ),
+        )
+    }
+
+    private fun linkAccount(email: String): LinkAccount {
+        return LinkAccount(
+            consumerSession = TestFactory.CONSUMER_SESSION.copy(emailAddress = email),
+        )
     }
 
     private suspend fun createHandler(

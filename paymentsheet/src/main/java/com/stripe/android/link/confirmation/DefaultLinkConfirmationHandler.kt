@@ -21,6 +21,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationOption
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import javax.inject.Inject
 
@@ -170,8 +171,10 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                     consumerSessionClientSecret = linkAccount.clientSecret,
                     cvc = cvc,
                     billingPhone = billingPhone,
-                    allowRedisplay = allowRedisplay,
                     clientAttributionMetadata = configuration.clientAttributionMetadata,
+                    configuration = configuration,
+                    linkAccount = linkAccount,
+                    allowRedisplay = allowRedisplay,
                 ),
                 extraParams = null,
                 optionsParams = null,
@@ -241,6 +244,8 @@ internal fun createPaymentMethodCreateParams(
     cvc: String?,
     billingPhone: String?,
     clientAttributionMetadata: ClientAttributionMetadata,
+    configuration: LinkConfiguration? = null,
+    linkAccount: LinkAccount? = null,
     allowRedisplay: PaymentMethod.AllowRedisplay? = null,
 ): PaymentMethodCreateParams {
     val billingDetails = PaymentMethod.BillingDetails(
@@ -254,7 +259,10 @@ internal fun createPaymentMethodCreateParams(
                 country = it.countryCode?.value,
             )
         },
-        email = selectedPaymentDetails.billingEmailAddress,
+        email = configuration?.billingEmailForLinkConfirmation(
+            selectedPaymentDetails = selectedPaymentDetails,
+            linkAccount = linkAccount,
+        ) ?: selectedPaymentDetails.billingEmailAddress,
         name = selectedPaymentDetails.billingAddress?.name,
         phone = billingPhone,
     )
@@ -269,6 +277,22 @@ internal fun createPaymentMethodCreateParams(
         originalPaymentMethodCode = selectedPaymentDetails.type
     )
 }
+
+private fun LinkConfiguration.billingEmailForLinkConfirmation(
+    selectedPaymentDetails: ConsumerPaymentDetails.PaymentDetails,
+    linkAccount: LinkAccount?,
+): String? {
+    return defaultBillingDetails?.email.takeIf {
+        billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
+    } ?: linkAccount?.email.takeIf {
+        shouldUseLinkAccountEmailForCheckoutSession
+    } ?: selectedPaymentDetails.billingEmailAddress
+}
+
+private val LinkConfiguration.shouldUseLinkAccountEmailForCheckoutSession: Boolean
+    get() = clientAttributionMetadata.checkoutSessionId != null &&
+        defaultBillingDetails?.email == null &&
+        billingDetailsCollectionConfiguration.email != CollectionMode.Never
 
 internal fun computeExpectedPaymentMethodType(
     configuration: LinkConfiguration,
