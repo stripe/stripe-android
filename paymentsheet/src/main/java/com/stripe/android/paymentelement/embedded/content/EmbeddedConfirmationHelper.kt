@@ -59,7 +59,8 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
             linkConfiguration = confirmationState.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = confirmationState.paymentMethodMetadata.cardFundingFilter,
             googlePayDisplayItems = GooglePayDisplayItemsFactory.create(confirmationState.paymentMethodMetadata),
-            googlePayBillingEmailOverride = GooglePayBillingEmailFactory.create(confirmationState.paymentMethodMetadata),
+            googlePayBillingEmailOverride =
+                GooglePayBillingEmailFactory.create(confirmationState.paymentMethodMetadata),
         ) ?: return null
 
         return ConfirmationHandler.Args(

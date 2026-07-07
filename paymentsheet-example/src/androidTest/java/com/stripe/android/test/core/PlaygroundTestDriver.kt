@@ -48,6 +48,9 @@ import com.stripe.android.paymentsheet.example.playground.activity.CustomPayment
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CheckoutSessionAutomaticTaxSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
@@ -389,6 +392,48 @@ internal class PlaygroundTestDriver(
         composeTestRule.waitForIdle()
 
         // Skips the full screen payment animation in `PaymentSheet`
+        while (currentActivity !is PaymentSheetPlaygroundActivity) {
+            composeTestRule.mainClock.advanceTimeByFrame()
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        teardown()
+    }
+
+    fun confirmWithGooglePay(
+        merchant: Merchant,
+        integrationType: PlaygroundConfigurationData.IntegrationType,
+        initializationType: InitializationType,
+        automaticTax: Boolean,
+    ) {
+        setup(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[MerchantSettingsDefinition] = merchant
+                settings.updateConfigurationData { it.copy(integrationType = integrationType) }
+                settings[InitializationTypeSettingsDefinition] = initializationType
+                settings[CheckoutSessionAutomaticTaxSettingsDefinition] = automaticTax
+            }
+        )
+
+        launchComplete()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        selectors.googlePayButton.waitForEnabled()
+        selectors.googlePayButton.click()
+
+        composeTestRule.waitForIdle()
+
+        selectors.googlePaySheet.waitFor()
+        selectors.googlePayCheckoutButton.click()
+
+        composeTestRule.waitForIdle()
+
         while (currentActivity !is PaymentSheetPlaygroundActivity) {
             composeTestRule.mainClock.advanceTimeByFrame()
         }
