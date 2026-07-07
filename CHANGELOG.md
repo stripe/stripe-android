@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [FIXED][13354](https://github.com/stripe/stripe-android/pull/13354) Fixed an issue where `PersonTokenParams.Verification` sent the `document` and `additionalDocument` fields to the Stripe API under each other's keys.
+
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet

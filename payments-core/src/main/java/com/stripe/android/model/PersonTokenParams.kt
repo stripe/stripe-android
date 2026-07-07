@@ -305,8 +305,8 @@ class PersonTokenParams(
     ) : StripeParamsModel, Parcelable {
         override fun toParamMap(): Map<String, Any> {
             return listOf(
-                PARAM_ADDITIONAL_DOCUMENT to document?.toParamMap(),
-                PARAM_DOCUMENT to additionalDocument?.toParamMap()
+                PARAM_ADDITIONAL_DOCUMENT to additionalDocument?.toParamMap(),
+                PARAM_DOCUMENT to document?.toParamMap()
             ).fold(emptyMap()) { acc, (key, value) ->
                 acc.plus(
                     value?.let { mapOf(key to it) }.orEmpty()
