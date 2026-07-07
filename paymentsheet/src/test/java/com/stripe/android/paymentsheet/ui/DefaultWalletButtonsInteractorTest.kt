@@ -642,6 +642,10 @@ class DefaultWalletButtonsInteractorTest {
                 WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first()) { false }
             )
 
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+            )
+
             val arguments = confirmationHandler.startTurbine.awaitItem()
             val option = arguments.confirmationOption as GooglePayConfirmationOption
 
