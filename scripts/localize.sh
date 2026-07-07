@@ -101,8 +101,19 @@ do
     # actually produced strings for this module. An empty download here would
     # otherwise delete every existing strings.xml and replace it with nothing.
     if [ -z "$(find android/$MODULE -type f -name strings.xml 2>/dev/null)" ]; then
-        echo "ERROR: no strings downloaded for $MODULE; aborting before removing existing translations."
-        exit 1
+        if [ -d "../$MODULE/res" ]; then
+            # A maintained module with existing translations returned nothing.
+            # Abort rather than wipe them (this is what produced the
+            # all-deletions PRs).
+            echo "ERROR: no strings downloaded for $MODULE but ../$MODULE/res exists; aborting before removing existing translations."
+            exit 1
+        else
+            # No local module to update — e.g. a module that was removed or
+            # merged elsewhere but is still listed here. Nothing to wipe, so
+            # skip it instead of failing the whole job.
+            echo "WARNING: no strings downloaded for $MODULE and no ../$MODULE/res directory; skipping."
+            continue
+        fi
     fi
 
     #There is a command line switch that might be better than this, see: --language-mapping
