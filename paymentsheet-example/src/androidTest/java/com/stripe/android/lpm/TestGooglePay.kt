@@ -3,11 +3,7 @@ package com.stripe.android.lpm
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
-import com.stripe.android.paymentsheet.example.playground.settings.CheckoutSessionAutomaticTaxSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
-import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -71,11 +67,9 @@ internal class TestGooglePay : BasePlaygroundTest() {
 
     @Test
     fun testCheckoutSessionWithFlowController() {
-        testDriver.confirmWithGooglePay(
+        testDriver.confirmGooglePayWithCheckoutSession(
             merchant = Merchant.US,
-            integrationType = PlaygroundConfigurationData.IntegrationType.FlowController,
-            initializationType = InitializationType.CheckoutSession,
-            automaticTax = false,
+            customerEmail = "test@example.com",
         )
     }
 }

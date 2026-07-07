@@ -403,12 +403,9 @@ internal class PlaygroundTestDriver(
         teardown()
     }
 
-    fun confirmWithGooglePay(
+    fun confirmGooglePayWithCheckoutSession(
         merchant: Merchant,
-        integrationType: PlaygroundConfigurationData.IntegrationType,
-        initializationType: InitializationType,
-        automaticTax: Boolean,
-        customerEmail: String = "test@example.com",
+        customerEmail: String,
     ) {
         setup(
             TestParameters.create(
@@ -416,9 +413,11 @@ internal class PlaygroundTestDriver(
             ) { settings ->
                 settings[MerchantSettingsDefinition] = merchant
                 settings[CustomerSettingsDefinition] = CustomerType.GUEST
-                settings.updateConfigurationData { it.copy(integrationType = integrationType) }
-                settings[InitializationTypeSettingsDefinition] = initializationType
-                settings[CheckoutSessionAutomaticTaxSettingsDefinition] = automaticTax
+                settings.updateConfigurationData {
+                    it.copy(integrationType = PlaygroundConfigurationData.IntegrationType.FlowController)
+                }
+                settings[InitializationTypeSettingsDefinition] = InitializationType.CheckoutSession
+                settings[CheckoutSessionAutomaticTaxSettingsDefinition] = false
                 settings[CustomerEmailSettingsDefinition] = customerEmail
             }
         )
