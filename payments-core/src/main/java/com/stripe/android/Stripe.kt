@@ -786,6 +786,92 @@ class Stripe internal constructor(
     }
 
     /**
+     * Create a card [PaymentMethod] from a Samsung Pay payment credential asynchronously.
+     *
+     * `POST /v1/tokens`
+     * `POST /v1/payment_methods`
+     *
+     * @param token the serialized payment credential
+     * @param billingDetails optional billing details to attach to the [PaymentMethod]
+     * @param metadata optional metadata to attach to the [PaymentMethod]
+     * @param allowRedisplay optional allow_redisplay value for the [PaymentMethod]
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @UiThread
+    @JvmOverloads
+    fun createSamsungPayPaymentMethod(
+        token: String,
+        billingDetails: PaymentMethod.BillingDetails? = null,
+        metadata: Map<String, String>? = null,
+        allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<PaymentMethod>
+    ) {
+        executeAsyncForResult(callback) {
+            createSamsungPayPaymentMethod(
+                token = token,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+                idempotencyKey = idempotencyKey,
+                stripeAccountId = stripeAccountId,
+            )
+        }
+    }
+
+    /**
+     * Blocking method to create a card [PaymentMethod] from a Samsung Pay payment credential.
+     * Do not call this on the UI thread or your app will crash.
+     *
+     * `POST /v1/tokens`
+     * `POST /v1/payment_methods`
+     *
+     * @param token the serialized payment credential
+     * @param billingDetails optional billing details to attach to the [PaymentMethod]
+     * @param metadata optional metadata to attach to the [PaymentMethod]
+     * @param allowRedisplay optional allow_redisplay value for the [PaymentMethod]
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     *
+     * @return a card [PaymentMethod]
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Throws(
+        APIException::class,
+        AuthenticationException::class,
+        InvalidRequestException::class,
+        APIConnectionException::class,
+        CardException::class
+    )
+    @WorkerThread
+    @JvmOverloads
+    fun createSamsungPayPaymentMethodSynchronous(
+        token: String,
+        billingDetails: PaymentMethod.BillingDetails? = null,
+        metadata: Map<String, String>? = null,
+        allowRedisplay: PaymentMethod.AllowRedisplay? = null,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId,
+    ): PaymentMethod {
+        return runBlocking {
+            createSamsungPayPaymentMethod(
+                token = token,
+                billingDetails = billingDetails,
+                metadata = metadata,
+                allowRedisplay = allowRedisplay,
+                idempotencyKey = idempotencyKey,
+                stripeAccountId = stripeAccountId,
+            ).getOrElse { throw StripeException.create(it) }
+        }
+    }
+
+    /**
      * Update a [PaymentMethod] asynchronously.
      *
      * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
@@ -1898,6 +1984,40 @@ class Stripe internal constructor(
                 val brands = metadata.accountRanges.map { it.brand }
                 PossibleBrands(brands = brands.distinct())
             }
+        }
+    }
+
+    private suspend fun createSamsungPayPaymentMethod(
+        token: String,
+        billingDetails: PaymentMethod.BillingDetails?,
+        metadata: Map<String, String>?,
+        allowRedisplay: PaymentMethod.AllowRedisplay?,
+        idempotencyKey: String?,
+        stripeAccountId: String?,
+    ): Result<PaymentMethod> {
+        val tokenOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId,
+        )
+        val paymentMethodOptions = ApiRequest.Options(
+            apiKey = publishableKey,
+            stripeAccount = stripeAccountId,
+            idempotencyKey = idempotencyKey,
+        )
+
+        return stripeRepository.createToken(
+            tokenParams = SamsungPayTokenParams(token),
+            options = tokenOptions,
+        ).flatMap { stripeToken ->
+            stripeRepository.createPaymentMethod(
+                PaymentMethodCreateParams.create(
+                    card = PaymentMethodCreateParams.Card.create(stripeToken.id),
+                    billingDetails = billingDetails,
+                    metadata = metadata,
+                    allowRedisplay = allowRedisplay,
+                ),
+                paymentMethodOptions,
+            )
         }
     }
 
