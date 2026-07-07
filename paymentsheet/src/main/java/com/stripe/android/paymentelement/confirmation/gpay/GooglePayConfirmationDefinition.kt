@@ -157,7 +157,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 merchantCountryCode = config.merchantCountryCode,
                 merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
                     ?: config.merchantName,
-                isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
+                isEmailRequired = config.isEmailRequired,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
