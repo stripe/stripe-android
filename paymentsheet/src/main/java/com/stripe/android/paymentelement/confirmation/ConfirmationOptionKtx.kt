@@ -20,7 +20,6 @@ internal fun PaymentSelection.toConfirmationOption(
     linkConfiguration: LinkConfiguration?,
     cardFundingFilter: CardFundingFilter,
     googlePayDisplayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
-    googlePayBillingEmailOverride: String? = null,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -33,7 +32,6 @@ internal fun PaymentSelection.toConfirmationOption(
             configuration,
             cardFundingFilter,
             googlePayDisplayItems,
-            googlePayBillingEmailOverride,
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
     }
@@ -126,7 +124,6 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
     cardFundingFilter: CardFundingFilter,
     displayItems: List<GooglePayJsonFactory.DisplayItem>,
-    billingEmailOverride: String?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -142,7 +139,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
                 cardFundingFilter = cardFundingFilter,
                 displayItems = displayItems,
-                billingEmailOverride = billingEmailOverride,
+                billingEmailOverride = configuration.defaultBillingDetails?.email,
             ),
         )
     }

@@ -5,7 +5,6 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailFactory
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -72,7 +71,6 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
             googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
-            googlePayBillingEmailOverride = GooglePayBillingEmailFactory.create(paymentMethodMetadata),
         ) ?: return null
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,

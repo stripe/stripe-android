@@ -49,6 +49,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutSessionAutomaticTaxSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
@@ -407,25 +408,28 @@ internal class PlaygroundTestDriver(
         integrationType: PlaygroundConfigurationData.IntegrationType,
         initializationType: InitializationType,
         automaticTax: Boolean,
+        customerEmail: String = "test@example.com",
     ) {
         setup(
             TestParameters.create(
                 paymentMethodCode = "card",
             ) { settings ->
                 settings[MerchantSettingsDefinition] = merchant
+                settings[CustomerSettingsDefinition] = CustomerType.GUEST
                 settings.updateConfigurationData { it.copy(integrationType = integrationType) }
                 settings[InitializationTypeSettingsDefinition] = initializationType
                 settings[CheckoutSessionAutomaticTaxSettingsDefinition] = automaticTax
+                settings[CustomerEmailSettingsDefinition] = customerEmail
             }
         )
 
-        launchComplete()
+        launchCustom(clickMultiStep = false)
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        selectors.googlePayButton.waitForEnabled()
-        selectors.googlePayButton.click()
+        selectors.playgroundBuyButton.waitForEnabled()
+        selectors.playgroundBuyButton.click()
 
         composeTestRule.waitForIdle()
 

@@ -1054,6 +1054,7 @@ constructor(
         fun createFromGooglePay(
             googlePayPaymentData: JSONObject,
             clientAttributionMetadata: ClientAttributionMetadata?,
+            billingEmailOverride: String? = null,
         ): PaymentMethodCreateParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
@@ -1067,7 +1068,7 @@ constructor(
                 billingDetails = PaymentMethod.BillingDetails(
                     address = googlePayResult.address,
                     name = googlePayResult.name,
-                    email = googlePayResult.email,
+                    email = googlePayResult.email ?: billingEmailOverride,
                     phone = googlePayResult.phoneNumber
                 ),
                 allowRedisplay = null,
