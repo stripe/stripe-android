@@ -3492,7 +3492,8 @@ internal class PaymentSheetViewModelTest {
                     }
                 },
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = null,
             )
         }
     }

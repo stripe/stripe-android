@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcConfig
 import com.stripe.android.ui.core.elements.CvcController
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
@@ -65,6 +66,7 @@ internal abstract class BaseSheetViewModel(
     val mode: EventReporter.Mode,
     val customerStateHolderFactory: CustomerStateHolder.Factory,
     val customViewModelScope: CoroutineScope,
+    val placesClient: PlacesClientProxy?,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -80,14 +82,16 @@ internal abstract class BaseSheetViewModel(
         analyticsListener.reportPaymentSheetHidden(poppedScreen)
     }
 
-    val autocompleteAddressInteractorFactory: PaymentElementAutocompleteAddressInteractor.Factory =
+    val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory =
         PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = autocompleteLauncher,
             autocompleteConfig = AutocompleteAddressInteractor.Config(
                 googlePlacesApiKey = config.googlePlacesApiKey,
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
-            )
+            ),
+            placesClient = placesClient,
+            coroutineScope = viewModelScope,
         )
 
     internal val validationRequested = MutableSharedFlow<Unit>()
