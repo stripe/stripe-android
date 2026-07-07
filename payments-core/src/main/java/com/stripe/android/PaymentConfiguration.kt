@@ -17,10 +17,26 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @Poko
-class PaymentConfiguration constructor(
+class PaymentConfiguration
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     val publishableKey: String,
     val stripeAccountId: String? = null
 ) : Parcelable {
+
+    class Builder(private val publishableKey: String) {
+        internal var stripeAccountId: String? = null
+            private set
+
+        fun stripeAccountId(stripeAccountId: String?) = apply {
+            this.stripeAccountId = stripeAccountId
+        }
+
+        fun build() = PaymentConfiguration(
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId
+        )
+    }
 
     init {
         ApiKeyValidator.get().requireValid(publishableKey)
