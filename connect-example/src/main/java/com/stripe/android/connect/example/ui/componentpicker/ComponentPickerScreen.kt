@@ -229,12 +229,12 @@ private enum class MenuItem(
     Payouts(
         title = R.string.payouts,
         subtitle = R.string.payouts_menu_subtitle,
-        isBeta = true,
+        isBeta = false,
     ),
     Payments(
         title = R.string.payments,
         subtitle = R.string.payments_menu_subtitle,
-        isBeta = true,
+        isBeta = false,
     ),
 }
 
