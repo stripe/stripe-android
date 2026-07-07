@@ -100,12 +100,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createPaymentMethod() uses billingEmailFallback when Google Pay has no email`() = runTest {
+    fun `createPaymentMethod() uses billingEmailOverride when Google Pay has no email`() = runTest {
         val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
             ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
-            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            ARGS.copy(billingEmailOverride = "checkout@example.com"),
             stripeRepository,
             googlePayJsonFactory,
             googlePayRepository,
@@ -123,12 +123,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createPaymentMethod() prefers Google Pay email over billingEmailFallback`() = runTest {
+    fun `createPaymentMethod() prefers billingEmailOverride over Google Pay email`() = runTest {
         val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
             ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
-            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            ARGS.copy(billingEmailOverride = "checkout@example.com"),
             stripeRepository,
             googlePayJsonFactory,
             googlePayRepository,
@@ -141,6 +141,21 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             )
         )
 
+        // The Checkout Session email must win over whatever Google Pay returned, otherwise the
+        // backend rejects the confirmation with a customer_email mismatch.
+        assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
+            .isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `createPaymentMethod() uses Google Pay email when no billingEmailOverride`() = runTest {
+        val result = viewModel.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(result).isInstanceOf(GooglePayPaymentMethodLauncher.Result.Completed::class.java)
         assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
             .isEqualTo("stripe@example.com")
     }

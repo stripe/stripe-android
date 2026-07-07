@@ -13,6 +13,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -536,6 +537,99 @@ class GooglePayConfirmationDefinitionTest {
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
                 displayItems = displayItems,
+            )
+        }
+    }
+
+    @Test
+    fun `On 'launch' for checkout session, overrides email and does not request it from Google Pay`() = runTest {
+        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                        merchantCurrencyCode = "USD",
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        ),
+                        billingEmailOverride = "checkout@example.com",
+                    ),
+                ),
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PAYMENT_INTENT.copy(currency = "USD"),
+                        integrationMetadata = IntegrationMetadata.CheckoutSession(
+                            id = "cs_123",
+                            instancesKey = "key",
+                        ),
+                    ),
+                ),
+                arguments = EmptyConfirmationLauncherArgs,
+                launcher = launcher,
+            )
+
+            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+            // Matches stripe-js: don't request the wallet email when we're going to override it.
+            assertThat(createGooglePayLauncherCall.config.isEmailRequired).isFalse()
+
+            verify(googlePayLauncher, times(1)).present(
+                currencyCode = "USD",
+                amount = 1000L,
+                transactionId = "pi_12345",
+                label = null,
+                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
+                displayItems = emptyList(),
+                billingEmailOverride = "checkout@example.com",
+            )
+        }
+    }
+
+    @Test
+    fun `On 'launch' outside checkout session, does not override email even when configured`() = runTest {
+        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                        merchantCurrencyCode = "USD",
+                        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                        ),
+                        billingEmailOverride = "checkout@example.com",
+                    ),
+                ),
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PAYMENT_INTENT.copy(currency = "USD"),
+                    ),
+                ),
+                arguments = EmptyConfirmationLauncherArgs,
+                launcher = launcher,
+            )
+
+            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+            assertThat(createGooglePayLauncherCall.config.isEmailRequired).isTrue()
+
+            verify(googlePayLauncher, times(1)).present(
+                currencyCode = "USD",
+                amount = 1000L,
+                transactionId = "pi_12345",
+                label = null,
+                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
+                displayItems = emptyList(),
+                billingEmailOverride = null,
             )
         }
     }

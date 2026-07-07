@@ -397,7 +397,7 @@ class ConfirmationHandlerOptionKtxTest {
 
     @OptIn(CheckoutSessionPreview::class)
     @Test
-    fun `On Google Pay selection, customerEmail from response flows through merger to billingEmailFallback`() {
+    fun `On Google Pay selection, customerEmail from response flows through merger to billingEmailOverride`() {
         val response = CheckoutSessionResponseFactory.create(
             customerEmail = "checkout@example.com",
         )
@@ -426,7 +426,7 @@ class ConfirmationHandlerOptionKtxTest {
         )
 
         assertThat(
-            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.billingEmailFallback
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.billingEmailOverride
         ).isEqualTo("checkout@example.com")
     }
 

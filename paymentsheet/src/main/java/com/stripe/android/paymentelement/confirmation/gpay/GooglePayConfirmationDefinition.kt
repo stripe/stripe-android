@@ -8,6 +8,7 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -81,11 +82,14 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
     ) {
         val config = confirmationOption.config
         val intent = confirmationArgs.intent
+        val isCheckoutSession = confirmationArgs.paymentMethodMetadata.integrationMetadata is
+            IntegrationMetadata.CheckoutSession
         val googlePayLauncher = createGooglePayLauncher(
             factory = googlePayPaymentMethodLauncherFactory,
             activityLauncher = launcher,
             config = confirmationOption.config,
             confirmationArgs = confirmationArgs,
+            isCheckoutSession = isCheckoutSession,
         )
 
         googlePayLauncher.present(
@@ -100,7 +104,10 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             clientAttributionMetadata = confirmationArgs.paymentMethodMetadata.clientAttributionMetadata,
             isElements = true,
             displayItems = config.displayItems,
-            billingEmailFallback = config.billingEmailFallback,
+            // Checkout Sessions require the payment method email to match the session's
+            // customer_email. Override Google Pay's returned email with it, mirroring
+            // stripe-js's __billingDetailsEmailOverride. Non-checkout flows keep Google Pay's email.
+            billingEmailOverride = config.billingEmailOverride.takeIf { isCheckoutSession },
         )
     }
 
@@ -147,6 +154,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
         activityLauncher: ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>,
         config: GooglePayConfirmationOption.Config,
         confirmationArgs: ConfirmationHandler.Args,
+        isCheckoutSession: Boolean,
     ): GooglePayPaymentMethodLauncher {
         return factory.create(
             lifecycleScope = CoroutineScope(Dispatchers.Default),
@@ -158,7 +166,10 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                 merchantCountryCode = config.merchantCountryCode,
                 merchantName = confirmationArgs.paymentMethodMetadata.sellerBusinessName
                     ?: config.merchantName,
-                isEmailRequired = config.billingDetailsCollectionConfiguration.collectsEmail,
+                // In a Checkout Session the email is overridden with the session's customer_email,
+                // so we don't request it from Google Pay (matching stripe-js, which sets
+                // requestPayerEmail=false whenever __billingDetailsEmailOverride is provided).
+                isEmailRequired = !isCheckoutSession && config.billingDetailsCollectionConfiguration.collectsEmail,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
