@@ -14,6 +14,8 @@ import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsService
 import com.stripe.android.crypto.onramp.exception.AppAttestationException
 import com.stripe.android.crypto.onramp.exception.AppAttestationUnavailableException
 import com.stripe.android.crypto.onramp.exception.CryptoOnrampApiException
+import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipChallengeApiErrorException
+import com.stripe.android.crypto.onramp.exception.InvalidWalletOwnershipSignatureApiErrorException
 import com.stripe.android.crypto.onramp.exception.MissingConsumerSecretException
 import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
@@ -23,6 +25,7 @@ import com.stripe.android.crypto.onramp.exception.SDKVersion
 import com.stripe.android.crypto.onramp.exception.UncategorizedApiErrorException
 import com.stripe.android.crypto.onramp.exception.UnsupportedNetworkApiErrorException
 import com.stripe.android.crypto.onramp.exception.WalletNotFoundApiErrorException
+import com.stripe.android.crypto.onramp.exception.WalletOwnershipChallengeExpiredApiErrorException
 import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoConsumerWallet
@@ -293,7 +296,6 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         val consumerWallet = CryptoConsumerWallet(
             id = "ccw_123",
-            isLiveMode = false,
             network = CryptoNetwork.Ethereum,
             walletAddress = "0x1234567890abcdef",
             verifiedOwnership = true
@@ -319,6 +321,139 @@ class OnrampInteractorTest {
         testAnalyticsService.assertContainsEvent(
             OnrampAnalyticsEvent.WalletOwnershipVerified(CryptoNetwork.Ethereum)
         )
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureMapsInvalidSignatureError() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val backendError = InvalidRequestException(
+            stripeError = StripeError(
+                type = "invalid_request_error",
+                code = "invalid_wallet_ownership_signature",
+                message = "The submitted signature does not prove ownership of the registered wallet.",
+            ),
+            requestId = "req_invalid_signature",
+            statusCode = 400,
+        )
+        whenever(cryptoApiRepository.submitWalletOwnershipSignature(any(), any(), any()))
+            .thenReturn(Result.failure(backendError))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.submitWalletOwnershipSignature(
+            challengeId = "woc_123",
+            signature = "0xsignature"
+        )
+
+        assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
+
+        val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
+        assertThat(error).isInstanceOf(InvalidWalletOwnershipSignatureApiErrorException::class.java)
+
+        val signatureError = error as InvalidWalletOwnershipSignatureApiErrorException
+        assertThat(signatureError.userMessage)
+            .isEqualTo("We couldn't verify ownership of this wallet. Please try again.")
+        assertThat(signatureError.message)
+            .isEqualTo("We couldn't verify ownership of this wallet. Please try again.")
+        assertThat(signatureError.code).isEqualTo("invalid_wallet_ownership_signature")
+        assertThat(signatureError.underlyingError).isSameInstanceAs(backendError)
+        assertThat(signatureError.developerMessage)
+            .contains("The submitted signature does not prove ownership of the registered wallet.")
+        assertThat(signatureError.developerMessage).contains("Code: invalid_wallet_ownership_signature")
+        assertThat(signatureError.developerMessage).contains("Next step: Sign the exact challenge message")
+        assertThat(signatureError.developerMessage).contains("operation: submit_wallet_ownership_signature")
+        assertThat(signatureError.developerMessage).contains("request_id: req_invalid_signature")
+        assertThat(signatureError.developerMessage).contains("type: invalid_request_error")
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureMapsChallengeExpiredError() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val backendError = InvalidRequestException(
+            stripeError = StripeError(
+                type = "invalid_request_error",
+                code = "wallet_ownership_challenge_expired",
+                message = "The wallet ownership challenge has expired.",
+            ),
+            requestId = "req_expired_challenge",
+            statusCode = 400,
+        )
+        whenever(cryptoApiRepository.submitWalletOwnershipSignature(any(), any(), any()))
+            .thenReturn(Result.failure(backendError))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.submitWalletOwnershipSignature(
+            challengeId = "woc_123",
+            signature = "0xsignature"
+        )
+
+        assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
+
+        val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
+        assertThat(error).isInstanceOf(WalletOwnershipChallengeExpiredApiErrorException::class.java)
+
+        val expiredError = error as WalletOwnershipChallengeExpiredApiErrorException
+        assertThat(expiredError.userMessage)
+            .isEqualTo("This wallet verification request expired. Please try again.")
+        assertThat(expiredError.message)
+            .isEqualTo("This wallet verification request expired. Please try again.")
+        assertThat(expiredError.code).isEqualTo("wallet_ownership_challenge_expired")
+        assertThat(expiredError.underlyingError).isSameInstanceAs(backendError)
+        assertThat(expiredError.developerMessage).contains("The wallet ownership challenge has expired.")
+        assertThat(expiredError.developerMessage).contains("Code: wallet_ownership_challenge_expired")
+        assertThat(expiredError.developerMessage).contains("Next step: Request a new wallet ownership challenge")
+        assertThat(expiredError.developerMessage).contains("operation: submit_wallet_ownership_signature")
+        assertThat(expiredError.developerMessage).contains("request_id: req_expired_challenge")
+        assertThat(expiredError.developerMessage).contains("type: invalid_request_error")
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureMapsInvalidChallengeError() = runTest {
+        whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
+        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        val backendError = InvalidRequestException(
+            stripeError = StripeError(
+                type = "invalid_request_error",
+                code = "invalid_wallet_ownership_challenge",
+                message = "The wallet ownership challenge is invalid.",
+            ),
+            requestId = "req_invalid_challenge",
+            statusCode = 400,
+        )
+        whenever(cryptoApiRepository.submitWalletOwnershipSignature(any(), any(), any()))
+            .thenReturn(Result.failure(backendError))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+        interactor.configure(createConfigurationState())
+
+        val result = interactor.submitWalletOwnershipSignature(
+            challengeId = "woc_123",
+            signature = "0xsignature"
+        )
+
+        assertThat(result).isInstanceOf(OnrampSubmitWalletOwnershipSignatureResult.Failed::class.java)
+
+        val error = (result as OnrampSubmitWalletOwnershipSignatureResult.Failed).error
+        assertThat(error).isInstanceOf(InvalidWalletOwnershipChallengeApiErrorException::class.java)
+
+        val challengeError = error as InvalidWalletOwnershipChallengeApiErrorException
+        assertThat(challengeError.userMessage)
+            .isEqualTo("This wallet verification request is no longer valid. Please try again.")
+        assertThat(challengeError.message)
+            .isEqualTo("This wallet verification request is no longer valid. Please try again.")
+        assertThat(challengeError.code).isEqualTo("invalid_wallet_ownership_challenge")
+        assertThat(challengeError.underlyingError).isSameInstanceAs(backendError)
+        assertThat(challengeError.developerMessage).contains("The wallet ownership challenge is invalid.")
+        assertThat(challengeError.developerMessage).contains("Code: invalid_wallet_ownership_challenge")
+        assertThat(challengeError.developerMessage).contains("Next step: Request a new challenge")
+        assertThat(challengeError.developerMessage).contains("operation: submit_wallet_ownership_signature")
+        assertThat(challengeError.developerMessage).contains("request_id: req_invalid_challenge")
+        assertThat(challengeError.developerMessage).contains("type: invalid_request_error")
     }
 
     @Test
@@ -1658,6 +1793,12 @@ class OnrampInteractorTest {
             "This wallet couldn't be found. Please choose or add a wallet and try again.",
         unsupportedNetworkUserMessage: String =
             "This wallet network isn't supported. Please choose a different network.",
+        invalidWalletOwnershipSignatureUserMessage: String =
+            "We couldn't verify ownership of this wallet. Please try again.",
+        walletOwnershipChallengeExpiredUserMessage: String =
+            "This wallet verification request expired. Please try again.",
+        invalidWalletOwnershipChallengeUserMessage: String =
+            "This wallet verification request is no longer valid. Please try again.",
     ): Application {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
@@ -1669,6 +1810,12 @@ class OnrampInteractorTest {
                 defaultAppAttestationUserMessage
             on { getString(R.string.stripe_onramp_app_attestation_unavailable_user_message) } doReturn
                 appAttestationUnavailableUserMessage
+            on { getString(R.string.stripe_onramp_invalid_wallet_ownership_signature_user_message) } doReturn
+                invalidWalletOwnershipSignatureUserMessage
+            on { getString(R.string.stripe_onramp_wallet_ownership_challenge_expired_user_message) } doReturn
+                walletOwnershipChallengeExpiredUserMessage
+            on { getString(R.string.stripe_onramp_invalid_wallet_ownership_challenge_user_message) } doReturn
+                invalidWalletOwnershipChallengeUserMessage
             on { getString(R.string.stripe_onramp_wallet_not_found_user_message) } doReturn
                 walletNotFoundUserMessage
             on { getString(R.string.stripe_onramp_unsupported_network_user_message) } doReturn

@@ -905,7 +905,6 @@ class CryptoApiRepositoryTest {
 
             val consumerWallet = result.getOrThrow()
             assertThat(consumerWallet.id).isEqualTo("ccw_123")
-            assertThat(consumerWallet.isLiveMode).isFalse()
             assertThat(consumerWallet.walletAddress).isEqualTo("0x1234567890abcdef")
             assertThat(consumerWallet.network).isEqualTo(CryptoNetwork.Ethereum)
             assertThat(consumerWallet.verifiedOwnership).isTrue()

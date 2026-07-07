@@ -70,6 +70,33 @@ internal fun Throwable.toCryptoOnrampError(
                 ),
             )
         }
+        stripeError.isInvalidWalletOwnershipSignatureError() -> {
+            InvalidWalletOwnershipSignatureApiErrorException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_invalid_wallet_ownership_signature_user_message,
+                ),
+            )
+        }
+        stripeError.isWalletOwnershipChallengeExpiredError() -> {
+            WalletOwnershipChallengeExpiredApiErrorException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_wallet_ownership_challenge_expired_user_message,
+                ),
+            )
+        }
+        stripeError.isInvalidWalletOwnershipChallengeError() -> {
+            InvalidWalletOwnershipChallengeApiErrorException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_invalid_wallet_ownership_challenge_user_message,
+                ),
+            )
+        }
         stripeError.isWalletNotFoundError() -> {
             WalletNotFoundApiErrorException(
                 apiErrorContext = apiErrorContext,
@@ -136,6 +163,18 @@ private fun Throwable.toAppAttestationUnavailableError(
 
 private fun StripeError.isAppAttestationError(): Boolean {
     return code == APP_ATTESTATION_ERROR_CODE
+}
+
+private fun StripeError.isInvalidWalletOwnershipSignatureError(): Boolean {
+    return code == INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE
+}
+
+private fun StripeError.isWalletOwnershipChallengeExpiredError(): Boolean {
+    return code == WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE
+}
+
+private fun StripeError.isInvalidWalletOwnershipChallengeError(): Boolean {
+    return code == INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE
 }
 
 private fun StripeError.isWalletNotFoundError(): Boolean {
