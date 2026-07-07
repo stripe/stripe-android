@@ -1,5 +1,8 @@
 package com.stripe.android.common.nfcscan.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -30,38 +33,48 @@ internal fun NfcScanningScreen(
     val deviceRotation = rememberDeviceRotation()
 
     NfcScanningLayout(
+        status = state.status,
         tapZone = state.tapZone,
         deviceRotation = deviceRotation,
         onClose = {
             viewActionHandler(NfcScanningViewAction.Close)
+        },
+        onSuccessShown = {
+            viewActionHandler(NfcScanningViewAction.SuccessShown)
         },
     )
 }
 
 @Composable
 internal fun NfcScanningLayout(
+    status: NfcScanningStatus,
     tapZone: TapZone,
     deviceRotation: DeviceRotation,
     onClose: () -> Unit,
+    onSuccessShown: () -> Unit,
 ) {
     val tapZone = remember(deviceRotation, tapZone) {
         createNormalizedTapZone(deviceRotation, tapZone)
     }
+
+    val canShowCloseButton = status !is NfcScanningStatus.Scanned
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colors.surface),
     ) {
-        NfcCoilLayout(tapZone, deviceRotation)
-        CloseButtonLayout(tapZone, deviceRotation, onClose)
+        NfcCoilLayout(status, tapZone, deviceRotation, onSuccessShown)
+        CloseButtonLayout(canShowCloseButton, tapZone, deviceRotation, onClose)
     }
 }
 
 @Composable
 private fun NfcCoilLayout(
+    status: NfcScanningStatus,
     tapZone: TapZone,
     deviceRotation: DeviceRotation,
+    onSuccessShown: () -> Unit,
 ) {
     val shouldRenderTextAboveCoil = rememberOrientationValues(
         deviceRotation = deviceRotation,
@@ -76,12 +89,17 @@ private fun NfcCoilLayout(
             verticalBias = tapZone.yBias * 2 - 1,
         ),
     ) {
-        NfcCoil(shouldRenderTextAboveCoil)
+        NfcCoil(
+            status = status,
+            shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
+            onSuccessShown = onSuccessShown,
+        )
     }
 }
 
 @Composable
 private fun BoxScope.CloseButtonLayout(
+    canShow: Boolean,
     tapZone: TapZone,
     deviceRotation: DeviceRotation,
     onClose: () -> Unit,
@@ -110,7 +128,13 @@ private fun BoxScope.CloseButtonLayout(
             .padding(padding)
             .align(alignment)
     ) {
-        NfcCloseButton(onClose)
+        AnimatedVisibility(
+            visible = canShow,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            NfcCloseButton(onClose)
+        }
     }
 }
 
