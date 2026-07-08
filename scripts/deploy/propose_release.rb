@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require_relative 'changelog_entries_steps'
 require_relative 'permissions_check'
 require_relative 'release_cli'
 require_relative 'release_tag_steps'
@@ -27,7 +28,7 @@ def pause_for_pr_merge
         return
     end
 
-    resume_command = "./scripts/deploy/propose_release.rb --continue-from 8 --version #{@version}"
+    resume_command = "./scripts/deploy/propose_release.rb --continue-from 9 --version #{@version}"
     resume_command += " --branch #{@deploy_branch}" if @deploy_branch != 'master'
     puts ""
     rputs "Version bump PR has been created. Get it reviewed and merged."
@@ -41,9 +42,9 @@ def pause_for_pr_merge
 end
 
 def prepare_propose_release_resume(step_index)
-    # When resuming after the PR merge pause (step 8+), ensure we have a
+    # When resuming after the PR merge pause (step 9+), ensure we have a
     # clean repo and are on the deploy branch with latest changes.
-    return if step_index < 8
+    return if step_index < 9
 
     ensure_clean_repo
     execute_or_fail("git checkout #{@deploy_branch}")
@@ -59,10 +60,10 @@ parse_release_options!(flow_name: 'propose release')
 
 steps = [
     method(:check_permissions),
-    method(:validate_translations_merged),
     method(:validate_version_number),
     method(:ensure_clean_repo),
     method(:pull_latest),
+    method(:generate_changelog_entries),
     method(:create_version_bump_pr),
     method(:pause_for_pr_merge),
     method(:create_release_tag),

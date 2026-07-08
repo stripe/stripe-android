@@ -1,14 +1,31 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.12.0 - 2026-07-08
 
 ### Connect
 * [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+* [CHANGED][13366](https://github.com/stripe/stripe-android/pull/13366) The Payments and Payouts embedded components are now generally available; removed @PreviewConnectSDK annotations and refactored PaymentsProps to use the builder pattern
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+* [ADDED][13240](https://github.com/stripe/stripe-android/pull/13240) Added `AppAttestationUnavailableException` to provide additional error information when configuring Crypto Onramp and native Link is unavailable (private preview, requires @OptIn(ExperimentalCryptoOnramp::class))
 
+### Payments
+* [ADDED][13362](https://github.com/stripe/stripe-android/pull/13362) Added support for a fallback billing email when creating a payment method via Google Pay if the Google Pay response does not include an email
+
+### PaymentSheet
+* [ADDED][13338](https://github.com/stripe/stripe-android/pull/13338) Added inline address autocomplete for billing address entry in PaymentSheet when Google Places API and feature flag are enabled
+* [CHANGED][13357](https://github.com/stripe/stripe-android/pull/13357) Improved `NfcCoil` with animated interior for enhanced NFC scan visual feedback
+* [CHANGED][13345](https://github.com/stripe/stripe-android/pull/13345) Refactored saved payment method editability logic to use new `isModifiable` and `canChangeCbc` functions on `PaymentMethod`, improving edit eligibility determination in PaymentSheet
+* [CHANGED][13332](https://github.com/stripe/stripe-android/pull/13332) PaymentSheet now disables Link and Google Pay when automatic tax is enabled with billing address as the tax source
+* [FIXED][13355](https://github.com/stripe/stripe-android/pull/13355) Fixed NFC card scanning so that the scanner is correctly re-registered when returning from background in `NfcScanningActivity`
+* [FIXED][13349](https://github.com/stripe/stripe-android/pull/13349) Fixed an issue where selecting an unknown card brand would incorrectly set the preferred network for card update parameters
+* [ADDED][13339](https://github.com/stripe/stripe-android/pull/13339) Added internal NFC card scanning building blocks including TLV parsing and APDU command handling foundational for future PaymentSheet NFC card support
+* [CHANGED][13337](https://github.com/stripe/stripe-android/pull/13337) Changed NFC scanning implementation to use actual IsoDep transceive operations, improving reliability of card data reading in PaymentSheet
+* [FIXED][13330](https://github.com/stripe/stripe-android/pull/13330) Fixed address inline autocomplete incorrectly displaying or activating when Places API is not available
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
