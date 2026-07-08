@@ -1,14 +1,29 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.12.0 - 2026-07-08
 
 ### Connect
 * [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+* CHANGED [#13366](https://github.com/stripe/stripe-android/pull/13366) Payments and Payouts components are now generally available. Removed PreviewConnectSDK annotation and replaced Payments component default filter with builder pattern.
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+* ADDED [#13240](https://github.com/stripe/stripe-android/pull/13240) Rich error detail for app attestation failure with improved coordinator configuration error messages.
 
+### PaymentSheet
+* FIXED [#13362](https://github.com/stripe/stripe-android/pull/13362) Google Pay in checkout sessions now properly uses customer email from the session when Google Pay doesn't provide an email address.
+* ADDED [#13365](https://github.com/stripe/stripe-android/pull/13365) NFC coil now displays scanning and success animations when cards are scanned.
+* ADDED [#13357](https://github.com/stripe/stripe-android/pull/13357) NFC coil now displays idle animation for improved user experience.
+* CHANGED [#13332](https://github.com/stripe/stripe-android/pull/13332) Google Pay and Link are now disabled when checkout sessions have automatic tax enabled with billing address as the tax source.
+* FIXED [#13355](https://github.com/stripe/stripe-android/pull/13355) NFC scanning lifecycle registration and added required NFC permissions to paymentsheet module.
+* FIXED [#13349](https://github.com/stripe/stripe-android/pull/13349) CustomerSheet no longer sends 'unknown' as the preferred network when editing a saved card without a recognized display brand.
+* ADDED [#13313](https://github.com/stripe/stripe-android/pull/13313) CheckoutController and UI element classes (PaymentElement, CurrencySelectorElement, ShippingAddressElement) for upcoming checkout functionality.
+
+### AddressElement
+* ADDED [#13338](https://github.com/stripe/stripe-android/pull/13338) Inline address autocomplete is now enabled on billing address fields in Payment Sheet and Flow Controller.
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
