@@ -50,6 +50,7 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -139,6 +140,7 @@ fun TextField(
     shouldAnnounceFieldValue: Boolean = true
 ) {
     val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
     val value by textFieldController.fieldValue.collectAsState()
     val trailingIcon by textFieldController.trailingIcon.collectAsState()
     val shouldShowValidationMessage by textFieldController.visibleValidationMessage.collectAsState()
@@ -158,6 +160,10 @@ fun TextField(
         // When field is in focus and full, move to next field so the user can keep typing
         if (fieldState is TextFieldStateConstants.Valid.Full && hasFocus.value) {
             focusManager.moveFocusSafely(nextFocusDirection)
+            // Explicitly show the keyboard after moving focus. On some Android versions,
+            // the legacy text input pipeline hides the keyboard during focus transfer, and
+            // the new field's show request may arrive too late to prevent the dismiss.
+            keyboardController?.show()
         }
     }
 
