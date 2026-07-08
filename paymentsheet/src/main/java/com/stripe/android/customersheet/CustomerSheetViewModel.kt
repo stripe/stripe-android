@@ -157,7 +157,7 @@ internal class CustomerSheetViewModel(
             permissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
             ),
             metadata = null,
         )
@@ -211,7 +211,6 @@ internal class CustomerSheetViewModel(
             isEditing = userCanEditAndIsEditing,
             isProcessing = selectionConfirmationState.isConfirming,
             errorMessage = selectionConfirmationState.error,
-            isCbcEligible = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             canEdit = customerState.canEdit,
             mandateText = paymentSelection?.mandateText(
                 merchantName = configuration.merchantDisplayName,
@@ -570,7 +569,8 @@ internal class CustomerSheetViewModel(
                 updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
                     isLiveMode = isLiveMode,
                     canRemove = customerState.canRemove,
-                    canUpdateFullPaymentMethodDetails = customerState.canUpdateFullPaymentMethodDetails,
+                    canUpdateCardExpiryAndBillingDetails = customerState.canUpdateCardExpiryAndBillingDetails,
+                    canChangeCbc = customerState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
                     displayableSavedPaymentMethod = paymentMethod,
                     addressCollectionMode = configuration.billingDetailsCollectionConfiguration.address,
                     allowedBillingCountries =
@@ -1274,12 +1274,15 @@ internal class CustomerSheetViewModel(
             else -> permissions.canRemovePaymentMethods
         }
 
-        val canUpdateFullPaymentMethodDetails = permissions.canUpdateFullPaymentMethodDetails
-
+        val canUpdateCardExpiryAndBillingDetails = permissions.canUpdateCardExpiryAndBillingDetails
         val cbcEligibility = metadata?.cbcEligibility ?: CardBrandChoiceEligibility.Ineligible
 
         val canEdit = canRemove || paymentMethods.any { method ->
-            isModifiable(method, cbcEligibility, canUpdateFullPaymentMethodDetails)
+            isModifiable(
+                paymentMethod = method,
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                canChangeCbc = cbcEligibility is CardBrandChoiceEligibility.Eligible,
+            )
         }
 
         val canShowSavedPaymentMethods = paymentMethods.isNotEmpty() || shouldShowGooglePay(metadata)

@@ -39,7 +39,9 @@ internal class EmbeddedNavigatorTest {
             assertThat(awaitItem()).isEqualTo(initialScreen)
             assertThat(navigator.canGoBack).isFalse()
 
-            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(FakeUpdatePaymentMethodInteractor())
+            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(
+                FakeUpdatePaymentMethodInteractor()
+            )
             navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
             assertThat(navigator.canGoBack).isTrue()
@@ -63,7 +65,9 @@ internal class EmbeddedNavigatorTest {
         navigator.screen.test {
             assertThat(awaitItem()).isEqualTo(initialScreen)
 
-            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(FakeUpdatePaymentMethodInteractor())
+            val newScreen = EmbeddedNavigator.Screen.ManageUpdate(
+                FakeUpdatePaymentMethodInteractor()
+            )
             navigator.performAction(EmbeddedNavigator.Action.GoToScreen(newScreen))
             assertThat(awaitItem()).isEqualTo(newScreen)
             assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
@@ -136,7 +140,9 @@ internal class EmbeddedNavigatorTest {
 
     @Test
     fun `Close while on ManageUpdate calls onHideEditablePaymentOption`() = testScenario {
-        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(FakeUpdatePaymentMethodInteractor())
+        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(
+            FakeUpdatePaymentMethodInteractor()
+        )
         navigator.screen.test {
             assertThat(awaitItem()).isEqualTo(initialScreen)
             navigator.performAction(EmbeddedNavigator.Action.GoToScreen(manageUpdateScreen))
@@ -154,7 +160,9 @@ internal class EmbeddedNavigatorTest {
         EmbeddedNavigator(
             coroutineScope = this,
             eventReporter = eventReporter,
-            initialScreen = EmbeddedNavigator.Screen.ManageUpdate(FakeUpdatePaymentMethodInteractor()),
+            initialScreen = EmbeddedNavigator.Screen.ManageUpdate(
+                FakeUpdatePaymentMethodInteractor()
+            ),
         )
         assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
         eventReporter.validate()

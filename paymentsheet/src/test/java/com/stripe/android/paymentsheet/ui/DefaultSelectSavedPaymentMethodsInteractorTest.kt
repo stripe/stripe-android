@@ -472,7 +472,6 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
             linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Saved(paymentMethods[0]),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = true,
             defaultPaymentMethodId = null,
         ).items
     }

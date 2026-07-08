@@ -58,7 +58,7 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
         )
     ) {
         savedPaymentMethodMutator.canEdit.test {
@@ -80,7 +80,7 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
         )
     ) {
         savedPaymentMethodMutator.canEdit.test {
@@ -237,7 +237,7 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
         )
     ) {
         val customerPaymentMethods = PaymentMethodFixtures.createCards(1)
@@ -267,7 +267,7 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
         )
     ) {
         val cards = PaymentMethodFixtures.createCards(3)
@@ -293,7 +293,7 @@ class SavedPaymentMethodMutatorTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
         )
     ) {
         val cards = PaymentMethodFixtures.createCards(1)
@@ -912,6 +912,7 @@ class SavedPaymentMethodMutatorTest {
             selection = MutableStateFlow(null),
             customerMetadata =
             stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         )
         runScenario(
             customerStateHolder = customerStateHolder,
@@ -956,6 +957,7 @@ class SavedPaymentMethodMutatorTest {
                 paymentMethodMetadata?.customerMetadata
                     ?: PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         ),
         block: suspend Scenario.() -> Unit
     ) {

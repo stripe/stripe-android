@@ -19,7 +19,6 @@ internal class PaymentOptionsItemsMapper(
     private val linkBrand: StateFlow<LinkBrand?>,
     private val nameProvider: (PaymentMethodCode?) -> ResolvableString,
     private val isNotPaymentFlow: Boolean,
-    private val isCbcEligible: () -> Boolean
 ) {
 
     operator fun invoke(): StateFlow<List<PaymentOptionsItem>> {
@@ -61,7 +60,6 @@ internal class PaymentOptionsItemsMapper(
             // linkBrand is non-null whenever showLink=true (Link is enabled only when LinkState is available)
             linkBrand = linkBrand ?: LinkBrand.Link,
             nameProvider = nameProvider,
-            isCbcEligible = isCbcEligible(),
             defaultPaymentMethodId = defaultPaymentMethodId,
         )
     }

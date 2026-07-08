@@ -20,7 +20,10 @@ internal class FakeCustomerStateHolder : CustomerStateHolder {
     override val canRemove: StateFlow<Boolean>
         get() = stateFlowOf(false)
 
-    override val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>
+    override val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>
+        get() = stateFlowOf(false)
+
+    override val canChangeCbc: StateFlow<Boolean>
         get() = stateFlowOf(false)
 
     val setCustomerStateCalls = Turbine<CustomerState?>()

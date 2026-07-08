@@ -5,7 +5,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import javax.inject.Inject
 
 internal class InitialManageScreenFactory @Inject constructor(
@@ -24,7 +23,6 @@ internal class InitialManageScreenFactory @Inject constructor(
             val displayableSavedPaymentMethod = DisplayableSavedPaymentMethod.create(
                 displayName = displayName,
                 paymentMethod = paymentMethod,
-                isCbcEligible = paymentMethodMetadata.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
             EmbeddedNavigator.Screen.ManageUpdate(
                 interactor = updateScreenInteractorFactory.createUpdateScreenInteractor(

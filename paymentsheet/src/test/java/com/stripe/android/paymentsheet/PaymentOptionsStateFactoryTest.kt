@@ -46,7 +46,6 @@ class PaymentOptionsStateFactoryTest {
             linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Saved(paymentMethod),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
             defaultPaymentMethodId = null,
         )
 
@@ -65,7 +64,6 @@ class PaymentOptionsStateFactoryTest {
             linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
             defaultPaymentMethodId = null,
         )
 
@@ -76,7 +74,7 @@ class PaymentOptionsStateFactoryTest {
     fun `'isModifiable' is true when canUpdatePaymentMethod is false and cbc can change`() {
         helperIsModifiable(
             canUpdatePaymentMethod = false,
-            isCbcEligible = true,
+            canChangeCbc = true,
             availableNetworks = setOf("visa", "cartes_bancaires"),
             expectedResult = true
         )
@@ -86,7 +84,7 @@ class PaymentOptionsStateFactoryTest {
     fun `'isModifiable' is true when canUpdatePaymentMethod is true and cbc cannot change`() {
         helperIsModifiable(
             canUpdatePaymentMethod = true,
-            isCbcEligible = false,
+            canChangeCbc = false,
             availableNetworks = setOf("visa"),
             expectedResult = true
         )
@@ -96,7 +94,7 @@ class PaymentOptionsStateFactoryTest {
     fun `'isModifiable' is false when canUpdatePaymentMethod is false and cbc cannot change`() {
         helperIsModifiable(
             canUpdatePaymentMethod = false,
-            isCbcEligible = false,
+            canChangeCbc = false,
             availableNetworks = setOf("visa"),
             expectedResult = false
         )
@@ -104,7 +102,7 @@ class PaymentOptionsStateFactoryTest {
 
     private fun helperIsModifiable(
         canUpdatePaymentMethod: Boolean = false,
-        isCbcEligible: Boolean = false,
+        canChangeCbc: Boolean = false,
         availableNetworks: Set<String> = emptySet(),
         expectedResult: Boolean
     ) {
@@ -129,7 +127,6 @@ class PaymentOptionsStateFactoryTest {
             linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = null,
         )
 
@@ -137,8 +134,8 @@ class PaymentOptionsStateFactoryTest {
             .displayableSavedPaymentMethod
         assertThat(
             displayableSavedPaymentMethod.paymentMethod.isModifiable(
-                canUpdateFullPaymentMethodDetails = canUpdatePaymentMethod,
-                isCbcEligible = displayableSavedPaymentMethod.isCbcEligible,
+                canUpdateCardExpiryAndBillingDetails = canUpdatePaymentMethod,
+                canChangeCbc = canChangeCbc,
             )
         ).isEqualTo(expectedResult)
     }
@@ -185,7 +182,6 @@ class PaymentOptionsStateFactoryTest {
             linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Saved(defaultPaymentMethod),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = false,
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
@@ -207,7 +203,6 @@ class PaymentOptionsStateFactoryTest {
             linkBrand = LinkBrand.Link,
             currentSelection = PaymentSelection.Link(brand = LinkBrand.Link),
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = true,
             defaultPaymentMethodId = null,
         )
     }

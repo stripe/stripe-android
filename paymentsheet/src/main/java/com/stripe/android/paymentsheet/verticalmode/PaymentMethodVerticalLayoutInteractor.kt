@@ -104,7 +104,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>,
     private val canRemove: StateFlow<Boolean>,
     private val walletsState: StateFlow<WalletsState?>,
-    private val canUpdateFullPaymentMethodDetails: StateFlow<Boolean>,
+    private val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean>,
+    private val canChangeCbc: StateFlow<Boolean>,
     private val updateSelection: (PaymentSelection?, Boolean) -> Unit,
     private val isCurrentScreen: StateFlow<Boolean>,
     private val reportPaymentMethodTypeSelected: (PaymentMethodCode) -> Unit,
@@ -179,7 +180,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                     }
                 },
                 walletsState = viewModel.walletsState,
-                canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder.canUpdateFullPaymentMethodDetails,
+                canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
+                    .canUpdateCardExpiryAndBillingDetails,
+                canChangeCbc = viewModel.customerStateHolder.canChangeCbc,
                 isCurrentScreen = isCurrentScreen,
                 reportPaymentMethodTypeSelected = viewModel.eventReporter::onSelectPaymentMethod,
                 reportFormShown = viewModel.eventReporter::onPaymentMethodFormShown,
@@ -242,13 +245,19 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods,
         displayedSavedPaymentMethod,
         canRemove,
-        canUpdateFullPaymentMethodDetails,
-    ) { paymentMethods, displayedSavedPaymentMethod, canRemove, canUpdateFullPaymentMethodDetails ->
+        canUpdateCardExpiryAndBillingDetails,
+        canChangeCbc,
+    ) { paymentMethods,
+        displayedSavedPaymentMethod,
+        canRemove,
+        canUpdateCardExpiryAndBillingDetails,
+        canChangeCbc ->
         getAvailableSavedPaymentMethodAction(
             paymentMethods = paymentMethods,
             savedPaymentMethod = displayedSavedPaymentMethod,
             canRemove = canRemove,
-            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+            canChangeCbc = canChangeCbc,
         )
     }
 
@@ -504,7 +513,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         paymentMethods: List<PaymentMethod>?,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
         canRemove: Boolean,
-        canUpdateFullPaymentMethodDetails: Boolean,
+        canUpdateCardExpiryAndBillingDetails: Boolean,
+        canChangeCbc: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
         if (paymentMethods == null || savedPaymentMethod == null) {
             return PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
@@ -516,7 +526,8 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 getSavedPaymentMethodActionForOnePaymentMethod(
                     canRemove = canRemove,
                     savedPaymentMethod = savedPaymentMethod,
-                    canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                    canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                    canChangeCbc = canChangeCbc,
                 )
             }
             else ->
@@ -527,13 +538,14 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun getSavedPaymentMethodActionForOnePaymentMethod(
         canRemove: Boolean,
         savedPaymentMethod: DisplayableSavedPaymentMethod?,
-        canUpdateFullPaymentMethodDetails: Boolean,
+        canUpdateCardExpiryAndBillingDetails: Boolean,
+        canChangeCbc: Boolean,
     ): PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction {
-        val canUpdatePaymentMethod = savedPaymentMethod?.paymentMethod?.isModifiable(
-            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
-            isCbcEligible = savedPaymentMethod.isCbcEligible,
-        ) == true
-        return if (canUpdatePaymentMethod || canRemove) {
+        return if (savedPaymentMethod?.paymentMethod?.isModifiable(
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                canChangeCbc = canChangeCbc,
+            ) == true || canRemove
+        ) {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.MANAGE_ONE
         } else {
             PaymentMethodVerticalLayoutInteractor.SavedPaymentMethodAction.NONE
