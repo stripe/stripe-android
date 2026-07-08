@@ -6,8 +6,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 internal data class CryptoConsumerWalletResponse(
     val id: String,
-    @SerialName("livemode")
-    val liveMode: Boolean = false,
     val network: CryptoNetwork,
     @SerialName("wallet_address")
     val walletAddress: String,
@@ -17,7 +15,6 @@ internal data class CryptoConsumerWalletResponse(
     fun toCryptoConsumerWallet(): CryptoConsumerWallet {
         return CryptoConsumerWallet(
             id = id,
-            isLiveMode = liveMode,
             network = network,
             walletAddress = walletAddress,
             verifiedOwnership = verifiedOwnership,

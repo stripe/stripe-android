@@ -3,10 +3,10 @@ package com.stripe.android.crypto.onramp.exception
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Indicates that Crypto Onramp does not support the requested wallet network for this operation.
+ * Indicates that a Stripe API request failed without a more specific Crypto Onramp category.
  */
 @ExperimentalCryptoOnramp
-class UnsupportedNetworkApiErrorException internal constructor(
+class UncategorizedApiException internal constructor(
     apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,
@@ -14,10 +14,9 @@ class UnsupportedNetworkApiErrorException internal constructor(
     apiErrorContext = apiErrorContext,
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
-        summary = apiErrorContext.apiErrorMessage
-            ?: "Crypto Onramp doesn't support this wallet network for the requested operation.",
-        code = apiErrorContext.code(fallback = CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE),
-        nextStep = "Use a network supported by Crypto Onramp for this operation, then retry the request.",
+        summary = apiErrorContext.apiErrorMessage ?: "Stripe API request failed.",
+        code = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE),
+        nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
         docUrl = apiErrorContext.docUrl,
         sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
@@ -29,7 +28,7 @@ class UnsupportedNetworkApiErrorException internal constructor(
     ),
 ) {
     override val code: String
-        get() = apiErrorContext.code(fallback = CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE)
 }
 
-internal const val CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE = "crypto_onramp_unsupported_network"
+private const val UNCATEGORIZED_API_ERROR_CODE = "uncategorized_api_error"

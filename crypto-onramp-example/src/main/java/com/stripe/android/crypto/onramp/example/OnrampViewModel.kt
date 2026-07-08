@@ -20,10 +20,10 @@ import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.model.OnrampUserData
 import com.stripe.android.crypto.onramp.example.model.Screen
 import com.stripe.android.crypto.onramp.example.network.LoginSignUpResponse
+import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.network.TestBackendRepository
 import com.stripe.android.crypto.onramp.example.store.OnrampUserDataStore
-import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
 import com.stripe.android.crypto.onramp.model.LinkUserInfo
@@ -474,16 +474,31 @@ internal class OnrampViewModel(
                 }
             }
             is OnrampCheckoutResult.Failed -> {
-                val error = result.error
-                _message.value = if (error is WalletOwnershipVerificationRequiredException) {
-                    "Checkout requires wallet ownership verification for ${error.walletAddress.orEmpty()}"
-                } else {
-                    "Checkout failed: ${error.message}"
+                val walletOwnershipSession = _uiState.value.onrampSession
+                    ?.takeIf { it.requiresWalletOwnershipVerification }
+                val walletAddress = walletOwnershipSession?.transactionDetails?.walletAddress
+                val walletNetwork = walletOwnershipSession
+                    ?.transactionDetails
+                    ?.destinationNetwork
+                    ?.toCryptoNetwork()
+
+                _message.value = when {
+                    walletOwnershipSession != null -> {
+                        "Checkout requires wallet ownership verification for ${walletAddress.orEmpty()}"
+                    }
+                    else -> "Checkout failed: ${result.error.message}"
                 }
                 _uiState.update {
                     it.copy(
                         screen = Screen.AuthenticatedOperations,
-                        loadingMessage = null
+                        loadingMessage = null,
+                        walletAddress = walletAddress ?: it.walletAddress,
+                        network = walletNetwork ?: it.network,
+                        walletOwnershipVerified = if (walletOwnershipSession != null) {
+                            false
+                        } else {
+                            it.walletOwnershipVerified
+                        }
                     )
                 }
             }
@@ -1156,6 +1171,13 @@ internal class OnrampViewModel(
         return "$walletAddress+$cryptoCustomerId+$challengeId"
     }
 
+    private val OnrampSessionResponse.requiresWalletOwnershipVerification: Boolean
+        get() = transactionDetails.lastError == WALLET_OWNERSHIP_VERIFICATION_REQUIRED
+
+    private fun String.toCryptoNetwork(): CryptoNetwork? {
+        return CryptoNetwork.entries.firstOrNull { it.value == this }
+    }
+
     private fun handleError(error: Throwable, onNonAuthError: () -> Unit = {}) {
         if (!error.isLinkAuthorizationError()) {
             onNonAuthError()
@@ -1302,6 +1324,7 @@ internal class OnrampViewModel(
 }
 
 private const val DEFAULT_DESTINATION_NETWORK = "ethereum"
+private const val WALLET_OWNERSHIP_VERIFICATION_REQUIRED = "wallet_ownership_verification_required"
 
 private fun List<String>.joinToStringOrNone(): String {
     return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"

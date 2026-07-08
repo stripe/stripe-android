@@ -3,10 +3,10 @@ package com.stripe.android.crypto.onramp.exception
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Indicates that a Stripe API request failed without a more specific Crypto Onramp category.
+ * Indicates that the submitted signature does not prove control of the wallet.
  */
 @ExperimentalCryptoOnramp
-class UncategorizedApiErrorException internal constructor(
+class InvalidWalletOwnershipSignatureApiException internal constructor(
     apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,
@@ -14,9 +14,11 @@ class UncategorizedApiErrorException internal constructor(
     apiErrorContext = apiErrorContext,
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
-        summary = apiErrorContext.apiErrorMessage ?: "Stripe API request failed.",
-        code = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE),
-        nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
+        summary = apiErrorContext.apiErrorMessage
+            ?: "Wallet ownership verification failed: the submitted signature does not prove control of the wallet.",
+        code = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE),
+        nextStep = "Sign the exact challenge message with the registered wallet address, then submit the " +
+            "resulting signature for the same challenge ID.",
         docUrl = apiErrorContext.docUrl,
         sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
@@ -28,7 +30,7 @@ class UncategorizedApiErrorException internal constructor(
     ),
 ) {
     override val code: String
-        get() = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE)
 }
 
-private const val UNCATEGORIZED_API_ERROR_CODE = "uncategorized_api_error"
+internal const val INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE = "crypto_onramp_invalid_wallet_ownership_signature"

@@ -85,6 +85,16 @@ public abstract class com/stripe/android/crypto/onramp/exception/CryptoOnrampApi
 	public final fun getUserMessage ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/crypto/onramp/exception/InvalidWalletOwnershipChallengeApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/crypto/onramp/exception/InvalidWalletOwnershipSignatureApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+	public static final field $stable I
+	public fun getCode ()Ljava/lang/String;
+}
+
 public final class com/stripe/android/crypto/onramp/exception/MissingConsumerSecretException : java/lang/IllegalStateException {
 	public static final field $stable I
 }
@@ -129,31 +139,24 @@ public abstract interface class com/stripe/android/crypto/onramp/exception/Strip
 	public abstract fun getUserMessage ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+public final class com/stripe/android/crypto/onramp/exception/UncategorizedApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
 	public fun getCode ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/exception/UnsupportedNetworkApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+public final class com/stripe/android/crypto/onramp/exception/UnsupportedNetworkApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
 	public fun getCode ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/exception/WalletNotFoundApiErrorException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
+public final class com/stripe/android/crypto/onramp/exception/WalletNotFoundApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
 	public fun getCode ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipVerificationRequiredException : java/lang/IllegalStateException {
+public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipChallengeExpiredApiException : com/stripe/android/crypto/onramp/exception/CryptoOnrampApiException {
 	public static final field $stable I
-	public static final field CODE Ljava/lang/String;
-	public static final field Companion Lcom/stripe/android/crypto/onramp/exception/WalletOwnershipVerificationRequiredException$Companion;
-	public final fun getCode ()Ljava/lang/String;
-	public final fun getNetwork ()Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
-	public final fun getWalletAddress ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipVerificationRequiredException$Companion {
+	public fun getCode ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/crypto/onramp/model/CryptoConsumerWallet {
@@ -164,7 +167,6 @@ public final class com/stripe/android/crypto/onramp/model/CryptoConsumerWallet {
 	public final fun getVerifiedOwnership ()Z
 	public final fun getWalletAddress ()Ljava/lang/String;
 	public fun hashCode ()I
-	public final fun isLiveMode ()Z
 	public fun toString ()Ljava/lang/String;
 }
 

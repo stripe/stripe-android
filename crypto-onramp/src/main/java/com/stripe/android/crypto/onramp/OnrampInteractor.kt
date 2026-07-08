@@ -16,7 +16,6 @@ import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
-import com.stripe.android.crypto.onramp.exception.WalletOwnershipVerificationRequiredException
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -1045,26 +1044,10 @@ internal class OnrampInteractor @Inject constructor(
         )
             // Retrieve and return the PaymentIntent using the special publishable key
             .flatMapCatching { onrampSession ->
-                val transactionDetails = onrampSession.transactionDetails
-                when {
-                    transactionDetails?.lastError == WALLET_OWNERSHIP_VERIFICATION_REQUIRED -> {
-                        Result.failure(
-                            WalletOwnershipVerificationRequiredException(
-                                walletAddress = transactionDetails.walletAddress,
-                                network = transactionDetails.destinationCryptoNetwork,
-                            )
-                        )
-                    }
-                    onrampSession.paymentIntentClientSecret != null -> {
-                        cryptoApiRepository.retrievePaymentIntent(
-                            clientSecret = onrampSession.paymentIntentClientSecret,
-                            publishableKey = platformApiKey
-                        )
-                    }
-                    else -> {
-                        Result.failure(PaymentFailedException())
-                    }
-                }
+                cryptoApiRepository.retrievePaymentIntent(
+                    clientSecret = onrampSession.paymentIntentClientSecret,
+                    publishableKey = platformApiKey
+                )
             }
     }
 
@@ -1153,7 +1136,6 @@ internal class OnrampInteractor @Inject constructor(
 
 private const val KEY_PENDING_CHECKOUT = "onramp_pending_checkout"
 private const val KEY_LAUNCHED_NEXT_ACTION = "onramp_launched_next_action"
-private const val WALLET_OWNERSHIP_VERIFICATION_REQUIRED = "wallet_ownership_verification_required"
 
 @Parcelize
 private data class PendingCheckout(
