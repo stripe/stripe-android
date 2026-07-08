@@ -1,14 +1,23 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.12.0 - 2026-07-08
 
 ### Connect
 * [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+* [CHANGED][13366](https://github.com/stripe/stripe-android/pull/13366) The Payments and Payouts embedded components are now generally available; removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+* [ADDED][13240](https://github.com/stripe/stripe-android/pull/13240) Added new `AppAttestationUnavailableException` for improved error reporting when app attestation is not configured for Crypto Onramp (requires @OptIn(ExperimentalCryptoOnramp::class))
 
+### PaymentSheet
+* [ADDED][13338](https://github.com/stripe/stripe-android/pull/13338) Added inline address autocomplete support for billing address entry in PaymentSheet using Google Places API when available
+* [CHANGED][13345](https://github.com/stripe/stripe-android/pull/13345) Updated logic for determining if saved payment methods can be modified or have card brand choice enabled, improving consistency across the PaymentSheet UI
+* [FIXED][13349](https://github.com/stripe/stripe-android/pull/13349) Fixed an issue where selecting 'Unknown' card brand in PaymentSheet resulted in incorrect preferred network behavior
+* [FIXED][13330](https://github.com/stripe/stripe-android/pull/13330) Fixed issues where inline address autocomplete jobs were not cancelled properly, preventing canceled requests from leaking or completing after dismissal in PaymentSheet forms
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
