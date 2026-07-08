@@ -57,4 +57,5 @@ dependencies {
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.espresso.core
 }
