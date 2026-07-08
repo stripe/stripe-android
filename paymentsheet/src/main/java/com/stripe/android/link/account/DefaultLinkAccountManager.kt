@@ -290,7 +290,7 @@ internal class DefaultLinkAccountManager @Inject constructor(
 
     override suspend fun sharePaymentDetails(
         paymentDetailsId: String,
-        expectedPaymentMethodType: String,
+        expectedPaymentMethodType: String?,
         billingPhone: String?,
         cvc: String?,
         allowRedisplay: String?,

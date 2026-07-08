@@ -520,6 +520,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
         return ElementsSession.Customer(
             paymentMethods = listOf(),
             defaultPaymentMethod = null,
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_1",
                 customerId = "cus_1",

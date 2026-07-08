@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.stripe.android.model.Address
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CardUpdateParams
 
@@ -48,7 +49,7 @@ internal fun toUpdateParams(
     billingDetailsEntry: BillingDetailsEntry?,
 ): CardUpdateParams {
     return CardUpdateParams(
-        cardBrand = cardDetailsEntry?.cardBrandChoice?.brand,
+        cardBrand = cardDetailsEntry?.cardBrandChoice?.brand?.takeIf { it != CardBrand.Unknown },
         expiryMonth = cardDetailsEntry?.expiryDateState?.expiryMonth,
         expiryYear = cardDetailsEntry?.expiryDateState?.expiryYear,
         billingDetails = createBillingDetails(billingDetailsEntry)

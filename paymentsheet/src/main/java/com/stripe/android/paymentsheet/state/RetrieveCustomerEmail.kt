@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import javax.inject.Inject
@@ -17,33 +18,37 @@ internal interface RetrieveCustomerEmail {
     suspend operator fun invoke(
         configuration: CommonConfiguration,
         customerMetadata: CustomerMetadata?,
+        customerEmail: String?,
     ): String?
 }
 
 internal class DefaultRetrieveCustomerEmail @Inject constructor(
     private val customerRepository: CustomerRepository,
+    private val durationProvider: DurationProvider,
 ) : RetrieveCustomerEmail {
 
     override suspend operator fun invoke(
         configuration: CommonConfiguration,
         customerMetadata: CustomerMetadata?,
+        customerEmail: String?,
     ): String? {
-        val defaultEmail = configuration.defaultBillingDetails?.email
-        return when (customerMetadata) {
-            is CustomerMetadata.CustomerSession -> {
-                defaultEmail ?: retrieveEmailFromApi(
-                    customerId = customerMetadata.id,
-                    ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                )
+        return durationProvider.measureDuration(
+            DurationProvider.Key.PaymentSheetLoadRetrieveCustomer,
+        ) {
+            val defaultEmail = configuration.defaultBillingDetails?.email
+            when (customerMetadata) {
+                is CustomerMetadata.CustomerSession -> {
+                    defaultEmail ?: customerEmail
+                }
+                is CustomerMetadata.LegacyEphemeralKey -> {
+                    defaultEmail ?: retrieveEmailFromApi(
+                        customerId = customerMetadata.id,
+                        ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                    )
+                }
+                is CustomerMetadata.CheckoutSession,
+                null -> defaultEmail
             }
-            is CustomerMetadata.LegacyEphemeralKey -> {
-                defaultEmail ?: retrieveEmailFromApi(
-                    customerId = customerMetadata.id,
-                    ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
-                )
-            }
-            is CustomerMetadata.CheckoutSession,
-            null -> defaultEmail
         }
     }
 

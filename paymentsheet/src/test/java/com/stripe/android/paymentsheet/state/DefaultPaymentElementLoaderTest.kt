@@ -7,15 +7,19 @@ import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
+import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
+import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.injection.GooglePayRepositoryFactory
@@ -66,8 +70,12 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.MERCHANT_DISPLAY_NAME
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.FakeLoadingEventReporter
+import com.stripe.android.paymentsheet.analytics.FakeLogFcLiteExperiment
 import com.stripe.android.paymentsheet.analytics.FakeLogLinkHoldbackExperiment
+import com.stripe.android.paymentsheet.analytics.FakePaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
@@ -88,6 +96,7 @@ import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeElementsSessionRepository.Companion.DEFAULT_ELEMENTS_SESSION_CONFIG_ID
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkStore
 import com.stripe.android.utils.FakePaymentMethodFilter
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -174,6 +183,14 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
+
+    @Test
+    fun `isNfcScanningAvailable in metadata is true if isNfcScanningAvailable is true`() =
+        runIsNfcScanningAvailableTest(expectedIsNfcScanningAvailable = true)
+
+    @Test
+    fun `isNfcScanningAvailable in metadata is false if isNfcScanningAvailable is false`() =
+        runIsNfcScanningAvailableTest(expectedIsNfcScanningAvailable = false)
 
     @Test
     fun `load with empty merchantDisplayName returns failure`() = runScenario {
@@ -340,6 +357,90 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             ).getOrThrow().paymentMethodMetadata.isGooglePayReady
         ).isFalse()
+
+        consumeLoadingEvents()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load with checkout session automatic tax billing should disable google pay`() = runScenario {
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            userFacingLogger = userFacingLogger,
+        )
+        val checkoutSessionResponse = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+
+        assertThat(
+            loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = "DefaultPaymentElementLoaderTest",
+                    checkoutSessionResponse = checkoutSessionResponse,
+                ),
+                PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                    .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
+                    .build(),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow().paymentMethodMetadata.isGooglePayReady
+        ).isFalse()
+
+        assertThat(userFacingLogger.getLoggedMessages())
+            .contains(
+                "Google Pay is disabled because automatic tax is configured to use the billing address."
+            )
+
+        consumeLoadingEvents()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load with checkout session automatic tax billing and no google pay config logs missing config`() = runScenario {
+        val userFacingLogger = FakeUserFacingLogger()
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isGooglePayReady = true,
+            userFacingLogger = userFacingLogger,
+        )
+        val checkoutSessionResponse = createCheckoutSessionResponse(
+            canDetachPaymentMethod = true,
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            automaticTaxEnabled = true,
+            taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+        )
+
+        assertThat(
+            loader.load(
+                initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                    instancesKey = "DefaultPaymentElementLoaderTest",
+                    checkoutSessionResponse = checkoutSessionResponse,
+                ),
+                PaymentSheetFixtures.CONFIG_MINIMUM.newBuilder()
+                    .defaultBillingDetails(PaymentSheet.BillingDetails(email = "customer@email.com"))
+                    .build(),
+                metadata = PaymentElementLoader.Metadata(
+                    initializedViaCompose = false,
+                ),
+            ).getOrThrow().paymentMethodMetadata.isGooglePayReady
+        ).isFalse()
+
+        assertThat(userFacingLogger.getLoggedMessages())
+            .contains("GooglePayConfiguration is not set.")
+        assertThat(userFacingLogger.getLoggedMessages())
+            .doesNotContain(
+                "Google Pay is disabled because automatic tax is configured to use the billing address."
+            )
 
         consumeLoadingEvents()
 
@@ -2666,7 +2767,7 @@ internal class DefaultPaymentElementLoaderTest {
             val cards = PaymentMethodFactory.cards(4)
             val loader = createPaymentElementLoader(
                 customerRepo = repository,
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = cards,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
@@ -2711,7 +2812,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has remove permissions enabled, should enable remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2762,7 +2863,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has remove permissions disabled, should disable remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2813,7 +2914,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has Payment Sheet component disabled, should disable permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2864,7 +2965,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `When 'elements_session' has partial remove permissions, should enable partial remove permissions in customerMetadata`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -2915,7 +3016,7 @@ internal class DefaultPaymentElementLoaderTest {
     fun `customer session should have canUpdateFullPaymentMethodDetails permission enabled`() =
         runScenario {
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(4),
                     session = createElementsSessionCustomerSession(
                         createEnabledMobilePaymentElement(
@@ -3226,7 +3327,7 @@ internal class DefaultPaymentElementLoaderTest {
         loaderScenario.prefsRepository.setSavedSelection(SavedSelection.PaymentMethod(lastUsed.id))
 
         val loader = loaderScenario.createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = paymentMethods,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_1",
@@ -3311,17 +3412,13 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
     @Test
-    fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
-        runScenario(
-            customerRepo = FakeCustomerRepository(
-                onRetrieveCustomer = {
-                    CustomerFactory.create(email = "email@stripe.com")
-                }
-            ),
-        ) {
+    fun `When using 'CustomerSession' & no default billing details, elements session customer email is used for link state`() =
+        runScenario {
+            val customerEmail = "example@stripe.com"
             val loader = createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = PaymentMethodFactory.cards(1),
+                    email = customerEmail,
                     session = ElementsSession.Customer.Session(
                         id = "cuss_1",
                         customerId = "cus_1",
@@ -3337,7 +3434,7 @@ internal class DefaultPaymentElementLoaderTest {
                 )
             )
 
-            loader.load(
+            val result = loader.load(
                 initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("secret"),
                 paymentSheetConfiguration = mockConfiguration(
                     customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
@@ -3351,9 +3448,8 @@ internal class DefaultPaymentElementLoaderTest {
                 ),
             )
 
-            val request = customerRepository.retrieveCustomerRequests.awaitItem()
-            assertThat(request.customerId).isEqualTo("cus_1")
-            assertThat(request.ephemeralKeySecret).isEqualTo("ek_123")
+            val linkState = result.getOrThrow().paymentMethodMetadata.linkState
+            assertThat(linkState?.configuration?.customerInfo?.email).isEqualTo(customerEmail)
 
             assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
             assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -3474,7 +3570,7 @@ internal class DefaultPaymentElementLoaderTest {
 
         runFilterScenario {
             val loader = loaderScenario.createPaymentElementLoader(
-                customer = ElementsSession.Customer(
+                customer = createElementsSessionCustomer(
                     paymentMethods = paymentMethodsForTestingOrdering,
                     session = createElementsSessionCustomerSession(
                         mobilePaymentElementComponent =
@@ -4076,6 +4172,123 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
+    @Test
+    fun `logs exposure and fetches messaging for pmm experiment treatment group`() = runScenario {
+        val reporter = FakeEventReporter()
+        val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(
+            eventReporter = reporter,
+            mode = EventReporter.Mode.Complete
+        )
+        val helper = FakePaymentMethodMessagePromotionsHelper()
+        val loader = createPaymentElementLoader(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                error = null,
+                linkSettings = null,
+                experimentsData = ElementsSession.ExperimentsData(
+                    arbId = "arb123",
+                    experimentAssignments = mapOf(
+                        ElementsSession.ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to
+                            "treatment"
+                    )
+                )
+            ),
+            paymentMethodMessagePromotionsHelper = helper,
+            paymentMethodMessageExperimentHandler = handler
+        )
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            )
+        )
+
+        assertThat(helper.calls.awaitItem()).isNotNull()
+        val exposure = reporter.experimentExposureCalls.awaitItem()
+        assertThat(exposure.experiment.group).isEqualTo("treatment")
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `logs exposure does not fetch messaging for pmm experiment control group`() = runScenario {
+        val reporter = FakeEventReporter()
+        val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(
+            eventReporter = reporter,
+            mode = EventReporter.Mode.Complete
+        )
+        val helper = FakePaymentMethodMessagePromotionsHelper()
+        val loader = createPaymentElementLoader(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                error = null,
+                linkSettings = null,
+                experimentsData = ElementsSession.ExperimentsData(
+                    arbId = "arb123",
+                    experimentAssignments = mapOf(
+                        ElementsSession.ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to
+                            "control"
+                    )
+                )
+            ),
+            paymentMethodMessagePromotionsHelper = helper,
+            paymentMethodMessageExperimentHandler = handler
+        )
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            )
+        )
+        helper.calls.expectNoEvents()
+        val exposure = reporter.experimentExposureCalls.awaitItem()
+        assertThat(exposure.experiment.group).isEqualTo("control")
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `does not log exposure or fetch messaging if not assigned to pmm experiment`() = runScenario {
+        val reporter = FakeEventReporter()
+        val handler = DefaultPaymentMethodMessagePromotionsExperimentHandler(
+            eventReporter = reporter,
+            mode = EventReporter.Mode.Complete
+        )
+        val helper = FakePaymentMethodMessagePromotionsHelper()
+        val loader = createPaymentElementLoader(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                error = null,
+                linkSettings = null,
+                experimentsData = ElementsSession.ExperimentsData(
+                    arbId = "arb123",
+                    experimentAssignments = mapOf()
+                )
+            ),
+            paymentMethodMessagePromotionsHelper = helper,
+            paymentMethodMessageExperimentHandler = handler
+        )
+        loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            )
+        )
+        helper.calls.expectNoEvents()
+        reporter.experimentExposureCalls.expectNoEvents()
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
     private fun removeLastPaymentMethodTest(
         customer: PaymentSheet.CustomerConfiguration,
         shouldDisableMobilePaymentElement: Boolean = false,
@@ -4085,7 +4298,7 @@ internal class DefaultPaymentElementLoaderTest {
         test: (CustomerMetadata) -> Unit,
     ) = runScenario {
         val loader = createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = PaymentMethodFactory.cards(4),
                 session = createElementsSessionCustomerSession(
                     if (shouldDisableMobilePaymentElement) {
@@ -4338,30 +4551,6 @@ internal class DefaultPaymentElementLoaderTest {
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
     }
 
-    @Test
-    fun `prefetches PMM promotions if enabled`() = runScenario {
-        FeatureFlags.paymentMethodMessagePromotions.setEnabled(true)
-        val helper = FakePaymentMethodMessagePromotionsHelper()
-        val loader = createPaymentElementLoader(
-            paymentMethodMessagePromotionsHelper = helper
-        )
-
-        loader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("test_123"),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Merchant"
-            ),
-            metadata = PaymentElementLoader.Metadata(
-                initializedViaCompose = false,
-            )
-        )
-
-        assertThat(helper.calls.awaitItem()).isNotNull()
-        helper.validate()
-        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
-        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
-    }
-
     private fun testCustomPaymentMethods(
         requestedCustomPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
         returnedCustomPaymentMethods: List<ElementsSession.CustomPaymentMethod>,
@@ -4470,6 +4659,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createElementsSessionCustomer(
         paymentMethods: List<PaymentMethod> = PaymentMethodFactory.cards(1),
+        email: String? = null,
         isPaymentMethodSaveEnabled: Boolean? = null,
         mobilePaymentElementComponent: ElementsSession.Customer.Components.MobilePaymentElement =
             isPaymentMethodSaveEnabled?.let {
@@ -4481,22 +4671,25 @@ internal class DefaultPaymentElementLoaderTest {
                     allowRedisplayOverride = null,
                     isPaymentMethodSetAsDefaultEnabled = false,
                 )
-            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled
+            } ?: ElementsSession.Customer.Components.MobilePaymentElement.Disabled,
+        session: ElementsSession.Customer.Session = ElementsSession.Customer.Session(
+            id = "cuss_1",
+            customerId = "cus_1",
+            liveMode = false,
+            apiKey = "ek_123",
+            apiKeyExpiry = 555555555,
+            components = ElementsSession.Customer.Components(
+                mobilePaymentElement = mobilePaymentElementComponent,
+                customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
+            ),
+        ),
+        defaultPaymentMethod: String? = null,
     ): ElementsSession.Customer {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
-            session = ElementsSession.Customer.Session(
-                id = "cuss_1",
-                customerId = "cus_1",
-                liveMode = false,
-                apiKey = "ek_123",
-                apiKeyExpiry = 555555555,
-                components = ElementsSession.Customer.Components(
-                    mobilePaymentElement = mobilePaymentElementComponent,
-                    customerSheet = ElementsSession.Customer.Components.CustomerSheet.Disabled,
-                ),
-            ),
-            defaultPaymentMethod = null,
+            email = email,
+            session = session,
+            defaultPaymentMethod = defaultPaymentMethod,
         )
     }
 
@@ -4538,6 +4731,91 @@ internal class DefaultPaymentElementLoaderTest {
             )
         ),
     )
+
+    @Test
+    fun `load populates expected timing keys`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadSessionLoad
+            )
+        ).isNotNull()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadCreateLinkState
+            )
+        ).isNotNull()
+        assertThat(
+            durationProvider.completedDuration(
+                DurationProvider.Key.PaymentSheetLoadCreateCustomerState
+            )
+        ).isNotNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `prefetchPMs timing key is absent when no legacy ephemeral key customer`() = runScenario {
+        val durationProvider = FakeDurationProvider()
+        val loader = createPaymentElementLoader(
+            durationProvider = durationProvider,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration("Merchant"),
+            metadata = PaymentElementLoader.Metadata(initializedViaCompose = false),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        // No legacy ephemeral key customer, so fetchSavedPaymentMethods should not be timed
+        assertThat(durationProvider.completedDuration(DurationProvider.Key.PaymentSheetLoadPrefetchPMs)).isNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    private fun runIsNfcScanningAvailableTest(
+        expectedIsNfcScanningAvailable: Boolean
+    ) = runScenario {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = expectedIsNfcScanningAvailable),
+        )
+
+        val state = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        assertThat(state.paymentMethodMetadata.isNfcScanningEnabled).isEqualTo(expectedIsNfcScanningAvailable)
+
+        consumeLoadingEvents()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
 
     private fun runFilterScenario(
         filteredPaymentMethods: List<PaymentMethod>? = null,
@@ -4612,6 +4890,7 @@ internal class DefaultPaymentElementLoaderTest {
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
         logLinkHoldbackExperiment: LogLinkHoldbackExperiment = FakeLogLinkHoldbackExperiment(),
+        logFcLiteExperiment: LogFcLiteExperiment = FakeLogFcLiteExperiment(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
         customPaymentMethods: List<ElementsSession.CustomPaymentMethod> = emptyList(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
@@ -4638,9 +4917,17 @@ internal class DefaultPaymentElementLoaderTest {
             },
         paymentMethodFilter: PaymentMethodFilter = FakePaymentMethodFilter.noOp(),
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper =
-            FakePaymentMethodMessagePromotionsHelper()
+            FakePaymentMethodMessagePromotionsHelper(),
+        durationProvider: FakeDurationProvider = FakeDurationProvider(),
+        paymentMethodMessageExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler =
+            FakePaymentMethodMessagePromotionsExperimentHandler(),
+        isNfcScanningAvailable: IsNfcScanningAvailable =
+            FakeIsNfcScanningAvailable(result = false),
     ): PaymentElementLoader {
-        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(customerRepo)
+        val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
+            customerRepo,
+            durationProvider,
+        )
         val createLinkState = DefaultCreateLinkState(
             accountStatusProvider = { linkAccountState },
             retrieveCustomerEmail = retrieveCustomerEmailImpl,
@@ -4667,6 +4954,7 @@ internal class DefaultPaymentElementLoaderTest {
             workContext = testDispatcher,
             createLinkState = createLinkState,
             logLinkHoldbackExperiment = logLinkHoldbackExperiment,
+            logFcLiteExperiment = logFcLiteExperiment,
             externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
             userFacingLogger = userFacingLogger,
             integrityRequestManager = integrityRequestManager,
@@ -4686,7 +4974,9 @@ internal class DefaultPaymentElementLoaderTest {
             createCustomerMetadata = CreateCustomerMetadata(errorReporter),
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
             tapToAddAvailabilityFactory = tapToAddAvailabilityFactory,
-            durationProvider = FakeDurationProvider(),
+            durationProvider = durationProvider,
+            paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
+            isNfcScanningAvailable = isNfcScanningAvailable,
         )
     }
 
@@ -4754,7 +5044,7 @@ internal class DefaultPaymentElementLoaderTest {
         }
 
         val loader = createPaymentElementLoader(
-            customer = ElementsSession.Customer(
+            customer = createElementsSessionCustomer(
                 paymentMethods = paymentMethodsForTestingOrdering,
                 session = createElementsSessionCustomerSession(
                     mobilePaymentElementComponent = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
@@ -4793,6 +5083,9 @@ internal class DefaultPaymentElementLoaderTest {
 
     private fun createCheckoutSessionResponse(
         canDetachPaymentMethod: Boolean,
+        stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        automaticTaxEnabled: Boolean = false,
+        taxAddressSource: CheckoutSessionResponse.TaxAddressSource? = null,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponseFactory.create(
             id = DEFAULT_CHECKOUT_SESSION_ID,
@@ -4800,7 +5093,7 @@ internal class DefaultPaymentElementLoaderTest {
             elementsSession = ElementsSession(
                 linkSettings = null,
                 paymentMethodSpecs = null,
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                stripeIntent = stripeIntent,
                 merchantCountry = null,
                 isGooglePayEnabled = true,
                 sessionsError = null,
@@ -4823,6 +5116,8 @@ internal class DefaultPaymentElementLoaderTest {
                 paymentMethods = PaymentMethodFactory.cards(2),
                 canDetachPaymentMethod = canDetachPaymentMethod,
             ),
+            automaticTaxEnabled = automaticTaxEnabled,
+            taxAddressSource = taxAddressSource,
         )
     }
 

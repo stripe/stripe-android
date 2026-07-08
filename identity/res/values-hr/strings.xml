@@ -144,6 +144,8 @@
   <string name="stripe_id_number">ID broj</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">Spreman/na sam</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Slika je snimljena</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Uneseni identifikacijski broj nije potpun.</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">4 zadnja broja socijalnog osiguranja</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Prezime</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Automatski</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Učitavanje</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Ručno</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Pomaknite osobni dokument bliže kameri</string>
   <!-- Instructional text when camera is too close to a document -->

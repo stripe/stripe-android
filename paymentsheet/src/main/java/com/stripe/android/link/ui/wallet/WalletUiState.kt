@@ -117,11 +117,12 @@ internal data class WalletUiState(
 
     private fun cardFundingAccepted(item: ConsumerPaymentDetails.PaymentDetails): Boolean {
         return when (item) {
-            is ConsumerPaymentDetails.BankAccount -> true
+            is ConsumerPaymentDetails.BankAccount,
+            is ConsumerPaymentDetails.Passthrough,
+            is ConsumerPaymentDetails.Generic -> true
             is ConsumerPaymentDetails.Card -> {
                 cardFundingFilter.isAccepted(item.funding.cardFunding)
             }
-            is ConsumerPaymentDetails.Passthrough -> true
         }
     }
 
@@ -175,5 +176,6 @@ private fun ConsumerPaymentDetails.PaymentDetails.makeMandateText(
             )
             else -> null
         }
+        is ConsumerPaymentDetails.Generic -> null
     }
 }

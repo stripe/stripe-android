@@ -1,6 +1,5 @@
 package com.stripe.android.link.ui.inline
 
-import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -118,24 +117,6 @@ internal class LinkInlineSignupViewTest {
     }
 
     @Test
-    fun when_expanded_inline_logo_visible() {
-        setContent(
-            expanded = true,
-            linkBrand = LinkBrand.Link,
-        )
-        onInlineLinkLogo().assertExists()
-    }
-
-    @Test
-    fun when_not_expanded_inline_logo_not_visible() {
-        setContent(
-            expanded = false,
-            linkBrand = LinkBrand.Link,
-        )
-        onInlineLinkLogo().assertDoesNotExist()
-    }
-
-    @Test
     fun checkbox_label_uses_link_brand_name_for_default_opt_in() {
         setContent(
             expanded = false,
@@ -162,13 +143,16 @@ internal class LinkInlineSignupViewTest {
     }
 
     @Test
-    fun inline_logo_content_description_uses_dynamic_brand_name() {
+    fun terms_logo_content_description_uses_dynamic_brand_name() {
         setContent(
             expanded = true,
+            signUpState = SignUpState.InputtingRemainingFields,
             linkBrand = LinkBrand.Onelink,
         )
 
-        onInlineLinkLogo().assertContentDescriptionContains("Onelink")
+        composeTestRule
+            .onNodeWithContentDescription("Onelink", useUnmergedTree = true)
+            .assertExists()
     }
 
     @Test
@@ -238,5 +222,4 @@ internal class LinkInlineSignupViewTest {
     private fun onPhoneField() = composeTestRule.onNodeWithText("Phone number")
     private fun onNameField() = composeTestRule.onNodeWithText("Full name")
     private fun onSaveMyInfo() = composeTestRule.onNodeWithText("Save my info", substring = true)
-    private fun onInlineLinkLogo() = composeTestRule.onNodeWithTag("LinkLogoIcon", useUnmergedTree = true)
 }

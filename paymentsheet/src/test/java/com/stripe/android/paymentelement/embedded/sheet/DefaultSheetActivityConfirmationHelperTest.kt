@@ -9,8 +9,9 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -80,10 +81,12 @@ internal class DefaultSheetActivityConfirmationHelperTest {
         confirmationHelper.confirm()
 
         assertThat(stateHelper.resultTurbine.awaitItem()).isEqualTo(
-            FormResult.Complete(
+            EmbeddedActivityResult.Complete(
                 selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
                 hasBeenConfirmed = false,
                 customerState = null,
+                shouldInvokeSelectionCallback = false,
+                launchMode = EmbeddedLaunchMode.Form,
             )
         )
 
@@ -120,6 +123,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             eventReporter = eventReporter,
             customerStateHolder = customerStateHolder,
             coroutineScope = backgroundScope,
+            launchMode = EmbeddedLaunchMode.Form,
         )
 
         Scenario(

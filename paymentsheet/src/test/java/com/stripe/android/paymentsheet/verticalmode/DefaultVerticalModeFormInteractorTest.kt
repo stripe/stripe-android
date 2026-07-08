@@ -13,6 +13,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
@@ -43,6 +44,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.shouldAutomaticallyLaunchCardScan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -215,7 +217,9 @@ internal class DefaultVerticalModeFormInteractorTest {
 
             val controller = elements[0].controller as CardDetailsSectionController
 
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(
+                controller.cardDetailsAction?.shouldAutomaticallyLaunchCardScan
+            ).isTrue()
         }
     }
 
@@ -229,7 +233,9 @@ internal class DefaultVerticalModeFormInteractorTest {
 
             val controller = elements[0].controller as CardDetailsSectionController
 
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(
+                controller.cardDetailsAction?.shouldAutomaticallyLaunchCardScan
+            ).isFalse()
         }
     }
 
@@ -256,6 +262,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
+            launchMode = EmbeddedLaunchMode.Form,
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -310,6 +317,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
+            launchMode = EmbeddedLaunchMode.Form,
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),

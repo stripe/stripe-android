@@ -1097,14 +1097,6 @@ internal class FlowControllerTest {
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
-        }
-
-        networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
         ) { response ->
@@ -1163,14 +1155,6 @@ internal class FlowControllerTest {
 
         networkRule.elementsSession { response ->
             response.testBodyFromFile("elements-sessions-requires_pm_with_link_and_cs.json")
-        }
-
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
         }
 
         networkRule.enqueue(

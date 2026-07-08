@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkPaymentDetails
 import com.stripe.android.model.PaymentMethod
@@ -27,34 +26,6 @@ internal data class DisplayableSavedPaymentMethod private constructor(
             is SavedPaymentMethod.USBankAccount,
             SavedPaymentMethod.Unexpected -> false
         }
-
-    fun canChangeCbc(): Boolean {
-        return when (savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> {
-                val hasMultipleNetworks = savedPaymentMethod.card.networks?.available?.let { available ->
-                    available.size > 1
-                } ?: false
-
-                return isCbcEligible && hasMultipleNetworks
-            }
-            is SavedPaymentMethod.SepaDebit,
-            is SavedPaymentMethod.USBankAccount,
-            is SavedPaymentMethod.Link,
-            SavedPaymentMethod.Unexpected -> false
-        }
-    }
-
-    fun isModifiable(canUpdateFullPaymentMethodDetails: Boolean): Boolean {
-        return when (savedPaymentMethod) {
-            is SavedPaymentMethod.Card -> {
-                canUpdateFullPaymentMethodDetails || (savedPaymentMethod.isExpired().not() && canChangeCbc())
-            }
-            is SavedPaymentMethod.SepaDebit,
-            is SavedPaymentMethod.USBankAccount,
-            is SavedPaymentMethod.Link,
-            SavedPaymentMethod.Unexpected -> false
-        }
-    }
 
     fun getDescription() = when (savedPaymentMethod) {
         is SavedPaymentMethod.Card -> {
@@ -87,6 +58,7 @@ internal data class DisplayableSavedPaymentMethod private constructor(
                         savedPaymentMethod.paymentDetails.last4
                     )
                 }
+                is LinkPaymentDetails.Generic -> displayName
             }
         }
         is SavedPaymentMethod.Unexpected -> resolvableString("")
@@ -171,15 +143,7 @@ internal sealed interface SavedPaymentMethod {
         val billingDetails: PaymentMethod.BillingDetails?
     ) : SavedPaymentMethod {
         fun isExpired(): Boolean {
-            val cardExpiryMonth = card.expiryMonth
-            val cardExpiryYear = card.expiryYear
-            // If the card's expiration dates are missing, we can't conclude that it is expired, so we don't want to
-            // show the user an expired card error.
-            return cardExpiryMonth != null && cardExpiryYear != null &&
-                !DateUtils.isExpiryDataValid(
-                    expiryMonth = cardExpiryMonth,
-                    expiryYear = cardExpiryYear,
-                )
+            return card.isExpired()
         }
     }
     data class USBankAccount(val usBankAccount: PaymentMethod.USBankAccount) : SavedPaymentMethod

@@ -277,6 +277,8 @@ internal class CreateCustomerMetadataTest {
                     lineItems = emptyList(),
                     shippingOptions = emptyList(),
                     adaptivePricingInfo = null,
+                    automaticTaxEnabled = false,
+                    taxAddressSource = null,
                 ),
             )
         }
@@ -287,6 +289,7 @@ internal class CreateCustomerMetadataTest {
             return ElementsSession.Customer(
                 paymentMethods = emptyList(),
                 defaultPaymentMethod = null,
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     customerId = "cus_1",

@@ -46,9 +46,84 @@ class AddressTextFieldControllerTest {
         }
     }
 
-    private fun createAddressController(): AddressTextFieldController {
+    @Test
+    fun `non-inline mode - is not editable`() = runTest {
+        val controller = createAddressController(isInlineAutocompleteEnabled = false)
+
+        assertThat(controller.isEditable).isFalse()
+    }
+
+    @Test
+    fun `inline mode - is editable and tracks query`() = runTest {
+        val controller = createAddressController(isInlineAutocompleteEnabled = true)
+
+        assertThat(controller.isEditable).isTrue()
+
+        turbineScope {
+            val queryTurbine = controller.inlineQuery.testIn(this)
+
+            assertThat(queryTurbine.awaitItem()).isEqualTo("")
+
+            controller.onInlineQueryChanged("123 Main St")
+
+            assertThat(queryTurbine.awaitItem()).isEqualTo("123 Main St")
+
+            queryTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `non-inline mode - query ignored when inline is disabled`() = runTest {
+        val controller = createAddressController(isInlineAutocompleteEnabled = false)
+
+        turbineScope {
+            val queryTurbine = controller.inlineQuery.testIn(this)
+
+            queryTurbine.awaitItem() // initial ""
+
+            controller.onInlineQueryChanged("should be ignored")
+
+            queryTurbine.expectNoEvents()
+
+            queryTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `predictions dropdown is hidden when state is idle`() {
+        assertThat(
+            shouldShowPredictionsDropdown(
+                AutocompleteAddressInteractor.InlinePredictionsState.Idle
+            )
+        ).isFalse()
+    }
+
+    @Test
+    fun `predictions dropdown remains shown when results are empty`() {
+        assertThat(
+            shouldShowPredictionsDropdown(
+                AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = "123 Main",
+                    predictions = emptyList()
+                )
+            )
+        ).isTrue()
+    }
+
+    private fun createAddressController(isInlineAutocompleteEnabled: Boolean = false): AddressTextFieldController {
         return AddressTextFieldController(
             label = resolvableString(value = "Name"),
+            addressInputMode = if (isInlineAutocompleteEnabled) {
+                AddressInputMode.AutocompleteInline(
+                    googleApiKey = "test-key",
+                    autocompleteCountries = emptySet(),
+                    phoneNumberConfig = AddressFieldConfiguration.HIDDEN,
+                    nameConfig = AddressFieldConfiguration.HIDDEN,
+                    emailConfig = AddressFieldConfiguration.HIDDEN,
+                )
+            } else {
+                AddressInputMode.NoAutocomplete()
+            },
         )
     }
 }

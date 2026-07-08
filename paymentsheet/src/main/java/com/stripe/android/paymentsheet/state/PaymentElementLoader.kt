@@ -5,10 +5,13 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
+import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.DurationProvider
@@ -26,6 +29,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.create
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -103,6 +107,28 @@ internal interface PaymentElementLoader {
     sealed class InitializationMode : Parcelable {
         abstract fun validate()
         abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
+
+        fun walletsDisabledReason(): WalletsDisabledReason? {
+            val shouldDisable = (this as? CheckoutSession)
+                ?.checkoutSessionResponse
+                ?.shouldDisableWalletsForAutomaticTaxBilling == true
+
+            return if (shouldDisable) {
+                WalletsDisabledReason.AutomaticTaxBillingAddress
+            } else {
+                null
+            }
+        }
+
+        enum class WalletsDisabledReason {
+            AutomaticTaxBillingAddress;
+
+            val googlePayWarning: String
+                get() = when (this) {
+                    AutomaticTaxBillingAddress ->
+                        "Google Pay is disabled because automatic tax is configured to use the billing address."
+                }
+        }
 
         @Parcelize
         data class PaymentIntent(
@@ -225,6 +251,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val createLinkState: CreateLinkState,
     private val logLinkHoldbackExperiment: LogLinkHoldbackExperiment,
+    private val logFcLiteExperiment: LogFcLiteExperiment,
     private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
@@ -240,6 +267,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
+    private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
+    private val isNfcScanningAvailable: IsNfcScanningAvailable,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -303,10 +332,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        // Pre-fetch PMM Promotions for BNPLs
-        paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+        fetchPaymentMethodMessaging(elementsSession)
 
-        val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
+        val isGooglePayReady = isGooglePayReady(
+            configuration = configuration,
+            elementsSession = elementsSession,
+            initializationMode = initializationMode,
+            isGooglePaySupportedByConfiguration = isGooglePaySupportedByConfiguration,
+        )
 
         val savedSelection = async {
             retrieveSavedSelection(
@@ -346,17 +379,19 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 errorReporter.report(ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_SKIPPED_DURING_LOAD)
             } ?: false
 
-            createPaymentMethodMetadata(
-                integrationConfiguration = integrationConfiguration,
-                elementsSession = elementsSession,
-                configuration = configuration,
-                linkStateResult = linkStateResult,
-                isGooglePayReady = isGooglePayReady,
-                isGooglePaySupported = isGooglePaySupported,
-                initializationMode = initializationMode,
-                customerMetadata = customerMetadata,
-                clientAttributionMetadata = clientAttributionMetadata,
-            )
+            durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
+                createPaymentMethodMetadata(
+                    integrationConfiguration = integrationConfiguration,
+                    elementsSession = elementsSession,
+                    configuration = configuration,
+                    linkStateResult = linkStateResult,
+                    isGooglePayReady = isGooglePayReady,
+                    isGooglePaySupported = isGooglePaySupported,
+                    initializationMode = initializationMode,
+                    customerMetadata = customerMetadata,
+                    clientAttributionMetadata = clientAttributionMetadata,
+                )
+            }
         }
 
         val customer = async {
@@ -408,10 +443,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = pmMetadata,
         )
 
-        logLinkExperimentExposures(
+        logExperimentExposures(
             elementsSession = elementsSession,
             state = state
         )
+
+        logPaymentMethodMessagingExposure(pmMetadata)
 
         reportSuccessfulLoad(
             elementsSession = elementsSession,
@@ -475,7 +512,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private fun logLinkExperimentExposures(
+    private fun logExperimentExposures(
         elementsSession: ElementsSession,
         state: PaymentElementLoader.State
     ) {
@@ -488,6 +525,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             elementsSession = elementsSession,
             state = state
         )
+        logFcLiteExperiment(elementsSession, state.paymentMethodMetadata)
     }
 
     private fun createPaymentMethodMetadata(
@@ -526,6 +564,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(elementsSession, customerMetadata)
+        val isNfcScanningAvailable = isNfcScanningAvailable.get(elementsSession, customerMetadata)
 
         val analyticsMetadata = analyticsMetadataFactory.create(
             initializationMode = initializationMode,
@@ -556,6 +595,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
+            isNfcScanningEnabled = isNfcScanningAvailable,
             paymentMethodLayout = paymentMethodLayout,
         )
 
@@ -584,8 +624,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        initializationMode: PaymentElementLoader.InitializationMode,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
+        val walletsDisabledReason = initializationMode.walletsDisabledReason()
+
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay is not enabled for this session."
@@ -594,6 +637,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
+        } else if (walletsDisabledReason != null) {
+            userFacingLogger.logWarningWithoutPii(walletsDisabledReason.googlePayWarning)
+            return false
         } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")
             userFacingLogger.logWarningWithoutPii(
@@ -826,6 +872,20 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     "error \"${unavailableCustomPaymentMethod.error}\"!"
             )
         }
+    }
+
+    private fun fetchPaymentMethodMessaging(elementsSession: ElementsSession) {
+        val variant = elementsSession.experimentsData?.experimentAssignments[
+            ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
+        ] ?: return
+
+        if (variant == "treatment") {
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+        }
+    }
+
+    private fun logPaymentMethodMessagingExposure(metadata: PaymentMethodMetadata) {
+        paymentMethodMessagePromotionsExperimentHandler.logExposure(metadata)
     }
 }
 

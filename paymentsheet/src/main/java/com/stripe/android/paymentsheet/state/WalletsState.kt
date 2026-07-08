@@ -24,7 +24,6 @@ internal enum class WalletLocation {
 internal data class WalletsState(
     private val link: Link?,
     private val googlePay: GooglePay?,
-    private val shopPay: ShopPay?,
     private val walletsAllowedInHeader: List<WalletType>,
     val buttonsEnabled: Boolean,
     @StringRes val dividerTextResource: Int,
@@ -32,14 +31,12 @@ internal data class WalletsState(
     val cardBrandFilter: CardBrandFilter,
     val onGooglePayPressed: () -> Unit,
     val onLinkPressed: () -> Unit,
-    val onShopPayPressed: () -> Unit,
 ) {
 
     fun wallets(location: WalletLocation): List<Wallet> {
         return buildList {
             googlePay(location)?.let { add(it) }
             link(location)?.let { add(it) }
-            shopPay(location)?.let { add(it) }
         }
     }
 
@@ -63,16 +60,6 @@ internal data class WalletsState(
         }
     }
 
-    /**
-     * Returns ShopPay data if it should be displayed in the specified location, null otherwise.
-     */
-    fun shopPay(location: WalletLocation): ShopPay? {
-        return when (location) {
-            WalletLocation.HEADER -> null
-            WalletLocation.INLINE -> shopPay
-        }
-    }
-
     val walletsInHeader
         get() = wallets(WalletLocation.HEADER).isNotEmpty()
 
@@ -91,22 +78,18 @@ internal data class WalletsState(
         val additionalEnabledNetworks: List<String>
     ) : Wallet
 
-    data object ShopPay : Wallet
-
     companion object {
 
         fun create(
             isLinkAvailable: Boolean?,
             linkEmail: String?,
             isGooglePayReady: Boolean,
-            isShopPayAvailable: Boolean,
             googlePayButtonType: GooglePayButtonType,
             buttonsEnabled: Boolean,
             paymentMethodTypes: List<String>,
             googlePayLauncherConfig: GooglePayPaymentMethodLauncher.Config?,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
-            onShopPayPressed: () -> Unit,
             isSetupIntent: Boolean,
             walletsAllowedInHeader: List<WalletType>,
             paymentDetails: DisplayablePaymentDetails? = null,
@@ -133,18 +116,14 @@ internal data class WalletsState(
                 googlePayLauncherConfig = googlePayLauncherConfig
             )
 
-            val shopPay = ShopPay.takeIf { isShopPayAvailable }
-
-            return if (link != null || googlePay != null || shopPay != null) {
+            return if (link != null || googlePay != null) {
                 WalletsState(
                     link = link,
                     googlePay = googlePay,
-                    shopPay = shopPay,
                     buttonsEnabled = buttonsEnabled,
                     dividerTextResource = getDividerTextResource(paymentMethodTypes, isSetupIntent),
                     onGooglePayPressed = onGooglePayPressed,
                     onLinkPressed = onLinkPressed,
-                    onShopPayPressed = onShopPayPressed,
                     walletsAllowedInHeader = walletsAllowedInHeader,
                     cardFundingFilter = cardFundingFilter,
                     cardBrandFilter = cardBrandFilter

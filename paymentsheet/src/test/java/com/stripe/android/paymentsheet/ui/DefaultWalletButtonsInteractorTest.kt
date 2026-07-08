@@ -36,6 +36,7 @@ import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOptio
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.testing.CoroutineTestRule
@@ -246,6 +247,38 @@ class DefaultWalletButtonsInteractorTest {
                 assertThat(state.buttonsEnabled).isTrue()
             }
         }
+
+    @Test
+    fun `on button pressed, should fire wallet button tapped analytics event`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val interactor = createInteractor(
+            arguments = null,
+            eventReporter = eventReporter,
+        )
+
+        interactor.handleViewAction(
+            WalletButtonsInteractor.ViewAction.OnButtonPressed(
+                button = WalletButtonsInteractor.WalletButton.GooglePay(
+                    buttonType = null,
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                    allowCreditCards = true,
+                    cardBrandFilter = PaymentSheetCardBrandFilter(
+                        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all()
+                    ),
+                    cardFundingFilter = DefaultCardFundingFilter,
+                    additionalEnabledNetworks = emptyList(),
+                ),
+                clickHandler = { false },
+            )
+        )
+
+        assertThat(eventReporter.walletButtonTappedCalls.awaitItem()).isEqualTo("google_pay")
+        analyticsEventCallbackRule.assertMatchesExpectedEvent(
+            AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+        )
+
+        eventReporter.validate()
+    }
 
     @Test
     fun `on button pressed with no arguments, should report unexpected error`() = runTest {
@@ -611,177 +644,6 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
-    fun `on init with ShopPay enabled in arguments, state should have only ShopPay button`() = runTest {
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.ShopPay),
-                linkEmail = null,
-            )
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull())
-                .isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-
-            assertThat(state.buttonsEnabled).isTrue()
-        }
-    }
-
-    @Test
-    fun `on init with GPay, Link & ShopPay enabled in arguments, state should have all buttons`() = runTest {
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
-                linkEmail = null,
-            )
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(3)
-            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
-            assertThat(state.walletButtons[1]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
-            assertThat(state.walletButtons[2]).isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-
-            assertThat(state.buttonsEnabled).isTrue()
-        }
-    }
-
-    @Test
-    fun `on init with all wallets enabled but only ShopPay visible, state should have only ShopPay`() = runTest {
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
-                walletButtonsViewVisibility = mapOf(
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
-                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
-                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
-                ),
-                linkEmail = null,
-            )
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-
-            assertThat(state.buttonsEnabled).isTrue()
-        }
-    }
-
-    @Test
-    fun `on init with ShopPay & GPay enabled, different wallet type order, state should reflect the order`() =
-        runTest {
-            val interactor = createInteractor(
-                arguments = createArguments(
-                    availableWallets = listOf(WalletType.ShopPay, WalletType.GooglePay),
-                    linkEmail = null,
-                )
-            )
-
-            interactor.state.test {
-                val state = awaitItem()
-
-                assertThat(state.walletButtons).hasSize(2)
-                assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-                assertThat(state.walletButtons[1]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
-
-                assertThat(state.buttonsEnabled).isTrue()
-            }
-        }
-
-    @Test
-    fun `on ShopPay button, should have expected default state`() = runTest {
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.ShopPay),
-                linkEmail = null,
-            )
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons.firstOrNull())
-                .isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-
-            assertThat(state.walletButtons.first())
-                .isInstanceOf(WalletButtonsInteractor.WalletButton.ShopPay::class.java)
-        }
-    }
-
-    @Test
-    fun `on ShopPay available & should always be visible, should show ShopPay button`() =
-        walletsVisibilityTest(
-            availableWallets = listOf(WalletType.ShopPay),
-            walletButtonsViewVisibility = mapOf(
-                PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-            ),
-        ) { state ->
-            assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-            assertThat(state.buttonsEnabled).isTrue()
-        }
-
-    @Test
-    fun `on ShopPay available but not allowed to be visible by merchant, should not show ShopPay button`() =
-        walletsVisibilityTest(
-            availableWallets = listOf(WalletType.ShopPay),
-            walletButtonsViewVisibility = mapOf(
-                PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                    PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
-            ),
-        ) { state ->
-            assertThat(state.walletButtons).hasSize(0)
-        }
-
-    @Test
-    fun `on init with ShopPay not available, state should not have ShopPay button`() = walletsVisibilityTest(
-        availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
-        walletButtonsViewVisibility = mapOf(
-            PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-            PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
-                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-            PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
-                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-        ),
-    ) { state ->
-        assertThat(state.walletButtons).hasSize(2)
-        assertThat(state.walletButtons.none { it is WalletButtonsInteractor.WalletButton.ShopPay }).isTrue()
-        assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
-        assertThat(state.walletButtons[1]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
-    }
-
-    @Test
-    fun `on init with only ShopPay available and visible, state should have only ShopPay`() = walletsVisibilityTest(
-        availableWallets = listOf(WalletType.ShopPay),
-        walletButtonsViewVisibility = mapOf(
-            PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-            PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
-                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
-            PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
-                PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
-        ),
-    ) { state ->
-        assertThat(state.walletButtons).hasSize(1)
-        assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-        assertThat(state.buttonsEnabled).isTrue()
-    }
-
-    @Test
     fun `when linkEnableDisplayableDefaultValuesInEce is false, should not use payment details`() = runTest {
         val interactor = createInteractor(
             arguments = createArguments(
@@ -853,51 +715,6 @@ class DefaultWalletButtonsInteractorTest {
                 assertThat(buttonState.paymentUI.last4).isEqualTo("4242")
             }
         }
-
-    @Test
-    fun `on init with mixed wallet order including ShopPay, state should preserve order`() = runTest {
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.GooglePay, WalletType.ShopPay, WalletType.Link),
-                linkEmail = null,
-            )
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(3)
-            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.GooglePay>()
-            assertThat(state.walletButtons[1]).isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-            assertThat(state.walletButtons[2]).isInstanceOf<WalletButtonsInteractor.WalletButton.Link>()
-        }
-    }
-
-    @Test
-    fun `on confirmation handler processing with ShopPay, buttons should be disabled`() = runTest {
-        val interactor = createInteractor(
-            arguments = createArguments(
-                availableWallets = listOf(WalletType.ShopPay),
-                linkEmail = null,
-            ),
-            confirmationHandler = FakeConfirmationHandler().apply {
-                state.value = ConfirmationHandler.State.Confirming(
-                    LinkConfirmationOption(
-                        linkExpressMode = LinkExpressMode.DISABLED,
-                        configuration = mock(),
-                    )
-                )
-            }
-        )
-
-        interactor.state.test {
-            val state = awaitItem()
-
-            assertThat(state.walletButtons).hasSize(1)
-            assertThat(state.walletButtons[0]).isInstanceOf<WalletButtonsInteractor.WalletButton.ShopPay>()
-            assertThat(state.buttonsEnabled).isFalse()
-        }
-    }
 
     @Test
     fun `when click handler returns true, should not proceed with default action`() = runTest {
@@ -1044,7 +861,7 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     private fun createArguments(
-        availableWallets: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay, WalletType.ShopPay),
+        availableWallets: List<WalletType> = listOf(WalletType.Link, WalletType.GooglePay),
         linkEmail: String? = null,
         appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
         googlePay: PaymentSheet.GooglePayConfiguration? = null,
@@ -1085,6 +902,7 @@ class DefaultWalletButtonsInteractorTest {
         arguments: DefaultWalletButtonsInteractor.Arguments? = null,
         confirmationHandler: ConfirmationHandler = FakeConfirmationHandler(),
         errorReporter: ErrorReporter = FakeErrorReporter(),
+        eventReporter: FakeEventReporter = FakeEventReporter(),
         linkPaymentLauncher: LinkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         onWalletButtonsRenderStateChanged: (isRendered: Boolean) -> Unit = {
@@ -1096,6 +914,7 @@ class DefaultWalletButtonsInteractorTest {
             confirmationHandler = confirmationHandler,
             coroutineScope = CoroutineScope(testDispatcher),
             errorReporter = errorReporter,
+            eventReporter = eventReporter,
             linkInlineInteractor = NoOpLinkInlineInteractor(),
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = linkAccountHolder,

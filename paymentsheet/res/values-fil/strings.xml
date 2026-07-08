@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Kumpirmahin ang iyong impormasyon</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">Huling 4 na digit ng SSN</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Mag-sign in o mag-sign up</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Sumang-ayon at magpatuloy</string>
   <!-- Title for the Link signup screen -->
@@ -175,6 +177,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Pangasiwaan ang mga kard</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">I-manage ang account sa bangko</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Pamahalaan ang paraan ng pagbabayad</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Pangasiwaan ang mga paraan ng pagbabayad</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -247,6 +251,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Hindi nabago ang default na paraan ng pagbabayad. Pakisubukan muli.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kabuuan: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Hindi maaaring baguhin ang mga detalye ng paraan ng pagbabayad.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Hindi na-update ang brand ng kard. Pakisubukan muli.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
@@ -259,6 +265,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_shop_pay_button_description">Shop Pay button</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Ipakita ang menu</string>
+  <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Mag-sign out sa Link</string>
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Mag-sign out sa %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Sumali sa Link</string>
   <!-- Title for the Link signup screen -->

@@ -119,6 +119,7 @@ internal object CustomerSheetFixtures {
     ) = if (hasCustomerSession) {
         ElementsSession.Customer(
             paymentMethods = listOf(),
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_123",
                 customerId = "cus_123",

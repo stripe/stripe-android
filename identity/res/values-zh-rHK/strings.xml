@@ -144,6 +144,8 @@
   <string name="stripe_id_number">證件號碼</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">我準備好了</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">相片已拍攝</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">您輸入的證件號碼不完整。</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">社會安全號碼後 4 位</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">姓氏</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">自動</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">正在載入</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">手動</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">請將證件靠近一些</string>
   <!-- Instructional text when camera is too close to a document -->

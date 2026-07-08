@@ -16,16 +16,12 @@ import kotlinx.coroutines.flow.StateFlow
 class CardDetailsSectionElement(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
-    automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     private val cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
     private val cardFundingFilter: CardFundingFilter,
     override val identifier: IdentifierSpec,
     private val cardDetailsAction: CardDetailsAction? = null,
-    private val isStripeCardScanAllowed: Boolean = false,
-    private val enableMlKitCardScan: Boolean = false,
-    private val disableSsdOcrCardScan: Boolean = false,
     override val controller: CardDetailsSectionController = CardDetailsSectionController(
         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
         initialValues = initialValues,
@@ -34,10 +30,6 @@ class CardDetailsSectionElement(
         cardBrandFilter = cardBrandFilter,
         cardFundingFilter = cardFundingFilter,
         cardDetailsAction = cardDetailsAction,
-        automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-        isStripeCardScanAllowed = isStripeCardScanAllowed,
-        enableMlKitCardScan = enableMlKitCardScan,
-        disableSsdOcrCardScan = disableSsdOcrCardScan,
     )
 ) : FormElement {
     override val allowsUserInteraction: Boolean = true

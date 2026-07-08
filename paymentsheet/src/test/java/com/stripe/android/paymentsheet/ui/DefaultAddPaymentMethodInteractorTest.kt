@@ -195,6 +195,44 @@ class DefaultAddPaymentMethodInteractorTest {
     }
 
     @Test
+    fun changingSelectedPaymentMethod_reportsPromotionDisplayed() {
+        val reportPromotionDisplayedTurbine = Turbine<PaymentMethodCode>()
+        runScenario(
+            initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
+            reportPromotionDisplayed = { reportPromotionDisplayedTurbine.add(it) },
+        ) {
+            // Initial state fires for the initially selected PM, actual promotions helper will only send event for
+            // supported PMs
+            assertThat(reportPromotionDisplayedTurbine.awaitItem()).isEqualTo("card")
+
+            interactor.handleViewAction(
+                AddPaymentMethodInteractor.ViewAction.OnPaymentMethodSelected(
+                    PaymentMethod.Type.Klarna.code,
+                )
+            )
+            assertThat(reportPaymentMethodTypeSelectedTurbine.awaitItem()).isEqualTo("klarna")
+            assertThat(reportPromotionDisplayedTurbine.awaitItem()).isEqualTo("klarna")
+
+            dispatcher.scheduler.advanceUntilIdle()
+
+            assertThat(clearErrorMessagesTurbine.awaitItem()).isNotNull()
+        }
+        reportPromotionDisplayedTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun initialState_reportsPromotionDisplayed() {
+        val reportPromotionDisplayedTurbine = Turbine<PaymentMethodCode>()
+        runScenario(
+            initiallySelectedPaymentMethodType = PaymentMethod.Type.Klarna.code,
+            reportPromotionDisplayed = { reportPromotionDisplayedTurbine.add(it) },
+        ) {
+            assertThat(reportPromotionDisplayedTurbine.awaitItem()).isEqualTo("klarna")
+        }
+        reportPromotionDisplayedTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun changingSelectedPaymentMethod_clearsErrorMessages() {
         runScenario(
             initiallySelectedPaymentMethodType = PaymentMethod.Type.Card.code,
@@ -343,6 +381,7 @@ class DefaultAddPaymentMethodInteractorTest {
         },
         formElementsForCode: (PaymentMethodCode) -> List<FormElement> = { emptyList() },
         createUSBankAccountFormArguments: (PaymentMethodCode) -> USBankAccountFormArguments = { mock() },
+        reportPromotionDisplayed: (PaymentMethodCode) -> Unit = {},
         dispatcher: TestDispatcher = StandardTestDispatcher(TestCoroutineScheduler()),
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -373,6 +412,7 @@ class DefaultAddPaymentMethodInteractorTest {
             reportPaymentMethodTypeSelected = {
                 reportPaymentMethodTypeSelectedTurbine.add(it)
             },
+            reportPromotionDisplayed = reportPromotionDisplayed,
             createUSBankAccountFormArguments = createUSBankAccountFormArguments,
             coroutineScope = CoroutineScope(dispatcher),
             validationRequested = validationRequestedSource,

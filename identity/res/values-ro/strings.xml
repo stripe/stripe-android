@@ -144,6 +144,8 @@
   <string name="stripe_id_number">Număr de identificare</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">Sunt gata</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Imagine realizată</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Numărul de identificare pe care l-ați introdus nu este complet.</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">Ultimele 4 cifre ale numărului de securitate socială</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Nume de familie</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Automat</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Se încarcă</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Manual</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Apropiați documentul de identitate</string>
   <!-- Instructional text when camera is too close to a document -->

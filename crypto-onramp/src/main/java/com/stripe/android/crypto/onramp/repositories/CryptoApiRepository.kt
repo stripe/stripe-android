@@ -2,19 +2,21 @@ package com.stripe.android.crypto.onramp.repositories
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.AppInfo
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
-import com.stripe.android.core.networking.executeRequestWithKSerializerParser
+import com.stripe.android.core.networking.StripeResponse
+import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclaration
-import com.stripe.android.crypto.onramp.model.CrsCarfDeclarationResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
 import com.stripe.android.crypto.onramp.model.CryptoCustomerResponse
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -28,6 +30,8 @@ import com.stripe.android.crypto.onramp.model.KycRetrieveResponse
 import com.stripe.android.crypto.onramp.model.RefreshKycInfo
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
+import com.stripe.android.crypto.onramp.model.UserAttestation
+import com.stripe.android.crypto.onramp.model.UserAttestationResponse
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirements
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirementsResponse
@@ -45,6 +49,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.json.jsonObject
+import org.json.JSONObject
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -156,26 +161,26 @@ internal class CryptoApiRepository @Inject constructor(
         ).mapCatching { it.toSubmitIdentifiersResult() }
     }
 
-    suspend fun retrieveCrsCarfDeclaration(
+    suspend fun retrieveUserAttestation(
         consumerSessionClientSecret: String
-    ): Result<CrsCarfDeclaration> {
+    ): Result<UserAttestation> {
         val request = apiRequestFactory.createGet(
-            url = crsCarfDeclarationUrl,
+            url = userAttestationUrl,
             options = buildRequestOptions(),
             params = credentialsParams(consumerSessionClientSecret).toMap(),
         )
 
         return execute(
             request = request,
-            responseSerializer = CrsCarfDeclarationResponse.serializer()
-        ).map { it.toDeclaration() }
+            responseSerializer = UserAttestationResponse.serializer()
+        ).map { it.toUserAttestation() }
     }
 
-    suspend fun confirmCrsCarfDeclaration(
+    suspend fun confirmUserAttestation(
         consumerSessionClientSecret: String
     ): Result<Unit> {
         return executePost(
-            crsCarfDeclarationUrl,
+            userAttestationUrl,
             credentialsParams(consumerSessionClientSecret),
             Unit.serializer()
         )
@@ -247,7 +252,8 @@ internal class CryptoApiRepository @Inject constructor(
             options = buildRequestOptions(),
             params = mapOf(
                 "crypto_customer_id" to cryptoCustomerId,
-                "country_hint" to countryHint
+                "country_hint" to countryHint,
+                "ui_mode" to "headless"
             ).filterNotNullValues()
         )
 
@@ -267,7 +273,7 @@ internal class CryptoApiRepository @Inject constructor(
         )
         return executePost(
             url = paymentToken,
-            paramsJson = Json.encodeToJsonElement(params).jsonObject,
+            paramsJson = json.encodeToJsonElement(params).jsonObject,
             responseSerializer = CreatePaymentTokenResponse.serializer()
         )
     }
@@ -359,12 +365,31 @@ internal class CryptoApiRepository @Inject constructor(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>,
     ): Result<Response> {
-        return executeRequestWithKSerializerParser(
-            stripeNetworkClient = stripeNetworkClient,
-            stripeErrorJsonParser = StripeErrorJsonParser(),
-            request = request,
-            responseSerializer = responseSerializer,
-            json = json
+        return runCatching {
+            stripeNetworkClient.executeRequest(request)
+        }.fold(
+            onSuccess = { response ->
+                if (response.isError) {
+                    Result.failure(apiException(response))
+                } else {
+                    val parsedResponse = runCatching {
+                        response.body?.let { body ->
+                            json.decodeFromString(responseSerializer, body)
+                        }
+                    }.getOrNull()
+
+                    if (parsedResponse != null) {
+                        Result.success(parsedResponse)
+                    } else {
+                        Result.failure(
+                            APIException(message = "Failed to parse response JSON for ${response.body}")
+                        )
+                    }
+                }
+            },
+            onFailure = {
+                Result.failure(connectionException(request, it))
+            }
         ).also {
             // If we get an authorization error, clear the Link account to force a re-authentication
             if (it.exceptionOrNull()?.isLinkAuthorizationError() == true) {
@@ -373,7 +398,59 @@ internal class CryptoApiRepository @Inject constructor(
         }
     }
 
+    private fun apiException(response: StripeResponse<String>): APIException {
+        val stripeError = try {
+            parseOnrampStripeError(response.responseJson())
+        } catch (_: APIException) {
+            null
+        }
+
+        return APIException(
+            stripeError = stripeError,
+            requestId = response.requestId?.value,
+            statusCode = response.code,
+            message = stripeError?.message
+                ?: "Request failed with status code ${response.code} and non-JSON error " +
+                    "body."
+        )
+    }
+
+    private fun parseOnrampStripeError(responseJson: JSONObject): StripeError {
+        val stripeError = StripeErrorJsonParser().parse(responseJson)
+        val extraFields = stripeError.extraFields.orEmpty() +
+            responseJson
+                .optJSONObject(FIELD_ERROR)
+                ?.extractOnrampExtraFields()
+                .orEmpty()
+
+        return stripeError.copy(
+            extraFields = extraFields.takeIf { it.isNotEmpty() }
+        )
+    }
+
+    private fun JSONObject.extractOnrampExtraFields(): Map<String, String> {
+        return buildMap {
+            optStringOrNull(FIELD_REASON)?.let { put(FIELD_REASON, it) }
+            optStringOrNull(FIELD_USER_MESSAGE)?.let { put(FIELD_USER_MESSAGE, it) }
+        }
+    }
+
+    private fun JSONObject.optStringOrNull(fieldName: String): String? {
+        return takeIf { has(fieldName) && !isNull(fieldName) }
+            ?.get(fieldName)
+            ?.toString()
+    }
+
+    private fun connectionException(request: StripeRequest, cause: Throwable) = APIConnectionException(
+        "Failed to execute $request",
+        cause = cause
+    )
+
     internal companion object {
+        private const val FIELD_ERROR = "error"
+        private const val FIELD_REASON = "reason"
+        private const val FIELD_USER_MESSAGE = "user_message"
+
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/customers`
          */
@@ -401,7 +478,7 @@ internal class CryptoApiRepository @Inject constructor(
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/crs_carf_declaration`
          */
-        internal val crsCarfDeclarationUrl: String
+        internal val userAttestationUrl: String
             get() = getApiUrl("crypto/internal/crs_carf_declaration")
 
         /**

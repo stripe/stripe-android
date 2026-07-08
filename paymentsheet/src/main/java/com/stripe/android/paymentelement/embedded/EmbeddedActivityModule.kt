@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
@@ -47,13 +46,14 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
+import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -127,14 +127,20 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideEmbeddedNavigator(
+            launchMode: EmbeddedLaunchMode,
+            formScreen: Lazy<EmbeddedNavigator.Screen.Form>,
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
+            val initialScreen = when (launchMode) {
+                EmbeddedLaunchMode.Form -> formScreen.get()
+                EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+            }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialScreen = initialManageScreenFactory.createInitialScreen(),
+                initialScreen = initialScreen,
             )
         }
 
@@ -156,7 +162,7 @@ internal interface EmbeddedActivityModule {
         @Singleton
         fun provideFormInteractor(
             interactorFactory: EmbeddedFormInteractorFactory
-        ): DefaultVerticalModeFormInteractor = interactorFactory.create()
+        ): VerticalModeFormInteractor = interactorFactory.create()
 
         @Provides
         @Singleton
@@ -231,10 +237,10 @@ internal interface EmbeddedActivityModule {
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
             promotion: PaymentMethodMessagePromotion?,
-            experimentHandler: PaymentMethodMessagePromotionsExperimentHandler
+            eventReporter: EventReporter
         ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionsHelper(
             listOfNotNull(promotion),
-            experimentHandler
+            eventReporter
         )
     }
 }

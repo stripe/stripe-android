@@ -385,4 +385,80 @@ class LinkBillingDetailsUtilsTest {
         // Should still supplement email from effective billing details
         assertThat(result.billingEmailAddress).isEqualTo("default@example.com")
     }
+
+    @Test
+    fun `ConsumerPaymentDetails Unknown supports when address is complete`() {
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "John Doe",
+                line1 = "123 Main St",
+                locality = "San Francisco",
+                postalCode = "94105",
+                countryCode = CountryCode.US,
+                line2 = null,
+                administrativeArea = "CA"
+            )
+        )
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = AddressCollectionMode.Full
+        )
+
+        val result = unknown.supports(configuration, linkAccount)
+
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `ConsumerPaymentDetails Unknown does not support when address is incomplete`() {
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC.copy(
+            billingAddress = ConsumerPaymentDetails.BillingAddress(
+                name = "John Doe",
+                line1 = null,
+                locality = "San Francisco",
+                postalCode = "94105",
+                countryCode = CountryCode.US,
+                line2 = null,
+                administrativeArea = "CA"
+            )
+        )
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            address = AddressCollectionMode.Full
+        )
+
+        val result = unknown.supports(configuration, linkAccount)
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `ConsumerPaymentDetails Unknown does not support when phone required but missing from Link account`() {
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC
+        val configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
+            phone = CollectionMode.Always
+        )
+        val linkAccountWithoutPhone = LinkAccount(
+            ConsumerSession(
+                emailAddress = testEmail,
+                clientSecret = "secret",
+                verificationSessions = emptyList(),
+                redactedPhoneNumber = "+1********00",
+                redactedFormattedPhoneNumber = "(***) *** **00",
+                unredactedPhoneNumber = null
+            )
+        )
+
+        val result = unknown.supports(configuration, linkAccountWithoutPhone)
+
+        assertThat(result).isFalse()
+    }
+
+    @Test
+    fun `withEffectiveBillingDetails returns same Unknown when linkAccount is null`() {
+        val unknown = TestFactory.CONSUMER_PAYMENT_DETAILS_GENERIC
+        val configuration = TestFactory.LINK_CONFIGURATION
+
+        val result = unknown.withEffectiveBillingDetails(configuration, null)
+
+        assertThat(result).isEqualTo(unknown)
+    }
 }

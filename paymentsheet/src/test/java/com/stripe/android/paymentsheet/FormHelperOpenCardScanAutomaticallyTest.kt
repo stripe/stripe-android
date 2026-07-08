@@ -38,6 +38,7 @@ import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import com.stripe.android.utils.shouldAutomaticallyLaunchCardScan
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
@@ -66,7 +67,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isFalse()
         }
     }
@@ -82,7 +85,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isTrue()
         }
     }
@@ -101,7 +106,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isFalse()
         }
     }
@@ -117,7 +124,9 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
             assertThat(formElements[0].controller).isInstanceOf<CardDetailsSectionController>()
 
             assertThat(
-                (formElements[0].controller as CardDetailsSectionController).shouldAutomaticallyLaunchCardScan()
+                (formElements[0].controller as CardDetailsSectionController)
+                    .cardDetailsAction
+                    ?.shouldAutomaticallyLaunchCardScan
             ).isTrue()
         }
     }
@@ -166,6 +175,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = null,
             )
         }
     }
@@ -217,7 +227,8 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                placesClient = null,
             )
         }
     }

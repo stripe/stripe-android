@@ -384,6 +384,7 @@ internal class CustomerMetadataTest {
         return ElementsSession.Customer(
             paymentMethods = paymentMethods,
             defaultPaymentMethod = defaultPaymentMethodId,
+            email = null,
             session = ElementsSession.Customer.Session(
                 id = "cuss_1",
                 customerId = customerId,

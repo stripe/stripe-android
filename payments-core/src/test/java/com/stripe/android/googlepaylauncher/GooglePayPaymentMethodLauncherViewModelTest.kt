@@ -63,6 +63,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     private val viewModel = GooglePayPaymentMethodLauncherViewModel(
+        ApplicationProvider.getApplicationContext(),
         paymentsClient,
         REQUEST_OPTIONS,
         ARGS,
@@ -96,6 +97,52 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         )
 
         assertThat(stripeRepository.getCreateParams()?.toParamMap()).containsKey("client_attribution_metadata")
+    }
+
+    @Test
+    fun `createPaymentMethod() uses billingEmailFallback when Google Pay has no email`() = runTest {
+        val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        viewModelWithEmail.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
+            .isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `createPaymentMethod() prefers Google Pay email over billingEmailFallback`() = runTest {
+        val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        viewModelWithEmail.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
+            .isEqualTo("stripe@example.com")
     }
 
     @Test
@@ -191,6 +238,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     @Test
     fun `createPaymentDataRequest() with isElements=true should set 'stripe-elements' software id`() {
         val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
             ARGS.copy(isElements = true),
@@ -212,6 +260,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     @Test
     fun `createPaymentDataRequest() with isElements=false should set 'stripe-launcher' software id`() {
         val viewModel = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
             ARGS.copy(isElements = false),

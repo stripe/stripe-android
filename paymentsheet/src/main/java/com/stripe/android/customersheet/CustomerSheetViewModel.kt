@@ -600,6 +600,7 @@ internal class CustomerSheetViewModel(
                             IllegalStateException("Unexpected attempt to update default from CustomerSheet.")
                         )
                     },
+                    autocompleteAddressInteractorFactory = null,
                 ),
                 isLiveMode = isLiveMode,
             )

@@ -5,9 +5,11 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormResult
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -29,6 +31,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     private val eventReporter: EventReporter,
     private val customerStateHolder: CustomerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
+    private val launchMode: EmbeddedLaunchMode,
 ) : SheetActivityConfirmationHelper {
 
     override fun confirm() {
@@ -42,10 +45,12 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
             when (configuration.formSheetAction) {
                 EmbeddedPaymentElement.FormSheetAction.Continue -> {
                     stateHelper.setResult(
-                        FormResult.Complete(
+                        EmbeddedActivityResult.Complete(
                             selection = selectionHolder.selection.value,
                             hasBeenConfirmed = false,
-                            customerState = customerStateHolder.customer.value
+                            customerState = customerStateHolder.customer.value,
+                            shouldInvokeSelectionCallback = false,
+                            launchMode = launchMode,
                         )
                     )
                 }
@@ -64,7 +69,8 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
         val confirmationOption = selectionHolder.selection.value?.toConfirmationOption(
             configuration = configuration.asCommonConfiguration(),
             linkConfiguration = paymentMethodMetadata.linkState?.configuration,
-            cardFundingFilter = paymentMethodMetadata.cardFundingFilter
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
         ) ?: return null
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,

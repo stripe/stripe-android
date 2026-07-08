@@ -41,6 +41,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Stack
 import javax.inject.Provider
 import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -161,6 +162,104 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("event", "mc_load_failed")
         assertThat(request.params).containsEntry("duration", 2.0f)
         assertThat(request.params).containsEntry("error_message", "java.lang.RuntimeException")
+    }
+
+    @Test
+    fun `onLoadSucceeded includes load_timings when durations are present`() = runScenario {
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Checkout,
+                reset = true,
+            )
+        )
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 1.seconds,
+            )
+        )
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 100.milliseconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadPrefetchPMs] = 50.milliseconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateLinkState] = 20.milliseconds
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadCreateCustomerState] = 30.milliseconds
+
+        eventReporter.onLoadSucceeded(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_succeeded")
+
+        val loadTimings = request.params["load_timings"] as Map<*, *>
+        assertThat(loadTimings).containsEntry("fetchElementsSession", 100)
+        assertThat(loadTimings).containsEntry("fetchSavedPaymentMethods", 50)
+        assertThat(loadTimings).containsEntry("lookUpLinkAccount", 20)
+        assertThat(loadTimings).containsEntry("filterPaymentMethods", 30)
+    }
+
+    @Test
+    fun `onLoadSucceeded omits load_timings when no durations are present`() = runScenario {
+        durationProvider.startCalls.push(
+            FakeDurationProvider.StartCall(
+                key = DurationProvider.Key.Checkout,
+                reset = true,
+            )
+        )
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 1.seconds,
+            )
+        )
+
+        eventReporter.onLoadSucceeded(
+            paymentSelection = PaymentSelection.GooglePay,
+            paymentMethodMetadata = paymentMethodMetadataWithTestAnalyticsMetadata,
+        )
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_succeeded")
+        assertThat(request.params).doesNotContainKey("load_timings")
+    }
+
+    @Test
+    fun `onLoadFailed includes load_timings with mapped keys and integer millisecond values`() = runScenario {
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 2.seconds,
+            )
+        )
+        durationProvider.completedDurations[DurationProvider.Key.PaymentSheetLoadSessionLoad] = 200.milliseconds
+
+        val error = RuntimeException("Test error")
+        eventReporter.onLoadFailed(error = error)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_failed")
+
+        val loadTimings = request.params["load_timings"] as Map<*, *>
+        assertThat(loadTimings).containsEntry("fetchElementsSession", 200)
+        assertThat(loadTimings).doesNotContainKey("fetchSavedPaymentMethods")
+        assertThat(loadTimings).doesNotContainKey("lookUpLinkAccount")
+        assertThat(loadTimings).doesNotContainKey("retrieveCustomer")
+    }
+
+    @Test
+    fun `onLoadFailed omits load_timings when no durations are present`() = runScenario {
+        durationProvider.endCalls.push(
+            FakeDurationProvider.EndCall(
+                key = DurationProvider.Key.Loading,
+                duration = 2.seconds,
+            )
+        )
+        val error = RuntimeException("Test error")
+        eventReporter.onLoadFailed(error = error)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_load_failed")
+        assertThat(request.params).doesNotContainKey("load_timings")
     }
 
     @Test
@@ -362,6 +461,18 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onWalletButtonTapped fires event`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+
+        eventReporter.onWalletButtonTapped(walletType = "google_pay")
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "mc_wallet_button_tapped")
+        assertThat(request.params).containsEntry("selected_lpm", "google_pay")
+        assertThat(request.params).containsEntry("example_from_test", true)
+    }
+
+    @Test
     fun `onAutofill fires event`() = runScenario {
         paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
 
@@ -495,13 +606,11 @@ class DefaultEventReporterTest {
                     billingAddressParameters = null,
                     additionalEnabledNetworks = emptyList()
                 ),
-                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = true,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
-                onShopPayPressed = {},
                 cardFundingFilter = DefaultCardFundingFilter,
                 cardBrandFilter = DefaultCardBrandFilter
             )
@@ -557,13 +666,11 @@ class DefaultEventReporterTest {
                     billingAddressParameters = null,
                     additionalEnabledNetworks = emptyList()
                 ),
-                shopPay = null,
                 walletsAllowedInHeader = listOf(WalletType.GooglePay, WalletType.Link),
                 buttonsEnabled = false,
                 dividerTextResource = 0,
                 onGooglePayPressed = {},
                 onLinkPressed = {},
-                onShopPayPressed = {},
                 cardFundingFilter = DefaultCardFundingFilter,
                 cardBrandFilter = DefaultCardBrandFilter
             )
@@ -582,52 +689,6 @@ class DefaultEventReporterTest {
             assertThat(request.params).containsEntry("payment_method_layout", "horizontal")
             assertThat(request.params).containsEntry("example_from_test", true)
         }
-
-    @Test
-    fun `onShopPayWebViewLoadAttempt fires event`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewLoadAttempt()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_load_attempt")
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
-    fun `onShopPayWebViewConfirmSuccess fires event`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewConfirmSuccess()
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_confirm_success")
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
-    fun `onShopPayWebViewCancelled fires event with didReceiveECEClick true`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewCancelled(didReceiveECEClick = true)
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_cancelled")
-        assertThat(request.params).containsEntry("did_receive_ece_click", true)
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
-
-    @Test
-    fun `onShopPayWebViewCancelled fires event with didReceiveECEClick false`() = runScenario {
-        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
-
-        eventReporter.onShopPayWebViewCancelled(didReceiveECEClick = false)
-
-        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
-        assertThat(request.params).containsEntry("event", "mc_shoppay_webview_cancelled")
-        assertThat(request.params).containsEntry("did_receive_ece_click", false)
-        assertThat(request.params).containsEntry("example_from_test", true)
-    }
 
     @Test
     fun `onCardScanStarted fires event`() = runScenario {
@@ -1322,6 +1383,24 @@ class DefaultEventReporterTest {
         assertThat(request.params).containsEntry("selected_lpm", "card")
     }
 
+    @Test
+    fun `onPaymentMethodMessagePromotionDisplayed fires event with duration`() = runScenario {
+        paymentMethodMetadataStack.push(paymentMethodMetadataWithTestAnalyticsMetadata)
+        durationProvider.elapsedCalls.push(
+            FakeDurationProvider.ElapsedCall(
+                key = DurationProvider.Key.PaymentMethodMessaging,
+                duration = 3.seconds,
+            )
+        )
+
+        eventReporter.onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully = true)
+
+        val request = analyticsRequestExecutor.requestTurbine.awaitItem()
+        assertThat(request.params).containsEntry("event", "payment_method_messaging_displayed")
+        assertThat(request.params).containsEntry("duration", 3.0f)
+        assertThat(request.params).containsEntry("displayed_successfully", true)
+    }
+
     private fun runScenario(
         throwInAnalyticsCallback: Boolean = false,
         block: suspend Scenario.() -> Unit
@@ -1415,6 +1494,8 @@ class DefaultEventReporterTest {
     private class FakeDurationProvider : DurationProvider {
         val startCalls: Stack<StartCall> = Stack()
         val endCalls: Stack<EndCall> = Stack()
+        val elapsedCalls: Stack<ElapsedCall> = Stack()
+        val completedDurations: MutableMap<DurationProvider.Key, Duration> = mutableMapOf()
 
         override fun start(key: DurationProvider.Key, reset: Boolean) {
             val call = startCalls.pop()
@@ -1422,14 +1503,20 @@ class DefaultEventReporterTest {
             assertThat(call.reset).isEqualTo(reset)
         }
 
-        override fun elapsed(key: DurationProvider.Key): Duration? {
-            return null
+        override fun elapsed(key: DurationProvider.Key): Duration {
+            val call = elapsedCalls.pop()
+            assertThat(call.key).isEqualTo(key)
+            return call.duration
         }
 
         override fun end(key: DurationProvider.Key): Duration {
             val call = endCalls.pop()
             assertThat(call.key).isEqualTo(key)
             return call.duration
+        }
+
+        override fun completedDuration(key: DurationProvider.Key): Duration? {
+            return completedDurations[key]
         }
 
         override suspend fun <T> measureDuration(
@@ -1447,9 +1534,11 @@ class DefaultEventReporterTest {
         fun validate() {
             assertThat(startCalls).isEmpty()
             assertThat(endCalls).isEmpty()
+            assertThat(elapsedCalls).isEmpty()
         }
 
         data class StartCall(val key: DurationProvider.Key, val reset: Boolean)
         data class EndCall(val key: DurationProvider.Key, val duration: Duration)
+        data class ElapsedCall(val key: DurationProvider.Key, val duration: Duration)
     }
 }

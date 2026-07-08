@@ -79,7 +79,7 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             elementsSession.experimentsData
         ) { "Experiments data required to log exposures" }
 
-        val customerEmail = state.getEmail()
+        val customerEmail = state.getEmail(elementsSession.customer?.email)
 
         val defaultValues = state.getDefaultValues()
 
@@ -177,11 +177,14 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
         return paymentMethodSaveEnabled && linkDisabledOrEnableLinkSPMFlagEnabled
     }
 
-    private suspend fun PaymentElementLoader.State.getEmail(): String? {
+    private suspend fun PaymentElementLoader.State.getEmail(
+        elementsSessionCustomerEmail: String?
+    ): String? {
         paymentMethodMetadata.linkState?.configuration?.customerInfo?.email?.let { return it }
         return retrieveCustomerEmail(
             configuration = config,
             customerMetadata = paymentMethodMetadata.customerMetadata,
+            customerEmail = elementsSessionCustomerEmail,
         )
     }
 }

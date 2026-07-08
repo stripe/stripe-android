@@ -392,6 +392,7 @@ internal class CustomerSheetScreenshotTest {
                 allowedBillingCountries = emptySet(),
                 removeMessage = null,
                 onUpdateSuccess = {},
+                autocompleteAddressInteractorFactory = null,
             ),
             isLiveMode = true,
         )

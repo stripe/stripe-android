@@ -310,7 +310,7 @@ private fun SignUpButton(
         label = if (isSigningUp) {
             stringResource(PaymentsUiCoreR.string.stripe_continue_button_label)
         } else {
-            stringResource(R.string.stripe_link_log_in_or_sign_up)
+            stringResource(R.string.stripe_link_sign_in_or_sign_up)
         },
         state = when {
             signUpScreenState.isSubmitting -> PrimaryButtonState.Processing

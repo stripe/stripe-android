@@ -95,7 +95,11 @@ internal class SavedPaymentMethodMutator(
         paymentOptionsItems
     ) { canRemove, items ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            item.isModifiable(customerStateHolder.canUpdateFullPaymentMethodDetails.value)
+            val displayableSavedPaymentMethod = item.displayableSavedPaymentMethod
+            displayableSavedPaymentMethod.paymentMethod.isModifiable(
+                canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails.value,
+                isCbcEligible = displayableSavedPaymentMethod.isCbcEligible,
+            )
         }
     }
 
@@ -407,6 +411,7 @@ internal class SavedPaymentMethodMutator(
                             removeMessage = paymentMethodMetadata?.customerMetadata?.removePaymentMethod
                                 ?.removeMessage(paymentMethodMetadata.merchantName),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
+                            autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
                         )
                     )
                 )

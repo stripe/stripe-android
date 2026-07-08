@@ -277,6 +277,31 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
+    fun cardUpdateParamsHasNullCardBrandWhenDisplayBrandIsNull() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val cardWithNoDisplayBrand = PaymentMethodFixtures.CARD_WITH_NETWORKS.copy(
+            displayBrand = null,
+        )
+        val handler = handler(
+            card = cardWithNoDisplayBrand,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(
+            EditCardDetailsInteractor.ViewAction.BillingDetailsChanged(
+                PaymentSheetFixtures.billingDetailsFormState(
+                    postalCode = FormFieldEntry("90211", isComplete = true),
+                )
+            )
+        )
+
+        assertThat(capturedCardUpdateParams?.billingDetails?.address?.postalCode).isEqualTo("90211")
+        assertThat(capturedCardUpdateParams?.cardBrand).isNull()
+    }
+
+    @Test
     fun cardUpdateParamsIsUpdatedForValidExpDateUpdate() {
         var capturedCardUpdateParams: CardUpdateParams? = null
         val handler = handler(
@@ -659,6 +684,7 @@ internal class DefaultEditCardDetailsInteractorTest {
             ),
             onBrandChoiceChanged = onBrandChoiceChanged,
             onCardUpdateParamsChanged = onCardUpdateParamsChanged,
+            autocompleteAddressInteractorFactory = null,
         )
     }
 }

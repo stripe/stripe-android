@@ -6,7 +6,6 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AddressAutocompletePreview
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
@@ -18,7 +17,6 @@ class PaymentSheetConfigurationTest {
     @OptIn(
         ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class,
         WalletButtonsPreview::class,
-        ShopPayPreview::class,
         CardFundingFilteringPrivatePreview::class,
         AddressAutocompletePreview::class,
     )
@@ -58,13 +56,6 @@ class PaymentSheetConfigurationTest {
             walletButtons = PaymentSheet.WalletButtonsConfiguration(
                 willDisplayExternally = true,
             ),
-            shopPayConfiguration = PaymentSheet.ShopPayConfiguration(
-                shopId = "shop_1",
-                shippingAddressRequired = false,
-                allowedShippingCountries = listOf("US"),
-                lineItems = listOf(PaymentSheet.ShopPayConfiguration.LineItem("Item", 100)),
-                shippingRates = emptyList(),
-            ),
             googlePlacesApiKey = "test_api_key",
             termsDisplay = mapOf(PaymentMethod.Type.Card to PaymentSheet.TermsDisplay.NEVER),
             opensCardScannerAutomatically = true,
@@ -86,6 +77,6 @@ class PaymentSheetConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(25)
+        assertThat(propertyCount).isEqualTo(24)
     }
 }

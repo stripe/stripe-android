@@ -34,6 +34,7 @@
   },
   "customer": {
     "payment_methods": [],
+    "email": "example@stripe.com",
     "customer_session": {
       "id": "cuss_654321",
       "livemode": false,

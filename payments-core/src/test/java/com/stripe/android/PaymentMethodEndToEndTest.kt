@@ -214,6 +214,22 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
+    fun `createPaymentMethod() with PayPay PaymentMethod should create expected object`() = runTest {
+        val paymentMethod = StripeApiRepository(
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY },
+            requestSurface = RequestSurface.PaymentElement,
+            workContext = testDispatcher
+        ).createPaymentMethod(
+            PaymentMethodCreateParams.createPayPay(),
+            ApiRequest.Options(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY)
+        ).getOrThrow()
+
+        assertThat(paymentMethod.type)
+            .isEqualTo(PaymentMethod.Type.PayPay)
+    }
+
+    @Test
     fun `createPaymentMethod() with PayPal PaymentMethod should create expected object`() = runTest {
         val paymentMethod = StripeApiRepository(
             context = context,

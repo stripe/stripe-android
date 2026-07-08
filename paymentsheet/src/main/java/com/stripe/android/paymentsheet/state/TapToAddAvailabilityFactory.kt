@@ -24,3 +24,10 @@ internal class DefaultTapToAddAvailabilityFactory @Inject constructor(
         return connectionManager.isSupported && elementsSession.isTapToAddEnabled && customerMetadata != null
     }
 }
+
+internal class TapToAddAvailabilityFactoryForCustomerSheet @Inject constructor() : TapToAddAvailabilityFactory {
+    override fun isAvailable(
+        elementsSession: ElementsSession,
+        customerMetadata: CustomerMetadata?,
+    ) = false
+}

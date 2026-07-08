@@ -65,22 +65,40 @@ internal sealed class LoggableExperiment(
         }
     }
 
+    data class ConnectionsFCLiteVsNative(
+        override val arbId: String,
+        override val group: String,
+        override val experiment: ExperimentAssignment,
+        val elementsSessionId: String,
+        val mobileSessionId: String,
+        val mobileSdkVersion: String,
+        val fcSdkAvailability: String,
+        val availableLpms: String,
+    ) : LoggableExperiment(
+        arbId = arbId,
+        group = group,
+        experiment = experiment,
+        dimensions = mapOf(
+            "elements_session_id" to elementsSessionId,
+            "mobile_session_id" to mobileSessionId,
+            "mobile_sdk_version" to mobileSdkVersion,
+            "fc_sdk_availability" to fcSdkAvailability,
+            "available_lpms" to availableLpms,
+        )
+    )
+
     data class OcsMobilePaymentMethodMessagingPromotions(
         val experimentsData: ElementsSession.ExperimentsData,
         override val group: String,
         val metadata: PaymentMethodMetadata,
         val mode: EventReporter.Mode,
-        val selectedPaymentMethodType: String,
-        val promotionDisplayedSuccessfully: Boolean?,
-        val layout: String
+        val layout: String,
     ) : LoggableExperiment(
         arbId = experimentsData.arbId,
         experiment = ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS,
         group = group,
         dimensions = CommonElementsDimensions.getDimensions(metadata, mode) + mapOf(
-            "selected_payment_method_type" to selectedPaymentMethodType,
-            "promotion_displayed_successfully" to promotionDisplayedSuccessfully.toString(),
-            "in_app_elements_layout" to layout
+            "in_app_elements_layout" to layout,
         ).filterNotNullValues()
     )
 }

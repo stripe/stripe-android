@@ -22,6 +22,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -40,6 +41,22 @@ class CheckoutTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val networkRule = NetworkRule()
+
+    private fun taxEnabledForShipping() = CheckoutSessionResponseFactory.create(
+        automaticTaxEnabled = true,
+        taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+    )
+
+    private fun taxEnabledForBilling() = CheckoutSessionResponseFactory.create(
+        automaticTaxEnabled = true,
+        taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+    )
+
+    private val testAddress = Address()
+        .city("Denver")
+        .country("US")
+        .postalCode("80202")
+        .state("CO")
 
     @get:Rule
     val ruleChain: RuleChain = RuleChain
@@ -306,7 +323,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress sends address fields and updates checkoutSession on success`() =
-        runCreateWithStateScenario {
+        runCreateWithStateScenario(checkoutSessionResponse = taxEnabledForBilling()) {
             networkRule.checkoutUpdate(
                 bodyPart("tax_region[country]", "US"),
                 bodyPart("tax_region[city]", "Denver"),
@@ -342,7 +359,9 @@ class CheckoutTest {
         }
 
     @Test
-    fun `updateBillingAddress returns failure on error response`() = runCreateWithStateScenario {
+    fun `updateBillingAddress returns failure on error response`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
+    ) {
         networkRule.checkoutUpdate { response ->
             response.setResponseCode(400)
             response.setBody("""{"error": {"message": "Invalid address"}}""")
@@ -392,6 +411,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress stores address in internalState`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -442,6 +462,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress does not store address in internalState on failure`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -475,6 +496,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress stores phoneNumber in internalState`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -506,6 +528,7 @@ class CheckoutTest {
 
     @Test
     fun `updateBillingAddress does not store phoneNumber in internalState on failure`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
         shouldValidateEvents = false,
     ) {
         networkRule.checkoutUpdate { response ->
@@ -521,7 +544,9 @@ class CheckoutTest {
     }
 
     @Test
-    fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario {
+    fun `updateBillingAddress omits empty fields from request`() = runCreateWithStateScenario(
+        checkoutSessionResponse = taxEnabledForBilling(),
+    ) {
         networkRule.checkoutUpdate(
             bodyPart("tax_region[country]", "US"),
             bodyPart("tax_region[postal_code]", "80202"),
@@ -544,6 +569,71 @@ class CheckoutTest {
         checkoutSessionTurbine.awaitItem()
         result.getOrThrow()
     }
+
+    @Test
+    fun `updateShippingAddress does not send tax_region when automatic_tax is disabled`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+            ),
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateShippingAddress(name = "John", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.shippingName).isEqualTo("John")
+            assertThat(state.shippingAddress?.country).isEqualTo("US")
+            assertThat(state.shippingAddress?.postalCode).isEqualTo("80202")
+        }
+
+    @Test
+    fun `updateShippingAddress does not send tax_region when address source is billing`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = taxEnabledForBilling(),
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateShippingAddress(name = "John", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.shippingName).isEqualTo("John")
+            assertThat(state.shippingAddress?.country).isEqualTo("US")
+        }
+
+    @Test
+    fun `updateBillingAddress does not send tax_region when automatic_tax is disabled`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateBillingAddress(name = "Jane", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.billingName).isEqualTo("Jane")
+            assertThat(state.billingAddress?.country).isEqualTo("US")
+        }
+
+    @Test
+    fun `updateBillingAddress does not send tax_region when address source is shipping`() =
+        runCreateWithStateScenario {
+            checkoutSessionTurbine.awaitItem()
+
+            val result = checkout.updateBillingAddress(name = "Jane", address = testAddress)
+            assertThat(result.isSuccess).isTrue()
+
+            val state = checkout.internalState
+            assertThat(state.billingName).isEqualTo("Jane")
+            assertThat(state.billingAddress?.country).isEqualTo("US")
+        }
 
     @Test
     fun `updateTaxId sends type and value and updates checkoutSession on success`() = runCreateWithStateScenario {
@@ -909,6 +999,82 @@ class CheckoutTest {
     }
 
     @Test
+    fun `isLoading stays true while queued mutations are pending`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        val holdFirstResponse = CountDownLatch(1)
+
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            holdFirstResponse.await(10, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "20OFF"),
+        ) { response ->
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        val job1 = async { checkout.applyPromotionCode("10OFF") }
+        val job2 = async { checkout.applyPromotionCode("20OFF") }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+
+        holdFirstResponse.countDown()
+        job1.await()
+        job2.await()
+
+        // isLoading should go directly from true to false with no intermediate flicker.
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `isLoading returns to false when queued mutation is cancelled`() = runCreateWithStateScenario(
+        shouldValidateEvents = false,
+    ) {
+        val holdFirstResponse = CountDownLatch(1)
+
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            holdFirstResponse.await(10, TimeUnit.SECONDS)
+            response.testBodyFromFile("checkout-session-apply-discount.json")
+        }
+
+        // No mock for "20OFF": NetworkRule fails unmatched requests, so if the cancelled
+        // mutation's network call fires, the test fails.
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        val job1 = async { checkout.applyPromotionCode("10OFF") }
+        val job2 = async { checkout.applyPromotionCode("20OFF") }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+
+        // Prove job2 has started and is suspended (waiting for the mutex), not just unstarted.
+        assertThat(job2.isActive).isTrue()
+
+        job2.cancelAndJoin()
+
+        // isLoading should still be true because job1 is in-flight.
+        assertThat(checkout.isLoading.value).isTrue()
+        isLoadingTurbine.expectNoEvents()
+
+        holdFirstResponse.countDown()
+        job1.await()
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        isLoadingTurbine.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `isLoading is false initially`() = runCreateWithStateScenario(
         shouldValidateEvents = false,
     ) {
@@ -1075,7 +1241,7 @@ class CheckoutTest {
     }
 
     private fun runCreateWithStateScenario(
-        checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        checkoutSessionResponse: CheckoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {

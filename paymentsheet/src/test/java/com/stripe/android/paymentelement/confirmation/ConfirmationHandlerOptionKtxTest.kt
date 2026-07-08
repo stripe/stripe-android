@@ -3,7 +3,9 @@ package com.stripe.android.paymentelement.confirmation
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.common.model.SHOP_PAY_CONFIGURATION
+import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CheckoutConfigurationMerger
+import com.stripe.android.checkout.InternalState
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
@@ -25,18 +27,20 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.bacs.BacsConfirmationOption
 import com.stripe.android.paymentelement.confirmation.cpms.CustomPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethodConfirmationOption
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
-import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.BankFormScreenStateFactory
@@ -334,6 +338,99 @@ class ConfirmationHandlerOptionKtxTest {
     }
 
     @Test
+    fun `On Google Pay selection with displayItems, should return expected option with displayItems`() {
+        val displayItems = listOf(
+            com.stripe.android.GooglePayJsonFactory.DisplayItem(
+                label = "Widget",
+                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 2000L,
+            ),
+            com.stripe.android.GooglePayJsonFactory.DisplayItem(
+                label = "Tax",
+                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
+                price = 500L,
+            ),
+        )
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+            googlePayDisplayItems = displayItems,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
+        ).isEqualTo(displayItems)
+    }
+
+    @Test
+    fun `On Google Pay selection without displayItems, should return empty displayItems`() {
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = PaymentSheetFixtures.CONFIG_GOOGLEPAY.newBuilder()
+                .googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+                .build()
+                .asCommonConfiguration(),
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.displayItems
+        ).isEmpty()
+    }
+
+    @OptIn(CheckoutSessionPreview::class)
+    @Test
+    fun `On Google Pay selection, customerEmail from response flows through merger to billingEmailFallback`() {
+        val response = CheckoutSessionResponseFactory.create(
+            customerEmail = "checkout@example.com",
+        )
+        val state = InternalState(
+            key = "test",
+            configuration = Checkout.Configuration().build(),
+            checkoutSessionResponse = response,
+            flagImages = null,
+        )
+        val mergedConfig = CheckoutConfigurationMerger.EmbeddedConfiguration(
+            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").apply {
+                googlePay(
+                    PaymentSheet.GooglePayConfiguration(
+                        environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                        countryCode = "US",
+                        currencyCode = "USD",
+                    )
+                )
+            }.build()
+        ).forCheckoutSession(state).asCommonConfiguration()
+
+        val confirmationOption = PaymentSelection.GooglePay.toConfirmationOption(
+            configuration = mergedConfig,
+            linkConfiguration = null,
+            cardFundingFilter = DefaultCardFundingFilter,
+        )
+
+        assertThat(
+            confirmationOption?.asOption<GooglePayConfirmationOption>()?.config?.billingEmailFallback
+        ).isEqualTo("checkout@example.com")
+    }
+
+    @Test
     fun `On Link selection but with no configuration, should return null`() {
         assertThat(
             PaymentSelection.Link(brand = LinkBrand.Link).toConfirmationOption(
@@ -531,56 +628,6 @@ class ConfirmationHandlerOptionKtxTest {
         assertThat(customPaymentMethodConfirmationOption.customPaymentMethodType)
             .isEqualTo(customPaymentMethod)
         assertThat(customPaymentMethodConfirmationOption.billingDetails).isEqualTo(billingDetails)
-    }
-
-    @Test
-    fun `On ShopPay selection with config with null shopPay config, should return null`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter,
-            )
-        ).isNull()
-    }
-
-    @Test
-    fun `On ShopPay selection with config with shopPay config but no customer session, should return null`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration().copy(
-                    shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-                    customer = null
-                ),
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter,
-            )
-        ).isNull()
-    }
-
-    @Test
-    fun `On ShopPay selection with config with shopPay config, should return expected option`() {
-        assertThat(
-            PaymentSelection.ShopPay.toConfirmationOption(
-                configuration = PaymentSheetFixtures.CONFIG_CUSTOMER
-                    .asCommonConfiguration()
-                    .copy(
-                        customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                            id = "",
-                            clientSecret = "css_test_123"
-                        ),
-                        shopPayConfiguration = SHOP_PAY_CONFIGURATION
-                    ),
-                linkConfiguration = null,
-                cardFundingFilter = DefaultCardFundingFilter,
-            )
-        ).isEqualTo(
-            ShopPayConfirmationOption(
-                shopPayConfiguration = SHOP_PAY_CONFIGURATION,
-                customerSessionClientSecret = "css_test_123",
-                merchantDisplayName = "Merchant, Inc."
-            )
-        )
     }
 
     private fun testLinkInlineSignupConfirmationOption(

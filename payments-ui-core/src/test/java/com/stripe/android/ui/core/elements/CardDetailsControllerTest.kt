@@ -10,17 +10,17 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.ui.core.cardscan.CardScanResult
-import com.stripe.android.ui.core.cardscan.ScannedCard
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.FieldValidationMessage
 import com.stripe.android.uicore.elements.FieldValidationMessageComparator
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.TextFieldConfig
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.isInstanceOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -115,18 +115,15 @@ class CardDetailsControllerTest {
         assertThat(cardController.cvcElement.controller.rawFieldValue.value)
             .isEqualTo("")
 
-        val scannedCard = ScannedCard(
-            pan = "5555555555554444",
-            expirationYear = 2044,
-            expirationMonth = 4,
-        )
-
-        val cardScanResult = CardScanResult.Completed(
-            scannedCard = scannedCard
-        )
         idleLooper()
 
-        cardController.onCardScanResult.invoke(cardScanResult)
+        cardController.onScannedCard(
+            ScannedCardDetails.Unvalidated(
+                cardNumber = "5555555555554444",
+                expirationYear = 2044,
+                expirationMonth = 4,
+            )
+        )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
             .isEqualTo("5555555555554444")
@@ -153,18 +150,15 @@ class CardDetailsControllerTest {
         assertThat(cardController.cvcElement.controller.rawFieldValue.value)
             .isEqualTo("123")
 
-        val scannedCard = ScannedCard(
-            pan = "5555555555554444",
-            expirationYear = 2044,
-            expirationMonth = 4,
-        )
-
-        val cardScanResult = CardScanResult.Completed(
-            scannedCard = scannedCard
-        )
         idleLooper()
 
-        cardController.onCardScanResult.invoke(cardScanResult)
+        cardController.onScannedCard(
+            ScannedCardDetails.Unvalidated(
+                cardNumber = "5555555555554444",
+                expirationYear = 2044,
+                expirationMonth = 4,
+            )
+        )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
             .isEqualTo("5555555555554444")
@@ -191,18 +185,15 @@ class CardDetailsControllerTest {
         assertThat(cardController.cvcElement.controller.rawFieldValue.value)
             .isEqualTo("123")
 
-        val scannedCard = ScannedCard(
-            pan = "5555555555554444",
-            expirationYear = 2009,
-            expirationMonth = 12,
-        )
-
-        val cardScanResult = CardScanResult.Completed(
-            scannedCard = scannedCard
-        )
         idleLooper()
 
-        cardController.onCardScanResult.invoke(cardScanResult)
+        cardController.onScannedCard(
+            ScannedCardDetails.Unvalidated(
+                cardNumber = "5555555555554444",
+                expirationYear = 2009,
+                expirationMonth = 12,
+            )
+        )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
             .isEqualTo("5555555555554444")
@@ -214,21 +205,56 @@ class CardDetailsControllerTest {
     fun `When new card scanned with single digit month, date is correctly formatted`() = runTest {
         val cardController = cardDetailsController()
 
-        val scannedCard = ScannedCard(
-            pan = "5555555555554444",
-            expirationYear = 2029,
-            expirationMonth = 1,
-        )
-
-        val cardScanResult = CardScanResult.Completed(
-            scannedCard = scannedCard
-        )
         idleLooper()
 
-        cardController.onCardScanResult.invoke(cardScanResult)
+        cardController.onScannedCard(
+            ScannedCardDetails.Unvalidated(
+                cardNumber = "5555555555554444",
+                expirationYear = 2029,
+                expirationMonth = 1,
+            )
+        )
 
         assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
             .isEqualTo("0129")
+    }
+
+    @Test
+    fun `When validated scanned card, card data is applied and fields have card pill & cvc`() = runTest {
+        val cardController = cardDetailsController()
+        idleLooper()
+
+        cardController.fields.test {
+            val before = awaitItem()
+            assertThat(before).hasSize(2)
+            assertThat(before[0]).isSameInstanceAs(cardController.numberElement)
+            assertThat(before[1]).isInstanceOf(RowElement::class.java)
+
+            cardController.onScannedCard(
+                ScannedCardDetails.Validated(
+                    cardNumber = "4242424242424242",
+                    expirationYear = 2030,
+                    expirationMonth = 6,
+                )
+            )
+            idleLooper()
+
+            val after = awaitItem()
+            assertThat(after).hasSize(2)
+            assertThat(after[0]).isInstanceOf<CardPillElement>()
+
+            val cardPillElement = after[0] as CardPillElement
+
+            assertThat(cardPillElement.controller.cardNumber).isEqualTo("4242424242424242")
+            assertThat(after[1]).isSameInstanceAs(cardController.cvcElement)
+            ensureAllEventsConsumed()
+        }
+
+        assertThat(cardController.numberElement.controller.rawFieldValue.value)
+            .isEqualTo("4242424242424242")
+        assertThat(cardController.expirationDateElement.controller.rawFieldValue.value)
+            .isEqualTo("0630")
+        assertThat(cardController.cvcElement.controller.rawFieldValue.value).isEqualTo("")
     }
 
     @Test
@@ -248,18 +274,15 @@ class CardDetailsControllerTest {
         assertThat(cardController.cvcElement.controller.rawFieldValue.value)
             .isEqualTo("123")
 
-        val scannedCard = ScannedCard(
-            pan = "5555555555554444",
-            expirationYear = null,
-            expirationMonth = null,
-        )
-
-        val cardScanResult = CardScanResult.Completed(
-            scannedCard = scannedCard
-        )
         idleLooper()
 
-        cardController.onCardScanResult.invoke(cardScanResult)
+        cardController.onScannedCard(
+            ScannedCardDetails.Unvalidated(
+                cardNumber = "5555555555554444",
+                expirationYear = null,
+                expirationMonth = null,
+            )
+        )
 
         assertThat(cardController.numberElement.controller.rawFieldValue.value)
             .isEqualTo("5555555555554444")

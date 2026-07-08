@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.res.Resources
 import androidx.core.os.LocaleListCompat
 import com.stripe.android.BuildConfig
+import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
@@ -34,6 +35,8 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
+import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactoryForCustomerSheet
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
@@ -43,7 +46,13 @@ import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
-@Module(includes = [PaymentConfigurationModule::class, StripeNetworkClientModule::class])
+@Module(
+    includes = [
+        PaymentConfigurationModule::class,
+        StripeNetworkClientModule::class,
+        NfcScanningAvailabilityModule::class,
+    ]
+)
 internal interface CustomerSheetViewModelModule {
     @Binds
     fun bindsUserFacingLogger(impl: RealUserFacingLogger): UserFacingLogger
@@ -72,6 +81,11 @@ internal interface CustomerSheetViewModelModule {
     fun bindsPrefsRepositoryFactory(
         factory: DefaultPrefsRepository.Factory
     ): PrefsRepository.Factory
+
+    @Binds
+    fun bindsTapToAddAvailabilityFactory(
+        tapToAddAvailabilityFactory: TapToAddAvailabilityFactoryForCustomerSheet
+    ): TapToAddAvailabilityFactory
 
     @Suppress("TooManyFunctions")
     companion object {

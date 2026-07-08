@@ -52,6 +52,7 @@ import com.stripe.android.paymentsheet.ui.DefaultSelectSavedPaymentMethodsIntera
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -82,7 +83,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    placesClient: PlacesClientProxy?,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -95,6 +97,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
+    placesClient = placesClient,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
@@ -166,8 +169,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             isLinkAvailable = isLinkAvailable == true && visibleWallets.contains(WalletType.Link),
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata.isGooglePayReady && visibleWallets.contains(WalletType.GooglePay),
-            isShopPayAvailable = paymentMethodMetadata.availableWallets.contains(WalletType.ShopPay) &&
-                visibleWallets.contains(WalletType.ShopPay),
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata.supportedPaymentMethodTypes(),
             googlePayLauncherConfig = null,
@@ -181,10 +182,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     updateSelection(Link(linkConfiguration.effectiveLinkBrand(linkAccountInfo.account)))
                     onUserSelection()
                 }
-            },
-            onShopPayPressed = {
-                updateSelection(PaymentSelection.ShopPay)
-                onUserSelection()
             },
             isSetupIntent = paymentMethodMetadata.stripeIntent is SetupIntent,
             walletsAllowedInHeader = walletsAllowedInHeader(paymentMethodMetadata),
@@ -460,6 +457,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             SelectSavedPaymentMethods(interactor = interactor)
         } else {

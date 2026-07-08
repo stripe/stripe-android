@@ -144,6 +144,8 @@
   <string name="stripe_id_number">Numéro d\'identification</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">Tout est prêt</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">Image prise</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Le numéro d\'identification que vous avez saisi est incomplet.</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">4 derniers chiffres du numéro de sécurité sociale</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">Nom</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">Automatique</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Chargement en cours</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">Manuel</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">Rapprochez la pièce d\'identité</string>
   <!-- Instructional text when camera is too close to a document -->

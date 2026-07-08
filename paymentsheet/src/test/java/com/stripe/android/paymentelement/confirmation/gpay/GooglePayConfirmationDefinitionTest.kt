@@ -489,6 +489,57 @@ class GooglePayConfirmationDefinitionTest {
         }
     }
 
+    @Test
+    fun `On 'launch', should pass display items to present`() = runTest {
+        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+        val displayItems = listOf(
+            com.stripe.android.GooglePayJsonFactory.DisplayItem(
+                label = "Widget",
+                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
+                price = 2000L,
+            ),
+            com.stripe.android.GooglePayJsonFactory.DisplayItem(
+                label = "Tax",
+                type = com.stripe.android.GooglePayJsonFactory.DisplayItem.Type.TAX,
+                price = 500L,
+            ),
+        )
+
+        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                        merchantCurrencyCode = "USD",
+                        displayItems = displayItems,
+                    ),
+                ),
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = PAYMENT_INTENT.copy(currency = "USD")
+                    ),
+                ),
+                arguments = EmptyConfirmationLauncherArgs,
+                launcher = launcher,
+            )
+
+            assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
+
+            verify(googlePayLauncher, times(1)).present(
+                currencyCode = "USD",
+                amount = 1000L,
+                transactionId = "pi_12345",
+                label = null,
+                clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
+                displayItems = displayItems,
+            )
+        }
+    }
+
     private fun runActionTest(
         merchantCurrencyCode: String?,
         intent: StripeIntent = SetupIntentFactory.create(),

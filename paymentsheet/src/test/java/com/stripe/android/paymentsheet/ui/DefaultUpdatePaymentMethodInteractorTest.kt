@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.C
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
@@ -683,6 +684,22 @@ class DefaultUpdatePaymentMethodInteractorTest {
         }
     }
 
+    @Test
+    fun editCardDetailsInteractorFactory_forwardsAutocompleteAddressInteractorFactory() {
+        val fakeEditCardFactory = FakeEditCardDetailsInteractorFactory()
+        val fakeAutocompleteFactory = AutocompleteAddressInteractor.Factory {
+            error("not expected to be called")
+        }
+        runScenario(
+            editCardDetailsInteractorFactory = fakeEditCardFactory,
+            autocompleteAddressInteractorFactory = fakeAutocompleteFactory,
+        ) {
+            interactor.editCardDetailsInteractor
+            assertThat(fakeEditCardFactory.autocompleteAddressInteractorFactory)
+                .isSameInstanceAs(fakeAutocompleteFactory)
+        }
+    }
+
     private fun updateCardAndDefaultPaymentMethod(
         interactor: UpdatePaymentMethodInteractor,
     ) {
@@ -717,6 +734,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
             .Factory(),
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
+        autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val onUpdateSuccessTurbine = Turbine<Unit>()
@@ -739,6 +757,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             editCardDetailsInteractorFactory = editCardDetailsInteractorFactory,
             removeMessage = null,
             allowedBillingCountries = allowedBillingCountries,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
 
         TestParams(

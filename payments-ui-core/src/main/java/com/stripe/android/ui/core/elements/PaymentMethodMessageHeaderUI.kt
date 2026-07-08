@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +33,7 @@ fun PaymentMethodMessagePromotionText(
         append(promotion.message.maybeAddPeriod())
         withLink(
             LinkAnnotation.Url(
-                url = promotion.learnMore.url,
+                url = promotion.learnMore.url + getThemeParam(),
                 styles = TextLinkStyles(
                     style = SpanStyle(
                         fontWeight = FontWeight.Medium,
@@ -54,4 +55,9 @@ fun PaymentMethodMessagePromotionText(
 
 private fun String.maybeAddPeriod(): String {
     return if (endsWith('.')) this else "$this. "
+}
+
+@Composable
+private fun getThemeParam(): String {
+    return if (isSystemInDarkTheme()) "&theme=night" else "&theme=stripe"
 }

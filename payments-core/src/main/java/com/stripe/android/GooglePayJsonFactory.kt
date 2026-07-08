@@ -279,6 +279,27 @@ class GooglePayJsonFactory internal constructor(
                 transactionInfo.checkoutOption?.let {
                     put("checkoutOption", it.code)
                 }
+
+                if (transactionInfo.displayItems.isNotEmpty()) {
+                    val displayItemsArray = JSONArray()
+                    for (item in transactionInfo.displayItems) {
+                        displayItemsArray.put(
+                            JSONObject()
+                                .put("label", item.label)
+                                .put("type", item.type.code)
+                                .put(
+                                    "price",
+                                    PayWithGoogleUtils.getPriceString(
+                                        item.price,
+                                        Currency.getInstance(
+                                            transactionInfo.currencyCode.uppercase()
+                                        )
+                                    )
+                                )
+                        )
+                    }
+                    put("displayItems", displayItemsArray)
+                }
             }
     }
 
@@ -393,6 +414,7 @@ class GooglePayJsonFactory internal constructor(
         internal val totalPrice: Long?,
         internal val totalPriceLabel: String?,
         internal val checkoutOption: CheckoutOption?,
+        internal val displayItems: List<DisplayItem> = emptyList(),
     ) : Parcelable {
 
         /**
@@ -429,6 +451,7 @@ class GooglePayJsonFactory internal constructor(
             totalPrice = totalPrice?.toLong(),
             totalPriceLabel = totalPriceLabel,
             checkoutOption = checkoutOption,
+            displayItems = emptyList(),
         )
 
         /**
@@ -469,6 +492,31 @@ class GooglePayJsonFactory internal constructor(
              * selections. This option is only available when totalPriceStatus is set to FINAL.
              */
             CompleteImmediatePurchase("COMPLETE_IMMEDIATE_PURCHASE")
+        }
+    }
+
+    /**
+     * A display line item for the Google Pay payment sheet.
+     *
+     * [DisplayLineItem](https://developers.google.com/pay/api/android/reference/request-objects#DisplayLineItem)
+     */
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Poko
+    class DisplayItem(
+        val label: String,
+        val type: Type,
+        val price: Long,
+    ) : Parcelable {
+        /**
+         * The type of display line item.
+         */
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class Type(val code: String) {
+            LINE_ITEM("LINE_ITEM"),
+            SUBTOTAL("SUBTOTAL"),
+            TAX("TAX"),
+            DISCOUNT("DISCOUNT"),
         }
     }
 

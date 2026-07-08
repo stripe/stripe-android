@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
@@ -21,17 +22,6 @@ internal class DefaultRetrieveCustomerEmailTest {
         customerMetadata = CUSTOMER_SESSION_METADATA,
     ) {
         assertThat(result).isEqualTo("default@example.com")
-    }
-
-    @Test
-    fun `customer session calls repository with session credentials when no default email`() = runScenario(
-        configuration = CONFIG_WITHOUT_EMAIL,
-        customerMetadata = CUSTOMER_SESSION_METADATA,
-    ) {
-        assertThat(result).isNull()
-        val call = customerRepository.retrieveCalls.awaitItem()
-        assertThat(call.customerId).isEqualTo("cus_1")
-        assertThat(call.ephemeralKeySecret).isEqualTo("ek_test_session")
     }
 
     @Test
@@ -61,17 +51,55 @@ internal class DefaultRetrieveCustomerEmailTest {
         assertThat(result).isEqualTo("default@example.com")
     }
 
+    @Test
+    fun `configuration email preferred over customer email`() = runTest {
+        val customerEmail = "customer@stripe.com"
+        runScenario(
+            CONFIG_WITH_DEFAULT_EMAIL,
+            customerEmail = customerEmail,
+            customerMetadata = CUSTOMER_SESSION_METADATA,
+        ) {
+            assertThat(result).isEqualTo("default@example.com")
+        }
+    }
+
+    @Test
+    fun `customerEmail used when no configuration email`() = runTest {
+        val customerEmail = "customer@stripe.com"
+        runScenario(
+            CONFIG_WITHOUT_EMAIL,
+            customerEmail = customerEmail,
+            customerMetadata = CUSTOMER_SESSION_METADATA,
+        ) {
+            assertThat(result).isEqualTo(customerEmail)
+        }
+    }
+
+    @Test
+    fun `when using customer sessions, no customer email if config email and customerEmail are null`() = runScenario(
+        CONFIG_WITHOUT_EMAIL,
+        customerEmail = null,
+        customerMetadata = CUSTOMER_SESSION_METADATA,
+    ) {
+        assertThat(result).isEqualTo(null)
+    }
+
     private fun runScenario(
         configuration: CommonConfiguration = CONFIG_WITHOUT_EMAIL,
         customerMetadata: CustomerMetadata? = null,
+        customerEmail: String? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val customerRepository = CallTrackingCustomerRepository()
-        val retrieveEmail = DefaultRetrieveCustomerEmail(customerRepository)
+        val retrieveEmail = DefaultRetrieveCustomerEmail(
+            customerRepository,
+            FakeDurationProvider(),
+        )
 
         val result = retrieveEmail(
             configuration = configuration,
             customerMetadata = customerMetadata,
+            customerEmail = customerEmail,
         )
 
         Scenario(

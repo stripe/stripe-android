@@ -19,7 +19,7 @@ class OnrampCallbacks {
     private var collectPaymentCallback: OnrampCollectPaymentMethodCallback? = null
     private var authorizeCallback: OnrampAuthorizeCallback? = null
     private var checkoutCallback: OnrampCheckoutCallback? = null
-    private var crsCarfDeclarationCallback: OnrampCrsCarfDeclarationCallback? = null
+    private var userAttestationCallback: OnrampUserAttestationCallback? = null
     private var onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider? = null
     private var googlePayIsReadyCallback: ((Boolean) -> Unit)? = null
 
@@ -59,10 +59,10 @@ class OnrampCallbacks {
     }
 
     /**
-     * Callback invoked when CRS/CARF declaration presentation completes.
+     * Callback invoked when user attestation presentation completes.
      */
-    fun crsCarfDeclarationCallback(callback: OnrampCrsCarfDeclarationCallback) = apply {
-        this.crsCarfDeclarationCallback = callback
+    fun userAttestationCallback(callback: OnrampUserAttestationCallback) = apply {
+        this.userAttestationCallback = callback
     }
 
     /**
@@ -93,7 +93,7 @@ class OnrampCallbacks {
         val collectPaymentCallback: OnrampCollectPaymentMethodCallback,
         val authorizeCallback: OnrampAuthorizeCallback,
         val checkoutCallback: OnrampCheckoutCallback,
-        val crsCarfDeclarationCallback: OnrampCrsCarfDeclarationCallback?,
+        val userAttestationCallback: OnrampUserAttestationCallback?,
         val onrampSessionClientSecretProvider: OnrampSessionClientSecretProvider,
         val googlePayIsReadyCallback: ((Boolean) -> Unit)?
     )
@@ -115,7 +115,7 @@ class OnrampCallbacks {
             checkoutCallback = requireNotNull(checkoutCallback) {
                 "checkoutCallback must not be null"
             },
-            crsCarfDeclarationCallback = crsCarfDeclarationCallback,
+            userAttestationCallback = userAttestationCallback,
             onrampSessionClientSecretProvider = requireNotNull(onrampSessionClientSecretProvider) {
                 "onrampSessionClientSecretProvider must be not null"
             },

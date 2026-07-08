@@ -60,6 +60,9 @@ internal class FakeEventReporter : EventReporter {
     private val _formCompletedCalls = Turbine<FormCompletedCall>()
     val formCompletedCalls: ReceiveTurbine<FormCompletedCall> = _formCompletedCalls
 
+    private val _walletButtonTappedCalls = Turbine<String>()
+    val walletButtonTappedCalls: ReceiveTurbine<String> = _walletButtonTappedCalls
+
     private val _pressConfirmButtonCalls = Turbine<PaymentSelection>()
     val pressConfirmButtonCalls: ReceiveTurbine<PaymentSelection> = _pressConfirmButtonCalls
 
@@ -98,9 +101,9 @@ internal class FakeEventReporter : EventReporter {
     val pmmPromotionsFetched: ReceiveTurbine<Unit> =
         _pmmPromotionsFetched
 
-    private val _pmmPromotionsIncomplete = Turbine<Unit>()
-    val pmmPromotionsIncomplete: ReceiveTurbine<Unit> =
-        _pmmPromotionsIncomplete
+    private val _pmmPromotionsDisplayed = Turbine<Boolean>()
+    val pmmPromotionsDisplayed: ReceiveTurbine<Boolean> =
+        _pmmPromotionsDisplayed
 
     fun validate() {
         _paymentFailureCalls.ensureAllEventsConsumed()
@@ -117,6 +120,7 @@ internal class FakeEventReporter : EventReporter {
         _experimentExposureCalls.ensureAllEventsConsumed()
         _removePaymentMethodCalls.ensureAllEventsConsumed()
         _formCompletedCalls.ensureAllEventsConsumed()
+        _walletButtonTappedCalls.ensureAllEventsConsumed()
         _pressConfirmButtonCalls.ensureAllEventsConsumed()
         _usBankAccountFormEventCalls.ensureAllEventsConsumed()
         _tapToAddButtonShownCalls.ensureAllEventsConsumed()
@@ -128,7 +132,7 @@ internal class FakeEventReporter : EventReporter {
         _failedToAddCardWithTapToAddCalls.ensureAllEventsConsumed()
         _tapToAddAttemptWithUnsupportedDeviceCalls.ensureAllEventsConsumed()
         _pmmPromotionsFetched.ensureAllEventsConsumed()
-        _pmmPromotionsIncomplete.ensureAllEventsConsumed()
+        _pmmPromotionsDisplayed.ensureAllEventsConsumed()
     }
 
     override fun onInit() {
@@ -173,6 +177,10 @@ internal class FakeEventReporter : EventReporter {
     }
 
     override fun onSelectPaymentOption(paymentSelection: PaymentSelection) {
+    }
+
+    override fun onWalletButtonTapped(walletType: String) {
+        _walletButtonTappedCalls.add(walletType)
     }
 
     override fun onPressConfirmButton(paymentSelection: PaymentSelection) {
@@ -272,21 +280,12 @@ internal class FakeEventReporter : EventReporter {
     override fun onAnalyticsEvent(event: AnalyticsEvent) {
     }
 
-    override fun onShopPayWebViewLoadAttempt() {
-    }
-
-    override fun onShopPayWebViewConfirmSuccess() {
-    }
-
-    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
-    }
-
-    override fun onPaymentMethodMessagePromotionsFetched() {
+    override fun onPaymentMethodMessagePromotionsFetchBegin() {
         _pmmPromotionsFetched.add(Unit)
     }
 
-    override fun onPaymentMethodMessagePromotionsIncomplete() {
-        _pmmPromotionsIncomplete.add(Unit)
+    override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
+        _pmmPromotionsDisplayed.add(displayedSuccessfully)
     }
 
     override fun onCardScanStarted(implementation: String) {

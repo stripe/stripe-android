@@ -267,14 +267,6 @@ internal class EmbeddedPaymentElementTest {
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
-        }
-
-        networkRule.enqueue(
             method("POST"),
             path("/v1/consumers/sessions/lookup"),
         ) { response ->

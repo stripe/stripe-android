@@ -757,7 +757,8 @@ class LinkController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class PaymentMethodType {
         Card,
-        BankAccount
+        BankAccount,
+        Generic
     }
 
     /**

@@ -21,6 +21,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.testing.FeatureFlagTestRule
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -747,6 +748,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -803,6 +805,27 @@ class ElementsSessionJsonParserTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `ElementsSession has expected customer email in the response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
+                externalPaymentMethods = emptyList(),
+                customPaymentMethods = emptyList(),
+                appId = APP_ID
+            ),
+            isLiveMode = false,
+        )
+
+        val intent = createPaymentIntentWithCustomerSession(
+            customerEmail = "customer@example.com",
+        )
+        val elementsSession = parser.parse(intent)
+
+        assertThat(elementsSession?.customer?.email).isEqualTo("customer@example.com")
     }
 
     @Test
@@ -863,6 +886,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -933,6 +957,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -1208,6 +1233,7 @@ class ElementsSessionJsonParserTest {
 
         assertThat(elementsSession?.customer).isEqualTo(
             ElementsSession.Customer(
+                email = null,
                 session = ElementsSession.Customer.Session(
                     id = "cuss_123",
                     apiKey = "ek_test_1234",
@@ -1987,6 +2013,65 @@ class ElementsSessionJsonParserTest {
         assertThat(pms?.get(1)?.card?.cardArt?.artImage?.url).isEqualTo("https://example.com/amex.png")
     }
 
+    @Test
+    fun `Card art is not merged into Link passthrough payment methods`() {
+        val json = createPaymentIntentWithCustomerSession(enableLinkSpm = true)
+
+        json.getJSONObject("customer").apply {
+            put(
+                "payment_methods_with_link_details",
+                JSONArray().apply {
+                    put(
+                        createPaymentMethodWithLinkDetailsJson(
+                            paymentMethod = createCardPaymentMethodJson(
+                                id = "pm_passthrough",
+                                last4 = "4242",
+                            ),
+                            isLinkOrigin = true,
+                        )
+                    )
+                    put(
+                        createPaymentMethodWithLinkDetailsJson(
+                            paymentMethod = createCardPaymentMethodJson(
+                                id = "pm_regular",
+                                last4 = "0005",
+                            ),
+                            isLinkOrigin = false,
+                        )
+                    )
+                }
+            )
+            put(
+                "card_art",
+                JSONArray().apply {
+                    put(
+                        createCardArtJson(
+                            paymentMethodId = "pm_passthrough",
+                            artUrl = "https://example.com/passthrough.png",
+                        )
+                    )
+                    put(
+                        createCardArtJson(
+                            paymentMethodId = "pm_regular",
+                            artUrl = "https://example.com/regular.png",
+                        )
+                    )
+                }
+            )
+        }
+
+        val paymentMethods = requireNotNull(parseElementsSession(json)?.customer?.paymentMethods)
+        val passthroughPaymentMethod = paymentMethods.first { it.id == "pm_passthrough" }
+        val regularPaymentMethod = paymentMethods.first { it.id == "pm_regular" }
+
+        assertThat(paymentMethods).hasSize(2)
+        assertThat(passthroughPaymentMethod.isLinkPassthroughMode).isTrue()
+        assertThat(passthroughPaymentMethod.card?.cardArt).isNull()
+        assertThat(regularPaymentMethod.isLinkPassthroughMode).isFalse()
+        assertThat(regularPaymentMethod.card?.cardArt?.artImage?.url)
+            .isEqualTo("https://example.com/regular.png")
+    }
+
     private fun parseElementsSession(json: JSONObject): ElementsSession? {
         return ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
@@ -1998,6 +2083,44 @@ class ElementsSessionJsonParserTest {
             ),
             isLiveMode = false,
         ).parse(json)
+    }
+
+    private fun createPaymentMethodWithLinkDetailsJson(
+        paymentMethod: JSONObject,
+        isLinkOrigin: Boolean,
+    ): JSONObject {
+        return JSONObject().apply {
+            put("payment_method", paymentMethod)
+            put("link_payment_details", JSONObject.NULL)
+            put("is_link_origin", isLinkOrigin)
+        }
+    }
+
+    private fun createCardPaymentMethodJson(
+        id: String,
+        last4: String,
+    ): JSONObject {
+        return JSONObject(CARD_PM_JSON).apply {
+            put("id", id)
+            getJSONObject("card").put("last4", last4)
+        }
+    }
+
+    private fun createCardArtJson(
+        paymentMethodId: String,
+        artUrl: String,
+    ): JSONObject {
+        return JSONObject().apply {
+            put("payment_method", paymentMethodId)
+            put(
+                "art_image",
+                JSONObject().apply {
+                    put("url", artUrl)
+                    put("format", "image/png")
+                }
+            )
+            put("program_name", "Test Program")
+        }
     }
 
     private fun createElementsSessionWithLinkBrand(linkBrand: String?): JSONObject {
