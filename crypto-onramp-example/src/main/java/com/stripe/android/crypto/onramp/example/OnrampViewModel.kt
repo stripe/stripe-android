@@ -33,12 +33,14 @@ import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
@@ -546,6 +548,41 @@ internal class OnrampViewModel(
                             loadingMessage = null
                         )
                     }
+                }
+            }
+        }
+    }
+
+    fun getWalletOwnershipChallenge(walletAddress: String, network: CryptoNetwork) {
+        viewModelScope.launch {
+            val trimmedAddress = walletAddress.trim()
+            if (trimmedAddress.isBlank()) {
+                _message.value = "Please enter a wallet address"
+                return@launch
+            }
+            when (val result = onrampCoordinator.getWalletOwnershipChallenge(trimmedAddress, network)) {
+                is OnrampGetWalletOwnershipChallengeResult.Completed -> {
+                    val challenge = result.challenge
+                    _message.value =
+                        "Challenge created. Message to sign: ${challenge.message}" +
+                        " (expires: ${challenge.expiresAt})"
+                }
+                is OnrampGetWalletOwnershipChallengeResult.Failed -> {
+                    _message.value = "Failed to get wallet ownership challenge: ${result.error.message}"
+                }
+            }
+        }
+    }
+
+    fun submitWalletOwnershipSignature(challengeId: String, signature: String) {
+        viewModelScope.launch {
+            when (val result = onrampCoordinator.submitWalletOwnershipSignature(challengeId, signature)) {
+                is OnrampSubmitWalletOwnershipSignatureResult.Completed -> {
+                    val wallet = result.wallet
+                    _message.value = "Wallet ownership verified. Wallet: ${wallet.walletAddress} on ${wallet.network}"
+                }
+                is OnrampSubmitWalletOwnershipSignatureResult.Failed -> {
+                    _message.value = "Failed to submit wallet ownership signature: ${result.error.message}"
                 }
             }
         }

@@ -15,6 +15,8 @@ import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.core.networking.responseJson
 import com.stripe.android.core.networking.toMap
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.crypto.onramp.model.ConsumerWallet
+import com.stripe.android.crypto.onramp.model.ConsumerWalletResponse
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenRequest
 import com.stripe.android.crypto.onramp.model.CreatePaymentTokenResponse
 import com.stripe.android.crypto.onramp.model.CryptoCustomerRequestParams
@@ -32,6 +34,10 @@ import com.stripe.android.crypto.onramp.model.StartIdentityVerificationRequest
 import com.stripe.android.crypto.onramp.model.StartIdentityVerificationResponse
 import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.model.UserAttestationResponse
+import com.stripe.android.crypto.onramp.model.WalletOwnershipChallenge
+import com.stripe.android.crypto.onramp.model.WalletOwnershipChallengeRequestParams
+import com.stripe.android.crypto.onramp.model.WalletOwnershipChallengeResponse
+import com.stripe.android.crypto.onramp.model.WalletOwnershipVerificationRequestParams
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirements
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifierRequirementsResponse
@@ -225,6 +231,56 @@ internal class CryptoApiRepository @Inject constructor(
             Json.encodeToJsonElement(params).jsonObject,
             Unit.serializer()
         )
+    }
+
+    /**
+     * Creates a short-lived challenge for verifying ownership of a wallet address.
+     *
+     * @param walletAddress The wallet address to verify ownership of.
+     * @param network The crypto network for the wallet address.
+     * @param consumerSessionClientSecret The client session secret for authentication.
+     */
+    suspend fun getWalletOwnershipChallenge(
+        walletAddress: String,
+        network: CryptoNetwork,
+        consumerSessionClientSecret: String
+    ): Result<WalletOwnershipChallenge> {
+        val params = WalletOwnershipChallengeRequestParams(
+            walletAddress = walletAddress,
+            network = network,
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+        )
+
+        return executePost(
+            walletOwnershipChallengeUrl,
+            Json.encodeToJsonElement(params).jsonObject,
+            WalletOwnershipChallengeResponse.serializer()
+        ).mapCatching { it.toWalletOwnershipChallenge() }
+    }
+
+    /**
+     * Submits a signature over a wallet ownership challenge to verify wallet ownership.
+     *
+     * @param challengeId The identifier from a prior [getWalletOwnershipChallenge] call.
+     * @param signature The signature over the challenge's message field.
+     * @param consumerSessionClientSecret The client session secret for authentication.
+     */
+    suspend fun submitWalletOwnershipSignature(
+        challengeId: String,
+        signature: String,
+        consumerSessionClientSecret: String
+    ): Result<ConsumerWallet> {
+        val params = WalletOwnershipVerificationRequestParams(
+            challengeId = challengeId,
+            signature = signature,
+            credentials = CryptoCustomerRequestParams.Credentials(consumerSessionClientSecret)
+        )
+
+        return executePost(
+            walletOwnershipVerificationUrl,
+            Json.encodeToJsonElement(params).jsonObject,
+            ConsumerWalletResponse.serializer()
+        ).mapCatching { it.toConsumerWallet() }
     }
 
     suspend fun startIdentityVerification(
@@ -486,6 +542,18 @@ internal class CryptoApiRepository @Inject constructor(
          */
         internal val setWalletAddressUrl: String
             get() = getApiUrl("crypto/internal/wallet")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/wallet_ownership_challenge`
+         */
+        internal val walletOwnershipChallengeUrl: String
+            get() = getApiUrl("crypto/internal/wallet_ownership_challenge")
+
+        /**
+         * @return `https://api.stripe.com/v1/crypto/internal/wallet_ownership_verification`
+         */
+        internal val walletOwnershipVerificationUrl: String
+            get() = getApiUrl("crypto/internal/wallet_ownership_verification")
 
         /**
          * @return `https://api.stripe.com/v1/crypto/internal/start_identity_verification`

@@ -13,12 +13,14 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
@@ -103,6 +105,36 @@ class OnrampCoordinator @Inject internal constructor(
         network: CryptoNetwork
     ): OnrampRegisterWalletAddressResult {
         return interactor.registerWalletAddress(walletAddress, network)
+    }
+
+    /**
+     * Creates a short-lived challenge for verifying ownership of a registered wallet address.
+     * Requires an authenticated Link user.
+     *
+     * @param walletAddress The crypto wallet address to verify ownership of.
+     * @param network The crypto network for the wallet address.
+     * @return [OnrampGetWalletOwnershipChallengeResult] containing the challenge details on success.
+     */
+    suspend fun getWalletOwnershipChallenge(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampGetWalletOwnershipChallengeResult {
+        return interactor.getWalletOwnershipChallenge(walletAddress, network)
+    }
+
+    /**
+     * Submits a signature over a wallet ownership challenge to verify wallet ownership.
+     * Requires an authenticated Link user.
+     *
+     * @param challengeId The identifier from a prior [getWalletOwnershipChallenge] call.
+     * @param signature The signature over the challenge's message field.
+     * @return [OnrampSubmitWalletOwnershipSignatureResult] containing the verified wallet on success.
+     */
+    suspend fun submitWalletOwnershipSignature(
+        challengeId: String,
+        signature: String
+    ): OnrampSubmitWalletOwnershipSignatureResult {
+        return interactor.submitWalletOwnershipSignature(challengeId, signature)
     }
 
     /**

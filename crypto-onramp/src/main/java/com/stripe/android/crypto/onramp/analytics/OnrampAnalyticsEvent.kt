@@ -101,6 +101,19 @@ internal sealed class OnrampAnalyticsEvent(
         )
     )
 
+    class WalletOwnershipChallengeCreated(
+        network: CryptoNetwork
+    ) : OnrampAnalyticsEvent(
+        name = "wallet_ownership_challenge_created",
+        params = mapOf(
+            "network" to network.value
+        )
+    )
+
+    data object WalletOwnershipVerified : OnrampAnalyticsEvent(
+        name = "wallet_ownership_verified"
+    )
+
     class CollectPaymentMethodStarted(
         paymentMethodType: PaymentMethodType?,
     ) : OnrampAnalyticsEvent(
@@ -183,7 +196,9 @@ internal sealed class OnrampAnalyticsEvent(
             VerifyKyc("verify_kyc_info"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
-            PresentUserAttestation("present_user_attestation")
+            PresentUserAttestation("present_user_attestation"),
+            GetWalletOwnershipChallenge("get_wallet_ownership_challenge"),
+            SubmitWalletOwnershipSignature("submit_wallet_ownership_signature")
         }
     }
 
