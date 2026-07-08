@@ -194,6 +194,32 @@ def extract_test_results(
     return {tid: (counts[0], counts[1]) for tid, counts in test_counts.items()}
 
 
+def build_dashboard_url(org_slug: str, project_id: str, app_slug: str, test_id: str) -> str:
+    """Build a Bitrise Insights dashboard URL for a specific test."""
+    from urllib.parse import quote_plus
+    classname, _, testname = test_id.partition("#")
+    base = f"https://app.bitrise.io/insights/{org_slug}/explore/tests"
+    params = (
+        f"project_id={project_id}"
+        f"&interval=monthly&duration=P12M&display_option=custom&tab=flaky_runs"
+        f"&breakdown={quote_plus(classname)}"
+        f"&app_slug={app_slug}"
+        f"&test_case_name={quote_plus(testname)}"
+        f"&test_suite_name={quote_plus(classname)}"
+        f"&module={quote_plus(classname)}"
+    )
+    return f"{base}?{params}"
+
+
+def get_org_info(app_slug: str, token: str) -> tuple[str, str]:
+    """Return (org_slug, project_id) from the app metadata."""
+    data = bitrise_get(f"https://api.bitrise.io/v0.1/apps/{app_slug}", token)
+    app = data.get("data", {})
+    org_slug = app.get("owner", {}).get("slug", "")
+    project_id = app.get("project_id", "")
+    return org_slug, project_id
+
+
 def analyze(
     app_slug: str,
     token: str,
@@ -206,6 +232,8 @@ def analyze(
     """
     workflow_set = set(workflows or DEFAULT_WORKFLOWS)
     cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+
+    org_slug, project_id = get_org_info(app_slug, token)
 
     print(f"Fetching builds from the past {days} days ...", file=sys.stderr)
     builds = fetch_builds(app_slug, token, cutoff, workflow_set)
@@ -262,19 +290,22 @@ def analyze(
 
         if criterion_1_met or criterion_2_met:
             classname, _, testname = test_id.partition("#")
-            quarantine.append(
-                {
-                    "testId": test_id,
-                    "className": classname,
-                    "testName": testname,
-                    "masterFailures": master_failures,
-                    "totalRuns": total_runs,
-                    "totalFailures": total_failures,
-                    "failureRate": round(failure_rate, 4),
-                    "criterion1": criterion_1_met,
-                    "criterion2": criterion_2_met,
-                }
-            )
+            entry: dict[str, Any] = {
+                "testId": test_id,
+                "className": classname,
+                "testName": testname,
+                "masterFailures": master_failures,
+                "totalRuns": total_runs,
+                "totalFailures": total_failures,
+                "failureRate": round(failure_rate, 4),
+                "criterion1": criterion_1_met,
+                "criterion2": criterion_2_met,
+            }
+            if org_slug and project_id:
+                entry["dashboardUrl"] = build_dashboard_url(
+                    org_slug, project_id, app_slug, test_id
+                )
+            quarantine.append(entry)
 
     quarantine.sort(key=lambda x: (-x["totalFailures"], x["testId"]))
 
