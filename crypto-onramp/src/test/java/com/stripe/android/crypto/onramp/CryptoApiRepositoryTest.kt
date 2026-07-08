@@ -911,51 +911,6 @@ class CryptoApiRepositoryTest {
         }
     }
 
-    @Test
-    fun testGetOnrampSessionParsesTransactionDetailsLastError() {
-        runTest {
-            val stripeResponse = StripeResponse(
-                200,
-                """
-                    {
-                        "id": "cos_123",
-                        "client_secret": "cos_123_secret_456",
-                        "transaction_details": {
-                            "wallet_address": "0x1234567890abcdef",
-                            "destination_network": "ethereum",
-                            "last_error": "wallet_ownership_verification_required"
-                        }
-                    }
-                """.trimIndent(),
-                emptyMap()
-            )
-
-            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
-                .thenReturn(stripeResponse)
-
-            val result = cryptoApiRepository.getOnrampSession(
-                sessionId = "cos_123",
-                sessionClientSecret = "cos_123_secret_456"
-            )
-
-            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
-            val apiRequest = apiRequestArgumentCaptor.firstValue
-
-            assertThat(apiRequest.baseUrl)
-                .isEqualTo("https://api.stripe.com/v1/crypto/internal/onramp_session")
-            assertThat(apiRequest.params).containsExactly(
-                "crypto_onramp_session", "cos_123",
-                "client_secret", "cos_123_secret_456"
-            )
-
-            val transactionDetails = result.getOrThrow().transactionDetails!!
-            assertThat(transactionDetails.walletAddress).isEqualTo("0x1234567890abcdef")
-            assertThat(transactionDetails.destinationNetwork).isEqualTo("ethereum")
-            assertThat(transactionDetails.destinationCryptoNetwork).isEqualTo(CryptoNetwork.Ethereum)
-            assertThat(transactionDetails.lastError).isEqualTo("wallet_ownership_verification_required")
-        }
-    }
-
     private fun assertKycCollectionRequest(apiRequest: ApiRequest) {
         assertThat(apiRequest.baseUrl)
             .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")

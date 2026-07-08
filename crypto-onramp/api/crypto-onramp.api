@@ -159,18 +159,6 @@ public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipCha
 	public fun getCode ()Ljava/lang/String;
 }
 
-public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipVerificationRequiredException : java/lang/IllegalStateException {
-	public static final field $stable I
-	public static final field CODE Ljava/lang/String;
-	public static final field Companion Lcom/stripe/android/crypto/onramp/exception/WalletOwnershipVerificationRequiredException$Companion;
-	public final fun getCode ()Ljava/lang/String;
-	public final fun getNetwork ()Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
-	public final fun getWalletAddress ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/crypto/onramp/exception/WalletOwnershipVerificationRequiredException$Companion {
-}
-
 public final class com/stripe/android/crypto/onramp/model/CryptoConsumerWallet {
 	public static final field $stable I
 	public fun equals (Ljava/lang/Object;)Z
