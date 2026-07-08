@@ -23,5 +23,5 @@ internal data class GetOnrampSessionResponse(
      * The PaymentIntent client secret associated with this onramp session.
      */
     @SerialName("payment_intent_client_secret")
-    val paymentIntentClientSecret: String? = null,
+    val paymentIntentClientSecret: String,
 )

@@ -1044,14 +1044,10 @@ internal class OnrampInteractor @Inject constructor(
         )
             // Retrieve and return the PaymentIntent using the special publishable key
             .flatMapCatching { onrampSession ->
-                if (onrampSession.paymentIntentClientSecret != null) {
-                    cryptoApiRepository.retrievePaymentIntent(
-                        clientSecret = onrampSession.paymentIntentClientSecret,
-                        publishableKey = platformApiKey
-                    )
-                } else {
-                    Result.failure(PaymentFailedException())
-                }
+                cryptoApiRepository.retrievePaymentIntent(
+                    clientSecret = onrampSession.paymentIntentClientSecret,
+                    publishableKey = platformApiKey
+                )
             }
     }
 
