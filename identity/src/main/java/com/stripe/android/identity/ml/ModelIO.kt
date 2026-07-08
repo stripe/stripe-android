@@ -50,7 +50,8 @@ internal data class IDDetectorOutput(
 internal data class FaceDetectorOutput(
     val boundingBox: BoundingBox,
     val resultScore: Float,
-    val pose: FacePose? = null
+    val pose: FacePose? = null,
+    val faceLandmarkResult: String? = null
 ) : AnalyzerOutput
 
 /**

@@ -119,15 +119,11 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     private fun VerificationPageStaticContentExperiment.matches(
         eventName: String,
         metadata: Map<String, Any?>?
-    ): Boolean {
-        return if (this.eventMetadata.isEmpty()) {
-            this.eventName == eventName && metadata == null
-        } else {
-            metadata?.let {
-                this.eventName == eventName && metadata.entries.containsAll(this.eventMetadata.entries)
-            } ?: false
-        }
-    }
+    ): Boolean =
+        this.eventName == eventName &&
+            this.eventMetadata.all { (key, value) ->
+                metadata?.get(key) == value
+            }
 
     private fun cameraMetadata(
         screenName: String,

@@ -91,7 +91,12 @@ private suspend fun handleScannedState(
 
     when (detectorOutput) {
         is FaceDetectorOutput -> {
-            identityViewModel.handleFaceDetectorOutput(detectorOutput, scanResult, navController)
+            identityViewModel.handleFaceDetectorOutput(
+                detectorOutput,
+                scanResult,
+                verificationPage,
+                navController
+            )
         }
         is IDDetectorOutput -> {
             identityViewModel.handleIdDetectorOutput(detectorOutput, scanResult)
@@ -110,6 +115,7 @@ private fun IdentityViewModel.setCameraMetadata(cameraManager: IdentityCameraMan
 private suspend fun IdentityViewModel.handleFaceDetectorOutput(
     detectorOutput: FaceDetectorOutput,
     scanResult: IdentityAggregator.FinalResult,
+    verificationPage: VerificationPage,
     navController: NavController
 ) {
     updateAnalyticsState { oldState ->
@@ -118,7 +124,8 @@ private suspend fun IdentityViewModel.handleFaceDetectorOutput(
     (scanResult.identityState.transitioner as? FaceDetectorTransitioner)?.let {
         collectDataForSelfieScreen(
             navController = navController,
-            faceDetectorTransitioner = it
+            faceDetectorTransitioner = it,
+            verificationPage = verificationPage
         )
     }
 }

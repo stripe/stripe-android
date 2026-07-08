@@ -161,10 +161,13 @@ internal data class CollectedDataParam(
             bestFocalLength: Float? = null,
             bestExposureDuration: Long? = null,
             bestIsVirtualCamera: Boolean? = null,
-            leftHighResResult: UploadedResult? = null,
-            leftLowResResult: UploadedResult? = null,
-            rightHighResResult: UploadedResult? = null,
-            rightLowResResult: UploadedResult? = null,
+            leftFullFrameResult: UploadedResult? = null,
+            rightFullFrameResult: UploadedResult? = null,
+            bestFrameData: FaceFrameDataParam? = null,
+            firstFrameData: FaceFrameDataParam? = null,
+            lastFrameData: FaceFrameDataParam? = null,
+            leftFrameData: FaceFrameDataParam? = null,
+            rightFrameData: FaceFrameDataParam? = null,
         ) = CollectedDataParam(
             face = FaceUploadParam(
                 bestHighResImage = requireNotNull(bestHighResResult.uploadedStripeFile.id),
@@ -182,10 +185,13 @@ internal data class CollectedDataParam(
                 bestIsVirtualCamera = bestIsVirtualCamera,
                 bestExposureIso = bestExposureIso,
                 trainingConsent = trainingConsent,
-                leftHighResImage = leftHighResResult?.uploadedStripeFile?.id,
-                leftLowResImage = leftLowResResult?.uploadedStripeFile?.id,
-                rightHighResImage = rightHighResResult?.uploadedStripeFile?.id,
-                rightLowResImage = rightLowResResult?.uploadedStripeFile?.id,
+                leftFullFrame = leftFullFrameResult?.uploadedStripeFile?.id,
+                rightFullFrame = rightFullFrameResult?.uploadedStripeFile?.id,
+                bestFrameData = bestFrameData,
+                firstFrameData = firstFrameData,
+                lastFrameData = lastFrameData,
+                leftFrameData = leftFrameData,
+                rightFrameData = rightFrameData,
             )
         )
 
@@ -301,4 +307,20 @@ private fun FaceUploadParam.roundFloatUploadParams(): FaceUploadParam =
         bestBrightnessValue = bestBrightnessValue?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
         bestFocalLength = bestFocalLength?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
         bestExposureIso = bestExposureIso?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        bestFrameData = bestFrameData?.roundFloatUploadParams(),
+        firstFrameData = firstFrameData?.roundFloatUploadParams(),
+        lastFrameData = lastFrameData?.roundFloatUploadParams(),
+        leftFrameData = leftFrameData?.roundFloatUploadParams(),
+        rightFrameData = rightFrameData?.roundFloatUploadParams(),
+    )
+
+private fun FaceFrameDataParam.roundFloatUploadParams(): FaceFrameDataParam =
+    copy(
+        faceScore = faceScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        faceScoreVariance = faceScoreVariance?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        blurScore = blurScore?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        blurScoreVariance = blurScoreVariance?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        yaw = yaw?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        pitch = pitch?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
+        roll = roll?.roundToMaxDecimals(MAX_UPLOAD_FLOAT_DECIMALS),
     )

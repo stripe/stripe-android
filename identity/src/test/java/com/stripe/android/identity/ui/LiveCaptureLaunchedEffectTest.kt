@@ -51,6 +51,7 @@ class LiveCaptureLaunchedEffectTest {
     }
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture } doReturn mockDocumentCapture
+        on { experiments } doReturn emptyList()
     }
     private val pageAndModel = MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>()
     private val mockScreenTracker = mock<ScreenTracker>()
@@ -95,6 +96,7 @@ class LiveCaptureLaunchedEffectTest {
                 verify(mockIdentityViewModel).collectDataForSelfieScreen(
                     same(mockNavController),
                     same(faceDetectorTransitioner),
+                    same(mockVerificationPage),
                     eq(false)
                 )
             }

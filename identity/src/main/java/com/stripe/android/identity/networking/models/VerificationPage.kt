@@ -1,6 +1,8 @@
 package com.stripe.android.identity.networking.models
 
 import android.os.Parcelable
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage.Companion.enable3DFaceCapture
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage.Companion.shouldSubmit3DFaceCaptureData
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -59,7 +61,7 @@ internal data class VerificationPage(
     @SerialName("user_session_id")
     val userSessionId: String,
     @SerialName("experiments")
-    val experiments: List<VerificationPageStaticContentExperiment>,
+    val experiments: List<VerificationPageStaticContentExperiment> = emptyList(),
     /* Whether this verification was triggered by Stripe */
     @SerialName("is_stripe")
     val isStripe: Boolean = false,
@@ -83,8 +85,22 @@ internal data class VerificationPage(
     }
 
     internal companion object {
+        const val IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT =
+            "idprod_3d_face_capture_mobile"
+
         fun VerificationPage.isUnsupportedClient() = unsupportedClient
 
         fun VerificationPage.requireSelfie() = selfieCapture != null
+
+        fun VerificationPage.has3DFaceCaptureExperiment(): Boolean =
+            experiments.any {
+                it.experimentName == IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
+            }
+
+        fun VerificationPage.enable3DFaceCapture(): Boolean =
+            selfieCapture?.enable3DFaceCapture() == true || has3DFaceCaptureExperiment()
+
+        fun VerificationPage.shouldSubmit3DFaceCaptureData(): Boolean =
+            selfieCapture?.shouldSubmit3DFaceCaptureData() == true || has3DFaceCaptureExperiment()
     }
 }

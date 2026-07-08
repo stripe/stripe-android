@@ -68,6 +68,7 @@ class SelfieScreenTest {
     private val verificationPage = mock<VerificationPage> {
         on { it.selfieCapture } doReturn selfieCapturePage
         on { fallbackUrl } doReturn FALLBACK_URL
+        on { experiments } doReturn emptyList()
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
@@ -234,6 +235,7 @@ class SelfieScreenTest {
                 verify(mockIdentityViewModel).collectDataForSelfieScreen(
                     same(mockNavController),
                     same(faceDetectorTransitioner),
+                    same(verificationPage),
                     eq(false)
                 )
             }

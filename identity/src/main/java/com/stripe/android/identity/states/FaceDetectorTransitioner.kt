@@ -9,6 +9,8 @@ import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage.Companion.POSE_LEFT
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage.Companion.POSE_RIGHT
 import com.stripe.android.identity.states.IdentityScanState.Finished
 import com.stripe.android.identity.states.IdentityScanState.Found
 import com.stripe.android.identity.states.IdentityScanState.Initial
@@ -51,7 +53,9 @@ internal class FaceDetectorTransitioner(
     private val selfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
     internal val selfieFrameSaver: SelfieFrameSaver = SelfieFrameSaver(),
     private val stayInFoundDuration: Int = DEFAULT_STAY_IN_FOUND_DURATION,
-    private val sideCapturePromptDuration: Int = DEFAULT_SIDE_CAPTURE_PROMPT_DURATION
+    private val sideCapturePromptDuration: Int = DEFAULT_SIDE_CAPTURE_PROMPT_DURATION,
+    enable3DFaceCapture: Boolean = false,
+    private val sideCaptureFallbackDuration: Int = DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION
 ) : IdentityScanStateTransitioner {
     @VisibleForTesting
     var timeoutAt: ComparableTimeMark =
@@ -73,6 +77,12 @@ internal class FaceDetectorTransitioner(
     private var captureStarted = false
     private var activeCaptureStartedAt: ComparableTimeMark = TimeSource.Monotonic.markNow()
     private var sideCapturePromptCompleted = true
+    private val captureSequence = buildList {
+        add(Capture.FRONT)
+        if (enable3DFaceCapture) {
+            addAll(selfieCapturePage.sideCaptureSequence())
+        }
+    }
 
     internal val isWaitingForSideCapturePrompt: Boolean
         get() = shouldWaitForSideCapturePrompt()
@@ -94,9 +104,10 @@ internal class FaceDetectorTransitioner(
         val output: FaceDetectorOutput,
         val bestFrameScore: Float,
         val capture: Capture = Capture.FRONT,
+        val capturedAt: Long = System.currentTimeMillis()
     )
 
-    internal val filteredFrames: List<Pair<AnalyzerInput, FaceDetectorOutput>>
+    internal val filteredSelfieFrames: List<SelfieFrame>
         get() {
             val savedFrames = requireNotNull(selfieFrameSaver.getSavedFrames()[Capture.FRONT.frameIdentifier]) {
                 "No frames saved"
@@ -106,19 +117,18 @@ internal class FaceDetectorTransitioner(
             }
 
             // Return the first, the best (based on bestFrameScore), and the last frame collected.
-            val firstFrame = savedFrames.last
-            val lastFrame = savedFrames.first
+            val firstFrame = savedFrames.last()
+            val lastFrame = savedFrames.first()
             val bestFrame = requireNotNull(
                 savedFrames.subList(1, savedFrames.size - 1)
                     .maxByOrNull { it.bestFrameScore }
             ) { "Couldn't find best frame" }
 
-            return listOf(
-                firstFrame.input to firstFrame.output,
-                bestFrame.input to bestFrame.output,
-                lastFrame.input to lastFrame.output,
-            )
+            return listOf(firstFrame, bestFrame, lastFrame)
         }
+
+    internal val filteredFrames: List<Pair<AnalyzerInput, FaceDetectorOutput>>
+        get() = filteredSelfieFrames.map { it.input to it.output }
 
     internal val numFrames = selfieCapturePage.numSamples
 
@@ -128,16 +138,20 @@ internal class FaceDetectorTransitioner(
         }
 
     internal fun frameForSelfie(selfie: Selfie): Pair<AnalyzerInput, FaceDetectorOutput> {
+        return selfieFrameForSelfie(selfie).let { it.input to it.output }
+    }
+
+    internal fun selfieFrameForSelfie(selfie: Selfie): SelfieFrame {
         return when (selfie) {
             Selfie.FIRST,
             Selfie.BEST,
-            Selfie.LAST -> filteredFrames[selfie.index]
+            Selfie.LAST -> filteredSelfieFrames[selfie.index]
             Selfie.LEFT,
             Selfie.RIGHT -> sideFrame(selfie.capture)
         }
     }
 
-    private fun sideFrame(capture: Capture): Pair<AnalyzerInput, FaceDetectorOutput> {
+    private fun sideFrame(capture: Capture): SelfieFrame {
         require(capture == Capture.LEFT || capture == Capture.RIGHT) {
             "Expected a side capture, got $capture"
         }
@@ -150,8 +164,13 @@ internal class FaceDetectorTransitioner(
         val bestFrame = requireNotNull(savedFrames.maxByOrNull { it.bestFrameScore }) {
             "Couldn't find best frame for $capture"
         }
-        return bestFrame.input to bestFrame.output
+        return bestFrame
     }
+
+    internal val sideSelfies: List<Selfie>
+        get() = captureSequence
+            .filter { it != Capture.FRONT }
+            .map { Selfie.fromCapture(it) }
 
     internal val scoreVariance: Float
         get() {
@@ -324,7 +343,7 @@ internal class FaceDetectorTransitioner(
         analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
-        val nextCapture = activeCapture.next()
+        val nextCapture = nextCapture()
         return if (nextCapture == null) {
             Finished(satisfiedState.type, this)
         } else {
@@ -380,11 +399,19 @@ internal class FaceDetectorTransitioner(
     }
 
     private fun isPoseValidForActiveCapture(analyzerOutput: FaceDetectorOutput): Boolean {
-        val pose = analyzerOutput.pose ?: return true
         return when (activeCapture) {
             Capture.FRONT -> true
-            Capture.LEFT -> pose.yaw < -SIDE_CAPTURE_YAW_THRESHOLD
-            Capture.RIGHT -> pose.yaw > SIDE_CAPTURE_YAW_THRESHOLD
+            Capture.LEFT,
+            Capture.RIGHT -> {
+                val pose = analyzerOutput.pose
+                    ?: return activeCaptureStartedAt.elapsedNow() >=
+                        sideCaptureFallbackDuration.milliseconds
+                when (activeCapture) {
+                    Capture.LEFT -> pose.yaw < -SIDE_CAPTURE_YAW_THRESHOLD
+                    Capture.RIGHT -> pose.yaw > SIDE_CAPTURE_YAW_THRESHOLD
+                    Capture.FRONT -> true
+                }
+            }
         }
     }
 
@@ -516,15 +543,31 @@ internal class FaceDetectorTransitioner(
     private fun isFaceScoreOverThreshold(actualScore: Float) =
         actualScore > selfieCapturePage.models.faceDetectorMinScore
 
+    private fun nextCapture(): Capture? {
+        val currentIndex = captureSequence.indexOf(activeCapture)
+        return captureSequence.getOrNull(currentIndex + 1)
+    }
+
+    private fun VerificationPageStaticContentSelfieCapturePage.sideCaptureSequence(): List<Capture> {
+        return poseSequence
+            ?.mapNotNull { Capture.fromPoseSequenceValue(it) }
+            ?.filter { it != Capture.FRONT }
+            ?.takeIf { it.isNotEmpty() }
+            ?: DEFAULT_SIDE_CAPTURE_SEQUENCE
+    }
+
     internal enum class Capture(val frameIdentifier: String) {
         FRONT(SELFIES),
         LEFT(LEFT_SELFIE),
         RIGHT(RIGHT_SELFIE);
 
-        fun next(): Capture? = when (this) {
-            FRONT -> LEFT
-            LEFT -> RIGHT
-            RIGHT -> null
+        internal companion object {
+            fun fromPoseSequenceValue(value: String): Capture? = when (value) {
+                VALUE_FRONT -> FRONT
+                POSE_LEFT -> LEFT
+                POSE_RIGHT -> RIGHT
+                else -> null
+            }
         }
     }
 
@@ -533,7 +576,15 @@ internal class FaceDetectorTransitioner(
         BEST(INDEX_BEST, VALUE_BEST, Capture.FRONT),
         LAST(INDEX_LAST, VALUE_LAST, Capture.FRONT),
         LEFT(INDEX_SIDE, VALUE_LEFT, Capture.LEFT),
-        RIGHT(INDEX_SIDE, VALUE_RIGHT, Capture.RIGHT)
+        RIGHT(INDEX_SIDE, VALUE_RIGHT, Capture.RIGHT);
+
+        internal companion object {
+            fun fromCapture(capture: Capture): Selfie = when (capture) {
+                Capture.FRONT -> error("Front capture maps to first, best, and last selfies")
+                Capture.LEFT -> LEFT
+                Capture.RIGHT -> RIGHT
+            }
+        }
     }
 
     internal companion object {
@@ -546,6 +597,7 @@ internal class FaceDetectorTransitioner(
         const val INDEX_BEST = 1
         const val INDEX_LAST = 2
         const val INDEX_SIDE = -1
+        const val VALUE_FRONT = "front"
         const val VALUE_FIRST = "first"
         const val VALUE_LAST = "last"
         const val VALUE_BEST = "best"
@@ -553,11 +605,13 @@ internal class FaceDetectorTransitioner(
         const val VALUE_RIGHT = "right"
         const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
         const val DEFAULT_SIDE_CAPTURE_PROMPT_DURATION = 900
+        const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 8000
 
         private const val SIDE_CAPTURE_NUM_FRAMES = 2
-        private const val SIDE_CAPTURE_YAW_THRESHOLD = 10f
+        private const val SIDE_CAPTURE_YAW_THRESHOLD = 15f
         private const val DEFAULT_MOTION_BLUR_MIN_DURATION_MS = 100L
         private const val DEFAULT_UNKNOWN_STABILITY_SCORE = 0.5f
+        private val DEFAULT_SIDE_CAPTURE_SEQUENCE = listOf(Capture.RIGHT, Capture.LEFT)
 
         // Mirrors iOS FaceScannerOutput.BestFrame
         private const val BEST_FRAME_TARGET_COVERAGE = 0.16f
