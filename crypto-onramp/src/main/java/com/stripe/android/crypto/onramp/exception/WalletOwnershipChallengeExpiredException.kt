@@ -3,10 +3,10 @@ package com.stripe.android.crypto.onramp.exception
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Indicates that the wallet ownership challenge is invalid for this verification attempt.
+ * Indicates that the wallet ownership challenge expired before the signature was submitted.
  */
 @ExperimentalCryptoOnramp
-class InvalidWalletOwnershipChallengeApiException internal constructor(
+class WalletOwnershipChallengeExpiredException internal constructor(
     apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,
@@ -15,11 +15,9 @@ class InvalidWalletOwnershipChallengeApiException internal constructor(
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = apiErrorContext.apiErrorMessage
-            ?: "Wallet ownership verification failed: the challenge is invalid, already consumed, missing, " +
-            "or not associated with the authenticated consumer.",
-        code = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE),
-        nextStep = "Request a new challenge for the registered wallet and authenticated consumer, then submit " +
-            "that challenge ID with its signature.",
+            ?: "Wallet ownership verification failed: the challenge has expired.",
+        code = apiErrorContext.code(fallback = WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE),
+        nextStep = "Request a new wallet ownership challenge and submit a fresh signature before it expires.",
         docUrl = apiErrorContext.docUrl,
         sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
@@ -31,7 +29,7 @@ class InvalidWalletOwnershipChallengeApiException internal constructor(
     ),
 ) {
     override val code: String
-        get() = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE)
 }
 
-internal const val INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE = "crypto_onramp_invalid_wallet_ownership_challenge"
+internal const val WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE = "crypto_onramp_wallet_ownership_challenge_expired"

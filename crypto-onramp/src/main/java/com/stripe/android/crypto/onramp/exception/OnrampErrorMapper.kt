@@ -71,7 +71,7 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
         stripeError.isInvalidWalletOwnershipSignatureError() -> {
-            InvalidWalletOwnershipSignatureApiException(
+            InvalidWalletOwnershipSignatureException(
                 apiErrorContext = apiErrorContext,
                 diagnosticContext = diagnosticContext,
                 userMessage = context.getString(
@@ -80,7 +80,7 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
         stripeError.isWalletOwnershipChallengeExpiredError() -> {
-            WalletOwnershipChallengeExpiredApiException(
+            WalletOwnershipChallengeExpiredException(
                 apiErrorContext = apiErrorContext,
                 diagnosticContext = diagnosticContext,
                 userMessage = context.getString(
@@ -89,7 +89,7 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
         stripeError.isInvalidWalletOwnershipChallengeError() -> {
-            InvalidWalletOwnershipChallengeApiException(
+            InvalidWalletOwnershipChallengeException(
                 apiErrorContext = apiErrorContext,
                 diagnosticContext = diagnosticContext,
                 userMessage = context.getString(
@@ -98,7 +98,7 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
         stripeError.isWalletNotFoundError() -> {
-            WalletNotFoundApiException(
+            WalletNotFoundException(
                 apiErrorContext = apiErrorContext,
                 diagnosticContext = diagnosticContext,
                 userMessage = context.getString(
@@ -107,7 +107,7 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
         stripeError.isUnsupportedNetworkError() -> {
-            UnsupportedNetworkApiException(
+            UnsupportedNetworkException(
                 apiErrorContext = apiErrorContext,
                 diagnosticContext = diagnosticContext,
                 userMessage = context.getString(
@@ -116,7 +116,7 @@ internal fun Throwable.toCryptoOnrampError(
             )
         }
         else -> {
-            UncategorizedApiException(
+            UncategorizedException(
                 apiErrorContext = apiErrorContext,
                 diagnosticContext = diagnosticContext,
                 userMessage = context.getString(
