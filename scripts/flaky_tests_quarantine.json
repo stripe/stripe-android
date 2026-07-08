@@ -1,0 +1,27 @@
+{
+  "generatedAt": "2026-07-08T18:15:30+00:00",
+  "lookbackDays": 7,
+  "totalBuildsAnalyzed": 1160,
+  "masterBuildsAnalyzed": 144,
+  "buildsWithTestResults": 159,
+  "analysisNotes": [
+    "Analyzed workflows: test, check, run-instrumentation-tests, run-paymentsheet-instrumentation-tests, run-cardscan-instrumentation-tests, run-financial-connections-instrumentation-tests.",
+    "Criterion 1 (master branch failures >= 2): No tests qualify.",
+    "Criterion 2 (failure rate >= 10% with >= 50 runs across master+PR): 1 test qualifies."
+  ],
+  "quarantinedTests": [
+    {
+      "testId": "com.stripe.android.utils.ExpiryDateContentDescriptionFormatterTest#formats month correctly based on locale",
+      "className": "com.stripe.android.utils.ExpiryDateContentDescriptionFormatterTest",
+      "testName": "formats month correctly based on locale",
+      "masterFailures": 0,
+      "totalRuns": 191,
+      "totalFailures": 37,
+      "failureRate": 0.1937,
+      "criterion1Met": false,
+      "criterion2Met": true,
+      "failureDescription": "Locale mismatch: test expects month name in French locale (e.g. 'decembre') but CI runner returns English ('December'). Fails across unrelated branches, indicating an environment-dependent flaky test.",
+      "module": "payments-ui-core"
+    }
+  ]
+}
