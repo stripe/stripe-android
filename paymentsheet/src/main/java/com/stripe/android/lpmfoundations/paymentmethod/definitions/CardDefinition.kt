@@ -212,7 +212,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 paymentMethodMetadata = metadata,
             )
         } else if (metadata.isNfcScanningEnabled) {
-            NfcScanningAction(merchantName = metadata.merchantName)
+            NfcScanningAction(paymentMethodMetadata = metadata)
         } else {
             CardScanAction(
                 isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,

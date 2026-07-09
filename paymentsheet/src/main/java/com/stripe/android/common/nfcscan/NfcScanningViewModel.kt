@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.common.nfcscan.analytics.NfcScanningEventReporter
 import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.TapZoneResolver
@@ -26,6 +27,7 @@ internal class NfcScanningViewModel @Inject constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     tapZoneResolver: TapZoneResolver,
     private val cardScanner: NfcCardScanner,
+    private val eventReporter: NfcScanningEventReporter,
 ) : ViewModel() {
     private val tapZone = tapZoneResolver.get()
 
@@ -44,6 +46,8 @@ internal class NfcScanningViewModel @Inject constructor(
     private var successShownDispatched = false
 
     init {
+        eventReporter.onNfcScanStarted()
+
         viewModelScope.launch {
             cardScanner.state.collectLatest { state ->
                 when (state) {
@@ -54,8 +58,12 @@ internal class NfcScanningViewModel @Inject constructor(
                                 status = NfcScanningStatus.Scanning,
                             )
                         )
+
+                        eventReporter.onNfcScanAttemptStarted()
                     }
-                    is NfcCardScanner.State.Failed -> Unit
+                    is NfcCardScanner.State.Failed -> {
+                        eventReporter.onNfcScanAttemptFailed()
+                    }
                     is NfcCardScanner.State.Complete -> {
                         _viewState.emit(
                             NfcScanningViewState(
@@ -63,6 +71,8 @@ internal class NfcScanningViewModel @Inject constructor(
                                 status = NfcScanningStatus.Scanned,
                             )
                         )
+
+                        eventReporter.onNfcScanAttemptSucceeded()
 
                         pendingValidCardData = state.cardData
                     }
@@ -79,6 +89,7 @@ internal class NfcScanningViewModel @Inject constructor(
         when (viewAction) {
             is NfcScanningViewAction.Close -> {
                 viewModelScope.launch {
+                    eventReporter.onNfcScanCancelled()
                     _result.emit(NfcScanningContract.Result.Canceled)
                 }
             }
@@ -87,6 +98,7 @@ internal class NfcScanningViewModel @Inject constructor(
                     return
                 }
                 successShownDispatched = true
+                eventReporter.onNfcScanSucceeded()
                 viewModelScope.launch {
                     pendingValidCardData?.let { cardData ->
                         _result.emit(
@@ -108,11 +120,16 @@ internal class NfcScanningViewModel @Inject constructor(
     }
 
     companion object {
-        fun factory(): ViewModelProvider.Factory {
+        fun factory(argsSupplier: () -> NfcScanningContract.Args): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer<NfcScanningViewModel> {
+                    val args = argsSupplier()
+
                     DaggerNfcScanningViewModelComponent.factory()
-                        .create(requireApplication())
+                        .create(
+                            application = requireApplication(),
+                            paymentMethodMetadata = args.paymentMethodMetadata,
+                        )
                         .viewModel
                 }
             }

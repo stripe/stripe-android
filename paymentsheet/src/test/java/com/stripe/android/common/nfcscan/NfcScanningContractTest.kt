@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -15,14 +16,15 @@ internal class NfcScanningContractTest {
 
     @Test
     fun `createIntent attaches Args so merchant name can be read back`() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val intent = NfcScanningContract.createIntent(
             context = context,
-            input = NfcScanningContract.Args(merchantName = "River Market")
+            input = NfcScanningContract.Args(paymentMethodMetadata)
         )
 
         val argsFromIntent = NfcScanningContract.Args.fromIntent(intent)
 
-        assertThat(argsFromIntent?.merchantName).isEqualTo("River Market")
+        assertThat(argsFromIntent?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
     }
 
     @Test
