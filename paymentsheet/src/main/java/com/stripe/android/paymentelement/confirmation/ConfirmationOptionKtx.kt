@@ -21,6 +21,9 @@ internal fun PaymentSelection.toConfirmationOption(
     cardFundingFilter: CardFundingFilter,
     googlePayDisplayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
+    // In a Checkout Session this MUST be supplied via GooglePayBillingEmailOverrideProvider: the
+    // backend rejects confirmation if the Google Pay payment method email differs from the session's
+    // customer_email. The null default is only correct for non-Checkout-Session flows.
     googlePayBillingEmailOverride: String? = null,
 ): ConfirmationHandler.Option? {
     return when (this) {
