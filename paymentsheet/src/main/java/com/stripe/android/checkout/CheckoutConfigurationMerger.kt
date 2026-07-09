@@ -64,7 +64,11 @@ private fun mergeCheckoutSessionData(
     return MergedDetails(
         billingDetails = PaymentSheet.BillingDetails(
             address = existingBillingDetails?.address ?: state.billingAddress?.asPaymentSheetAddress(),
-            email = existingBillingDetails?.email ?: response.customerEmail,
+            // The Checkout Session's customer_email is authoritative: the backend rejects
+            // confirmation if the payment method email differs from it. So it must win over a
+            // merchant-provided default email, falling back to the default only when the session
+            // has no customer_email.
+            email = response.customerEmail ?: existingBillingDetails?.email,
             name = existingBillingDetails?.name ?: state.billingName,
             phone = existingBillingDetails?.phone ?: state.billingPhoneNumber,
         ),

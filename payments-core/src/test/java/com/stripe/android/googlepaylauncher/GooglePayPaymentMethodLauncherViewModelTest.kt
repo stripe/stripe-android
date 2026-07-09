@@ -100,12 +100,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createPaymentMethod() uses billingEmailFallback when Google Pay has no email`() = runTest {
+    fun `createPaymentMethod() uses billingEmailOverride when Google Pay has no email`() = runTest {
         val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
             ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
-            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            ARGS.copy(billingEmailOverride = "checkout@example.com"),
             stripeRepository,
             googlePayJsonFactory,
             googlePayRepository,
@@ -123,12 +123,12 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
-    fun `createPaymentMethod() prefers Google Pay email over billingEmailFallback`() = runTest {
+    fun `createPaymentMethod() prefers billingEmailOverride over Google Pay email`() = runTest {
         val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
             ApplicationProvider.getApplicationContext(),
             paymentsClient,
             REQUEST_OPTIONS,
-            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            ARGS.copy(billingEmailOverride = "checkout@example.com"),
             stripeRepository,
             googlePayJsonFactory,
             googlePayRepository,
@@ -141,8 +141,10 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             )
         )
 
+        // The Checkout Session email must win over whatever Google Pay returned, otherwise the
+        // backend rejects the confirmation with a customer_email mismatch.
         assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
-            .isEqualTo("stripe@example.com")
+            .isEqualTo("checkout@example.com")
     }
 
     @Test

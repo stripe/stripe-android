@@ -21,6 +21,10 @@ internal fun PaymentSelection.toConfirmationOption(
     cardFundingFilter: CardFundingFilter,
     googlePayDisplayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
     googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
+    // In a Checkout Session this MUST be supplied via GooglePayBillingEmailOverrideProvider: the
+    // backend rejects confirmation if the Google Pay payment method email differs from the session's
+    // customer_email. The null default is only correct for non-Checkout-Session flows.
+    googlePayBillingEmailOverride: String? = null,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -34,6 +38,7 @@ internal fun PaymentSelection.toConfirmationOption(
             cardFundingFilter,
             googlePayDisplayItems,
             isEmailRequired = googlePayIsEmailRequired,
+            billingEmailOverride = googlePayBillingEmailOverride,
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
     }
@@ -127,6 +132,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
     cardFundingFilter: CardFundingFilter,
     displayItems: List<GooglePayJsonFactory.DisplayItem>,
     isEmailRequired: Boolean,
+    billingEmailOverride: String?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -143,7 +149,7 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 cardFundingFilter = cardFundingFilter,
                 displayItems = displayItems,
                 isEmailRequired = isEmailRequired,
-                billingEmailFallback = configuration.defaultBillingDetails?.email,
+                billingEmailOverride = billingEmailOverride,
             ),
         )
     }
