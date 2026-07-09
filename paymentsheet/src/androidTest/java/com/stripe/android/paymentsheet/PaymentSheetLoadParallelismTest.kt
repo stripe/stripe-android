@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -16,7 +15,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
-import java.util.Collections
+import java.io.Closeable
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 /**
@@ -38,25 +38,8 @@ internal class PaymentSheetLoadParallelismTest {
     private val networkRule = testRules.networkRule
     private val page: PaymentSheetPage = PaymentSheetPage(testRules.compose)
 
-    private val requestLog: MutableList<RequestEvent> =
-        Collections.synchronizedList(mutableListOf())
-
-    private data class RequestEvent(val request: Request, val arrivalNanos: Long)
-
     companion object {
-        /**
-         * The body delay applied to each mock response. If requests are truly parallel, they
-         * should all arrive at the mock server within a small window of each other regardless
-         * of this delay. If they are serial, subsequent requests won't arrive until at least
-         * DELAY_MS after the previous response.
-         */
-        private const val DELAY_MS = 100L
-
-        /**
-         * Maximum allowed time gap (in ms) between requests that should arrive concurrently.
-         * This is generous to accommodate CI variability.
-         */
-        private const val PARALLEL_TOLERANCE_MS = 80L
+        private const val REQUEST_TIMEOUT_SECONDS = 10L
     }
 
     @Test
@@ -175,80 +158,26 @@ internal class PaymentSheetLoadParallelismTest {
         resultCallback = ::expectNoResult,
         successTimeoutSeconds = 15L,
     ) { testContext ->
-        enqueueLoadResponses(
-            requests = expectedRequestOrdering.allRequests(),
-            linkEnabled = linkEnabled,
-        )
-
-        testContext.presentPaymentSheet {
-            presentWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = buildConfiguration(
-                    customerType = customerType,
-                    defaultEmail = defaultEmail,
-                ),
+        runScenario(expectedRequestOrdering) {
+            enqueueLoadResponses(
+                requests = expectedRequestOrdering.allRequests(),
+                linkEnabled = linkEnabled,
             )
-        }
 
-        page.waitForCardForm()
-
-        assertParallelismForConfig(expectedRequestOrdering)
-
-        testContext.markTestSucceeded()
-    }
-
-    private fun enqueueLoadResponses(
-        requests: List<Request>,
-        linkEnabled: Boolean,
-    ) {
-        requests.forEach { request ->
-            when (request) {
-                Request.ElementsSessionsWithCs -> enqueueElementsSession(
-                    "elements-sessions-requires_pm_with_ps_pi_cs.json",
-                    request = request,
-                    linkEnabled = linkEnabled,
+            testContext.presentPaymentSheet {
+                presentWithPaymentIntent(
+                    paymentIntentClientSecret = "pi_example_secret_example",
+                    configuration = buildConfiguration(
+                        customerType = customerType,
+                        defaultEmail = defaultEmail,
+                    ),
                 )
-                Request.ElementsSessionsWithEk -> enqueueElementsSession(
-                    "elements-sessions-requires_payment_method.json",
-                    request = Request.ElementsSessionsWithEk,
-                    linkEnabled = linkEnabled,
-                )
-                Request.FetchCards -> enqueueFetchPaymentMethods(PaymentMethod.Type.Card, request)
-                Request.FetchSepaDebit -> enqueueFetchPaymentMethods(PaymentMethod.Type.SepaDebit, request)
-                Request.FetchUsBank -> enqueueFetchPaymentMethods(PaymentMethod.Type.USBankAccount, request)
-                Request.FetchCustomer -> enqueueFetchCustomer()
-                Request.LinkAccountLookup -> enqueueLinkAccountLookup()
             }
-        }
-    }
 
-    private fun enqueueElementsSession(
-        bodyFile: String,
-        request: Request,
-        linkEnabled: Boolean,
-    ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { _, response ->
-            recordArrival(request)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            if (linkEnabled) {
-                response.testBodyFromFile(bodyFile) { json ->
-                    enableLinkPassthroughMode(json)
-                    setPaymentMethodTypes(
-                        json, paymentMethodTypes = listOf(
-                            PaymentMethod.Type.Card,
-                            PaymentMethod.Type.Link
-                        )
-                    )
-                }
-            } else {
-                response.testBodyFromFile(bodyFile) { json ->
-                    setPaymentMethodTypes(json, paymentMethodTypes = listOf(PaymentMethod.Type.Card))
-                }
-            }
+            assertParallelismForConfig(expectedRequestOrdering)
+            page.waitForCardForm()
+
+            testContext.markTestSucceeded()
         }
     }
 
@@ -271,49 +200,6 @@ internal class PaymentSheetLoadParallelismTest {
         paymentMethodPreferences.put("payment_intent", paymentIntent)
         paymentMethodPreferences.put("ordered_payment_method_types", paymentMethodsJson)
         json.put("payment_method_preference", paymentMethodPreferences)
-    }
-
-    private fun enqueueFetchPaymentMethods(
-        type: PaymentMethod.Type,
-        request: Request,
-    ) {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", type.code),
-        ) { _, response ->
-            recordArrival(request)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            response.setBody(
-                """{"object":"list","data":[],"has_more":false,"url":"/v1/payment_methods"}"""
-            )
-        }
-    }
-
-    private fun enqueueFetchCustomer() {
-        networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_1"),
-        ) { _, response ->
-            recordArrival(Request.FetchCustomer)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            response.setBody(
-                """{"id":"cus_1","object":"customer","email":null,"name":null}"""
-            )
-        }
-    }
-
-    private fun enqueueLinkAccountLookup() {
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/lookup"),
-        ) { _, response ->
-            recordArrival(Request.LinkAccountLookup)
-            response.setBodyDelay(DELAY_MS, TimeUnit.MILLISECONDS)
-            response.setBody("""{"exists":"false"}""")
-        }
     }
 
     private fun buildConfiguration(
@@ -343,65 +229,11 @@ internal class PaymentSheetLoadParallelismTest {
         )
     }
 
-    private fun assertParallelismForConfig(
-        requestOrdering: RequestOrdering,
+    private fun runScenario(
+        expectedRequestOrdering: RequestOrdering,
+        block: Scenario.() -> Unit,
     ) {
-        when (requestOrdering) {
-            is RequestOrdering.Parallel -> assertParallelRequests(requestOrdering)
-            is RequestOrdering.Sequential -> assertSequentialRequests(requestOrdering)
-            is RequestOrdering.Singleton -> {} // The fact that the network request occurred is enough for these.
-        }
-    }
-
-    private fun assertSequentialRequests(
-        requestOrdering: RequestOrdering.Sequential,
-    ) {
-        if (requestOrdering.requests.size < 2) {
-            return
-        }
-
-        (0..<requestOrdering.requests.size - 1).forEach { idx ->
-            val firstRequest = requestOrdering.requests[idx].firstRequest()
-            val secondRequest = requestOrdering.requests[idx + 1].firstRequest()
-            val firstArrival = findArrival(firstRequest)
-            val secondArrival = findArrival(secondRequest)
-            val deltaMs = (secondArrival - firstArrival) / 1_000_000
-            if (deltaMs < DELAY_MS - 20) {
-                throw AssertionError(
-                    "$secondRequest was expected to be ${DELAY_MS - 20}ms after $firstRequest but was $deltaMs"
-                )
-            }
-            assertThat(deltaMs).isAtLeast(DELAY_MS - 20)
-        }
-    }
-
-    private fun recordArrival(request: Request) {
-        requestLog.add(RequestEvent(request, System.nanoTime()))
-    }
-
-    private fun findArrival(request: Request): Long {
-        val event = requestLog.firstOrNull { it.request == request }
-            ?: throw AssertionError("Expected request '$request' to have been recorded")
-        return event.arrivalNanos
-    }
-
-    /**
-     * Asserts that all requests with the given labels arrived at the mock server within
-     * [PARALLEL_TOLERANCE_MS] of each other, indicating they were fired in parallel.
-     */
-    private fun assertParallelRequests(parallelRequests: RequestOrdering.Parallel) {
-        val arrivals = parallelRequests.requests.map { request -> findArrival(request) }
-
-        val minArrival = arrivals.min()
-        val maxArrival = arrivals.max()
-        val spreadMs = (maxArrival - minArrival) / 1_000_000
-
-        if (spreadMs > PARALLEL_TOLERANCE_MS) {
-            throw AssertionError(
-                "Requests (${parallelRequests.requests.joinToString { it.name }}) should arrive concurrently. " +
-                    "Spread was ${spreadMs}ms, max allowed is ${PARALLEL_TOLERANCE_MS}ms."
-            )
-        }
+        Scenario(expectedRequestOrdering).use(block)
     }
 
     private enum class Request {
@@ -429,9 +261,348 @@ internal class PaymentSheetLoadParallelismTest {
                 is Singleton -> listOf(this.request)
             }
         }
+    }
 
-        fun firstRequest(): Request {
-            return this.allRequests()[0]
+    private inner class Scenario(
+        expectedRequestOrdering: RequestOrdering,
+    ) : Closeable {
+        val requestTracker = RequestTracker(expectedRequestOrdering.allRequests())
+
+        fun enqueueLoadResponses(
+            requests: List<Request>,
+            linkEnabled: Boolean,
+        ) {
+            requests.forEach { request ->
+                when (request) {
+                    Request.ElementsSessionsWithCs -> enqueueElementsSession(
+                        "elements-sessions-requires_pm_with_ps_pi_cs.json",
+                        request = request,
+                        linkEnabled = linkEnabled,
+                    )
+                    Request.ElementsSessionsWithEk -> enqueueElementsSession(
+                        "elements-sessions-requires_payment_method.json",
+                        request = Request.ElementsSessionsWithEk,
+                        linkEnabled = linkEnabled,
+                    )
+                    Request.FetchCards -> enqueueFetchPaymentMethods(PaymentMethod.Type.Card, request)
+                    Request.FetchSepaDebit -> enqueueFetchPaymentMethods(PaymentMethod.Type.SepaDebit, request)
+                    Request.FetchUsBank -> enqueueFetchPaymentMethods(PaymentMethod.Type.USBankAccount, request)
+                    Request.FetchCustomer -> enqueueFetchCustomer()
+                    Request.LinkAccountLookup -> enqueueLinkAccountLookup()
+                }
+            }
+        }
+
+        fun enqueueElementsSession(
+            bodyFile: String,
+            request: Request,
+            linkEnabled: Boolean,
+        ) {
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/elements/sessions"),
+            ) { _, response ->
+                enqueueTrackedResponse(request) {
+                    if (linkEnabled) {
+                        response.testBodyFromFile(bodyFile) { json ->
+                            enableLinkPassthroughMode(json)
+                            setPaymentMethodTypes(
+                                json, paymentMethodTypes = listOf(
+                                    PaymentMethod.Type.Card,
+                                    PaymentMethod.Type.Link
+                                )
+                            )
+                        }
+                    } else {
+                        response.testBodyFromFile(bodyFile) { json ->
+                            setPaymentMethodTypes(json, paymentMethodTypes = listOf(PaymentMethod.Type.Card))
+                        }
+                    }
+                }
+            }
+        }
+
+        fun enqueueFetchPaymentMethods(
+            type: PaymentMethod.Type,
+            request: Request,
+        ) {
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/payment_methods"),
+                query("type", type.code),
+            ) { _, response ->
+                enqueueTrackedResponse(request) {
+                    response.setBody(
+                        """{"object":"list","data":[],"has_more":false,"url":"/v1/payment_methods"}"""
+                    )
+                }
+            }
+        }
+
+        fun enqueueFetchCustomer() {
+            networkRule.enqueue(
+                host("api.stripe.com"),
+                method("GET"),
+                path("/v1/customers/cus_1"),
+            ) { _, response ->
+                enqueueTrackedResponse(Request.FetchCustomer) {
+                    response.setBody(
+                        """{"id":"cus_1","object":"customer","email":null,"name":null}"""
+                    )
+                }
+            }
+        }
+
+        fun enqueueLinkAccountLookup() {
+            networkRule.enqueue(
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
+            ) { _, response ->
+                enqueueTrackedResponse(Request.LinkAccountLookup) {
+                    response.setBody("""{"exists":"false"}""")
+                }
+            }
+        }
+
+        fun enqueueTrackedResponse(
+            request: Request,
+            block: () -> Unit,
+        ) {
+            requestTracker.recordStarted(request)
+            requestTracker.awaitRelease(request)
+
+            try {
+                block()
+            } finally {
+                requestTracker.recordFinished(request)
+            }
+        }
+
+        fun assertParallelismForConfig(
+            requestOrdering: RequestOrdering,
+        ) {
+            when (requestOrdering) {
+                is RequestOrdering.Parallel -> assertParallelRequests(requestOrdering)
+                is RequestOrdering.Sequential -> assertSequentialRequests(requestOrdering)
+                is RequestOrdering.Singleton -> assertSingletonRequest(requestOrdering)
+            }
+        }
+
+        fun assertSingletonRequest(
+            requestOrdering: RequestOrdering.Singleton,
+        ) {
+            requestTracker.awaitStarted(requestOrdering.request)
+            assertNoOtherRequestsInProgress(setOf(requestOrdering.request))
+            requestTracker.release(requestOrdering.request)
+            requestTracker.awaitFinished(requestOrdering.request)
+        }
+
+        fun assertSequentialRequests(
+            requestOrdering: RequestOrdering.Sequential,
+        ) {
+            requestOrdering.requests.forEach { nestedRequestOrdering ->
+                assertParallelismForConfig(nestedRequestOrdering)
+            }
+        }
+
+        fun assertNoOtherRequestsInProgress(
+            currentRequests: Set<Request>,
+        ) {
+            val inProgressRequests = requestTracker.inProgressRequestsExcluding(currentRequests)
+
+            if (inProgressRequests.isNotEmpty()) {
+                throw AssertionError(
+                    "Requests (${inProgressRequests.joinToString { it.name }}) were in progress outside the " +
+                        "current request group (${currentRequests.joinToString { it.name }})."
+                )
+            }
+        }
+
+        fun assertParallelRequests(
+            parallelRequests: RequestOrdering.Parallel,
+        ) {
+            requestTracker.awaitStarted(parallelRequests.requests)
+            assertNoOtherRequestsInProgress(parallelRequests.requests.toSet())
+            requestTracker.release(parallelRequests.requests)
+            requestTracker.awaitFinished(parallelRequests.requests)
+        }
+
+        override fun close() {
+            requestTracker.cleanup()
         }
     }
+
+    private class RequestTracker(
+        requests: List<Request>,
+    ) {
+        private val requestStates: Map<Request, RequestState>
+
+        init {
+            require(requests.size == requests.toSet().size) {
+                "Each request must only be tracked once. Requests: ${requests.joinToString()}"
+            }
+
+            requestStates = requests.associateWith { RequestState() }
+        }
+
+        fun recordStarted(request: Request) {
+            state(request).started.countDown()
+        }
+
+        fun recordFinished(request: Request) {
+            state(request).finished.countDown()
+        }
+
+        fun awaitRelease(request: Request) {
+            try {
+                state(request).releaseResponse.await()
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                throw AssertionError("Interrupted while waiting for response for '$request' to be released.", e)
+            }
+        }
+
+        fun awaitStarted(request: Request) {
+            awaitWithTimeout(
+                latch = state(request).started,
+                description = "request '$request' to start",
+            )
+        }
+
+        fun awaitStarted(requests: List<Request>) {
+            val deadlineNanos = deadlineFromNow()
+            requests.forEach { request ->
+                awaitUntil(
+                    latch = state(request).started,
+                    description = "request '$request' to start",
+                    deadlineNanos = deadlineNanos,
+                )
+            }
+        }
+
+        fun awaitFinished(request: Request) {
+            awaitWithTimeout(
+                latch = state(request).finished,
+                description = "request '$request' to finish",
+            )
+        }
+
+        fun awaitFinished(requests: List<Request>) {
+            val deadlineNanos = deadlineFromNow()
+            requests.forEach { request ->
+                awaitUntil(
+                    latch = state(request).finished,
+                    description = "request '$request' to finish",
+                    deadlineNanos = deadlineNanos,
+                )
+            }
+        }
+
+        fun release(request: Request) {
+            state(request).releaseResponse.countDown()
+        }
+
+        fun release(requests: List<Request>) {
+            requests.forEach(::release)
+        }
+
+        fun releaseAll() {
+            requestStates.values.forEach { requestState ->
+                requestState.releaseResponse.countDown()
+            }
+        }
+
+        fun cleanup() {
+            releaseAll()
+
+            try {
+                awaitFinished(requestStates.keys.toList())
+            } catch (e: AssertionError) {
+                throw AssertionError(
+                    "Unfinished requests at the end of the scenario: ${unfinishedRequests().joinToString()}. ${e.message}"
+                )
+            }
+
+            validateNoUnfinishedRequests()
+        }
+
+        fun inProgressRequestsExcluding(requests: Set<Request>): List<Request> {
+            return requestStates.keys.filter { request ->
+                request !in requests && isInProgress(request)
+            }
+        }
+
+        fun validateNoUnfinishedRequests() {
+            val unfinishedRequests = unfinishedRequests()
+            if (unfinishedRequests.isNotEmpty()) {
+                throw AssertionError(
+                    "Unfinished requests at the end of the scenario: ${unfinishedRequests.joinToString()}."
+                )
+            }
+        }
+
+        private fun state(request: Request): RequestState {
+            return requireNotNull(requestStates[request]) {
+                "Request '$request' was not registered with the tracker"
+            }
+        }
+
+        private fun isInProgress(request: Request): Boolean {
+            val requestState = state(request)
+            return requestState.started.count == 0L && requestState.finished.count != 0L
+        }
+
+        private fun unfinishedRequests(): List<String> {
+            return requestStates.mapNotNull { (request, requestState) ->
+                when {
+                    requestState.finished.count == 0L -> null
+                    requestState.started.count == 0L -> "${request.name} (in progress)"
+                    else -> "${request.name} (not started)"
+                }
+            }
+        }
+
+        private fun deadlineFromNow(): Long {
+            return System.nanoTime() + TimeUnit.SECONDS.toNanos(REQUEST_TIMEOUT_SECONDS)
+        }
+
+        private fun awaitWithTimeout(
+            latch: CountDownLatch,
+            description: String,
+        ) {
+            awaitUntil(
+                latch = latch,
+                description = description,
+                deadlineNanos = System.nanoTime() + TimeUnit.SECONDS.toNanos(REQUEST_TIMEOUT_SECONDS),
+            )
+        }
+
+        private fun awaitUntil(
+            latch: CountDownLatch,
+            description: String,
+            deadlineNanos: Long,
+        ) {
+            val remainingNanos = deadlineNanos - System.nanoTime()
+            if (remainingNanos <= 0) {
+                throw AssertionError("Timed out waiting for $description.")
+            }
+
+            try {
+                if (!latch.await(remainingNanos, TimeUnit.NANOSECONDS)) {
+                    throw AssertionError("Timed out waiting for $description.")
+                }
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                throw AssertionError("Interrupted while waiting for $description.", e)
+            }
+        }
+    }
+
+    private data class RequestState(
+        val started: CountDownLatch = CountDownLatch(1),
+        val releaseResponse: CountDownLatch = CountDownLatch(1),
+        val finished: CountDownLatch = CountDownLatch(1),
+    )
 }

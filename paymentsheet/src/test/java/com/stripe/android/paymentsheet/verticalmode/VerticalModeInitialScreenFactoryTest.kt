@@ -155,7 +155,8 @@ class VerticalModeInitialScreenFactoryTest {
             selection = fakeViewModel.selection,
             customerMetadata = stateFlowOf(
                 paymentMethodMetadata.customerMetadata
-            )
+            ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         )
         if (hasSavedPaymentMethods) {
             customerStateHolder.setCustomerState(

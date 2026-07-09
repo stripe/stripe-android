@@ -356,7 +356,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             isLiveMode = false,
             canRemove = true,
             canUpdateCardExpiryAndBillingDetails = true,
-            canUpdateCardBrandChoice = true,
+            canChangeCbc = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
             allowedBillingCountries = emptySet(),

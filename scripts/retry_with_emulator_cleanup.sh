@@ -9,7 +9,12 @@ trap 'rm -f "$OUTPUT_LOG"' EXIT
 function clear_corrupted_orchestrator_cache {
   if [ -f "$OUTPUT_LOG" ] && grep -qE "Failed to install split APK|Invalid File.*orchestrator" "$OUTPUT_LOG"; then
     echo "Detected orchestrator APK installation failure. Clearing corrupted cache..."
-    rm -rf ~/.gradle/caches/modules-2/files-2.1/androidx.test/orchestrator/
+    rm -rf \
+      ~/.gradle/caches/modules-2/files-2.1/androidx.test/orchestrator/ \
+      ~/.gradle/caches/modules-2/metadata-*/descriptors/androidx.test/orchestrator/
+    if [ -f ./gradlew ]; then
+      ./gradlew --stop
+    fi
     echo "Orchestrator cache cleared. Will re-download on next attempt."
   fi
 }

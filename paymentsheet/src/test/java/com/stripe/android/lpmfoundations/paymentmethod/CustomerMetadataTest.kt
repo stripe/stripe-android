@@ -18,7 +18,7 @@ import org.junit.Test
 internal class CustomerMetadataTest {
 
     @Test
-    fun `CheckoutSession should not support card expiry and billing details or card brand updates`() {
+    fun `CheckoutSession should support card expiry and billing details but not card brand updates`() {
         val metadata = CustomerMetadata.CheckoutSession(
             sessionId = "cs_123",
             customerId = "cus_123",
@@ -26,8 +26,34 @@ internal class CustomerMetadataTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
         )
 
-        assertThat(metadata.canUpdateCardExpiryAndBillingDetails).isFalse()
+        assertThat(metadata.canUpdateCardExpiryAndBillingDetails).isTrue()
         assertThat(metadata.canUpdateCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun `CustomerSession and legacy ephemeral key should support card brand updates`() {
+        val customerSessionMetadata = CustomerMetadata.CustomerSession(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = "cuss_123",
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateCardExpiryAndBillingDetails = true,
+        )
+        val legacyEphemeralKeyMetadata = CustomerMetadata.LegacyEphemeralKey(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_123",
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateCardExpiryAndBillingDetails = false,
+        )
+
+        assertThat(customerSessionMetadata.canUpdateCardBrandChoice).isTrue()
+        assertThat(legacyEphemeralKeyMetadata.canUpdateCardBrandChoice).isTrue()
     }
 
     @Test

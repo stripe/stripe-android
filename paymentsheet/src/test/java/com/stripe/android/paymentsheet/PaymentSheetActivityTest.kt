@@ -1368,7 +1368,8 @@ internal class PaymentSheetActivityTest {
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                placesClient = null,
             )
         }
     }

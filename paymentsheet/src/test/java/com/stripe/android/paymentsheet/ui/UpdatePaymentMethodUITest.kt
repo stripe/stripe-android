@@ -171,7 +171,8 @@ class UpdatePaymentMethodUITest {
         runScenario(
             displayableSavedPaymentMethod = PaymentMethodFixtures
                 .CARD_WITH_NETWORKS_PAYMENT_METHOD
-                .toDisplayableSavedPaymentMethod()
+                .toDisplayableSavedPaymentMethod(),
+            shouldShowCardBrandDropdown = true,
         ) {
             composeRule.onNodeWithTag(UPDATE_PM_DETAILS_SUBTITLE_TEST_TAG).assertTextEquals(
                 "Only card brand can be changed."
@@ -318,6 +319,7 @@ class UpdatePaymentMethodUITest {
         canRemove: Boolean = true,
         isModifiablePaymentMethod: Boolean = true,
         hasValidBrandChoices: Boolean = true,
+        shouldShowCardBrandDropdown: Boolean = false,
         setAsDefaultCheckboxChecked: Boolean = false,
         setAsDefaultCheckboxEnabled: Boolean = true,
         cardBrandFilter: CardBrandFilter = DefaultCardBrandFilter,
@@ -336,10 +338,10 @@ class UpdatePaymentMethodUITest {
             cardBrandFilter = cardBrandFilter,
             viewActionRecorder = viewActionRecorder,
             hasValidBrandChoices = hasValidBrandChoices,
+            shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             shouldShowSaveButton = shouldShowSaveButton,
             setAsDefaultCheckboxEnabled = setAsDefaultCheckboxEnabled,
-            canUpdateCardBrandChoice = true,
             initialState = UpdatePaymentMethodInteractor.State(
                 error = errorMessage,
                 status = UpdatePaymentMethodInteractor.Status.Idle,

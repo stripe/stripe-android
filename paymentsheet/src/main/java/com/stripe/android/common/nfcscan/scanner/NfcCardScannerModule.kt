@@ -15,4 +15,7 @@ internal interface NfcCardScannerModule {
 
     @Binds
     fun bindsNfcCardReader(reader: ApduCardReader): NfcCardReader
+
+    @Binds
+    fun bindsNfcCardDataParser(parser: DefaultNfcCardDataParser): NfcCardDataParser
 }

@@ -5,22 +5,16 @@ import com.stripe.android.model.PaymentMethod
 
 internal fun PaymentMethod.isModifiable(
     canUpdateCardExpiryAndBillingDetails: Boolean,
-    canUpdateCardBrandChoice: Boolean,
-    isCbcEligible: Boolean,
+    canChangeCbc: Boolean,
 ): Boolean {
     val card = editableSavedCard() ?: return false
-
     return canUpdateCardExpiryAndBillingDetails ||
-        (canUpdateCardBrandChoice && card.isExpired().not() && canChangeCbc(isCbcEligible))
+        (canChangeCbc && card.isExpired().not() && hasMultipleNetworks())
 }
 
-internal fun PaymentMethod.canChangeCbc(isCbcEligible: Boolean): Boolean {
+internal fun PaymentMethod.hasMultipleNetworks(): Boolean {
     val card = editableSavedCard() ?: return false
-    val hasMultipleNetworks = card.networks?.available?.let { available ->
-        available.size > 1
-    } ?: false
-
-    return isCbcEligible && hasMultipleNetworks
+    return card.networks?.available?.let { it.size > 1 } ?: false
 }
 
 internal fun PaymentMethod.Card.isExpired(): Boolean {

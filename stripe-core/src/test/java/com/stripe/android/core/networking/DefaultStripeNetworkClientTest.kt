@@ -56,10 +56,58 @@ internal class DefaultStripeNetworkClientTest {
                 workContext = testDispatcher,
                 connectionFactory = okConnectionFactory
             )
-            assertThat(executor.executeRequest(mock())).isSameInstanceAs(
+            assertThat(executor.executeRequest(FakeStripeRequest())).isSameInstanceAs(
                 okResponseWithString
             )
         }
+
+    @Test
+    fun `executeRequest should log sanitized request target status and absent request id`() = runTest {
+        val client = DefaultStripeNetworkClient(
+            workContext = testDispatcher,
+            connectionFactory = okConnectionFactory,
+            logger = mockLogger,
+        )
+
+        client.executeRequest(
+            FakeStripeRequest(
+                method = StripeRequest.Method.GET,
+                url = "https://q.stripe.com?event=mc_complete&client_secret=pi_secret",
+            )
+        )
+
+        verify(mockLogger).info(
+            "Request: GET q.stripe.com/, Request-Id: absent, Status Code: 200"
+        )
+    }
+
+    @Test
+    fun `executeRequest should log sanitized API path and request id`() = runTest {
+        val connectionFactory = RetryCountConnectionFactory(
+            ResponseConnection(
+                StripeResponse(
+                    code = HttpURLConnection.HTTP_OK,
+                    body = "response_string",
+                    headers = mapOf(StripeResponse.HEADER_REQUEST_ID to listOf("req_123"))
+                )
+            )
+        )
+        val client = DefaultStripeNetworkClient(
+            workContext = testDispatcher,
+            connectionFactory = connectionFactory,
+            logger = mockLogger,
+        )
+
+        client.executeRequest(
+            FakeStripeRequest(
+                url = "https://api.stripe.com/v1/payment_pages/cs_test_123/init?expand[]=elements_session",
+            )
+        )
+
+        verify(mockLogger).info(
+            "Request: POST /v1/payment_pages/[redacted]/init, Request-Id: req_123, Status Code: 200"
+        )
+    }
 
     @Test
     fun `executeRequestForFile should return StripeResponse with File`() =
@@ -68,7 +116,7 @@ internal class DefaultStripeNetworkClientTest {
                 workContext = testDispatcher,
                 connectionFactory = okConnectionFactory
             )
-            assertThat(executor.executeRequestForFile(mock(), mock())).isSameInstanceAs(
+            assertThat(executor.executeRequestForFile(FakeStripeRequest(), mock())).isSameInstanceAs(
                 okResponseWithFile
             )
         }
@@ -222,8 +270,7 @@ internal class DefaultStripeNetworkClientTest {
                 throw error
             }
 
-        override fun close() {
-        }
+        override fun close() = Unit
 
         override fun createBodyFromResponseStream(responseStream: InputStream?): String? = null
     }
@@ -237,8 +284,20 @@ internal class DefaultStripeNetworkClientTest {
                 body = null
             )
 
-        override fun close() {
-        }
+        override fun close() = Unit
+
+        override fun createBodyFromResponseStream(responseStream: InputStream?): String? = null
+    }
+
+    private class ResponseConnection(
+        private val stripeResponse: StripeResponse<String>
+    ) : StripeConnection<String> {
+        override val responseCode: Int = stripeResponse.code
+
+        override val response: StripeResponse<String>
+            get() = stripeResponse
+
+        override fun close() = Unit
 
         override fun createBodyFromResponseStream(responseStream: InputStream?): String? = null
     }

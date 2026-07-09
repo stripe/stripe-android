@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
 internal sealed class CustomerSheetViewState(
@@ -67,7 +66,6 @@ internal sealed class CustomerSheetViewState(
         val canRemovePaymentMethods: Boolean,
         val errorMessage: String? = null,
         val mandateText: ResolvableString? = null,
-        val isCbcEligible: Boolean,
     ) : CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
@@ -143,12 +141,11 @@ internal sealed class CustomerSheetViewState(
 
 internal fun isModifiable(
     paymentMethod: PaymentMethod,
-    cbcEligibility: CardBrandChoiceEligibility,
     canUpdateCardExpiryAndBillingDetails: Boolean,
+    canChangeCbc: Boolean,
 ): Boolean {
     return paymentMethod.isModifiable(
         canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
-        canUpdateCardBrandChoice = true,
-        isCbcEligible = cbcEligibility is CardBrandChoiceEligibility.Eligible,
+        canChangeCbc = canChangeCbc,
     )
 }

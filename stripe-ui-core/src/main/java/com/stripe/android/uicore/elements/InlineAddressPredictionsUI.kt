@@ -44,12 +44,8 @@ fun InlineAddressPredictionsUI(
     onClear: () -> Unit,
     onEnterManually: (() -> Unit)? = null,
 ) {
-    val loading = state is AutocompleteAddressInteractor.InlinePredictionsState.Loading
-    val results = state as? AutocompleteAddressInteractor.InlinePredictionsState.Results
-    val expanded = loading || (results != null && results.predictions.isNotEmpty())
-
     DropdownMenu(
-        expanded = expanded,
+        expanded = shouldShowPredictionsDropdown(state),
         onDismissRequest = onDismiss,
         offset = DpOffset(x = (-1).dp, y = 0.dp),
         modifier = if (fieldWidthDp > 0.dp) {
@@ -227,4 +223,14 @@ private fun buildQueryRegex(query: String): Regex? {
 private fun applyBoldMatches(primaryText: String, queryRegex: Regex?): String {
     if (queryRegex == null) return primaryText
     return queryRegex.replace(primaryText) { "<b>${it.value}</b>" }
+}
+
+internal fun shouldShowPredictionsDropdown(
+    state: AutocompleteAddressInteractor.InlinePredictionsState
+): Boolean {
+    return when (state) {
+        AutocompleteAddressInteractor.InlinePredictionsState.Idle -> false
+        AutocompleteAddressInteractor.InlinePredictionsState.Loading -> true
+        is AutocompleteAddressInteractor.InlinePredictionsState.Results -> true
+    }
 }

@@ -100,6 +100,52 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentMethod() uses billingEmailFallback when Google Pay has no email`() = runTest {
+        val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        viewModelWithEmail.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
+            .isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `createPaymentMethod() prefers Google Pay email over billingEmailFallback`() = runTest {
+        val viewModelWithEmail = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(billingEmailFallback = "checkout@example.com"),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        viewModelWithEmail.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
+            .isEqualTo("stripe@example.com")
+    }
+
+    @Test
     fun `createTransactionInfo() with amount should create expected TransactionInfo`() {
         val transactionInfo = viewModel.createTransactionInfo(ARGS)
         assertThat(transactionInfo)

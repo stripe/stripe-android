@@ -1463,7 +1463,8 @@ internal class PaymentOptionsViewModelTest {
                 }
             },
             customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            placesClient = null,
         )
     }
 

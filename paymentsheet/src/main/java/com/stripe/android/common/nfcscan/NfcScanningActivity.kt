@@ -24,8 +24,6 @@ internal class NfcScanningActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        viewModel.register(this)
-
         lifecycleScope.launch {
             viewModel.result.collectLatest { result ->
                 finishWithResult(result)
@@ -53,6 +51,11 @@ internal class NfcScanningActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.register(this)
     }
 
     override fun onStop() {

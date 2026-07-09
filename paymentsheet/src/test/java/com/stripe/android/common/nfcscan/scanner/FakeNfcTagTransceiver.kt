@@ -8,11 +8,14 @@ internal class FakeNfcTagTransceiver(
     private val openException: Throwable? = null,
     private val closeException: Throwable? = null,
     private val transceiveResult: ByteArray = byteArrayOf(),
+    private val transceiveResults: List<ByteArray> = emptyList(),
     private val transceiveException: Throwable? = null,
 ) : NfcTagTransceiver {
     val openCalls = Turbine<Unit>()
     val closeCalls = Turbine<Unit>()
     val transceiveCalls = Turbine<ByteArray>()
+
+    private var transceiveResultIndex = 0
 
     override fun open() {
         openCalls.add(Unit)
@@ -22,7 +25,11 @@ internal class FakeNfcTagTransceiver(
     override fun transceive(data: ByteArray): ByteArray {
         transceiveCalls.add(data)
         transceiveException?.let { throw it as IOException }
-        return transceiveResult
+        return if (transceiveResultIndex < transceiveResults.size) {
+            transceiveResults[transceiveResultIndex++]
+        } else {
+            transceiveResult
+        }
     }
 
     override fun close() {

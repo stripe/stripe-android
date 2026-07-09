@@ -108,6 +108,28 @@ internal interface PaymentElementLoader {
         abstract fun validate()
         abstract fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata
 
+        fun walletsDisabledReason(): WalletsDisabledReason? {
+            val shouldDisable = (this as? CheckoutSession)
+                ?.checkoutSessionResponse
+                ?.shouldDisableWalletsForAutomaticTaxBilling == true
+
+            return if (shouldDisable) {
+                WalletsDisabledReason.AutomaticTaxBillingAddress
+            } else {
+                null
+            }
+        }
+
+        enum class WalletsDisabledReason {
+            AutomaticTaxBillingAddress;
+
+            val googlePayWarning: String
+                get() = when (this) {
+                    AutomaticTaxBillingAddress ->
+                        "Google Pay is disabled because automatic tax is configured to use the billing address."
+                }
+        }
+
         @Parcelize
         data class PaymentIntent(
             val clientSecret: String,
@@ -312,7 +334,12 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
         fetchPaymentMethodMessaging(elementsSession)
 
-        val isGooglePayReady = isGooglePayReady(configuration, elementsSession, isGooglePaySupportedByConfiguration)
+        val isGooglePayReady = isGooglePayReady(
+            configuration = configuration,
+            elementsSession = elementsSession,
+            initializationMode = initializationMode,
+            isGooglePaySupportedByConfiguration = isGooglePaySupportedByConfiguration,
+        )
 
         val savedSelection = async {
             retrieveSavedSelection(
@@ -597,8 +624,11 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private suspend fun isGooglePayReady(
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        initializationMode: PaymentElementLoader.InitializationMode,
         isGooglePaySupportedByConfiguration: Deferred<Boolean>,
     ): Boolean {
+        val walletsDisabledReason = initializationMode.walletsDisabledReason()
+
         if (!elementsSession.isGooglePayEnabled) {
             userFacingLogger.logWarningWithoutPii(
                 "Google Pay is not enabled for this session."
@@ -607,6 +637,9 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             userFacingLogger.logWarningWithoutPii(
                 "GooglePayConfiguration is not set."
             )
+        } else if (walletsDisabledReason != null) {
+            userFacingLogger.logWarningWithoutPii(walletsDisabledReason.googlePayWarning)
+            return false
         } else if (!isGooglePaySupportedByConfiguration.await()) {
             @Suppress("MaxLineLength")
             userFacingLogger.logWarningWithoutPii(

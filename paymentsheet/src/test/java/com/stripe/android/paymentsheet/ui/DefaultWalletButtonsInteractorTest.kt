@@ -618,6 +618,42 @@ class DefaultWalletButtonsInteractorTest {
     }
 
     @Test
+    fun `On Google Pay pressed, should require email when configured to collect email`() = runTest {
+        val confirmationHandler = FakeConfirmationHandler()
+        val interactor = createInteractor(
+            arguments = createArguments(
+                availableWallets = listOf(WalletType.GooglePay),
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
+                    countryCode = "US",
+                    currencyCode = "USD",
+                ),
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                ),
+            ),
+            confirmationHandler = confirmationHandler,
+        )
+
+        interactor.state.test {
+            val state = awaitItem()
+
+            interactor.handleViewAction(
+                WalletButtonsInteractor.ViewAction.OnButtonPressed(state.walletButtons.first()) { false }
+            )
+
+            analyticsEventCallbackRule.assertMatchesExpectedEvent(
+                AnalyticEvent.TapsButtonInWalletsButtonsView(walletType = "google_pay")
+            )
+
+            val arguments = confirmationHandler.startTurbine.awaitItem()
+            val option = arguments.confirmationOption as GooglePayConfirmationOption
+
+            assertThat(option.config.isEmailRequired).isTrue()
+        }
+    }
+
+    @Test
     fun `On wallet buttons rendered, should call provided callback with true`() = runTest {
         val completable = CompletableDeferred<Boolean>()
 

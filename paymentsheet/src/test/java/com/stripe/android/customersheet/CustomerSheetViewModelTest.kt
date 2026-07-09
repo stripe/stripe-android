@@ -2681,9 +2681,7 @@ class CustomerSheetViewModelTest {
                     )
                 )
 
-                val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
-
-                assertThat(selectPaymentMethodState.isCbcEligible).isTrue()
+                awaitViewState<SelectPaymentMethod>()
             }
         }
 

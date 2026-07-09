@@ -2,7 +2,6 @@
 
 MODULES=(
   "connect"
-  "link"
   "paymentsheet"
   "payments-core"
   "payments-ui-core"

@@ -158,7 +158,6 @@ internal class DefaultRetrieveCustomerEmailTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
             canRemoveLastPaymentMethod = false,
             canUpdateCardExpiryAndBillingDetails = false,
-            canUpdateCardBrandChoice = true,
         )
 
         val LEGACY_EK_METADATA = CustomerMetadata.LegacyEphemeralKey(
@@ -169,7 +168,6 @@ internal class DefaultRetrieveCustomerEmailTest {
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
             canUpdateCardExpiryAndBillingDetails = false,
-            canUpdateCardBrandChoice = true,
         )
 
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
