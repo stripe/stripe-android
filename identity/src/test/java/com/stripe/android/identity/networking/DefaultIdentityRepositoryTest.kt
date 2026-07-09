@@ -93,12 +93,6 @@ class DefaultIdentityRepositoryTest {
             VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING.replace(
                 "\"experiment1\"",
                 "\"$IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT\""
-            ).replace(
-                "\"eventName1\"",
-                "\"screen_presented\""
-            ).replace(
-                "\"metadata1\": \"value1\"",
-                "\"screen_name\": \"selfie\""
             )
         ) {
             assertThat(it.experiments).hasSize(1)
@@ -108,15 +102,15 @@ class DefaultIdentityRepositoryTest {
     }
 
     @Test
-    fun `retrieveVerificationPage does not enable 3D for experiment name without selfie exposure match`() {
+    fun `retrieveVerificationPage enables 3D from experiment name only`() {
         testFetchVerificationPage(
             VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING.replace(
                 "\"experiment1\"",
                 "\"$IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT\""
             )
         ) {
-            assertThat(it.has3DFaceCaptureExperiment()).isFalse()
-            assertThat(it.enable3DFaceCapture()).isFalse()
+            assertThat(it.has3DFaceCaptureExperiment()).isTrue()
+            assertThat(it.enable3DFaceCapture()).isTrue()
         }
     }
 
