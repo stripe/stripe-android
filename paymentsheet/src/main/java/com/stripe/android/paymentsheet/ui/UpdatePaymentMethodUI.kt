@@ -31,7 +31,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.SavedPaymentMethod
-import com.stripe.android.paymentsheet.canChangeCbc
 import com.stripe.android.paymentsheet.utils.testMetadata
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.CheckboxElementUI
@@ -48,10 +47,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     val context = LocalContext.current
     val horizontalPadding = StripeTheme.getOuterFormInsets()
     val state by interactor.state.collectAsState()
-    val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
-        interactor.displayableSavedPaymentMethod.paymentMethod.canChangeCbc(
-            interactor.displayableSavedPaymentMethod.isCbcEligible
-        )
+    val shouldShowCardBrandDropdown = interactor.shouldShowCardBrandDropdown
 
     Column(
         modifier = modifier
@@ -102,7 +98,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         }
 
         val showCardDetailsCannotBeChanged = interactor.isExpiredCard.not() &&
-            (interactor.isModifiablePaymentMethod.not() || interactor.canUpdateFullPaymentMethodDetails.not())
+            (interactor.isModifiablePaymentMethod.not() || interactor.canUpdateCardExpiryAndBillingDetails.not())
         if (showCardDetailsCannotBeChanged) {
             DetailsCannotBeChangedText(interactor, shouldShowCardBrandDropdown, context)
         }
@@ -359,7 +355,8 @@ private fun PreviewUpdatePaymentMethodUI() {
         interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = false,
             canRemove = true,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
+            canChangeCbc = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
             allowedBillingCountries = emptySet(),

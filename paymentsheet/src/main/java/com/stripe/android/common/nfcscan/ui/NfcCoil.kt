@@ -1,5 +1,8 @@
 package com.stripe.android.common.nfcscan.ui
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -29,12 +32,17 @@ private val ShadowElevation = 8.dp
 
 @Composable
 internal fun NfcCoil(
+    status: NfcScanningStatus,
     shouldRenderTextAboveCoil: Boolean,
+    onSuccessShown: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val canShowText = status !is NfcScanningStatus.Scanned
+
     Box(modifier.width(IntrinsicSize.Min)) {
         if (shouldRenderTextAboveCoil) {
             NfcCoilInstructionText(
+                canShow = canShowText,
                 modifier = Modifier
                     .align(Alignment.TopCenter)
                     .offsetWithGap(TopTextOffset)
@@ -56,11 +64,16 @@ internal fun NfcCoil(
                 .background(color = MaterialTheme.colors.primary, shape = CircleShape),
             contentAlignment = Alignment.Center,
         ) {
-            NfcCoilAnimatedInterior(Modifier.fillMaxSize())
+            NfcCoilAnimatedInterior(
+                status = status,
+                onSuccessShown = onSuccessShown,
+                modifier = Modifier.fillMaxSize(),
+            )
         }
 
         if (!shouldRenderTextAboveCoil) {
             NfcCoilInstructionText(
+                canShow = canShowText,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .offsetWithGap(30.dp)
@@ -71,16 +84,23 @@ internal fun NfcCoil(
 
 @Composable
 private fun NfcCoilInstructionText(
+    canShow: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    Text(
-        text = stringResource(R.string.stripe_nfc_scan_hold_card_behind_phone),
+    AnimatedVisibility(
+        visible = canShow,
+        enter = fadeIn(),
+        exit = fadeOut(),
         modifier = modifier
             .wrapContentSize(unbounded = true),
-        color = MaterialTheme.colors.onSurface,
-        style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
-        textAlign = TextAlign.Center,
-    )
+    ) {
+        Text(
+            text = stringResource(R.string.stripe_nfc_scan_hold_card_behind_phone),
+            color = MaterialTheme.colors.onSurface,
+            style = MaterialTheme.typography.h4.copy(fontWeight = FontWeight.Bold),
+            textAlign = TextAlign.Center,
+        )
+    }
 }
 
 private fun Modifier.offsetWithGap(gap: Dp): Modifier {

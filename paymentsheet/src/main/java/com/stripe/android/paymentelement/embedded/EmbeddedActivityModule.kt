@@ -19,6 +19,7 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -161,8 +162,13 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideFormInteractor(
-            interactorFactory: EmbeddedFormInteractorFactory
-        ): VerticalModeFormInteractor = interactorFactory.create()
+            interactorFactory: EmbeddedFormInteractorFactory,
+            paymentMethodCode: PaymentMethodCode,
+            hasSavedPaymentMethods: Boolean,
+        ): VerticalModeFormInteractor = interactorFactory.create(
+            paymentMethodCode = paymentMethodCode,
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+        )
 
         @Provides
         @Singleton

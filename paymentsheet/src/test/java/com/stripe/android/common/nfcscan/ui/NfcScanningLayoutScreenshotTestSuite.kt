@@ -1,11 +1,17 @@
 package com.stripe.android.common.nfcscan.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.screenshottesting.Orientation
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import kotlinx.coroutines.delay
 import org.junit.Rule
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
@@ -33,9 +39,11 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             paparazziRule.snapshot {
                 NfcScanningTheme {
                     NfcScanningLayout(
+                        status = NfcScanningStatus.Idle,
                         tapZone = tapZone,
                         deviceRotation = deviceRotation,
                         onClose = {},
+                        onSuccessShown = {},
                     )
                 }
             }
@@ -92,9 +100,33 @@ internal class NfcScanningLayoutScreenshotTestSuite {
             paparazziRule.gif(end = 1500L) {
                 NfcScanningTheme {
                     NfcScanningLayout(
+                        status = NfcScanningStatus.Idle,
                         tapZone = TapZone(xBias = 0.5f, yBias = 0.35f),
                         deviceRotation = DeviceRotation.Portrait,
                         onClose = {},
+                        onSuccessShown = {},
+                    )
+                }
+            }
+        }
+
+        @Test
+        fun scanned() {
+            paparazziRule.gif(end = 2400L) {
+                NfcScanningTheme {
+                    var status by remember { mutableStateOf<NfcScanningStatus>(NfcScanningStatus.Idle) }
+
+                    LaunchedEffect(Unit) {
+                        delay(800L)
+                        status = NfcScanningStatus.Scanned
+                    }
+
+                    NfcScanningLayout(
+                        status = status,
+                        tapZone = TapZone(xBias = 0.5f, yBias = 0.35f),
+                        deviceRotation = DeviceRotation.Portrait,
+                        onClose = {},
+                        onSuccessShown = {},
                     )
                 }
             }

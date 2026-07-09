@@ -115,7 +115,6 @@ class PaymentOptionsScreenshotTest {
                 DisplayableSavedPaymentMethod.create(
                     displayName = "Card".resolvableString,
                     paymentMethod = createCard("1234", addNetworks = true),
-                    isCbcEligible = true,
                 ),
             ),
         )
@@ -189,7 +188,6 @@ class PaymentOptionsScreenshotTest {
             DisplayableSavedPaymentMethod.create(
                 displayName = "Card".resolvableString,
                 paymentMethod = createCard("1234", addNetworks = true),
-                isCbcEligible = true,
             ),
         ),
     )

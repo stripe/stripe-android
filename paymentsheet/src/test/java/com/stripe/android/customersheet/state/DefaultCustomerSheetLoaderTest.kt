@@ -789,7 +789,7 @@ internal class DefaultCustomerSheetLoaderTest {
                         permissions = CustomerPermissions(
                             removePaymentMethod = PaymentMethodRemovePermission.Full,
                             canRemoveLastPaymentMethod = true,
-                            canUpdateFullPaymentMethodDetails = true,
+                            canUpdateCardExpiryAndBillingDetails = true,
                         ),
                         defaultPaymentMethodId = defaultPaymentMethodId,
                         customerId = "unused_for_customer_adapter_data_source",

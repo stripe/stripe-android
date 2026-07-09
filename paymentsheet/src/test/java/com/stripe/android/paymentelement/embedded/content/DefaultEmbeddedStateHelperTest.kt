@@ -216,6 +216,7 @@ internal class DefaultEmbeddedStateHelperTest {
             customerMetadata = stateFlowOf(
                 PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         )
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = savedStateHandle,

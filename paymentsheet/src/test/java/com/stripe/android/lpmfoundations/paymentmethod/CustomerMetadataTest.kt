@@ -18,6 +18,45 @@ import org.junit.Test
 internal class CustomerMetadataTest {
 
     @Test
+    fun `CheckoutSession should not support card expiry and billing details or card brand updates`() {
+        val metadata = CustomerMetadata.CheckoutSession(
+            sessionId = "cs_123",
+            customerId = "cus_123",
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+        )
+
+        assertThat(metadata.canUpdateCardExpiryAndBillingDetails).isFalse()
+        assertThat(metadata.canUpdateCardBrandChoice).isFalse()
+    }
+
+    @Test
+    fun `CustomerSession and legacy ephemeral key should support card brand updates`() {
+        val customerSessionMetadata = CustomerMetadata.CustomerSession(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_123",
+            customerSessionClientSecret = "cuss_123",
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateCardExpiryAndBillingDetails = true,
+        )
+        val legacyEphemeralKeyMetadata = CustomerMetadata.LegacyEphemeralKey(
+            id = "cus_123",
+            ephemeralKeySecret = "ek_123",
+            isPaymentMethodSetAsDefaultEnabled = false,
+            removePaymentMethod = PaymentMethodRemovePermission.Full,
+            saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
+            canRemoveLastPaymentMethod = true,
+            canUpdateCardExpiryAndBillingDetails = false,
+        )
+
+        assertThat(customerSessionMetadata.canUpdateCardBrandChoice).isTrue()
+        assertThat(legacyEphemeralKeyMetadata.canUpdateCardBrandChoice).isTrue()
+    }
+
+    @Test
     fun `Should create 'Permissions' for customer session properly with permissions disabled`() {
         customerSessionPermissionsTest(
             paymentElementDisabled = true,
@@ -326,7 +365,7 @@ internal class CustomerMetadataTest {
             permissions = CustomerPermissions(
                 removePaymentMethod = removePermission,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true
+                canUpdateCardExpiryAndBillingDetails = true
             ),
             defaultPaymentMethodId = null,
             customerId = "unused_for_customer_adapter_data_source",

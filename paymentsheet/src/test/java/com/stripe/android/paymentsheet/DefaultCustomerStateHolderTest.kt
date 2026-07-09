@@ -477,12 +477,13 @@ internal class DefaultCustomerStateHolderTest {
                 removePaymentMethod = paymentMethodRemovePermission,
                 saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
             )
         )
 
         val customerStateHolder = DefaultCustomerStateHolder(
             customerMetadata = customerMetadata,
+            paymentMethodMetadataFlow = stateFlowOf(null),
             savedStateHandle = savedStateHandle,
             selection = selection,
         )

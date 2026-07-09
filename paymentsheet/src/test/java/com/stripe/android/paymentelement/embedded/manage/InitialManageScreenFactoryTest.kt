@@ -49,6 +49,7 @@ internal class InitialManageScreenFactoryTest {
             customerMetadata = stateFlowOf(
                 PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
             ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
         )
         val factory = InitialManageScreenFactory(
             customerStateHolder = customerStateHolder,

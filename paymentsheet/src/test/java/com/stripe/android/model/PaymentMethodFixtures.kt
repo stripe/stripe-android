@@ -710,7 +710,6 @@ internal object PaymentMethodFixtures {
         return DisplayableSavedPaymentMethod.create(
             displayName = displayName,
             paymentMethod = this,
-            isCbcEligible = true,
             shouldShowDefaultBadge = shouldShowDefaultBadge,
         )
     }
