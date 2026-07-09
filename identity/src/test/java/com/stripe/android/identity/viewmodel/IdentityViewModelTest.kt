@@ -229,7 +229,7 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `uploadScanResult uploads selected non-3D files and notifies _selfieUploadedState`() = runBlocking {
+    fun `uploadScanResult uploads side full frames when local 3D override is enabled`() = runBlocking {
         mockUploadSuccess()
         viewModel.uploadScanResult(
             FINAL_FACE_DETECTOR_RESULT,
@@ -245,7 +245,13 @@ internal class IdentityViewModelTest {
                 testUploadSelfieScanSuccessResult(selfie, isHighRes)
             }
         }
-        verify(mockIdentityAnalyticsRequestFactory, times(6)).imageUpload(
+        listOf(
+            FaceDetectorTransitioner.Selfie.RIGHT,
+            FaceDetectorTransitioner.Selfie.LEFT
+        ).forEach { selfie ->
+            testUploadSelfieScanSuccessResult(selfie, isHighRes = false)
+        }
+        verify(mockIdentityAnalyticsRequestFactory, times(8)).imageUpload(
             anyOrNull(),
             anyOrNull(),
             anyOrNull(),
@@ -325,7 +331,9 @@ internal class IdentityViewModelTest {
             (viewModel.selfieUploadState.value.bestHighResResult),
             (viewModel.selfieUploadState.value.bestLowResResult),
             (viewModel.selfieUploadState.value.lastHighResResult),
-            (viewModel.selfieUploadState.value.lastLowResResult)
+            (viewModel.selfieUploadState.value.lastLowResResult),
+            (viewModel.selfieUploadState.value.leftLowResResult),
+            (viewModel.selfieUploadState.value.rightLowResResult)
         ).forEach { uploadedResult ->
             assertThat(uploadedResult).isEqualTo(
                 Resource.error<UploadedResult>(

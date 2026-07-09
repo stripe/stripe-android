@@ -46,12 +46,13 @@ internal data class VerificationPageStaticContentSelfieCapturePage(
     internal companion object {
         const val POSE_LEFT = "left"
         const val POSE_RIGHT = "right"
+        private val local3DFaceCaptureOverride: Boolean? = true
 
         fun VerificationPageStaticContentSelfieCapturePage.enable3DFaceCapture(): Boolean =
-            apiIncludes3DFaceCapturePose()
+            local3DFaceCaptureOverride ?: apiIncludes3DFaceCapturePose()
 
         fun VerificationPageStaticContentSelfieCapturePage.shouldSubmit3DFaceCaptureData(): Boolean =
-            apiIncludes3DFaceCapturePose()
+            local3DFaceCaptureOverride ?: apiIncludes3DFaceCapturePose()
 
         fun VerificationPageStaticContentSelfieCapturePage.apiIncludes3DFaceCapturePose(): Boolean =
             poseSequence?.any {
