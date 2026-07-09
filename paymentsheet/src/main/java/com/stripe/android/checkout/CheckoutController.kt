@@ -91,6 +91,8 @@ class CheckoutController(
             CurrencySelectorElement.Configuration()
         private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration =
             ShippingAddressElement.Configuration()
+        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
+            ExpressCheckoutElement.Configuration()
 
         fun adaptivePricingAllowed(
             adaptivePricingAllowed: Boolean
@@ -116,12 +118,19 @@ class CheckoutController(
             this.shippingAddressElementConfiguration = configuration
         }
 
+        fun expressCheckoutElement(
+            configuration: ExpressCheckoutElement.Configuration
+        ): Configuration = apply {
+            this.expressCheckoutElementConfiguration = configuration
+        }
+
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
+            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
         ) : Parcelable
 
         internal fun build(): State = State(
@@ -129,6 +138,7 @@ class CheckoutController(
             paymentElementConfiguration = paymentElementConfiguration.build(),
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
+            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
         )
     }
 
