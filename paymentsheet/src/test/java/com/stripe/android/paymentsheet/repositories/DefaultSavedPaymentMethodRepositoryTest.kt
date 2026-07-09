@@ -158,23 +158,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
     }
 
     @Test
-    fun `update fails for checkout session when params only update card brand`() = runScenario(
-        customerMetadata = CHECKOUT_SESSION_METADATA,
-    ) {
-        val result = repository.updatePaymentMethod(
-            customerMetadata = customerMetadata,
-            paymentMethodId = "pm_123",
-            params = PaymentMethodUpdateParams.createCard(
-                networks = PaymentMethodUpdateParams.Card.Networks(preferred = "visa"),
-            ),
-        )
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).hasMessageThat()
-            .contains("card expiry and billing details only")
-    }
-
-    @Test
     fun `update fails for checkout session when params include card brand`() = runScenario(
         customerMetadata = CHECKOUT_SESSION_METADATA,
     ) {
