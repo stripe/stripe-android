@@ -33,7 +33,6 @@ class PaymentMethodCreateParamsTest {
             billingEmailOverride = "checkout@example.com",
         )
 
-        // The override must win over Google Pay's own email (Checkout Session requirement).
         assertThat(params.billingDetails?.email).isEqualTo("checkout@example.com")
     }
 

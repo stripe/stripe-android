@@ -283,8 +283,6 @@ internal class FlowControllerCheckoutSessionTest {
     fun testCheckoutSessionEmailTakesPrecedenceOverDefaultBillingEmail() =
         runCheckoutSessionEmailPrecedenceTest(
             defaultEmail = "merchant@example.com",
-            // customer_email is authoritative: the backend rejects confirmation if the payment
-            // method email differs from it, so it must win over a merchant-provided default.
             expectedEmail = "session@example.com",
         )
 
