@@ -22,11 +22,25 @@ class CheckoutConfigurationMergerTest {
     }
 
     @Test
-    fun `embedded - preserves merchant email when already set`() {
+    fun `embedded - checkout session email overrides merchant email when both set`() {
         val config = embeddedConfiguration(
             defaultBillingDetails = PaymentSheet.BillingDetails(email = "merchant@example.com"),
         )
         val state = state(customerEmail = "checkout@example.com")
+
+        val result = CheckoutConfigurationMerger.EmbeddedConfiguration(config).forCheckoutSession(state)
+
+        // customer_email is authoritative; the backend rejects a mismatched PM email, so it must
+        // win over a merchant-provided default rather than fall back to it.
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `embedded - preserves merchant email when checkout session has no customer email`() {
+        val config = embeddedConfiguration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "merchant@example.com"),
+        )
+        val state = state(customerEmail = null)
 
         val result = CheckoutConfigurationMerger.EmbeddedConfiguration(config).forCheckoutSession(state)
 
@@ -263,11 +277,24 @@ class CheckoutConfigurationMergerTest {
     }
 
     @Test
-    fun `paymentSheet - preserves merchant email when already set`() {
+    fun `paymentSheet - checkout session email overrides merchant email when both set`() {
         val config = paymentSheetConfiguration(
             defaultBillingDetails = PaymentSheet.BillingDetails(email = "merchant@example.com"),
         )
         val state = state(customerEmail = "checkout@example.com")
+
+        val result = CheckoutConfigurationMerger.PaymentSheetConfiguration(config).forCheckoutSession(state)
+
+        // customer_email is authoritative; it must win over a merchant-provided default.
+        assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun `paymentSheet - preserves merchant email when checkout session has no customer email`() {
+        val config = paymentSheetConfiguration(
+            defaultBillingDetails = PaymentSheet.BillingDetails(email = "merchant@example.com"),
+        )
+        val state = state(customerEmail = null)
 
         val result = CheckoutConfigurationMerger.PaymentSheetConfiguration(config).forCheckoutSession(state)
 
