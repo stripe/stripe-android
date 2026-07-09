@@ -174,7 +174,24 @@ internal class CardDetailsEntryTest {
             expYear = 2030
         )
 
-        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry(), includeCardBrand = true)
+
+        assertThat(params.cardBrand).isNull()
+        assertThat(params.expiryMonth).isEqualTo(12)
+        assertThat(params.expiryYear).isEqualTo(2030)
+        assertThat(params.billingDetails).isEqualTo(BILLING_DETAILS_FORM_DETAILS)
+    }
+
+    @Test
+    fun `toUpdateParams() should omit card brand when includeCardBrand is false`() {
+        val cardBrandChoice = CardBrandChoice(CardBrand.Visa, true)
+        val cardDetailsEntry = createEntry(
+            cardBrandChoice = cardBrandChoice,
+            expMonth = 12,
+            expYear = 2030
+        )
+
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry(), includeCardBrand = false)
 
         assertThat(params.cardBrand).isNull()
         assertThat(params.expiryMonth).isEqualTo(12)
@@ -191,7 +208,7 @@ internal class CardDetailsEntryTest {
             expYear = 2030
         )
 
-        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry(), includeCardBrand = true)
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isEqualTo(12)
@@ -208,7 +225,7 @@ internal class CardDetailsEntryTest {
             expYear = null
         )
 
-        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry(), includeCardBrand = true)
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isNull()
@@ -226,7 +243,7 @@ internal class CardDetailsEntryTest {
             expYear = 2030,
         )
 
-        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry())
+        val params = toUpdateParams(cardDetailsEntry, billingDetailsEntry(), includeCardBrand = true)
 
         assertThat(params.cardBrand).isEqualTo(CardBrand.Visa)
         assertThat(params.expiryMonth).isEqualTo(12)

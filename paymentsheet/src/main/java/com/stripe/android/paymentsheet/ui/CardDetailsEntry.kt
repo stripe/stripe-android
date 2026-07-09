@@ -42,14 +42,17 @@ internal data class CardDetailsEntry(
 /**
  * Builds [CardUpdateParams] from the provided [CardDetailsEntry] and [BillingDetailsEntry].
  *
- * @return CardUpdateParams containing the updated card and billing information.
+ * @param includeCardBrand whether to include the selected card brand; only true when the brand is
+ * editable (CBC modifiable).
  */
 internal fun toUpdateParams(
     cardDetailsEntry: CardDetailsEntry?,
     billingDetailsEntry: BillingDetailsEntry?,
+    includeCardBrand: Boolean,
 ): CardUpdateParams {
     return CardUpdateParams(
-        cardBrand = cardDetailsEntry?.cardBrandChoice?.brand?.takeIf { it != CardBrand.Unknown },
+        cardBrand = cardDetailsEntry?.cardBrandChoice?.brand
+            ?.takeIf { includeCardBrand && it != CardBrand.Unknown },
         expiryMonth = cardDetailsEntry?.expiryDateState?.expiryMonth,
         expiryYear = cardDetailsEntry?.expiryDateState?.expiryYear,
         billingDetails = createBillingDetails(billingDetailsEntry)
