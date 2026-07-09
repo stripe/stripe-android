@@ -241,6 +241,7 @@ internal class FaceDetectorTransitioner(
         val shouldRefreshInitialAfterSidePrompt = consumeSideCapturePromptCompletion()
         val nowTimestampMs = SystemClock.elapsedRealtime()
         val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
+        val previousCaptureGuideProgress = captureGuideProgress
 
         return when {
             isFrameValidForActiveCapture(analyzerOutput, motionBlurResult) -> {
@@ -260,13 +261,20 @@ internal class FaceDetectorTransitioner(
 
             else -> {
                 Log.d(TAG, "Valid face not found, stay in Initial")
-                if (shouldRefreshInitialAfterSidePrompt) {
+                if (shouldRefreshInitialAfterSidePrompt ||
+                    shouldRefreshInitialForCaptureGuideProgress(previousCaptureGuideProgress)
+                ) {
                     Initial(initialState.type, this)
                 } else {
                     initialState
                 }
             }
         }
+    }
+
+    private fun shouldRefreshInitialForCaptureGuideProgress(previousCaptureGuideProgress: Float): Boolean {
+        return activeCapture != Capture.FRONT &&
+            previousCaptureGuideProgress != captureGuideProgress
     }
 
     @Suppress("LongMethod")
@@ -402,8 +410,8 @@ internal class FaceDetectorTransitioner(
         analyzerOutput: FaceDetectorOutput,
         motionBlurResult: MotionBlurDetector.Output?,
     ): Boolean {
+        updateCaptureGuideProgress(analyzerOutput)
         if (!isFaceValid(analyzerOutput, motionBlurResult)) {
-            captureGuideProgress = 0f
             return false
         }
 
@@ -415,17 +423,22 @@ internal class FaceDetectorTransitioner(
             Capture.FRONT -> true
             Capture.LEFT,
             Capture.RIGHT -> {
+                analyzerOutput.pose != null && captureGuideProgress >= 1f ||
+                    activeCaptureStartedAt.elapsedNow() >= sideCaptureFallbackDuration.milliseconds
+            }
+        }
+    }
+
+    private fun updateCaptureGuideProgress(analyzerOutput: FaceDetectorOutput) {
+        captureGuideProgress = when (activeCapture) {
+            Capture.FRONT -> 0f
+            Capture.LEFT,
+            Capture.RIGHT -> {
                 val pose = analyzerOutput.pose
-                if (pose == null) {
-                    captureGuideProgress = 0f
-                    return activeCaptureStartedAt.elapsedNow() >=
-                        sideCaptureFallbackDuration.milliseconds
-                }
-                captureGuideProgress = captureGuideProgressForPose(activeCapture, pose.yaw)
-                when (activeCapture) {
-                    Capture.LEFT -> captureGuideProgress >= 1f
-                    Capture.RIGHT -> captureGuideProgress >= 1f
-                    Capture.FRONT -> true
+                if (pose == null || !isFaceScoreOverThreshold(analyzerOutput.resultScore)) {
+                    0f
+                } else {
+                    captureGuideProgressForPose(activeCapture, pose.yaw)
                 }
             }
         }
@@ -629,7 +642,7 @@ internal class FaceDetectorTransitioner(
         const val VALUE_RIGHT = "right"
         const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
         const val DEFAULT_SIDE_CAPTURE_PROMPT_DURATION = 900
-        const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 8000
+        const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 10000000
 
         private const val SIDE_CAPTURE_NUM_FRAMES = 2
         private const val SIDE_CAPTURE_YAW_THRESHOLD = 0.08f
