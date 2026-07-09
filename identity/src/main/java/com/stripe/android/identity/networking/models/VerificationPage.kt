@@ -87,6 +87,9 @@ internal data class VerificationPage(
     internal companion object {
         const val IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT =
             "idprod_3d_face_capture_mobile"
+        private const val EVENT_SCREEN_PRESENTED = "screen_presented"
+        private const val PARAM_SCREEN_NAME = "screen_name"
+        private const val SCREEN_NAME_SELFIE = "selfie"
 
         fun VerificationPage.isUnsupportedClient() = unsupportedClient
 
@@ -94,7 +97,7 @@ internal data class VerificationPage(
 
         fun VerificationPage.has3DFaceCaptureExperiment(): Boolean =
             experiments.any {
-                it.experimentName == IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
+                it.experimentName == IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT &&
             }
 
         fun VerificationPage.enable3DFaceCapture(): Boolean =

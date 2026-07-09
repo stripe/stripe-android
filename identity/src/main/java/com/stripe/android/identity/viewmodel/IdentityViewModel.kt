@@ -2068,14 +2068,14 @@ internal class IdentityViewModel(
                                 bestFocalLength = selfieBestFocalLength,
                                 bestExposureDuration = selfieBestExposureDuration,
                                 bestIsVirtualCamera = selfieBestIsVirtualCamera,
-                                leftFullFrameResult = if (
+                                leftHighResResult = if (
                                     FaceDetectorTransitioner.Selfie.LEFT in sideSelfies
                                 ) {
                                     it.leftLowResResult.data
                                 } else {
                                     null
                                 },
-                                rightFullFrameResult = if (
+                                rightHighResResult = if (
                                     FaceDetectorTransitioner.Selfie.RIGHT in sideSelfies
                                 ) {
                                     it.rightLowResResult.data

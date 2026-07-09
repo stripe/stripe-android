@@ -93,11 +93,30 @@ class DefaultIdentityRepositoryTest {
             VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING.replace(
                 "\"experiment1\"",
                 "\"$IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT\""
+            ).replace(
+                "\"eventName1\"",
+                "\"screen_presented\""
+            ).replace(
+                "\"metadata1\": \"value1\"",
+                "\"screen_name\": \"selfie\""
             )
         ) {
             assertThat(it.experiments).hasSize(1)
             assertThat(it.has3DFaceCaptureExperiment()).isTrue()
             assertThat(it.enable3DFaceCapture()).isTrue()
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage does not enable 3D for experiment name without selfie exposure match`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING.replace(
+                "\"experiment1\"",
+                "\"$IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT\""
+            )
+        ) {
+            assertThat(it.has3DFaceCaptureExperiment()).isFalse()
+            assertThat(it.enable3DFaceCapture()).isFalse()
         }
     }
 
@@ -253,8 +272,8 @@ class DefaultIdentityRepositoryTest {
                 bestIsVirtualCamera = true,
                 bestExposureIso = 100.123f,
                 trainingConsent = false,
-                leftFullFrame = "left_full_frame",
-                rightFullFrame = "right_full_frame",
+                leftHighResImage = "left_high_res_image",
+                rightHighResImage = "right_high_res_image",
                 bestFrameData = FaceFrameDataParam(
                     faceScore = 0.891f,
                     faceScoreVariance = 0.154f,
@@ -309,10 +328,10 @@ class DefaultIdentityRepositoryTest {
             assertThat(face["best_is_virtual_camera"]).isEqualTo("true")
             assertThat(face["best_exposure_iso"]).isEqualTo("100.12")
             assertThat(face["training_consent"]).isEqualTo("false")
-            assertThat(face["left_full_frame"]).isEqualTo("left_full_frame")
-            assertThat(face["right_full_frame"]).isEqualTo("right_full_frame")
-            assertThat(face).doesNotContainKey("left_high_res_image")
-            assertThat(face).doesNotContainKey("right_high_res_image")
+            assertThat(face["left_high_res_image"]).isEqualTo("left_high_res_image")
+            assertThat(face["right_high_res_image"]).isEqualTo("right_high_res_image")
+            assertThat(face).doesNotContainKey("left_full_frame")
+            assertThat(face).doesNotContainKey("right_full_frame")
             val bestFrameData = face["best_frame_data"] as Map<*, *>
             assertThat(bestFrameData["face_score"]).isEqualTo("0.89")
             assertThat(bestFrameData["face_score_variance"]).isEqualTo("0.15")

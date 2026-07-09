@@ -47,10 +47,10 @@ internal data class FaceUploadParam(
     val bestExposureIso: Float? = null,
     @SerialName("training_consent")
     val trainingConsent: Boolean? = null,
-    @SerialName("left_full_frame")
-    val leftFullFrame: String? = null,
-    @SerialName("right_full_frame")
-    val rightFullFrame: String? = null,
+    @SerialName("left_high_res_image")
+    val leftHighResImage: String? = null,
+    @SerialName("right_high_res_image")
+    val rightHighResImage: String? = null,
     @SerialName("best_frame_data")
     val bestFrameData: FaceFrameDataParam? = null,
     @SerialName("first_frame_data")
