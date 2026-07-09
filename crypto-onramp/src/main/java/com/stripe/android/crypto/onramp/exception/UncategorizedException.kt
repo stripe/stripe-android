@@ -3,10 +3,10 @@ package com.stripe.android.crypto.onramp.exception
 import com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp
 
 /**
- * Indicates that the wallet ownership challenge expired before the signature was submitted.
+ * Indicates that a Stripe API request failed without a more specific Crypto Onramp category.
  */
 @ExperimentalCryptoOnramp
-class WalletOwnershipChallengeExpiredApiException internal constructor(
+class UncategorizedException internal constructor(
     apiErrorContext: APIErrorContext,
     diagnosticContext: DiagnosticContext,
     userMessage: String,
@@ -14,10 +14,9 @@ class WalletOwnershipChallengeExpiredApiException internal constructor(
     apiErrorContext = apiErrorContext,
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
-        summary = apiErrorContext.apiErrorMessage
-            ?: "Wallet ownership verification failed: the challenge has expired.",
-        code = apiErrorContext.code(fallback = WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE),
-        nextStep = "Request a new wallet ownership challenge and submit a fresh signature before it expires.",
+        summary = apiErrorContext.apiErrorMessage ?: "Stripe API request failed.",
+        code = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE),
+        nextStep = "Inspect the preserved Stripe API error for details and retry after correcting the request.",
         docUrl = apiErrorContext.docUrl,
         sdkVersions = diagnosticContext.sdkVersions,
         requestContext = CryptoOnrampErrorRenderer.requestContextLines(
@@ -29,7 +28,7 @@ class WalletOwnershipChallengeExpiredApiException internal constructor(
     ),
 ) {
     override val code: String
-        get() = apiErrorContext.code(fallback = WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE)
+        get() = apiErrorContext.code(fallback = UNCATEGORIZED_API_ERROR_CODE)
 }
 
-internal const val WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE = "crypto_onramp_wallet_ownership_challenge_expired"
+private const val UNCATEGORIZED_API_ERROR_CODE = "uncategorized_api_error"

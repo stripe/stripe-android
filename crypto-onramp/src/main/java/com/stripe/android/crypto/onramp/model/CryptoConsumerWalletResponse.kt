@@ -10,7 +10,7 @@ internal data class CryptoConsumerWalletResponse(
     @SerialName("wallet_address")
     val walletAddress: String,
     @SerialName("verified_ownership")
-    val verifiedOwnership: Boolean = false,
+    val verifiedOwnership: Boolean,
 ) {
     fun toCryptoConsumerWallet(): CryptoConsumerWallet {
         return CryptoConsumerWallet(
