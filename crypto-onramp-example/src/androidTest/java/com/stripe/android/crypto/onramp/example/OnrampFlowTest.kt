@@ -186,4 +186,4 @@ class OnrampFlowTest {
 }
 
 private const val EXTRA_SCROLL_DISTANCE = 72f
-private const val EXTRA_SCROLL_DURATION_MILLIS = 100L
+private const val EXTRA_SCROLL_DURATION_MILLIS = 50L
