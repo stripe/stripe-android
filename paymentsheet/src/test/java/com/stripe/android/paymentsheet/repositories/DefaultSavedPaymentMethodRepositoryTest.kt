@@ -10,7 +10,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.utils.FakeCustomerRepository
@@ -158,15 +160,47 @@ class DefaultSavedPaymentMethodRepositoryTest {
     }
 
     @Test
-    fun `update fails for checkout session when params include card brand`() = runScenario(
+    fun `update ignores unsupported card brand and updates expiry for checkout session`() = runScenario(
         customerMetadata = CHECKOUT_SESSION_METADATA,
     ) {
+        // The card brand is always included on any card edit even when unchanged. Checkout sessions
+        // can't update the brand (and never expose the brand dropdown), so it must be dropped and the
+        // supported expiry update must still go through instead of failing the whole request.
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_pages/cs_123"),
+            bodyPart("payment_method_to_update[payment_method_id]", "pm_123"),
+            bodyPart("payment_method_to_update[expiry_details][exp_month]", "12"),
+            bodyPart("payment_method_to_update[expiry_details][exp_year]", "2030"),
+            not(hasBodyPart("payment_method_to_update[card][networks][preferred]")),
+        ) { response ->
+            response.setBody(checkoutSessionUpdateResponse())
+        }
+
         val result = repository.updatePaymentMethod(
             customerMetadata = customerMetadata,
             paymentMethodId = "pm_123",
             params = PaymentMethodUpdateParams.createCard(
                 expiryMonth = 12,
                 expiryYear = 2030,
+                networks = PaymentMethodUpdateParams.Card.Networks(preferred = "visa"),
+            ),
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrThrow().id).isEqualTo("pm_123")
+    }
+
+    @Test
+    fun `update fails for checkout session when only card brand is provided`() = runScenario(
+        customerMetadata = CHECKOUT_SESSION_METADATA,
+    ) {
+        // With no supported expiry/billing changes there is nothing to send, so the update fails
+        // rather than making a request the backend would reject.
+        val result = repository.updatePaymentMethod(
+            customerMetadata = customerMetadata,
+            paymentMethodId = "pm_123",
+            params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(preferred = "visa"),
             ),
         )
