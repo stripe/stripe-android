@@ -30,8 +30,6 @@ class CheckoutConfigurationMergerTest {
 
         val result = CheckoutConfigurationMerger.EmbeddedConfiguration(config).forCheckoutSession(state)
 
-        // customer_email is authoritative; the backend rejects a mismatched PM email, so it must
-        // win over a merchant-provided default rather than fall back to it.
         assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
     }
 
@@ -285,7 +283,6 @@ class CheckoutConfigurationMergerTest {
 
         val result = CheckoutConfigurationMerger.PaymentSheetConfiguration(config).forCheckoutSession(state)
 
-        // customer_email is authoritative; it must win over a merchant-provided default.
         assertThat(result.defaultBillingDetails?.email).isEqualTo("checkout@example.com")
     }
 

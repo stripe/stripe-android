@@ -141,8 +141,6 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             )
         )
 
-        // The Checkout Session email must win over whatever Google Pay returned, otherwise the
-        // backend rejects the confirmation with a customer_email mismatch.
         assertThat(stripeRepository.getCreateParams()?.billingDetails?.email)
             .isEqualTo("checkout@example.com")
     }
