@@ -25,7 +25,7 @@ internal data class GooglePayConfirmationOption(
         val cardFundingFilter: CardFundingFilter,
         val additionalEnabledNetworks: List<String> = emptyList(),
         val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
-        val isEmailRequired: Boolean = false,
+        val isEmailRequired: Boolean = billingDetailsCollectionConfiguration.collectsEmail,
         val billingEmailFallback: String? = null,
     ) : Parcelable
 }
