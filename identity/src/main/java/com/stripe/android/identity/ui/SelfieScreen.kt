@@ -82,10 +82,14 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.uicore.text.dimensionResourceSp
 import com.stripe.android.uicore.utils.collectAsState
+import kotlin.math.PI
+import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.math.sqrt
 import android.graphics.Path as AndroidPath
@@ -104,9 +108,11 @@ internal const val SELFIE_CAPTURE_GUIDE_TAG = "SelfieCaptureGuideTag"
 internal const val SELFIE_CAPTURE_GUIDE_SHADOW_TAG = "SelfieCaptureGuideShadowTag"
 internal const val SELFIE_SCAN_ACTIVITY_INDICATOR_TAG = "SelfieScanActivityIndicatorTag"
 internal const val SELFIE_CAPTURED_CHECK_TAG = "SelfieCapturedCheckTag"
-private const val CAPTURE_GUIDE_TICK_COUNT = 77
-private const val CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO = 0.62f
-private const val CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO = 0.56f
+private const val CAPTURE_GUIDE_TICK_COUNT = 68
+private const val CAPTURE_GUIDE_TICK_HORIZONTAL_DIAMETER_RATIO = 0.57f
+private const val CAPTURE_GUIDE_TICK_VERTICAL_DIAMETER_RATIO = 0.57f
+private const val CAPTURE_GUIDE_SHADOW_HORIZONTAL_DIAMETER_RATIO = 0.62f
+private const val CAPTURE_GUIDE_SHADOW_VERTICAL_DIAMETER_RATIO = 0.56f
 
 // FaceDetectorTransitioner validates centering against the normalized image center.
 private const val CAPTURE_GUIDE_CENTER_Y_RATIO = 0.5f
@@ -120,12 +126,20 @@ private const val CAPTURE_GUIDE_SHADOW_INNER_ALPHA = 0.12f
 private const val CAPTURE_GUIDE_SHADOW_MID_ALPHA = 0.22f
 private const val CAPTURE_GUIDE_SHADOW_RING_ALPHA = 0.3f
 private const val CAPTURE_GUIDE_SHADOW_OUTER_ALPHA = 0.36f
-private const val CAPTURE_GUIDE_TICK_ALPHA = 0.8f
-private const val CAPTURE_GUIDE_ACTIVE_TICK_COLOR = 0xFF2DD36F
+private const val CAPTURE_GUIDE_TICK_ALPHA = 0.9f
+private const val CAPTURE_GUIDE_BASE_TICK_LENGTH_DP = 10.25f
+private const val CAPTURE_GUIDE_ACCEPTED_TICK_LENGTH_DP = 18.75f
+private const val CAPTURE_GUIDE_BASE_TICK_STROKE_WIDTH_DP = 2.09f
+private const val CAPTURE_GUIDE_ACCEPTED_TICK_STROKE_WIDTH_DP = 4.025f
+private const val CAPTURE_GUIDE_ACTIVE_TICK_COLOR = 0xFF31C95F
 private const val CAPTURE_GUIDE_TICK_SHADOW_ALPHA = 0.3f
 private const val CAPTURED_SELFIE_OVERLAY_ALPHA = 0.16f
 private const val STATUS_PILL_TEXT_SHADOW_ALPHA = 0.35f
 private const val STATUS_PILL_BACKGROUND_COLOR = 0x9921252C
+private val HALF_PI_RADIANS = (PI / 2.0).toFloat()
+private val PI_RADIANS = PI.toFloat()
+private val THREE_HALVES_PI_RADIANS = (PI * 1.5).toFloat()
+private val TWO_PI_RADIANS = (PI * 2.0).toFloat()
 
 @Composable
 internal fun SelfieScanScreen(
@@ -283,7 +297,7 @@ private fun SelfieCaptureScreen(
                 status = status,
                 showCaptureGuideShadow = (selfieScannerState as? IdentityScanViewModel.State.Scanning)
                     ?.scanState is IdentityScanState.Found,
-                captureGuideTone = scanState.captureGuideTone(),
+                captureGuideState = scanState.captureGuideState(),
                 showCaptureGuide = !isCheckingImages,
                 capturedSelfie = faceDetectorTransitioner?.lastCapturedSelfie(),
                 isShowingSideCapturePrompt = isShowingSideCapturePrompt
@@ -316,7 +330,7 @@ private fun SelfieCameraViewFinder(
     identityViewModel: IdentityViewModel,
     status: SelfieStatus?,
     showCaptureGuideShadow: Boolean,
-    captureGuideTone: CaptureGuideTone,
+    captureGuideState: CaptureGuideState,
     showCaptureGuide: Boolean,
     capturedSelfie: Bitmap?,
     isShowingSideCapturePrompt: Boolean
@@ -347,7 +361,7 @@ private fun SelfieCameraViewFinder(
             blurCamera = isShowingSideCapturePrompt
         )
         if (showCaptureGuide) {
-            CaptureGuide(showCaptureGuideShadow, captureGuideTone)
+            CaptureGuide(showCaptureGuideShadow, captureGuideState)
             if (showCaptureGuideShadow) {
                 Box(
                     modifier = Modifier
@@ -520,16 +534,75 @@ private fun IdentityScanState?.status(): SelfieStatus? {
     }
 }
 
-private enum class CaptureGuideTone {
-    Default,
-    Active
+private data class CaptureGuideState(
+    val uses3DCaptureAnimations: Boolean,
+    val target: CaptureGuideTarget = CaptureGuideTarget.None,
+    val targetProgress: Float = 0f,
+    val highlight: CaptureGuideHighlight = CaptureGuideHighlight.None
+)
+
+private enum class CaptureGuideTarget {
+    None,
+    Left,
+    Right
 }
 
-private fun IdentityScanState?.captureGuideTone(): CaptureGuideTone {
+private enum class CaptureGuideHighlight {
+    None,
+    Front,
+    Left,
+    Right
+}
+
+private fun IdentityScanState?.captureGuideState(): CaptureGuideState {
+    val transitioner = this?.transitioner as? FaceDetectorTransitioner
+    val uses3DCaptureAnimations = transitioner?.uses3DFaceCapture == true
+    val activeTarget = transitioner?.activeCapture?.toCaptureGuideTarget()
+        ?: CaptureGuideTarget.None
+
     return when (this) {
-        is IdentityScanState.Found,
-        is IdentityScanState.Satisfied -> CaptureGuideTone.Active
-        else -> CaptureGuideTone.Default
+        is IdentityScanState.Initial -> CaptureGuideState(
+            uses3DCaptureAnimations = uses3DCaptureAnimations,
+            target = if (uses3DCaptureAnimations) activeTarget else CaptureGuideTarget.None,
+            targetProgress = if (uses3DCaptureAnimations) {
+                transitioner?.captureGuideProgress ?: 0f
+            } else {
+                0f
+            }
+        )
+        is IdentityScanState.Found -> CaptureGuideState(
+            uses3DCaptureAnimations = uses3DCaptureAnimations,
+            target = if (uses3DCaptureAnimations) activeTarget else CaptureGuideTarget.None,
+            targetProgress = if (uses3DCaptureAnimations &&
+                activeTarget != CaptureGuideTarget.None
+            ) {
+                1f
+            } else {
+                0f
+            }
+        )
+        is IdentityScanState.Satisfied -> CaptureGuideState(
+            uses3DCaptureAnimations = uses3DCaptureAnimations,
+            highlight = transitioner?.completedCapture.toCaptureGuideHighlight()
+        )
+        else -> CaptureGuideState(uses3DCaptureAnimations = uses3DCaptureAnimations)
+    }
+}
+
+private fun FaceDetectorTransitioner.Capture.toCaptureGuideTarget(): CaptureGuideTarget {
+    return when (this) {
+        FaceDetectorTransitioner.Capture.LEFT -> CaptureGuideTarget.Left
+        FaceDetectorTransitioner.Capture.RIGHT -> CaptureGuideTarget.Right
+        FaceDetectorTransitioner.Capture.FRONT -> CaptureGuideTarget.None
+    }
+}
+
+private fun FaceDetectorTransitioner.Capture?.toCaptureGuideHighlight(): CaptureGuideHighlight {
+    return when (this) {
+        FaceDetectorTransitioner.Capture.FRONT -> CaptureGuideHighlight.Front
+        FaceDetectorTransitioner.Capture.LEFT -> CaptureGuideHighlight.Left
+        FaceDetectorTransitioner.Capture.RIGHT -> CaptureGuideHighlight.Right
+        null -> CaptureGuideHighlight.None
     }
 }
 
@@ -731,7 +804,7 @@ private fun SelfieStatusBadge(
 @Composable
 private fun CaptureGuide(
     showCenteredShadow: Boolean,
-    captureGuideTone: CaptureGuideTone
+    captureGuideState: CaptureGuideState
 ) {
     val centeredShadowAlpha = remember { Animatable(0f) }
 
@@ -754,17 +827,27 @@ private fun CaptureGuide(
             return@Canvas
         }
 
-        val geometry = captureGuideGeometry()
+        val tickGeometry = captureGuideGeometry(
+            horizontalDiameterRatio = CAPTURE_GUIDE_TICK_HORIZONTAL_DIAMETER_RATIO,
+            verticalDiameterRatio = CAPTURE_GUIDE_TICK_VERTICAL_DIAMETER_RATIO
+        )
         if (centeredShadowAlpha.value > 0f) {
+            val shadowGeometry = captureGuideGeometry(
+                horizontalDiameterRatio = CAPTURE_GUIDE_SHADOW_HORIZONTAL_DIAMETER_RATIO,
+                verticalDiameterRatio = CAPTURE_GUIDE_SHADOW_VERTICAL_DIAMETER_RATIO
+            )
             drawCenteredGuideShadow(
-                center = geometry.center,
-                horizontalRadius = geometry.horizontalRadius,
-                verticalRadius = geometry.verticalRadius,
+                center = shadowGeometry.center,
+                horizontalRadius = shadowGeometry.horizontalRadius,
+                verticalRadius = shadowGeometry.verticalRadius,
                 opacity = centeredShadowAlpha.value
             )
         }
 
-        drawCaptureGuideTicks(geometry, captureGuideTone)
+        drawCaptureGuideTicks(
+            geometry = tickGeometry,
+            captureGuideState = captureGuideState
+        )
     }
 }
 
@@ -774,35 +857,36 @@ private data class CaptureGuideGeometry(
     val verticalRadius: Float
 )
 
-private fun DrawScope.captureGuideGeometry(): CaptureGuideGeometry {
+private fun DrawScope.captureGuideGeometry(
+    horizontalDiameterRatio: Float,
+    verticalDiameterRatio: Float
+): CaptureGuideGeometry {
     return CaptureGuideGeometry(
         center = Offset(
             x = size.width / 2f,
             y = size.height * CAPTURE_GUIDE_CENTER_Y_RATIO
         ),
-        horizontalRadius = size.width * CAPTURE_GUIDE_HORIZONTAL_DIAMETER_RATIO / 2f,
-        verticalRadius = size.height * CAPTURE_GUIDE_VERTICAL_DIAMETER_RATIO / 2f
+        horizontalRadius = size.width * horizontalDiameterRatio / 2f,
+        verticalRadius = size.height * verticalDiameterRatio / 2f
     )
 }
 
 private fun DrawScope.drawCaptureGuideTicks(
     geometry: CaptureGuideGeometry,
-    captureGuideTone: CaptureGuideTone
+    captureGuideState: CaptureGuideState
 ) {
     with(geometry) {
-        val tickLength = 10.dp.toPx()
-        val strokeWidth = 2.dp.toPx()
+        val baseTickLength = CAPTURE_GUIDE_BASE_TICK_LENGTH_DP.dp.toPx()
+        val acceptedTickLength = CAPTURE_GUIDE_ACCEPTED_TICK_LENGTH_DP.dp.toPx()
+        val baseStrokeWidth = CAPTURE_GUIDE_BASE_TICK_STROKE_WIDTH_DP.dp.toPx()
+        val acceptedStrokeWidth = CAPTURE_GUIDE_ACCEPTED_TICK_STROKE_WIDTH_DP.dp.toPx()
         val shadowOffsetY = 1.dp.toPx()
         val shadowBlur = 4.dp.toPx()
         drawIntoCanvas { canvas ->
-            val tickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = when (captureGuideTone) {
-                    CaptureGuideTone.Default -> Color.White.copy(alpha = CAPTURE_GUIDE_TICK_ALPHA)
-                    CaptureGuideTone.Active -> Color(CAPTURE_GUIDE_ACTIVE_TICK_COLOR)
-                }.toArgb()
+            val baseTickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 style = Paint.Style.STROKE
-                strokeCap = Paint.Cap.BUTT
-                this.strokeWidth = strokeWidth
+                strokeCap = Paint.Cap.ROUND
+                strokeWidth = baseStrokeWidth
                 setShadowLayer(
                     shadowBlur,
                     0f,
@@ -810,29 +894,159 @@ private fun DrawScope.drawCaptureGuideTicks(
                     Color.Black.copy(alpha = CAPTURE_GUIDE_TICK_SHADOW_ALPHA).toArgb()
                 )
             }
-            repeat(CAPTURE_GUIDE_TICK_COUNT) { index ->
-                val angle = (index.toFloat() / CAPTURE_GUIDE_TICK_COUNT.toFloat()) * Math.PI.toFloat() * 2f
-                val cosAngle = cos(angle)
-                val sinAngle = sin(angle)
-                val tickCenter = Offset(
-                    x = center.x + cosAngle * horizontalRadius,
-                    y = center.y + sinAngle * verticalRadius
-                )
-                val normalX = cosAngle / horizontalRadius
-                val normalY = sinAngle / verticalRadius
-                val normalLength = sqrt((normalX * normalX) + (normalY * normalY))
-                val unitNormalX = normalX / normalLength
-                val unitNormalY = normalY / normalLength
-                val halfTickLength = tickLength / 2f
+            val acceptedTickPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                color = Color(CAPTURE_GUIDE_ACTIVE_TICK_COLOR).toArgb()
+                style = Paint.Style.STROKE
+                strokeCap = Paint.Cap.ROUND
+                strokeWidth = acceptedStrokeWidth
+            }
 
-                canvas.nativeCanvas.drawLine(
-                    tickCenter.x - unitNormalX * halfTickLength,
-                    tickCenter.y - unitNormalY * halfTickLength,
-                    tickCenter.x + unitNormalX * halfTickLength,
-                    tickCenter.y + unitNormalY * halfTickLength,
-                    tickPaint
-                )
+            repeat(CAPTURE_GUIDE_TICK_COUNT) { index ->
+                val tick = captureGuideTick(index)
+                val isAcceptedByTarget = captureGuideState.uses3DCaptureAnimations &&
+                    captureGuideState.target.isProgressRevealedTick(
+                        angle = tick.angle,
+                        targetProgress = captureGuideState.targetProgress
+                    )
+                val isAcceptedByHighlight =
+                    captureGuideState.highlight.isHighlightTick(tick.angle)
+
+                if (!isAcceptedByTarget && !isAcceptedByHighlight) {
+                    baseTickPaint.color = Color.White.copy(
+                        alpha = captureGuideState.baseTickAlpha(
+                            angle = tick.angle
+                        )
+                    ).toArgb()
+                    drawGuideTick(
+                        canvas = canvas.nativeCanvas,
+                        tick = tick,
+                        length = baseTickLength,
+                        baseLength = baseTickLength,
+                        growsOutward = false,
+                        paint = baseTickPaint
+                    )
+                }
+
+                if (isAcceptedByTarget || isAcceptedByHighlight) {
+                    drawGuideTick(
+                        canvas = canvas.nativeCanvas,
+                        tick = tick,
+                        length = acceptedTickLength,
+                        baseLength = baseTickLength,
+                        growsOutward = captureGuideState.uses3DCaptureAnimations ||
+                            isAcceptedByTarget,
+                        paint = acceptedTickPaint
+                    )
+                }
             }
         }
+    }
+}
+
+private data class CaptureGuideTick(
+    val angle: Float,
+    val center: Offset,
+    val unitNormalX: Float,
+    val unitNormalY: Float
+)
+
+private fun CaptureGuideGeometry.captureGuideTick(index: Int): CaptureGuideTick {
+    val angle = (index.toFloat() / CAPTURE_GUIDE_TICK_COUNT.toFloat()) * TWO_PI_RADIANS
+    val cosAngle = cos(angle)
+    val sinAngle = sin(angle)
+    val tickCenter = Offset(
+        x = center.x + cosAngle * horizontalRadius,
+        y = center.y + sinAngle * verticalRadius
+    )
+    val normalX = cosAngle / horizontalRadius
+    val normalY = sinAngle / verticalRadius
+    val normalLength = sqrt((normalX * normalX) + (normalY * normalY))
+
+    return CaptureGuideTick(
+        angle = angle,
+        center = tickCenter,
+        unitNormalX = normalX / normalLength,
+        unitNormalY = normalY / normalLength
+    )
+}
+
+private fun drawGuideTick(
+    canvas: android.graphics.Canvas,
+    tick: CaptureGuideTick,
+    length: Float,
+    baseLength: Float,
+    growsOutward: Boolean,
+    paint: Paint
+) {
+    val innerLength = if (growsOutward) {
+        baseLength / 2f
+    } else {
+        length / 2f
+    }
+    val outerLength = if (growsOutward) {
+        length - (baseLength / 2f)
+    } else {
+        length / 2f
+    }
+
+    canvas.drawLine(
+        tick.center.x - tick.unitNormalX * innerLength,
+        tick.center.y - tick.unitNormalY * innerLength,
+        tick.center.x + tick.unitNormalX * outerLength,
+        tick.center.y + tick.unitNormalY * outerLength,
+        paint
+    )
+}
+
+private fun CaptureGuideState.baseTickAlpha(angle: Float): Float {
+    if (!uses3DCaptureAnimations || target == CaptureGuideTarget.None) {
+        return CAPTURE_GUIDE_TICK_ALPHA
+    }
+
+    val oppositePoleAngle = when (target) {
+        CaptureGuideTarget.Left -> 0f
+        CaptureGuideTarget.Right -> PI_RADIANS
+        CaptureGuideTarget.None -> return CAPTURE_GUIDE_TICK_ALPHA
+    }
+    val wrongSideStrength = max(0f, cos(angle - oppositePoleAngle)).pow(0.25f)
+    val dimmingMultiplier = 1f - (0.98f * wrongSideStrength)
+
+    return CAPTURE_GUIDE_TICK_ALPHA *
+        dimmingMultiplier.coerceIn(0f, 1f)
+}
+
+private fun CaptureGuideTarget.isTargetHalfTick(angle: Float): Boolean {
+    return when (this) {
+        CaptureGuideTarget.Left -> angle >= HALF_PI_RADIANS && angle <= THREE_HALVES_PI_RADIANS
+        CaptureGuideTarget.Right -> angle <= HALF_PI_RADIANS || angle >= THREE_HALVES_PI_RADIANS
+        CaptureGuideTarget.None -> false
+    }
+}
+
+private fun CaptureGuideTarget.isProgressRevealedTick(
+    angle: Float,
+    targetProgress: Float
+): Boolean {
+    if (!isTargetHalfTick(angle)) {
+        return false
+    }
+
+    val poleAngle = when (this) {
+        CaptureGuideTarget.Left -> PI_RADIANS
+        CaptureGuideTarget.Right -> 0f
+        CaptureGuideTarget.None -> return false
+    }
+    val distanceFromPole = abs(atan2(sin(angle - poleAngle), cos(angle - poleAngle)))
+    val hiddenAngle = (1f - targetProgress.coerceIn(0f, 1f)) * HALF_PI_RADIANS
+
+    return hiddenAngle <= distanceFromPole && distanceFromPole <= HALF_PI_RADIANS
+}
+
+private fun CaptureGuideHighlight.isHighlightTick(angle: Float): Boolean {
+    return when (this) {
+        CaptureGuideHighlight.Front -> true
+        CaptureGuideHighlight.Left -> angle > HALF_PI_RADIANS && angle < THREE_HALVES_PI_RADIANS
+        CaptureGuideHighlight.Right -> angle < HALF_PI_RADIANS || angle > THREE_HALVES_PI_RADIANS
+        CaptureGuideHighlight.None -> false
     }
 }

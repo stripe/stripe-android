@@ -395,6 +395,7 @@ internal class FaceDetectorTransitionerTest {
             sideCapturePromptDuration = 0,
             enable3DFaceCapture = true
         )
+        assertThat(transitioner.uses3DFaceCapture).isTrue()
         transitioner.timeoutAt = mockNeverTimeoutClockMark
         whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
 
@@ -422,7 +423,7 @@ internal class FaceDetectorTransitionerTest {
         val stillInitial = transitioner.transitionFromInitial(
             lookRightInitial as IdentityScanState.Initial,
             mock(),
-            VALID_OUTPUT.copy(pose = FacePose(yaw = -16f, pitch = 0f, roll = 0f))
+            VALID_OUTPUT.copy(pose = FacePose(yaw = -0.2f, pitch = 0f, roll = 0f))
         )
 
         assertThat(stillInitial).isInstanceOf(IdentityScanState.Initial::class.java)
@@ -431,7 +432,7 @@ internal class FaceDetectorTransitionerTest {
         val rightFound = transitioner.transitionFromInitial(
             stillInitial as IdentityScanState.Initial,
             mock(),
-            VALID_OUTPUT.copy(pose = FacePose(yaw = 16f, pitch = 0f, roll = 0f))
+            VALID_OUTPUT.copy(pose = FacePose(yaw = 0.2f, pitch = 0f, roll = 0f))
         )
 
         assertThat(rightFound).isInstanceOf(IdentityScanState.Found::class.java)
@@ -443,7 +444,7 @@ internal class FaceDetectorTransitionerTest {
                 reachedStateAt = mockReachedStateAt
             ),
             mock(),
-            VALID_OUTPUT.copy(pose = FacePose(yaw = 16f, pitch = 0f, roll = 0f))
+            VALID_OUTPUT.copy(pose = FacePose(yaw = 0.2f, pitch = 0f, roll = 0f))
         )
 
         assertThat(rightSatisfied).isInstanceOf(IdentityScanState.Satisfied::class.java)
@@ -461,7 +462,7 @@ internal class FaceDetectorTransitionerTest {
         val leftFound = transitioner.transitionFromInitial(
             lookLeftInitial as IdentityScanState.Initial,
             mock(),
-            VALID_OUTPUT.copy(pose = FacePose(yaw = -16f, pitch = 0f, roll = 0f))
+            VALID_OUTPUT.copy(pose = FacePose(yaw = -0.2f, pitch = 0f, roll = 0f))
         )
 
         assertThat(leftFound).isInstanceOf(IdentityScanState.Found::class.java)
@@ -473,7 +474,7 @@ internal class FaceDetectorTransitionerTest {
                 reachedStateAt = mockReachedStateAt
             ),
             mock(),
-            VALID_OUTPUT.copy(pose = FacePose(yaw = -16f, pitch = 0f, roll = 0f))
+            VALID_OUTPUT.copy(pose = FacePose(yaw = -0.2f, pitch = 0f, roll = 0f))
         )
 
         assertThat(leftSatisfied).isInstanceOf(IdentityScanState.Satisfied::class.java)
@@ -489,12 +490,98 @@ internal class FaceDetectorTransitionerTest {
     }
 
     @Test
+    fun `side capture guide progress follows left and right yaw signs`() = runBlocking {
+        val quickCapturePage = SELFIE_CAPTURE_PAGE.copy(numSamples = 1)
+        val transitioner = FaceDetectorTransitioner(
+            quickCapturePage,
+            sideCapturePromptDuration = 0,
+            enable3DFaceCapture = true
+        )
+        transitioner.timeoutAt = mockNeverTimeoutClockMark
+        whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+
+        val frontSatisfied = transitioner.transitionFromInitial(
+            IdentityScanState.Initial(
+                IdentityScanState.ScanType.SELFIE,
+                transitioner
+            ),
+            mock(),
+            VALID_OUTPUT
+        ) as IdentityScanState.Satisfied
+
+        val lookRightInitial = transitioner.transitionFromSatisfied(
+            frontSatisfied,
+            mock(),
+            VALID_OUTPUT
+        ) as IdentityScanState.Initial
+
+        assertThat(transitioner.activeCapture).isEqualTo(FaceDetectorTransitioner.Capture.RIGHT)
+        assertThat(transitioner.captureGuideProgress).isEqualTo(0f)
+
+        val partialRight = transitioner.transitionFromInitial(
+            lookRightInitial,
+            mock(),
+            VALID_OUTPUT.copy(pose = FacePose(yaw = 0.04f, pitch = 0f, roll = 0f))
+        )
+
+        assertThat(partialRight).isInstanceOf(IdentityScanState.Initial::class.java)
+        assertThat(transitioner.captureGuideProgress).isWithin(0.01f).of(0.5f)
+
+        val wrongRight = transitioner.transitionFromInitial(
+            partialRight as IdentityScanState.Initial,
+            mock(),
+            VALID_OUTPUT.copy(pose = FacePose(yaw = -0.04f, pitch = 0f, roll = 0f))
+        )
+
+        assertThat(wrongRight).isInstanceOf(IdentityScanState.Initial::class.java)
+        assertThat(transitioner.captureGuideProgress).isEqualTo(0f)
+
+        val rightFound = transitioner.transitionFromInitial(
+            wrongRight as IdentityScanState.Initial,
+            mock(),
+            VALID_OUTPUT.copy(pose = FacePose(yaw = 0.1f, pitch = 0f, roll = 0f))
+        )
+        val rightSatisfied = transitioner.transitionFromFound(
+            IdentityScanState.Found(
+                IdentityScanState.ScanType.SELFIE,
+                transitioner,
+                reachedStateAt = mockReachedStateAt
+            ),
+            mock(),
+            VALID_OUTPUT.copy(pose = FacePose(yaw = 0.1f, pitch = 0f, roll = 0f))
+        )
+
+        assertThat(rightFound).isInstanceOf(IdentityScanState.Found::class.java)
+        assertThat(rightSatisfied).isInstanceOf(IdentityScanState.Satisfied::class.java)
+        assertThat(transitioner.captureGuideProgress).isEqualTo(1f)
+
+        val lookLeftInitial = transitioner.transitionFromSatisfied(
+            rightSatisfied as IdentityScanState.Satisfied,
+            mock(),
+            VALID_OUTPUT
+        ) as IdentityScanState.Initial
+
+        assertThat(transitioner.activeCapture).isEqualTo(FaceDetectorTransitioner.Capture.LEFT)
+        assertThat(transitioner.captureGuideProgress).isEqualTo(0f)
+
+        val partialLeft = transitioner.transitionFromInitial(
+            lookLeftInitial,
+            mock(),
+            VALID_OUTPUT.copy(pose = FacePose(yaw = -0.04f, pitch = 0f, roll = 0f))
+        )
+
+        assertThat(partialLeft).isInstanceOf(IdentityScanState.Initial::class.java)
+        assertThat(transitioner.captureGuideProgress).isWithin(0.01f).of(0.5f)
+    }
+
+    @Test
     fun `non-3D capture finishes after front samples`() = runBlocking {
         val quickCapturePage = SELFIE_CAPTURE_PAGE.copy(numSamples = 1)
         val transitioner = FaceDetectorTransitioner(
             quickCapturePage,
             sideCapturePromptDuration = 0
         )
+        assertThat(transitioner.uses3DFaceCapture).isFalse()
         transitioner.timeoutAt = mockNeverTimeoutClockMark
 
         val frontSatisfied = transitioner.transitionFromInitial(
@@ -581,7 +668,7 @@ internal class FaceDetectorTransitionerTest {
         val resultState = transitioner.transitionFromInitial(
             lookRightInitial,
             mock(),
-            VALID_OUTPUT.copy(pose = FacePose(yaw = 16f, pitch = 0f, roll = 0f))
+            VALID_OUTPUT.copy(pose = FacePose(yaw = 0.2f, pitch = 0f, roll = 0f))
         )
 
         assertThat(resultState).isSameInstanceAs(lookRightInitial)

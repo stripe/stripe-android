@@ -84,6 +84,12 @@ internal class FaceDetectorTransitioner(
         }
     }
 
+    internal val uses3DFaceCapture: Boolean = captureSequence.any { it != Capture.FRONT }
+
+    @VisibleForTesting
+    internal var captureGuideProgress: Float = 0f
+        private set
+
     internal val isWaitingForSideCapturePrompt: Boolean
         get() = shouldWaitForSideCapturePrompt()
 
@@ -93,6 +99,7 @@ internal class FaceDetectorTransitioner(
         motionBlurDetector.reset()
         activeCapture = Capture.FRONT
         completedCapture = null
+        captureGuideProgress = 0f
         captureStarted = false
         activeCaptureStartedAt = TimeSource.Monotonic.markNow()
         sideCapturePromptCompleted = true
@@ -350,6 +357,7 @@ internal class FaceDetectorTransitioner(
             activeCapture = nextCapture
             activeCaptureStartedAt = TimeSource.Monotonic.markNow()
             completedCapture = null
+            captureGuideProgress = 0f
             sideCapturePromptCompleted = false
             motionBlurDetector.reset()
             Initial(
@@ -394,8 +402,12 @@ internal class FaceDetectorTransitioner(
         analyzerOutput: FaceDetectorOutput,
         motionBlurResult: MotionBlurDetector.Output?,
     ): Boolean {
-        return isFaceValid(analyzerOutput, motionBlurResult) &&
-            isPoseValidForActiveCapture(analyzerOutput)
+        if (!isFaceValid(analyzerOutput, motionBlurResult)) {
+            captureGuideProgress = 0f
+            return false
+        }
+
+        return isPoseValidForActiveCapture(analyzerOutput)
     }
 
     private fun isPoseValidForActiveCapture(analyzerOutput: FaceDetectorOutput): Boolean {
@@ -404,15 +416,27 @@ internal class FaceDetectorTransitioner(
             Capture.LEFT,
             Capture.RIGHT -> {
                 val pose = analyzerOutput.pose
-                    ?: return activeCaptureStartedAt.elapsedNow() >=
+                if (pose == null) {
+                    captureGuideProgress = 0f
+                    return activeCaptureStartedAt.elapsedNow() >=
                         sideCaptureFallbackDuration.milliseconds
+                }
+                captureGuideProgress = captureGuideProgressForPose(activeCapture, pose.yaw)
                 when (activeCapture) {
-                    Capture.LEFT -> pose.yaw < -SIDE_CAPTURE_YAW_THRESHOLD
-                    Capture.RIGHT -> pose.yaw > SIDE_CAPTURE_YAW_THRESHOLD
+                    Capture.LEFT -> captureGuideProgress >= 1f
+                    Capture.RIGHT -> captureGuideProgress >= 1f
                     Capture.FRONT -> true
                 }
             }
         }
+    }
+
+    private fun captureGuideProgressForPose(capture: Capture, yaw: Float): Float {
+        return when (capture) {
+            Capture.LEFT -> -yaw / SIDE_CAPTURE_YAW_THRESHOLD
+            Capture.RIGHT -> yaw / SIDE_CAPTURE_YAW_THRESHOLD
+            Capture.FRONT -> 0f
+        }.coerceIn(0f, 1f)
     }
 
     private fun shouldWaitForSideCapturePrompt(): Boolean {
@@ -608,7 +632,7 @@ internal class FaceDetectorTransitioner(
         const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 8000
 
         private const val SIDE_CAPTURE_NUM_FRAMES = 2
-        private const val SIDE_CAPTURE_YAW_THRESHOLD = 15f
+        private const val SIDE_CAPTURE_YAW_THRESHOLD = 0.08f
         private const val DEFAULT_MOTION_BLUR_MIN_DURATION_MS = 100L
         private const val DEFAULT_UNKNOWN_STABILITY_SCORE = 0.5f
         private val DEFAULT_SIDE_CAPTURE_SEQUENCE = listOf(Capture.RIGHT, Capture.LEFT)
