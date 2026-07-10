@@ -482,7 +482,6 @@ internal class DefaultEmbeddedSelectionChooserTest {
             embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
-            selectedPaymentMethodCode = "",
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(

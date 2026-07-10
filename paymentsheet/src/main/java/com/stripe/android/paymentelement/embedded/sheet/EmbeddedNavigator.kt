@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
+import javax.inject.Inject
 
 internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
@@ -158,14 +160,14 @@ internal class EmbeddedNavigator private constructor(
         }
 
         class Form(
-            private val formInteractor: VerticalModeFormInteractor,
+            val formInteractor: VerticalModeFormInteractor,
             private val eventReporter: EventReporter,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
-            private val launchMode: EmbeddedLaunchMode,
+            private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                     PaymentSheetTopBarState(
@@ -206,6 +208,35 @@ internal class EmbeddedNavigator private constructor(
                     updateSelection = embeddedSelectionHolder::set,
                     savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                 )
+            }
+
+            class Factory @Inject constructor(
+                private val interactorFactory: EmbeddedFormInteractorFactory,
+                private val eventReporter: EventReporter,
+                private val sheetActivityStateHolder: SheetActivityStateHolder,
+                private val confirmationHelper: SheetActivityConfirmationHelper,
+                private val embeddedSelectionHolder: EmbeddedSelectionHolder,
+                private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
+                private val customerStateHolder: CustomerStateHolder,
+            ) {
+                fun create(launchMode: EmbeddedLaunchMode.Form): Form {
+                    val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                        it.type?.code == launchMode.selectedPaymentMethodCode
+                    }
+                    return Form(
+                        formInteractor = interactorFactory.create(
+                            paymentMethodCode = launchMode.selectedPaymentMethodCode,
+                            hasSavedPaymentMethods = hasSavedPaymentMethods,
+                        ),
+                        eventReporter = eventReporter,
+                        sheetActivityStateHolder = sheetActivityStateHolder,
+                        confirmationHelper = confirmationHelper,
+                        embeddedSelectionHolder = embeddedSelectionHolder,
+                        savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
+                        customerStateHolder = customerStateHolder,
+                        launchMode = launchMode,
+                    )
+                }
             }
         }
     }

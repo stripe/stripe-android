@@ -14,6 +14,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
+import androidx.test.espresso.Espresso.pressBack
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
@@ -23,6 +24,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
@@ -102,7 +104,7 @@ internal class EmbeddedSheetActivityTest {
                     hasBeenConfirmed = true,
                     customerState = null,
                     shouldInvokeSelectionCallback = false,
-                    launchMode = EmbeddedLaunchMode.Form,
+                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
                 )
             )
         }
@@ -112,6 +114,37 @@ internal class EmbeddedSheetActivityTest {
         assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
         val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
         assertThat(result).isInstanceOf<EmbeddedActivityResult.Complete>()
+    }
+
+    @Test
+    fun `when dismissed, finishes with cancelled result preserving the form launch mode`() = launch(
+        selectedPaymentMethodCode = "card",
+    ) { scenario ->
+        pressBack()
+
+        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
+        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
+        assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
+        assertThat((result as EmbeddedActivityResult.Cancelled).launchMode)
+            .isEqualTo(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+    }
+
+    @Test
+    fun `when dismissed, finishes with cancelled result preserving a non-card form launch mode`() = launch(
+        selectedPaymentMethodCode = "cashapp",
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "cashapp"),
+            ),
+        ),
+    ) { scenario ->
+        pressBack()
+
+        assertThat(scenario.result.resultCode).isEqualTo(Activity.RESULT_OK)
+        val result = EmbeddedSheetContract.parseResult(scenario.result.resultCode, scenario.result.resultData)
+        assertThat(result).isInstanceOf<EmbeddedActivityResult.Cancelled>()
+        assertThat((result as EmbeddedActivityResult.Cancelled).launchMode)
+            .isEqualTo(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"))
     }
 
     @Test
@@ -144,7 +177,6 @@ internal class EmbeddedSheetActivityTest {
     private fun launch(
         selectedPaymentMethodCode: PaymentMethodCode = "card",
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        hasSavedPaymentMethods: Boolean = false,
         configuration: EmbeddedPaymentElement.Configuration =
             EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         block: (ActivityScenario<EmbeddedSheetActivity>) -> Unit,
@@ -153,16 +185,14 @@ internal class EmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    selectedPaymentMethodCode = selectedPaymentMethodCode,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethods = hasSavedPaymentMethods,
                     configuration = configuration,
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
                     selection = null,
                     customerState = createCustomerState(paymentMethods = emptyList()),
                     promotion = null,
-                    launchMode = EmbeddedLaunchMode.Form,
+                    launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = selectedPaymentMethodCode),
                 ),
             )
         ).use { scenario ->

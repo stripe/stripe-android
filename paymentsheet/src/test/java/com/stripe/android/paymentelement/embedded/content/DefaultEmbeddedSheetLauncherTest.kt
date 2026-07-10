@@ -78,16 +78,14 @@ internal class DefaultEmbeddedSheetLauncherTest {
             ),
         )
         val expectedArgs = EmbeddedActivityArgs(
-            selectedPaymentMethodCode = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             configuration = state.configuration,
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = null,
             customerState = customerState,
             promotion = promotion,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = code),
         )
 
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
@@ -95,7 +93,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             embeddedConfirmationState = state,
             customerState = customerState,
             promotion = promotion,
@@ -115,7 +112,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             embeddedConfirmationState = state,
             customerState = createCustomerState(),
             promotion = null,
@@ -134,7 +130,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             embeddedConfirmationState = state,
             customerState = createCustomerState(),
             promotion = null,
@@ -152,7 +147,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             embeddedConfirmationState = state,
             customerState = createCustomerState(),
             promotion = null,
@@ -170,7 +164,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             embeddedConfirmationState = state,
             customerState = createCustomerState(),
             promotion = null,
@@ -187,7 +180,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             embeddedConfirmationState = null,
             customerState = createCustomerState(),
             promotion = null,
@@ -209,7 +201,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = false,
             embeddedConfirmationState = state,
             customerState = createCustomerState(),
             promotion = null,
@@ -227,7 +218,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = true,
             customerState = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -251,7 +242,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = false,
             customerState = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -277,7 +268,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 hasBeenConfirmed = false,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.Form,
+                launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             )
             val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -299,7 +290,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 hasBeenConfirmed = true,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.Form,
+                launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             )
             val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -317,7 +308,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
         val result = EmbeddedActivityResult.Cancelled(
             customerState = null,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -338,7 +329,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
 
             val result = EmbeddedActivityResult.Cancelled(
                 customerState = null,
-                launchMode = EmbeddedLaunchMode.Form,
+                launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             )
             val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -358,7 +349,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = null,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -373,7 +364,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val result = EmbeddedActivityResult.Cancelled(
             customerState = createCustomerState(),
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -389,9 +380,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         val expectedArgs = EmbeddedActivityArgs(
-            selectedPaymentMethodCode = "google_pay",
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = customerState.paymentMethods.isNotEmpty(),
             configuration = state.configuration,
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
@@ -525,7 +514,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = true,
             customerState = null,
             shouldInvokeSelectionCallback = false,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -541,7 +530,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `form cancellation handled correctly without prior launchForm call`() = testScenario {
         val result = EmbeddedActivityResult.Cancelled(
             customerState = null,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
 
@@ -573,7 +562,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetLauncher.launchForm(
                 code = "card",
                 paymentMethodMetadata = paymentMethodMetadata,
-                hasSavedPaymentMethods = false,
                 embeddedConfirmationState = state,
                 customerState = createCustomerState(),
                 promotion = null,
@@ -713,7 +701,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetLauncher.launchForm(
                 code = code,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                hasSavedPaymentMethods = false,
                 embeddedConfirmationState = EmbeddedConfirmationStateFixtures.defaultState(),
                 customerState = null,
                 promotion = null,

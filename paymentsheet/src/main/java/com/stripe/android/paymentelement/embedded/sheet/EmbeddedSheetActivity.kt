@@ -129,8 +129,8 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                     embeddedNavigator.result.collect { result ->
                         hasResult = true
                         when (args?.launchMode) {
-                            EmbeddedLaunchMode.Form -> dismissAndFinish()
-                            EmbeddedLaunchMode.Manage, null -> {
+                            is EmbeddedLaunchMode.Form -> dismissAndFinish()
+                            is EmbeddedLaunchMode.Manage, null -> {
                                 setManageResult(shouldInvokeSelectionCallback = result == true)
                                 finish()
                             }
@@ -203,16 +203,16 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     }
 
     private fun dismissAndFinish() {
-        when (args?.launchMode) {
-            EmbeddedLaunchMode.Form -> {
+        when (val launchMode = args?.launchMode) {
+            is EmbeddedLaunchMode.Form -> {
                 setActivityResult(
                     EmbeddedActivityResult.Cancelled(
                         customerState = customerStateHolder.customer.value,
-                        launchMode = EmbeddedLaunchMode.Form,
+                        launchMode = launchMode,
                     )
                 )
             }
-            EmbeddedLaunchMode.Manage, null -> {
+            is EmbeddedLaunchMode.Manage, null -> {
                 setManageResult(shouldInvokeSelectionCallback = false)
             }
         }
