@@ -6,8 +6,10 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
@@ -312,10 +314,45 @@ internal class EmbeddedNavigatorTest {
             .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
     }
 
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods per code, ignoring saved methods of other types`() {
+        // A saved card is present, but the selected code is cashapp. A card-only check would resolve to
+        // true here; keying off the selected code correctly resolves to false.
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+            ),
+        )
+
+        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"))
+
+        // setAsDefaultMatchesSaveForFutureUse is !hasSavedPaymentMethods, so true confirms the per-code
+        // derivation resolved to false for cashapp despite the saved card.
+        assertThat(screen.formInteractor.state.value.usBankAccountFormArguments.setAsDefaultMatchesSaveForFutureUse)
+            .isTrue()
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods false when there are no saved payment methods`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = emptyList(),
+        )
+
+        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+
+        // With no saved payment methods the derivation resolves to false, so the interactor uses the
+        // "Add card" header rather than "Add new card".
+        assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
+    }
+
     private fun createFormFactory(
         savedPaymentMethods: List<PaymentMethod>,
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ): EmbeddedNavigator.Screen.Form.Factory {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
         val interactorFactory = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
