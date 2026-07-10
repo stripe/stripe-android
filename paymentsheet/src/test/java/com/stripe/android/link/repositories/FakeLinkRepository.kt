@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SharePaymentDetails
 import com.stripe.android.model.StripeIntent
+import org.mockito.kotlin.mock
 
 internal open class FakeLinkRepository : LinkRepository {
     var lookupConsumerResult = Result.success(TestFactory.CONSUMER_SESSION_LOOKUP)
@@ -56,7 +57,6 @@ internal open class FakeLinkRepository : LinkRepository {
     var updatePaymentDetailsResult = Result.success(TestFactory.CONSUMER_PAYMENT_DETAILS)
     var updatePhoneNumberResult = Result.success(TestFactory.CONSUMER_SESSION)
     var deletePaymentDetailsResult = Result.success(Unit)
-
     private val lookupConsumerCalls = Turbine<LookupCall>()
     private val lookupConsumerWithoutBackendLoggingCalls = Turbine<LookupCall>()
     private val mobileLookupCalls = Turbine<MobileLookupCall>()
