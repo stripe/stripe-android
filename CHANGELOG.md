@@ -1,14 +1,33 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.12.0 - 2026-07-10
 
 ### Connect
 * [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+* [CHANGED][13366](https://github.com/stripe/stripe-android/pull/13366) The Payments and Payouts embedded components are now generally available; removed the `@PreviewConnectSDK` annotation and updated `PaymentsProps` to use a builder pattern
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+* [ADDED][13371](https://github.com/stripe/stripe-android/pull/13371) Added wallet ownership verification APIs to retrieve Stripe-issued wallet ownership challenges and submit signatures (private preview, requires @OptIn(ExperimentalCryptoOnramp::class))
+* [ADDED][13240](https://github.com/stripe/stripe-android/pull/13240) Added a new `AppAttestationUnavailableException` to provide additional error information when configuring Crypto Onramp fails due to unavailable app attestation
 
+### Payments
+* [ADDED][13145](https://github.com/stripe/stripe-android/pull/13145) Added a unified LinkController full-present flow for consumer lookup, authentication, payment method selection, and payment method creation, delivered via PresentCallback
+
+### PaymentSheet
+* [FIXED][13390](https://github.com/stripe/stripe-android/pull/13390) Fixed an issue where the card brand was incorrectly included in update parameters when card brand choice was not modifiable
+* [CHANGED][13363](https://github.com/stripe/stripe-android/pull/13363) Improved Google Pay confirmation to require email collection based on billing configuration and session context in PaymentSheet
+* [CHANGED][13344](https://github.com/stripe/stripe-android/pull/13344) Updated editability logic and permissions for saved cards in PaymentSheet and CustomerSheet; now `canUpdateCardExpiryAndBillingDetails` and `canChangeCbc` are handled distinctly, allowing more accurate control of what details are editable and when card brand choices can be changed
+* [ADDED][13338](https://github.com/stripe/stripe-android/pull/13338) Added inline address autocomplete for billing address fields in PaymentSheet when Google Places API is available
+* [CHANGED][13345](https://github.com/stripe/stripe-android/pull/13345) Improved logic for determining when a saved card is modifiable or eligible for Cartes Bancaires network selection
+* [FIXED][13349](https://github.com/stripe/stripe-android/pull/13349) Fixed an issue where selecting an unknown card brand would incorrectly pass a value to `CardUpdateParams` instead of treating it as null
+* [FIXED][13330](https://github.com/stripe/stripe-android/pull/13330) Fixed inline address autocomplete incorrectly activating in cases where Places API is not available
+
+### EmbeddedPaymentElement
+* [CHANGED][13386](https://github.com/stripe/stripe-android/pull/13386) Refactored Embedded Form screen creation logic for better modularity; this may impact dependency injection and testing for EmbeddedPaymentElement flows
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
