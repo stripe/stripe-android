@@ -8,12 +8,11 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,15 +24,32 @@ import javax.inject.Singleton
 class CheckoutController @Inject internal constructor(
     resultCallback: ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val checkoutStateLoader: CheckoutStateLoader,
+    private val stateHolder: CheckoutControllerStateHolder,
+    internal val confirmationStateHolder: CheckoutConfirmationStateHolder,
 ) {
-    private val _checkoutSession = MutableStateFlow<CheckoutSession?>(null)
-    val checkoutSession: StateFlow<CheckoutSession?> = _checkoutSession.asStateFlow()
+    val checkoutSession: StateFlow<CheckoutSession?>
+        get() = stateHolder.checkoutSession
 
     suspend fun configure(
         checkoutSessionClientSecret: String,
         configuration: Configuration = Configuration(),
     ): kotlin.Result<Unit> {
-        TODO("Not yet implemented")
+        val configurationState = configuration.build()
+        val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
+
+        return checkoutSessionRepository.init(
+            sessionId = sessionId,
+            adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+        ).mapCatching { response ->
+            checkoutStateLoader.load(
+                CheckoutControllerState.defaultState(
+                    configuration = configurationState,
+                    checkoutSessionResponse = response,
+                )
+            )
+        }
     }
 
     suspend fun applyPromotionCode(promotionCode: String): kotlin.Result<Unit> {
