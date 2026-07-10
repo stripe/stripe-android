@@ -15,7 +15,6 @@ internal data class CheckoutSessionUpdatePaymentMethodParams(
     private val expiryYear: Int?,
     private val billingDetails: PaymentMethod.BillingDetails?,
 ) {
-    /** Whether there is at least one supported field (expiry or billing details) to update. */
     val hasSupportedUpdates: Boolean
         get() = billingDetails != null || (expiryMonth != null && expiryYear != null)
 
