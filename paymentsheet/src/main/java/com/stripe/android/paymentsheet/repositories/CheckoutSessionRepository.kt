@@ -93,32 +93,24 @@ internal class CheckoutSessionRepository @Inject constructor(
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<CheckoutSessionResponse> {
-        val updateParams = params.toParamMap()
-        if (updateParams.hasUnsupportedCheckoutSessionUpdateParams()) {
+        val paramMap = params.toParamMap()
+        if (paramMap.hasUnsupportedCheckoutSessionUpdateParams()) {
             return Result.failure(IllegalArgumentException(UNSUPPORTED_UPDATE_ERROR))
         }
 
-        // Nested maps are flattened to `key[sub][sub]` form by the networking layer.
-        val checkoutSessionUpdateParams = buildMap<String, Any> {
-            put("payment_method_to_update[payment_method_id]", paymentMethodId)
-            (updateParams["billing_details"] as? Map<*, *>)?.let {
-                put("payment_method_to_update[billing_details]", it)
-            }
-            expiryDetails(updateParams["card"] as? Map<*, *>)?.let {
-                put("payment_method_to_update[expiry_details]", it)
-            }
-            put("elements_session_client[is_aggregation_expected]", "true")
-        }
+        val card = params as? PaymentMethodUpdateParams.Card
+        val updateParams = CheckoutSessionUpdatePaymentMethodParams(
+            paymentMethodId = paymentMethodId,
+            expiryMonth = card?.expiryMonth,
+            expiryYear = card?.expiryYear,
+            // billingDetails isn't accessible off PaymentMethodUpdateParams from this module.
+            billingDetails = paramMap["billing_details"] as? Map<*, *>,
+        )
 
-        val hasSupportedUpdateParams = checkoutSessionUpdateParams.keys.any {
-            it.startsWith("payment_method_to_update[billing_details]") ||
-                it.startsWith("payment_method_to_update[expiry_details]")
-        }
-
-        return if (hasSupportedUpdateParams) {
+        return if (updateParams.hasSupportedUpdates) {
             executePost(
                 url = updateUrl(sessionId),
-                params = checkoutSessionUpdateParams,
+                params = updateParams.toParamMap(),
             )
         } else {
             Result.failure(IllegalArgumentException(UNSUPPORTED_UPDATE_ERROR))
@@ -218,19 +210,6 @@ internal class CheckoutSessionRepository @Inject constructor(
 private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {
     if (!value.isNullOrEmpty()) {
         put(key, value)
-    }
-}
-
-// Remaps a card param map to the `expiry_details` shape the checkout session endpoint expects,
-// only when both fields are present.
-private fun expiryDetails(cardParams: Map<*, *>?): Map<String, Any>? {
-    val expiryMonth = cardParams?.get("exp_month")
-    val expiryYear = cardParams?.get("exp_year")
-
-    return if (expiryMonth != null && expiryYear != null) {
-        mapOf("exp_month" to expiryMonth, "exp_year" to expiryYear)
-    } else {
-        null
     }
 }
 
