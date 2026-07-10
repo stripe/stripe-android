@@ -93,11 +93,6 @@ internal class CheckoutSessionRepository @Inject constructor(
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<CheckoutSessionResponse> {
-        val paramMap = params.toParamMap()
-        if (paramMap.hasUnsupportedCheckoutSessionUpdateParams()) {
-            return Result.failure(IllegalArgumentException(UNSUPPORTED_UPDATE_ERROR))
-        }
-
         val card = params as? PaymentMethodUpdateParams.Card
         val updateParams = CheckoutSessionUpdatePaymentMethodParams(
             paymentMethodId = paymentMethodId,
@@ -193,7 +188,7 @@ internal class CheckoutSessionRepository @Inject constructor(
 
     private companion object {
         private const val UNSUPPORTED_UPDATE_ERROR =
-            "Checkout sessions support updating card expiry and billing details only."
+            "Checkout session update requires at least card expiry or billing details."
 
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
@@ -210,12 +205,4 @@ private fun MutableMap<String, Any>.putIfNotEmpty(key: String, value: String?) {
     if (!value.isNullOrEmpty()) {
         put(key, value)
     }
-}
-
-private fun Map<String, Any>.hasUnsupportedCheckoutSessionUpdateParams(): Boolean {
-    val unsupportedTopLevelParams = keys - setOf("billing_details", "card")
-    val cardParams = this["card"] as? Map<*, *>
-    val unsupportedCardParams = cardParams?.keys.orEmpty() - setOf("exp_month", "exp_year")
-
-    return unsupportedTopLevelParams.isNotEmpty() || unsupportedCardParams.isNotEmpty()
 }
