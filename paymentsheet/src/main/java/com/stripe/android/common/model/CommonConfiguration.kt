@@ -275,7 +275,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
-internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
+internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = null,
     googlePay = null,
@@ -294,7 +294,7 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
         display = PaymentSheet.LinkConfiguration.Display.Automatic,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = allowUserEmailEdits,
-        allowLogOut = allowLogOut,
+        allowLogOut = allowLogout,
         disallowFundingSourceCreation = emptySet(),
     ),
     googlePlacesApiKey = null,
