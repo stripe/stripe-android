@@ -17,7 +17,7 @@ internal object LinkControllerAllowUserEmailEditsSettingsDefinition : BooleanSet
 
     override fun configure(
         value: Boolean,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData
     ) {

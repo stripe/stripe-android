@@ -44,7 +44,7 @@ internal interface PlaygroundSettingDefinition<T> {
 
     fun configure(
         value: T,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: LinkControllerConfigurationData,
     ) {
@@ -180,7 +180,7 @@ internal interface PlaygroundSettingDefinition<T> {
     }
 
     data class LinkControllerConfigurationData(
-        private val configurationBuilder: LinkController.Configuration.Builder,
+        private val configurationBuilder: LinkController.Configuration,
         private val billingDetailsCollectionConfigurationBuilder: BillingDetailsCollectionConfigurationBuilder =
             BillingDetailsCollectionConfigurationBuilder()
     ) {

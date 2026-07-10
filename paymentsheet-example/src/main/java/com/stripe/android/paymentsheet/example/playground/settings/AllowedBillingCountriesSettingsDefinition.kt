@@ -62,7 +62,7 @@ internal object AllowedBillingCountriesSettingsDefinition :
 
     override fun configure(
         value: AllowedBillingCountries,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData,
     ) {

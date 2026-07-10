@@ -49,7 +49,7 @@ internal object CollectEmailSettingsDefinition : CollectionModeSettingsDefinitio
 
     override fun configure(
         value: CollectionMode,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData,
     ) {

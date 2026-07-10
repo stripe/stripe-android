@@ -49,7 +49,7 @@ internal object AttachBillingDetailsToPaymentMethodSettingsDefinition : BooleanS
 
     override fun configure(
         value: Boolean,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData,
     ) {
