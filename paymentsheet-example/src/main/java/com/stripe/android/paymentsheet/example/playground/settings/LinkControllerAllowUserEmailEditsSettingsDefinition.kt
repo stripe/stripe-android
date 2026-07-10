@@ -1,6 +1,9 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 
 internal object LinkControllerAllowUserEmailEditsSettingsDefinition : BooleanSettingsDefinition(

@@ -1,4 +1,5 @@
 @file:Suppress("LongMethod", "MagicNumber")
+@file:OptIn(LinkControllerPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground
 
@@ -55,6 +56,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.ui.core.R
 

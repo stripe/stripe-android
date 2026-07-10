@@ -1,10 +1,11 @@
-@file:OptIn(CheckoutSessionPreview::class)
+@file:OptIn(CheckoutSessionPreview::class, LinkControllerPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
