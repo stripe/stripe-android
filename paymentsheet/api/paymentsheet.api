@@ -305,6 +305,9 @@ public final class com/stripe/android/link/LinkController$Presenter {
 	public final fun present ()V
 }
 
+public abstract interface annotation class com/stripe/android/link/LinkControllerPreview : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt;
 	public fun <init> ()V
