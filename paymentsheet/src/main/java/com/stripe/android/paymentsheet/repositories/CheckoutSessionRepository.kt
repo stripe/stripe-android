@@ -255,12 +255,7 @@ private fun MutableMap<String, Any>.putExpiryDetails(cardParams: Map<*, *>?) {
 private fun Map<String, Any>.hasUnsupportedCheckoutSessionUpdateParams(): Boolean {
     val unsupportedTopLevelParams = keys - setOf("billing_details", "card")
     val cardParams = this["card"] as? Map<*, *>
-    // Card brand choice (`networks`) can't be updated via checkout sessions, and the request
-    // builder never forwards it. The current card brand is included on every card edit even when
-    // it hasn't changed (checkout sessions never expose the brand dropdown), so tolerate it here
-    // instead of failing the whole update. Only genuinely unsupported fields (e.g. card number,
-    // cvc) should cause a failure.
-    val unsupportedCardParams = cardParams?.keys.orEmpty() - setOf("exp_month", "exp_year", "networks")
+    val unsupportedCardParams = cardParams?.keys.orEmpty() - setOf("exp_month", "exp_year")
 
     return unsupportedTopLevelParams.isNotEmpty() || unsupportedCardParams.isNotEmpty()
 }
