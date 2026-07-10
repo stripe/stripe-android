@@ -1,14 +1,32 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.12.0 - 2026-07-10
 
 ### Connect
 * [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+* [CHANGED][13366](https://github.com/stripe/stripe-android/pull/13366) The Payments and Payouts embedded components are now generally available, removing the need for @OptIn(PreviewConnectSDK::class) and refactoring PaymentsProps to use the builder pattern
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+* [ADDED][13371](https://github.com/stripe/stripe-android/pull/13371) Added wallet ownership challenge and signature verification APIs to the Crypto Onramp module (private preview, requires @OptIn(ExperimentalCryptoOnramp::class))
+* [ADDED][13240](https://github.com/stripe/stripe-android/pull/13240) Added a new `AppAttestationUnavailableException` (private preview) for additional error context when app attestation is not configured during Crypto Onramp flow setup
 
+### Payments
+* [ADDED][13145](https://github.com/stripe/stripe-android/pull/13145) Added a new LinkController `present()` method and supporting API for presenting the entire Link payment flow to collect payment method details in a single call (private preview)
+
+### EmbeddedPaymentElement
+* [CHANGED][13386](https://github.com/stripe/stripe-android/pull/13386) Refactored form screen creation for Embedded Payment Element to use a new `EmbeddedFormScreenFactory` for improved modularity and Dagger integration
+
+### PaymentSheet
+* [CHANGED][13363](https://github.com/stripe/stripe-android/pull/13363) Google Pay email collection behavior now more accurately reflects checkout session and billing details configuration
+* [CHANGED][13344](https://github.com/stripe/stripe-android/pull/13344) Changed saved card editability behavior: editability for expiry and billing details now uses `canUpdateCardExpiryAndBillingDetails` (replacing `canUpdateFullPaymentMethodDetails`), and card brand change eligibility is now determined separately
+* [ADDED][13338](https://github.com/stripe/stripe-android/pull/13338) Added inline address autocomplete support to `PaymentSheet` when Google Places is available and enabled
+* [FIXED][13345](https://github.com/stripe/stripe-android/pull/13345) Fixed incorrect edit menu display for CBC-eligible expired cards in CustomerSheet and PaymentSheet
+* [FIXED][13349](https://github.com/stripe/stripe-android/pull/13349) Fixed an issue where specifying an unknown card brand in card details would incorrectly set preferred network for card updates
+* [FIXED][13330](https://github.com/stripe/stripe-android/pull/13330) Fixed inline address autocomplete remaining active when Google Places is unavailable in PaymentSheet billing and card details forms
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
