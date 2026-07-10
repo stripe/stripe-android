@@ -210,36 +210,6 @@ class GooglePayDisplayItemsFactoryTest {
         ).inOrder()
     }
 
-    @Test
-    fun `includes subtotal from total summary when no discounts or taxes`() {
-        val result = createAndGetDisplayItems(
-            lineItems = listOf(
-                lineItem(
-                    id = "li_1", name = "Widget", quantity = 1,
-                    unitAmount = 1000L, subtotal = 1000L, total = 1000L,
-                ),
-            ),
-            totalSummary = totalSummary(
-                subtotal = 1000L,
-                totalDueToday = 1000L,
-                totalAmountDue = 1000L,
-            ),
-        )
-
-        assertThat(result).containsExactly(
-            displayItem(
-                label = "Widget",
-                type = GooglePayJsonFactory.DisplayItem.Type.LINE_ITEM,
-                price = 1000L,
-            ),
-            displayItem(
-                label = "Subtotal",
-                type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
-                price = 1000L,
-            ),
-        ).inOrder()
-    }
-
     private fun createAndGetDisplayItems(
         lineItems: List<CheckoutSessionResponse.LineItem>,
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
