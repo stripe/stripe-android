@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Cerrar la sesión de %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Se produjo un error. Verifica tu conexión y vuelve a intentarlo.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Sostén la tarjeta detrás del teléfono</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">o ingresa manualmente</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->

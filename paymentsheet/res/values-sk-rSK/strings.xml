@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Odhlásiť sa z %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Vyskytla sa chyba. Skontrolujte svoje pripojenie a skúste to znova.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Podržte kartu za telefónom</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">alebo zadajte manuálne</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
