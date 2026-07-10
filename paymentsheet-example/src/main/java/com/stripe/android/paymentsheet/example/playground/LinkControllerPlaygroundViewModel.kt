@@ -17,7 +17,8 @@ internal class LinkControllerPlaygroundViewModel(
     savedStateHandle: SavedStateHandle,
 ) : AndroidViewModel(application) {
 
-    private val linkController = LinkController.Builder(application, savedStateHandle).build()
+    private var linkController = LinkController.Builder(application, savedStateHandle)
+        .build()
     private var linkControllerPresenter: LinkController.Presenter? = null
 
     val status = MutableStateFlow<StatusMessage?>(null)
@@ -49,7 +50,7 @@ internal class LinkControllerPlaygroundViewModel(
     }
 
     fun configureLinkController(config: LinkController.Configuration) {
-        if (state.value.configureResult == LinkController.ConfigureResult.Success) {
+        if (state.value.configureResult?.isSuccess == true) {
             // Assumes `config` doesn't change in LinkControllerPlaygroundActivity.
             return
         }
@@ -72,11 +73,19 @@ internal class LinkControllerPlaygroundViewModel(
         phoneNumber: String?,
         paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
-        linkControllerPresenter?.present(
-            email = email,
-            phoneNumber = phoneNumber,
-            filterPaymentMethodTypes = paymentMethodTypes,
-        )
+        viewModelScope.launch {
+            val result = linkController.configure(
+                LinkController.Configuration(
+                    merchantDisplayName = "PaymentSheet Example",
+                    email = email
+                ).phoneNumber(phoneNumber).supportedPaymentMethodTypes(paymentMethodTypes)
+            )
+
+            if (result.isSuccess) {
+                linkControllerPresenter?.present()
+            }
+            state.update { it.copy(configureResult = result) }
+        }
     }
 
     fun onLookupClick(email: String) {
