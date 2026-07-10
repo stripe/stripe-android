@@ -65,7 +65,7 @@ internal class LinkControllerInteractor @Inject constructor(
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkComponentFactoryProvider: Provider<LinkComponent.Factory>,
-    @ViewModelScope internal val coroutineScope: CoroutineScope,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
     private val savedStateHandle: SavedStateHandle,
 ) {
 
@@ -154,16 +154,13 @@ internal class LinkControllerInteractor @Inject constructor(
     }
 
     suspend fun configure(configuration: LinkController.Configuration): Result<Unit> {
-        logger.debug("$tag: updating configuration")
-        val paymentConfig = PaymentConfiguration.getInstance(application)
-
         val config = configuration.build()
         this.configuration = config
         updateState { State() }
         PaymentConfiguration.init(
             context = application,
-            publishableKey = config.publishableKey.takeIf { it.isNotBlank() } ?: paymentConfig.publishableKey,
-            stripeAccountId = config.stripeAccountId ?: paymentConfig.stripeAccountId,
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
         )
         return linkConfigurationLoader.load(config)
             .flatMapCatching { linkMetadata ->

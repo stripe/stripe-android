@@ -50,7 +50,13 @@ internal class LinkControllerPlaygroundActivity : AppCompatActivity() {
                         playgroundState = linkControllerPlaygroundState,
                         onPaymentMethodButtonClick = viewModel::onPaymentMethodClick,
                         onCreatePaymentMethodClick = viewModel::onCreatePaymentMethodClick,
-                        onPresentClick = viewModel::onPresentClick,
+                        onPresentClick = { email, phoneNumber, filter ->
+                            viewModel.onPresentClick(
+                                linkControllerConfig.email(email)
+                                    .phoneNumber(phoneNumber)
+                                    .supportedPaymentMethodTypes(filter)
+                            )
+                        },
                         onLookupClick = viewModel::onLookupClick,
                         onAuthenticationClick = viewModel::onAuthenticateClick,
                         onAuthorizeClick = viewModel::onAuthorizeClick,

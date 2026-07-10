@@ -224,11 +224,16 @@ class LinkController @Inject internal constructor(
         private var allowUserEmailEdits: Boolean = true
         private var allowLogout: Boolean = true
 
-        constructor(merchantDisplayName: String, email: String) {
+        constructor(
+            publishableKey: String,
+            merchantDisplayName: String,
+            email: String,
+            stripeAccountId: String? = null
+        ) {
             this.merchantDisplayName = merchantDisplayName
             this.email = email
-            this.publishableKey = null
-            this.stripeAccountId = null
+            this.publishableKey = publishableKey
+            this.stripeAccountId = stripeAccountId
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

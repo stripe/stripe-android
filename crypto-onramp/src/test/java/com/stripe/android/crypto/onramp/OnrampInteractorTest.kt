@@ -317,7 +317,7 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsInvalidSignatureError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -362,7 +362,7 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsChallengeExpiredError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -406,7 +406,7 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsInvalidChallengeError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -450,7 +450,7 @@ class OnrampInteractorTest {
     @Test
     fun testGetWalletOwnershipChallengeMapsWalletNotFoundError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -496,7 +496,7 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsUnsupportedNetworkError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",

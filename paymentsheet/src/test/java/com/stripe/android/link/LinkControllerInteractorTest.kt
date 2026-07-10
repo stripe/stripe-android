@@ -1265,6 +1265,7 @@ class LinkControllerInteractorTest {
         PaymentConfiguration.init(application, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         interactor.configure(
             LinkController.Configuration(
+                publishableKey = "pk_123",
                 merchantDisplayName = "Test",
                 email = "test@example.com"
             ).phoneNumber("+15551234567")
@@ -1296,6 +1297,7 @@ class LinkControllerInteractorTest {
         PaymentConfiguration.init(application, ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
         interactor.configure(
             LinkController.Configuration(
+                publishableKey = "pk_123",
                 merchantDisplayName = "Test",
                 email = "test@example.com",
             ).supportedPaymentMethodTypes(listOf(LinkController.PaymentMethodType.Card)),
@@ -1373,48 +1375,50 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `onLinkActivityResult() with present flow Completed emits PresentResult Failed when PM creation fails`() = runTest {
-        val interactor = createInteractor()
-        configure(interactor)
+    fun `onLinkActivityResult() with present flow Completed emits PresentResult Failed when PM creation fails`() =
+        runTest {
+            val interactor = createInteractor()
+            configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher())
+            interactor.presentFull(FakeActivityResultLauncher())
 
-        val expectedError = RuntimeException("PM creation failed")
-        linkAccountManager.createPaymentMethodResult = Result.failure(expectedError)
+            val expectedError = RuntimeException("PM creation failed")
+            linkAccountManager.createPaymentMethodResult = Result.failure(expectedError)
 
-        interactor.presentResultFlow.test {
-            interactor.onLinkActivityResult(
-                LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                    selectedPayment = createTestPaymentMethod(),
-                    shippingAddress = null,
+            interactor.presentResultFlow.test {
+                interactor.onLinkActivityResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                        selectedPayment = createTestPaymentMethod(),
+                        shippingAddress = null,
+                    )
                 )
-            )
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.PresentResult.Failed::class.java)
-            assertThat((result as LinkController.PresentResult.Failed).error).isEqualTo(expectedError)
+                val result = awaitItem()
+                assertThat(result).isInstanceOf(LinkController.PresentResult.Failed::class.java)
+                assertThat((result as LinkController.PresentResult.Failed).error).isEqualTo(expectedError)
+            }
         }
-    }
 
     @Test
-    fun `onLinkActivityResult() with present flow Completed but no selected payment emits PresentResult Failed`() = runTest {
-        val interactor = createInteractor()
-        configure(interactor)
+    fun `onLinkActivityResult() with present flow Completed but no selected payment emits PresentResult Failed`() =
+        runTest {
+            val interactor = createInteractor()
+            configure(interactor)
 
-        interactor.presentFull(FakeActivityResultLauncher())
+            interactor.presentFull(FakeActivityResultLauncher())
 
-        interactor.presentResultFlow.test {
-            interactor.onLinkActivityResult(
-                LinkActivityResult.Completed(
-                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
-                    selectedPayment = null,
-                    shippingAddress = null,
+            interactor.presentResultFlow.test {
+                interactor.onLinkActivityResult(
+                    LinkActivityResult.Completed(
+                        linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                        selectedPayment = null,
+                        shippingAddress = null,
+                    )
                 )
-            )
-            val result = awaitItem()
-            assertThat(result).isInstanceOf(LinkController.PresentResult.Failed::class.java)
+                val result = awaitItem()
+                assertThat(result).isInstanceOf(LinkController.PresentResult.Failed::class.java)
+            }
         }
-    }
 
     @Test
     fun `onLinkActivityResult() with present flow Completed updates selectedPaymentMethod state`() = runTest {

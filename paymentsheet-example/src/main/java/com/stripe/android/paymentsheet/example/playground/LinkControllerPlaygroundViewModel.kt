@@ -69,16 +69,11 @@ internal class LinkControllerPlaygroundViewModel(
     }
 
     fun onPresentClick(
-        email: String,
-        phoneNumber: String?,
-        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
+        config: LinkController.Configuration,
     ) {
         viewModelScope.launch {
             val result = linkController.configure(
-                LinkController.Configuration(
-                    merchantDisplayName = "PaymentSheet Example",
-                    email = email
-                ).phoneNumber(phoneNumber).supportedPaymentMethodTypes(paymentMethodTypes)
+                config
             )
 
             if (result.isSuccess) {

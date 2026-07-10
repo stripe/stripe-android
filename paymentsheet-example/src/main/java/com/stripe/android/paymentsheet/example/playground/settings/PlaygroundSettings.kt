@@ -192,7 +192,8 @@ internal class PlaygroundSettings private constructor(
                 publishableKey = paymentConfiguration.publishableKey,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
             )
-            val linkControllerConfigurationData = PlaygroundSettingDefinition.LinkControllerConfigurationData(configuration)
+            val linkControllerConfigurationData =
+                PlaygroundSettingDefinition.LinkControllerConfigurationData(configuration)
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->

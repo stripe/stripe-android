@@ -138,7 +138,7 @@ internal class OnrampInteractor @Inject constructor(
         return if (linkResult.isSuccess) {
             OnrampConfigurationResult.Completed(success = true)
         } else {
-            val error = mapError(Operation.Configure, linkResult.exceptionOrNull() ?: Throwable())
+            val error = mapError(Operation.Configure, linkResult.exceptionOrNull() ?: Exception("Unknown error"))
             trackError(Operation.Configure, error)
             OnrampConfigurationResult.Failed(error)
         }
