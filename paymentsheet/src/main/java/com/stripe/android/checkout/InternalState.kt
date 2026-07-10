@@ -14,7 +14,7 @@ internal data class InternalState(
     val key: String,
     val configuration: Checkout.Configuration.State,
     val checkoutSessionResponse: CheckoutSessionResponse,
-    private val flagImages: Map<String, Bitmap>?,
+    val flagImages: Map<String, Bitmap>?,
     val shippingName: String? = null,
     val billingName: String? = null,
     val shippingPhoneNumber: String? = null,

@@ -3,6 +3,8 @@ package com.stripe.android.checkout.injection
 import android.app.Application
 import android.content.Context
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.checkout.FlagImageResolver
+import com.stripe.android.common.di.DisplayDensity
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
@@ -17,6 +19,8 @@ import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
+import com.stripe.android.uicore.image.DefaultStripeImageLoader
+import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -38,6 +42,7 @@ internal interface CheckoutComponent {
     val checkoutSessionRepository: CheckoutSessionRepository
     val analyticsRequestExecutor: AnalyticsRequestExecutor
     val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
+    val flagImageResolver: FlagImageResolver
 
     @Component.Factory
     interface Factory {
@@ -67,4 +72,11 @@ internal object CheckoutModule {
         apiKey = paymentConfiguration.get().publishableKey,
         stripeAccount = paymentConfiguration.get().stripeAccountId,
     )
+
+    @Provides
+    fun provideStripeImageLoader(context: Context): StripeImageLoader = DefaultStripeImageLoader(context)
+
+    @Provides
+    @DisplayDensity
+    fun provideDisplayDensity(context: Context): Float = context.resources.displayMetrics.density
 }
