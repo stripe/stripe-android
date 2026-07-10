@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.link.exceptions.LinkUnavailableException
@@ -21,7 +22,7 @@ internal class DefaultLinkConfigurationLoaderTest {
     private val linkGate = FakeLinkGate()
     private val linkGateFactory = FakeLinkGate.Factory(linkGate)
     private val configuration =
-        LinkController.Configuration.Builder(
+        LinkController.Configuration(
             merchantDisplayName = "Test Merchant",
             publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY,
         ).build()
@@ -35,13 +36,15 @@ internal class DefaultLinkConfigurationLoaderTest {
 
     private fun createLoader(
         paymentElementLoader: PaymentElementLoader,
-        useNativeLink: Boolean? = null
+        useNativeLink: Boolean? = null,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): DefaultLinkConfigurationLoader {
         useNativeLink?.let { linkGate.setUseNativeLink(it) }
         return DefaultLinkConfigurationLoader(
             logger = logger,
             paymentElementLoader = paymentElementLoader,
             linkGateFactory = linkGateFactory,
+            savedStateHandle = savedStateHandle,
         )
     }
 
@@ -105,7 +108,7 @@ internal class DefaultLinkConfigurationLoaderTest {
             PaymentSheet.BillingDetailsCollectionConfiguration(
                 phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
             )
-        val controllerConfig = LinkController.Configuration.Builder(
+        val controllerConfig = LinkController.Configuration(
             merchantDisplayName = TestFactory.MERCHANT_NAME,
             publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
         )
@@ -124,5 +127,48 @@ internal class DefaultLinkConfigurationLoaderTest {
         assertThat(commonConfig.merchantDisplayName).isEqualTo(TestFactory.MERCHANT_NAME)
         assertThat(commonConfig.defaultBillingDetails).isEqualTo(defaultBillingDetails)
         assertThat(commonConfig.billingDetailsCollectionConfiguration).isEqualTo(billingDetailsCollectionConfiguration)
+    }
+
+    @Test
+    fun `load() sets isReloadingAfterProcessDeath true when configured key is present`() = runTest {
+        val paymentElementLoader = mock<PaymentElementLoader>()
+        val savedStateHandle = SavedStateHandle().apply {
+            set(LinkControllerInteractor.LINK_CONFIGURED_KEY, true)
+        }
+        val loader = createLoader(
+            paymentElementLoader = paymentElementLoader,
+            useNativeLink = true,
+            savedStateHandle = savedStateHandle,
+        )
+
+        loader.load(configuration)
+
+        val metadataCaptor = argumentCaptor<PaymentElementLoader.Metadata>()
+        verify(paymentElementLoader).load(
+            initializationMode = any(),
+            integrationConfiguration = any(),
+            metadata = metadataCaptor.capture(),
+        )
+        assertThat(metadataCaptor.firstValue.isReloadingAfterProcessDeath).isTrue()
+    }
+
+    @Test
+    fun `load() sets isReloadingAfterProcessDeath false when configured key is absent`() = runTest {
+        val paymentElementLoader = mock<PaymentElementLoader>()
+        val loader = createLoader(
+            paymentElementLoader = paymentElementLoader,
+            useNativeLink = true,
+            savedStateHandle = SavedStateHandle(),
+        )
+
+        loader.load(configuration)
+
+        val metadataCaptor = argumentCaptor<PaymentElementLoader.Metadata>()
+        verify(paymentElementLoader).load(
+            initializationMode = any(),
+            integrationConfiguration = any(),
+            metadata = metadataCaptor.capture(),
+        )
+        assertThat(metadataCaptor.firstValue.isReloadingAfterProcessDeath).isFalse()
     }
 }
