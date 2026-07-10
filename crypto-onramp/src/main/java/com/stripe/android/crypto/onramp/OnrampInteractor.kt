@@ -57,7 +57,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -126,24 +125,22 @@ internal class OnrampInteractor @Inject constructor(
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
         // `LinkController.configure()` to do it.
-        val linkResult: ConfigureResult = linkController.configure(
-            LinkController.Configuration.Builder(
+        val linkResult = linkController.configure(
+            LinkController.Configuration(
                 merchantDisplayName = configurationState.merchantDisplayName,
                 publishableKey = configurationState.publishableKey,
             )
-                .allowLogOut(false)
+                .allowLogout(false)
                 .allowUserEmailEdits(false)
                 .appearance(configurationState.appearance)
-                .build()
         )
 
-        return when (linkResult) {
-            is ConfigureResult.Success -> OnrampConfigurationResult.Completed(success = true)
-            is ConfigureResult.Failed -> {
-                val error = mapError(Operation.Configure, linkResult.error)
-                trackError(Operation.Configure, error)
-                OnrampConfigurationResult.Failed(error)
-            }
+        return if (linkResult.isSuccess) {
+            OnrampConfigurationResult.Completed(success = true)
+        } else {
+            val error = mapError(Operation.Configure, linkResult.exceptionOrNull() ?: Throwable())
+            trackError(Operation.Configure, error)
+            OnrampConfigurationResult.Failed(error)
         }
     }
 
