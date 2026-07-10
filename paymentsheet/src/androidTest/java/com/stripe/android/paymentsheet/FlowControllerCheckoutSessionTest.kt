@@ -280,10 +280,10 @@ internal class FlowControllerCheckoutSessionTest {
         )
 
     @Test
-    fun testDefaultBillingEmailTakesPrecedenceOverCheckoutSessionEmail() =
+    fun testCheckoutSessionEmailTakesPrecedenceOverDefaultBillingEmail() =
         runCheckoutSessionEmailPrecedenceTest(
             defaultEmail = "merchant@example.com",
-            expectedEmail = "merchant@example.com",
+            expectedEmail = "session@example.com",
         )
 
     private fun runCheckoutSessionEmailPrecedenceTest(

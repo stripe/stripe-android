@@ -64,7 +64,8 @@ private fun mergeCheckoutSessionData(
     return MergedDetails(
         billingDetails = PaymentSheet.BillingDetails(
             address = existingBillingDetails?.address ?: state.billingAddress?.asPaymentSheetAddress(),
-            email = existingBillingDetails?.email ?: response.customerEmail,
+            // customer_email is authoritative; fall back to the merchant default only when absent.
+            email = response.customerEmail ?: existingBillingDetails?.email,
             name = existingBillingDetails?.name ?: state.billingName,
             phone = existingBillingDetails?.phone ?: state.billingPhoneNumber,
         ),

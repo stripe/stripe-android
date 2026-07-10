@@ -427,6 +427,8 @@ internal class PlaygroundTestDriver(
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
+        resultCountDownLatch = testParameters.countDownLatch()
+
         selectors.playgroundBuyButton.waitForEnabled()
         selectors.playgroundBuyButton.click()
 
@@ -443,6 +445,11 @@ internal class PlaygroundTestDriver(
 
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+
+        resultCountDownLatch?.let {
+            assertThat(it.await(5, TimeUnit.SECONDS)).isTrue()
+        }
+        assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
 
         teardown()
     }
