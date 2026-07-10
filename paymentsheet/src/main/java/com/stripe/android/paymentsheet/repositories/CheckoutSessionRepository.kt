@@ -103,8 +103,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             paymentMethodId = paymentMethodId,
             expiryMonth = card?.expiryMonth,
             expiryYear = card?.expiryYear,
-            // billingDetails isn't accessible off PaymentMethodUpdateParams from this module.
-            billingDetails = paramMap["billing_details"] as? Map<*, *>,
+            billingDetails = params.billingDetails,
         )
 
         return if (updateParams.hasSupportedUpdates) {

@@ -1,18 +1,19 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.model.PaymentMethod
+
 /**
  * Parameters for updating a saved card on a checkout session via the update API
  * (`/v1/payment_pages/{cs_id}` with `payment_method_to_update`).
  *
  * Only card expiry and billing details can be updated; card brand and other card fields are not
- * supported by the endpoint. [billingDetails] is a param map (rather than a typed model) because
- * [com.stripe.android.model.PaymentMethodUpdateParams] only exposes its billing details as one.
+ * supported by the endpoint.
  */
 internal data class CheckoutSessionUpdatePaymentMethodParams(
     private val paymentMethodId: String,
     private val expiryMonth: Int?,
     private val expiryYear: Int?,
-    private val billingDetails: Map<*, *>?,
+    private val billingDetails: PaymentMethod.BillingDetails?,
 ) {
     /** Whether there is at least one supported field (expiry or billing details) to update. */
     val hasSupportedUpdates: Boolean
@@ -23,7 +24,7 @@ internal data class CheckoutSessionUpdatePaymentMethodParams(
         return buildMap {
             put("payment_method_to_update[payment_method_id]", paymentMethodId)
             billingDetails?.let {
-                put("payment_method_to_update[billing_details]", it)
+                put("payment_method_to_update[billing_details]", it.toParamMap())
             }
             if (expiryMonth != null && expiryYear != null) {
                 put(
