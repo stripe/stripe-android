@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import org.junit.Test
 
@@ -45,6 +46,28 @@ internal class CheckoutSessionUpdatePaymentMethodParamsTest {
 
         assertThat(paramMap).containsExactly(
             "payment_method_to_update[payment_method_id]", "pm_123",
+            "elements_session_client[is_aggregation_expected]", "true",
+        )
+    }
+
+    @Test
+    fun `toParamMap includes payment method id, expiry details, and billing details`() {
+        val billingDetails = PaymentMethod.BillingDetails(
+            name = "Jane Doe",
+            address = Address(postalCode = "94111"),
+        )
+
+        val paramMap = paramsWith(
+            expiryMonth = 12,
+            expiryYear = 2030,
+            billingDetails = billingDetails,
+        ).toParamMap()
+
+        assertThat(paramMap).containsExactly(
+            "payment_method_to_update[payment_method_id]", "pm_123",
+            "payment_method_to_update[expiry_details]", mapOf("exp_month" to 12, "exp_year" to 2030),
+            // BillingDetails owns its own serialization; we only assert it's forwarded under the right key.
+            "payment_method_to_update[billing_details]", billingDetails.toParamMap(),
             "elements_session_client[is_aggregation_expected]", "true",
         )
     }
