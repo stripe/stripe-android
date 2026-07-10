@@ -9,32 +9,37 @@ import javax.inject.Inject
 
 internal interface NfcScanningEventReporter {
     /**
-     * NFC scan flow has been started.
+     * The NFC scan flow has been started and the user is presented with the NFC scanning UI which has the scanner
+     * running in the background
      */
     fun onNfcScanStarted()
 
     /**
-     * User attempts to scan their card using NFC.
+     * User attempts to scan their card using NFC, meaning the scanner has detected a readable NFC card placed
+     * against the device.
      */
     fun onNfcScanAttemptStarted()
 
     /**
-     * User attempt to scan their card with NFC succeeded.
+     * The user's attempt to scan their card with NFC succeeded meaning the scanner was able to produce valid card
+     * details from the NFC card held against the device.
      */
     fun onNfcScanAttemptSucceeded()
 
     /**
-     * User attempt to scan their card with NFC failed.
+     * User attempt to scan their card with NFC failed meaning the scanner was NOT able to produce valid card
+     * details from the NFC card held against the device.
      */
     fun onNfcScanAttemptFailed()
 
     /**
-     * NFC scan flow completed successfully.
+     * NFC scan flow completed successfully meaning the user is being returned to the calling payment flow after
+     * being shown that they successfully scanned valid card details.
      */
     fun onNfcScanSucceeded()
 
     /**
-     * NFC scan was canceled by the user.
+     * The user has chosen to exit the NFC scanning flow without scanning valid card details.
      */
     fun onNfcScanCancelled()
 }
