@@ -322,6 +322,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
             stripeNetworkClient = DefaultStripeNetworkClient(),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
+            betas = emptySet(),
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,

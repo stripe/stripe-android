@@ -357,6 +357,7 @@ internal class DefaultTapToAddCollectionHandler(
         return ApiRequest.Options(
             apiKey = ephemeralKeySecret,
             stripeAccount = paymentConfiguration.stripeAccountId,
+            betas = paymentConfiguration.betas,
         )
     }
 

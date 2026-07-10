@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.SetupIntentResult
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
@@ -36,6 +37,7 @@ internal class SetupIntentFlowResultProcessorTest {
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        emptySet<StripeApiBeta>(),
         mockStripeRepository,
         Logger.noop(),
         testDispatcher

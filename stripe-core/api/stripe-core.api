@@ -27,6 +27,15 @@ public final class com/stripe/android/core/BuildConfig {
 	public fun <init> ()V
 }
 
+public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
+	public static final field VippsPreviewV1 Lcom/stripe/android/StripeApiBeta;
+	public static final field WeChatPayV1 Lcom/stripe/android/StripeApiBeta;
+	public final fun getCode ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/StripeApiBeta;
+	public static fun values ()[Lcom/stripe/android/StripeApiBeta;
+}
+
 public final class com/stripe/android/core/Logger$Companion {
 	public final fun noop ()Lcom/stripe/android/core/Logger;
 	public final fun real ()Lcom/stripe/android/core/Logger;
@@ -269,4 +278,3 @@ public final class com/stripe/android/core/version/StripeSdkVersion {
 	public static final field VERSION Ljava/lang/String;
 	public static final field VERSION_NAME Ljava/lang/String;
 }
-

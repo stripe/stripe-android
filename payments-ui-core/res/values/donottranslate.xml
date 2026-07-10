@@ -28,6 +28,7 @@
     <string name="stripe_paymentsheet_payment_method_crypto">Crypto</string>
     <string name="stripe_paymentsheet_payment_method_alma">Alma</string>
     <string name="stripe_paymentsheet_payment_method_mobile_pay">MobilePay</string>
+    <string name="stripe_paymentsheet_payment_method_vipps">Vipps</string>
     <string name="stripe_paymentsheet_payment_method_zip">Zip</string>
     <string name="stripe_paymentsheet_payment_method_blik">BLIK</string>
     <string name="stripe_paymentsheet_payment_method_alipay">Alipay</string>

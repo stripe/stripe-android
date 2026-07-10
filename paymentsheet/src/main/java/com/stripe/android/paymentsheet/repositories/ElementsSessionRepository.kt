@@ -68,6 +68,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         get() = ApiRequest.Options(
             apiKey = lazyPaymentConfig.get().publishableKey,
             stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            betas = lazyPaymentConfig.get().betas,
         )
 
     override suspend fun get(

@@ -37,6 +37,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SunbitDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.VippsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeroDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
@@ -66,6 +67,7 @@ internal object PaymentMethodRegistry {
         KlarnaDefinition,
         KonbiniDefinition,
         MobilePayDefinition,
+        VippsDefinition,
         MultibancoDefinition,
         OxxoDefinition,
         P24Definition,

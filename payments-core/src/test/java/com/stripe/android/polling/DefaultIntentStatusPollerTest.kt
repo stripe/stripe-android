@@ -1,6 +1,8 @@
 package com.stripe.android.polling
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.model.StripeIntent.Status.RequiresAction
 import com.stripe.android.model.StripeIntent.Status.RequiresCapture
 import com.stripe.android.model.StripeIntent.Status.Succeeded
@@ -147,5 +149,24 @@ class DefaultIntentStatusPollerTest {
         assertThat(poller.state.value).isEqualTo(Succeeded)
 
         poller.stopPolling()
+    }
+
+    @Test
+    fun `Force poll uses payment configuration betas`() = runTest(testDispatcher) {
+        var requestOptions: com.stripe.android.core.networking.ApiRequest.Options? = null
+        val poller = createIntentStatusPoller(
+            enqueuedStatuses = listOf(RequiresAction),
+            dispatcher = testDispatcher,
+            paymentConfiguration = PaymentConfiguration(
+                publishableKey = "key",
+                stripeAccountId = "account_id",
+                betas = setOf(StripeApiBeta.VippsPreviewV1),
+            ),
+            onRetrievePaymentIntent = { requestOptions = it },
+        )
+
+        poller.forcePoll()
+
+        assertThat(requestOptions?.betas).containsExactly(StripeApiBeta.VippsPreviewV1)
     }
 }

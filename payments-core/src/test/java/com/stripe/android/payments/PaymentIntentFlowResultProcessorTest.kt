@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -143,6 +144,32 @@ internal class PaymentIntentFlowResultProcessorTest {
                 eq(ApiRequest.Options("pk_test_nextActionData"))
             )
         }
+
+    @Test
+    fun `processResult forwards configured betas when retrieving the intent`() = runTest(testDispatcher) {
+        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            Result.success(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        val clientSecret = requireNotNull(PaymentIntentFixtures.PI_SUCCEEDED.clientSecret)
+        val requestOptions = ApiRequest.Options(
+            apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            betas = setOf(StripeApiBeta.VippsPreviewV1),
+        )
+
+        createProcessor(betas = setOf(StripeApiBeta.VippsPreviewV1)).processResult(
+            PaymentFlowResult.Unvalidated(
+                clientSecret = clientSecret,
+                flowOutcome = StripeIntentResult.Outcome.SUCCEEDED,
+            )
+        )
+
+        verify(mockStripeRepository).retrievePaymentIntent(
+            eq(clientSecret),
+            eq(requestOptions),
+            eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD),
+        )
+    }
 
     @Test
     fun `no refresh when user cancels the payment`() = runTest(testDispatcher) {
@@ -1008,9 +1035,11 @@ internal class PaymentIntentFlowResultProcessorTest {
 
     private fun createProcessor(
         stripeRepository: StripeRepository = mockStripeRepository,
+        betas: Set<StripeApiBeta> = emptySet(),
     ): PaymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
         { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        betas,
         stripeRepository,
         Logger.noop(),
         testDispatcher

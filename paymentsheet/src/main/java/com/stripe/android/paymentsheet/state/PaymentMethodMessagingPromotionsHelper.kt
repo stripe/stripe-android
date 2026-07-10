@@ -69,7 +69,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 locale = Locale.getDefault().language,
                 requestOptions = ApiRequest.Options(
                     apiKey = lazyPaymentConfig.get().publishableKey,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId
+                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+                    betas = lazyPaymentConfig.get().betas,
                 )
             )
         }

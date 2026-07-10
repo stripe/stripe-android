@@ -2,6 +2,7 @@ package com.stripe.android.core.networking
 
 import android.os.Build
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.core.ApiKeyFixtures
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
@@ -57,6 +58,20 @@ class RequestHeadersFactoriesTest {
         assertThat(headers.containsKey(HEADER_STRIPE_VERSION)).isTrue()
         assertThat(headers.containsKey(HEADER_STRIPE_ACCOUNT)).isFalse()
         assertThat(headers.containsKey(HEADER_AUTHORIZATION)).isTrue()
+    }
+
+    @Test
+    fun headers_withBetaRequestOptions_mergeRequestBetasIntoStripeVersion() {
+        val headers = createBasePaymentApiHeaders(
+            options = ApiRequest.Options(
+                apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.VippsPreviewV1),
+            )
+        )
+
+        assertThat(headers[HEADER_STRIPE_VERSION]).isEqualTo(
+            "${ApiVersion.get().code};vipps_preview=v1"
+        )
     }
 
     @Test

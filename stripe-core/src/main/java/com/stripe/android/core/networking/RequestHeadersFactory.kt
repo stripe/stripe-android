@@ -88,7 +88,7 @@ sealed class RequestHeadersFactory {
                 val apiRequestOptions = optionsProvider()
                 return mapOf(
                     HEADER_ACCEPT to "application/json",
-                    HEADER_STRIPE_VERSION to apiVersion,
+                    HEADER_STRIPE_VERSION to createStripeVersion(apiRequestOptions),
                     HEADER_AUTHORIZATION to "Bearer ${apiRequestOptions.apiKey}"
                 ).plus(
                     stripeClientUserAgentHeaderFactory.create(appInfo)
@@ -111,6 +111,26 @@ sealed class RequestHeadersFactory {
                     languageTag?.let { mapOf(HEADER_ACCEPT_LANGUAGE to it) }.orEmpty()
                 )
             }
+
+        private fun createStripeVersion(options: ApiRequest.Options): String {
+            if (options.betas.isEmpty()) {
+                return apiVersion
+            }
+
+            val version = apiVersion.substringBefore(';')
+            val configuredBetas = apiVersion
+                .substringAfter(';', "")
+                .split(';')
+                .filter { it.isNotBlank() }
+                .toCollection(linkedSetOf())
+
+            configuredBetas.addAll(options.betas.map { it.code })
+
+            return ApiVersion(
+                version = version,
+                betaCodes = configuredBetas,
+            ).code
+        }
     }
 
     /**

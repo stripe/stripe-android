@@ -2,11 +2,13 @@ package com.stripe.android.core.networking
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.AppInfo
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.version.StripeSdkVersion
 import kotlinx.parcelize.Parcelize
@@ -14,7 +16,7 @@ import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
+import kotlin.jvm.JvmSuppressWildcards
 
 /**
  * A class representing a Stripe API or Analytics request.
@@ -102,7 +104,8 @@ data class ApiRequest internal constructor(
     data class Options constructor(
         val apiKey: String,
         val stripeAccount: String? = null,
-        val idempotencyKey: String? = null
+        val idempotencyKey: String? = null,
+        val betas: Set<StripeApiBeta> = emptySet(),
     ) : Parcelable {
 
         override fun toString(): String {
@@ -125,10 +128,12 @@ data class ApiRequest internal constructor(
         @Inject
         constructor(
             @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
+            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+            @Named(STRIPE_API_BETAS) betas: Set<@JvmSuppressWildcards StripeApiBeta>,
         ) : this(
             apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider()
+            stripeAccount = stripeAccountIdProvider(),
+            betas = betas,
         )
 
         init {

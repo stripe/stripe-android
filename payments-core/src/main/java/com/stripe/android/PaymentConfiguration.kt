@@ -14,7 +14,8 @@ class PaymentConfiguration
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 constructor(
     val publishableKey: String,
-    val stripeAccountId: String? = null
+    val stripeAccountId: String? = null,
+    val betas: Set<StripeApiBeta> = emptySet(),
 ) : Parcelable {
 
     init {
@@ -36,11 +37,13 @@ constructor(
         @JvmSynthetic
         fun save(
             publishableKey: String,
-            stripeAccountId: String?
+            stripeAccountId: String?,
+            betas: Set<StripeApiBeta>,
         ) {
             prefs.edit()
                 .putString(KEY_PUBLISHABLE_KEY, publishableKey)
                 .putString(KEY_ACCOUNT_ID, stripeAccountId)
+                .putStringSet(KEY_BETAS, betas.mapTo(linkedSetOf()) { it.code })
                 .apply()
         }
 
@@ -49,7 +52,10 @@ constructor(
             return prefs.getString(KEY_PUBLISHABLE_KEY, null)?.let { publishableKey ->
                 PaymentConfiguration(
                     publishableKey = publishableKey,
-                    stripeAccountId = prefs.getString(KEY_ACCOUNT_ID, null)
+                    stripeAccountId = prefs.getString(KEY_ACCOUNT_ID, null),
+                    betas = prefs.getStringSet(KEY_BETAS, linkedSetOf<String>()).orEmpty().mapNotNullTo(linkedSetOf()) { betaCode ->
+                        StripeApiBeta.entries.firstOrNull { it.code == betaCode }
+                    }
                 )
             }
         }
@@ -59,6 +65,7 @@ constructor(
 
             private const val KEY_PUBLISHABLE_KEY = "key_publishable_key"
             private const val KEY_ACCOUNT_ID = "key_account_id"
+            private const val KEY_BETAS = "key_betas"
         }
     }
 
@@ -95,16 +102,19 @@ constructor(
         fun init(
             context: Context,
             publishableKey: String,
-            stripeAccountId: String? = null
+            stripeAccountId: String? = null,
+            betas: Set<StripeApiBeta> = emptySet(),
         ) {
             instance = PaymentConfiguration(
                 publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId
+                stripeAccountId = stripeAccountId,
+                betas = betas,
             )
             Store(context)
                 .save(
                     publishableKey = publishableKey,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    betas = betas,
                 )
 
             DefaultFraudDetectionDataRepository(context).refresh()

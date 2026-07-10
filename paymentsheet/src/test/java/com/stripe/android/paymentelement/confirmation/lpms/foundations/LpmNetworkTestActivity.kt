@@ -13,11 +13,13 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.utils.DurationProvider
@@ -53,6 +55,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.JvmSuppressWildcards
 
 internal class LpmNetworkTestActivity : AppCompatActivity() {
     val viewModel: TestViewModel by viewModels {
@@ -209,6 +212,10 @@ internal interface LpmNetworkTestModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = ENABLE_LOGGING_VALUE
+
+        @Provides
+        @Named(STRIPE_API_BETAS)
+        fun providesStripeApiBetas(): Set<@JvmSuppressWildcards StripeApiBeta> = emptySet()
 
         @Provides
         @Singleton

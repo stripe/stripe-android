@@ -112,6 +112,28 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun createVipps() {
+        assertThat(PaymentMethodCreateParamsFixtures.VIPPS.toParamMap())
+            .isEqualTo(
+                mapOf(
+                    "type" to "vipps",
+                    "billing_details" to mapOf(
+                        "address" to mapOf(
+                            "city" to "San Francisco",
+                            "country" to "US",
+                            "line1" to "1234 Main St",
+                            "state" to "CA",
+                            "postal_code" to "94111"
+                        ),
+                        "email" to "jenny.rosen@example.com",
+                        "name" to "Jenny Rosen",
+                        "phone" to "1-800-555-1234"
+                    )
+                )
+            )
+    }
+
+    @Test
     fun auBecsDebit_toParamMap_shouldCreateExpectedMap() {
         assertThat(PaymentMethodCreateParamsFixtures.AU_BECS_DEBIT.toParamMap())
             .isEqualTo(

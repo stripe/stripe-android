@@ -112,7 +112,8 @@ class Stripe internal constructor(
         ),
         ApiKeyValidator.get().requireValid(publishableKey),
         stripeAccountId,
-        enableLogging
+        enableLogging,
+        betas,
     )
 
     private constructor(
@@ -120,14 +121,16 @@ class Stripe internal constructor(
         stripeRepository: StripeRepository,
         publishableKey: String,
         stripeAccountId: String?,
-        enableLogging: Boolean
+        enableLogging: Boolean,
+        betas: Set<StripeApiBeta> = emptySet(),
     ) : this(
         stripeRepository,
         StripePaymentController(
             context.applicationContext,
             { publishableKey },
             stripeRepository,
-            enableLogging
+            enableLogging,
+            betasProvider = { betas },
         ),
         publishableKey,
         stripeAccountId

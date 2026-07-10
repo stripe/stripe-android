@@ -3,8 +3,10 @@ package com.stripe.android.paymentsheet.repositories
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.Customer
 import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -23,6 +25,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.anyString
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -331,6 +334,43 @@ internal class CustomerRepositoryTest {
                     ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS.eventName,
                 )
         }
+
+    @Test
+    fun `retrieveCustomer() forwards configured betas in request options`() = runTest {
+        val repository = CustomerApiRepository(
+            stripeRepository = stripeRepository,
+            lazyPaymentConfig = {
+                PaymentConfiguration(
+                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    "acct_123",
+                    betas = setOf(StripeApiBeta.VippsPreviewV1),
+                )
+            },
+            logger = Logger.getInstance(false),
+            errorReporter = errorReporter,
+            workContext = testDispatcher,
+        )
+        val optionsCaptor = argumentCaptor<ApiRequest.Options>()
+        whenever(
+            stripeRepository.retrieveCustomer(
+                customerId = any(),
+                productUsageTokens = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.success(mock<Customer>()))
+
+        repository.retrieveCustomer(
+            customerId = FAKE_CUSTOMER_ID,
+            ephemeralKeySecret = FAKE_EPHEMERAL_KEY,
+        )
+
+        verify(stripeRepository).retrieveCustomer(
+            customerId = eq(FAKE_CUSTOMER_ID),
+            productUsageTokens = any(),
+            requestOptions = optionsCaptor.capture(),
+        )
+        assertThat(optionsCaptor.firstValue.betas).containsExactly(StripeApiBeta.VippsPreviewV1)
+    }
 
     @Test
     fun `detachPaymentMethod() should return payment method on success`() =

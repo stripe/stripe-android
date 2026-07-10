@@ -364,12 +364,14 @@ public final class com/stripe/android/PaymentConfiguration : android/os/Parcelab
 	public static final field Companion Lcom/stripe/android/PaymentConfiguration$Companion;
 	public final fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
+	public final fun getBetas ()Ljava/util/Set;
 	public static final fun getInstance (Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
 	public final fun getPublishableKey ()Ljava/lang/String;
 	public final fun getStripeAccountId ()Ljava/lang/String;
 	public fun hashCode ()I
 	public static final fun init (Landroid/content/Context;Ljava/lang/String;)V
 	public static final fun init (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
+	public static final fun init (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
 	public fun toString ()Ljava/lang/String;
 	public final fun writeToParcel (Landroid/os/Parcel;I)V
 }
@@ -378,7 +380,8 @@ public final class com/stripe/android/PaymentConfiguration$Companion {
 	public final fun getInstance (Landroid/content/Context;)Lcom/stripe/android/PaymentConfiguration;
 	public final fun init (Landroid/content/Context;Ljava/lang/String;)V
 	public final fun init (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;)V
-	public static synthetic fun init$default (Lcom/stripe/android/PaymentConfiguration$Companion;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)V
+	public final fun init (Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;)V
+	public static synthetic fun init$default (Lcom/stripe/android/PaymentConfiguration$Companion;Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/util/Set;ILjava/lang/Object;)V
 }
 
 public final class com/stripe/android/PaymentIntentResult : com/stripe/android/StripeIntentResult {
@@ -587,14 +590,6 @@ public final class com/stripe/android/Stripe$Companion {
 	public final fun getAppInfo ()Lcom/stripe/android/core/AppInfo;
 	public final fun setAdvancedFraudSignalsEnabled (Z)V
 	public final fun setAppInfo (Lcom/stripe/android/core/AppInfo;)V
-}
-
-public final class com/stripe/android/StripeApiBeta : java/lang/Enum {
-	public static final field WeChatPayV1 Lcom/stripe/android/StripeApiBeta;
-	public final fun getCode ()Ljava/lang/String;
-	public static fun getEntries ()Lkotlin/enums/EnumEntries;
-	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/StripeApiBeta;
-	public static fun values ()[Lcom/stripe/android/StripeApiBeta;
 }
 
 public abstract class com/stripe/android/StripeIntentResult : com/stripe/android/core/model/StripeModel {
@@ -2138,6 +2133,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field Konbini Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Link Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field MobilePay Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Vipps Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Multibanco Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Netbanking Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Oxxo Lcom/stripe/android/model/PaymentMethod$Type;
@@ -2333,6 +2329,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createMobilePay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createMobilePay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createMobilePay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createVipps ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createVipps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createVipps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createVipps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createMultibanco ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createMultibanco (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createMultibanco (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -2587,6 +2587,11 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createMobilePay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createMobilePay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createMobilePay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createVipps ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createVipps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createVipps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createVipps (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createVipps$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;Lcom/stripe/android/model/PaymentMethod$AllowRedisplay;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createMultibanco ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createMultibanco (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createMultibanco (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -4323,4 +4328,3 @@ public final class com/stripe/android/view/i18n/TranslatorManager {
 	public final fun getErrorMessageTranslator ()Lcom/stripe/android/view/i18n/ErrorMessageTranslator;
 	public final fun setErrorMessageTranslator (Lcom/stripe/android/view/i18n/ErrorMessageTranslator;)V
 }
-

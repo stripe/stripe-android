@@ -71,6 +71,7 @@ internal object CheckoutModule {
     ): ApiRequest.Options = ApiRequest.Options(
         apiKey = paymentConfiguration.get().publishableKey,
         stripeAccount = paymentConfiguration.get().stripeAccountId,
+        betas = paymentConfiguration.get().betas,
     )
 
     @Provides
