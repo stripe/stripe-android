@@ -30,7 +30,7 @@ import javax.inject.Singleton
  * A controller to perform various Link operations.
  */
 @Singleton
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@LinkControllerPreview
 @Suppress("TooManyFunctions")
 class LinkController @Inject internal constructor(
     private val interactor: LinkControllerInteractor,
@@ -60,7 +60,7 @@ class LinkController @Inject internal constructor(
      * @param configuration The [Configuration] to use for Link operations.
      * @return The result of the configuration.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     suspend fun configure(configuration: Configuration): Result<Unit> {
         return interactor.configure(configuration)
     }
@@ -206,7 +206,7 @@ class LinkController @Inject internal constructor(
     /**
      * Configuration for [LinkController].
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     class Configuration {
         private var merchantDisplayName: String
         private var publishableKey: String?
@@ -354,7 +354,7 @@ class LinkController @Inject internal constructor(
      * The Presenter is tied to an Activity lifecycle and should be created and destroyed appropriately
      * to avoid memory leaks.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     class Presenter @Inject internal constructor(
         private val coordinator: LinkControllerCoordinator,
         private val interactor: LinkControllerInteractor,
@@ -557,7 +557,7 @@ class LinkController @Inject internal constructor(
     /**
      * Result of [Presenter.present].
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     sealed interface PresentResult {
 
         /**
@@ -565,14 +565,14 @@ class LinkController @Inject internal constructor(
          *
          * @param paymentMethod The [PaymentMethod] created from the selected Link payment method.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         @Poko
         class Completed internal constructor(val paymentMethod: PaymentMethod) : PresentResult
 
         /**
          * The user canceled the Link flow.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         class Canceled internal constructor() : PresentResult
 
         /**
@@ -580,7 +580,7 @@ class LinkController @Inject internal constructor(
          *
          * @param error The error that occurred.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         @Poko
         class Failed internal constructor(val error: Throwable) : PresentResult
     }
@@ -745,7 +745,7 @@ class LinkController @Inject internal constructor(
     /**
      * Callback for receiving results from [Presenter.present].
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     fun interface PresentCallback {
         fun onPresentResult(result: PresentResult)
     }
@@ -803,7 +803,7 @@ class LinkController @Inject internal constructor(
     /**
      * The type of payment method to present for selection.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     enum class PaymentMethodType {
         Card,
         BankAccount,
@@ -817,7 +817,7 @@ class LinkController @Inject internal constructor(
      * @param label The main label text (e.g., "Link").
      * @param sublabel Additional descriptive text (e.g., "Visa •••• 4242").
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     @Poko
     class PaymentMethodPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -871,7 +871,7 @@ class LinkController @Inject internal constructor(
      * @param application The application context.
      * @param savedStateHandle The [SavedStateHandle] for persisting state across process death.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     class Builder(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
