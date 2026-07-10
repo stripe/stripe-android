@@ -1,6 +1,7 @@
 package com.stripe.android.common.nfcscan
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.nfc.NfcAdapter
 import android.os.Build
@@ -13,6 +14,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -60,6 +62,23 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
+    fun `activity returns canceled result when started without arguments`() {
+        val intent = Intent(context, NfcScanningActivity::class.java)
+
+        ActivityScenario.launchActivityForResult<NfcScanningActivity>(intent).use { scenario ->
+            shadowOf(Looper.getMainLooper()).idle()
+            Espresso.onIdle()
+
+            val result = NfcScanningContract.parseResult(
+                resultCode = scenario.result.resultCode,
+                intent = scenario.result.resultData,
+            )
+
+            assertThat(result).isEqualTo(NfcScanningContract.Result.Canceled)
+        }
+    }
+
+    @Test
     fun `onResume re-registers NFC card scanner when returning from background`() = test {
         waitForIdle()
         assertThat(nfcAdapter?.isInReaderMode).isTrue()
@@ -80,7 +99,9 @@ internal class NfcScanningActivityTest {
 
         val intent = NfcScanningContract.createIntent(
             context = context,
-            input = NfcScanningContract.Args(merchantName = "River Market"),
+            input = NfcScanningContract.Args(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            ),
         )
 
         ActivityScenario.launchActivityForResult<NfcScanningActivity>(intent).use { scenario ->

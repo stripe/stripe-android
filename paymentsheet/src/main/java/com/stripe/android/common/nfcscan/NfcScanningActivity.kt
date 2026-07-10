@@ -17,12 +17,23 @@ import kotlinx.coroutines.launch
 import android.graphics.Color as AndroidColor
 
 internal class NfcScanningActivity : AppCompatActivity() {
+    private lateinit var args: NfcScanningContract.Args
+
     private val viewModel by viewModels<NfcScanningViewModel> {
-        NfcScanningViewModel.factory()
+        NfcScanningViewModel.factory { args }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        args = runCatching {
+            requireNotNull(NfcScanningContract.Args.fromIntent(intent)) {
+                "NfcScanningActivity was started without arguments."
+            }
+        }.getOrElse {
+            finishWithResult(NfcScanningContract.Result.Canceled)
+            return
+        }
 
         lifecycleScope.launch {
             viewModel.result.collectLatest { result ->

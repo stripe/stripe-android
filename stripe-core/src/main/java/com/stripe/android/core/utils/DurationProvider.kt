@@ -37,6 +37,8 @@ interface DurationProvider {
         Checkout,
         LinkSignup,
         ConfirmButtonClicked,
+        NfcScan,
+        NfcScanAttempt,
         TapToAdd,
         CardScan,
         Captcha,
