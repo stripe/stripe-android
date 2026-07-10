@@ -1,6 +1,9 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 
 data class LinkControllerPlaygroundState(
     val controllerState: LinkController.State? = null,

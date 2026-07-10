@@ -1,3 +1,5 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Context
@@ -16,6 +18,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 @Suppress("LongMethod")

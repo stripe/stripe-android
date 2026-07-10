@@ -9,6 +9,9 @@ NEXT_VERSION_BUMP: MINOR
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
 
+### PaymentSheet
+* [ADDED] Standalone Link wallet APIs in private preview via `LinkController`.
+
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
