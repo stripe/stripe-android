@@ -6,6 +6,7 @@ import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DefaultFormHelper
 import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.LinkInlineHandler
@@ -22,30 +23,17 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
-    private val selectedPaymentMethodCode: String,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
         setAsDefaultMatchesSaveForFutureUse: Boolean,
         paymentMethodMetadata: PaymentMethodMetadata,
         eventReporter: EventReporter,
-        tapToAddHelper: TapToAddHelper? = null,
+        automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
+        tapToAddHelper: TapToAddHelper?,
         paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
         selectionUpdater: (PaymentSelection?) -> Unit,
     ): FormHelper {
-        val automaticallyLaunchedCardScanFormDataHelper = if (selectedPaymentMethodCode.isNotBlank()) {
-            val paymentSelection = embeddedSelectionHolder.selection.value as? PaymentSelection.New
-            val isLaunchingEmptyCardForm =
-                selectedPaymentMethodCode == PaymentMethod.Type.Card.code &&
-                    paymentSelection?.paymentMethodCreateParams == null
-            AutomaticallyLaunchedCardScanFormDataHelper(
-                hasAutomaticallyLaunchedCardScanInitialValue = !isLaunchingEmptyCardForm,
-                savedStateHandle = savedStateHandle,
-                openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
-            )
-        } else {
-            null
-        }
         return DefaultFormHelper(
             coroutineScope = coroutineScope,
             linkInlineHandler = LinkInlineHandler.create(),
@@ -74,6 +62,26 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+        )
+    }
+
+    /**
+     * Card scan auto-launch is only relevant in the form screen, so this is only built for that flow. We suppress
+     * the automatic launch when the card form is being reopened with previously entered details (i.e. the user has
+     * already seen it), and otherwise let it launch when configured to.
+     */
+    fun createAutomaticallyLaunchedCardScanFormDataHelper(
+        selectedPaymentMethodCode: PaymentMethodCode,
+        paymentMethodMetadata: PaymentMethodMetadata,
+    ): AutomaticallyLaunchedCardScanFormDataHelper {
+        val paymentSelection = embeddedSelectionHolder.selection.value as? PaymentSelection.New
+        val isLaunchingEmptyCardForm =
+            selectedPaymentMethodCode == PaymentMethod.Type.Card.code &&
+                paymentSelection?.paymentMethodCreateParams == null
+        return AutomaticallyLaunchedCardScanFormDataHelper(
+            hasAutomaticallyLaunchedCardScanInitialValue = !isLaunchingEmptyCardForm,
+            savedStateHandle = savedStateHandle,
+            openCardScanAutomaticallyConfig = paymentMethodMetadata.openCardScanAutomatically,
         )
     }
 }

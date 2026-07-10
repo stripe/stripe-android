@@ -19,7 +19,6 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -31,11 +30,9 @@ import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInt
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.InitialManageScreenFactory
 import com.stripe.android.paymentelement.embedded.manage.ManageSavedPaymentMethodMutatorFactory
-import com.stripe.android.paymentelement.embedded.sheet.DefaultEmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
-import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
@@ -61,7 +58,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Singleton
 
-@Suppress("TooManyFunctions")
 @Module
 internal interface EmbeddedActivityModule {
     @Binds
@@ -73,11 +69,6 @@ internal interface EmbeddedActivityModule {
     fun bindsEmbeddedUpdateScreenInteractorFactory(
         factory: DefaultEmbeddedUpdateScreenInteractorFactory
     ): EmbeddedUpdateScreenInteractorFactory
-
-    @Binds
-    fun bindsEmbeddedFormScreenFactory(
-        factory: DefaultEmbeddedFormScreenFactory
-    ): EmbeddedFormScreenFactory
 
     @Binds
     fun bindsCardAccountRangeRepositoryFactory(
@@ -134,15 +125,14 @@ internal interface EmbeddedActivityModule {
         @Singleton
         fun provideEmbeddedNavigator(
             launchMode: EmbeddedLaunchMode,
-            selectedPaymentMethodCode: PaymentMethodCode,
-            formScreenFactory: EmbeddedFormScreenFactory,
+            formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
             val initialScreen = when (launchMode) {
-                EmbeddedLaunchMode.Form -> formScreenFactory.createFormScreen(selectedPaymentMethodCode)
-                EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+                is EmbeddedLaunchMode.Form -> formScreenFactory.create(launchMode)
+                is EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,

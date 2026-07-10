@@ -7,12 +7,13 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
-internal class FakeCustomerStateHolder : CustomerStateHolder {
+internal class FakeCustomerStateHolder(
+    paymentMethods: List<PaymentMethod> = emptyList(),
+) : CustomerStateHolder {
     override val customer: StateFlow<CustomerState?>
         get() = stateFlowOf<CustomerState?>(null)
 
-    override val paymentMethods: StateFlow<List<PaymentMethod>>
-        get() = stateFlowOf(emptyList())
+    override val paymentMethods: StateFlow<List<PaymentMethod>> = stateFlowOf(paymentMethods)
 
     override val mostRecentlySelectedSavedPaymentMethod: StateFlow<PaymentMethod?>
         get() = stateFlowOf<PaymentMethod?>(null)

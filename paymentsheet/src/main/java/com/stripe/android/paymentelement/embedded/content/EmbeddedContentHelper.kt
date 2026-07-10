@@ -197,6 +197,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
+            // Card scan auto-launch is only relevant in the form, not the list (as the form helper is used in here).
+            automaticallyLaunchedCardScanFormDataHelper = null,
+            tapToAddHelper = null,
             selectionUpdater = {
                 setSelection(it)
                 invokeRowSelectionCallback()
@@ -238,9 +241,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                 sheetLauncher?.launchForm(
                     code = code,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
-                        it.type?.code == code
-                    },
                     embeddedConfirmationState = confirmationStateHolder.state,
                     customerState = customerStateHolder.customer.value,
                     promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(

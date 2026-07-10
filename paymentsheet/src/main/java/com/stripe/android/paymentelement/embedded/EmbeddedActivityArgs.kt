@@ -12,9 +12,7 @@ import kotlinx.parcelize.Parcelize
 
 @Parcelize
 internal data class EmbeddedActivityArgs(
-    val selectedPaymentMethodCode: String,
     val paymentMethodMetadata: PaymentMethodMetadata,
-    val hasSavedPaymentMethods: Boolean,
     val configuration: EmbeddedPaymentElement.Configuration,
     val paymentElementCallbackIdentifier: String,
     val statusBarColor: Int?,

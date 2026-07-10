@@ -4,9 +4,18 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.taptoadd.FakeTapToAddHelper
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityStateHolder
@@ -18,11 +27,22 @@ import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
+import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import kotlin.test.Test
+import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 internal class EmbeddedNavigatorTest {
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
 
     @Test
     fun `initial state is correct`() = testScenario {
@@ -266,6 +286,100 @@ internal class EmbeddedNavigatorTest {
         assertThat(screen.isPerformingNetworkOperation()).isTrue()
     }
 
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods true when a saved payment method matches the code`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        )
+
+        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+
+        // "Add new card" is only used when the customer has a saved card, so this proves the per-code
+        // derivation resolved to hasSavedPaymentMethods = true and flowed into the created interactor.
+        assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_new_card.resolvableString)
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods false when no saved payment method matches the code`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.US_BANK_ACCOUNT),
+        )
+
+        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+
+        // The saved payment method is not a card, so the derivation resolves to false and the interactor
+        // uses the "Add card" header instead of "Add new card".
+        assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods per code, ignoring saved methods of other types`() {
+        // A saved card is present, but the selected code is cashapp. A card-only check would resolve to
+        // true here; keying off the selected code correctly resolves to false.
+        val factory = createFormFactory(
+            savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "cashapp"),
+                ),
+            ),
+        )
+
+        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "cashapp"))
+
+        // setAsDefaultMatchesSaveForFutureUse is !hasSavedPaymentMethods, so true confirms the per-code
+        // derivation resolved to false for cashapp despite the saved card.
+        assertThat(screen.formInteractor.state.value.usBankAccountFormArguments.setAsDefaultMatchesSaveForFutureUse)
+            .isTrue()
+    }
+
+    @Test
+    fun `Form Factory derives hasSavedPaymentMethods false when there are no saved payment methods`() {
+        val factory = createFormFactory(
+            savedPaymentMethods = emptyList(),
+        )
+
+        val screen = factory.create(EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"))
+
+        // With no saved payment methods the derivation resolves to false, so the interactor uses the
+        // "Add card" header rather than "Add new card".
+        assertThat(screen.formInteractor.state.value.headerInformation?.displayName)
+            .isEqualTo(PaymentsUiCoreR.string.stripe_paymentsheet_add_card.resolvableString)
+    }
+
+    private fun createFormFactory(
+        savedPaymentMethods: List<PaymentMethod>,
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+    ): EmbeddedNavigator.Screen.Form.Factory {
+        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val interactorFactory = EmbeddedFormInteractorFactory(
+            paymentMethodMetadata = paymentMethodMetadata,
+            embeddedSelectionHolder = selectionHolder,
+            embeddedFormHelperFactory = EmbeddedFormHelperFactory(
+                linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
+                embeddedSelectionHolder = selectionHolder,
+                cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
+                savedStateHandle = SavedStateHandle(),
+            ),
+            viewModelScope = TestScope(UnconfinedTestDispatcher()),
+            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            tapToAddHelper = FakeTapToAddHelper.noOp(),
+            eventReporter = FakeEventReporter(),
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+        )
+        return EmbeddedNavigator.Screen.Form.Factory(
+            interactorFactory = interactorFactory,
+            eventReporter = FakeEventReporter(),
+            sheetActivityStateHolder = FakeSheetActivityStateHolder(),
+            confirmationHelper = FakeSheetActivityConfirmationHelper(),
+            embeddedSelectionHolder = selectionHolder,
+            savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
+            customerStateHolder = FakeCustomerStateHolder(paymentMethods = savedPaymentMethods),
+        )
+    }
+
     private fun createFormScreen(): Pair<EmbeddedNavigator.Screen.Form, TestFormInteractor> {
         val formInteractor = TestFormInteractor()
         val screen = EmbeddedNavigator.Screen.Form(
@@ -276,7 +390,7 @@ internal class EmbeddedNavigatorTest {
             embeddedSelectionHolder = EmbeddedSelectionHolder(SavedStateHandle()),
             savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
             customerStateHolder = FakeCustomerStateHolder(),
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         return screen to formInteractor
     }
