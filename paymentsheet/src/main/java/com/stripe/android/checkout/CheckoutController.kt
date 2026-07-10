@@ -5,20 +5,26 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import dev.drewhamilton.poko.Poko
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Suppress("TooManyFunctions", "UnusedParameter")
-class CheckoutController(
-    application: Application,
-    savedStateHandle: SavedStateHandle,
+class CheckoutController @Inject internal constructor(
     resultCallback: ResultCallback,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
 ) {
     private val _checkoutSession = MutableStateFlow<CheckoutSession?>(null)
     val checkoutSession: StateFlow<CheckoutSession?> = _checkoutSession.asStateFlow()
@@ -75,11 +81,29 @@ class CheckoutController(
     }
 
     fun destroy() {
-        TODO("Not yet implemented")
+        viewModelScope.cancel()
     }
 
     fun clearPaymentOption() {
         TODO("Not yet implemented")
+    }
+
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Builder(
+        private val application: Application,
+        private val savedStateHandle: SavedStateHandle,
+        private val resultCallback: ResultCallback,
+    ) {
+        fun build(): CheckoutController {
+            val component = DaggerCheckoutControllerComponent.factory().create(
+                application = application,
+                savedStateHandle = savedStateHandle,
+                resultCallback = resultCallback,
+            )
+
+            return component.checkoutController
+        }
     }
 
     @CheckoutSessionPreview
