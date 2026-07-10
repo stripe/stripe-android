@@ -23,11 +23,20 @@ internal object GooglePayDisplayItemsFactory {
         items += checkoutSession.lineItems.map { it.asDisplayItem() }
 
         checkoutSession.totalSummary?.let { summary ->
+            items += summary.asSubtotalDisplayItem()
             items += summary.discountAmounts.map { it.asDisplayItem() }
             items += summary.taxAmounts.map { it.asDisplayItem() }
         }
 
         return items
+    }
+
+    private fun CheckoutSession.TotalSummary.asSubtotalDisplayItem(): GooglePayJsonFactory.DisplayItem {
+        return GooglePayJsonFactory.DisplayItem(
+            label = SUBTOTAL_LABEL,
+            type = GooglePayJsonFactory.DisplayItem.Type.SUBTOTAL,
+            price = subtotal,
+        )
     }
 
     private fun CheckoutSession.LineItem.asDisplayItem(): GooglePayJsonFactory.DisplayItem {
@@ -54,4 +63,6 @@ internal object GooglePayDisplayItemsFactory {
             price = amount,
         )
     }
+
+    private const val SUBTOTAL_LABEL = "Subtotal"
 }
