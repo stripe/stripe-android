@@ -5,7 +5,7 @@ import com.stripe.android.link.LinkController
 data class LinkControllerPlaygroundState(
     val controllerState: LinkController.State? = null,
     val selectedPaymentMethodPreview: LinkController.PaymentMethodPreview? = null,
-    val configureResult: LinkController.ConfigureResult? = null,
+    val configureResult: Result<Unit>? = null,
     val presentPaymentMethodsResult: LinkController.PresentPaymentMethodsResult? = null,
     val presentResult: LinkController.PresentResult? = null,
     val lookupConsumerResult: LinkController.LookupConsumerResult? = null,

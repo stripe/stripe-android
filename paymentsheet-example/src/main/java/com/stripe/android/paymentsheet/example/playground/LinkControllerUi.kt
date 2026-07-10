@@ -365,7 +365,7 @@ private fun StatusBox(
 
 @Composable
 private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = listOf(
-    (configureResult as? LinkController.ConfigureResult.Failed)?.error,
+    configureResult?.exceptionOrNull(),
     (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)?.error,
     (presentResult as? LinkController.PresentResult.Failed)?.error,
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
@@ -377,7 +377,7 @@ private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = li
 
 private fun LinkController.PresentResult.toStatusString(): String = when (this) {
     is LinkController.PresentResult.Completed -> "Completed: ${paymentMethod.id}"
-    LinkController.PresentResult.Canceled -> "Canceled"
+    is LinkController.PresentResult.Canceled -> "Canceled"
     is LinkController.PresentResult.Failed -> "Failed: ${error.message}"
 }
 

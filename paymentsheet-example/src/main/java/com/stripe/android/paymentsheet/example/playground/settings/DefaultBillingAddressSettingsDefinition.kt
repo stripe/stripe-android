@@ -85,7 +85,7 @@ internal object DefaultBillingAddressSettingsDefinition :
 
     override fun configure(
         value: DefaultBillingAddress,
-        configurationBuilder: LinkController.Configuration.Builder,
+        configurationBuilder: LinkController.Configuration,
         playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData
     ) {
