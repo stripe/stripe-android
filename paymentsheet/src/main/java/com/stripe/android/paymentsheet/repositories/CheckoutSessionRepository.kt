@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import java.util.TimeZone
 import java.util.UUID
@@ -87,6 +88,29 @@ internal class CheckoutSessionRepository @Inject constructor(
         ),
     )
 
+    suspend fun updatePaymentMethod(
+        sessionId: String,
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams,
+    ): Result<CheckoutSessionResponse> {
+        val card = params as? PaymentMethodUpdateParams.Card
+        val updateParams = CheckoutSessionUpdatePaymentMethodParams(
+            paymentMethodId = paymentMethodId,
+            expiryMonth = card?.expiryMonth,
+            expiryYear = card?.expiryYear,
+            billingDetails = params.billingDetails,
+        )
+
+        return if (updateParams.hasSupportedUpdates) {
+            executePost(
+                url = updateUrl(sessionId),
+                params = updateParams.toParamMap(),
+            )
+        } else {
+            Result.failure(IllegalArgumentException(UNSUPPORTED_UPDATE_ERROR))
+        }
+    }
+
     suspend fun applyPromotionCode(
         sessionId: String,
         promotionCode: String,
@@ -163,6 +187,9 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
 
     private companion object {
+        private const val UNSUPPORTED_UPDATE_ERROR =
+            "Checkout session update requires at least card expiry or billing details."
+
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
 
