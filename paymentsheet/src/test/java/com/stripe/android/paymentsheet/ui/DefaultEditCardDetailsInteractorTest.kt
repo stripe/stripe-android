@@ -257,6 +257,39 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
+    fun cardBrandIsOmittedFromUpdateParamsWhenCbcIsNotModifiable() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            // CARD_WITH_NETWORKS has a resolvable brand, but the brand isn't editable here.
+            isCbcModifiable = false,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged("1230"))
+
+        assertThat(capturedCardUpdateParams?.expiryYear).isEqualTo(2030)
+        assertThat(capturedCardUpdateParams?.cardBrand).isNull()
+    }
+
+    @Test
+    fun cardBrandIsIncludedInUpdateParamsWhenCbcIsModifiable() {
+        var capturedCardUpdateParams: CardUpdateParams? = null
+        val handler = handler(
+            isCbcModifiable = true,
+            onCardUpdateParamsChanged = {
+                capturedCardUpdateParams = it
+            }
+        )
+
+        handler.handleViewAction(EditCardDetailsInteractor.ViewAction.DateChanged("1230"))
+
+        assertThat(capturedCardUpdateParams?.expiryYear).isEqualTo(2030)
+        assertThat(capturedCardUpdateParams?.cardBrand).isEqualTo(CardBrand.CartesBancaires)
+    }
+
+    @Test
     fun cardUpdateParamsIsUpdatedForValidAddressUpdate() {
         var capturedCardUpdateParams: CardUpdateParams? = null
         val handler = handler(
