@@ -1,14 +1,23 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.12.0 - 2026-07-10
 
 ### Connect
 * [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+* [CHANGED][13366](https://github.com/stripe/stripe-android/pull/13366) The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+* [ADDED][13371](https://github.com/stripe/stripe-android/pull/13371) Added wallet ownership verification APIs (`getWalletOwnershipChallenge` and `submitWalletOwnershipSignature`) to `OnrampCoordinator`, along with new model types and error exceptions (requires `@OptIn(ExperimentalCryptoOnramp::class)`)
+* [ADDED][13240](https://github.com/stripe/stripe-android/pull/13240) A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs
 
+### PaymentSheet
+* [FIXED][13390](https://github.com/stripe/stripe-android/pull/13390) Fixed an issue where editing a saved card would incorrectly send the card brand in update requests when the brand was not editable
+* [FIXED][13363](https://github.com/stripe/stripe-android/pull/13363) Fixed Google Pay not requesting email when required during Checkout Session flows
+* [FIXED][13349](https://github.com/stripe/stripe-android/pull/13349) Fixed an issue where updating card details could incorrectly send an unknown card brand as the preferred network
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet
