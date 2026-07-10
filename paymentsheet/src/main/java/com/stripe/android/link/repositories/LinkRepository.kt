@@ -228,4 +228,5 @@ internal interface LinkRepository {
         consumerSessionClientSecret: String,
         phoneNumber: String,
     ): Result<ConsumerSession>
+
 }

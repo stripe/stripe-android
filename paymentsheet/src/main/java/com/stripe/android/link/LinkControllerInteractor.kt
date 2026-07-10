@@ -6,6 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ViewModelScope
@@ -64,8 +65,11 @@ internal class LinkControllerInteractor @Inject constructor(
     private val linkConfigurationLoader: LinkConfigurationLoader,
     private val linkAccountHolder: LinkAccountHolder,
     private val linkComponentFactoryProvider: Provider<LinkComponent.Factory>,
-    @ViewModelScope private val coroutineScope: CoroutineScope,
+    @ViewModelScope internal val coroutineScope: CoroutineScope,
+    private val savedStateHandle: SavedStateHandle,
 ) {
+
+    private var configuration: LinkController.Configuration.State? = null
 
     private val tag = "LinkControllerViewInteractor"
 
@@ -113,12 +117,10 @@ internal class LinkControllerInteractor @Inject constructor(
     init {
         coroutineScope.launch {
             _presentSelectionSucceededFlow.collect {
-                val presentResult = when (val createResult = createPaymentMethod()) {
-                    is LinkController.CreatePaymentMethodResult.Success ->
-                        LinkController.PresentResult.Completed(createResult.paymentMethod)
-                    is LinkController.CreatePaymentMethodResult.Failed ->
-                        LinkController.PresentResult.Failed(createResult.error)
-                }
+                val presentResult = performCreatePaymentMethod(apiKey = null).fold(
+                    onSuccess = { pm -> LinkController.PresentResult.Completed(pm) },
+                    onFailure = { error -> LinkController.PresentResult.Failed(error) }
+                )
                 emitPresentResult(presentResult)
             }
         }
@@ -151,15 +153,19 @@ internal class LinkControllerInteractor @Inject constructor(
         }
     }
 
-    suspend fun configure(configuration: LinkController.Configuration): LinkController.ConfigureResult {
+    suspend fun configure(configuration: LinkController.Configuration): Result<Unit> {
         logger.debug("$tag: updating configuration")
+        val paymentConfig = PaymentConfiguration.getInstance(application)
+
+        val config = configuration.build()
+        this.configuration = config
         updateState { State() }
         PaymentConfiguration.init(
             context = application,
-            publishableKey = configuration.publishableKey,
-            stripeAccountId = configuration.stripeAccountId,
+            publishableKey = config.publishableKey.takeIf { it.isNotBlank() } ?: paymentConfig.publishableKey,
+            stripeAccountId = config.stripeAccountId ?: paymentConfig.stripeAccountId,
         )
-        return linkConfigurationLoader.load(configuration)
+        return linkConfigurationLoader.load(config)
             .flatMapCatching { linkMetadata ->
                 val component = linkComponentFactoryProvider.get()
                     .create(
@@ -172,10 +178,11 @@ internal class LinkControllerInteractor @Inject constructor(
             .fold(
                 onSuccess = { (component, paymentMethodMetadata) ->
                     updateState { it.copy(linkComponent = component, paymentMethodMetadata = paymentMethodMetadata) }
-                    LinkController.ConfigureResult.Success
+                    savedStateHandle[LINK_CONFIGURED_KEY] = true
+                    Result.success(Unit)
                 },
                 onFailure = { error ->
-                    LinkController.ConfigureResult.Failed(error)
+                    Result.failure(error)
                 }
             )
     }
@@ -210,17 +217,21 @@ internal class LinkControllerInteractor @Inject constructor(
 
     fun presentFull(
         launcher: ActivityResultLauncher<LinkActivityContract.Args>,
-        email: String,
-        phoneNumber: String?,
-        paymentMethodTypes: List<LinkController.PaymentMethodType>?,
     ) {
+        val config = configuration
+        if (config == null) {
+            _presentResultFlow.tryEmit(
+                LinkController.PresentResult.Failed(MissingConfigurationException())
+            )
+            return
+        }
         if (_state.value.presentationType != null) return
         updateState { it.copy(presentationType = PresentationType.Full) }
         present(
             launcher = launcher,
-            email = email,
-            phoneNumber = phoneNumber,
-            paymentMethodTypes = paymentMethodTypes,
+            email = config.email.takeIf { !it.isNullOrEmpty() },
+            phoneNumber = config.phoneNumber,
+            paymentMethodTypes = config.supportedPaymentMethodTypes,
             onConfigurationError = { error ->
                 updateState { it.copy(presentationType = null) }
                 _presentResultFlow.tryEmit(LinkController.PresentResult.Failed(error))
@@ -228,7 +239,7 @@ internal class LinkControllerInteractor @Inject constructor(
             getLaunchMode = { _, state ->
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = state.selectedPaymentMethod?.details,
-                    paymentMethodFilters = paymentMethodTypes?.toFilters(),
+                    paymentMethodFilters = config.supportedPaymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
                     shouldShowSecondaryCta = false,
                 )
@@ -403,7 +414,7 @@ internal class LinkControllerInteractor @Inject constructor(
             PresentationType.Full -> when (result) {
                 is LinkActivityResult.Canceled -> {
                     logger.debug("$tag: present canceled")
-                    _presentResultFlow.tryEmit(LinkController.PresentResult.Canceled)
+                    _presentResultFlow.tryEmit(LinkController.PresentResult.Canceled())
                 }
                 is LinkActivityResult.Completed -> {
                     logger.debug("$tag: present PM selected, creating payment method")
@@ -742,6 +753,10 @@ internal class LinkControllerInteractor @Inject constructor(
     ) {
         val linkConfiguration: LinkConfiguration?
             get() = linkComponent?.configuration
+    }
+
+    companion object {
+        internal const val LINK_CONFIGURED_KEY = "LinkController_Configured"
     }
 }
 
