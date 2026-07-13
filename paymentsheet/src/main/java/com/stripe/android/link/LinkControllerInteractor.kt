@@ -16,6 +16,7 @@ import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.account.toLinkAuthResult
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.AppAttestationException
@@ -132,6 +133,13 @@ internal class LinkControllerInteractor @Inject constructor(
         PaymentSelection.IconLoader(application.resources, DefaultStripeImageLoader(application))
     }
 
+    private val _confirmSetupIntentResultFlow =
+        MutableSharedFlow<LinkController.ConfirmSetupIntentResult>(extraBufferCapacity = 1)
+    val confirmSetupIntentResultFlow = _confirmSetupIntentResultFlow.asSharedFlow()
+
+    internal val setupIntentClientSecret: String?
+        get() = _state.value.setupIntentClientSecret
+
     val paymentMethodMetadata: PaymentMethodMetadata?
         get() = _state.value.paymentMethodMetadata
 
@@ -174,7 +182,13 @@ internal class LinkControllerInteractor @Inject constructor(
             }
             .fold(
                 onSuccess = { (component, paymentMethodMetadata) ->
-                    updateState { it.copy(linkComponent = component, paymentMethodMetadata = paymentMethodMetadata) }
+                    updateState {
+                        it.copy(
+                            linkComponent = component,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            setupIntentClientSecret = config.setupIntentClientSecret,
+                        )
+                    }
                     savedStateHandle[LINK_CONFIGURED_KEY] = true
                     Result.success(Unit)
                 },
@@ -568,6 +582,36 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
+    internal suspend fun performCreatePaymentMethodForConfirmation(): Result<PaymentMethod> {
+        val result = performCreatePaymentMethod(apiKey = null)
+        updateState { it.copy(createdPaymentMethod = result.getOrNull()) }
+        return result
+    }
+
+    internal fun onSetupIntentConfirmationResult(result: InternalPaymentResult) {
+        val confirmResult = when (result) {
+            is InternalPaymentResult.Completed -> {
+                val paymentMethod = _state.value.createdPaymentMethod
+                if (paymentMethod != null) {
+                    LinkController.ConfirmSetupIntentResult.Success(paymentMethod)
+                } else {
+                    LinkController.ConfirmSetupIntentResult.Failed(
+                        IllegalStateException("Payment method not found after SetupIntent confirmation")
+                    )
+                }
+            }
+            is InternalPaymentResult.Failed ->
+                LinkController.ConfirmSetupIntentResult.Failed(result.throwable)
+            is InternalPaymentResult.Canceled ->
+                LinkController.ConfirmSetupIntentResult.Canceled
+        }
+        _confirmSetupIntentResultFlow.tryEmit(confirmResult)
+    }
+
+    internal fun emitConfirmSetupIntentResult(result: LinkController.ConfirmSetupIntentResult) {
+        _confirmSetupIntentResultFlow.tryEmit(result)
+    }
+
     suspend fun registerConsumer(
         email: String,
         phone: String,
@@ -742,6 +786,7 @@ internal class LinkControllerInteractor @Inject constructor(
     internal data class State(
         val linkComponent: LinkComponent? = null,
         val paymentMethodMetadata: PaymentMethodMetadata? = null,
+        val setupIntentClientSecret: String? = null,
         val emailInput: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
