@@ -677,6 +677,26 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure resets isLoading to false when the request fails`() = runTest {
+        networkRule.checkoutInit { response ->
+            response.setResponseCode(500)
+            response.setBody("""{"error": {"message": "Internal server error"}}""")
+        }
+        val controller = createController()
+
+        turbineScope {
+            val isLoadingTurbine = controller.isLoading.testIn(backgroundScope)
+            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+            assertThat(controller.configure(DEFAULT_CLIENT_SECRET).isFailure).isTrue()
+
+            // The failure path must still release the loading window via the finally block.
+            assertThat(isLoadingTurbine.awaitItem()).isTrue()
+            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+        }
+    }
+
+    @Test
     fun `configure is serialized behind an in-flight mutation and shares its loading window`() =
         runMutationScenario {
             val holdMutation = CountDownLatch(1)
