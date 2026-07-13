@@ -92,6 +92,9 @@ internal abstract class BaseSheetViewModel(
             ),
             placesClient = placesClient,
             coroutineScope = viewModelScope,
+            shouldUseAutocompleteProxyEndpointsProvider = {
+                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
+            },
         )
 
     internal val validationRequested = MutableSharedFlow<Unit>()

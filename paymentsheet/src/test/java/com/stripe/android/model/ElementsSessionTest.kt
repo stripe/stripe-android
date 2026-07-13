@@ -328,6 +328,44 @@ class ElementsSessionTest {
         assertThat(session.disableSsdOcrCardScan).isFalse()
     }
 
+    @Test
+    fun `OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS flag has correct value`() {
+        assertThat(
+            ElementsSession.Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS.flagValue
+        ).isEqualTo("ocs_mobile_should_use_autocomplete_proxy_endpoints")
+    }
+
+    @Test
+    fun `shouldUseAutocompleteProxyEndpoints returns true when flag is enabled`() {
+        val session = createElementsSession(
+            flags = mapOf(
+                ElementsSession.Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS to true
+            )
+        )
+
+        assertThat(session.shouldUseAutocompleteProxyEndpoints).isTrue()
+    }
+
+    @Test
+    fun `shouldUseAutocompleteProxyEndpoints returns false when flag is disabled`() {
+        val session = createElementsSession(
+            flags = mapOf(
+                ElementsSession.Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS to false
+            )
+        )
+
+        assertThat(session.shouldUseAutocompleteProxyEndpoints).isFalse()
+    }
+
+    @Test
+    fun `shouldUseAutocompleteProxyEndpoints returns false when flag is missing`() {
+        val session = createElementsSession(
+            flags = emptyMap()
+        )
+
+        assertThat(session.shouldUseAutocompleteProxyEndpoints).isFalse()
+    }
+
     private fun createElementsSession(
         passiveCaptcha: PassiveCaptchaParams? = null,
         flags: Map<ElementsSession.Flag, Boolean> = emptyMap(),

@@ -80,6 +80,7 @@ internal object PaymentMethodMetadataFactory {
         elementsSessionId: String? = null,
         disableSsdOcrCardScan: Boolean = false,
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
+        shouldUseAutocompleteProxyEndpoints: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -152,6 +153,7 @@ internal object PaymentMethodMetadataFactory {
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             cardArts = cardArts,
+            shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             paymentMethodLayout = paymentMethodLayout,
         )
     }

@@ -95,6 +95,7 @@ internal data class PaymentMethodMetadata(
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
+    val shouldUseAutocompleteProxyEndpoints: Boolean,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
 
@@ -428,6 +429,7 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
+                shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = paymentMethodLayout,
             )
         }
@@ -499,6 +501,7 @@ internal data class PaymentMethodMetadata(
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
+                shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }

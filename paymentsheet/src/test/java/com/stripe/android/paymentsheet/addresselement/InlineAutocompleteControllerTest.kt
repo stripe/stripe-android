@@ -619,10 +619,101 @@ class InlineAutocompleteControllerTest {
         assertThat(call.country).isEqualTo("")
     }
 
+    @Test
+    fun `proxy flag true keeps Google Places enabled for predictions until proxy is implemented`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = true
+    ) {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(call.query).isEqualTo("123 Main")
+    }
+
+    @Test
+    fun `proxy flag true keeps Google Places enabled for place selection until proxy is implemented`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = true
+    ) {
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            FetchPlaceResponse(
+                Place(
+                    listOf(
+                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
+                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
+                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+                    )
+                )
+            )
+        )
+        delegate.onPredictionSelected("place-id-123")
+
+        val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
+        assertThat(call).isEqualTo("place-id-123")
+        eventCalls.awaitItem()
+    }
+
+    @Test
+    fun `proxy flag true with null placesClient stays Idle until proxy is implemented`() = runScenario(
+        usePlacesClient = false,
+        shouldUseAutocompleteProxyEndpoints = true
+    ) {
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+    }
+
+    @Test
+    fun `proxy flag false calls Google Places for predictions`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = false
+    ) {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(emptyList())
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(call.query).isEqualTo("123 Main")
+    }
+
+    @Test
+    fun `proxy flag false calls Google Places for place selection`() = runScenario(
+        shouldUseAutocompleteProxyEndpoints = false
+    ) {
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            FetchPlaceResponse(
+                Place(
+                    listOf(
+                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
+                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
+                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+                    )
+                )
+            )
+        )
+
+        delegate.onPredictionSelected("place-id-123")
+
+        val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
+        assertThat(call).isEqualTo("place-id-123")
+        eventCalls.awaitItem()
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),
         usePlacesClient: Boolean = true,
+        shouldUseAutocompleteProxyEndpoints: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val fakePlaces = if (usePlacesClient) FakePlacesClientProxy() else null
@@ -638,6 +729,7 @@ class InlineAutocompleteControllerTest {
             config = config,
             coroutineScope = backgroundScope,
             eventListenerProvider = { { event -> eventCalls.add(event) } },
+            shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
         )
 
         Scenario(

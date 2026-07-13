@@ -81,6 +81,7 @@ internal class InputAddressViewModel @Inject constructor(
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
             eventListenerProvider = { eventListener },
+            shouldUseAutocompleteProxyEndpoints = false,
         )
     } else {
         null
