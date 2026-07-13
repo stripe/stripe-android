@@ -9,7 +9,7 @@
   <!-- Error message shown when the wallet ownership challenge has expired. -->
   <string name="stripe_onramp_wallet_ownership_challenge_expired_user_message">This wallet verification request expired. Please try again.</string>
   <!-- Error message shown when the wallet ownership challenge is invalid. -->
-  <string name="stripe_onramp_invalid_wallet_ownership_challenge_user_message">This wallet verification request is no longer valid. Please try again.</string>
+  <string name="stripe_onramp_invalid_wallet_ownership_challenge_user_message">This wallet verification request is invalid. Please try again.</string>
   <!-- Error message shown when the wallet is not registered for crypto onramp. -->
   <string name="stripe_onramp_wallet_not_found_user_message">This wallet couldn\'t be found. Please choose or add a wallet and try again.</string>
   <!-- Error message shown when the wallet network is not supported for crypto onramp. -->
