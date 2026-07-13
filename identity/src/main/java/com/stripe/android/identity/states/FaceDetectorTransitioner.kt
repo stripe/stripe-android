@@ -430,6 +430,7 @@ internal class FaceDetectorTransitioner(
     }
 
     private fun updateCaptureGuideProgress(analyzerOutput: FaceDetectorOutput) {
+        val previousProgress = captureGuideProgress
         captureGuideProgress = when (activeCapture) {
             Capture.FRONT -> 0f
             Capture.LEFT,
@@ -442,6 +443,10 @@ internal class FaceDetectorTransitioner(
                 }
             }
         }
+        logCaptureGuideProgress(
+            analyzerOutput = analyzerOutput,
+            previousProgress = previousProgress
+        )
     }
 
     private fun captureGuideProgressForPose(capture: Capture, yaw: Float): Float {
@@ -450,6 +455,31 @@ internal class FaceDetectorTransitioner(
             Capture.RIGHT -> yaw / SIDE_CAPTURE_YAW_THRESHOLD
             Capture.FRONT -> 0f
         }.coerceIn(0f, 1f)
+    }
+
+    private fun logCaptureGuideProgress(
+        analyzerOutput: FaceDetectorOutput,
+        previousProgress: Float
+    ) {
+        if (activeCapture == Capture.FRONT) {
+            return
+        }
+
+        val pose = analyzerOutput.pose
+        Log.d(
+            TAG,
+            "Selfie side capture pose " +
+                "activeCapture=$activeCapture, " +
+                "score=${analyzerOutput.resultScore}, " +
+                "faceScoreOk=${isFaceScoreOverThreshold(analyzerOutput.resultScore)}, " +
+                "bbox=${analyzerOutput.boundingBox}, " +
+                "pose=$pose, " +
+                "yaw=${pose?.yaw}, " +
+                "pitch=${pose?.pitch}, " +
+                "roll=${pose?.roll}, " +
+                "progress=$previousProgress->$captureGuideProgress, " +
+                "threshold=$SIDE_CAPTURE_YAW_THRESHOLD"
+        )
     }
 
     private fun shouldWaitForSideCapturePrompt(): Boolean {

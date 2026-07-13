@@ -13,6 +13,7 @@ import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.ml.MediaPipeFaceDetectorAnalyzer
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
@@ -63,7 +64,11 @@ internal abstract class CameraViewModel(
 
         modelPerformanceTracker.reportAndReset(
             if (result.result is FaceDetectorOutput) {
-                FaceDetectorAnalyzer.MODEL_NAME
+                if (result.result.pose != null || result.result.faceLandmarkResult != null) {
+                    MediaPipeFaceDetectorAnalyzer.MODEL_NAME
+                } else {
+                    FaceDetectorAnalyzer.MODEL_NAME
+                }
             } else {
                 IDDetectorAnalyzer.MODEL_NAME
             }

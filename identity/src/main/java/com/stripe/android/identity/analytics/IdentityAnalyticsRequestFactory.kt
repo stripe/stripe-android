@@ -46,7 +46,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     enum class ModelType(val analyticsValue: String) {
         DOCUMENT("document"),
-        SELFIE("selfie")
+        SELFIE("selfie"),
+        FACE("face")
     }
     var verificationPage: VerificationPage? = null
     private val requestFactory = AnalyticsRequestV2Factory(
@@ -586,6 +587,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val MODEL_LOADING_STAGE_DOWNLOAD = "download"
         const val MODEL_LOADING_STAGE_VALIDATE = "validate"
         const val MODEL_LOADING_STAGE_INITIALIZE = "initialize"
+        const val MODEL_LOADING_STAGE_MEDIA_PIPE_DETECTOR = "media_pipe_detector"
         const val UPLOAD_STAGE_PREPARE = "prepare"
         const val UPLOAD_STAGE_REQUEST = "request"
 

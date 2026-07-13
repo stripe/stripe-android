@@ -54,10 +54,14 @@ internal data class SelfieUploadState(
                 )
             }
             FaceDetectorTransitioner.Selfie.LEFT -> {
-                this
+                this.copy(
+                    leftLowResResult = Resource.success(newResult)
+                )
             }
             FaceDetectorTransitioner.Selfie.RIGHT -> {
-                this
+                this.copy(
+                    rightLowResResult = Resource.success(newResult)
+                )
             }
         }
     } else {
@@ -113,10 +117,14 @@ internal data class SelfieUploadState(
                 )
             }
             FaceDetectorTransitioner.Selfie.LEFT -> {
-                this
+                this.copy(
+                    leftLowResResult = Resource.error(msg = message, throwable = throwable)
+                )
             }
             FaceDetectorTransitioner.Selfie.RIGHT -> {
-                this
+                this.copy(
+                    rightLowResResult = Resource.error(msg = message, throwable = throwable)
+                )
             }
         }
     } else {
@@ -188,7 +196,9 @@ internal data class SelfieUploadState(
         }
         FaceDetectorTransitioner.Selfie.LEFT -> {
             if (isHighRes) {
-                this
+                this.copy(
+                    leftLowResResult = Resource.loading()
+                )
             } else {
                 this.copy(
                     leftLowResResult = Resource.loading()
@@ -197,7 +207,9 @@ internal data class SelfieUploadState(
         }
         FaceDetectorTransitioner.Selfie.RIGHT -> {
             if (isHighRes) {
-                this
+                this.copy(
+                    rightLowResResult = Resource.loading()
+                )
             } else {
                 this.copy(
                     rightLowResResult = Resource.loading()

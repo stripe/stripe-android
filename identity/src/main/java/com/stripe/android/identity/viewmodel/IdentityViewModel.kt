@@ -38,6 +38,8 @@ import com.stripe.android.identity.ml.Category
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.ml.MediaPipeFaceDetectorAnalyzer
+import com.stripe.android.identity.ml.MediaPipeFaceDetectorUnavailableException
 import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.DocumentScanDestination
@@ -75,6 +77,7 @@ import com.stripe.android.identity.networking.models.Requirement.Companion.INDIV
 import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
 import com.stripe.android.identity.networking.models.Requirement.Companion.supportsForceConfirm
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.enable3DFaceCapture
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.shouldSubmit3DFaceCaptureData
 import com.stripe.android.identity.networking.models.VerificationPageData
@@ -99,6 +102,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
@@ -712,7 +716,7 @@ internal class IdentityViewModel(
                 add(selfie to false)
             }
             sideSelfies.forEach { selfie ->
-                add(selfie to false)
+                add(selfie to true)
             }
         }
     }
@@ -1145,11 +1149,15 @@ internal class IdentityViewModel(
                             IdentityAnalyticsRequestFactory.ModelType.DOCUMENT
                         )
                         verificationPage.selfieCapture?.let { selfieCapture ->
-                            downloadModelAndPost(
-                                selfieCapture.models.faceDetectorUrl,
-                                _faceDetectorModelFile,
-                                IdentityAnalyticsRequestFactory.ModelType.SELFIE
-                            )
+                            if (verificationPage.enable3DFaceCapture()) {
+                                loadMediaPipeFaceDetectorAndPost(_faceDetectorModelFile)
+                            } else {
+                                downloadModelAndPost(
+                                    selfieCapture.models.faceDetectorUrl,
+                                    _faceDetectorModelFile,
+                                    IdentityAnalyticsRequestFactory.ModelType.SELFIE
+                                )
+                            }
                         } ?: run {
                             // Selfie not required, post null
                             _faceDetectorModelFile.postValue(Resource.success(null))
@@ -1341,6 +1349,51 @@ internal class IdentityViewModel(
 
                     // Exit with failure
                     finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(it))
+                }
+            )
+        }
+    }
+
+    private fun loadMediaPipeFaceDetectorAndPost(
+        target: MutableLiveData<Resource<File>>
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                target.postValue(Resource.loading())
+                withContext(workContext) {
+                    MediaPipeFaceDetectorAnalyzer.assertAvailable(getApplication())
+                }
+            }.fold(
+                onSuccess = {
+                    target.postValue(Resource.success(null))
+                },
+                onFailure = { throwable ->
+                    val mediaPipeThrowable = throwable as? MediaPipeFaceDetectorUnavailableException
+                        ?: MediaPipeFaceDetectorUnavailableException(throwable)
+                    identityAnalyticsRequestFactory.genericError(
+                        throwable = mediaPipeThrowable,
+                        overrideMessage = "MediaPipe face detector unavailable",
+                        additionalMetadata = modelLoadingErrorMetadata(
+                            modelType = IdentityAnalyticsRequestFactory.ModelType.FACE,
+                            stage = IdentityAnalyticsRequestFactory.MODEL_LOADING_STAGE_MEDIA_PIPE_DETECTOR
+                        )
+                    )
+                    identityAnalyticsRequestFactory.verificationFailed(
+                        isFromFallbackUrl = false,
+                        requireSelfie = verificationPage.value?.data?.requireSelfie(),
+                        throwable = mediaPipeThrowable,
+                        lastScreenName = modelScreenName(IdentityAnalyticsRequestFactory.ModelType.FACE)
+                    )
+                    target.postValue(
+                        Resource.error(
+                            "MediaPipe face detector unavailable",
+                            mediaPipeThrowable
+                        )
+                    )
+
+                    finishWithResult(
+                        IdentityVerificationSheet.VerificationFlowResult.Failed(mediaPipeThrowable)
+                    )
                 }
             )
         }
@@ -2263,7 +2316,8 @@ internal class IdentityViewModel(
     ): String = when (modelType) {
         IdentityAnalyticsRequestFactory.ModelType.DOCUMENT ->
             IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
-        IdentityAnalyticsRequestFactory.ModelType.SELFIE ->
+        IdentityAnalyticsRequestFactory.ModelType.SELFIE,
+        IdentityAnalyticsRequestFactory.ModelType.FACE ->
             IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
     }
 
