@@ -46,6 +46,24 @@ class PaymentConfigurationTest {
     }
 
     @Test
+    fun `betas should be persisted`() {
+        PaymentConfiguration.init(
+            context,
+            ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+            betas = setOf(StripeApiBeta.VippsPreviewV1)
+        )
+
+        assertThat(
+            PaymentConfiguration.getInstance(context)
+        ).isEqualTo(
+            PaymentConfiguration(
+                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                betas = setOf(StripeApiBeta.VippsPreviewV1)
+            )
+        )
+    }
+
+    @Test
     fun getInstance_whenInstanceIsNull_loadsFromPrefs() {
         PaymentConfiguration.init(
             context,

@@ -11,15 +11,18 @@ import kotlinx.coroutines.CoroutineDispatcher
 internal fun createIntentStatusPoller(
     enqueuedStatuses: List<StripeIntent.Status>,
     dispatcher: CoroutineDispatcher,
+    paymentConfiguration: PaymentConfiguration = PaymentConfiguration(
+        publishableKey = "key",
+        stripeAccountId = "account_id",
+    ),
+    onRetrievePaymentIntent: (ApiRequest.Options) -> Unit = {},
 ): DefaultIntentStatusPoller {
     return DefaultIntentStatusPoller(
-        stripeRepository = FakeStripeRepository(enqueuedStatuses),
-        paymentConfigProvider = {
-            PaymentConfiguration(
-                publishableKey = "key",
-                stripeAccountId = "account_id",
-            )
-        },
+        stripeRepository = FakeStripeRepository(
+            enqueuedStatuses = enqueuedStatuses,
+            onRetrievePaymentIntent = onRetrievePaymentIntent,
+        ),
+        paymentConfigProvider = { paymentConfiguration },
         config = IntentStatusPoller.Config(
             clientSecret = "secret",
         ),
@@ -28,7 +31,8 @@ internal fun createIntentStatusPoller(
 }
 
 private class FakeStripeRepository(
-    enqueuedStatuses: List<StripeIntent.Status>
+    enqueuedStatuses: List<StripeIntent.Status>,
+    private val onRetrievePaymentIntent: (ApiRequest.Options) -> Unit,
 ) : AbsFakeStripeRepository() {
 
     private val queue = enqueuedStatuses.toMutableList()
@@ -38,6 +42,7 @@ private class FakeStripeRepository(
         options: ApiRequest.Options,
         expandFields: List<String>
     ): Result<PaymentIntent> {
+        onRetrievePaymentIntent(options)
         val intentStatus = queue.removeAt(0)
         val paymentIntent = PaymentIntentFactory.create(status = intentStatus)
         return Result.success(paymentIntent)

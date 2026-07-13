@@ -1,5 +1,7 @@
 package com.stripe.android.googlepaylauncher.injection
 
+import com.stripe.android.StripeApiBeta
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
 import com.stripe.android.googlepaylauncher.DefaultPaymentsClientFactory
@@ -12,7 +14,9 @@ import com.stripe.android.payments.core.analytics.RealErrorReporter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import javax.inject.Named
 import javax.inject.Singleton
+import kotlin.jvm.JvmSuppressWildcards
 
 @Module(
     subcomponents = [GooglePayPaymentMethodLauncherViewModelSubcomponent::class]
@@ -50,5 +54,9 @@ internal abstract class GooglePayPaymentMethodLauncherModule {
             googlePayConfig: GooglePayPaymentMethodLauncher.Config,
             paymentsClientFactory: PaymentsClientFactory
         ) = paymentsClientFactory.create(googlePayConfig.environment)
+
+        @Provides
+        @Named(STRIPE_API_BETAS)
+        fun provideStripeApiBetas(): Set<@JvmSuppressWildcards StripeApiBeta> = emptySet()
     }
 }

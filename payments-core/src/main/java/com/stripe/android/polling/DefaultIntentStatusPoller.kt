@@ -60,8 +60,9 @@ class DefaultIntentStatusPoller @Inject constructor(
         val paymentIntent = stripeRepository.retrievePaymentIntent(
             clientSecret = config.clientSecret,
             options = ApiRequest.Options(
-                publishableKeyProvider = { paymentConfig.publishableKey },
-                stripeAccountIdProvider = { paymentConfig.stripeAccountId },
+                apiKey = paymentConfig.publishableKey,
+                stripeAccount = paymentConfig.stripeAccountId,
+                betas = paymentConfig.betas,
             ),
         )
         return paymentIntent.getOrNull()?.status

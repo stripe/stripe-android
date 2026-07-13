@@ -6,11 +6,13 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -210,6 +212,13 @@ internal interface NativeLinkModule {
         fun providePaymentConfiguration(appContext: Context): PaymentConfiguration {
             return PaymentConfiguration.getInstance(appContext)
         }
+
+        @Provides
+        @NativeLinkScope
+        @Named(STRIPE_API_BETAS)
+        fun provideStripeApiBetas(
+            paymentConfiguration: PaymentConfiguration,
+        ): Set<@JvmSuppressWildcards StripeApiBeta> = paymentConfiguration.betas
 
         @Provides
         @NativeLinkScope

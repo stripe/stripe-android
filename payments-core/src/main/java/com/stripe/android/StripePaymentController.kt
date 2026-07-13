@@ -56,13 +56,15 @@ constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
-    private val uiContext: CoroutineContext = Dispatchers.Main
+    private val uiContext: CoroutineContext = Dispatchers.Main,
+    private val betasProvider: () -> Set<StripeApiBeta> = { emptySet() },
 ) : PaymentController {
 
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
         publishableKeyProvider,
+        betasProvider(),
         stripeRepository,
         Logger.getInstance(enableLogging),
         workContext
@@ -70,6 +72,7 @@ constructor(
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
         publishableKeyProvider,
+        betasProvider(),
         stripeRepository,
         Logger.getInstance(enableLogging),
         workContext

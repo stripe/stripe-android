@@ -409,6 +409,14 @@ constructor(
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
         ),
+        Vipps(
+            "vipps",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            requiresMandateForPaymentIntent = false,
+            hasDelayedSettlement = false,
+        ),
         Multibanco(
             "multibanco",
             isReusable = false,

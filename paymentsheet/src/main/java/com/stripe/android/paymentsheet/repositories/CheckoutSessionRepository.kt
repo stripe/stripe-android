@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
@@ -15,6 +17,7 @@ import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.jvm.JvmSuppressWildcards
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
@@ -22,6 +25,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    @Named(STRIPE_API_BETAS) private val betas: Set<@JvmSuppressWildcards StripeApiBeta>,
 ) {
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -34,6 +38,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private fun createOptions(): ApiRequest.Options = ApiRequest.Options(
         apiKey = publishableKeyProvider(),
         stripeAccount = stripeAccountIdProvider(),
+        betas = betas,
     )
 
     private suspend fun executePost(

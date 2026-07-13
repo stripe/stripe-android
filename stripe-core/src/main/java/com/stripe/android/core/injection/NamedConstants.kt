@@ -21,6 +21,12 @@ const val PUBLISHABLE_KEY = "publishableKey"
 const val STRIPE_ACCOUNT_ID = "stripeAccountId"
 
 /**
+ * Name for user's configured Stripe API betas
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val STRIPE_API_BETAS = "stripeApiBetas"
+
+/**
  * Name for form initial values
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

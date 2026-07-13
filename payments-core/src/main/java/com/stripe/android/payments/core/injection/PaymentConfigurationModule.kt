@@ -3,12 +3,15 @@ package com.stripe.android.payments.core.injection
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
 import javax.inject.Provider
+import kotlin.jvm.JvmSuppressWildcards
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
@@ -29,4 +32,10 @@ class PaymentConfigurationModule {
     fun provideStripeAccountId(
         paymentConfiguration: Provider<PaymentConfiguration>
     ): () -> String? = { paymentConfiguration.get().stripeAccountId }
+
+    @Provides
+    @Named(STRIPE_API_BETAS)
+    fun provideStripeApiBetas(
+        paymentConfiguration: Provider<PaymentConfiguration>
+    ): Set<@JvmSuppressWildcards StripeApiBeta> = paymentConfiguration.get().betas
 }

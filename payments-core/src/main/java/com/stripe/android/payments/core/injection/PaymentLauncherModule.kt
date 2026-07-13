@@ -2,9 +2,11 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import com.google.android.instantapps.InstantApps
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -17,6 +19,7 @@ import dagger.Provides
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.JvmSuppressWildcards
 
 @Module(
     subcomponents = [PaymentLauncherViewModelSubcomponent::class]
@@ -59,6 +62,10 @@ internal class PaymentLauncherModule {
     fun provideIsInstantApp(context: Context): Boolean {
         return InstantApps.isInstantApp(context)
     }
+
+    @Provides
+    @Named(STRIPE_API_BETAS)
+    fun provideStripeApiBetas(): Set<@JvmSuppressWildcards StripeApiBeta> = emptySet()
 
     @Provides
     @Singleton

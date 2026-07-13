@@ -14,11 +14,13 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -65,6 +67,7 @@ import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.JvmSuppressWildcards
 
 internal fun paymentElementConfirmationTest(
     application: Application,
@@ -187,6 +190,10 @@ internal interface PaymentElementConfirmationTestModule {
 
         @Provides
         fun providesErrorReporter(): ErrorReporter = FakeErrorReporter()
+
+        @Provides
+        @Named(STRIPE_API_BETAS)
+        fun providesStripeApiBetas(): Set<@JvmSuppressWildcards StripeApiBeta> = emptySet()
 
         @Provides
         fun provideDurationProvider(): DurationProvider = FakeDurationProvider()

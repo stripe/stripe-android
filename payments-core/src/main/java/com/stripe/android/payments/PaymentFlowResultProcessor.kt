@@ -3,6 +3,7 @@ package com.stripe.android.payments
 import android.content.Context
 import com.stripe.android.PaymentController
 import com.stripe.android.PaymentIntentResult
+import com.stripe.android.StripeApiBeta
 import com.stripe.android.SetupIntentResult
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.StripeIntentResult.Outcome.Companion.CANCELED
@@ -10,6 +11,7 @@ import com.stripe.android.StripeIntentResult.Outcome.Companion.SUCCEEDED
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_API_BETAS
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -22,16 +24,17 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
+import kotlin.jvm.JvmSuppressWildcards
 
 /**
  * Class responsible for processing the result of a [PaymentController] confirm operation.
  */
 internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : StripeIntentResult<T>>(
     context: Context,
-    private val publishableKeyProvider: Provider<String>,
+    private val publishableKeyProvider: () -> String,
+    private val betasProvider: () -> Set<@JvmSuppressWildcards StripeApiBeta>,
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
@@ -46,8 +49,9 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         val requestOptions = ApiRequest.Options(
-            apiKey = publishableKeyProvider.get(),
-            stripeAccount = result.stripeAccountId
+            apiKey = publishableKeyProvider(),
+            stripeAccount = result.stripeAccountId,
+            betas = betasProvider(),
         )
 
         val initialRetrieveIntentStartTime = System.currentTimeMillis()
@@ -310,12 +314,14 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 internal class PaymentIntentFlowResultProcessor @Inject constructor(
     context: Context,
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    @Named(STRIPE_API_BETAS) betas: Set<@JvmSuppressWildcards StripeApiBeta>,
     stripeRepository: StripeRepository,
     logger: Logger,
     @IOContext workContext: CoroutineContext
 ) : PaymentFlowResultProcessor<PaymentIntent, PaymentIntentResult>(
     context,
     publishableKeyProvider,
+    { betas },
     stripeRepository,
     logger,
     workContext
@@ -374,12 +380,14 @@ internal class PaymentIntentFlowResultProcessor @Inject constructor(
 internal class SetupIntentFlowResultProcessor @Inject constructor(
     context: Context,
     @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+    @Named(STRIPE_API_BETAS) betas: Set<@JvmSuppressWildcards StripeApiBeta>,
     stripeRepository: StripeRepository,
     logger: Logger,
     @IOContext workContext: CoroutineContext
 ) : PaymentFlowResultProcessor<SetupIntent, SetupIntentResult>(
     context,
     publishableKeyProvider,
+    { betas },
     stripeRepository,
     logger,
     workContext
