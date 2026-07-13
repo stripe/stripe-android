@@ -109,8 +109,15 @@ class CheckoutController @Inject internal constructor(
     class Builder(
         private val application: Application,
         private val savedStateHandle: SavedStateHandle,
-        private val resultCallback: ResultCallback,
     ) {
+        private var resultCallback: ResultCallback = ResultCallback {}
+
+        fun resultCallback(
+            resultCallback: ResultCallback
+        ): Builder = apply {
+            this.resultCallback = resultCallback
+        }
+
         fun build(): CheckoutController {
             val component = DaggerCheckoutControllerComponent.factory().create(
                 application = application,
