@@ -451,8 +451,8 @@ internal class FaceDetectorTransitioner(
 
     private fun captureGuideProgressForPose(capture: Capture, yaw: Float): Float {
         return when (capture) {
-            Capture.LEFT -> -yaw / SIDE_CAPTURE_YAW_THRESHOLD
-            Capture.RIGHT -> yaw / SIDE_CAPTURE_YAW_THRESHOLD
+            Capture.LEFT -> yaw / SIDE_CAPTURE_YAW_THRESHOLD_RADIANS
+            Capture.RIGHT -> -yaw / SIDE_CAPTURE_YAW_THRESHOLD_RADIANS
             Capture.FRONT -> 0f
         }.coerceIn(0f, 1f)
     }
@@ -478,7 +478,7 @@ internal class FaceDetectorTransitioner(
                 "pitch=${pose?.pitch}, " +
                 "roll=${pose?.roll}, " +
                 "progress=$previousProgress->$captureGuideProgress, " +
-                "threshold=$SIDE_CAPTURE_YAW_THRESHOLD"
+                "threshold=$SIDE_CAPTURE_YAW_THRESHOLD_RADIANS"
         )
     }
 
@@ -675,7 +675,7 @@ internal class FaceDetectorTransitioner(
         const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 10000000
 
         private const val SIDE_CAPTURE_NUM_FRAMES = 2
-        private const val SIDE_CAPTURE_YAW_THRESHOLD = 0.08f
+        private const val SIDE_CAPTURE_YAW_THRESHOLD_RADIANS = 0.2617994f // 15 degrees
         private const val DEFAULT_MOTION_BLUR_MIN_DURATION_MS = 100L
         private const val DEFAULT_UNKNOWN_STABILITY_SCORE = 0.5f
         private val DEFAULT_SIDE_CAPTURE_SEQUENCE = listOf(Capture.RIGHT, Capture.LEFT)
