@@ -42,7 +42,7 @@ internal class NfcCoilAnimatedInteriorTest {
     fun `idle status keeps ring progress at zero`() {
         composeRule.setContent {
             NfcCoilAnimatedInterior(
-                status = NfcScanningStatus.Idle,
+                status = NfcScanningStatus.Idle(error = null),
                 onSuccessShown = {},
                 modifier = Modifier.size(CoilSize),
             )

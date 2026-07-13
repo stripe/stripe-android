@@ -37,7 +37,7 @@ internal class NfcScanningViewModel @Inject constructor(
     private val _viewState = MutableStateFlow(
         NfcScanningViewState(
             tapZone = tapZone,
-            status = NfcScanningStatus.Idle,
+            status = NfcScanningStatus.Idle(error = null),
         )
     )
     val viewState: StateFlow<NfcScanningViewState> = _viewState.asStateFlow()
@@ -62,6 +62,13 @@ internal class NfcScanningViewModel @Inject constructor(
                         eventReporter.onNfcScanAttemptStarted()
                     }
                     is NfcCardScanner.State.Failed -> {
+                        _viewState.emit(
+                            NfcScanningViewState(
+                                tapZone = tapZone,
+                                status = NfcScanningStatus.Idle(error = state.error.userMessage),
+                            )
+                        )
+
                         eventReporter.onNfcScanAttemptFailed()
                     }
                     is NfcCardScanner.State.Complete -> {
