@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -46,12 +47,18 @@ internal class ExpressCheckoutElementInteractor private constructor(
     private val confirmationHandler: ConfirmationHandler,
     private val coroutineScope: CoroutineScope,
 ) {
+
+    val state = confirmationHandler.state.mapAsStateFlow { confirmationHandlerState ->
+        createInitialState(
+            buttonsEnabled = confirmationHandlerState !is ConfirmationHandler.State.Confirming,
+        )
+    }
+
     data class State(
         val walletButtons: List<ExpressButton>,
         val buttonsEnabled: Boolean,
     )
 
-    // TODO: listen for confirmation state to be confirming and if so, disable wallet buttons.
     sealed interface ViewAction {
         data class OnButtonPressed(val button: ExpressButton) : ViewAction
     }
@@ -177,7 +184,9 @@ internal class ExpressCheckoutElementInteractor private constructor(
         }
     }
 
-    private fun createInitialState(): State {
+    private fun createInitialState(
+        buttonsEnabled: Boolean,
+    ): State {
         val linkConfiguration = paymentMethodMetadata.linkState?.configuration
         return State(
             walletButtons = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
@@ -211,14 +220,11 @@ internal class ExpressCheckoutElementInteractor private constructor(
                     }
                 }
             },
-            buttonsEnabled = true,
+            buttonsEnabled = buttonsEnabled,
         )
     }
 
-    private val _state = MutableStateFlow<State>(
-        createInitialState()
-    )
-    val state = _state
+
 
     internal class ExpressCheckoutElementInteractorFactory @Inject constructor(
         private val linkAccountHolder: LinkAccountHolder,
