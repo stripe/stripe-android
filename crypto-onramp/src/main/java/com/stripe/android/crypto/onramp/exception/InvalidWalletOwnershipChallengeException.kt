@@ -15,8 +15,8 @@ class InvalidWalletOwnershipChallengeException internal constructor(
     userMessage = userMessage,
     developerMessage = CryptoOnrampErrorRenderer.renderDeveloperMessage(
         summary = apiErrorContext.apiErrorMessage
-            ?: "Wallet ownership verification failed: the challenge is invalid, already consumed, missing, " +
-            "or not associated with the authenticated consumer.",
+            ?: "Wallet ownership verification failed: the challenge does not exist, belongs to a different " +
+            "authenticated consumer, was already consumed, or is otherwise invalid.",
         code = apiErrorContext.code(fallback = INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE),
         nextStep = "Request a new challenge for the registered wallet and authenticated consumer, then submit " +
             "that challenge ID with its signature.",
