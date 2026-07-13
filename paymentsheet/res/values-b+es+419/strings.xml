@@ -267,7 +267,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Mostrar menú</string>
   <!-- Title of the sign-out action. -->
-  <string name="stripe_sign_out_link">Cerrar sesión en Link</string>
   <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_sign_out_with_brand">Cerrar sesión en %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
