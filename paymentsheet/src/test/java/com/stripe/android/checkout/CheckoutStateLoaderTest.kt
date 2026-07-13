@@ -137,6 +137,7 @@ internal class CheckoutStateLoaderTest {
         loader.load(checkoutControllerState())
 
         assertThat(stateHolder.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
+        assertThat(stateHolder.state?.key).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         // No adaptive pricing in the response, so no flag images are resolved.
         assertThat(stateHolder.state?.flagImages).isNull()
     }
