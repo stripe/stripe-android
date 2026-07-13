@@ -18,4 +18,7 @@ internal interface NfcCardScannerModule {
 
     @Binds
     fun bindsNfcCardDataParser(parser: DefaultNfcCardDataParser): NfcCardDataParser
+
+    @Binds
+    fun bindsNfcCardValidator(validator: DefaultNfcCardValidator): NfcCardValidator
 }
