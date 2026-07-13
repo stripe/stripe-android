@@ -15,6 +15,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHe
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedStateHelper
 import com.stripe.android.paymentelement.embedded.content.PaymentOptionDisplayDataHolder
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.async
@@ -62,6 +63,29 @@ internal class EmbeddedPaymentElementTest {
             .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
 
         deferred.cancel()
+    }
+
+    @Test
+    fun `configure with checkout returns Failed when BDCC address is Never`() = runTest {
+        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
+        val embeddedPaymentElement = createEmbeddedPaymentElement()
+
+        val result = embeddedPaymentElement.configure(
+            checkout,
+            EmbeddedPaymentElement.Configuration.Builder("Test")
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    ),
+                )
+                .build(),
+        )
+
+        assertThat(result).isInstanceOf(EmbeddedPaymentElement.ConfigureResult.Failed::class.java)
+        val error = (result as EmbeddedPaymentElement.ConfigureResult.Failed).error
+        assertThat(error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(error).hasMessageThat()
+            .contains("BillingDetailsCollectionConfiguration.address must not be CollectionMode.Never")
     }
 
     private fun createEmbeddedPaymentElement(): EmbeddedPaymentElement {

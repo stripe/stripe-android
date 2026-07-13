@@ -3325,6 +3325,7 @@ class PaymentSheet internal constructor(
 
         internal fun copy(
             name: CollectionMode = this.name,
+            address: AddressCollectionMode = this.address,
             attachDefaultsToPaymentMethod: Boolean = this.attachDefaultsToPaymentMethod,
         ): BillingDetailsCollectionConfiguration {
             return BillingDetailsCollectionConfiguration(

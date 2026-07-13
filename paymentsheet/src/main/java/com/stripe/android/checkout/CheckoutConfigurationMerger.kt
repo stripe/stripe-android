@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
@@ -35,7 +36,10 @@ internal sealed class CheckoutConfigurationMerger<T> {
                 defaultBillingDetails(merged.billingDetails)
                 shippingDetails(merged.shippingDetails)
                 billingDetailsCollectionConfiguration(
-                    config.billingDetailsCollectionConfiguration.copy(attachDefaultsToPaymentMethod = true)
+                    reconcileBillingCollection(
+                        config.billingDetailsCollectionConfiguration,
+                        state.checkoutSessionResponse,
+                    )
                 )
             }.build()
         }
@@ -54,11 +58,31 @@ internal sealed class CheckoutConfigurationMerger<T> {
                 defaultBillingDetails(merged.billingDetails)
                 shippingDetails(merged.shippingDetails)
                 billingDetailsCollectionConfiguration(
-                    config.billingDetailsCollectionConfiguration.copy(attachDefaultsToPaymentMethod = true)
+                    reconcileBillingCollection(
+                        config.billingDetailsCollectionConfiguration,
+                        state.checkoutSessionResponse,
+                    )
                 )
             }.build()
         }
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun reconcileBillingCollection(
+    bdcc: PaymentSheet.BillingDetailsCollectionConfiguration,
+    response: CheckoutSessionResponse,
+): PaymentSheet.BillingDetailsCollectionConfiguration {
+    require(bdcc.address != AddressCollectionMode.Never) {
+        "BillingDetailsCollectionConfiguration.address must not be CollectionMode.Never when using " +
+            "CheckoutSession, because billing address collection is required."
+    }
+    val reconciledAddress = if (response.requiresBillingAddress && bdcc.address == AddressCollectionMode.Automatic) {
+        AddressCollectionMode.Full
+    } else {
+        bdcc.address
+    }
+    return bdcc.copy(address = reconciledAddress, attachDefaultsToPaymentMethod = true)
 }
 
 private data class MergedDetails(

@@ -1349,4 +1349,79 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result).isNotNull()
         assertThat(result?.allowedShippingCountries).isEqualTo(emptyList<String>())
     }
+
+    @Test
+    fun `requiresBillingAddress is true when billing_address_collection is required`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "billing_address_collection": "required"
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.requiresBillingAddress).isTrue()
+    }
+
+    @Test
+    fun `requiresBillingAddress is false when billing_address_collection is auto`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "billing_address_collection": "auto"
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.requiresBillingAddress).isFalse()
+    }
+
+    @Test
+    fun `requiresBillingAddress is false when billing_address_collection is absent`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.requiresBillingAddress).isFalse()
+    }
+
+    @Test
+    fun `requiresBillingAddress is false when billing_address_collection is JSON null`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "billing_address_collection": null
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.requiresBillingAddress).isFalse()
+    }
 }

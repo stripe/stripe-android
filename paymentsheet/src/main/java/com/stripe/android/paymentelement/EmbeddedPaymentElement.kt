@@ -103,9 +103,14 @@ class EmbeddedPaymentElement @Inject internal constructor(
         configuration: Configuration,
     ): ConfigureResult {
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
+        val mergedConfiguration = try {
+            CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
+                .forCheckoutSession(checkout.internalState)
+        } catch (e: IllegalArgumentException) {
+            return ConfigureResult.Failed(e)
+        }
         return configurationCoordinator.configure(
-            configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
-                .forCheckoutSession(checkout.internalState),
+            configuration = mergedConfiguration,
             initializationMode = checkout.internalState.initializationMode,
         )
     }

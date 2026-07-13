@@ -609,20 +609,26 @@ class CheckoutConfigurationMergerTest {
     private fun embeddedConfiguration(
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
         shippingDetails: AddressDetails? = null,
+        bdcc: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
     ): EmbeddedPaymentElement.Configuration {
         return EmbeddedPaymentElement.Configuration.Builder("Test Merchant")
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
+            .billingDetailsCollectionConfiguration(bdcc)
             .build()
     }
 
     private fun paymentSheetConfiguration(
         defaultBillingDetails: PaymentSheet.BillingDetails? = null,
         shippingDetails: AddressDetails? = null,
+        bdcc: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
     ): PaymentSheet.Configuration {
         return PaymentSheet.Configuration.Builder("Test Merchant")
             .defaultBillingDetails(defaultBillingDetails)
             .shippingDetails(shippingDetails)
+            .billingDetailsCollectionConfiguration(bdcc)
             .build()
     }
 
@@ -634,12 +640,14 @@ class CheckoutConfigurationMergerTest {
         billingPhoneNumber: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
+        requiresBillingAddress: Boolean = false,
     ): InternalState {
         return InternalState(
             key = "CheckoutConfigurationMergerTest",
             configuration = Checkout.Configuration().build(),
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 customerEmail = customerEmail,
+                requiresBillingAddress = requiresBillingAddress,
             ),
             shippingName = shippingName,
             billingName = billingName,

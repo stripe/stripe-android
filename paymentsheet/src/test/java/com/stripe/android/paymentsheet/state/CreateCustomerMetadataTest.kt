@@ -12,6 +12,7 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
@@ -259,27 +260,10 @@ internal class CreateCustomerMetadataTest {
         ): PaymentElementLoader.InitializationMode.CheckoutSession {
             return PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "instances_test",
-                checkoutSessionResponse = CheckoutSessionResponse(
+                checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     id = "cs_test_123",
-                    amount = 1000,
-                    currency = "usd",
-                    mode = CheckoutSessionResponse.Mode.PAYMENT,
-                    status = CheckoutSessionResponse.Status.OPEN,
-                    liveMode = false,
-                    taxStatus = CheckoutSessionResponse.TaxStatus.READY,
-                    customerEmail = null,
-                    elementsSession = null,
-                    paymentIntent = null,
-                    setupIntent = null,
                     customer = customer,
                     savedPaymentMethodsOfferSave = savedPaymentMethodsOfferSave,
-                    totalSummary = null,
-                    lineItems = emptyList(),
-                    shippingOptions = emptyList(),
-                    adaptivePricingInfo = null,
-                    automaticTaxEnabled = false,
-                    taxAddressSource = null,
-                    allowedShippingCountries = null,
                 ),
             )
         }

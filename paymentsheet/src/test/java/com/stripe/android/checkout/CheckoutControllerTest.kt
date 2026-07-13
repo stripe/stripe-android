@@ -7,6 +7,7 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
@@ -37,6 +38,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -151,6 +153,26 @@ internal class CheckoutControllerTest {
             assertThat(committedState?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
                 .isFalse()
         }
+
+    @Test
+    fun `configure upgrades Automatic to Full when session requires billing address`() = runConfigureScenario(
+        configuration = CheckoutController.Configuration().paymentElement(
+            PaymentElement.Configuration().billingDetailsCollectionConfiguration(
+                BillingDetailsCollectionConfiguration().address(Automatic)
+            )
+        ),
+        networkSetup = {
+            networkRule.checkoutInit(
+                responseFactory = successResponseFactory { json ->
+                    json.put("billing_address_collection", "required")
+                },
+            )
+        },
+    ) {
+        assertThat(result.isSuccess).isTrue()
+        assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+            .isEqualTo(PSFull)
+    }
 
     @Test
     fun `configure returns failure when network request fails`() = runConfigureScenario(

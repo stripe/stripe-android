@@ -43,6 +43,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val taxContext = json.optJSONObject(FIELD_TAX_CONTEXT)
         val automaticTaxEnabled = taxContext?.optBoolean(FIELD_AUTOMATIC_TAX_ENABLED, false) ?: false
         val taxAddressSource = parseTaxAddressSource(taxContext)
+        val requiresBillingAddress = json.optString(FIELD_BILLING_ADDRESS_COLLECTION) == "required"
         val taxStatus = parseTaxStatusFromMeta(
             taxMeta = json.optJSONObject(FIELD_TAX_META),
             taxAddressSource = taxAddressSource,
@@ -105,6 +106,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             automaticTaxEnabled = automaticTaxEnabled,
             taxAddressSource = taxAddressSource,
             allowedShippingCountries = allowedShippingCountries,
+            requiresBillingAddress = requiresBillingAddress,
         )
     }
 
@@ -573,6 +575,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_PRICE = "price"
     private const val FIELD_UNIT_AMOUNT = "unit_amount"
     private const val FIELD_UNIT_AMOUNT_OVERRIDE = "unit_amount_override"
+    private const val FIELD_BILLING_ADDRESS_COLLECTION = "billing_address_collection"
     private const val FIELD_ADAPTIVE_PRICING_INFO = "adaptive_pricing_info"
     private const val FIELD_ACTIVE_PRESENTMENT_CURRENCY = "active_presentment_currency"
     private const val FIELD_INTEGRATION_AMOUNT = "integration_amount"

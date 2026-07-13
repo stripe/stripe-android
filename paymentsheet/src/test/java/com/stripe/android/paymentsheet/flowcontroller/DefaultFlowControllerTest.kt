@@ -2384,6 +2384,34 @@ internal class DefaultFlowControllerTest {
     }
 
     @Test
+    fun `configureWithCheckout reports failure when BDCC address is Never`() = runTest {
+        val checkout = CheckoutStateFactory.createCheckout(context)
+        val flowController = createFlowController()
+
+        var success: Boolean? = null
+        var error: Throwable? = null
+        flowController.configureWithCheckout(
+            checkout,
+            PaymentSheet.Configuration.Builder("Test")
+                .billingDetailsCollectionConfiguration(
+                    PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+                    ),
+                )
+                .build(),
+        ) { configuredSuccess, configuredError ->
+            success = configuredSuccess
+            error = configuredError
+        }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(success).isFalse()
+        assertThat(error).isInstanceOf(IllegalArgumentException::class.java)
+        assertThat(error).hasMessageThat()
+            .contains("BillingDetailsCollectionConfiguration.address must not be CollectionMode.Never")
+    }
+
+    @Test
     fun `presentPaymentOptions throws when checkout mutation is in flight`() = runTest {
         val checkout = CheckoutStateFactory.createCheckout(context)
         val flowController = createFlowController(
