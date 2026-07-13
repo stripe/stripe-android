@@ -235,7 +235,13 @@ internal class DefaultEditCardDetailsInteractor(
             billingDetailsEntry?.isComplete(billingDetailsCollectionConfiguration) != false
 
         return if ((hasChanges || requiresModification.not()) && isComplete) {
-            toUpdateParams(cardDetailsEntry, billingDetailsEntry)
+            toUpdateParams(
+                cardDetailsEntry = cardDetailsEntry,
+                billingDetailsEntry = billingDetailsEntry,
+                // Only send the brand when it's editable; otherwise it's the card's existing network
+                // and some update endpoints (e.g. checkout sessions) don't support card network updates.
+                includeCardBrand = cardEditConfiguration?.isCbcModifiable == true,
+            )
         } else {
             null
         }

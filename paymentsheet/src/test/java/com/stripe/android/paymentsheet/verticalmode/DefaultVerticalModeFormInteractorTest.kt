@@ -262,20 +262,17 @@ internal class DefaultVerticalModeFormInteractorTest {
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
-            selectedPaymentMethodCode = "",
         )
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
-            paymentMethodCode = "card",
-            hasSavedPaymentMethods = hasSavedPaymentMethods,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
@@ -283,7 +280,10 @@ internal class DefaultVerticalModeFormInteractorTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
-        ).create()
+        ).create(
+            paymentMethodCode = "card",
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+        )
 
         val formElements = setAsDefaultInteractor.state.value.formUiElements
 
@@ -317,20 +317,17 @@ internal class DefaultVerticalModeFormInteractorTest {
             confirmationHandler = FakeConfirmationHandler(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = selectedPaymentMethodCode),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
-            selectedPaymentMethodCode = selectedPaymentMethodCode,
         )
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
-            paymentMethodCode = selectedPaymentMethodCode,
-            hasSavedPaymentMethods = false,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
@@ -338,7 +335,10 @@ internal class DefaultVerticalModeFormInteractorTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
-        ).create()
+        ).create(
+            paymentMethodCode = selectedPaymentMethodCode,
+            hasSavedPaymentMethods = false,
+        )
         block(setAsDefaultInteractor.state.value.formUiElements)
     }
 

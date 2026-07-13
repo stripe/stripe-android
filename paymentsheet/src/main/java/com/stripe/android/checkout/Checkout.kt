@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.Parcelable
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
@@ -21,7 +20,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
-import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
@@ -78,7 +76,7 @@ class Checkout private constructor(
                 sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
             ).map { response ->
-                val flagImages = prefetchFlagImages(context, response, component)
+                val flagImages = component.flagImageResolver.resolve(response, cached = null)
                 val key = UUID.randomUUID().toString()
                 CheckoutInstances.getOrCreate(key) {
                     Checkout(
@@ -92,36 +90,6 @@ class Checkout private constructor(
                     )
                 }
             }
-        }
-
-        private suspend fun prefetchFlagImages(
-            context: Context,
-            response: CheckoutSessionResponse,
-            component: CheckoutComponent,
-        ): Map<String, Bitmap>? {
-            val adaptivePricingInfo = response.adaptivePricingInfo ?: return null
-            val localOption = adaptivePricingInfo.localCurrencyOptions.firstOrNull() ?: return null
-            val flagImageRepository = FlagImageRepository(
-                imageLoader = DefaultStripeImageLoader(context),
-                displayDensity = context.resources.displayMetrics.density,
-            )
-            val result = flagImageRepository.fetch(
-                integrationCurrencyCode = adaptivePricingInfo.integrationCurrency,
-                localCurrencyCode = localOption.currency,
-            )
-            for (failure in result.failures) {
-                val event = PaymentSheetEvent.AdaptivePricingFlagImageLoadFailed(
-                    countryCode = failure.countryCode,
-                    url = failure.url,
-                )
-                component.analyticsRequestExecutor.executeAsync(
-                    component.paymentAnalyticsRequestFactory.createRequest(
-                        event = event,
-                        additionalParams = event.params,
-                    )
-                )
-            }
-            return result.images
         }
 
         /**
@@ -606,8 +574,13 @@ class Checkout private constructor(
                 val result = runCatching {
                     internalState.block(internalState.checkoutSessionResponse.id).getOrThrow()
                 }.map { response ->
-                    internalState =
-                        internalState.copy(checkoutSessionResponse = response).additionalStateMutations()
+                    val flagImages = component.flagImageResolver.resolve(
+                        response = response,
+                        cached = internalState.flagImages,
+                    )
+                    internalState = internalState
+                        .copy(checkoutSessionResponse = response, flagImages = flagImages)
+                        .additionalStateMutations()
                     _checkoutSession.value = internalState.asCheckoutSession()
                 }
                 result

@@ -4,21 +4,17 @@ import com.stripe.android.core.utils.DateUtils
 import com.stripe.android.model.PaymentMethod
 
 internal fun PaymentMethod.isModifiable(
-    canUpdateFullPaymentMethodDetails: Boolean,
-    isCbcEligible: Boolean,
+    canUpdateCardExpiryAndBillingDetails: Boolean,
+    canChangeCbc: Boolean,
 ): Boolean {
     val card = editableSavedCard() ?: return false
-
-    return canUpdateFullPaymentMethodDetails || (card.isExpired().not() && canChangeCbc(isCbcEligible))
+    return canUpdateCardExpiryAndBillingDetails ||
+        (canChangeCbc && card.isExpired().not() && hasMultipleNetworks())
 }
 
-internal fun PaymentMethod.canChangeCbc(isCbcEligible: Boolean): Boolean {
+internal fun PaymentMethod.hasMultipleNetworks(): Boolean {
     val card = editableSavedCard() ?: return false
-    val hasMultipleNetworks = card.networks?.available?.let { available ->
-        available.size > 1
-    } ?: false
-
-    return isCbcEligible && hasMultipleNetworks
+    return card.networks?.available?.let { it.size > 1 } ?: false
 }
 
 internal fun PaymentMethod.Card.isExpired(): Boolean {

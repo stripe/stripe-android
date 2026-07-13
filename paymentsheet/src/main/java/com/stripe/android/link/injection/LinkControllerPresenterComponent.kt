@@ -21,6 +21,7 @@ internal interface LinkControllerPresenterComponent {
             @BindsInstance presentPaymentMethodsCallback: LinkController.PresentPaymentMethodsCallback,
             @BindsInstance authenticationCallback: LinkController.AuthenticationCallback,
             @BindsInstance authorizeCallback: LinkController.AuthorizeCallback,
+            @BindsInstance presentCallback: LinkController.PresentCallback,
         ): LinkControllerPresenterComponent
     }
 }

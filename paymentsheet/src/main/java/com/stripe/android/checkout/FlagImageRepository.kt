@@ -1,14 +1,16 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
+import com.stripe.android.common.di.DisplayDensity
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import javax.inject.Inject
 import kotlin.math.roundToInt
 
-internal class FlagImageRepository(
+internal class FlagImageRepository @Inject constructor(
     private val imageLoader: StripeImageLoader,
-    private val displayDensity: Float,
+    @DisplayDensity private val displayDensity: Float,
 ) {
     suspend fun fetch(
         integrationCurrencyCode: String,

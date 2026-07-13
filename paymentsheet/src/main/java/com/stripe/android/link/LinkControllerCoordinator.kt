@@ -20,6 +20,7 @@ internal class LinkControllerCoordinator @Inject constructor(
     private val selectedPaymentMethodCallback: LinkController.PresentPaymentMethodsCallback,
     private val authenticationCallback: LinkController.AuthenticationCallback,
     private val authorizeCallback: LinkController.AuthorizeCallback,
+    private val presentCallback: LinkController.PresentCallback,
 ) {
     val linkActivityResultLauncher: ActivityResultLauncher<LinkActivityContract.Args>
 
@@ -46,6 +47,10 @@ internal class LinkControllerCoordinator @Inject constructor(
                 launch {
                     interactor.authorizeResultFlow
                         .collect(authorizeCallback::onAuthorizeResult)
+                }
+                launch {
+                    interactor.presentResultFlow
+                        .collect(presentCallback::onPresentResult)
                 }
             }
         }

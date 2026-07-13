@@ -58,6 +58,26 @@ internal class NfcScanningLayoutScreenshotTestSuite {
                 arrayOf(DeviceRotation.UpsideDown, LOW_TAP_ZONE, Orientation.Portrait),
                 arrayOf(DeviceRotation.UpsideDown, HIGH_TAP_ZONE, Orientation.Portrait),
                 arrayOf(
+                    DeviceRotation.Portrait,
+                    PORTRAIT_CLOSE_START_TAP_ZONE,
+                    Orientation.Portrait,
+                ),
+                arrayOf(
+                    DeviceRotation.Portrait,
+                    PORTRAIT_CLOSE_END_TAP_ZONE,
+                    Orientation.Portrait,
+                ),
+                arrayOf(
+                    DeviceRotation.LandscapeRight,
+                    LANDSCAPE_CLOSE_START_TAP_ZONE,
+                    Orientation.Landscape,
+                ),
+                arrayOf(
+                    DeviceRotation.LandscapeRight,
+                    LANDSCAPE_CLOSE_END_TAP_ZONE,
+                    Orientation.Landscape,
+                ),
+                arrayOf(
                     DeviceRotation.LandscapeLeft,
                     LANDSCAPE_LEFT_TOP_END_CLOSE_TAP_ZONE,
                     Orientation.Landscape,
@@ -81,6 +101,12 @@ internal class NfcScanningLayoutScreenshotTestSuite {
 
             val LOW_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.2f)
             val HIGH_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.85f)
+
+            val PORTRAIT_CLOSE_START_TAP_ZONE = TapZone(xBias = 0.05f, yBias = 0.3f)
+            val PORTRAIT_CLOSE_END_TAP_ZONE = TapZone(xBias = 0.95f, yBias = 0.3f)
+            val LANDSCAPE_CLOSE_START_TAP_ZONE = TapZone(xBias = 0.5f, yBias = 0.05f)
+            val LANDSCAPE_CLOSE_END_TAP_ZONE = TapZone(xBias = 0.5f, yBias = 0.95f)
+
             val LANDSCAPE_LEFT_TOP_END_CLOSE_TAP_ZONE = TapZone(xBias = 0.8f, yBias = 0.1f)
             val LANDSCAPE_LEFT_TOP_START_CLOSE_TAP_ZONE = TapZone(xBias = 0.1f, yBias = 0.5f)
             val LANDSCAPE_RIGHT_TOP_END_CLOSE_TAP_ZONE = TapZone(xBias = 0.2f, yBias = 0.85f)

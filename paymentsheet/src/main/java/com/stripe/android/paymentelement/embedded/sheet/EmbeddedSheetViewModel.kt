@@ -27,8 +27,6 @@ internal class EmbeddedSheetViewModel @Inject constructor(
             val args = argsSupplier()
             val component = DaggerEmbeddedSheetComponent.factory().build(
                 paymentMethodMetadata = args.paymentMethodMetadata,
-                selectedPaymentMethodCode = args.selectedPaymentMethodCode,
-                hasSavedPaymentMethods = args.hasSavedPaymentMethods,
                 statusBarColor = args.statusBarColor,
                 configuration = args.configuration,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,

@@ -19,6 +19,10 @@ class CheckoutPresenter internal constructor() {
         TODO("Not yet implemented")
     }
 
+    fun expressCheckoutElement(): ExpressCheckoutElement {
+        TODO("Not yet implemented")
+    }
+
     fun confirm() {
         TODO("Not yet implemented")
     }

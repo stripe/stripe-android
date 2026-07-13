@@ -2,17 +2,20 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CustomerStateHolder.Companion.SAVED_CUSTOMER
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 internal class DefaultCustomerStateHolder(
     private val customerMetadata: StateFlow<CustomerMetadata?>,
+    private val paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
     private val savedStateHandle: SavedStateHandle,
     private val selection: StateFlow<PaymentSelection?>,
 ) : CustomerStateHolder {
@@ -48,8 +51,17 @@ internal class DefaultCustomerStateHolder(
         } ?: false
     }
 
-    override val canUpdateFullPaymentMethodDetails: StateFlow<Boolean> = customerMetadata.mapAsStateFlow {
-        it?.canUpdateFullPaymentMethodDetails ?: false
+    override val canUpdateCardExpiryAndBillingDetails: StateFlow<Boolean> = customerMetadata.mapAsStateFlow {
+        it?.canUpdateCardExpiryAndBillingDetails ?: false
+    }
+
+    override val canChangeCbc: StateFlow<Boolean> = combineAsStateFlow(
+        customerMetadata,
+        paymentMethodMetadataFlow,
+    ) { metadata, pmMetadata ->
+        val canUpdateBrandChoice = metadata?.canUpdateCardBrandChoice ?: false
+        val isCbcEligible = pmMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible
+        canUpdateBrandChoice && isCbcEligible
     }
 
     override fun setCustomerState(customerState: CustomerState?) {
@@ -112,7 +124,8 @@ internal class DefaultCustomerStateHolder(
                 selection = viewModel.selection,
                 customerMetadata = viewModel.paymentMethodMetadata.mapAsStateFlow {
                     it?.customerMetadata
-                }
+                },
+                paymentMethodMetadataFlow = viewModel.paymentMethodMetadata,
             )
         }
     }

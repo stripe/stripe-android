@@ -11,7 +11,6 @@ internal class FakeEmbeddedSheetLauncher : EmbeddedSheetLauncher {
     override fun launchForm(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
-        hasSavedPaymentMethods: Boolean,
         embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
         customerState: CustomerState?,
         promotion: PaymentMethodMessagePromotion?,

@@ -5,29 +5,51 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
+import javax.inject.Singleton
 
+@Singleton
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Suppress("TooManyFunctions", "UnusedParameter")
-class CheckoutController(
-    application: Application,
-    savedStateHandle: SavedStateHandle,
+class CheckoutController @Inject internal constructor(
     resultCallback: ResultCallback,
+    @ViewModelScope private val viewModelScope: CoroutineScope,
+    private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val checkoutStateLoader: CheckoutStateLoader,
+    private val stateHolder: CheckoutControllerStateHolder,
+    internal val confirmationStateHolder: CheckoutConfirmationStateHolder,
 ) {
-    private val _checkoutSession = MutableStateFlow<CheckoutSession?>(null)
-    val checkoutSession: StateFlow<CheckoutSession?> = _checkoutSession.asStateFlow()
+    val checkoutSession: StateFlow<CheckoutSession?>
+        get() = stateHolder.checkoutSession
 
     suspend fun configure(
         checkoutSessionClientSecret: String,
         configuration: Configuration = Configuration(),
     ): kotlin.Result<Unit> {
-        TODO("Not yet implemented")
+        val configurationState = configuration.build()
+        val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
+
+        return checkoutSessionRepository.init(
+            sessionId = sessionId,
+            adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+        ).mapCatching { response ->
+            checkoutStateLoader.load(
+                CheckoutControllerState.defaultState(
+                    configuration = configurationState,
+                    checkoutSessionResponse = response,
+                )
+            )
+        }
     }
 
     suspend fun applyPromotionCode(promotionCode: String): kotlin.Result<Unit> {
@@ -75,11 +97,29 @@ class CheckoutController(
     }
 
     fun destroy() {
-        TODO("Not yet implemented")
+        viewModelScope.cancel()
     }
 
     fun clearPaymentOption() {
         TODO("Not yet implemented")
+    }
+
+    @CheckoutSessionPreview
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    class Builder(
+        private val application: Application,
+        private val savedStateHandle: SavedStateHandle,
+        private val resultCallback: ResultCallback,
+    ) {
+        fun build(): CheckoutController {
+            val component = DaggerCheckoutControllerComponent.factory().create(
+                application = application,
+                savedStateHandle = savedStateHandle,
+                resultCallback = resultCallback,
+            )
+
+            return component.checkoutController
+        }
     }
 
     @CheckoutSessionPreview
@@ -91,6 +131,8 @@ class CheckoutController(
             CurrencySelectorElement.Configuration()
         private var shippingAddressElementConfiguration: ShippingAddressElement.Configuration =
             ShippingAddressElement.Configuration()
+        private var expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration =
+            ExpressCheckoutElement.Configuration()
 
         fun adaptivePricingAllowed(
             adaptivePricingAllowed: Boolean
@@ -116,12 +158,19 @@ class CheckoutController(
             this.shippingAddressElementConfiguration = configuration
         }
 
+        fun expressCheckoutElement(
+            configuration: ExpressCheckoutElement.Configuration
+        ): Configuration = apply {
+            this.expressCheckoutElementConfiguration = configuration
+        }
+
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
+            val expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
         ) : Parcelable
 
         internal fun build(): State = State(
@@ -129,6 +178,7 @@ class CheckoutController(
             paymentElementConfiguration = paymentElementConfiguration.build(),
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
+            expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
         )
     }
 

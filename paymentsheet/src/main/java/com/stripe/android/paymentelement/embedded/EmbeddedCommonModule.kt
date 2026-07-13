@@ -127,7 +127,8 @@ internal interface EmbeddedCommonModule {
             return DefaultCustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
-                customerMetadata = customerMetadata
+                customerMetadata = customerMetadata,
+                paymentMethodMetadataFlow = paymentMethodMetadataFlow,
             )
         }
 

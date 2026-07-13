@@ -34,7 +34,6 @@ class PaymentOptionsItemsMapperTest {
             linkBrand = linkBrandFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false },
             customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
@@ -67,7 +66,6 @@ class PaymentOptionsItemsMapperTest {
             linkBrand = linkBrandFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false },
             customerMetadata = getDefaultCustomerMetadataFlow(),
         )
 
@@ -118,7 +116,6 @@ class PaymentOptionsItemsMapperTest {
             linkBrand = linkBrandFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!!.resolvableString },
-            isCbcEligible = { false },
             customerMetadata = getDefaultCustomerMetadataFlow(
                 isPaymentMethodSetAsDefaultEnabled = isSetAsDefaultEnabled
             ),

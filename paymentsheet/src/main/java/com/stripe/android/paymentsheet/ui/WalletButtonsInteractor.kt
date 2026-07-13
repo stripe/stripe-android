@@ -28,7 +28,9 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayIsEmailRequiredProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
@@ -327,6 +329,14 @@ internal class DefaultWalletButtonsInteractor constructor(
             linkConfiguration = arguments.paymentMethodMetadata.linkState?.configuration,
             cardFundingFilter = arguments.paymentMethodMetadata.cardFundingFilter,
             googlePayDisplayItems = GooglePayDisplayItemsFactory.create(arguments.paymentMethodMetadata),
+            googlePayIsEmailRequired = GooglePayIsEmailRequiredProvider.get(
+                configuration = arguments.configuration,
+                paymentMethodMetadata = arguments.paymentMethodMetadata,
+            ),
+            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
+                configuration = arguments.configuration,
+                paymentMethodMetadata = arguments.paymentMethodMetadata,
+            ),
         ) ?: return null
 
         return ConfirmationHandler.Args(

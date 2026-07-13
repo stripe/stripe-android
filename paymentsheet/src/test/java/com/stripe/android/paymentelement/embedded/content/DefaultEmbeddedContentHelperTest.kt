@@ -146,7 +146,6 @@ internal class DefaultEmbeddedContentHelperTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
-            selectedPaymentMethodCode = "",
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
@@ -174,6 +173,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 customerMetadata = stateFlowOf(
                     PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
                 ),
+                paymentMethodMetadataFlow = stateFlowOf(null),
             ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,

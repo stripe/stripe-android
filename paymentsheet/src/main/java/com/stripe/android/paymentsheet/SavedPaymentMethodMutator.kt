@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PaymentOptionsItemsMapper
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -84,7 +83,6 @@ internal class SavedPaymentMethodMutator(
             linkBrand = effectiveLinkBrand,
             isNotPaymentFlow = isNotPaymentFlow,
             nameProvider = { paymentMethodMetadataFlow.value?.displayNameForCode(it).orEmpty() },
-            isCbcEligible = { paymentMethodMetadataFlow.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible },
         )
     }
 
@@ -92,13 +90,14 @@ internal class SavedPaymentMethodMutator(
 
     val canEdit: StateFlow<Boolean> = combineAsStateFlow(
         customerStateHolder.canRemove,
-        paymentOptionsItems
-    ) { canRemove, items ->
+        paymentOptionsItems,
+        customerStateHolder.canUpdateCardExpiryAndBillingDetails,
+        customerStateHolder.canChangeCbc,
+    ) { canRemove, items, canUpdateCardExpiryAndBillingDetails, canChangeCbc ->
         canRemove || items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().any { item ->
-            val displayableSavedPaymentMethod = item.displayableSavedPaymentMethod
-            displayableSavedPaymentMethod.paymentMethod.isModifiable(
-                canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails.value,
-                isCbcEligible = displayableSavedPaymentMethod.isCbcEligible,
+            item.displayableSavedPaymentMethod.paymentMethod.isModifiable(
+                canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+                canChangeCbc = canChangeCbc,
             )
         }
     }
@@ -379,8 +378,9 @@ internal class SavedPaymentMethodMutator(
                         DefaultUpdatePaymentMethodInteractor(
                             isLiveMode = isLiveMode,
                             canRemove = canRemove,
-                            canUpdateFullPaymentMethodDetails = viewModel.customerStateHolder
-                                .canUpdateFullPaymentMethodDetails.value,
+                            canUpdateCardExpiryAndBillingDetails = viewModel.customerStateHolder
+                                .canUpdateCardExpiryAndBillingDetails.value,
+                            canChangeCbc = viewModel.customerStateHolder.canChangeCbc.value,
                             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
                             cardBrandFilter = PaymentSheetCardBrandFilter(viewModel.config.cardBrandAcceptance),
                             addressCollectionMode = viewModel.config.billingDetailsCollectionConfiguration.address,

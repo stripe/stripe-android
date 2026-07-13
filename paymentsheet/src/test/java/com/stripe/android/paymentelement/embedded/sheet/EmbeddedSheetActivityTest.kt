@@ -29,7 +29,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -214,7 +213,7 @@ internal class EmbeddedSheetActivityTest {
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
                 integrationMetadata = IntegrationMetadata.CheckoutSession(
                     id = "cs_test",
                     instancesKey = CheckoutStateFactory.DEFAULT_KEY,
@@ -242,7 +241,7 @@ internal class EmbeddedSheetActivityTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
         ),
         paymentMethods: List<PaymentMethod> = defaultPaymentMethods(),
         selection: PaymentSelection? = null,
@@ -252,9 +251,7 @@ internal class EmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
                     paymentMethodMetadata = paymentMethodMetadata,
-                    hasSavedPaymentMethods = paymentMethods.isNotEmpty(),
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
                         .build(),
                     paymentElementCallbackIdentifier = "EmbeddedSheetActivityTestCallbackIdentifier",

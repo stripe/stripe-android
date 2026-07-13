@@ -28,6 +28,7 @@ import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -36,6 +37,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersRe
 import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
@@ -55,7 +57,6 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -124,24 +125,22 @@ internal class OnrampInteractor @Inject constructor(
 
         // We are *not* calling `PaymentConfiguration.init()` here because we're relying on
         // `LinkController.configure()` to do it.
-        val linkResult: ConfigureResult = linkController.configure(
-            LinkController.Configuration.Builder(
+        val linkResult = linkController.configure(
+            LinkController.Configuration(
                 merchantDisplayName = configurationState.merchantDisplayName,
                 publishableKey = configurationState.publishableKey,
             )
-                .allowLogOut(false)
+                .allowLogout(false)
                 .allowUserEmailEdits(false)
                 .appearance(configurationState.appearance)
-                .build()
         )
 
-        return when (linkResult) {
-            is ConfigureResult.Success -> OnrampConfigurationResult.Completed(success = true)
-            is ConfigureResult.Failed -> {
-                val error = mapError(Operation.Configure, linkResult.error)
-                trackError(Operation.Configure, error)
-                OnrampConfigurationResult.Failed(error)
-            }
+        return if (linkResult.isSuccess) {
+            OnrampConfigurationResult.Completed(success = true)
+        } else {
+            val error = mapError(Operation.Configure, linkResult.exceptionOrNull() ?: Exception("Unknown error"))
+            trackError(Operation.Configure, error)
+            OnrampConfigurationResult.Failed(error)
         }
     }
 
@@ -292,6 +291,70 @@ internal class OnrampInteractor @Inject constructor(
             )
             trackError(Operation.RegisterWalletAddress, error)
             OnrampRegisterWalletAddressResult.Failed(error)
+        }
+    }
+
+    suspend fun getWalletOwnershipChallenge(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampGetWalletOwnershipChallengeResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            val result = cryptoApiRepository.getWalletOwnershipChallenge(
+                walletAddress = walletAddress,
+                network = network,
+                consumerSessionClientSecret = secret
+            )
+            result.fold(
+                onSuccess = { challenge ->
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletOwnershipChallengeRetrieved(network))
+                    OnrampGetWalletOwnershipChallengeResult.Completed(challenge)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.GetWalletOwnershipChallenge, error)
+                    trackError(Operation.GetWalletOwnershipChallenge, mappedError)
+                    OnrampGetWalletOwnershipChallengeResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.GetWalletOwnershipChallenge,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.GetWalletOwnershipChallenge, error)
+            OnrampGetWalletOwnershipChallengeResult.Failed(error)
+        }
+    }
+
+    suspend fun submitWalletOwnershipSignature(
+        challengeId: String,
+        signature: String
+    ): OnrampSubmitWalletOwnershipSignatureResult {
+        val secret = consumerSessionClientSecret()
+        return if (secret != null) {
+            val result = cryptoApiRepository.submitWalletOwnershipSignature(
+                challengeId = challengeId,
+                signature = signature,
+                consumerSessionClientSecret = secret
+            )
+            result.fold(
+                onSuccess = { consumerWallet ->
+                    analyticsService?.track(OnrampAnalyticsEvent.WalletOwnershipVerified(consumerWallet.network))
+                    OnrampSubmitWalletOwnershipSignatureResult.Completed(consumerWallet)
+                },
+                onFailure = { error ->
+                    val mappedError = mapError(Operation.SubmitWalletOwnershipSignature, error)
+                    trackError(Operation.SubmitWalletOwnershipSignature, mappedError)
+                    OnrampSubmitWalletOwnershipSignatureResult.Failed(mappedError)
+                }
+            )
+        } else {
+            val error = mapError(
+                operation = Operation.SubmitWalletOwnershipSignature,
+                error = MissingConsumerSecretException(),
+            )
+            trackError(Operation.SubmitWalletOwnershipSignature, error)
+            OnrampSubmitWalletOwnershipSignatureResult.Failed(error)
         }
     }
 

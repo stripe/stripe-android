@@ -132,20 +132,17 @@ internal class FormActivityScreenShotTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
-            selectedPaymentMethodCode = "",
         )
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
-            paymentMethodCode = "card",
-            hasSavedPaymentMethods = false,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
@@ -153,7 +150,10 @@ internal class FormActivityScreenShotTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
-        ).create()
+        ).create(
+            paymentMethodCode = "card",
+            hasSavedPaymentMethods = false,
+        )
 
         stateHolder.updateMandate(usBankMandate)
         stateHolder.updateSavedPaymentSelectionToConfirm(savedPaymentMethodSelectionToConfirm)
