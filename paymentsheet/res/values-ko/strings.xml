@@ -265,7 +265,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">메뉴 표시</string>
   <!-- Title of the sign-out action. -->
-  <string name="stripe_sign_out_link">Link에서 로그아웃</string>
   <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_sign_out_with_brand">%s에서 로그아웃</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
