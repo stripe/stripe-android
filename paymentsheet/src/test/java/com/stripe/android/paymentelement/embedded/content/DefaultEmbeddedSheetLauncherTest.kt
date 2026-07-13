@@ -616,9 +616,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         val state = EmbeddedConfirmationStateFixtures.defaultState()
         val selection = PaymentSelection.GooglePay
         val expectedArgs = EmbeddedActivityArgs(
-            selectedPaymentMethodCode = "google_pay",
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = customerState.paymentMethods.isNotEmpty(),
             configuration = state.configuration,
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,

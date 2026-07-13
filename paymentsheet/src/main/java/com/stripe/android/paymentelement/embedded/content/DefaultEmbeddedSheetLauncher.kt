@@ -244,9 +244,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
         val args = EmbeddedActivityArgs(
-            selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
             paymentMethodMetadata = paymentMethodMetadata,
-            hasSavedPaymentMethods = customerState?.paymentMethods?.isNotEmpty() == true,
             configuration = embeddedConfirmationState.configuration,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,

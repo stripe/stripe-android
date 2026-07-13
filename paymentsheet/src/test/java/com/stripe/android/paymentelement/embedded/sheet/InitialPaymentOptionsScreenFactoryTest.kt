@@ -75,6 +75,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
             customerMetadata = stateFlowOf(paymentMethodMetadata.customerMetadata),
+            paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
         )
         val eventReporter = FakeEventReporter()
         val testScope = TestScope(UnconfinedTestDispatcher())
@@ -84,7 +85,6 @@ internal class InitialPaymentOptionsScreenFactoryTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
-            selectedPaymentMethodCode = "",
         )
         val updateScreenInteractorFactory = FakeEmbeddedUpdateScreenInteractorFactory()
         val manageInteractorFactory = EmbeddedManageScreenInteractorFactory {

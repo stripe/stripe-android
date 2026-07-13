@@ -39,9 +39,9 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                 selectionHolder.setSelection(savedPmSelection)
                 eventReporter.onSelectPaymentOption(savedPmSelection)
                 val action = when (launchMode) {
-                    EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
-                    EmbeddedLaunchMode.Manage,
-                    EmbeddedLaunchMode.Form -> EmbeddedNavigator.Action.Close(
+                    is EmbeddedLaunchMode.PaymentOptions -> EmbeddedNavigator.Action.Back
+                    is EmbeddedLaunchMode.Manage,
+                    is EmbeddedLaunchMode.Form -> EmbeddedNavigator.Action.Close(
                         shouldInvokeRowSelectionCallback = true
                     )
                 }

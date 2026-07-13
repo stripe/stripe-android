@@ -48,9 +48,9 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
                 val shouldNavigateBack = when (launchMode) {
-                    EmbeddedLaunchMode.PaymentOptions -> true
-                    EmbeddedLaunchMode.Manage,
-                    EmbeddedLaunchMode.Form -> customerStateHolder.paymentMethods.value.size > 1
+                    is EmbeddedLaunchMode.PaymentOptions -> true
+                    is EmbeddedLaunchMode.Manage,
+                    is EmbeddedLaunchMode.Form -> customerStateHolder.paymentMethods.value.size > 1
                 }
                 if (shouldNavigateBack) {
                     embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
@@ -72,9 +72,9 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     private fun onPaymentMethodRemoved() {
         if (customerStateHolder.paymentMethods.value.isEmpty()) {
             when (launchMode) {
-                EmbeddedLaunchMode.PaymentOptions -> Unit
-                EmbeddedLaunchMode.Manage,
-                EmbeddedLaunchMode.Form -> {
+                is EmbeddedLaunchMode.PaymentOptions -> Unit
+                is EmbeddedLaunchMode.Manage,
+                is EmbeddedLaunchMode.Form -> {
                     embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Close())
                 }
             }

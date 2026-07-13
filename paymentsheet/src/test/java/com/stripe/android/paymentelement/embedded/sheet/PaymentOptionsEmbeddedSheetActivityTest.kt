@@ -16,7 +16,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import org.junit.Rule
 import org.junit.Test
@@ -104,9 +103,7 @@ internal class PaymentOptionsEmbeddedSheetActivityTest {
             EmbeddedSheetContract.createIntent(
                 context = applicationContext,
                 input = EmbeddedActivityArgs(
-                    selectedPaymentMethodCode = selection?.paymentMethodType ?: "",
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                    hasSavedPaymentMethods = false,
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                     statusBarColor = null,
                     paymentElementCallbackIdentifier = "PaymentOptionsTestIdentifier",
