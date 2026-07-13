@@ -12,6 +12,7 @@ import com.stripe.android.common.nfcscan.tapzone.FakeTapZoneResolver
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
@@ -35,9 +36,22 @@ internal class NfcScanningViewModelTest {
         tapZone = TapZone(xBias = 0.3f, yBias = 0.7f),
     ) {
         assertThat(viewModel.viewState.value).isEqualTo(
-            NfcScanningViewState(
+            NfcScanningViewState.Available(
                 tapZone = TapZone(xBias = 0.3f, yBias = 0.7f),
                 status = NfcScanningStatus.Idle(error = null),
+            ),
+        )
+    }
+
+    @Test
+    fun `viewState contains error when scanner is disabled`() = runScenario(
+        enablementState = NfcCardScanner.EnablementState.Disabled(
+            "Turn developer options off and try again.".resolvableString,
+        ),
+    ) {
+        assertThat(viewModel.viewState.value).isEqualTo(
+            NfcScanningViewState.Unavailable(
+                "Turn developer options off and try again.".resolvableString,
             ),
         )
     }
@@ -51,6 +65,21 @@ internal class NfcScanningViewModelTest {
         }
 
         assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `handleViewAction Close does not report cancelled when scanner is disabled`() = runScenario(
+        enablementState = NfcCardScanner.EnablementState.Disabled(
+            "Turn developer options off and try again.".resolvableString,
+        ),
+    ) {
+        viewModel.result.test {
+            viewModel.handleViewAction(NfcScanningViewAction.Close)
+
+            assertThat(awaitItem()).isEqualTo(NfcScanningContract.Result.Canceled)
+        }
+
+        fakeEventReporter.onNfcScanCancelledCalls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -77,9 +106,11 @@ internal class NfcScanningViewModelTest {
     @Test
     fun `card scanner in scanning status updates the view model state to scanning`() = runScenario {
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Idle(error = null))
             scannerState.emit(NfcCardScanner.State.Scanning)
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Scanning)
         }
 
         assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
@@ -88,7 +119,8 @@ internal class NfcScanningViewModelTest {
     @Test
     fun `card scanner in scanned status updates the view model state to scanned`() = runScenario {
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Idle(error = null))
 
             scannerState.emit(
                 NfcCardScanner.State.Complete(
@@ -100,7 +132,8 @@ internal class NfcScanningViewModelTest {
                 ),
             )
 
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanned)
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Scanned)
         }
 
         assertThat(fakeEventReporter.onNfcScanAttemptSucceededCalls.awaitItem()).isNotNull()
@@ -111,7 +144,8 @@ internal class NfcScanningViewModelTest {
         val errorMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString
 
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Idle(error = null))
 
             scannerState.emit(
                 NfcCardScanner.State.Failed(
@@ -119,7 +153,8 @@ internal class NfcScanningViewModelTest {
                 ),
             )
 
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
             assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
         }
     }
@@ -129,18 +164,21 @@ internal class NfcScanningViewModelTest {
         val errorMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString
 
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Idle(error = null))
 
             scannerState.emit(
                 NfcCardScanner.State.Failed(
                     error = NfcCardScanner.Error(userMessage = errorMessage),
                 ),
             )
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
             assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
 
             scannerState.emit(NfcCardScanner.State.Scanning)
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
+            assertThat((awaitItem().asAvailable()).status)
+                .isEqualTo(NfcScanningStatus.Scanning)
             assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
         }
     }
@@ -193,12 +231,22 @@ internal class NfcScanningViewModelTest {
         assertThat(viewModelScope.coroutineContext[Job]?.isCancelled).isTrue()
     }
 
+    private fun NfcScanningViewState.asAvailable(): NfcScanningViewState.Available {
+        assertThat(this).isInstanceOf<NfcScanningViewState.Available>()
+
+        return this as NfcScanningViewState.Available
+    }
+
     private fun runScenario(
         tapZone: TapZone = TapZone(xBias = 0.5f, yBias = 0.5f),
+        enablementState: NfcCardScanner.EnablementState = NfcCardScanner.EnablementState.Enabled,
         block: suspend Scenario.() -> Unit,
     ) = runTest(dispatcher) {
         val scannerState = MutableSharedFlow<NfcCardScanner.State>()
-        val fakeCardScanner = FakeNfcCardScanner(stateFlow = scannerState)
+        val fakeCardScanner = FakeNfcCardScanner(
+            stateFlow = scannerState,
+            enablementState = enablementState,
+        )
         val fakeEventReporter = FakeNfcScanningEventReporter()
         val viewModel = NfcScanningViewModel(
             viewModelScope = CoroutineScope(dispatcher),
@@ -207,7 +255,9 @@ internal class NfcScanningViewModelTest {
             eventReporter = fakeEventReporter,
         )
 
-        assertThat(fakeEventReporter.onNfcScanStartedCalls.awaitItem()).isNotNull()
+        if (enablementState.enabled) {
+            assertThat(fakeEventReporter.onNfcScanStartedCalls.awaitItem()).isNotNull()
+        }
 
         Scenario(
             viewModel = viewModel,

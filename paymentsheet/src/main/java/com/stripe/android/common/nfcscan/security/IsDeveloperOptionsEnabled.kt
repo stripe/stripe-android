@@ -4,22 +4,23 @@ import android.provider.Settings
 import com.stripe.android.core.utils.FeatureFlags
 import javax.inject.Inject
 
-internal fun interface IsDeviceSecureForNfc {
+internal fun interface IsDeveloperOptionsEnabled {
     fun get(): Boolean
 }
 
 /**
- * Default implementation of [IsDeviceSecureForNfc] that checks if the user's device is secure for NFC scanning
+ * Default implementation of [IsDeveloperOptionsEnabled] that checks if the user's device has developer options toggle
+ * on.
  *
  * In addition to checking if the developer option master toggle is enabled, this also checks if various other toggles
  * are enabled, including toggles that could:
  * - Allow debugging over USB or Wi-Fi
  * - Log sensitive NFC data directly to logcat
  */
-internal class DefaultIsDeviceSecureForNfc @Inject constructor(
+internal class DefaultIsDeveloperOptionsEnabled @Inject constructor(
     @OsSettingsDevicePropertiesKey private val osProperties: PlatformDeviceProperties,
     @GlobalSettingsDevicePropertiesKey private val globalProperties: PlatformDeviceProperties,
-) : IsDeviceSecureForNfc {
+) : IsDeveloperOptionsEnabled {
     override fun get(): Boolean {
         // Override security checks if flag is enabled
         if (FeatureFlags.disableNfcScanningSecurity.isEnabled) {

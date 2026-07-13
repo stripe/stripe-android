@@ -28,18 +28,32 @@ internal fun NfcScanningScreen(
     viewActionHandler: (NfcScanningViewAction) -> Unit,
 ) {
     val deviceRotation = rememberDeviceRotation()
+    val onClose = {
+        viewActionHandler(NfcScanningViewAction.Close)
+    }
 
-    NfcScanningLayout(
-        status = state.status,
-        tapZone = state.tapZone,
-        deviceRotation = deviceRotation,
-        onClose = {
-            viewActionHandler(NfcScanningViewAction.Close)
-        },
-        onSuccessShown = {
-            viewActionHandler(NfcScanningViewAction.SuccessShown)
-        },
-    )
+    when (state) {
+        is NfcScanningViewState.Unavailable -> {
+            NfcScanningFullScreenErrorLayout(
+                message = state.message,
+                deviceRotation = deviceRotation,
+                onClose = {
+                    viewActionHandler(NfcScanningViewAction.Close)
+                },
+            )
+        }
+        is NfcScanningViewState.Available -> {
+            NfcScanningLayout(
+                status = state.status,
+                tapZone = state.tapZone,
+                deviceRotation = deviceRotation,
+                onClose = onClose,
+                onSuccessShown = {
+                    viewActionHandler(NfcScanningViewAction.SuccessShown)
+                },
+            )
+        }
+    }
 }
 
 @Composable

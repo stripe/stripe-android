@@ -5,6 +5,7 @@ import android.content.Context
 import com.stripe.android.common.nfcscan.analytics.NfcScanningEventReporterModule
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegateModule
 import com.stripe.android.common.nfcscan.scanner.NfcCardScannerModule
+import com.stripe.android.common.nfcscan.security.NfcSecurityModule
 import com.stripe.android.common.nfcscan.tapzone.TapZoneModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
@@ -36,6 +37,7 @@ internal interface NfcScanningViewModelComponent {
         CoroutineContextModule::class,
         NfcHardwareDelegateModule::class,
         NfcCardScannerModule::class,
+        NfcSecurityModule::class,
         NfcScanningEventReporterModule::class,
         TapZoneModule::class,
     ]

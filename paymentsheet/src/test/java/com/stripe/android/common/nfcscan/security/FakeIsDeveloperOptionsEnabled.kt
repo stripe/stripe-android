@@ -1,7 +1,7 @@
 package com.stripe.android.common.nfcscan.security
 
-internal class FakeIsDeviceSecureForNfc(
+internal class FakeIsDeveloperOptionsEnabled(
     private val result: Boolean = true,
-) : IsDeviceSecureForNfc {
+) : IsDeveloperOptionsEnabled {
     override fun get(): Boolean = result
 }

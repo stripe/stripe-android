@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.hardware.FakeNfcHardwareDelegate
+import com.stripe.android.common.nfcscan.security.FakeIsDeveloperOptionsEnabled
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
@@ -21,6 +22,39 @@ internal class DefaultNfcCardScannerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @Test
+    fun `enablementState is Disabled when hardware is unavailable`() = runScenario(
+        isHardwareAvailable = false,
+    ) {
+        assertThat(scanner.enablementState).isEqualTo(
+            NfcCardScanner.EnablementState.Disabled(
+                R.string.stripe_nfc_scan_full_screen_error_reader.resolvableString,
+            ),
+        )
+    }
+
+    @Test
+    fun `enablementState is Disabled when developer options are enabled`() = runScenario(
+        isDeveloperOptionsEnabled = false,
+    ) {
+        assertThat(scanner.enablementState).isEqualTo(
+            NfcCardScanner.EnablementState.Disabled(
+                R.string.stripe_nfc_scan_full_screen_error_dev_options_action.resolvableString,
+            ),
+        )
+    }
+
+    @Test
+    fun `start does not emit state when scanner is disabled`() = runScenario(
+        isHardwareAvailable = false,
+    ) {
+        scanner.state.test {
+            scanner.start(activity)
+
+            expectNoEvents()
+        }
+    }
 
     @Test
     fun `start emits Scanning then Complete when card read succeeds`() = runScenario(
@@ -161,6 +195,7 @@ internal class DefaultNfcCardScannerTest {
 
     private fun runScenario(
         isHardwareAvailable: Boolean = true,
+        isDeveloperOptionsEnabled: Boolean = true,
         cardData: ScannedCardData? = null,
         cardReadError: Throwable? = null,
         openException: Throwable? = null,
@@ -186,6 +221,7 @@ internal class DefaultNfcCardScannerTest {
 
         val scanner = DefaultNfcCardScanner(
             hardwareDelegate = fakeHardwareDelegate,
+            isDeveloperOptionsEnabled = FakeIsDeveloperOptionsEnabled(isDeveloperOptionsEnabled),
             cardReader = fakeCardReader,
             transceiverFactory = fakeTransceiverFactory,
             viewModelScope = CoroutineScope(dispatcher),

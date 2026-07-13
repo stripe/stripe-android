@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-internal class IsDeviceSecureForNfcTest {
+internal class IsDeveloperOptionsEnabledTest {
     @After
     fun tearDown() {
         FeatureFlags.disableNfcScanningSecurity.reset()
@@ -17,7 +17,7 @@ internal class IsDeviceSecureForNfcTest {
 
     @Test
     fun `returns true when all security checks pass`() = runScenario {
-        assertThat(isDeviceSecureForNfc.get()).isTrue()
+        assertThat(isDeveloperOptionsEnabled.get()).isTrue()
     }
 
     @Test
@@ -34,7 +34,7 @@ internal class IsDeviceSecureForNfcTest {
             booleanValues = mapOf(NFC_VENDOR_DEBUG_ENABLED to null),
         ),
     ) {
-        assertThat(isDeviceSecureForNfc.get()).isTrue()
+        assertThat(isDeveloperOptionsEnabled.get()).isTrue()
     }
 
     @Test
@@ -43,7 +43,7 @@ internal class IsDeviceSecureForNfcTest {
             booleanValues = mapOf(DEVELOPMENT_SETTINGS_ENABLED to true),
         ),
     ) {
-        assertThat(isDeviceSecureForNfc.get()).isFalse()
+        assertThat(isDeveloperOptionsEnabled.get()).isFalse()
     }
 
     @Test
@@ -52,7 +52,7 @@ internal class IsDeviceSecureForNfcTest {
             booleanValues = mapOf(ADB_ENABLED to true),
         ),
     ) {
-        assertThat(isDeviceSecureForNfc.get()).isFalse()
+        assertThat(isDeveloperOptionsEnabled.get()).isFalse()
     }
 
     @Test
@@ -61,7 +61,7 @@ internal class IsDeviceSecureForNfcTest {
             booleanValues = mapOf(ADB_WIFI_ENABLED to true),
         ),
     ) {
-        assertThat(isDeviceSecureForNfc.get()).isFalse()
+        assertThat(isDeveloperOptionsEnabled.get()).isFalse()
     }
 
     @Test
@@ -70,7 +70,7 @@ internal class IsDeviceSecureForNfcTest {
             stringValues = mapOf(NFC_SNOOP_LOG_MODE to NFC_SNOOP_LOG_MODE_FULL),
         ),
     ) {
-        assertThat(isDeviceSecureForNfc.get()).isFalse()
+        assertThat(isDeveloperOptionsEnabled.get()).isFalse()
     }
 
     @Test
@@ -79,7 +79,7 @@ internal class IsDeviceSecureForNfcTest {
             booleanValues = mapOf(NFC_VENDOR_DEBUG_ENABLED to true),
         ),
     ) {
-        assertThat(isDeviceSecureForNfc.get()).isFalse()
+        assertThat(isDeveloperOptionsEnabled.get()).isFalse()
     }
 
     @Test
@@ -98,7 +98,7 @@ internal class IsDeviceSecureForNfcTest {
     ) {
         FeatureFlags.disableNfcScanningSecurity.setEnabled(true)
 
-        assertThat(isDeviceSecureForNfc.get()).isTrue()
+        assertThat(isDeveloperOptionsEnabled.get()).isTrue()
     }
 
     private fun runScenario(
@@ -106,16 +106,16 @@ internal class IsDeviceSecureForNfcTest {
         osProperties: FakePlatformDeviceProperties = FakePlatformDeviceProperties(),
         block: Scenario.() -> Unit,
     ) {
-        val isDeviceSecureForNfc = DefaultIsDeviceSecureForNfc(
+        val isDeveloperOptionsEnabled = DefaultIsDeveloperOptionsEnabled(
             osProperties = osProperties,
             globalProperties = globalProperties,
         )
 
-        Scenario(isDeviceSecureForNfc = isDeviceSecureForNfc).block()
+        Scenario(isDeveloperOptionsEnabled = isDeveloperOptionsEnabled).block()
     }
 
     private data class Scenario(
-        val isDeviceSecureForNfc: DefaultIsDeviceSecureForNfc,
+        val isDeveloperOptionsEnabled: DefaultIsDeveloperOptionsEnabled,
     )
 
     private class FakePlatformDeviceProperties(

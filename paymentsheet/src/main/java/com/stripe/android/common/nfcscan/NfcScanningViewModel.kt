@@ -34,58 +34,14 @@ internal class NfcScanningViewModel @Inject constructor(
     private val _result = MutableSharedFlow<NfcScanningContract.Result>()
     val result = _result.asSharedFlow()
 
-    private val _viewState = MutableStateFlow(
-        NfcScanningViewState(
-            tapZone = tapZone,
-            status = NfcScanningStatus.Idle(error = null),
-        )
-    )
+    private val _viewState = MutableStateFlow(createInitialViewState())
     val viewState: StateFlow<NfcScanningViewState> = _viewState.asStateFlow()
 
     private var pendingValidCardData: ScannedCardData? = null
     private var successShownDispatched = false
 
     init {
-        eventReporter.onNfcScanStarted()
-
-        viewModelScope.launch {
-            cardScanner.state.collectLatest { state ->
-                when (state) {
-                    is NfcCardScanner.State.Scanning -> {
-                        _viewState.emit(
-                            NfcScanningViewState(
-                                tapZone = tapZone,
-                                status = NfcScanningStatus.Scanning,
-                            )
-                        )
-
-                        eventReporter.onNfcScanAttemptStarted()
-                    }
-                    is NfcCardScanner.State.Failed -> {
-                        _viewState.emit(
-                            NfcScanningViewState(
-                                tapZone = tapZone,
-                                status = NfcScanningStatus.Idle(error = state.error.userMessage),
-                            )
-                        )
-
-                        eventReporter.onNfcScanAttemptFailed()
-                    }
-                    is NfcCardScanner.State.Complete -> {
-                        _viewState.emit(
-                            NfcScanningViewState(
-                                tapZone = tapZone,
-                                status = NfcScanningStatus.Scanned,
-                            )
-                        )
-
-                        eventReporter.onNfcScanAttemptSucceeded()
-
-                        pendingValidCardData = state.cardData
-                    }
-                }
-            }
-        }
+        initialize()
     }
 
     fun register(activity: AppCompatActivity) {
@@ -96,7 +52,10 @@ internal class NfcScanningViewModel @Inject constructor(
         when (viewAction) {
             is NfcScanningViewAction.Close -> {
                 viewModelScope.launch {
-                    eventReporter.onNfcScanCancelled()
+                    if (cardScanner.enablementState.enabled) {
+                        eventReporter.onNfcScanCancelled()
+                    }
+
                     _result.emit(NfcScanningContract.Result.Canceled)
                 }
             }
@@ -124,6 +83,63 @@ internal class NfcScanningViewModel @Inject constructor(
     override fun onCleared() {
         viewModelScope.cancel()
         super.onCleared()
+    }
+
+    private fun initialize() {
+        if (!cardScanner.enablementState.enabled) {
+            return
+        }
+
+        eventReporter.onNfcScanStarted()
+
+        viewModelScope.launch {
+            cardScanner.state.collectLatest { state ->
+                when (state) {
+                    is NfcCardScanner.State.Scanning -> {
+                        _viewState.emit(
+                            NfcScanningViewState.Available(
+                                tapZone = tapZone,
+                                status = NfcScanningStatus.Scanning,
+                            )
+                        )
+
+                        eventReporter.onNfcScanAttemptStarted()
+                    }
+                    is NfcCardScanner.State.Failed -> {
+                        _viewState.emit(
+                            NfcScanningViewState.Available(
+                                tapZone = tapZone,
+                                status = NfcScanningStatus.Idle(error = state.error.userMessage),
+                            )
+                        )
+
+                        eventReporter.onNfcScanAttemptFailed()
+                    }
+                    is NfcCardScanner.State.Complete -> {
+                        _viewState.emit(
+                            NfcScanningViewState.Available(
+                                tapZone = tapZone,
+                                status = NfcScanningStatus.Scanned,
+                            )
+                        )
+
+                        eventReporter.onNfcScanAttemptSucceeded()
+
+                        pendingValidCardData = state.cardData
+                    }
+                }
+            }
+        }
+    }
+
+    private fun createInitialViewState(): NfcScanningViewState {
+        return when (val state = cardScanner.enablementState) {
+            is NfcCardScanner.EnablementState.Disabled -> NfcScanningViewState.Unavailable(state.message)
+            NfcCardScanner.EnablementState.Enabled -> NfcScanningViewState.Available(
+                tapZone = tapZone,
+                status = NfcScanningStatus.Idle(error = null),
+            )
+        }
     }
 
     companion object {

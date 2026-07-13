@@ -19,9 +19,9 @@ internal interface NfcSecurityModule {
     ): PlatformDeviceProperties
 
     @Binds
-    fun bindsIsDeviceSecureForNfc(
-        isDeviceSecureForNfc: DefaultIsDeviceSecureForNfc
-    ): IsDeviceSecureForNfc
+    fun bindsIsDeveloperOptionsEnabled(
+        isDeveloperOptionsEnabled: DefaultIsDeveloperOptionsEnabled
+    ): IsDeveloperOptionsEnabled
 }
 
 @Qualifier

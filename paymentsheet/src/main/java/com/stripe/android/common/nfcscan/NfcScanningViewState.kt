@@ -2,8 +2,15 @@ package com.stripe.android.common.nfcscan
 
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
+import com.stripe.android.core.strings.ResolvableString
 
-internal data class NfcScanningViewState(
-    val tapZone: TapZone,
-    val status: NfcScanningStatus,
-)
+internal sealed interface NfcScanningViewState {
+    data class Available(
+        val tapZone: TapZone,
+        val status: NfcScanningStatus,
+    ) : NfcScanningViewState
+
+    data class Unavailable(
+        val message: ResolvableString,
+    ) : NfcScanningViewState
+}

@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.emptyFlow
 
 internal class FakeNfcCardScanner(
     stateFlow: Flow<NfcCardScanner.State> = emptyFlow(),
+    override val enablementState: NfcCardScanner.EnablementState = NfcCardScanner.EnablementState.Enabled,
 ) : NfcCardScanner {
     val startCalls = Turbine<AppCompatActivity>()
 

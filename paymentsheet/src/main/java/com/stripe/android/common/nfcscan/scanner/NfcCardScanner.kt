@@ -2,6 +2,7 @@ package com.stripe.android.common.nfcscan.scanner
 
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
+import com.stripe.android.common.nfcscan.security.IsDeveloperOptionsEnabled
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
@@ -26,13 +27,27 @@ internal interface NfcCardScanner {
         val userMessage: ResolvableString,
     )
 
+    sealed interface EnablementState {
+        val enabled: Boolean
+
+        data object Enabled : EnablementState {
+            override val enabled = true
+        }
+
+        data class Disabled(val message: ResolvableString) : EnablementState {
+            override val enabled = false
+        }
+    }
+
     val state: Flow<State>
+    val enablementState: EnablementState
 
     fun start(activity: AppCompatActivity)
 }
 
 internal class DefaultNfcCardScanner @Inject constructor(
     private val hardwareDelegate: NfcHardwareDelegate,
+    private val isDeveloperOptionsEnabled: IsDeveloperOptionsEnabled,
     private val cardReader: NfcCardReader,
     private val transceiverFactory: NfcTagTransceiver.Factory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -41,9 +56,17 @@ internal class DefaultNfcCardScanner @Inject constructor(
     private val _state = MutableSharedFlow<NfcCardScanner.State>()
     override val state: Flow<NfcCardScanner.State> = _state.asSharedFlow()
 
+    override val enablementState: NfcCardScanner.EnablementState by lazy {
+        resolveEnablementState()
+    }
+
     override fun start(
         activity: AppCompatActivity,
     ) {
+        if (!enablementState.enabled) {
+            return
+        }
+
         hardwareDelegate.start(
             activity = activity,
         ) { tag ->
@@ -72,6 +95,22 @@ internal class DefaultNfcCardScanner @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun resolveEnablementState(): NfcCardScanner.EnablementState {
+        if (!hardwareDelegate.isAvailable()) {
+            return NfcCardScanner.EnablementState.Disabled(
+                R.string.stripe_nfc_scan_full_screen_error_reader.resolvableString,
+            )
+        }
+
+        if (!isDeveloperOptionsEnabled.get()) {
+            return NfcCardScanner.EnablementState.Disabled(
+                R.string.stripe_nfc_scan_full_screen_error_dev_options_action.resolvableString,
+            )
+        }
+
+        return NfcCardScanner.EnablementState.Enabled
     }
 
     private companion object {

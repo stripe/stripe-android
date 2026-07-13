@@ -104,6 +104,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind phone</string>
+  <!-- Full screen error shown to users when they launch the NFC scanning flow with developer options enabled. -->
+  <string name="stripe_nfc_scan_full_screen_error_dev_options_action">Turn developer options off and try again.</string>
+  <!-- Full screen error shown to users when they launch the NFC scanning flow while the NFC reader is occupied. -->
+  <string name="stripe_nfc_scan_full_screen_error_reader">NFC reader is currently unavailable.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">or enter manually</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
