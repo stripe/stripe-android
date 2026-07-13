@@ -19,6 +19,7 @@ import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
@@ -465,8 +466,13 @@ class Checkout private constructor(
         name: String? = null,
         phoneNumber: String? = null,
         address: Address,
-    ): Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
-        copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
+    ): Result<Unit> {
+        internalState.checkoutSessionResponse
+            .validateShippingCountry(address.build().country)
+            .onFailure { return Result.failure(it) }
+        return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
+            copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
+        }
     }
 
     /**
