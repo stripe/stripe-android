@@ -140,6 +140,7 @@ class LinkController @Inject internal constructor(
         authenticationCallback = {},
         authorizeCallback = {},
         presentCallback = presentCallback,
+        confirmSetupIntentCallback = ConfirmSetupIntentCallback { },
     )
 
     /**
@@ -156,6 +157,7 @@ class LinkController @Inject internal constructor(
         authenticationCallback: AuthenticationCallback,
         authorizeCallback: AuthorizeCallback,
         presentCallback: PresentCallback = PresentCallback {},
+        confirmSetupIntentCallback: ConfirmSetupIntentCallback = ConfirmSetupIntentCallback { },
     ): Presenter {
         return presenterComponentFactory
             .build(
@@ -166,6 +168,7 @@ class LinkController @Inject internal constructor(
                 authenticationCallback = authenticationCallback,
                 authorizeCallback = authorizeCallback,
                 presentCallback = presentCallback,
+                confirmSetupIntentCallback = confirmSetupIntentCallback,
             )
             .presenter
     }
@@ -223,6 +226,7 @@ class LinkController @Inject internal constructor(
             ConfigurationDefaults.billingDetailsCollectionConfiguration
         private var allowUserEmailEdits: Boolean = true
         private var allowLogout: Boolean = true
+        private var setupIntentClientSecret: String? = null
 
         constructor(
             publishableKey: String,
@@ -279,6 +283,11 @@ class LinkController @Inject internal constructor(
 
         fun allowLogout(allowLogout: Boolean) = apply { this.allowLogout = allowLogout }
 
+        @LinkControllerPreview
+        fun setupIntentClientSecret(setupIntentClientSecret: String?) = apply {
+            this.setupIntentClientSecret = setupIntentClientSecret
+        }
+
         @Parcelize
         @Poko
         internal class State(
@@ -294,6 +303,7 @@ class LinkController @Inject internal constructor(
             internal val email: String?,
             internal val phoneNumber: String?,
             internal val supportedPaymentMethodTypes: List<PaymentMethodType>?,
+            internal val setupIntentClientSecret: String? = null,
         ) : Parcelable
 
         internal fun build(): State = State(
@@ -309,6 +319,7 @@ class LinkController @Inject internal constructor(
             allowUserEmailEdits = allowUserEmailEdits,
             allowLogout = allowLogout,
             linkAppearance = appearance?.build(),
+            setupIntentClientSecret = setupIntentClientSecret,
         )
 
         internal companion object {
@@ -397,6 +408,22 @@ class LinkController @Inject internal constructor(
                 email = email,
                 paymentMethodTypes = null,
             )
+        }
+
+        /**
+         * Creates a payment method from the currently selected Link payment method and confirms
+         * the SetupIntent configured via [Configuration.setupIntentClientSecret].
+         *
+         * This combines payment method creation with SetupIntent confirmation in a single operation.
+         * Requires that [Configuration.setupIntentClientSecret] was provided during configuration
+         * and a payment method was selected via [presentPaymentMethods].
+         *
+         * The result will be communicated through the [ConfirmSetupIntentCallback] provided
+         * during presenter creation. If [Configuration.setupIntentClientSecret] was not provided,
+         * the callback will receive [ConfirmSetupIntentResult.Failed].
+         */
+        fun createPaymentMethodAndConfirmSetupIntent() {
+            coordinator.createPaymentMethodAndConfirmSetupIntent()
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -732,6 +759,45 @@ class LinkController @Inject internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Poko
         class Failed internal constructor(val error: Throwable) : AuthenticateWithTokenResult
+    }
+
+    /**
+     * Result of confirming a SetupIntent after payment method creation.
+     */
+    @LinkControllerPreview
+    sealed interface ConfirmSetupIntentResult {
+
+        /**
+         * The SetupIntent was confirmed and the payment method is now attached to the customer.
+         *
+         * @param paymentMethod The payment method that was attached.
+         */
+        @LinkControllerPreview
+        @Poko
+        class Success internal constructor(val paymentMethod: PaymentMethod) : ConfirmSetupIntentResult
+
+        /**
+         * The user canceled the SetupIntent confirmation (e.g., dismissed 3DS authentication).
+         */
+        @LinkControllerPreview
+        data object Canceled : ConfirmSetupIntentResult
+
+        /**
+         * An error occurred while confirming the SetupIntent.
+         *
+         * @param error The error that occurred.
+         */
+        @LinkControllerPreview
+        @Poko
+        class Failed internal constructor(val error: Throwable) : ConfirmSetupIntentResult
+    }
+
+    /**
+     * Callback for receiving results from [Presenter.createPaymentMethodAndConfirmSetupIntent].
+     */
+    @LinkControllerPreview
+    fun interface ConfirmSetupIntentCallback {
+        fun onConfirmSetupIntentResult(result: ConfirmSetupIntentResult)
     }
 
     /**
