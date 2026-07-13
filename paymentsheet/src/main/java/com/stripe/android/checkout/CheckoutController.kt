@@ -7,8 +7,13 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.core.exception.safeAnalyticsMessage
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -18,6 +23,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
@@ -25,6 +31,7 @@ import kotlinx.parcelize.Parcelize
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 
 private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
@@ -36,10 +43,13 @@ private val SERVER_UPDATE_TIMEOUT_MS = 20.seconds.inWholeMilliseconds
 class CheckoutController @Inject internal constructor(
     resultCallback: ResultCallback,
     @ViewModelScope private val viewModelScope: CoroutineScope,
+    @IOContext private val workContext: CoroutineContext,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
+    internal val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    internal val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
@@ -283,6 +293,32 @@ class CheckoutController @Inject internal constructor(
             if (pendingMutations.decrementAndGet() == 0) {
                 _isLoading.value = false
             }
+        }
+    }
+
+    internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
+        val result = withCheckoutState { sessionId ->
+            checkoutSessionRepository.updateCurrency(sessionId, currency)
+        }
+        result.onSuccess {
+            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
+        }.onFailure {
+            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
+        }
+        return result
+    }
+
+    private fun fireEvent(event: PaymentSheetEvent) {
+        // Build and dispatch the analytics request off the main thread. Kept under viewModelScope so
+        // it's cancelled with the controller, but run on the IO context so request construction
+        // doesn't touch the main thread.
+        viewModelScope.launch(workContext) {
+            analyticsRequestExecutor.executeAsync(
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = event.params,
+                )
+            )
         }
     }
 
