@@ -8,6 +8,7 @@ import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
@@ -55,6 +56,7 @@ class ExpressCheckoutElement internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var visibility: Map<ExpressButton, ExpressButtonVisibility> = emptyMap()
+        private var googlePayButtonType: PaymentSheet.GooglePayConfiguration.ButtonType? = null
 
         fun visibility(
             visibility: Map<ExpressButton, ExpressButtonVisibility>
@@ -62,13 +64,21 @@ class ExpressCheckoutElement internal constructor(
             this.visibility = visibility
         }
 
+        fun googlePayButtonType(
+            googlePayButtonType: PaymentSheet.GooglePayConfiguration.ButtonType?
+        ) {
+            this.googlePayButtonType = googlePayButtonType
+        }
+
         @Parcelize
         internal data class State(
             val visibility: Map<ExpressButton, ExpressButtonVisibility>,
+            val googlePayButtonType: PaymentSheet.GooglePayConfiguration.ButtonType?,
         ) : Parcelable
 
         internal fun build(): State = State(
             visibility = visibility,
+            googlePayButtonType = googlePayButtonType,
         )
     }
 }

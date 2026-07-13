@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.collections.orEmpty
@@ -193,9 +192,7 @@ internal class ExpressCheckoutElementInteractor private constructor(
                 when (walletType) {
                     WalletType.GooglePay -> ExpressButton.GooglePay(
                         allowCreditCards = true,
-                        // TODO: ECE should probably have its own button type config.
-                        buttonType = commonConfiguration.googlePay?.buttonType,
-                        // TODO: what do we need to do to account for the fact that this isn't supported in CS?
+                        buttonType = configuration.googlePayButtonType ?: commonConfiguration.googlePay?.buttonType,
                         cardBrandFilter = PaymentSheetCardBrandFilter(
                             cardBrandAcceptance = commonConfiguration.cardBrandAcceptance,
                         ),
@@ -208,13 +205,12 @@ internal class ExpressCheckoutElementInteractor private constructor(
                     }
                     WalletType.Link -> ExpressButton.Link(
                         state = LinkButtonState.create(
-                            // TODO: what's this?
                             enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
-                            linkEmail = "", // TODO
+                            linkEmail = linkAccountHolder.linkAccountInfo.value.account?.email,
                             paymentDetails = linkAccountHolder.linkAccountInfo.value.account?.displayablePaymentDetails,
                         ),
                         theme = LinkButtonTheme.DEFAULT,
-                        linkBrand = LinkBrand.Link, // TODO
+                        linkBrand =  linkAccountHolder.linkAccountInfo.value.account?.linkBrand ?: LinkBrand.Link,
                     ).takeIf {
                         configuration.visibility[ExpressCheckoutElement.ExpressButton.Link] != ExpressCheckoutElement.ExpressButtonVisibility.Never
                     }
@@ -223,8 +219,6 @@ internal class ExpressCheckoutElementInteractor private constructor(
             buttonsEnabled = buttonsEnabled,
         )
     }
-
-
 
     internal class ExpressCheckoutElementInteractorFactory @Inject constructor(
         private val linkAccountHolder: LinkAccountHolder,
