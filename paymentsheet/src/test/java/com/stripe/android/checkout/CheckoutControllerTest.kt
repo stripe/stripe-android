@@ -247,7 +247,6 @@ internal class CheckoutControllerTest {
         return CheckoutController.Builder(
             application = applicationContext,
             savedStateHandle = savedStateHandle,
-            resultCallback = {},
         ).build()
     }
 
