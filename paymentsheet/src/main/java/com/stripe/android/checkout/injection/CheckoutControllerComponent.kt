@@ -64,6 +64,7 @@ import com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilter
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.DefaultTapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
+import com.stripe.android.paymentsheet.state.LoadedPaymentSelectionResolver
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
@@ -71,6 +72,7 @@ import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
 import dagger.Binds
 import dagger.BindsInstance
+import dagger.BindsOptionalOf
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -120,6 +122,9 @@ internal interface CheckoutControllerComponent {
 internal interface CheckoutControllerModule {
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @BindsOptionalOf
+    fun optionalLoadedPaymentSelectionResolver(): LoadedPaymentSelectionResolver
 
     @Binds
     fun bindsElementsSessionRepository(impl: RealElementsSessionRepository): ElementsSessionRepository

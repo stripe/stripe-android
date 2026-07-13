@@ -16,6 +16,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.FLOW_CONTROLLER_LINK_LAUNCHER
 import com.stripe.android.paymentsheet.flowcontroller.DefaultFlowController.Companion.WALLETS_BUTTON_LINK_LAUNCHER
+import com.stripe.android.paymentsheet.state.LoadedPaymentSelectionResolver
 import com.stripe.android.paymentsheet.ui.DefaultWalletButtonsInteractor
 import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -133,5 +134,10 @@ internal object FlowControllerModule {
         fun bindsFlowControllerConfirmationHandler(
             handler: DefaultFlowControllerConfirmationHandler
         ): FlowControllerConfirmationHandler
+
+        @Binds
+        fun bindsSelectionResolver(
+            impl: PaymentSelectionUpdaterResolver
+        ): LoadedPaymentSelectionResolver
     }
 }

@@ -59,6 +59,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
+import java.util.Optional
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -74,11 +75,23 @@ internal interface PaymentElementLoader {
         initializationMode: InitializationMode,
         integrationConfiguration: Configuration,
         metadata: Metadata,
+        reconfigureContext: ReconfigureContext? = null,
     ): Result<State>
 
     data class Metadata(
         val isReloadingAfterProcessDeath: Boolean = false,
         val initializedViaCompose: Boolean,
+    )
+
+    /**
+     * Caller-owned mutable state describing a prior configuration, used by a
+     * [LoadedPaymentSelectionResolver] to preserve the customer's previous selection across
+     * reloads/reconfigures. `null` (the default) means a fresh load with nothing to preserve.
+     */
+    data class ReconfigureContext(
+        val previousSelection: PaymentSelection?,
+        val previousPaymentSheetConfig: PaymentSheet.Configuration? = null,
+        val walletButtonsAlreadyShown: Boolean = false,
     )
 
     sealed interface Configuration {
@@ -269,6 +282,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
     private val isNfcScanningAvailable: IsNfcScanningAvailable,
+    private val selectionResolver: Optional<LoadedPaymentSelectionResolver>,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -289,6 +303,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
+        reconfigureContext: PaymentElementLoader.ReconfigureContext?,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
         // Validate configuration before loading
@@ -457,7 +472,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             paymentMethodMetadata = state.paymentMethodMetadata,
         )
 
-        return@runCatching state
+        // Analytics above report the loader's freshly computed selection; the resolver gets the
+        // final say (e.g. preserving the customer's previous selection across a reconfigure) and
+        // only the returned selection reflects it.
+        val resolver = selectionResolver.orElse(IdentityLoadedPaymentSelectionResolver)
+        return@runCatching state.copy(
+            paymentSelection = resolver.resolve(state, integrationConfiguration, reconfigureContext),
+        )
     }
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(

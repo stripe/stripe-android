@@ -457,54 +457,10 @@ internal class DefaultFlowControllerTest {
         assertThat(flowController.getPaymentOption()).isNull()
     }
 
-    @Test
-    fun `getPaymentOption() returns null when setupFutureUsage is added via reconfiguration`() = runTest {
-        val intentWithoutSFU = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-
-        val cardSelection = PaymentSelection.New.Card(
-            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            brand = CardBrand.Visa,
-            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-        )
-
-        val paymentSheetLoader = FakePaymentElementLoader(
-            stripeIntent = intentWithoutSFU,
-            paymentSelection = cardSelection,
-        )
-
-        val flowController = createFlowController(
-            paymentElementLoader = paymentSheetLoader,
-            paymentSelectionUpdater = DefaultPaymentSelectionUpdater(),
-        )
-
-        val intentConfig = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = 5000,
-                currency = "usd",
-            ),
-        )
-
-        // First configure: no setupFutureUsage — card selection is preserved
-        flowController.configureWithIntentConfigurationExpectingSuccess(intentConfig)
-        assertThat(flowController.getPaymentOption()).isNotNull()
-
-        // Merchant reconfigures with setupFutureUsage = OffSession
-        paymentSheetLoader.updateStripeIntent(
-            intentWithoutSFU.copy(setupFutureUsage = StripeIntent.Usage.OffSession)
-        )
-
-        val intentConfigWithSFU = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = 5000,
-                currency = "usd",
-                setupFutureUse = PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession,
-            ),
-        )
-        flowController.configureWithIntentConfigurationExpectingSuccess(intentConfigWithSFU)
-
-        // Card selection should be invalidated — user must re-open payment sheet to see mandate
-        assertThat(flowController.getPaymentOption()).isNull()
-    }
+    // Selection preservation/invalidation on reconfiguration (e.g. a new-card selection being
+    // invalidated when setupFutureUsage is added) is now resolved inside PaymentElementLoader via
+    // PaymentSelectionUpdaterResolver. That logic is covered by PaymentSelectionUpdaterTest and
+    // PaymentSelectionUpdaterResolverTest; it can't be exercised through the fake loader here.
 
     @Test
     fun `init with failure should return expected value`() = runTest {
@@ -2525,9 +2481,6 @@ internal class DefaultFlowControllerTest {
         eventReporter: EventReporter = this.eventReporter,
         confirmationHandler: FlowControllerConfirmationHandler? = null,
         linkHandler: LinkHandler? = null,
-        paymentSelectionUpdater: PaymentSelectionUpdater = PaymentSelectionUpdater { _, _, newState, _, _ ->
-            newState.paymentSelection
-        },
     ): DefaultFlowController {
         return DefaultFlowController(
             viewModelScope = testScope,
@@ -2552,7 +2505,6 @@ internal class DefaultFlowControllerTest {
                 paymentElementLoader = paymentElementLoader,
                 uiContext = testDispatcher,
                 viewModel = viewModel,
-                paymentSelectionUpdater = paymentSelectionUpdater,
                 confirmationHandler = confirmationHandler ?: FakeFlowControllerConfirmationHandler(),
             ),
             errorReporter = errorReporter,

@@ -39,6 +39,10 @@ internal class FakePaymentElementLoader(
     private val integrationMetadata: IntegrationMetadata? = null,
 ) : PaymentElementLoader {
 
+    /** The [PaymentElementLoader.ReconfigureContext] passed to the most recent [load] call. */
+    var lastReconfigureContext: PaymentElementLoader.ReconfigureContext? = null
+        private set
+
     fun updateStripeIntent(intent: StripeIntent) {
         this.stripeIntent = intent
     }
@@ -87,7 +91,9 @@ internal class FakePaymentElementLoader(
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
+        reconfigureContext: PaymentElementLoader.ReconfigureContext?,
     ): Result<PaymentElementLoader.State> {
+        lastReconfigureContext = reconfigureContext
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("oh no"))

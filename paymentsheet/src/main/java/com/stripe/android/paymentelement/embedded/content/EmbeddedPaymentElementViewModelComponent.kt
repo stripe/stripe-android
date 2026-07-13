@@ -40,6 +40,7 @@ import com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilter
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.DefaultTapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
+import com.stripe.android.paymentsheet.state.LoadedPaymentSelectionResolver
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
@@ -50,6 +51,7 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
+import dagger.BindsOptionalOf
 import dagger.Component
 import dagger.Module
 import dagger.Provides
@@ -134,6 +136,12 @@ internal interface EmbeddedPaymentElementViewModelModule {
 
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
+
+    // No real resolver bound here: the config handler caches the loader's raw state and applies
+    // selection resolution outside the cache (see DefaultEmbeddedConfigurationHandler), so the
+    // loader itself must return the raw selection (identity).
+    @BindsOptionalOf
+    fun optionalLoadedPaymentSelectionResolver(): LoadedPaymentSelectionResolver
 
     @Binds
     fun bindsTapToAddAvailabilityFactory(

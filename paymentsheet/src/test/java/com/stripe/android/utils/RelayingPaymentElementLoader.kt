@@ -43,6 +43,7 @@ internal class RelayingPaymentElementLoader : PaymentElementLoader {
         initializationMode: PaymentElementLoader.InitializationMode,
         integrationConfiguration: PaymentElementLoader.Configuration,
         metadata: PaymentElementLoader.Metadata,
+        reconfigureContext: PaymentElementLoader.ReconfigureContext?,
     ): Result<PaymentElementLoader.State> {
         return results.receive()
     }

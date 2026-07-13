@@ -11,8 +11,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.Dispatchers
@@ -104,6 +106,33 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             initializationMode = initializationMode,
         ).getOrThrow()
         assertThat(state1).isEqualTo(state2)
+    }
+
+    @Test
+    fun `configure re-resolves selection against current holder on a cache hit`() = runScenario(
+        // Preserve the previous selection when present, else use the loader's selection.
+        chooser = { _, _, previousSelection, newSelection, _, _ -> previousSelection ?: newSelection },
+    ) {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
+        val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+            PaymentSheet.IntentConfiguration(
+                mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+            )
+        )
+
+        // First load: no previous selection, so the loader's (null) selection is used.
+        val first = handler.configure(configuration, initializationMode).getOrThrow()
+        assertThat(first.paymentSelection).isNull()
+
+        // The customer picks Google Pay after the initial load.
+        selectionHolder.set(PaymentSelection.GooglePay)
+
+        // The second configure hits the cache (only one loader emit was provided, so a second load
+        // would hang) yet re-resolves against the current selection.
+        val second = handler.configure(configuration, initializationMode).getOrThrow()
+        assertThat(second.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(loader.loadCalledTurbine.awaitItem()).isEqualTo(initializationMode)
     }
 
     @Test
@@ -316,17 +345,24 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
     }
 
     private fun runScenario(
+        chooser: EmbeddedSelectionChooser = EmbeddedSelectionChooser {
+                _, _, _, newSelection, _, _ ->
+            newSelection
+        },
         block: suspend Scenario.() -> Unit
     ) {
         runTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
             val sheetStateHolder = SheetStateHolder(savedStateHandle)
+            val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
             val handler = DefaultEmbeddedConfigurationHandler(
                 loader,
                 savedStateHandle,
                 sheetStateHolder,
                 internalRowSelectionCallback = { null },
+                selectionResolver = EmbeddedSelectionChooserResolver(chooser),
+                selectionHolder = selectionHolder,
             )
             Scenario(
                 loader = loader,
@@ -334,6 +370,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 handler = handler,
                 testScope = this,
                 sheetStateHolder = sheetStateHolder,
+                selectionHolder = selectionHolder,
             ).apply {
                 block()
             }
@@ -347,6 +384,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val handler: DefaultEmbeddedConfigurationHandler,
         val testScope: TestScope,
         val sheetStateHolder: SheetStateHolder,
+        val selectionHolder: EmbeddedSelectionHolder,
     )
 
     private class FakePaymentElementLoader : PaymentElementLoader {
@@ -389,6 +427,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             initializationMode: PaymentElementLoader.InitializationMode,
             integrationConfiguration: PaymentElementLoader.Configuration,
             metadata: PaymentElementLoader.Metadata,
+            reconfigureContext: PaymentElementLoader.ReconfigureContext?,
         ): Result<PaymentElementLoader.State> {
             loadCalledTurbine.add(initializationMode)
             return resultTurbine.awaitItem()

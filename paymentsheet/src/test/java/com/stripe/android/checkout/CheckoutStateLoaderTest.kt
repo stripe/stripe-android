@@ -6,26 +6,17 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
-import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
-import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
-import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -75,58 +66,56 @@ internal class CheckoutStateLoaderTest {
 
             assertThat(confirmationStateHolder.state?.configuration?.embeddedViewDisplaysMandateText)
                 .isFalse()
-        }
+    }
 
     @Test
-    fun `load routes the selection through the chooser`() = runScenario(
+    fun `load resolves selection locally with chooser and commits it`() = runScenario(
         loaderSelection = PaymentSelection.GooglePay,
-        chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+        selectionChooser = EmbeddedSelectionChooser { _, _, previousSelection, _, _, _ ->
+            previousSelection
+        },
     ) {
-        // The customer's prior selection is what the chooser must be offered as the previous value.
         selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         loader.load(checkoutControllerState())
 
-        // The committed state adopts whatever the chooser returned, not the loader's recomputed
-        // selection, and the selection holder is updated to match.
         assertThat(confirmationStateHolder.state?.selection)
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(selectionHolder.selection.value)
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        val call = chooser.lastCall
-        assertThat(call?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(call?.newSelection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(paymentElementLoader.lastReconfigureContext).isNull()
     }
 
     @Test
-    fun `load preserves a non-default selection across a mutation`() = runScenario(
-        // The loader would recompute a card selection, but the customer's Google Pay pick must win.
-        loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
-        isGooglePayAvailable = true,
-        selectionChooser = { savedStateHandle ->
-            DefaultEmbeddedSelectionChooser(
-                savedStateHandle = savedStateHandle,
-                formHelperFactory = EmbeddedFormHelperFactory(
-                    linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                    embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
-                    cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                    savedStateHandle = savedStateHandle,
-                ),
-                eventReporter = FakeEventReporter(),
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-                internalRowSelectionCallback = { null },
-            )
-        },
+    fun `load re-resolves against the current selection on a reload`() {
+        val previousSelections = mutableListOf<PaymentSelection?>()
+        runScenario(
+            loaderSelection = PaymentSelection.GooglePay,
+            selectionChooser = EmbeddedSelectionChooser { _, _, previousSelection, newSelection, _, _ ->
+                previousSelections += previousSelection
+                previousSelection ?: newSelection
+            },
+        ) {
+            loader.load(checkoutControllerState())
+
+            selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+            loader.load(requireNotNull(stateHolder.state))
+
+            assertThat(previousSelections)
+                .containsExactly(null, PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+                .inOrder()
+            assertThat(confirmationStateHolder.state?.selection)
+                .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+            assertThat(paymentElementLoader.lastReconfigureContext).isNull()
+        }
+    }
+
+    @Test
+    fun `load commits the loader selection when the chooser returns it`() = runScenario(
+        loaderSelection = PaymentSelection.GooglePay,
     ) {
-        // Initial load seeds the chooser's stored previous configuration.
         loader.load(checkoutControllerState())
-
-        // The customer picks Google Pay after the initial load.
-        selectionHolder.set(PaymentSelection.GooglePay)
-
-        // A mutation reloads with the same configuration, so the chooser keeps the customer's
-        // selection rather than adopting the loader's recomputed one.
-        loader.load(requireNotNull(stateHolder.state))
 
         assertThat(confirmationStateHolder.state?.selection).isEqualTo(PaymentSelection.GooglePay)
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
@@ -198,12 +187,11 @@ internal class CheckoutStateLoaderTest {
     private fun runScenario(
         merchantDisplayName: String = "Example, Inc.",
         loaderSelection: PaymentSelection? = null,
-        chosenSelection: PaymentSelection? = null,
         shouldFail: Boolean = false,
         isGooglePayAvailable: Boolean = false,
-        // When null, a RecordingSelectionChooser is used. Pass a factory to exercise the real
-        // DefaultEmbeddedSelectionChooser (it needs the shared SavedStateHandle to track state).
-        selectionChooser: ((SavedStateHandle) -> EmbeddedSelectionChooser)? = null,
+        selectionChooser: EmbeddedSelectionChooser = EmbeddedSelectionChooser { _, _, _, newSelection, _, _ ->
+            newSelection
+        },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val application = ApplicationProvider.getApplicationContext<Application>()
@@ -227,17 +215,16 @@ internal class CheckoutStateLoaderTest {
             coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
         )
         val stateHolder = CheckoutControllerStateHolder(savedStateHandle)
-        val recordingChooser = RecordingSelectionChooser(chosenSelection)
-        val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
+        val paymentElementLoader = FakePaymentElementLoader(
+            paymentSelection = loaderSelection,
+            shouldFail = shouldFail,
+            isGooglePayAvailable = isGooglePayAvailable,
+        )
         val loader = CheckoutStateLoader(
             merchantDisplayName = merchantDisplayName,
             flagImageResolver = flagImageResolver,
-            paymentElementLoader = FakePaymentElementLoader(
-                paymentSelection = loaderSelection,
-                shouldFail = shouldFail,
-                isGooglePayAvailable = isGooglePayAvailable,
-            ),
-            selectionChooser = chooser,
+            paymentElementLoader = paymentElementLoader,
+            selectionChooser = selectionChooser,
             selectionHolder = selectionHolder,
             confirmationStateHolder = confirmationStateHolder,
             stateHolder = stateHolder,
@@ -248,7 +235,7 @@ internal class CheckoutStateLoaderTest {
             stateHolder = stateHolder,
             confirmationStateHolder = confirmationStateHolder,
             selectionHolder = selectionHolder,
-            chooser = recordingChooser,
+            paymentElementLoader = paymentElementLoader,
             imageLoader = imageLoader,
         ).block()
 
@@ -260,33 +247,7 @@ internal class CheckoutStateLoaderTest {
         val stateHolder: CheckoutControllerStateHolder,
         val confirmationStateHolder: CheckoutConfirmationStateHolder,
         val selectionHolder: EmbeddedSelectionHolder,
-        val chooser: RecordingSelectionChooser,
+        val paymentElementLoader: FakePaymentElementLoader,
         val imageLoader: FakeStripeImageLoader,
     )
-
-    // Records the arguments of the most recent choose() call and returns a preconfigured selection,
-    // so tests can verify the loader threads the holder's previous selection and the loader's new
-    // selection into the chooser.
-    private class RecordingSelectionChooser(
-        private val result: PaymentSelection?,
-    ) : EmbeddedSelectionChooser {
-        var lastCall: Call? = null
-
-        override fun choose(
-            paymentMethodMetadata: PaymentMethodMetadata,
-            paymentMethods: List<PaymentMethod>?,
-            previousSelection: PaymentSelection?,
-            newSelection: PaymentSelection?,
-            newConfiguration: CommonConfiguration,
-            formSheetAction: EmbeddedPaymentElement.FormSheetAction,
-        ): PaymentSelection? {
-            lastCall = Call(previousSelection = previousSelection, newSelection = newSelection)
-            return result
-        }
-
-        data class Call(
-            val previousSelection: PaymentSelection?,
-            val newSelection: PaymentSelection?,
-        )
-    }
 }
