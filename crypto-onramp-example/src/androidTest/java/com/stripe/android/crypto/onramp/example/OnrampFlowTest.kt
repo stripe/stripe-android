@@ -9,9 +9,12 @@ import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeUp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.rules.activityScenarioRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -149,10 +152,38 @@ class OnrampFlowTest {
 
     private fun performClickOnNode(tag: String, timeoutMs: Long = defaultTimeout.inWholeMilliseconds) {
         waitForTag(tag = tag, timeoutMs = timeoutMs)
-        waitForSnackbarToHide()
 
         val node = composeRule.onNodeWithTag(tag)
         runCatching { node.performScrollTo() }
+        scrollContentUp()
+        if (snackbarOverlaps(node)) {
+            waitForSnackbarToHide()
+        }
         node.performClick()
     }
+
+    private fun scrollContentUp() {
+        runCatching {
+            composeRule.onRoot().performTouchInput {
+                val scrollCenterY = centerY
+                swipeUp(
+                    startY = scrollCenterY + EXTRA_SCROLL_DISTANCE,
+                    endY = scrollCenterY - EXTRA_SCROLL_DISTANCE,
+                    durationMillis = EXTRA_SCROLL_DURATION_MILLIS
+                )
+            }
+        }
+        composeRule.waitForIdle()
+    }
+
+    private fun snackbarOverlaps(node: SemanticsNodeInteraction): Boolean {
+        val snackbar = composeRule.onAllNodes(hasTestTag(SNACKBAR_TAG))
+            .fetchSemanticsNodes(atLeastOneRootRequired = false)
+            .firstOrNull() ?: return false
+
+        return snackbar.boundsInRoot.overlaps(node.fetchSemanticsNode().boundsInRoot)
+    }
 }
+
+private const val EXTRA_SCROLL_DISTANCE = 72f
+private const val EXTRA_SCROLL_DURATION_MILLIS = 50L
