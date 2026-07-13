@@ -283,7 +283,7 @@ class LinkController @Inject internal constructor(
 
         fun allowLogout(allowLogout: Boolean) = apply { this.allowLogout = allowLogout }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         fun setupIntentClientSecret(setupIntentClientSecret: String?) = apply {
             this.setupIntentClientSecret = setupIntentClientSecret
         }
@@ -764,7 +764,7 @@ class LinkController @Inject internal constructor(
     /**
      * Result of confirming a SetupIntent after payment method creation.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     sealed interface ConfirmSetupIntentResult {
 
         /**
@@ -772,14 +772,14 @@ class LinkController @Inject internal constructor(
          *
          * @param paymentMethod The payment method that was attached.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         @Poko
         class Success internal constructor(val paymentMethod: PaymentMethod) : ConfirmSetupIntentResult
 
         /**
          * The user canceled the SetupIntent confirmation (e.g., dismissed 3DS authentication).
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         data object Canceled : ConfirmSetupIntentResult
 
         /**
@@ -787,7 +787,7 @@ class LinkController @Inject internal constructor(
          *
          * @param error The error that occurred.
          */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         @Poko
         class Failed internal constructor(val error: Throwable) : ConfirmSetupIntentResult
     }
@@ -795,7 +795,7 @@ class LinkController @Inject internal constructor(
     /**
      * Callback for receiving results from [Presenter.createPaymentMethodAndConfirmSetupIntent].
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @LinkControllerPreview
     fun interface ConfirmSetupIntentCallback {
         fun onConfirmSetupIntentResult(result: ConfirmSetupIntentResult)
     }
