@@ -267,7 +267,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Uri l-menù</string>
   <!-- Title of the sign-out action. -->
-  <string name="stripe_sign_out_link">Oħroġ minn Link</string>
   <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_sign_out_with_brand">Oħroġ minn %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

@@ -129,21 +129,6 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withEps_missingName_shouldFail() {
-        val params = PaymentMethodCreateParams.createEps(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
-        )
-        val exception = assertFailsWith<InvalidRequestException>(
-            "A name is required to create a EPS payment method"
-        ) {
-            Stripe(context, ApiKeyFixtures.EPS_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-        assertThat(exception.message)
-            .isEqualTo("Missing required param: billing_details[name].")
-    }
-
-    @Test
     fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {
         val params = PaymentMethodCreateParams.createOxxo(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS

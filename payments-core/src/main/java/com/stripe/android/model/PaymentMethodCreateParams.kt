@@ -898,7 +898,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createP24(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -916,7 +916,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createBancontact(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -952,7 +952,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createEps(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
