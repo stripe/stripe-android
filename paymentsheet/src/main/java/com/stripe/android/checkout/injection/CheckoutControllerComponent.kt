@@ -31,6 +31,7 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.injection.ConfirmationHandlerModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
@@ -100,6 +101,7 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
+        ConfirmationHandlerModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {

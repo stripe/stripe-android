@@ -7,7 +7,10 @@ import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.common.model.CommonConfiguration
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.LinkExpressMode
+import com.stripe.android.link.LinkLaunchMode
+import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -15,12 +18,20 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilt
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayIsEmailRequiredProvider
+import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.ButtonThemes.LinkButtonTheme
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.utils.asGooglePayButtonType
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.collections.orEmpty
 
@@ -30,6 +41,10 @@ internal class ExpressCheckoutElementInteractor private constructor(
     val configuration: ExpressCheckoutElement.Configuration.State,
     val paymentMethodMetadata: PaymentMethodMetadata,
     val linkAccountHolder: LinkAccountHolder,
+    private val errorReporter: ErrorReporter,
+    private val linkPaymentLauncher: LinkPaymentLauncher,
+    private val confirmationHandler: ConfirmationHandler,
+    private val coroutineScope: CoroutineScope,
 ) {
     data class State(
         val walletButtons: List<ExpressButton>,
@@ -37,6 +52,75 @@ internal class ExpressCheckoutElementInteractor private constructor(
     )
 
     // TODO: listen for confirmation state to be confirming and if so, disable wallet buttons.
+    sealed interface ViewAction {
+        data class OnButtonPressed(val button: ExpressButton) : ViewAction
+    }
+
+    fun handleViewAction(action: ViewAction) {
+        when (action) {
+            is ViewAction.OnButtonPressed -> {
+                when (action.button) {
+                    is ExpressButton.Link -> handleLinkButtonPressed()
+                    is ExpressButton.GooglePay -> handleButtonPressed(action.button)
+                }
+            }
+        }
+    }
+
+    private fun handleLinkButtonPressed() {
+        val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+        if (linkConfiguration != null) {
+            linkPaymentLauncher.present(
+                configuration = linkConfiguration,
+                paymentMethodMetadata = paymentMethodMetadata,
+                linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
+                launchMode = LinkLaunchMode.PaymentMethodSelection(null),
+                linkExpressMode = LinkExpressMode.ENABLED,
+            )
+        } else {
+            handleButtonPressed(
+                ExpressButton.Link(
+                    state = LinkButtonState.Default,
+                    theme = LinkButtonTheme.DEFAULT,
+                    linkBrand = LinkBrand.Link,
+                )
+            )
+        }
+    }
+
+    private fun handleButtonPressed(button: ExpressButton) {
+        confirmationArgs(button.createSelection())?.let {
+            coroutineScope.launch {
+                confirmationHandler.start(it)
+            }
+        } ?: run {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+            )
+        }
+    }
+
+    private fun confirmationArgs(selection: PaymentSelection): ConfirmationHandler.Args? {
+        val confirmationOption = selection.toConfirmationOption(
+            configuration = commonConfiguration,
+            linkConfiguration = paymentMethodMetadata.linkState?.configuration,
+            cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+            googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
+            googlePayIsEmailRequired = GooglePayIsEmailRequiredProvider.get(
+                configuration = commonConfiguration,
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
+            googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
+                configuration = commonConfiguration,
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
+        ) ?: return null
+
+        return ConfirmationHandler.Args(
+            confirmationOption = confirmationOption,
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+    }
 
     sealed interface ExpressButton {
         val walletType: WalletType
@@ -138,6 +222,10 @@ internal class ExpressCheckoutElementInteractor private constructor(
 
     internal class ExpressCheckoutElementInteractorFactory @Inject constructor(
         private val linkAccountHolder: LinkAccountHolder,
+        private val errorReporter: ErrorReporter,
+        private val linkPaymentLauncher: LinkPaymentLauncher,
+        private val confirmationHandlerFactory: ConfirmationHandler.Factory,
+        @ViewModelScope private val coroutineScope: CoroutineScope,
     ) {
         fun create(
             commonConfiguration: CommonConfiguration,
@@ -149,6 +237,10 @@ internal class ExpressCheckoutElementInteractor private constructor(
                 commonConfiguration = commonConfiguration,
                 paymentMethodMetadata = paymentMethodMetadata,
                 linkAccountHolder = linkAccountHolder,
+                errorReporter = errorReporter,
+                linkPaymentLauncher = linkPaymentLauncher,
+                confirmationHandler = confirmationHandlerFactory.create(coroutineScope),
+                coroutineScope = coroutineScope,
             )
         }
     }

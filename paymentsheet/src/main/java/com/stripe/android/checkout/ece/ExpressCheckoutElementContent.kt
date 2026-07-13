@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -27,7 +26,9 @@ internal fun ExpressCheckoutElementContent(
                 cardFundingFilter = button.cardFundingFilter,
                 additionalEnabledNetworks = button.additionalEnabledNetworks,
                 onPressed = {
-                    TODO()
+                    interactor.handleViewAction(
+                        ExpressCheckoutElementInteractor.ViewAction.OnButtonPressed(button)
+                    )
                 },
             )
             is ExpressCheckoutElementInteractor.ExpressButton.Link -> LinkButton(
@@ -36,7 +37,9 @@ internal fun ExpressCheckoutElementContent(
                 theme = button.theme,
                 linkBrand = button.linkBrand,
                 onClick = {
-                    TODO()
+                    interactor.handleViewAction(
+                        ExpressCheckoutElementInteractor.ViewAction.OnButtonPressed(button)
+                    )
                 },
             )
         }
