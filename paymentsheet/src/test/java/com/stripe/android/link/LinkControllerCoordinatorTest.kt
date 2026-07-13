@@ -1,6 +1,5 @@
 package com.stripe.android.link
 
-import android.app.Application
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner

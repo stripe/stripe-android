@@ -16,7 +16,6 @@ import com.stripe.android.core.utils.flatMapCatching
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.account.LinkAuthResult
 import com.stripe.android.link.account.toLinkAuthResult
-import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.confirmation.computeExpectedPaymentMethodType
 import com.stripe.android.link.exceptions.AppAttestationException
@@ -34,6 +33,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.EmailSource
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
