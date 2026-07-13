@@ -1,10 +1,11 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
-public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcInstructionTextLayoutKt {
-	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcInstructionTextLayoutKt;
+public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt {
+	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt;
 	public fun <init> ()V
-	public final fun getLambda$1568718839$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1325870959$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-298415252$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddDelayScreenKt {

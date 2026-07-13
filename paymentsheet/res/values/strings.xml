@@ -325,6 +325,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_tap_to_add_unsupported_device_error_title">Device not supported</string>
   <!-- Error message shown to the user to try tapping their different card as their next action. -->
   <string name="stripe_tap_to_add_unusable_error_action">Try another card</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">Card expired. Try another card.</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Cancel and pay another way</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.hardware.FakeNfcHardwareDelegate
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -66,8 +68,13 @@ internal class DefaultNfcCardScannerTest {
             startCall.onTagDiscovered.invoke(tag)
 
             assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
-            val failedState = awaitItem() as NfcCardScanner.State.Failed
-            assertThat(failedState.error).isInstanceOf(IllegalStateException::class.java)
+            assertThat(awaitItem()).isEqualTo(
+                NfcCardScanner.State.Failed(
+                    error = NfcCardScanner.Error(
+                        userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+                    ),
+                ),
+            )
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
@@ -106,9 +113,13 @@ internal class DefaultNfcCardScannerTest {
             startCall.onTagDiscovered.invoke(tag)
 
             assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
-            val failedState = awaitItem() as NfcCardScanner.State.Failed
-            assertThat(failedState.error).isInstanceOf(IOException::class.java)
-            assertThat(failedState.error.message).isEqualTo("open failed")
+            assertThat(awaitItem()).isEqualTo(
+                NfcCardScanner.State.Failed(
+                    error = NfcCardScanner.Error(
+                        userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+                    ),
+                ),
+            )
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
@@ -135,8 +146,8 @@ internal class DefaultNfcCardScannerTest {
 
             assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
             val failedState = awaitItem() as NfcCardScanner.State.Failed
-            assertThat(failedState.error).isInstanceOf(IOException::class.java)
-            assertThat(failedState.error.message).isEqualTo("close failed")
+            assertThat(failedState.error.userMessage)
+                .isEqualTo(R.string.stripe_tap_to_add_card_default_error_action.resolvableString)
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)

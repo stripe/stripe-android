@@ -11,6 +11,8 @@ import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.FakeTapZoneResolver
 import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -35,7 +37,7 @@ internal class NfcScanningViewModelTest {
         assertThat(viewModel.viewState.value).isEqualTo(
             NfcScanningViewState(
                 tapZone = TapZone(xBias = 0.3f, yBias = 0.7f),
-                status = NfcScanningStatus.Idle,
+                status = NfcScanningStatus.Idle(error = null),
             ),
         )
     }
@@ -53,7 +55,13 @@ internal class NfcScanningViewModelTest {
 
     @Test
     fun `card scanner failed reports attempt failed`() = runScenario {
-        scannerState.emit(NfcCardScanner.State.Failed(RuntimeException("test")))
+        scannerState.emit(
+            NfcCardScanner.State.Failed(
+                error = NfcCardScanner.Error(
+                    userMessage = R.string.stripe_nfc_expired_error.resolvableString,
+                ),
+            ),
+        )
         assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
     }
 
@@ -69,7 +77,7 @@ internal class NfcScanningViewModelTest {
     @Test
     fun `card scanner in scanning status updates the view model state to scanning`() = runScenario {
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
             scannerState.emit(NfcCardScanner.State.Scanning)
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
         }
@@ -80,7 +88,7 @@ internal class NfcScanningViewModelTest {
     @Test
     fun `card scanner in scanned status updates the view model state to scanned`() = runScenario {
         viewModel.viewState.test {
-            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle)
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
 
             scannerState.emit(
                 NfcCardScanner.State.Complete(
@@ -96,6 +104,45 @@ internal class NfcScanningViewModelTest {
         }
 
         assertThat(fakeEventReporter.onNfcScanAttemptSucceededCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `card scanner in failed status updates the view model state to idle with error`() = runScenario {
+        val errorMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString
+
+        viewModel.viewState.test {
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+
+            scannerState.emit(
+                NfcCardScanner.State.Failed(
+                    error = NfcCardScanner.Error(userMessage = errorMessage),
+                ),
+            )
+
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `card scanner in scanning status clears idle error`() = runScenario {
+        val errorMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString
+
+        viewModel.viewState.test {
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = null))
+
+            scannerState.emit(
+                NfcCardScanner.State.Failed(
+                    error = NfcCardScanner.Error(userMessage = errorMessage),
+                ),
+            )
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
+
+            scannerState.emit(NfcCardScanner.State.Scanning)
+            assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
+            assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
+        }
     }
 
     @Test
