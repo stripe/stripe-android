@@ -12,6 +12,9 @@ NEXT_VERSION_BUMP: MINOR
 ### PaymentSheet
 * [ADDED] Standalone Link wallet APIs in private preview via `LinkController`.
 
+### CustomerSheet
+* [FIXED][13383](https://github.com/stripe/stripe-android/issues/13383) `CustomerSheet` no longer reports a failure when the sheet is torn down by the OS without returning a result (e.g. when a `singleTask` host activity is relaunched). The result callback is now a no-op in that case, leaving the merchant's state unchanged.
+
 ## 23.11.1 - 2026-06-30
 
 ### PaymentSheet

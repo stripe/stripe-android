@@ -12,7 +12,6 @@ import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
-import com.stripe.android.isInstanceOf
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -75,7 +74,7 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
-    fun `Finish without result emits null result and contract parses error`() {
+    fun `Finish without result emits null result and contract parses null`() {
         runActivityScenario {
             activity.finish()
             assertThat(
@@ -87,7 +86,7 @@ internal class CustomerSheetActivityTest {
                 scenario.getResult().resultCode,
                 scenario.getResult().resultData,
             )
-            assertThat(result).isInstanceOf<InternalCustomerSheetResult.Error>()
+            assertThat(result).isNull()
         }
     }
 
