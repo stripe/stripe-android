@@ -1,10 +1,11 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
-public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcInstructionTextLayoutKt {
-	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcInstructionTextLayoutKt;
+public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt {
+	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt;
 	public fun <init> ()V
-	public final fun getLambda$1568718839$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1325870959$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-298415252$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddDelayScreenKt {
@@ -250,7 +251,39 @@ public final class com/stripe/android/link/LinkController$Configuration {
 	public final fun allowLogout (Z)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun email (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun phoneNumber (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun setupIntentClientSecret (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
 	public final fun supportedPaymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/link/LinkController$Configuration;
+}
+
+public abstract interface class com/stripe/android/link/LinkController$ConfirmSetupIntentCallback {
+	public abstract fun onConfirmSetupIntentResult (Lcom/stripe/android/link/LinkController$ConfirmSetupIntentResult;)V
+}
+
+public abstract interface class com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+}
+
+public final class com/stripe/android/link/LinkController$ConfirmSetupIntentResult$Canceled : com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/link/LinkController$ConfirmSetupIntentResult$Canceled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$ConfirmSetupIntentResult$Failed : com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$ConfirmSetupIntentResult$Success : com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/link/LinkController$PaymentMethodPreview {
@@ -302,6 +335,7 @@ public final class com/stripe/android/link/LinkController$PresentResult$Failed :
 
 public final class com/stripe/android/link/LinkController$Presenter {
 	public static final field $stable I
+	public final fun createPaymentMethodAndConfirmSetupIntent ()V
 	public final fun present ()V
 }
 

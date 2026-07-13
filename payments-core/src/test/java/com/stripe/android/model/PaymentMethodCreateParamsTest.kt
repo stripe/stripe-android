@@ -112,6 +112,24 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun `createEps() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createEps().toParamMap())
+            .isEqualTo(mapOf("type" to "eps"))
+    }
+
+    @Test
+    fun `createBancontact() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createBancontact().toParamMap())
+            .isEqualTo(mapOf("type" to "bancontact"))
+    }
+
+    @Test
+    fun `createP24() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createP24().toParamMap())
+            .isEqualTo(mapOf("type" to "p24"))
+    }
+
+    @Test
     fun auBecsDebit_toParamMap_shouldCreateExpectedMap() {
         assertThat(PaymentMethodCreateParamsFixtures.AU_BECS_DEBIT.toParamMap())
             .isEqualTo(

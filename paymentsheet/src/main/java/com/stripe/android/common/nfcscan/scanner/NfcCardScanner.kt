@@ -4,6 +4,9 @@ import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -16,8 +19,12 @@ internal interface NfcCardScanner {
     sealed interface State {
         data object Scanning : State
         data class Complete(val cardData: ScannedCardData) : State
-        data class Failed(val error: Throwable) : State
+        data class Failed(val error: Error) : State
     }
+
+    data class Error(
+        val userMessage: ResolvableString,
+    )
 
     val state: Flow<State>
 
@@ -59,11 +66,17 @@ internal class DefaultNfcCardScanner @Inject constructor(
                     onSuccess = { cardData ->
                         _state.emit(NfcCardScanner.State.Complete(cardData))
                     },
-                    onFailure = { error ->
-                        _state.emit(NfcCardScanner.State.Failed(error))
+                    onFailure = {
+                        _state.emit(NfcCardScanner.State.Failed(GENERIC_ERROR))
                     }
                 )
             }
         }
+    }
+
+    private companion object {
+        val GENERIC_ERROR = NfcCardScanner.Error(
+            userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+        )
     }
 }

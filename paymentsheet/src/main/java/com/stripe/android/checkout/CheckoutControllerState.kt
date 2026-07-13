@@ -6,7 +6,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
-import java.util.UUID
 
 /**
  * Internal state for [CheckoutController]. Unlike [InternalState] (used by [Checkout]), this holds
@@ -48,7 +47,7 @@ internal data class CheckoutControllerState(
             configuration: CheckoutController.Configuration.State,
             checkoutSessionResponse: CheckoutSessionResponse,
         ): CheckoutControllerState = CheckoutControllerState(
-            key = UUID.randomUUID().toString(),
+            key = checkoutSessionResponse.id,
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             flagImages = null,

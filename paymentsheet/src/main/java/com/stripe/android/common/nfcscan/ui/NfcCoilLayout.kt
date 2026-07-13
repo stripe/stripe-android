@@ -48,13 +48,14 @@ internal fun NfcCoilLayout(
             )
         }
 
-        NfcCoilInstructionTextLayout(
+        NfcCoilTextLayout(
             containerWidth = maxWidth,
             containerHeight = maxHeight,
             tapZone = tapZone,
             shouldRenderTextAboveCoil = shouldRenderTextAboveCoil,
             coilSize = CoilCircleSize,
             canShow = canShowInstructionText,
+            error = (status as? NfcScanningStatus.Idle)?.error,
         )
     }
 }
