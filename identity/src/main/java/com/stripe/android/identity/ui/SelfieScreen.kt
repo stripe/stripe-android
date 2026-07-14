@@ -1,11 +1,16 @@
 package com.stripe.android.identity.ui
 
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.os.Build
+import android.view.HapticFeedbackConstants
+import android.view.View
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -37,6 +42,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -268,6 +274,7 @@ private fun SelfieCaptureScreen(
     val scanState = (selfieScannerState as? IdentityScanViewModel.State.Scanning)?.scanState
     val showPreCameraInstruction =
         selfieScannerState is IdentityScanViewModel.State.Scanning && scanState == null
+    CaptureAcceptanceFeedback(scanState)
 
     Column(
         modifier = Modifier
@@ -456,6 +463,93 @@ private fun AnnounceSelfieStatus(status: SelfieStatus?) {
             view.announceForAccessibility(checkingImagesText)
         }
     }
+}
+
+@Composable
+private fun CaptureAcceptanceFeedback(scanState: IdentityScanState?) {
+    val context = LocalContext.current
+    val view = LocalView.current
+    val soundPlayer = remember(context.applicationContext) {
+        CaptureConfirmationSoundPlayer(context.applicationContext)
+    }
+    val acceptedCapture = (scanState as? IdentityScanState.Satisfied)
+        ?.transitioner
+        ?.let { it as? FaceDetectorTransitioner }
+        ?.completedCapture
+
+    DisposableEffect(soundPlayer) {
+        onDispose(soundPlayer::release)
+    }
+
+    LaunchedEffect(acceptedCapture) {
+        if (acceptedCapture != null) {
+            view.performCaptureConfirmationHaptic()
+            soundPlayer.play()
+        }
+    }
+}
+
+private class CaptureConfirmationSoundPlayer(context: Context) {
+    private val soundPool = SoundPool.Builder()
+        .setMaxStreams(1)
+        .setAudioAttributes(
+            AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build()
+        )
+        .build()
+    private var isLoaded = false
+    private var playWhenLoaded = false
+    private var activeStreamId = 0
+    private val soundId: Int
+
+    init {
+        soundPool.setOnLoadCompleteListener { _, _, status ->
+            isLoaded = status == 0
+            if (isLoaded && playWhenLoaded) {
+                playWhenLoaded = false
+                playLoadedSound()
+            }
+        }
+        soundId = soundPool.load(context, R.raw.selfie_capture_confirmed, 1)
+    }
+
+    fun play() {
+        if (isLoaded) {
+            playLoadedSound()
+        } else {
+            playWhenLoaded = true
+        }
+    }
+
+    fun release() {
+        soundPool.setOnLoadCompleteListener(null)
+        soundPool.release()
+    }
+
+    private fun playLoadedSound() {
+        if (activeStreamId != 0) {
+            soundPool.stop(activeStreamId)
+        }
+        activeStreamId = soundPool.play(
+            soundId,
+            1f,
+            1f,
+            1,
+            0,
+            1f
+        )
+    }
+}
+
+private fun View.performCaptureConfirmationHaptic() {
+    val feedbackConstant = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        HapticFeedbackConstants.CONFIRM
+    } else {
+        HapticFeedbackConstants.VIRTUAL_KEY
+    }
+    performHapticFeedback(feedbackConstant)
 }
 
 @Composable
