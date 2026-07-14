@@ -18,6 +18,7 @@ import com.stripe.android.link.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.paymentsheet.CardUpdateParams
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
@@ -34,6 +35,9 @@ class UpdateCardScreenViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `viewmodel initializes with valid card details`() = runTest(dispatcher) {
@@ -481,6 +485,6 @@ class UpdateCardScreenViewModelTest {
             billingDetailsUpdateFlow = billingDetailsUpdateFlow,
             linkLaunchMode = LinkLaunchMode.Full,
             dismissWithResult = {}
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

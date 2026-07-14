@@ -2,14 +2,19 @@ package com.stripe.android.customersheet
 
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import org.junit.Rule
 import kotlin.test.Test
 
 class CustomerSheetConfigViewModelTest {
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Test
     fun `On set configure request, should be able to retrieve the same request`() {
         val viewModel = CustomerSheetConfigViewModel(
             savedStateHandle = SavedStateHandle(),
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         val request = CustomerSheetConfigureRequest(
             configuration = CustomerSheet.Configuration.builder(
@@ -29,7 +34,7 @@ class CustomerSheetConfigViewModelTest {
         val handle = SavedStateHandle()
         val viewModel = CustomerSheetConfigViewModel(
             savedStateHandle = handle,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         val request = CustomerSheetConfigureRequest(
             configuration = CustomerSheet.Configuration.builder(
@@ -43,7 +48,7 @@ class CustomerSheetConfigViewModelTest {
 
         val recreatedViewModel = CustomerSheetConfigViewModel(
             savedStateHandle = handle
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(recreatedViewModel.configureRequest).isEqualTo(request)
     }

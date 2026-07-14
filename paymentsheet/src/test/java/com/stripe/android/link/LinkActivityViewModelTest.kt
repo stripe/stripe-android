@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteActivityLaunch
 import com.stripe.android.paymentsheet.addresselement.TestAutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
@@ -75,6 +76,9 @@ internal class LinkActivityViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `test that cancel result is called on back pressed`() = runTest(dispatcher) {
@@ -1019,7 +1023,7 @@ internal class LinkActivityViewModelTest {
             addPaymentMethodOptionsFactory = addPaymentMethodOptionsFactory,
         ).apply {
             this.launchWebFlow = launchWeb
-        }
+        }.also { viewModelStoreRule.track(it) }
     }
 
     private fun creationExtras(): CreationExtras {

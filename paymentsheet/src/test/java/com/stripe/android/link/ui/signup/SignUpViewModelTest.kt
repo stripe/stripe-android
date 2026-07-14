@@ -24,6 +24,7 @@ import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -43,6 +44,9 @@ internal class SignUpViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `init sends analytics event`() = runTest(dispatcher) {
@@ -440,7 +444,7 @@ internal class SignUpViewModelTest {
                 dismissResults.add(result)
             },
             verifyDuringSignUp = {},
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         authViewModel.emailController.onRawValueChange("test@example.com")
         advanceTimeBy(SignUpViewModel.LOOKUP_DEBOUNCE + 1.milliseconds)
@@ -858,7 +862,7 @@ internal class SignUpViewModelTest {
             linkLaunchMode = linkLaunchMode,
             dismissWithResult = dismissWithResult,
             verifyDuringSignUp = verifyDuringSignUp,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun mockConsumerSessionWithVerificationSession(

@@ -11,10 +11,11 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
-import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -29,12 +30,15 @@ import org.robolectric.annotation.Config
 
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
-internal class CustomerSheetActivityTest {
+internal class CustomerSheetActivityTest : CustomerSheetTestHelper {
     @get:Rule
     val rule = InstantTaskExecutorRule()
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    override val viewModelStoreTestRule = ViewModelStoreTestRule()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()

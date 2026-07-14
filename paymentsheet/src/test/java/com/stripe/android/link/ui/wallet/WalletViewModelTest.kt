@@ -40,6 +40,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -65,6 +66,9 @@ class WalletViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
@@ -1172,7 +1176,7 @@ class WalletViewModelTest {
                 configuration = configuration,
                 linkLaunchMode = linkLaunchMode
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private suspend fun testAddBankAccount(

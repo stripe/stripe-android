@@ -96,6 +96,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
@@ -173,6 +174,9 @@ internal class DefaultFlowControllerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Suppress("LongMethod")
     @BeforeTest
@@ -2572,11 +2576,13 @@ internal class DefaultFlowControllerTest {
     }
 
     private fun createViewModel(): FlowControllerViewModel {
-        return FlowControllerViewModel(
-            application = ApplicationProvider.getApplicationContext(),
-            handle = SavedStateHandle(),
-            statusBarColor = STATUS_BAR_COLOR,
-            paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+        return viewModelStoreRule.track(
+            FlowControllerViewModel(
+                application = ApplicationProvider.getApplicationContext(),
+                handle = SavedStateHandle(),
+                statusBarColor = STATUS_BAR_COLOR,
+                paymentElementCallbackIdentifier = FLOW_CONTROLLER_CALLBACK_TEST_IDENTIFIER,
+            )
         )
     }
 

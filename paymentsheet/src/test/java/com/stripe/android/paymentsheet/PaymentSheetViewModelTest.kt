@@ -112,6 +112,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.utils.prefillCreate
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
@@ -172,8 +173,11 @@ internal class PaymentSheetViewModelTest {
 
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
+    private val viewModelStoreRule = ViewModelStoreTestRule()
+
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
+        .around(viewModelStoreRule)
         .around(InstantTaskExecutorRule())
         .around(SessionTestRule())
         .around(PaymentElementCallbackTestRule())
@@ -3453,7 +3457,7 @@ internal class PaymentSheetViewModelTest {
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         customerStateHolder: CustomerStateHolder? = null,
     ): PaymentSheetViewModel {
-        return TestViewModelFactory.create(
+        val viewModel = TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = savedStateHandle,
         ) { linkHandler, thisSavedStateHandle ->
@@ -3496,6 +3500,7 @@ internal class PaymentSheetViewModelTest {
                 placesClient = null,
             )
         }
+        return viewModelStoreRule.track(viewModel)
     }
 
     private fun FakeConfirmationHandler.Scenario.createLinkViewModel(): PaymentSheetViewModel {
