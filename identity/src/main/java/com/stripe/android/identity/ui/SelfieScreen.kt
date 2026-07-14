@@ -3,7 +3,9 @@ package com.stripe.android.identity.ui
 import android.graphics.Bitmap
 import android.graphics.Paint
 import android.graphics.RadialGradient
+import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -59,6 +61,7 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
@@ -491,7 +494,7 @@ private fun SelfieCameraViewFinderContent(
         )
         val cameraModifier = Modifier
             .fillMaxSize()
-            .blur(blurRadius)
+        val blurRadiusPx = with(LocalDensity.current) { blurRadius.toPx() }
         AndroidView(
             modifier = cameraModifier,
             factory = {
@@ -502,9 +505,27 @@ private fun SelfieCameraViewFinderContent(
             },
             update = {
                 cameraManager.onCameraViewUpdate(it)
+                it.setLivePreviewBlur(blurRadiusPx)
             }
         )
     }
+}
+
+private fun CameraView.setLivePreviewBlur(radiusPx: Float) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+        return
+    }
+    setRenderEffect(
+        if (radiusPx > 0f) {
+            RenderEffect.createBlurEffect(
+                radiusPx,
+                radiusPx,
+                Shader.TileMode.CLAMP
+            )
+        } else {
+            null
+        }
+    )
 }
 
 private enum class SelfieStatus(

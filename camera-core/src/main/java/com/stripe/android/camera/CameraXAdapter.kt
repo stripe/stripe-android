@@ -199,6 +199,7 @@ class CameraXAdapter(
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
+    private var previewImplementationMode = PreviewView.ImplementationMode.PERFORMANCE
     private val cameraProviderFuture = ProcessCameraProvider.getInstance(activity)
     private lateinit var lifecycleOwner: LifecycleOwner
 
@@ -230,7 +231,15 @@ class CameraXAdapter(
         )
     }
 
-    private val previewTextureView by lazy { PreviewView(activity) }
+    private val previewTextureView by lazy {
+        PreviewView(activity).apply {
+            implementationMode = previewImplementationMode
+        }
+    }
+
+    fun useCompatiblePreview() {
+        previewImplementationMode = PreviewView.ImplementationMode.COMPATIBLE
+    }
 
     override fun withFlashSupport(task: (Boolean) -> Unit) {
         withCamera { task(it.cameraInfo.hasFlashUnit()) }
