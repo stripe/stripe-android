@@ -1,10 +1,13 @@
 package com.stripe.android.uicore.elements
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.R
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.semantics.SemanticsProperties
 import androidx.compose.ui.semantics.SemanticsProperties.TextSelectionRange
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.SemanticsNodeInteraction
@@ -19,12 +22,14 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -138,6 +143,38 @@ class TextFieldTest {
         textField.assert(hasText("A1B2C3"))
     }
 
+    @Test
+    fun `On autofill, reports readable content type and updates field value`() {
+        val reportedAutofillTypes = mutableListOf<String>()
+        val textFieldController = SimpleTextFieldController(
+            textFieldConfig = EmailConfig(),
+        )
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalAutofillEventReporter provides { reportedAutofillTypes.add(it) }
+            ) {
+                TextField(
+                    modifier = Modifier.testTag(TEST_TAG),
+                    textFieldController = textFieldController,
+                    enabled = true,
+                    imeAction = ImeAction.Next,
+                )
+            }
+        }
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG)
+            .assert(hasContentType(ContentType.EmailAddress))
+            .performAutofillText(AnnotatedString("test@email.com"))
+
+        assertThat(reportedAutofillTypes).containsExactly("emailAddress")
+
+        composeTestRule
+            .onNodeWithTag(TEST_TAG)
+            .assert(hasText("test@email.com"))
+    }
+
     @Composable
     private fun TestTextField(
         initialValue: String?,
@@ -191,6 +228,16 @@ class TextFieldTest {
 
     private fun hasTextSelection(range: TextRange): SemanticsMatcher {
         return SemanticsMatcher.expectValue(TextSelectionRange, range)
+    }
+
+    private fun hasContentType(contentType: ContentType): SemanticsMatcher {
+        return SemanticsMatcher.expectValue(SemanticsProperties.ContentType, contentType)
+    }
+
+    private fun SemanticsNodeInteraction.performAutofillText(text: AnnotatedString) {
+        performSemanticsAction(SemanticsActions.OnAutofillText) { action ->
+            action(text)
+        }
     }
 
     private fun SemanticsNodeInteraction.performTextInputSelection(
