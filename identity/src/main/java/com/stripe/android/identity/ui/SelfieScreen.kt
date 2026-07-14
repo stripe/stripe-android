@@ -1027,7 +1027,7 @@ private fun CaptureGuideTarget.isProgressRevealedTick(
     angle: Float,
     targetProgress: Float
 ): Boolean {
-    if (!isTargetHalfTick(angle)) {
+    if (targetProgress <= 0f || !isTargetHalfTick(angle)) {
         return false
     }
 
