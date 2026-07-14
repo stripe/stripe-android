@@ -1,0 +1,67 @@
+package com.stripe.android.checkout.ece
+
+import androidx.compose.ui.test.assertDoesNotExist
+import androidx.compose.ui.test.assertExists
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+internal class ExpressCheckoutElementContentTest {
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
+    @get:Rule
+    val coroutineTestRule = CoroutineTestRule()
+
+    @Test
+    fun `renders wallet button text`() {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractor.State(
+                    walletButtons = listOf(
+                        ExpressCheckoutElementInteractor.ExpressButton.GooglePay,
+                        ExpressCheckoutElementInteractor.ExpressButton.Link,
+                    ),
+                )
+            )
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.onNodeWithText("Google Pay Button").assertExists()
+        composeRule.onNodeWithText("Link Button").assertExists()
+    }
+
+    @Test
+    fun `does not render wallet button text when state has no buttons`() {
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractor.State(walletButtons = emptyList())
+            )
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.onNodeWithText("Google Pay Button").assertDoesNotExist()
+        composeRule.onNodeWithText("Link Button").assertDoesNotExist()
+    }
+
+    private class FakeExpressCheckoutElementInteractor(
+        override val state: StateFlow<ExpressCheckoutElementInteractor.State>,
+    ) : ExpressCheckoutElementInteractor
+}
