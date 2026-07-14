@@ -22,11 +22,14 @@ class ExpressCheckoutElement internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class LinkVisibility {
             Auto,
             Never,
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         enum class GooglePayVisibility {
             Auto,
             Never,
