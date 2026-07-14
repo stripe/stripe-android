@@ -585,7 +585,9 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `isLoading transitions to true then false on a successful mutation`() = runMutationScenario {
+    fun `isLoading transitions to true then false on a successful mutation`() = runMutationScenario(
+        assertLoadingConsumed = true,
+    ) {
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
             responseFactory = successResponseFactory(),
@@ -597,11 +599,12 @@ internal class CheckoutControllerTest {
 
         assertThat(isLoadingTurbine.awaitItem()).isTrue()
         assertThat(isLoadingTurbine.awaitItem()).isFalse()
-        isLoadingTurbine.ensureAllEventsConsumed()
     }
 
     @Test
-    fun `isLoading stays true while queued mutations are pending`() = runMutationScenario {
+    fun `isLoading stays true while queued mutations are pending`() = runMutationScenario(
+        assertLoadingConsumed = true,
+    ) {
         val holdFirstResponse = CountDownLatch(1)
         networkRule.checkoutUpdate(
             bodyPart("promotion_code", "10OFF"),
@@ -628,7 +631,6 @@ internal class CheckoutControllerTest {
 
         // isLoading should go directly from true to false with no intermediate flicker.
         assertThat(isLoadingTurbine.awaitItem()).isFalse()
-        isLoadingTurbine.ensureAllEventsConsumed()
     }
 
     @Test
@@ -698,7 +700,7 @@ internal class CheckoutControllerTest {
 
     @Test
     fun `configure is serialized behind an in-flight mutation and shares its loading window`() =
-        runMutationScenario {
+        runMutationScenario(assertLoadingConsumed = true) {
             val holdMutation = CountDownLatch(1)
             networkRule.checkoutUpdate(
                 bodyPart("promotion_code", "10OFF"),
@@ -724,7 +726,6 @@ internal class CheckoutControllerTest {
 
             // A single loading window spanned both operations, with no flicker to false in between.
             assertThat(isLoadingTurbine.awaitItem()).isFalse()
-            isLoadingTurbine.ensureAllEventsConsumed()
         }
 
     private fun NetworkRule.defaultInit() {
@@ -799,8 +800,13 @@ internal class CheckoutControllerTest {
     // Configures a controller from a fresh init, then hands it to [block] alongside the shared
     // SavedStateHandle (used to read committed state and simulate a presented payment flow) and an
     // isLoading Turbine.
+    //
+    // Set [assertLoadingConsumed] for tests that verify loading behavior: the block must consume
+    // every isLoading emission and this asserts none are left over. Tests that don't care about
+    // loading leave it false, and any unconsumed emissions are ignored.
     private fun runMutationScenario(
         initModifier: (JSONObject) -> Unit = {},
+        assertLoadingConsumed: Boolean = false,
         block: suspend MutationScenario.() -> Unit,
     ) = runTest {
         networkRule.checkoutInit(responseFactory = successResponseFactory(initModifier))
@@ -818,7 +824,11 @@ internal class CheckoutControllerTest {
                     isLoadingTurbine = isLoadingTurbine,
                 )
             )
-            isLoadingTurbine.cancelAndIgnoreRemainingEvents()
+            if (assertLoadingConsumed) {
+                isLoadingTurbine.ensureAllEventsConsumed()
+            } else {
+                isLoadingTurbine.cancelAndIgnoreRemainingEvents()
+            }
         }
     }
 
