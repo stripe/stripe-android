@@ -1,7 +1,5 @@
 package com.stripe.android.checkout.ece
 
-import androidx.compose.ui.test.assertDoesNotExist
-import androidx.compose.ui.test.assertExists
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.stripe.android.testing.CoroutineTestRule
@@ -29,9 +27,9 @@ internal class ExpressCheckoutElementContentTest {
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
                 ExpressCheckoutElementInteractor.State(
-                    walletButtons = listOf(
-                        ExpressCheckoutElementInteractor.ExpressButton.GooglePay,
-                        ExpressCheckoutElementInteractor.ExpressButton.Link,
+                    expressButtons = listOf(
+                        ExpressButton.GooglePay,
+                        ExpressButton.Link,
                     ),
                 )
             )
@@ -49,7 +47,7 @@ internal class ExpressCheckoutElementContentTest {
     fun `does not render wallet button text when state has no buttons`() {
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
-                ExpressCheckoutElementInteractor.State(walletButtons = emptyList())
+                ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
             )
         )
 

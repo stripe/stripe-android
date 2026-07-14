@@ -7,27 +7,17 @@ internal interface ExpressCheckoutElementInteractor {
     val state: StateFlow<State>
 
     data class State(
-        val walletButtons: List<ExpressButton>,
+        val expressButtons: List<ExpressButton>,
     )
-
-    fun interface Factory {
-        fun create(): ExpressCheckoutElementInteractor
-    }
-
-    sealed interface ExpressButton {
-        data object Link : ExpressButton
-        data object GooglePay : ExpressButton
-    }
 }
 
 internal class DefaultExpressCheckoutElementInteractor(
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = stateFlowOf(
-        ExpressCheckoutElementInteractor.State(walletButtons = emptyList())
+        ExpressCheckoutElementInteractor.State(
+            expressButtons = listOf(
+                ExpressButton.Link,
+                ExpressButton.GooglePay,
+            )
+        )
     ),
-) : ExpressCheckoutElementInteractor {
-    internal object Factory : ExpressCheckoutElementInteractor.Factory {
-        override fun create(): ExpressCheckoutElementInteractor {
-            return DefaultExpressCheckoutElementInteractor()
-        }
-    }
-}
+) : ExpressCheckoutElementInteractor

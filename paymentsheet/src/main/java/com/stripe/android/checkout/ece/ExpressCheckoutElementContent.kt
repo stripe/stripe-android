@@ -11,10 +11,10 @@ internal fun ExpressCheckoutElementContent(
 ) {
     val state by interactor.state.collectAsState()
 
-    state.walletButtons.forEach { button ->
+    state.expressButtons.forEach { button ->
         when (button) {
-            ExpressCheckoutElementInteractor.ExpressButton.GooglePay -> Text("Google Pay Button")
-            ExpressCheckoutElementInteractor.ExpressButton.Link -> Text("Link Button")
+            ExpressButton.GooglePay -> Text("Google Pay Button")
+            ExpressButton.Link -> Text("Link Button")
         }
     }
 }
