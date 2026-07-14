@@ -659,8 +659,17 @@ private fun IdentityScanState?.captureGuideState(): CaptureGuideState {
                 0f
             }
         )
-        is IdentityScanState.Satisfied -> CaptureGuideState(
+        is IdentityScanState.Satisfied,
+        is IdentityScanState.Finished -> CaptureGuideState(
             uses3DCaptureAnimations = uses3DCaptureAnimations,
+            target = if (uses3DCaptureAnimations) activeTarget else CaptureGuideTarget.None,
+            targetProgress = if (uses3DCaptureAnimations &&
+                activeTarget != CaptureGuideTarget.None
+            ) {
+                1f
+            } else {
+                0f
+            },
             highlight = transitioner?.completedCapture.toCaptureGuideHighlight()
         )
         else -> CaptureGuideState(uses3DCaptureAnimations = uses3DCaptureAnimations)
