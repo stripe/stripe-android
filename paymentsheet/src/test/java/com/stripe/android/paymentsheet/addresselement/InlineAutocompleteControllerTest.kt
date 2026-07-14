@@ -23,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class InlineAutocompleteControllerTest {
 
@@ -620,9 +621,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy flag true keeps Google Places enabled for predictions until proxy is implemented`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = true
-    ) {
+    fun `without stripeHostedProxy falls back to Google Places for predictions`() = runScenario {
         fakePlacesClient.findPredictionsResult = Result.success(
             FindAutocompletePredictionsResponse(emptyList())
         )
@@ -636,9 +635,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy flag true keeps Google Places enabled for place selection until proxy is implemented`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = true
-    ) {
+    fun `without stripeHostedProxy falls back to Google Places for place selection`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
             FetchPlaceResponse(
                 Place(
@@ -658,9 +655,94 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy flag true with null placesClient stays Idle until proxy is implemented`() = runScenario(
+    fun `with stripeHostedProxy and placesClient prefers proxy for predictions`() = runScenario(
+        useStripeHostedProxy = true,
+    ) {
+        fakeStripeHostedProxy.findPredictionsResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        val call = fakeStripeHostedProxy.findPredictionsCalls.awaitItem()
+        assertThat(call.query).isEqualTo("123 Main")
+        assertThat(call.country).isEqualTo("US")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `with stripeHostedProxy and placesClient prefers proxy for place selection`() = runScenario(
+        useStripeHostedProxy = true,
+    ) {
+        fakeStripeHostedProxy.fetchPlaceResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
+        delegate.onPredictionSelected("place-id-123")
+
+        val call = fakeStripeHostedProxy.fetchPlaceCalls.awaitItem()
+        assertThat(call).isEqualTo("place-id-123")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem())
+            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+    }
+
+    @Test
+    fun `with stripeHostedProxy uses proxy for predictions`() = runScenario(
         usePlacesClient = false,
-        shouldUseAutocompleteProxyEndpoints = true
+        useStripeHostedProxy = true,
+    ) {
+        fakeStripeHostedProxy.findPredictionsResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        val call = fakeStripeHostedProxy.findPredictionsCalls.awaitItem()
+        assertThat(call.query).isEqualTo("123 Main")
+        assertThat(call.country).isEqualTo("US")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `with stripeHostedProxy uses proxy for place selection`() = runScenario(
+        usePlacesClient = false,
+        useStripeHostedProxy = true,
+    ) {
+        fakeStripeHostedProxy.fetchPlaceResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
+        delegate.onPredictionSelected("place-id-123")
+
+        val call = fakeStripeHostedProxy.fetchPlaceCalls.awaitItem()
+        assertThat(call).isEqualTo("place-id-123")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem())
+            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
+    }
+
+    @Test
+    fun `null placesClient and no proxy stays Idle`() = runScenario(
+        usePlacesClient = false,
     ) {
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
@@ -671,9 +753,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy flag false calls Google Places for predictions`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = false
-    ) {
+    fun `no proxy calls Google Places for predictions`() = runScenario {
         fakePlacesClient.findPredictionsResult = Result.success(
             FindAutocompletePredictionsResponse(emptyList())
         )
@@ -687,9 +767,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy flag false calls Google Places for place selection`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = false
-    ) {
+    fun `no proxy calls Google Places for place selection`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
             FetchPlaceResponse(
                 Place(
@@ -713,10 +791,15 @@ class InlineAutocompleteControllerTest {
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),
         usePlacesClient: Boolean = true,
-        shouldUseAutocompleteProxyEndpoints: Boolean = false,
+        useStripeHostedProxy: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val fakePlaces = if (usePlacesClient) FakePlacesClientProxy() else null
+        val stripeHostedProxy = if (useStripeHostedProxy) {
+            FakePlacesClientProxy()
+        } else {
+            null
+        }
         val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
@@ -726,15 +809,16 @@ class InlineAutocompleteControllerTest {
         )
         val delegate = InlineAutocompleteController(
             placesClient = fakePlaces,
+            stripeHostedProxy = stripeHostedProxy,
             config = config,
             coroutineScope = backgroundScope,
             eventListenerProvider = { { event -> eventCalls.add(event) } },
-            shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
         )
 
         Scenario(
             delegate = delegate,
             fakePlacesClientOrNull = fakePlaces,
+            fakeStripeHostedProxyOrNull = stripeHostedProxy,
             eventCalls = eventCalls,
             queryFlow = MutableStateFlow(""),
             countryFlow = MutableStateFlow("US"),
@@ -742,12 +826,14 @@ class InlineAutocompleteControllerTest {
         ).apply { block() }
 
         fakePlaces?.ensureAllEventsConsumed()
+        stripeHostedProxy?.ensureAllEventsConsumed()
         eventCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val delegate: InlineAutocompleteController,
         private val fakePlacesClientOrNull: FakePlacesClientProxy?,
+        private val fakeStripeHostedProxyOrNull: FakePlacesClientProxy?,
         val eventCalls: Turbine<AutocompleteAddressInteractor.Event>,
         val queryFlow: MutableStateFlow<String>,
         val countryFlow: MutableStateFlow<String?>,
@@ -755,6 +841,9 @@ class InlineAutocompleteControllerTest {
     ) {
         val fakePlacesClient: FakePlacesClientProxy
             get() = requireNotNull(fakePlacesClientOrNull)
+
+        val fakeStripeHostedProxy: FakePlacesClientProxy
+            get() = requireNotNull(fakeStripeHostedProxyOrNull)
 
         fun advanceTimeBy(millis: Long) = testScope.advanceTimeBy(millis)
     }

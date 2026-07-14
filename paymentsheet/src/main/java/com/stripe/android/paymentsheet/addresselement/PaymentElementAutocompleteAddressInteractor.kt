@@ -51,18 +51,35 @@ internal class PaymentElementAutocompleteAddressInteractor(
         private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
 
         override fun create(): AutocompleteAddressInteractor {
-            if (placesClient != null && coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
+            val shouldUseProxy = shouldUseAutocompleteProxyEndpointsProvider()
+            val hasClient = placesClient != null || shouldUseProxy
+            if (hasClient && coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
                 activeInlineInteractor?.dispose()
                 return BillingInlineAutocompleteAddressInteractor(
                     placesClient = placesClient,
-                    autocompleteConfig = autocompleteConfig,
+                    autocompleteConfig = createInlineAutocompleteConfig(shouldUseProxy),
                     coroutineScope = coroutineScope,
-                    shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpointsProvider(),
+                    shouldUseAutocompleteProxyEndpoints = shouldUseProxy,
+                    googleApiKey = autocompleteConfig.googlePlacesApiKey,
                 ).also { activeInlineInteractor = it }
             }
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
                 autocompleteConfig = autocompleteConfig,
+            )
+        }
+
+        private fun createInlineAutocompleteConfig(shouldUseProxy: Boolean): AutocompleteAddressInteractor.Config {
+            if (!shouldUseProxy || autocompleteConfig.shouldUseStripeHostedAutocomplete) {
+                return autocompleteConfig
+            }
+
+            return AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
+                autocompleteCountries = autocompleteConfig.autocompleteCountries,
+                isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
+                isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
+                shouldUseStripeHostedAutocomplete = true,
             )
         }
     }

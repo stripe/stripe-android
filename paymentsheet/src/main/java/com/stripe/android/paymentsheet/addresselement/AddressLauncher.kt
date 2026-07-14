@@ -112,6 +112,7 @@ class AddressLauncher internal constructor(
         internal val googlePlacesApiKey: String? = null,
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
+        internal val useStripeHostedAutocomplete: Boolean = false,
     ) : Parcelable {
         @JvmOverloads
         constructor(
@@ -152,6 +153,12 @@ class AddressLauncher internal constructor(
              * countries that Stripe has audited to ensure a good autocomplete experience.
              */
             autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+            /**
+             * When true, routes inline autocomplete through Stripe-hosted endpoints instead of the
+             * Google Places SDK. The current hosted path is intended to fail gracefully until the
+             * backend implementation is available.
+             */
+            useStripeHostedAutocomplete: Boolean = false,
         ) : this(
             appearance = appearance,
             address = address,
@@ -162,6 +169,7 @@ class AddressLauncher internal constructor(
             googlePlacesApiKey = googlePlacesApiKey,
             autocompleteCountries = autocompleteCountries,
             billingAddress = null,
+            useStripeHostedAutocomplete = useStripeHostedAutocomplete,
         )
 
         /**
@@ -177,6 +185,7 @@ class AddressLauncher internal constructor(
             private var googlePlacesApiKey: String? = null
             private var autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES
             private var billingAddress: PaymentSheet.BillingDetails? = null
+            private var useStripeHostedAutocomplete: Boolean = false
 
             fun appearance(appearance: PaymentSheet.Appearance) =
                 apply { this.appearance = appearance }
@@ -206,6 +215,9 @@ class AddressLauncher internal constructor(
             fun billingAddress(billingAddress: PaymentSheet.BillingDetails?) =
                 apply { this.billingAddress = billingAddress }
 
+            fun useStripeHostedAutocomplete(useStripeHostedAutocomplete: Boolean) =
+                apply { this.useStripeHostedAutocomplete = useStripeHostedAutocomplete }
+
             fun build() = Configuration(
                 appearance = appearance,
                 address = address,
@@ -216,6 +228,7 @@ class AddressLauncher internal constructor(
                 googlePlacesApiKey = googlePlacesApiKey,
                 autocompleteCountries = autocompleteCountries,
                 billingAddress = billingAddress,
+                useStripeHostedAutocomplete = useStripeHostedAutocomplete,
             )
         }
     }
