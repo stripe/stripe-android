@@ -62,14 +62,16 @@ internal class NfcScanningViewModel @Inject constructor(
                         eventReporter.onNfcScanAttemptStarted()
                     }
                     is NfcCardScanner.State.Failed -> {
+                        val error = state.error
+
                         _viewState.emit(
                             NfcScanningViewState(
                                 tapZone = tapZone,
-                                status = NfcScanningStatus.Idle(error = state.error.userMessage),
+                                status = NfcScanningStatus.Idle(error = error.userMessage),
                             )
                         )
 
-                        eventReporter.onNfcScanAttemptFailed()
+                        eventReporter.onNfcScanAttemptFailed(errorCode = error.code)
                     }
                     is NfcCardScanner.State.Complete -> {
                         _viewState.emit(

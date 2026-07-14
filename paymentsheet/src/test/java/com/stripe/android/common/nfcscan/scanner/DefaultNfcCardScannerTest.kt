@@ -78,6 +78,7 @@ internal class DefaultNfcCardScannerTest {
             assertThat(awaitItem()).isEqualTo(
                 NfcCardScanner.State.Failed(
                     error = NfcCardScanner.Error(
+                        code = "unknown",
                         userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
                     ),
                 ),
@@ -123,6 +124,7 @@ internal class DefaultNfcCardScannerTest {
             assertThat(awaitItem()).isEqualTo(
                 NfcCardScanner.State.Failed(
                     error = NfcCardScanner.Error(
+                        code = "unknown",
                         userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
                     ),
                 ),
@@ -153,8 +155,12 @@ internal class DefaultNfcCardScannerTest {
 
             assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
             val failedState = awaitItem() as NfcCardScanner.State.Failed
-            assertThat(failedState.error.userMessage)
-                .isEqualTo(R.string.stripe_tap_to_add_card_default_error_action.resolvableString)
+            assertThat(failedState.error).isEqualTo(
+                NfcCardScanner.Error(
+                    code = "unknown",
+                    userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+                ),
+            )
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
@@ -174,6 +180,7 @@ internal class DefaultNfcCardScannerTest {
             expirationYear = 2030,
         ),
         validationResult = NfcCardValidator.Result.Invalid(
+            errorCode = "cardUnsupportedByMerchant",
             userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
         ),
     ) {
@@ -187,6 +194,7 @@ internal class DefaultNfcCardScannerTest {
             assertThat(awaitItem()).isEqualTo(
                 NfcCardScanner.State.Failed(
                     error = NfcCardScanner.Error(
+                        code = "cardUnsupportedByMerchant",
                         userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
                     ),
                 ),

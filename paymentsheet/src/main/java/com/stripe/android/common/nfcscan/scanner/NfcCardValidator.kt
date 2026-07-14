@@ -13,7 +13,10 @@ internal interface NfcCardValidator {
 
     sealed interface Result {
         data object Validated : Result
-        data class Invalid(val userMessage: ResolvableString) : Result
+        data class Invalid(
+            val errorCode: String,
+            val userMessage: ResolvableString,
+        ) : Result
     }
 }
 
@@ -23,6 +26,7 @@ internal class DefaultNfcCardValidator @Inject constructor(
     override fun validate(cardData: ScannedCardData): NfcCardValidator.Result {
         if (!paymentMethodMetadata.cardBrandFilter.isAccepted(CardBrand.fromCardNumber(cardData.cardNumber))) {
             return NfcCardValidator.Result.Invalid(
+                errorCode = UNSUPPORTED_CARD_VALIDATION_ERROR_CODE,
                 userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
             )
         }
@@ -34,10 +38,16 @@ internal class DefaultNfcCardValidator @Inject constructor(
             )
         ) {
             return NfcCardValidator.Result.Invalid(
+                errorCode = EXPIRED_CARD_VALIDATION_ERROR_CODE,
                 userMessage = R.string.stripe_nfc_scan_error_expired_card.resolvableString,
             )
         }
 
         return NfcCardValidator.Result.Validated
+    }
+
+    private companion object {
+        const val UNSUPPORTED_CARD_VALIDATION_ERROR_CODE = "cardUnsupportedByMerchant"
+        const val EXPIRED_CARD_VALIDATION_ERROR_CODE = "expiredCard"
     }
 }
