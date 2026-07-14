@@ -8,19 +8,19 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class ExpressCheckoutElementContentTest {
-    @get:Rule
-    val composeRule = createComposeRule()
+    private val composeRule = createComposeRule()
 
     @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
-
-    @get:Rule
-    val coroutineTestRule = CoroutineTestRule()
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(createComposeCleanupRule())
+        .around(composeRule)
+        .around(CoroutineTestRule())
 
     @Test
     fun `renders wallet button text`() {
