@@ -8,13 +8,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     fun `default state contains link and google pay buttons`() {
         val interactor = DefaultExpressCheckoutElementInteractor()
 
-        assertThat(interactor.state.value).isEqualTo(
-            ExpressCheckoutElementInteractor.State(
-                expressButtons = listOf(
-                    ExpressButton.Link,
-                    ExpressButton.GooglePay,
-                )
-            )
+        assertThat(interactor.state.value.expressButtons).containsExactly(
+            ExpressButton.Link, ExpressButton.GooglePay
         )
     }
 }

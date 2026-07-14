@@ -26,7 +26,7 @@ internal class ExpressCheckoutElementContentTest {
     fun `renders wallet button text`() {
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
-                ExpressCheckoutElementInteractor.State(
+                ExpressCheckoutElementInteractorStateFactory.create(
                     expressButtons = listOf(
                         ExpressButton.GooglePay,
                         ExpressButton.Link,
@@ -47,7 +47,7 @@ internal class ExpressCheckoutElementContentTest {
     fun `does not render wallet button text when state has no buttons`() {
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
-                ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
+                ExpressCheckoutElementInteractorStateFactory.create(expressButtons = emptyList())
             )
         )
 
