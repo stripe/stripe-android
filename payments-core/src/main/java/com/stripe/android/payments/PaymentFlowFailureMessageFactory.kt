@@ -20,7 +20,10 @@ internal class PaymentFlowFailureMessageFactory(
         outcome == StripeIntentResult.Outcome.TIMEDOUT -> {
             context.resources.getString(R.string.stripe_failure_reason_timed_out)
         }
-        intent.is3DS2() -> {
+        intent.is3DS2() && !intent.hasLastError() -> {
+            // A 3DS2 intent that succeeded or is still mid-authentication (e.g. the
+            // customer canceled) has no decline to surface. Declined 3DS2 intents
+            // carry a lastPaymentError and fall through to the localized message path.
             null
         }
         (intent.status == StripeIntent.Status.RequiresPaymentMethod) ||
@@ -81,5 +84,10 @@ internal class PaymentFlowFailureMessageFactory(
     private fun StripeIntent.is3DS2(): Boolean {
         return paymentMethod?.type == PaymentMethod.Type.Card &&
             nextActionData is StripeIntent.NextActionData.SdkData.Use3DS2
+    }
+
+    private fun StripeIntent.hasLastError(): Boolean = when (this) {
+        is PaymentIntent -> lastPaymentError != null
+        is SetupIntent -> lastSetupError != null
     }
 }
