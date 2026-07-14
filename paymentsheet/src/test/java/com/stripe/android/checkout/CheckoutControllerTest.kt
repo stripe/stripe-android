@@ -26,6 +26,7 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Rule
 import org.junit.Test
@@ -728,6 +729,103 @@ internal class CheckoutControllerTest {
             assertThat(isLoadingTurbine.awaitItem()).isFalse()
         }
 
+    // region allowedShippingCountries validation
+
+    @Test
+    fun `updateShippingAddress succeeds when country is in allowedShippingCountries`() =
+        runMutationScenario(
+            initModifier = combine(allowedShippingCountries(listOf("US", "CA")), automaticTaxFor("shipping")),
+        ) {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+                bodyPart("elements_session_client[is_aggregation_expected]", "true"),
+                responseFactory = successResponseFactory(
+                    combine(allowedShippingCountries(listOf("US", "CA")), automaticTaxFor("shipping")),
+                ),
+            )
+
+            val result = controller.updateShippingAddress(
+                name = null,
+                phoneNumber = null,
+                address = Address().country("US"),
+            )
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `updateShippingAddress fails with IllegalArgumentException for disallowed country`() =
+        runMutationScenario(
+            initModifier = allowedShippingCountries(listOf("US", "CA")),
+            assertLoadingConsumed = true,
+        ) {
+            val before = controller.checkoutSession.value
+
+            // Fast-fail returns before runSerialized, so isLoading must never flip to true.
+            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+            val result = controller.updateShippingAddress(
+                name = null,
+                phoneNumber = null,
+                address = Address().country("DE"),
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val exception = result.exceptionOrNull()
+            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception).hasMessageThat().isEqualTo(
+                "Country code 'DE' is not in allowedShippingCountries"
+            )
+            assertThat(controller.checkoutSession.value).isEqualTo(before)
+        }
+
+    @Test
+    fun `updateShippingAddress succeeds when allowedShippingCountries is null`() =
+        runMutationScenario {
+            // No allowlist set, so any country passes.
+            val result = controller.updateShippingAddress(
+                name = null,
+                phoneNumber = null,
+                address = Address().country("DE"),
+            )
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `updateShippingAddress fails for all countries when allowedShippingCountries is empty`() =
+        runMutationScenario(initModifier = allowedShippingCountries(emptyList())) {
+            val before = controller.checkoutSession.value
+
+            val result = controller.updateShippingAddress(
+                name = null,
+                phoneNumber = null,
+                address = Address().country("US"),
+            )
+
+            assertThat(result.isFailure).isTrue()
+            val exception = result.exceptionOrNull()
+            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception).hasMessageThat().isEqualTo(
+                "Country code 'US' is not in allowedShippingCountries"
+            )
+            assertThat(controller.checkoutSession.value).isEqualTo(before)
+        }
+
+    @Test
+    fun `updateBillingAddress is not gated by allowedShippingCountries`() =
+        runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
+            val result = controller.updateBillingAddress(
+                name = null,
+                phoneNumber = null,
+                address = Address().country("DE"),
+            )
+
+            assertThat(result.isSuccess).isTrue()
+        }
+
+    // endregion
+
     private fun NetworkRule.defaultInit() {
         checkoutInit(responseFactory = ::successResponse)
     }
@@ -759,6 +857,19 @@ internal class CheckoutControllerTest {
         .put("subtotal", due)
         .put("due", due)
         .put("total", due)
+
+    private fun combine(vararg modifiers: (JSONObject) -> Unit): (JSONObject) -> Unit = { json ->
+        modifiers.forEach { it(json) }
+    }
+
+    // Sets shipping_address_collection.allowed_countries in the session JSON.
+    private fun allowedShippingCountries(countries: List<String>): (JSONObject) -> Unit = { json ->
+        val countriesArray = JSONArray().apply { countries.forEach { put(it) } }
+        json.put(
+            "shipping_address_collection",
+            JSONObject().put("allowed_countries", countriesArray),
+        )
+    }
 
     // Enables automatic tax with the given address source ("shipping" or "billing"), so an address
     // update sends tax_region to the server.

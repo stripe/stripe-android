@@ -10,6 +10,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
@@ -129,8 +130,13 @@ class CheckoutController @Inject internal constructor(
         name: String?,
         phoneNumber: String?,
         address: Address,
-    ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
-        copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
+    ): kotlin.Result<Unit> {
+        stateHolder.state?.checkoutSessionResponse
+            ?.validateShippingCountry(address.build().country)
+            ?.onFailure { return kotlin.Result.failure(it) }
+        return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
+            copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
+        }
     }
 
     /**
