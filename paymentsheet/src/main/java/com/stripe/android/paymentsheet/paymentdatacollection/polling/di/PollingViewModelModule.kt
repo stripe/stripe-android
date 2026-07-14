@@ -5,15 +5,15 @@ import android.content.Context
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.polling.DefaultPollingAnalyticsEventReporter
-import com.stripe.android.polling.PollingAnalyticsEventReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.DefaultTimeProvider
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.TimeProvider
 import com.stripe.android.polling.DefaultIntentStatusPoller
+import com.stripe.android.polling.DefaultPollingAnalyticsEventReporter
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.polling.PollingAnalyticsEventReporter
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
