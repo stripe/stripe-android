@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>ConstructorParameterNaming:AddressElement.kt:AddressElement$_identifier: IdentifierSpec</ID>
     <ID>ConstructorParameterNaming:RowElement.kt:RowElement$_identifier: IdentifierSpec</ID>
+    <ID>CyclomaticComplexMethod:ContentTypeUtils.kt:internal fun ContentType.toReadableString: String</ID>
     <ID>CyclomaticComplexMethod:Html.kt:@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource: AnnotatedString</ID>
     <ID>CyclomaticComplexMethod:IdentifierSpec.kt:IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get</ID>
     <ID>CyclomaticComplexMethod:StripeTheme.kt:@Composable @ReadOnlyComposable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun StripeTypography.toComposeTypography: Typography</ID>
