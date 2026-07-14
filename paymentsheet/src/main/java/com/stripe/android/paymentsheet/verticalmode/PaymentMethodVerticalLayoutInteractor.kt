@@ -35,6 +35,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
@@ -51,6 +52,9 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     val showsWalletsHeader: StateFlow<Boolean>
 
     fun handleViewAction(viewAction: ViewAction)
+
+    /** Cancels the interactor's coroutine scope and its perpetual collectors. */
+    fun close()
 
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
@@ -590,6 +594,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 cancelPaymentMethodVisibilityTracking()
             }
         }
+    }
+
+    override fun close() {
+        coroutineScope.cancel()
     }
 
     private val visibilityTracker = PaymentMethodInitialVisibilityTracker(

@@ -55,4 +55,6 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
     override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)
     }
+
+    override fun close() = Unit
 }

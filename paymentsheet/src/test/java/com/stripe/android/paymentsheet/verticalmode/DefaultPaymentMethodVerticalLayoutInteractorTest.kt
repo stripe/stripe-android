@@ -1918,6 +1918,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
+            interactor.close()
         }
     }
 
