@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:tools="http://schemas.android.com/tools">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-sdk tools:overrideLibrary="com.google.android.libraries.places,com.google.android.gms.common" />
+
+    <application>
+        <activity
+            android:name="com.stripe.android.ui.core.cardscan.CardScanGoogleActivity"
+            android:exported="false"
+            android:theme="@style/StripeCardScanGoogleTheme" />
+    </application>
 </manifest>
