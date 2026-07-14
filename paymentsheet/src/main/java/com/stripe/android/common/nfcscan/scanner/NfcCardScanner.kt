@@ -34,6 +34,7 @@ internal interface NfcCardScanner {
 internal class DefaultNfcCardScanner @Inject constructor(
     private val hardwareDelegate: NfcHardwareDelegate,
     private val cardReader: NfcCardReader,
+    private val cardValidator: NfcCardValidator,
     private val transceiverFactory: NfcTagTransceiver.Factory,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
@@ -64,7 +65,14 @@ internal class DefaultNfcCardScanner @Inject constructor(
                     }
                 }.fold(
                     onSuccess = { cardData ->
-                        _state.emit(NfcCardScanner.State.Complete(cardData))
+                        val state = when (val result = cardValidator.validate(cardData)) {
+                            is NfcCardValidator.Result.Validated -> NfcCardScanner.State.Complete(cardData)
+                            is NfcCardValidator.Result.Invalid -> NfcCardScanner.State.Failed(
+                                error = NfcCardScanner.Error(result.userMessage)
+                            )
+                        }
+
+                        _state.emit(state)
                     },
                     onFailure = {
                         _state.emit(NfcCardScanner.State.Failed(GENERIC_ERROR))

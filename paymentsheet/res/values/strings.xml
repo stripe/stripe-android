@@ -104,6 +104,10 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_network_error_message">An error occurred. Check your connection and try again.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind phone</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">Card expired. Try another card.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">Card not supported. Try another card.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">or enter manually</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
