@@ -25,8 +25,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -221,7 +219,7 @@ internal class DefaultEmbeddedStateHelperTest {
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,
-            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+            coroutineScope = backgroundScope,
         )
         val embeddedContentHelper = FakeEmbeddedContentHelper()
         val confirmationHandler = FakeConfirmationHandler()

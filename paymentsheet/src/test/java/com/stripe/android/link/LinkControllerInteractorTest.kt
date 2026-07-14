@@ -28,10 +28,12 @@ import com.stripe.android.utils.FakeActivityResultLauncher
 import com.stripe.android.utils.FakeLinkComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.json.JSONObject
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -64,6 +66,15 @@ class LinkControllerInteractorTest {
         )
     private val linkComponentFactoryProvider: Provider<LinkComponent.Factory> =
         Provider { FakeLinkComponent.Factory(linkComponent) }
+
+    // Each created interactor owns a scope with a perpetual collector in its init; track and cancel
+    // them so the scopes don't outlive the test.
+    private val trackedScopes = mutableListOf<CoroutineScope>()
+
+    @After
+    fun cancelTrackedScopes() {
+        trackedScopes.forEach { it.cancel() }
+    }
 
     @Test
     fun `Initial state is correct`() = runTest {
@@ -1024,13 +1035,14 @@ class LinkControllerInteractorTest {
     }
 
     private fun createInteractor(): LinkControllerInteractor {
+        val coroutineScope = CoroutineScope(dispatcher).also { trackedScopes.add(it) }
         return LinkControllerInteractor(
             application = application,
             logger = logger,
             linkConfigurationLoader = linkConfigurationLoader,
             linkAccountHolder = linkAccountHolder,
             linkComponentFactoryProvider = linkComponentFactoryProvider,
-            coroutineScope = CoroutineScope(dispatcher),
+            coroutineScope = coroutineScope,
             savedStateHandle = savedStateHandle,
         )
     }
