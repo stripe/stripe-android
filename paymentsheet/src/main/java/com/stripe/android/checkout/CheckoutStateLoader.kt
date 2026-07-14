@@ -40,6 +40,7 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         val baseConfig = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
+            .googlePay(resolvedState.configuration.googlePay)
             .defaultBillingDetails(resolvedState.configuration.defaultBillingDetails)
             .embeddedViewDisplaysMandateText(
                 resolvedState.configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText

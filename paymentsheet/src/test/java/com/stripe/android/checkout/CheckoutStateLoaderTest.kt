@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
@@ -76,6 +77,22 @@ internal class CheckoutStateLoaderTest {
             assertThat(confirmationStateHolder.state?.configuration?.embeddedViewDisplaysMandateText)
                 .isFalse()
         }
+
+    @Test
+    fun `load propagates google pay configuration from the controller configuration`() = runScenario {
+        val googlePay = PaymentSheet.GooglePayConfiguration(
+            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+            countryCode = "US",
+            currencyCode = "usd",
+        )
+        val configuration = CheckoutController.Configuration()
+            .googlePay(googlePay)
+            .build()
+
+        loader.load(checkoutControllerState(configuration = configuration))
+
+        assertThat(confirmationStateHolder.state?.configuration?.googlePay).isEqualTo(googlePay)
+    }
 
     @Test
     fun `load routes the selection through the chooser`() = runScenario(

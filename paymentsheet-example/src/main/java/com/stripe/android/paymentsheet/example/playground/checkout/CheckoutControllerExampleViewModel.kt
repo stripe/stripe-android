@@ -66,13 +66,23 @@ internal class CheckoutControllerExampleViewModel(
     private suspend fun fetchAndConfigure() {
         repository.fetchCheckoutSessionClientSecret().fold(
             onSuccess = { clientSecret ->
+                val configuration = CheckoutController.Configuration()
+                    // The example backend does not populate customer_email on the session.
+                    .defaultBillingDetails(
+                        PaymentSheet.BillingDetails(email = "checkout-controller@example.com")
+                    )
+                    // The example backend creates a USD checkout session for a US merchant in test mode.
+                    .googlePay(
+                        PaymentSheet.GooglePayConfiguration(
+                            environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                            countryCode = "US",
+                            currencyCode = "usd",
+                        )
+                    )
+
                 controller.configure(
                     clientSecret,
-                    configuration = CheckoutController.Configuration()
-                        // The example backend does not populate customer_email on the session.
-                        .defaultBillingDetails(
-                            PaymentSheet.BillingDetails(email = "checkout-controller@example.com")
-                        ),
+                    configuration = configuration,
                 ).fold(
                     onSuccess = {
                         _status.value = Status.Configured(

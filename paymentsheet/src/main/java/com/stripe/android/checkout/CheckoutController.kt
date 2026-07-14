@@ -137,6 +137,7 @@ class CheckoutController @Inject internal constructor(
     class Configuration {
         private var adaptivePricingAllowed: Boolean = false
         private var defaultBillingDetails: PaymentSheet.BillingDetails? = null
+        private var googlePay: PaymentSheet.GooglePayConfiguration? = null
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
             CurrencySelectorElement.Configuration()
@@ -155,6 +156,12 @@ class CheckoutController @Inject internal constructor(
             defaultBillingDetails: PaymentSheet.BillingDetails?
         ): Configuration = apply {
             this.defaultBillingDetails = defaultBillingDetails
+        }
+
+        fun googlePay(
+            googlePay: PaymentSheet.GooglePayConfiguration?
+        ): Configuration = apply {
+            this.googlePay = googlePay
         }
 
         fun paymentElement(
@@ -185,6 +192,7 @@ class CheckoutController @Inject internal constructor(
         internal data class State(
             val adaptivePricingAllowed: Boolean,
             val defaultBillingDetails: PaymentSheet.BillingDetails?,
+            val googlePay: PaymentSheet.GooglePayConfiguration?,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
@@ -194,6 +202,7 @@ class CheckoutController @Inject internal constructor(
         internal fun build(): State = State(
             adaptivePricingAllowed = adaptivePricingAllowed,
             defaultBillingDetails = defaultBillingDetails,
+            googlePay = googlePay,
             paymentElementConfiguration = paymentElementConfiguration.build(),
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
