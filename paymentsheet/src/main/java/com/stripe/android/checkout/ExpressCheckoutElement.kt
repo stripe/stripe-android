@@ -3,12 +3,9 @@ package com.stripe.android.checkout
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
-import com.stripe.android.checkout.ece.ExpressButton
 import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
 import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.state.WalletsState
 import kotlinx.parcelize.Parcelize
 
 @CheckoutSessionPreview
