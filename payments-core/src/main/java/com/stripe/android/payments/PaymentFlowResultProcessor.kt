@@ -269,6 +269,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
                 pollingAnalyticsEventReporter.onPollingTimedOut(
                     paymentMethodType = originalIntent.paymentMethod?.type?.code ?: "unknown",
                     lastKnownStatus = stripeIntentResult?.getOrNull()?.status?.name,
+                    timeLimitSeconds = getPollingDurationForPaymentMethod(originalIntent) / 1000,
                 )
             }
         }

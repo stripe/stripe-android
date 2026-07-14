@@ -11,8 +11,8 @@ class DefaultPollingAnalyticsEventReporter @Inject constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory,
 ) : PollingAnalyticsEventReporter {
 
-    override fun onPollingTimedOut(paymentMethodType: String, lastKnownStatus: String?) {
-        val event = PollingAnalyticsEvent.TimedOut(paymentMethodType, lastKnownStatus)
+    override fun onPollingTimedOut(paymentMethodType: String, lastKnownStatus: String?, timeLimitSeconds: Long) {
+        val event = PollingAnalyticsEvent.TimedOut(paymentMethodType, lastKnownStatus, timeLimitSeconds)
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = event,

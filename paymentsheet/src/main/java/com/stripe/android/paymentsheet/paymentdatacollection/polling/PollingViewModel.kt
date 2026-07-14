@@ -136,6 +136,7 @@ internal class PollingViewModel @Inject constructor(
             pollingAnalyticsEventReporter.onPollingTimedOut(
                 paymentMethodType = args.paymentMethodType,
                 lastKnownStatus = intentStatus?.name,
+                timeLimitSeconds = args.timeLimit.inWholeSeconds,
             )
             _uiState.update {
                 it.copy(pollingState = PollingState.Failed)

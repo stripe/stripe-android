@@ -225,8 +225,75 @@ class PollingViewModelTest {
             FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
                 paymentMethodType = "blik",
                 lastKnownStatus = "RequiresAction",
+                timeLimitSeconds = 10,
             )
         )
+    }
+
+    @Test
+    fun `Reports analytics exactly once when PayNow polling times out`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+        createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+            paymentMethodType = "paynow",
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.RequiresAction)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+            FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                paymentMethodType = "paynow",
+                lastKnownStatus = "RequiresAction",
+                timeLimitSeconds = 10,
+            )
+        )
+        pollingAnalyticsEventReporter.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `Reports analytics exactly once when PromptPay polling times out`() = runTest(StandardTestDispatcher()) {
+        val fakePoller = FakeIntentStatusPoller().apply {
+            emitNextPollResult(StripeIntent.Status.RequiresAction)
+        }
+        val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+        createPollingViewModel(
+            poller = fakePoller,
+            timeLimit = 10.seconds,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+            paymentMethodType = "promptpay",
+        )
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
+
+        fakePoller.enqueueForcePollResult(StripeIntent.Status.RequiresAction)
+
+        advanceTimeBy(10.seconds + 1.milliseconds)
+
+        assertThat(fakePoller.pollingTurbine.awaitItem()).isFalse()
+
+        advanceTimeBy(3.seconds)
+
+        assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+            FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                paymentMethodType = "promptpay",
+                lastKnownStatus = "RequiresAction",
+                timeLimitSeconds = 10,
+            )
+        )
+        pollingAnalyticsEventReporter.ensureAllEventsConsumed()
     }
 
     @Test
@@ -342,6 +409,7 @@ private fun createPollingViewModel(
     savedStateHandle: SavedStateHandle = SavedStateHandle(),
     qrCodeUrl: String? = null,
     pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
+    paymentMethodType: String = "blik",
 ): PollingViewModel {
     return PollingViewModel(
         args = PollingViewModel.Args(
@@ -351,7 +419,7 @@ private fun createPollingViewModel(
             ctaText = R.string.stripe_blik_confirm_payment,
             stripeAccountId = null,
             qrCodeUrl = qrCodeUrl,
-            paymentMethodType = "blik",
+            paymentMethodType = paymentMethodType,
         ),
         poller = poller,
         timeProvider = timeProvider,

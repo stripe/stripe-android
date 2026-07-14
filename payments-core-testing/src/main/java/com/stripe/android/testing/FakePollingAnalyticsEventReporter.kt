@@ -6,8 +6,8 @@ import com.stripe.android.polling.PollingAnalyticsEventReporter
 class FakePollingAnalyticsEventReporter : PollingAnalyticsEventReporter {
     private val calls = Turbine<Call>()
 
-    override fun onPollingTimedOut(paymentMethodType: String, lastKnownStatus: String?) {
-        calls.add(Call.PollingTimedOut(paymentMethodType, lastKnownStatus))
+    override fun onPollingTimedOut(paymentMethodType: String, lastKnownStatus: String?, timeLimitSeconds: Long) {
+        calls.add(Call.PollingTimedOut(paymentMethodType, lastKnownStatus, timeLimitSeconds))
     }
 
     suspend fun awaitCall(): Call {
@@ -22,6 +22,7 @@ class FakePollingAnalyticsEventReporter : PollingAnalyticsEventReporter {
         data class PollingTimedOut(
             val paymentMethodType: String,
             val lastKnownStatus: String?,
+            val timeLimitSeconds: Long,
         ) : Call
     }
 }
