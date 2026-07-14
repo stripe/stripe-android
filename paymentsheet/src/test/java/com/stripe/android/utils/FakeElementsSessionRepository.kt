@@ -21,7 +21,8 @@ internal class FakeElementsSessionRepository(
     private val flags: Map<ElementsSession.Flag, Boolean> = mapOf(
         ElementsSession.Flag.ELEMENTS_ENABLE_PASSIVE_CAPTCHA to true,
         ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_TAP_TO_ADD_ENABLED to true,
-    )
+    ),
+    private val experimentsData: ElementsSession.ExperimentsData? = null,
 ) : ElementsSessionRepository {
     data class Params(
         val initializationMode: PaymentElementLoader.InitializationMode,
@@ -71,7 +72,7 @@ internal class FakeElementsSessionRepository(
                     elementsSessionId = DEFAULT_ELEMENTS_SESSION_ID,
                     flags = this.flags,
                     orderedPaymentMethodTypesAndWallets = stripeIntent.paymentMethodTypes,
-                    experimentsData = null,
+                    experimentsData = experimentsData,
                     passiveCaptcha = passiveCaptchaParams,
                     merchantLogoUrl = null,
                     elementsSessionConfigId = DEFAULT_ELEMENTS_SESSION_CONFIG_ID,

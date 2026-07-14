@@ -5,7 +5,6 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.common.spms.DefaultLinkFormElementFactory
 import com.stripe.android.common.spms.DefaultLinkInlineSignupAvailability
 import com.stripe.android.common.spms.DefaultSavedPaymentMethodLinkFormHelper
@@ -23,7 +22,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
@@ -47,7 +45,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -127,14 +124,20 @@ internal interface EmbeddedActivityModule {
         @Provides
         @Singleton
         fun provideEmbeddedNavigator(
+            launchMode: EmbeddedLaunchMode,
+            formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
+            val initialScreen = when (launchMode) {
+                is EmbeddedLaunchMode.Form -> formScreenFactory.create(launchMode)
+                is EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+            }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
                 eventReporter = eventReporter,
-                initialScreen = initialManageScreenFactory.createInitialScreen(),
+                initialScreen = initialScreen,
             )
         }
 
@@ -151,12 +154,6 @@ internal interface EmbeddedActivityModule {
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle)
         }
-
-        @Provides
-        @Singleton
-        fun provideFormInteractor(
-            interactorFactory: EmbeddedFormInteractorFactory
-        ): DefaultVerticalModeFormInteractor = interactorFactory.create()
 
         @Provides
         @Singleton
@@ -231,10 +228,10 @@ internal interface EmbeddedActivityModule {
         @Provides
         fun providesPaymentMethodMessagePromotionHelper(
             promotion: PaymentMethodMessagePromotion?,
-            experimentHandler: PaymentMethodMessagePromotionsExperimentHandler
+            eventReporter: EventReporter
         ): PaymentMethodMessagePromotionsHelper = PrefetchedPaymentMethodMessagePromotionsHelper(
             listOfNotNull(promotion),
-            experimentHandler
+            eventReporter
         )
     }
 }

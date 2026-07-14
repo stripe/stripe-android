@@ -47,8 +47,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
     val context = LocalContext.current
     val horizontalPadding = StripeTheme.getOuterFormInsets()
     val state by interactor.state.collectAsState()
-    val shouldShowCardBrandDropdown = interactor.isModifiablePaymentMethod &&
-        interactor.displayableSavedPaymentMethod.canChangeCbc()
+    val shouldShowCardBrandDropdown = interactor.shouldShowCardBrandDropdown
 
     Column(
         modifier = modifier
@@ -76,6 +75,12 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
                             editCardDetailsInteractor = interactor.editCardDetailsInteractor,
                         )
                     }
+                    is LinkPaymentDetails.Generic -> {
+                        GenericUi(
+                            label = savedPaymentMethod.paymentDetails.label,
+                            last4 = savedPaymentMethod.paymentDetails.last4
+                        )
+                    }
                 }
             }
             is SavedPaymentMethod.SepaDebit -> SepaDebitUI(
@@ -93,7 +98,7 @@ internal fun UpdatePaymentMethodUI(interactor: UpdatePaymentMethodInteractor, mo
         }
 
         val showCardDetailsCannotBeChanged = interactor.isExpiredCard.not() &&
-            (interactor.isModifiablePaymentMethod.not() || interactor.canUpdateFullPaymentMethodDetails.not())
+            (interactor.isModifiablePaymentMethod.not() || interactor.canUpdateCardExpiryAndBillingDetails.not())
         if (showCardDetailsCannotBeChanged) {
             DetailsCannotBeChangedText(interactor, shouldShowCardBrandDropdown, context)
         }
@@ -322,6 +327,16 @@ private fun DeletePaymentMethodUi(interactor: UpdatePaymentMethodInteractor) {
     }
 }
 
+@Composable
+private fun GenericUi(label: String, last4: String) {
+    CommonTextField(
+        value = "$label $last4",
+        onValueChange = {},
+        enabled = false,
+        label = stringResource(R.string.stripe_label_payment_method),
+    )
+}
+
 @Preview
 @Composable
 private fun PreviewUpdatePaymentMethodUI() {
@@ -340,7 +355,8 @@ private fun PreviewUpdatePaymentMethodUI() {
         interactor = DefaultUpdatePaymentMethodInteractor(
             isLiveMode = false,
             canRemove = true,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
+            canChangeCbc = true,
             displayableSavedPaymentMethod = exampleCard,
             addressCollectionMode = AddressCollectionMode.Automatic,
             allowedBillingCountries = emptySet(),
@@ -353,6 +369,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             shouldShowSetAsDefaultCheckbox = true,
             isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
+            autocompleteAddressInteractorFactory = null,
         ),
         modifier = Modifier
     )
@@ -376,6 +393,9 @@ private fun DisplayableSavedPaymentMethod.getDetailsCannotBeChangedText(
                     }
                     is LinkPaymentDetails.Card -> {
                         PaymentSheetR.string.stripe_paymentsheet_card_details_cannot_be_changed
+                    }
+                    is LinkPaymentDetails.Generic -> {
+                        PaymentSheetR.string.stripe_paymentsheet_unknown_details_cannot_be_changed
                     }
                 }
             }

@@ -35,7 +35,6 @@ internal data class CommonConfiguration(
     val cardBrandAcceptance: PaymentSheet.CardBrandAcceptance,
     internal val allowedCardFundingTypes: List<PaymentSheet.CardFundingType>,
     val customPaymentMethods: List<PaymentSheet.CustomPaymentMethod>,
-    val shopPayConfiguration: PaymentSheet.ShopPayConfiguration?,
     val googlePlacesApiKey: String?,
     val linkAppearance: LinkAppearance.State? = null,
     val termsDisplay: Map<PaymentMethod.Type, TermsDisplay>,
@@ -242,7 +241,6 @@ internal fun PaymentSheet.Configuration.asCommonConfiguration(): CommonConfigura
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    shopPayConfiguration = shopPayConfiguration,
     googlePlacesApiKey = googlePlacesApiKey,
     termsDisplay = termsDisplay,
     walletButtons = walletButtons,
@@ -268,7 +266,6 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     cardBrandAcceptance = cardBrandAcceptance,
     customPaymentMethods = customPaymentMethods,
     link = link,
-    shopPayConfiguration = null,
     googlePlacesApiKey = null,
     termsDisplay = termsDisplay,
     walletButtons = null,
@@ -278,7 +275,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
-internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
+internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = null,
     googlePay = null,
@@ -297,10 +294,9 @@ internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfigu
         display = PaymentSheet.LinkConfiguration.Display.Automatic,
         collectMissingBillingDetailsForExistingPaymentMethods = true,
         allowUserEmailEdits = allowUserEmailEdits,
-        allowLogOut = allowLogOut,
+        allowLogOut = allowLogout,
         disallowFundingSourceCreation = emptySet(),
     ),
-    shopPayConfiguration = null,
     googlePlacesApiKey = null,
     linkAppearance = linkAppearance,
     termsDisplay = emptyMap(),

@@ -1,3 +1,5 @@
+@file:OptIn(LinkControllerPreview::class)
+
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Context
@@ -6,6 +8,7 @@ import androidx.compose.runtime.Stable
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.PaymentMethodOptionsSetupFutureUsagePreview
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -231,7 +234,7 @@ internal sealed interface PlaygroundState : Parcelable {
                     networkId = "internal",
                     externalId = "stripe_test_merchant"
                 ),
-                paymentMethodTypes = listOf("card", "shop_pay")
+                paymentMethodTypes = listOf("card")
             )
         }
     }

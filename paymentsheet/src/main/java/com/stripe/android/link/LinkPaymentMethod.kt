@@ -21,6 +21,7 @@ internal sealed class LinkPaymentMethod(
             !currentDetails.isExpired && cvcReady
         }
         is ConsumerPaymentDetailsModel.Passthrough -> true
+        is ConsumerPaymentDetailsModel.Generic -> true
     }
 
     /**

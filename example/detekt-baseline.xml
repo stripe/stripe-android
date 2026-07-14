@@ -9,7 +9,6 @@
     <ID>LongMethod:ManualUSBankAccountPaymentMethodActivity.kt:ManualUSBankAccountPaymentMethodActivity$@Composable private fun CollectBankScreen</ID>
     <ID>LongMethod:ManualUSBankAccountPaymentMethodActivity.kt:ManualUSBankAccountPaymentMethodActivity$@Composable private fun VerifyWithMicrodepositScreen</ID>
     <ID>MagicNumber:PaymentAuthActivity.kt:PaymentAuthActivity$6</ID>
-    <ID>MagicNumber:UpiWaitingActivity.kt:UpiWaitingActivity$5000</ID>
     <ID>VariableNaming:StripeImageActivity.kt:StripeImageActivity$private val LocalStripeImageLoader = staticCompositionLocalOf&lt;StripeImageLoader> { error("No ImageLoader provided") }</ID>
   </CurrentIssues>
 </SmellBaseline>

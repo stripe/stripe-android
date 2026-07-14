@@ -3,6 +3,9 @@ package com.stripe.android.uicore.elements
 import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.autofill.ContentType
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -306,6 +309,20 @@ internal class SimpleTextFieldControllerTest {
             visibleErrorTurbine.cancelAndIgnoreRemainingEvents()
             errorTurbine.cancelAndIgnoreRemainingEvents()
         }
+    }
+
+    @Test
+    fun `Verify autofillType for AddressTextFieldConfig`() {
+        val controller = SimpleTextFieldController(
+            AddressTextFieldConfig(
+                label = resolvableString(CoreR.string.stripe_address_label_full_name),
+                capitalization = KeyboardCapitalization.Words,
+                keyboard = KeyboardType.Text,
+                optional = false,
+                autofillContentType = ContentType.AddressStreet,
+            )
+        )
+        assertThat(controller.autofillType).isEqualTo(ContentType.AddressStreet)
     }
 
     private fun createControllerWithState(

@@ -1,0 +1,202 @@
+package com.stripe.android.crypto.onramp.exception
+
+import android.content.Context
+import com.stripe.android.core.StripeError
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.crypto.onramp.R
+import com.stripe.android.crypto.onramp.analytics.OnrampAnalyticsEvent
+import com.stripe.android.link.exceptions.LinkUnavailableException
+import com.stripe.android.link.exceptions.AppAttestationException as LinkAppAttestationException
+
+@Suppress("LongMethod")
+internal fun Throwable.toCryptoOnrampError(
+    context: Context,
+    operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
+    publishableKey: String?,
+    additionalSdkVersions: List<SDKVersion> = emptyList(),
+): Throwable {
+    if (this is StripeCryptoOnrampError) return this
+
+    val diagnosticContext = DiagnosticContext(
+        sdkVersions = listOf(SDKVersion.stripeAndroid) + additionalSdkVersions,
+        operation = operation.value,
+        appPackageName = context.packageName,
+        mode = publishableKey.toMode(),
+    )
+
+    if (this is LinkAppAttestationException) {
+        val apiBackedAttestationError = cause
+            ?.toCryptoOnrampErrorIfAppAttestationApiError(
+                context = context,
+                operation = operation,
+                publishableKey = publishableKey,
+                additionalSdkVersions = additionalSdkVersions,
+            )
+
+        return apiBackedAttestationError ?: toAppAttestationUnavailableError(
+            context = context,
+            diagnosticContext = diagnosticContext,
+        )
+    }
+
+    if (this is LinkUnavailableException) {
+        return toAppAttestationUnavailableError(
+            context = context,
+            diagnosticContext = diagnosticContext,
+        )
+    }
+
+    val stripeException = this as? StripeException ?: return this
+    val stripeError = stripeException.stripeError ?: return this
+    val apiUserMessage = stripeError.extraFields?.get(FIELD_USER_MESSAGE)?.takeIf { it.isNotBlank() }
+
+    val apiErrorContext = APIErrorContext(
+        reason = stripeError.extraFields?.get(FIELD_REASON),
+        apiErrorCode = stripeError.code,
+        apiErrorType = stripeException.apiErrorType(),
+        apiErrorMessage = stripeError.message,
+        apiUserMessage = apiUserMessage,
+        docUrl = stripeError.docUrl,
+        underlyingError = stripeException,
+    )
+
+    return when {
+        stripeError.isAppAttestationError() -> {
+            AppAttestationException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_app_attestation_default_user_message,
+                ),
+            )
+        }
+        stripeError.isInvalidWalletOwnershipSignatureError() -> {
+            InvalidWalletOwnershipSignatureException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_invalid_wallet_ownership_signature_user_message,
+                ),
+            )
+        }
+        stripeError.isWalletOwnershipChallengeExpiredError() -> {
+            WalletOwnershipChallengeExpiredException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_wallet_ownership_challenge_expired_user_message,
+                ),
+            )
+        }
+        stripeError.isInvalidWalletOwnershipChallengeError() -> {
+            InvalidWalletOwnershipChallengeException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_invalid_wallet_ownership_challenge_user_message,
+                ),
+            )
+        }
+        stripeError.isWalletNotFoundError() -> {
+            WalletNotFoundException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_wallet_not_found_user_message,
+                ),
+            )
+        }
+        stripeError.isUnsupportedNetworkError() -> {
+            UnsupportedNetworkException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_unsupported_network_user_message,
+                ),
+            )
+        }
+        else -> {
+            UncategorizedException(
+                apiErrorContext = apiErrorContext,
+                diagnosticContext = diagnosticContext,
+                userMessage = context.getString(
+                    R.string.stripe_onramp_default_api_error_user_message,
+                ),
+            )
+        }
+    }
+}
+
+private fun Throwable.toCryptoOnrampErrorIfAppAttestationApiError(
+    context: Context,
+    operation: OnrampAnalyticsEvent.ErrorOccurred.Operation,
+    publishableKey: String?,
+    additionalSdkVersions: List<SDKVersion>,
+): Throwable? {
+    val stripeException = this as? StripeException ?: return null
+    val stripeError = stripeException.stripeError ?: return null
+
+    return if (stripeError.isAppAttestationError()) {
+        toCryptoOnrampError(
+            context = context,
+            operation = operation,
+            publishableKey = publishableKey,
+            additionalSdkVersions = additionalSdkVersions,
+        )
+    } else {
+        null
+    }
+}
+
+private fun Throwable.toAppAttestationUnavailableError(
+    context: Context,
+    diagnosticContext: DiagnosticContext,
+): AppAttestationUnavailableException {
+    return AppAttestationUnavailableException(
+        underlyingError = this,
+        diagnosticContext = diagnosticContext,
+        userMessage = context.getString(
+            R.string.stripe_onramp_app_attestation_unavailable_user_message,
+        ),
+    )
+}
+
+private fun StripeError.isAppAttestationError(): Boolean {
+    return code == APP_ATTESTATION_ERROR_CODE
+}
+
+private fun StripeError.isInvalidWalletOwnershipSignatureError(): Boolean {
+    return code == INVALID_WALLET_OWNERSHIP_SIGNATURE_ERROR_CODE
+}
+
+private fun StripeError.isWalletOwnershipChallengeExpiredError(): Boolean {
+    return code == WALLET_OWNERSHIP_CHALLENGE_EXPIRED_ERROR_CODE
+}
+
+private fun StripeError.isInvalidWalletOwnershipChallengeError(): Boolean {
+    return code == INVALID_WALLET_OWNERSHIP_CHALLENGE_ERROR_CODE
+}
+
+private fun StripeError.isWalletNotFoundError(): Boolean {
+    return code == CRYPTO_ONRAMP_WALLET_NOT_FOUND_ERROR_CODE
+}
+
+private fun StripeError.isUnsupportedNetworkError(): Boolean {
+    return code == CRYPTO_ONRAMP_UNSUPPORTED_NETWORK_ERROR_CODE
+}
+
+private fun StripeException.apiErrorType(): String? {
+    return stripeError?.type?.takeIf { it.isNotBlank() }
+}
+
+private fun String?.toMode(): String? {
+    return when {
+        this == null -> null
+        startsWith("pk_live_") -> "live"
+        startsWith("pk_test_") -> "test"
+        else -> null
+    }
+}
+
+private const val FIELD_REASON = "reason"
+private const val FIELD_USER_MESSAGE = "user_message"

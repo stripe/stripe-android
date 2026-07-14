@@ -3,10 +3,53 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+## 23.12.0 - 2026-07-13
+
+### Connect
+* [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
+
+### CryptoOnramp
+* [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+
+### PaymentSheet
+* [ADDED] Standalone Link wallet APIs in private preview via `LinkController`.
+
+### CustomerSheet
+* [FIXED][13383](https://github.com/stripe/stripe-android/issues/13383) `CustomerSheet` no longer reports a failure when the sheet is torn down by the OS without returning a result (e.g. when a `singleTask` host activity is relaunched). The result callback is now a no-op in that case, leaving the merchant's state unchanged.
+
+## 23.11.1 - 2026-06-30
+
+### PaymentSheet
+* [FIXED][13311](https://github.com/stripe/stripe-android/pull/13311) Fixed HUF currency amounts displaying incorrectly on Android 17.
+
+## 23.11.0 - 2026-06-22
+
+### CryptoOnramp
+* [CHANGED] Renamed the EU attestation presentation API from `presentCrsCarfDeclaration()` to `presentUserAttestation()`, `crsCarfDeclarationCallback` to `userAttestationCallback`, and renamed `OnrampCrsCarfDeclarationResult` to `OnrampUserAttestationResult`.
+
+## 23.10.1 - 2026-06-15
+
+### AddressElement
+* [ADDED] Added autofill support for Address Element text fields and the state/province dropdown.
+
+## 23.10.0 - 2026-06-08
+
+### Identity
+* [ADDED][12987](https://github.com/stripe/stripe-android/pull/12987) Added a manual capture mode for identity document verification, allowing users to tap "Take Photo" instead of relying on automatic capture.
+
+### CryptoOnramp
+* [CHANGED] Updated EU compliance identifier APIs to match the latest backend contract, including CRS/CARF TIN requirements and `SubmitIdentifiersResult.completed`.
+* [ADDED] Added known compliance identifier types for Spain NIF (`es_nif`) and France NIR (`fr_nir`).
+
 ## 23.9.2 - 2026-06-01
 
 ### Payments
 * [CHANGED][13144](https://github.com/stripe/stripe-android/pull/13144) On payment or setup confirmation failure, we now include error code, decline code, and error type in the exception thrown.
+
+### CryptoOnramp
+* [ADDED][13156](https://github.com/stripe/stripe-android/pull/13156) Added `SDKVersion`, `StripeCryptoOnrampError`, `CryptoOnrampApiException`, `AppAttestationException`, and `UncategorizedApiErrorException` to expose richer developer-facing diagnostics and preserved backend API error context for Crypto Onramp failures.
+* [CHANGED][13156](https://github.com/stripe/stripe-android/pull/13156) Improved Crypto Onramp API error handling with localized fallback user messaging and more consistent error mapping across attestation, payment collection, and checkout flows.
+
 
 ## 23.9.1 - 2026-05-26
 

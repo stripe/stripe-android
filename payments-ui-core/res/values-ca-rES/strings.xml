@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Desa les dades de pagament a %s per a compres futures</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Escanejar targeta</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Netegeu la targeta escanejada</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Proporcionant la informació de pagament i confirmant aquest pagament, estàs autoritzant (A) %s i Stripe, el nostre proveïdor de serveis de pagament, a enviar ordres al teu banc per tal de carregar des del teu compte i (B) carregar el teu compte en conformitat amb aquestes ordres. Tens dret a un reembolsament per part del teu banc sota els termes i condicions que s\'hagin acordat amb aquest. El reembolsament s\'ha de sol·licitar en un termini de 8 setmanes des de la data en que es va carregar el compte. Els teus drets estan explicats en un extracte que pots demanar al teu banc. Estàs acceptant rebre notificacions per pròxims dèbits fins a dos dies abans de que es portin a terme.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

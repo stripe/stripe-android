@@ -6,6 +6,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import javax.inject.Inject
@@ -19,21 +20,20 @@ internal class EmbeddedSheetViewModel @Inject constructor(
     }
 
     class Factory(
-        private val argsSupplier: () -> EmbeddedSheetContract.Args,
+        private val argsSupplier: () -> EmbeddedActivityArgs,
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val args = argsSupplier()
             val component = DaggerEmbeddedSheetComponent.factory().build(
                 paymentMethodMetadata = args.paymentMethodMetadata,
-                selectedPaymentMethodCode = args.selectedPaymentMethodCode,
-                hasSavedPaymentMethods = args.hasSavedPaymentMethods,
                 statusBarColor = args.statusBarColor,
                 configuration = args.configuration,
                 paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                 application = extras.requireApplication(),
                 savedStateHandle = extras.createSavedStateHandle(),
                 promotion = args.promotion,
+                launchMode = args.launchMode,
             )
 
             component.customerStateHolder.setCustomerState(args.customerState)

@@ -13,12 +13,14 @@ import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampConfiguration
 import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
+import com.stripe.android.crypto.onramp.model.OnrampGetWalletOwnershipChallengeResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterWalletAddressResult
 import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
+import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
@@ -106,6 +108,36 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
+     * Retrieves a short-lived Stripe-issued wallet ownership challenge for a registered wallet.
+     * Requires an authenticated Link user.
+     *
+     * @param walletAddress The registered wallet address to verify.
+     * @param network The crypto network for the wallet address.
+     * @return [OnrampGetWalletOwnershipChallengeResult] indicating the result.
+     */
+    suspend fun getWalletOwnershipChallenge(
+        walletAddress: String,
+        network: CryptoNetwork
+    ): OnrampGetWalletOwnershipChallengeResult {
+        return interactor.getWalletOwnershipChallenge(walletAddress, network)
+    }
+
+    /**
+     * Submits a signature for a previously retrieved wallet ownership challenge.
+     * Requires an authenticated Link user.
+     *
+     * @param challengeId The challenge identifier returned by [getWalletOwnershipChallenge].
+     * @param signature The signature produced over the exact challenge message.
+     * @return [OnrampSubmitWalletOwnershipSignatureResult] indicating the result.
+     */
+    suspend fun submitWalletOwnershipSignature(
+        challengeId: String,
+        signature: String
+    ): OnrampSubmitWalletOwnershipSignatureResult {
+        return interactor.submitWalletOwnershipSignature(challengeId, signature)
+    }
+
+    /**
      * Attaches the specific KYC info to the current Link user. Requires an authenticated Link user.
      *
      * @param info The KYC info to attach to the Link user.
@@ -116,7 +148,7 @@ class OnrampCoordinator @Inject internal constructor(
     }
 
     /**
-     * Retrieves compliance identifiers still required for MiCA and CRS/CARF compliance.
+     * Retrieves MiCA identifiers and whether a CRS/CARF TIN is still required.
      * Requires an authenticated Link user.
      */
     suspend fun retrieveMissingIdentifiers(): OnrampRetrieveMissingIdentifiersResult {
@@ -231,11 +263,11 @@ class OnrampCoordinator @Inject internal constructor(
         }
 
         /**
-         * Presents the CRS/CARF declaration screen and records acceptance when the user confirms.
-         * The result will be delivered through the CRS/CARF declaration callback provided in OnrampCallbacks.
+         * Presents the user attestation screen and records acceptance when the user confirms.
+         * The result will be delivered through the user attestation callback provided in OnrampCallbacks.
          */
-        fun presentCrsCarfDeclaration() {
-            coordinator.presentCrsCarfDeclaration()
+        fun presentUserAttestation() {
+            coordinator.presentUserAttestation()
         }
     }
 

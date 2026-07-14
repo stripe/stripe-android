@@ -109,6 +109,10 @@
   <string name="stripe_save_payment_details_to_merchant_name">Uložiť údaje o platbe na %s pre budúce nákupy</string>
   <!-- Button title to open camera to scan credit/debit card -->
   <string name="stripe_scan_card">Naskenovať kartu</string>
+  <!-- Accessibility label for the control that clears a scanned card shown in the card pill -->
+  <string name="stripe_scanned_card_pill_clear_content_description">Vymazať naskenovanú kartu</string>
+  <!-- Shown after a successful card scan: masked PAN prefix and last four digits (e.g. "···· 4242") -->
+  <string name="stripe_scanned_card_pill_masked_last4">•••• %1$s</string>
   <!-- SEPA mandate text -->
   <string name="stripe_sepa_mandate">Poskytnutím informácií o platbe a potvrdením tejto platby splnomocňujete (A) spoločnosti %s a Stripe, nášho poskytovateľa platobných služieb, na posielanie platobných príkazov do vašej banky na odpísanie finančných prostriedkov z vášho účtu a (B) vašu banku na odpísanie finančných prostriedkov z vášho účtu v súlade s pokynmi. V rámci vašich práv máte právo na refundáciu od vašej banky podľa zmluvných podmienok uvedených v zmluve s vašou bankou. Refundáciu si musíte vyžiadať do 8 týždňov odo dňa, kedy boli finančné prostriedky odpísané z vášho účtu. Vaše práva sú vysvetlené vo vyhlásení, ktoré môžete získať od svojej banky. Súhlasíte s tým, že budete dostávať oznámenia o budúcich debetných platbách až 2 dni pred ich uskutočnením.</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->

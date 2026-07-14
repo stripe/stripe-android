@@ -64,4 +64,12 @@ internal class TestGooglePay : BasePlaygroundTest() {
             checkoutMode = CheckoutMode.SETUP
         )
     }
+
+    @Test
+    fun testCheckoutSessionWithFlowController() {
+        testDriver.confirmGooglePayWithCheckoutSession(
+            merchant = Merchant.US,
+            customerEmail = "test@example.com",
+        )
+    }
 }

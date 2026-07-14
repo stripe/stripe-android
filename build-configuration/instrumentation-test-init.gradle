@@ -3,6 +3,62 @@ apply from: new File(gradle.startParameter.currentDir, "build-configuration/quar
 def load = gradle.ext.quarantinedTestsLoad
 
 allprojects { project ->
+    def configureAndroidTestOrchestratorResolution = {
+        project.afterEvaluate {
+            def androidTestUtilConfig = project.configurations.findByName('androidTestUtil')
+            if (androidTestUtilConfig == null || androidTestUtilConfig.dependencies.empty) {
+                return
+            }
+
+            def androidTestUtilConfiguration = androidTestUtilConfig
+            def resolveTask = project.tasks.register('resolveAndroidTestUtilArtifacts') {
+                group = 'verification'
+                description = 'Resolves androidTestUtil artifacts (e.g. test orchestrator APK).'
+                notCompatibleWithConfigurationCache(
+                    'Downloads androidTestUtil APKs and repairs stale Gradle cache entries'
+                )
+                doLast {
+                    def resolveArtifacts = {
+                        androidTestUtilConfiguration.resolve()
+                    }
+
+                    def artifacts = resolveArtifacts()
+                    def missingArtifacts = artifacts.findAll { !it.isFile() }
+                    if (!missingArtifacts.isEmpty()) {
+                        missingArtifacts.each { file ->
+                            logger.lifecycle(
+                                "androidTestUtil artifact missing at ${file}, clearing stale cache entry"
+                            )
+                            delete(file.parentFile)
+                        }
+                        artifacts = resolveArtifacts()
+                        missingArtifacts = artifacts.findAll { !it.isFile() }
+                        if (!missingArtifacts.isEmpty()) {
+                            throw new GradleException(
+                                "androidTestUtil artifacts still missing: ${missingArtifacts}"
+                            )
+                        }
+                    }
+
+                    artifacts.each { file ->
+                        logger.lifecycle("Resolved androidTestUtil: ${file}")
+                    }
+                }
+            }
+
+            project.tasks.configureEach { task ->
+                def installsOnDevice = (task.name.startsWith('connected') && task.name.endsWith('AndroidTest')) ||
+                    (task.name.endsWith('DebugAndroidTest') && !task.name.startsWith('assemble'))
+                if (installsOnDevice) {
+                    task.dependsOn(resolveTask)
+                }
+            }
+        }
+    }
+
+    project.plugins.withId('com.android.library', configureAndroidTestOrchestratorResolution)
+    project.plugins.withId('com.android.application', configureAndroidTestOrchestratorResolution)
+
     if (load.status != 'OK') {
         return
     }

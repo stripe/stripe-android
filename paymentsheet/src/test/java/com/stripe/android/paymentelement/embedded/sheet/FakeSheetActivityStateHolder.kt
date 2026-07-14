@@ -3,7 +3,7 @@ package com.stripe.android.paymentelement.embedded.sheet
 import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
@@ -27,9 +27,9 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
             )
         )
 
-    val resultTurbine = Turbine<FormResult>()
+    val resultTurbine = Turbine<EmbeddedActivityResult>()
 
-    override val result: SharedFlow<FormResult> = MutableSharedFlow<FormResult>()
+    override val result: SharedFlow<EmbeddedActivityResult> = MutableSharedFlow<EmbeddedActivityResult>()
 
     override fun updateMandate(mandateText: ResolvableString?) {
         error("This should never be called!")
@@ -43,7 +43,7 @@ internal class FakeSheetActivityStateHolder : SheetActivityStateHolder {
         error("This should never be called!")
     }
 
-    override fun setResult(result: FormResult) {
+    override fun setResult(result: EmbeddedActivityResult) {
         resultTurbine.add(result)
     }
 

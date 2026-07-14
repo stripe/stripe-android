@@ -156,6 +156,8 @@
   <string name="stripe_fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Tinanggihan ang iyong paraan ng pagbabayad.</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">Kabuuan</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->
   <string name="stripe_insufficient_funds">Walang sapat na pondo ang card mo.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -171,6 +173,8 @@
   <string name="stripe_invalid_shipping_information">Adres ng Nagpadala ay di balido</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Ang iyong postal code ay di kumpleto.</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">Mga detalye ng paraan ng pagbabayad</string>
   <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
   <string name="stripe_link_simple_secure_payments">Simple, ligtas na isang-click na mga pagbabayad</string>
   <string name="stripe_payment_method_add_new_card">Magdagdag ng bagong kard...</string>

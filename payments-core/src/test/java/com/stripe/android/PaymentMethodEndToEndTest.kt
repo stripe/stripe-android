@@ -129,21 +129,6 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withEps_missingName_shouldFail() {
-        val params = PaymentMethodCreateParams.createEps(
-            billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS.toBuilder().setName(null).build()
-        )
-        val exception = assertFailsWith<InvalidRequestException>(
-            "A name is required to create a EPS payment method"
-        ) {
-            Stripe(context, ApiKeyFixtures.EPS_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        }
-        assertThat(exception.message)
-            .isEqualTo("Missing required param: billing_details[name].")
-    }
-
-    @Test
     fun createPaymentMethod_withOxxo_shouldCreatePaymentMethodWithOxxoType() {
         val params = PaymentMethodCreateParams.createOxxo(
             billingDetails = PaymentMethodCreateParamsFixtures.BILLING_DETAILS
@@ -211,6 +196,22 @@ internal class PaymentMethodEndToEndTest {
         ).getOrThrow()
         assertThat(paymentMethod.type)
             .isEqualTo(PaymentMethod.Type.GrabPay)
+    }
+
+    @Test
+    fun `createPaymentMethod() with PayPay PaymentMethod should create expected object`() = runTest {
+        val paymentMethod = StripeApiRepository(
+            context = context,
+            publishableKeyProvider = { ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY },
+            requestSurface = RequestSurface.PaymentElement,
+            workContext = testDispatcher
+        ).createPaymentMethod(
+            PaymentMethodCreateParams.createPayPay(),
+            ApiRequest.Options(ApiKeyFixtures.PAY_PAY_PUBLISHABLE_KEY)
+        ).getOrThrow()
+
+        assertThat(paymentMethod.type)
+            .isEqualTo(PaymentMethod.Type.PayPay)
     }
 
     @Test

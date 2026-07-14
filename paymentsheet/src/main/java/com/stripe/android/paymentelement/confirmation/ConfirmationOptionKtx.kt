@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation
 
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkLaunchMode
@@ -12,14 +13,15 @@ import com.stripe.android.paymentelement.confirmation.epms.ExternalPaymentMethod
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.linkinline.LinkInlineSignupConfirmationOption
-import com.stripe.android.paymentelement.confirmation.shoppay.ShopPayConfirmationOption
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 
 internal fun PaymentSelection.toConfirmationOption(
     configuration: CommonConfiguration,
     linkConfiguration: LinkConfiguration?,
-    cardFundingFilter: CardFundingFilter
+    cardFundingFilter: CardFundingFilter,
+    googlePayDisplayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
+    googlePayIsEmailRequired: Boolean = configuration.billingDetailsCollectionConfiguration.collectsEmail,
+    googlePayBillingEmailOverride: String? = null,
 ): ConfirmationHandler.Option? {
     return when (this) {
         is PaymentSelection.Saved -> toConfirmationOption(linkConfiguration)
@@ -30,10 +32,12 @@ internal fun PaymentSelection.toConfirmationOption(
         is PaymentSelection.New -> toConfirmationOption()
         is PaymentSelection.GooglePay -> toConfirmationOption(
             configuration,
-            cardFundingFilter
+            cardFundingFilter,
+            googlePayDisplayItems,
+            isEmailRequired = googlePayIsEmailRequired,
+            billingEmailOverride = googlePayBillingEmailOverride,
         )
         is PaymentSelection.Link -> toConfirmationOption(linkConfiguration)
-        is PaymentSelection.ShopPay -> toConfirmationOption(configuration)
     }
 }
 
@@ -122,7 +126,10 @@ private fun PaymentSelection.New.toConfirmationOption(): ConfirmationHandler.Opt
 
 private fun PaymentSelection.GooglePay.toConfirmationOption(
     configuration: CommonConfiguration,
-    cardFundingFilter: CardFundingFilter
+    cardFundingFilter: CardFundingFilter,
+    displayItems: List<GooglePayJsonFactory.DisplayItem>,
+    isEmailRequired: Boolean,
+    billingEmailOverride: String?,
 ): GooglePayConfirmationOption? {
     return configuration.googlePay?.let { googlePay ->
         GooglePayConfirmationOption(
@@ -136,7 +143,10 @@ private fun PaymentSelection.GooglePay.toConfirmationOption(
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 additionalEnabledNetworks = googlePay.additionalEnabledNetworks,
                 cardBrandFilter = PaymentSheetCardBrandFilter(configuration.cardBrandAcceptance),
-                cardFundingFilter = cardFundingFilter
+                cardFundingFilter = cardFundingFilter,
+                displayItems = displayItems,
+                isEmailRequired = isEmailRequired,
+                billingEmailOverride = billingEmailOverride,
             ),
         )
     }
@@ -168,22 +178,6 @@ private fun PaymentSelection.CustomPaymentMethod.toConfirmationOption(
         CustomPaymentMethodConfirmationOption(
             customPaymentMethodType = type,
             billingDetails = billingDetails
-        )
-    }
-}
-
-private fun PaymentSelection.ShopPay.toConfirmationOption(
-    configuration: CommonConfiguration?
-): ShopPayConfirmationOption? {
-    val customerSessionClientSecret = when (val accessType = configuration?.customer?.accessType) {
-        is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
-        else -> return null
-    }
-    return configuration.shopPayConfiguration?.let { config ->
-        ShopPayConfirmationOption(
-            shopPayConfiguration = config,
-            customerSessionClientSecret = customerSessionClientSecret,
-            merchantDisplayName = configuration.merchantDisplayName
         )
     }
 }

@@ -12,7 +12,6 @@ android {
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
         buildConfigField "boolean", "IS_RUNNING_IN_CI", "$gradle.ext.isCi"
-        buildConfigField "boolean", "IS_BROWSERSTACK_BUILD", "$gradle.ext.isBrowserstackBuild"
     }
 
     buildFeatures {
@@ -58,4 +57,5 @@ dependencies {
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.truth
+    androidTestImplementation testLibs.espresso.core
 }

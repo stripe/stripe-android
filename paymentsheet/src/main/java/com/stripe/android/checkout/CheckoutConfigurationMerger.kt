@@ -4,16 +4,28 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+
+@OptIn(CheckoutSessionPreview::class)
+internal interface CheckoutSessionData {
+    val checkoutSessionResponse: CheckoutSessionResponse
+    val shippingName: String?
+    val billingName: String?
+    val shippingPhoneNumber: String?
+    val billingPhoneNumber: String?
+    val shippingAddress: Address.State?
+    val billingAddress: Address.State?
+}
 
 @OptIn(CheckoutSessionPreview::class)
 internal sealed class CheckoutConfigurationMerger<T> {
 
-    abstract fun forCheckoutSession(state: InternalState): T
+    abstract fun forCheckoutSession(state: CheckoutSessionData): T
 
     class PaymentSheetConfiguration(
         private val config: PaymentSheet.Configuration,
     ) : CheckoutConfigurationMerger<PaymentSheet.Configuration>() {
-        override fun forCheckoutSession(state: InternalState): PaymentSheet.Configuration {
+        override fun forCheckoutSession(state: CheckoutSessionData): PaymentSheet.Configuration {
             val merged = mergeCheckoutSessionData(
                 existingBillingDetails = config.defaultBillingDetails,
                 existingShippingDetails = config.shippingDetails,
@@ -32,7 +44,7 @@ internal sealed class CheckoutConfigurationMerger<T> {
     class EmbeddedConfiguration(
         private val config: EmbeddedPaymentElement.Configuration,
     ) : CheckoutConfigurationMerger<EmbeddedPaymentElement.Configuration>() {
-        override fun forCheckoutSession(state: InternalState): EmbeddedPaymentElement.Configuration {
+        override fun forCheckoutSession(state: CheckoutSessionData): EmbeddedPaymentElement.Configuration {
             val merged = mergeCheckoutSessionData(
                 existingBillingDetails = config.defaultBillingDetails,
                 existingShippingDetails = config.shippingDetails,
@@ -58,13 +70,14 @@ private data class MergedDetails(
 private fun mergeCheckoutSessionData(
     existingBillingDetails: PaymentSheet.BillingDetails?,
     existingShippingDetails: AddressDetails?,
-    state: InternalState,
+    state: CheckoutSessionData,
 ): MergedDetails {
     val response = state.checkoutSessionResponse
     return MergedDetails(
         billingDetails = PaymentSheet.BillingDetails(
             address = existingBillingDetails?.address ?: state.billingAddress?.asPaymentSheetAddress(),
-            email = existingBillingDetails?.email ?: response.customerEmail,
+            // customer_email is authoritative; fall back to the merchant default only when absent.
+            email = response.customerEmail ?: existingBillingDetails?.email,
             name = existingBillingDetails?.name ?: state.billingName,
             phone = existingBillingDetails?.phone ?: state.billingPhoneNumber,
         ),

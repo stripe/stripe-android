@@ -167,10 +167,14 @@ class CustomerSheet internal constructor(
         }
     }
 
-    private fun onCustomerSheetResult(result: InternalCustomerSheetResult) {
-        callback.onCustomerSheetResult(
-            result.toPublicResult(paymentOptionFactory)
-        )
+    private fun onCustomerSheetResult(result: InternalCustomerSheetResult?) {
+        // A null result means the sheet was torn down by the OS without returning a result (e.g.
+        // when a `singleTask` host is relaunched). Leave the caller's state untouched in that case.
+        result?.let {
+            callback.onCustomerSheetResult(
+                it.toPublicResult(paymentOptionFactory)
+            )
+        }
     }
 
     /**

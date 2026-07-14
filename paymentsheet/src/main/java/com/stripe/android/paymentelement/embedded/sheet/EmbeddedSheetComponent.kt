@@ -5,17 +5,18 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -29,6 +30,7 @@ import javax.inject.Singleton
         ExtendedPaymentElementConfirmationModule::class,
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class,
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ],
 )
 @Singleton
@@ -43,8 +45,6 @@ internal interface EmbeddedSheetComponent {
     interface Factory {
         fun build(
             @BindsInstance paymentMethodMetadata: PaymentMethodMetadata,
-            @BindsInstance selectedPaymentMethodCode: PaymentMethodCode,
-            @BindsInstance hasSavedPaymentMethods: Boolean,
             @BindsInstance
             @Named(STATUS_BAR_COLOR)
             statusBarColor: Int?,
@@ -55,6 +55,7 @@ internal interface EmbeddedSheetComponent {
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
             @BindsInstance promotion: PaymentMethodMessagePromotion?,
+            @BindsInstance launchMode: EmbeddedLaunchMode,
         ): EmbeddedSheetComponent
     }
 }

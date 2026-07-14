@@ -533,7 +533,7 @@ class CustomerAdapterDataSourceTest {
         assertThat(customerSheetSession.paymentMethods).containsExactlyElementsIn(paymentMethods)
         assertThat(customerSheetSession.savedSelection).isEqualTo(SavedSelection.PaymentMethod(id = "pm_1"))
         assertThat(customerSheetSession.permissions.removePaymentMethod).isEqualTo(PaymentMethodRemovePermission.Full)
-        assertThat(customerSheetSession.permissions.canUpdateFullPaymentMethodDetails).isFalse()
+        assertThat(customerSheetSession.permissions.canUpdateCardExpiryAndBillingDetails).isFalse()
         assertThat(customerSheetSession.paymentMethodSaveConsentBehavior).isEqualTo(
             PaymentMethodSaveConsentBehavior.Legacy
         )

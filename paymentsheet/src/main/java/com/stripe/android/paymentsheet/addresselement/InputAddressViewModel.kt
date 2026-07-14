@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.model.CountryUtils
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -23,6 +25,7 @@ internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
     private val eventReporter: AddressLauncherEventReporter,
+    private val placesClient: PlacesClientProxy?,
 ) : ViewModel(), AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
@@ -64,10 +67,32 @@ internal class InputAddressViewModel @Inject constructor(
     )
     val collectedAddress: StateFlow<AddressDetails?> = _collectedAddress
 
+    private val isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled
+
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
+        isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
     )
+
+    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled) {
+        InlineAutocompleteController(
+            placesClient = placesClient,
+            config = autocompleteConfig,
+            coroutineScope = viewModelScope,
+            eventListenerProvider = { eventListener },
+            // The standalone Address Element does not have access to ElementsSession flags.
+            // When the proxy endpoint ships, thread this value through Args.
+            shouldUseAutocompleteProxyEndpoints = false,
+        )
+    } else {
+        null
+    }
+
+    override val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
+        inlineAutocompleteController?.inlinePredictionsState ?: MutableStateFlow(
+            AutocompleteAddressInteractor.InlinePredictionsState.Idle
+        )
 
     val addressFormController = AddressFormController(
         initialValues = _collectedAddress.value?.toIdentifierMap() ?: emptyMap(),
@@ -218,6 +243,15 @@ internal class InputAddressViewModel @Inject constructor(
         _checkboxChecked.value = newValue
     }
 
+    fun onEnterManually() {
+        val currentValues = getCurrentAddress().toIdentifierMap()
+        eventListener?.invoke(AutocompleteAddressInteractor.Event.OnExpandForm(currentValues))
+    }
+
+    override fun onEnterManuallyFromInline() {
+        onEnterManually()
+    }
+
     private fun canUseShippingSameAsBilling(): Boolean {
         return args.config?.let { config ->
             if (initialBillingAddress == null) {
@@ -254,7 +288,20 @@ internal class InputAddressViewModel @Inject constructor(
         }
     }
 
+    override fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
+        inlineAutocompleteController?.observeQueryChanges(query, country)
+    }
+
+    override fun onDismissed() {
+        inlineAutocompleteController?.onDismissed()
+    }
+
+    override fun onPredictionSelected(predictionId: String) {
+        inlineAutocompleteController?.onPredictionSelected(predictionId)
+    }
+
     override fun onAutocomplete(country: String) {
+        if (autocompleteConfig.isInlineAutocompleteEnabled) return
         viewModelScope.launch {
             _collectedAddress.emit(getCurrentAddress())
             navigator.navigateTo(

@@ -87,22 +87,18 @@ enum class WalletButtonsPlaygroundType(
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                 ),
                 walletButtonsView = mapOf(
                     PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                 ),
             )
         ),
     ),
-    GPayAlwaysLinkAutoNeverShopPayAuto(
-        displayName = "Google Pay (Always), Link (Never in Wallets, Auto in MPE), Shop Pay (Automatic)",
+    GPayAlwaysLinkNever(
+        displayName = "Google Pay (Always), Link (Never in Wallets, Auto in MPE)",
         configuration = PaymentSheet.WalletButtonsConfiguration(
             willDisplayExternally = true,
             visibility = PaymentSheet.WalletButtonsConfiguration.Visibility(
@@ -111,16 +107,12 @@ enum class WalletButtonsPlaygroundType(
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.PaymentElementVisibility.Automatic,
                 ),
                 walletButtonsView = mapOf(
                     PaymentSheet.WalletButtonsConfiguration.Wallet.GooglePay to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                     PaymentSheet.WalletButtonsConfiguration.Wallet.Link to
                         PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Never,
-                    PaymentSheet.WalletButtonsConfiguration.Wallet.ShopPay to
-                        PaymentSheet.WalletButtonsConfiguration.WalletButtonsViewVisibility.Always,
                 ),
             )
         ),

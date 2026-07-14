@@ -223,7 +223,72 @@ class ConsumerPaymentDetailsJsonParserTest {
     }
 
     @Test
-    fun `parse card with unrecognized funding defaults to Unknown`() {
+    fun `parse generic payment type`() {
+        assertEquals(
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Generic(
+                        id = "csmrpd_126",
+                        last4 = "0x••••22Dd",
+                        isDefault = false,
+                        nickname = null,
+                        billingAddress = null,
+                        billingEmailAddress = null,
+                        rawType = "CRYPTO",
+                        display = ConsumerPaymentDetails.Display(
+                            label = "Crypto",
+                            sublabel = "0x••••22Dd",
+                            icon = ConsumerPaymentDetails.Display.Icon(
+                                defaultUrl = "https://example.com/crypto-icon.png"
+                            )
+                        ),
+                        nextActionTypes = listOf("redirect_to_url")
+                    )
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_SINGLE_GENERIC_PAYMENT_DETAILS_JSON),
+        )
+    }
+
+    @Test
+    fun `parse generic payment type without sublabel or icon`() {
+        assertEquals(
+            ConsumerPaymentDetails(
+                listOf(
+                    ConsumerPaymentDetails.Generic(
+                        id = "csmrpd_126",
+                        last4 = "",
+                        isDefault = false,
+                        nickname = null,
+                        billingAddress = null,
+                        billingEmailAddress = null,
+                        rawType = "CRYPTO",
+                        display = ConsumerPaymentDetails.Display(
+                            label = "Crypto",
+                            sublabel = null,
+                            icon = null
+                        ),
+                        nextActionTypes = emptyList()
+                    )
+                )
+            ),
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_GENERIC_PAYMENT_DETAILS_NO_SUBLABEL_ICON_JSON),
+        )
+    }
+
+    @Test
+    fun `parse generic payment type without display is dropped`() {
+        assertEquals(
+            ConsumerPaymentDetails(emptyList()),
+            ConsumerPaymentDetailsJsonParser
+                .parse(ConsumerFixtures.CONSUMER_GENERIC_PAYMENT_DETAILS_NO_DISPLAY_JSON),
+        )
+    }
+
+    @Test
+    fun `parse card with unrecognized funding defaults to Generic`() {
         val json = createCardJsonWithFunding("INVALID")
         val expected = createExpectedCardWithFunding(ConsumerPaymentDetails.Card.Funding.Unknown)
         assertEquals(expected, ConsumerPaymentDetailsJsonParser.parse(json))

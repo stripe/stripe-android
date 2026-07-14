@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Apstipriniet savu informāciju</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">SSN pēdējie 4 cipari</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Pierakstīties vai reģistrēties</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Piekrist un turpināt</string>
   <!-- Title for the Link signup screen -->
@@ -98,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Iziet no %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Radās kļūda. Pārbaudiet savu savienojumu un mēģiniet vēlreiz.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Turiet karti aiz tālruņa</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">vai ievadiet manuāli</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
@@ -175,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Pārvaldīt kartes</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Pārvaldīt bankas kontu</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Pārvaldīt maksājuma veidu</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Pārvaldīt maksājuma veidus</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -247,6 +253,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Noklusējuma maksājumu veids netika mainīts. Mēģiniet vēlreiz.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Kopā: %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Maksājuma veida informāciju nevar mainīt.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">Kartes zīmols netika atjaunināts. Lūdzu, mēģiniet vēlreiz.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
@@ -261,6 +269,9 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_shop_pay_button_description">Shop Pay poga</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Rādīt izvēlni</string>
+  <!-- Title of the sign-out action. -->
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Izrakstīties no %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Pievienoties Link</string>
   <!-- Title for the Link signup screen -->

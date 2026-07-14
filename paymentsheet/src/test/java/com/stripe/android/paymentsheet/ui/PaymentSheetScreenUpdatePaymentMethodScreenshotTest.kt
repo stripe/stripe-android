@@ -37,6 +37,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = false,
                 isModifiablePaymentMethod = true,
+                shouldShowCardBrandDropdown = true,
             )
         }
     }
@@ -114,7 +115,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                     .toDisplayableSavedPaymentMethod(),
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Automatic
             )
         }
@@ -130,7 +131,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Full,
             )
         }
@@ -146,7 +147,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Never,
             )
         }
@@ -162,7 +163,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Automatic,
             )
         }
@@ -178,10 +179,20 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
                 isModifiablePaymentMethod = true,
                 canRemove = true,
                 shouldShowSetAsDefaultCheckbox = false,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
                 addressCollectionMode = AddressCollectionMode.Full,
                 useDefaultBillingDetails = false,
                 validating = true,
+            )
+        }
+    }
+
+    @Test
+    fun updatePaymentMethodScreen_forLinkGeneric() {
+        paparazziRule.snapshot {
+            PaymentSheetScreenOnUpdatePaymentMethod(
+                paymentMethod = PaymentMethodFixtures.displayableLinkGenericPaymentMethod(),
+                canRemove = true
             )
         }
     }
@@ -194,7 +205,8 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
         isExpiredCard: Boolean = false,
         error: String? = null,
         shouldShowSetAsDefaultCheckbox: Boolean = false,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
+        shouldShowCardBrandDropdown: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
         addressCollectionMode: AddressCollectionMode = AddressCollectionMode.Never,
         useDefaultBillingDetails: Boolean = true,
         validating: Boolean = false,
@@ -204,6 +216,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             canRemove = canRemove,
             isExpiredCard = isExpiredCard,
             isModifiablePaymentMethod = isModifiablePaymentMethod,
+            shouldShowCardBrandDropdown = shouldShowCardBrandDropdown,
             shouldShowSetAsDefaultCheckbox = shouldShowSetAsDefaultCheckbox,
             setAsDefaultCheckboxEnabled = true,
             viewActionRecorder = null,
@@ -216,7 +229,7 @@ internal class PaymentSheetScreenUpdatePaymentMethodScreenshotTest {
             useDefaultBillingDetails = useDefaultBillingDetails,
             shouldShowSaveButton = isModifiablePaymentMethod || shouldShowSetAsDefaultCheckbox,
             addressCollectionMode = addressCollectionMode,
-            canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
         ).apply {
             if (validating) {
                 editCardDetailsInteractor.handleViewAction(EditCardDetailsInteractor.ViewAction.Validate)

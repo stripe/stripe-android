@@ -36,7 +36,9 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -66,6 +68,7 @@ import com.stripe.android.paymentsheet.utils.toConfirmationError
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeInitialScreenFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -102,7 +105,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
+    placesClient: PlacesClientProxy?,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -115,6 +119,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     mode = mode,
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
+    placesClient = placesClient,
 ) {
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,
@@ -208,14 +213,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
             isGooglePayReady = paymentMethodMetadata?.isGooglePayReady == true,
-            isShopPayAvailable = paymentMethodMetadata?.availableWallets?.contains(WalletType.ShopPay) == true,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodMetadata?.supportedPaymentMethodTypes().orEmpty(),
             googlePayLauncherConfig = googlePayLauncherConfig,
             googlePayButtonType = args.googlePayConfig?.buttonType.asGooglePayButtonType,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = { checkoutWithLink(linkBrand) },
-            onShopPayPressed = this::checkoutWithShopPay,
             isSetupIntent = paymentMethodMetadata?.stripeIntent is SetupIntent,
             walletsAllowedInHeader = WalletType.entries, // PaymentSheet: all wallets in header
             cardFundingFilter = paymentMethodMetadata?.cardFundingFilter ?: DefaultCardFundingFilter,
@@ -433,10 +436,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
     }
 
-    fun checkoutWithShopPay() {
-        checkout(PaymentSelection.ShopPay, CheckoutIdentifier.SheetTopWallet)
-    }
-
     @VisibleForTesting
     internal fun checkoutWithLink(linkBrand: LinkBrand) {
         checkout(
@@ -575,7 +574,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     ?.toConfirmationOption(
                         configuration = config.asCommonConfiguration(),
                         linkConfiguration = linkHandler.linkConfiguration.value,
-                        cardFundingFilter = paymentMethodMetadata.cardFundingFilter
+                        cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
+                        googlePayDisplayItems = GooglePayDisplayItemsFactory.create(paymentMethodMetadata),
+                        googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
+                            configuration = config.asCommonConfiguration(),
+                            paymentMethodMetadata = paymentMethodMetadata,
+                        ),
                     )
             }
 
@@ -724,6 +728,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerStateHolder = customerStateHolder,
                 savedPaymentMethodMutator = savedPaymentMethodMutator,
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
             )
             PaymentSheetScreen.SelectSavedPaymentMethods(
                 interactor = interactor,

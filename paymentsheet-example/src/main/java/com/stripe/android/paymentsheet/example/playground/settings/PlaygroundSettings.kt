@@ -1,4 +1,4 @@
-@file:OptIn(CheckoutSessionPreview::class)
+@file:OptIn(CheckoutSessionPreview::class, LinkControllerPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.settings
 
@@ -13,6 +13,7 @@ import com.stripe.android.checkout.Checkout
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -187,18 +188,19 @@ internal class PlaygroundSettings private constructor(
             playgroundState: PlaygroundState.Payment
         ): LinkController.Configuration {
             val paymentConfiguration = PaymentConfiguration.getInstance(context)
-            val builder = LinkController.Configuration.Builder(
+            val configuration = LinkController.Configuration(
                 merchantDisplayName = "Example, Inc.",
                 publishableKey = paymentConfiguration.publishableKey,
                 stripeAccountId = paymentConfiguration.stripeAccountId,
             )
-            val linkControllerConfigurationData = PlaygroundSettingDefinition.LinkControllerConfigurationData(builder)
+            val linkControllerConfigurationData =
+                PlaygroundSettingDefinition.LinkControllerConfigurationData(configuration)
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData, settings)
             }.onEach { (settingDefinition, value) ->
-                settingDefinition.configure(value, builder, playgroundState, linkControllerConfigurationData)
+                settingDefinition.configure(value, configuration, playgroundState, linkControllerConfigurationData)
             }
-            return builder.build()
+            return configuration
         }
 
         fun customerSheetConfiguration(
@@ -249,7 +251,7 @@ internal class PlaygroundSettings private constructor(
 
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             value: Any?,
-            configurationBuilder: LinkController.Configuration.Builder,
+            configurationBuilder: LinkController.Configuration,
             playgroundState: PlaygroundState.Payment,
             configurationData: PlaygroundSettingDefinition.LinkControllerConfigurationData,
         ) {
@@ -586,7 +588,6 @@ internal class PlaygroundSettings private constructor(
                 allowedIntegrationTypes = PlaygroundConfigurationData.IntegrationType.paymentFlows().toList() +
                     PlaygroundConfigurationData.IntegrationType.sptFlows().toList(),
             ),
-            ShopPaySettingsDefinition,
             LinkControllerAllowUserEmailEditsSettingsDefinition,
             FeatureFlagSettingsDefinition(FeatureFlags.forceLinkWebAuth),
             FeatureFlagSettingsDefinition(
@@ -596,7 +597,9 @@ internal class PlaygroundSettings private constructor(
             TermsDisplaySettingsDefinition,
             CustomStripeApiDefinition,
             CaptureMethodSettingsDefinition,
-            FeatureFlagSettingsDefinition(FeatureFlags.paymentMethodMessagePromotions)
+            FeatureFlagSettingsDefinition(FeatureFlags.enableNfcScanning),
+            FeatureFlagSettingsDefinition(FeatureFlags.disableNfcScanningSecurity),
+            FeatureFlagSettingsDefinition(FeatureFlags.inlineAddressAutocompleteEnabled),
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(

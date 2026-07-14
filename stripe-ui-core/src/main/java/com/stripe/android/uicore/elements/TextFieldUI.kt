@@ -599,7 +599,7 @@ private fun Modifier.onAutofill(
 
     onAutofillText {
         textFieldController.autofillType?.let { type ->
-            autofillReporter(type.toString())
+            autofillReporter(type.toReadableString())
         }
 
         textFieldController.onValueChange(it.text)

@@ -17,6 +17,7 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFr
 import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -52,7 +53,7 @@ internal class DocumentScanViewModel(
     }
 
     @OptIn(FlowPreview::class)
-    override val scanFeedback = combine(
+    override val scanFeedback: StateFlow<Int?> = combine(
         scannerState,
         targetScanTypeFlow,
         identityViewModel.verificationPage.asFlow()
@@ -60,6 +61,7 @@ internal class DocumentScanViewModel(
         when (scannerState) {
             State.Initializing -> idleFeedback(targetScanType)
             is State.Scanned -> R.string.stripe_scanned
+            State.ManualCaptured -> R.string.stripe_image_taken
 
             is State.Scanning -> {
                 when (scannerState.scanState) {
@@ -79,7 +81,7 @@ internal class DocumentScanViewModel(
         }
     }.distinctUntilChanged()
         .debounce { value ->
-            if (value == R.string.stripe_scanned) 0 else 300
+            if (value == R.string.stripe_scanned || value == R.string.stripe_image_taken) 0L else 300L
         }
         .stateIn(
             scope = viewModelScope,

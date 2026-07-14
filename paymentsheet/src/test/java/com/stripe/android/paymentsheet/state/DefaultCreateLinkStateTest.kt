@@ -12,13 +12,17 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFi
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
 import com.stripe.android.model.ClientAttributionMetadata
 import com.stripe.android.model.ElementsSession
+import com.stripe.android.model.LinkDisabledReason
 import com.stripe.android.model.PaymentIntentCreationFlow
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.paymentsheet.CardFundingFilteringPrivatePreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FakeLinkStore
 import kotlinx.coroutines.test.runTest
@@ -79,6 +83,33 @@ internal class DefaultCreateLinkStateTest {
             isLinkInlineSignupAvailableForSavedPaymentMethods = true,
         )
 
+    @Test
+    fun `link is disabled when checkout session should disable wallets for automatic tax billing`() = runTest {
+        val createLinkState = createLinkStateFactory()
+        val elementsSession = createElementsSession()
+        val initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+            instancesKey = "DefaultCreateLinkStateTest",
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                elementsSession = elementsSession,
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+            ),
+        )
+
+        val result = createLinkState(
+            elementsSession = elementsSession,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.asCommonConfiguration(),
+            initializationMode = initializationMode,
+            customerMetadata = null,
+            clientAttributionMetadata = DEFAULT_CLIENT_ATTRIBUTION_METADATA,
+        )
+
+        assertThat(result).isInstanceOf<LinkDisabledState>()
+        val disabledState = result as LinkDisabledState
+        assertThat(disabledState.linkDisabledReasons)
+            .contains(LinkDisabledReason.AutomaticTaxBillingAddress)
+    }
+
     private fun testLinkInlineSignupWithSavedPaymentMethodsEnabledFlag(
         flags: Map<ElementsSession.Flag, Boolean>,
         isLinkInlineSignupAvailableForSavedPaymentMethods: Boolean
@@ -137,7 +168,10 @@ internal class DefaultCreateLinkStateTest {
 
     private fun createLinkStateFactory(
         cardFundingFilterFactory: PaymentSheetCardFundingFilterFactory = FakeCardFundingFilterFactory(),
-        retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(FakeCustomerRepository()),
+        retrieveCustomerEmail: RetrieveCustomerEmail = DefaultRetrieveCustomerEmail(
+            FakeCustomerRepository(),
+            FakeDurationProvider(),
+        ),
     ): DefaultCreateLinkState {
         return DefaultCreateLinkState(
             accountStatusProvider = { AccountStatus.SignedOut },

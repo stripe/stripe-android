@@ -26,7 +26,22 @@ fi
 if [[ -z $(which lokalise2) ]]; then
     echo "Installing lokalise2 via homebrew..."
     brew tap lokalise/cli-2
+    # Homebrew now requires third-party taps to be explicitly trusted before
+    # their formulae will load. Without this, `brew install` silently refuses
+    # to install lokalise2 and downloads below produce zero files. If trust
+    # fails, we let the install fail rather than reaching for the (deprecated)
+    # HOMEBREW_NO_REQUIRE_TAP_TRUST escape hatch; the lokalise2 check below
+    # then aborts before any translations are removed.
+    brew trust lokalise/cli-2
     brew install lokalise2
+fi
+
+# Fail loudly if lokalise2 is still unavailable. Otherwise every download below
+# produces nothing, and the "remove existing strings" step wipes all
+# translations, opening a PR that deletes every strings.xml.
+if [[ -z $(which lokalise2) ]]; then
+    echo "ERROR: lokalise2 is not installed; aborting before any strings are removed."
+    exit 1
 fi
 
 if [[ -z $(which recode) ]]; then
@@ -81,6 +96,25 @@ do
           --original-filenames=false \
           --bundle-structure "android/$MODULE/values-%LANG_ISO%/strings.xml" \
           --async
+
+    # Guard: only proceed to the destructive remove/copy below if the download
+    # actually produced strings for this module. An empty download here would
+    # otherwise delete every existing strings.xml and replace it with nothing.
+    if [ -z "$(find android/$MODULE -type f -name strings.xml 2>/dev/null)" ]; then
+        if [ -d "../$MODULE/res" ]; then
+            # A maintained module with existing translations returned nothing.
+            # Abort rather than wipe them (this is what produced the
+            # all-deletions PRs).
+            echo "ERROR: no strings downloaded for $MODULE but ../$MODULE/res exists; aborting before removing existing translations."
+            exit 1
+        else
+            # No local module to update — e.g. a module that was removed or
+            # merged elsewhere but is still listed here. Nothing to wipe, so
+            # skip it instead of failing the whole job.
+            echo "WARNING: no strings downloaded for $MODULE and no ../$MODULE/res directory; skipping."
+            continue
+        fi
+    fi
 
     #There is a command line switch that might be better than this, see: --language-mapping
     if [ "$FETCH_ALL_LANGUAGES" = true ]; then

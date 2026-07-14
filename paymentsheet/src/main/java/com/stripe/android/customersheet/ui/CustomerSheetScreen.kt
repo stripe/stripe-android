@@ -156,7 +156,6 @@ internal fun SelectPaymentMethod(
             linkBrand = LinkBrand.Link,
             currentSelection = viewState.paymentSelection,
             nameProvider = paymentMethodNameProvider,
-            isCbcEligible = viewState.isCbcEligible,
             defaultPaymentMethodId = null
         )
 

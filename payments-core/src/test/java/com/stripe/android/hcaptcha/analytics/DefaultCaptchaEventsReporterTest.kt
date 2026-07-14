@@ -174,6 +174,10 @@ internal class DefaultCaptchaEventsReporterTest {
                 throw NotImplementedError("this function should not be called")
             }
 
+            override fun completedDuration(key: DurationProvider.Key): Duration? {
+                throw NotImplementedError("this function should not be called")
+            }
+
             override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
                 throw NotImplementedError("this function should not be called")
             }

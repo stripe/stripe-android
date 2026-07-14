@@ -1,13 +1,14 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
-import com.stripe.android.paymentelement.embedded.form.FormResult
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -16,10 +17,10 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
-import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -129,10 +130,8 @@ internal class EmbeddedNavigator private constructor(
 
             @Composable
             override fun Content() {
-                Column {
-                    ManageScreenUI(interactor = interactor)
-                    PaymentSheetContentPadding(subtractingExtraPadding = 12.dp)
-                }
+                ManageScreenUI(interactor = interactor)
+                PaymentSheetContentPadding(subtractingExtraPadding = 12.dp)
             }
 
             override fun close() {
@@ -155,21 +154,20 @@ internal class EmbeddedNavigator private constructor(
 
             @Composable
             override fun Content() {
-                Column {
-                    UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
-                    PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
-                }
+                UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
+                PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
             }
         }
 
-        class Form @Inject constructor(
-            private val formInteractor: DefaultVerticalModeFormInteractor,
+        class Form(
+            val formInteractor: VerticalModeFormInteractor,
             private val eventReporter: EventReporter,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
+            private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                     PaymentSheetTopBarState(
@@ -197,10 +195,12 @@ internal class EmbeddedNavigator private constructor(
                     },
                     onProcessingCompleted = {
                         sheetActivityStateHolder.setResult(
-                            FormResult.Complete(
+                            EmbeddedActivityResult.Complete(
                                 selection = null,
                                 hasBeenConfirmed = true,
                                 customerState = customerStateHolder.customer.value,
+                                shouldInvokeSelectionCallback = false,
+                                launchMode = launchMode,
                             )
                         )
                     },
@@ -208,6 +208,35 @@ internal class EmbeddedNavigator private constructor(
                     updateSelection = embeddedSelectionHolder::set,
                     savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                 )
+            }
+
+            class Factory @Inject constructor(
+                private val interactorFactory: EmbeddedFormInteractorFactory,
+                private val eventReporter: EventReporter,
+                private val sheetActivityStateHolder: SheetActivityStateHolder,
+                private val confirmationHelper: SheetActivityConfirmationHelper,
+                private val embeddedSelectionHolder: EmbeddedSelectionHolder,
+                private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
+                private val customerStateHolder: CustomerStateHolder,
+            ) {
+                fun create(launchMode: EmbeddedLaunchMode.Form): Form {
+                    val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                        it.type?.code == launchMode.selectedPaymentMethodCode
+                    }
+                    return Form(
+                        formInteractor = interactorFactory.create(
+                            paymentMethodCode = launchMode.selectedPaymentMethodCode,
+                            hasSavedPaymentMethods = hasSavedPaymentMethods,
+                        ),
+                        eventReporter = eventReporter,
+                        sheetActivityStateHolder = sheetActivityStateHolder,
+                        confirmationHelper = confirmationHelper,
+                        embeddedSelectionHolder = embeddedSelectionHolder,
+                        savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
+                        customerStateHolder = customerStateHolder,
+                        launchMode = launchMode,
+                    )
+                }
             }
         }
     }

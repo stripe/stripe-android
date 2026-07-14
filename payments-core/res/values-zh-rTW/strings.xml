@@ -142,6 +142,8 @@
   <string name="stripe_fpx_bank_offline">%s - 線下</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">您的支付方式被拒絕了。</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">總計</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
   <string name="stripe_internal_error">發生了內部錯誤。</string>
   <!-- An error message displayed when the customer's iban is invalid. -->
@@ -155,6 +157,8 @@
   <string name="stripe_invalid_shipping_information">收貨地址無效</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">您的郵遞區號不完整。</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">支付方式詳細資料</string>
   <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
   <string name="stripe_link_simple_secure_payments">簡單、安全地一鍵支付</string>
   <string name="stripe_payment_method_add_new_card">添加新卡...</string>

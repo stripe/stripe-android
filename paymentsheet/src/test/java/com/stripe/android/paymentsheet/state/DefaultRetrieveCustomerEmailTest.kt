@@ -10,6 +10,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentB
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.runTest
 import kotlin.test.Test
 
@@ -90,7 +91,10 @@ internal class DefaultRetrieveCustomerEmailTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val customerRepository = CallTrackingCustomerRepository()
-        val retrieveEmail = DefaultRetrieveCustomerEmail(customerRepository)
+        val retrieveEmail = DefaultRetrieveCustomerEmail(
+            customerRepository,
+            FakeDurationProvider(),
+        )
 
         val result = retrieveEmail(
             configuration = configuration,
@@ -153,7 +157,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             removePaymentMethod = PaymentMethodRemovePermission.None,
             saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
             canRemoveLastPaymentMethod = false,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
         )
 
         val LEGACY_EK_METADATA = CustomerMetadata.LegacyEphemeralKey(
@@ -163,7 +167,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = false,
+            canUpdateCardExpiryAndBillingDetails = false,
         )
 
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(

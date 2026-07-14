@@ -144,7 +144,6 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             is PaymentSelection.CustomPaymentMethod -> {
                 paymentMethodMetadata.isCustomPaymentMethod(previousSelection.id)
             }
-            is PaymentSelection.ShopPay -> false
         }
     }
 
@@ -156,6 +155,9 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
             coroutineScope = coroutineScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
+            // Card scan auto-launch is only relevant in the form, not when selecting the default.
+            automaticallyLaunchedCardScanFormDataHelper = null,
+            tapToAddHelper = null,
             // Not important for determining formType so use default value
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = null,
@@ -169,6 +171,9 @@ internal class DefaultEmbeddedSelectionChooser @Inject constructor(
                 coroutineScope = coroutineScope,
                 paymentMethodMetadata = previousPaymentMethodMetadata,
                 eventReporter = eventReporter,
+                // Card scan auto-launch is only relevant in the form, not when selecting the default.
+                automaticallyLaunchedCardScanFormDataHelper = null,
+                tapToAddHelper = null,
                 // Not important for determining formType so use default value
                 setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
                 paymentMethodMessagePromotionsHelper = null

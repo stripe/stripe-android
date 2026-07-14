@@ -11,12 +11,10 @@ import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.paymentsheet.example.playground.settings.MerchantSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-@Ignore("ir-alabaster-elude")
 internal class TestWeChatPay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "wechat_pay",

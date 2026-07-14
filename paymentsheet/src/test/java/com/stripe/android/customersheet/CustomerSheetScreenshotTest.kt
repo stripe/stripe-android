@@ -103,7 +103,6 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonVisible = false,
         canEdit = true,
         canRemovePaymentMethods = true,
-        isCbcEligible = false,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -376,7 +375,8 @@ internal class CustomerSheetScreenshotTest {
     ): CustomerSheetViewState {
         return CustomerSheetViewState.UpdatePaymentMethod(
             updatePaymentMethodInteractor = DefaultUpdatePaymentMethodInteractor(
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
+                canChangeCbc = true,
                 displayableSavedPaymentMethod = PaymentMethodFixtures.displayableCard(),
                 removeExecutor = { null },
                 updatePaymentMethodExecutor = { paymentMethod, _ -> Result.success(paymentMethod) },
@@ -392,6 +392,7 @@ internal class CustomerSheetScreenshotTest {
                 allowedBillingCountries = emptySet(),
                 removeMessage = null,
                 onUpdateSuccess = {},
+                autocompleteAddressInteractorFactory = null,
             ),
             isLiveMode = true,
         )

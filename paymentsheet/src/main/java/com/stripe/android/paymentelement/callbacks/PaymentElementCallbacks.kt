@@ -9,17 +9,14 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.RowSelectionBehavior.Companion.getInternalRowSelectionCallback
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
-import com.stripe.android.paymentelement.ShopPayPreview
 import com.stripe.android.paymentelement.TapToAddPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ShopPayHandlers
 
 @OptIn(
     ExperimentalAnalyticEventCallbackApi::class,
-    ShopPayPreview::class,
     SharedPaymentTokenSessionPreview::class,
     WalletButtonsPreview::class,
     TapToAddPreview::class,
@@ -31,7 +28,6 @@ internal data class PaymentElementCallbacks private constructor(
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     val analyticEventCallback: AnalyticEventCallback?,
     val rowSelectionCallback: InternalRowSelectionCallback?,
-    val shopPayHandlers: ShopPayHandlers?,
     val preparePaymentMethodHandler: PreparePaymentMethodHandler?,
     val createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback?,
 ) {
@@ -42,7 +38,6 @@ internal data class PaymentElementCallbacks private constructor(
         private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
         private var analyticEventCallback: AnalyticEventCallback? = null
         private var rowSelectionCallback: InternalRowSelectionCallback? = null
-        private var shopPayHandlers: ShopPayHandlers? = null
         private var preparePaymentMethodHandler: PreparePaymentMethodHandler? = null
         private var createCardPresentSetupIntentCallback: CreateCardPresentSetupIntentCallback? = null
 
@@ -90,11 +85,6 @@ internal data class PaymentElementCallbacks private constructor(
             )
         }
 
-        @OptIn(ShopPayPreview::class)
-        fun shopPayHandlers(shopPayHandlers: ShopPayHandlers?) = apply {
-            this.shopPayHandlers = shopPayHandlers
-        }
-
         fun build(): PaymentElementCallbacks {
             var mutualExclusiveCallbackCount = 0
             if (createIntentCallback != null) {
@@ -121,7 +111,6 @@ internal data class PaymentElementCallbacks private constructor(
                 externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 analyticEventCallback = analyticEventCallback,
                 rowSelectionCallback = rowSelectionCallback,
-                shopPayHandlers = shopPayHandlers,
                 preparePaymentMethodHandler = preparePaymentMethodHandler,
                 createCardPresentSetupIntentCallback = createCardPresentSetupIntentCallback,
             )

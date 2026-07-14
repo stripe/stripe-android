@@ -17,7 +17,8 @@ internal class BrandTextUtilsTest {
     fun `inline signup text replaces Link with inline brand icon`() {
         assertThat(
             context.getString(
-                R.string.stripe_inline_sign_up_toggle,
+                R.string.stripe_inline_sign_up_toggle_with_brand,
+                LinkBrand.Link.brandName(),
             ).buildBrandIconAnnotatedString(
                 brandToken = LinkBrand.Link.brandName(),
                 inlineContentId = "brand_icon",

@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
+import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
@@ -197,8 +198,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
         val paymentSelection = when (selection) {
             is PaymentSelection.Saved,
             is PaymentSelection.Link,
-            is PaymentSelection.GooglePay,
-            is PaymentSelection.ShopPay -> selection
+            is PaymentSelection.GooglePay -> selection
             is PaymentSelection.New,
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
@@ -245,6 +245,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
             paymentMethodMetadata: PaymentMethodMetadata,
             customerStateHolder: CustomerStateHolder,
             savedPaymentMethodMutator: SavedPaymentMethodMutator,
+            paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
         ): SelectSavedPaymentMethodsInteractor {
             return DefaultSelectSavedPaymentMethodsInteractor(
                 paymentOptionsItems = savedPaymentMethodMutator.paymentOptionsItems,
@@ -259,7 +260,7 @@ internal class DefaultSelectSavedPaymentMethodsInteractor(
                     val interactor = DefaultAddPaymentMethodInteractor.create(
                         viewModel = viewModel,
                         paymentMethodMetadata = paymentMethodMetadata,
-                        paymentMethodMessagePromotionsHelper = null
+                        paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
                     )
                     viewModel.navigationHandler.transitionTo(
                         AddAnotherPaymentMethod(interactor = interactor)

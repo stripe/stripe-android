@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
+import com.stripe.android.paymentsheet.isModifiable
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -15,7 +16,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 
 internal sealed class CustomerSheetViewState(
@@ -66,7 +66,6 @@ internal sealed class CustomerSheetViewState(
         val canRemovePaymentMethods: Boolean,
         val errorMessage: String? = null,
         val mandateText: ResolvableString? = null,
-        val isCbcEligible: Boolean,
     ) : CustomerSheetViewState(
         isLiveMode = isLiveMode,
         isProcessing = isProcessing,
@@ -142,13 +141,11 @@ internal sealed class CustomerSheetViewState(
 
 internal fun isModifiable(
     paymentMethod: PaymentMethod,
-    cbcEligibility: CardBrandChoiceEligibility,
-    canUpdateFullPaymentMethodDetails: Boolean
+    canUpdateCardExpiryAndBillingDetails: Boolean,
+    canChangeCbc: Boolean,
 ): Boolean {
-    if (canUpdateFullPaymentMethodDetails && paymentMethod.card != null) return true
-    val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
-        available.size > 1
-    } ?: false
-
-    return cbcEligibility is CardBrandChoiceEligibility.Eligible && hasMultipleNetworks
+    return paymentMethod.isModifiable(
+        canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+        canChangeCbc = canChangeCbc,
+    )
 }

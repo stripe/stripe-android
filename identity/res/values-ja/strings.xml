@@ -144,6 +144,8 @@
   <string name="stripe_id_number">ID 番号</string>
   <!-- I'm ready button text -->
   <string name="stripe_im_ready">準備完了</string>
+  <!-- State when a manual identity document image has been captured -->
+  <string name="stripe_image_taken">撮影された画像</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">入力した ID 番号に不備があります。</string>
   <!-- Instructional text when environment is too dark -->
@@ -160,8 +162,12 @@
   <string name="stripe_last_4_of_ssn">社会保障番号の末尾 4 桁</string>
   <!-- Label for last (family) name field -->
   <string name="stripe_last_name">姓</string>
+  <!-- Segmented control option for automatic identity document capture -->
+  <string name="stripe_live">自動</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">読み込み中</string>
+  <!-- Segmented control option for manual identity document capture -->
+  <string name="stripe_manual">手動</string>
   <!-- Instructional text when camera is too far from a document -->
   <string name="stripe_move_closer">身分証明書を少し近づけてください</string>
   <!-- Instructional text when camera is too close to a document -->

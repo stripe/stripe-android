@@ -66,6 +66,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_link_onramp_kyc_verification_screen_title">Confirmez vos informations</string>
   <!-- Title for the SSN field on the KYC verification screen -->
   <string name="stripe_link_onramp_kyc_verification_ssn_field_title">4 derniers chiffres du numéro de sécurité sociale</string>
+  <!-- Title for a button that indicates a user can sign in or sign up. -->
+  <string name="stripe_link_sign_in_or_sign_up">Se connecter ou s’inscrire</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_link_sign_up">Accepter et continuer</string>
   <!-- Title for the Link signup screen -->
@@ -98,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Se déconnecter de %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Une erreur s\'est produite. Vérifiez votre connexion et réessayez.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">Placez la carte bancaire derrière le téléphone</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">ou saisissez manuellement</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
@@ -175,6 +179,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_manage_cards">Gérer les cartes bancaires</string>
   <!-- Title shown above a view containing the customer's bank account that they can delete -->
   <string name="stripe_paymentsheet_manage_international_bank_account">Gérer le compte bancaire</string>
+  <!-- Title shown above a view containing a customer's unknown payment methods that they can delete or update -->
+  <string name="stripe_paymentsheet_manage_payment_method">Gérer le moyen de paiement</string>
   <!-- Title shown above a view containing the customer's card payment methods that they can delete or update -->
   <string name="stripe_paymentsheet_manage_payment_methods">Gérer vos moyens de paiement</string>
   <!-- Title shown above a view containing a customer's SEPA debit account that they can delete or update -->
@@ -247,6 +253,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_paymentsheet_set_default_payment_method_failed_error_message">Le moyen de paiement par défaut n\'a pas été modifié. Veuillez réessayer.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Total : %s</string>
+  <!-- Text displayed on manage card screen when card details are not editable. -->
+  <string name="stripe_paymentsheet_unknown_details_cannot_be_changed">Les informations du moyen de paiement ne peuvent pas être modifiées.</string>
   <!-- Error message displayed when updating card brand fails. -->
   <string name="stripe_paymentsheet_update_card_brand_failed_error_message">La marque de la carte n\'a pas été modifiée. Veuillez réessayer.</string>
   <!-- Text for alert message when user needs to confirm payment in their PayNow app -->
@@ -259,6 +267,9 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_shop_pay_button_description">Bouton Shop Pay</string>
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Afficher le menu</string>
+  <!-- Title of the sign-out action. -->
+  <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
+  <string name="stripe_sign_out_with_brand">Se déconnecter de %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
   <string name="stripe_sign_up">Rejoindre Link</string>
   <!-- Title for the Link signup screen -->

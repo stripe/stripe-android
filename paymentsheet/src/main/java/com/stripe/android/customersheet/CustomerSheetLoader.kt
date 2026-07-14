@@ -3,6 +3,7 @@ package com.stripe.android.customersheet
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -41,6 +42,7 @@ internal interface CustomerSheetLoader {
 internal class DefaultCustomerSheetLoader(
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
+    private val isNfcScanningAvailable: IsNfcScanningAvailable,
     private val lpmRepository: LpmRepository,
     private val initializationDataSourceProvider: Single<CustomerSheetInitializationDataSource>,
     private val intentDataSourceProvider: Single<CustomerSheetIntentDataSource>,
@@ -53,6 +55,7 @@ internal class DefaultCustomerSheetLoader(
     constructor(
         googlePayRepositoryFactory: GooglePayRepositoryFactory,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
+        isNfcScanningAvailable: IsNfcScanningAvailable,
         lpmRepository: LpmRepository,
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
@@ -60,6 +63,7 @@ internal class DefaultCustomerSheetLoader(
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+        isNfcScanningAvailable = isNfcScanningAvailable,
         lpmRepository = lpmRepository,
         initializationDataSourceProvider = CustomerSheetHacks.initializationDataSource,
         intentDataSourceProvider = CustomerSheetHacks.intentDataSource,
@@ -165,12 +169,18 @@ internal class DefaultCustomerSheetLoader(
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
 
+        val isNfcScanningAvailable = isNfcScanningAvailable.get(
+            elementsSession = elementsSession,
+            customerMetadata = customerMetadata,
+        )
+
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecs,
             isGooglePayReady = isGooglePayReadyAndEnabled,
             customerMetadata = customerMetadata,
+            isNfcScanningEnabled = isNfcScanningAvailable,
             integrationMetadata = IntegrationMetadata.CustomerSheet(
                 attachmentStyle = if (intentDataSourceProvider.await().canCreateSetupIntents) {
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.SetupIntent

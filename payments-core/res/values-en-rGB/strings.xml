@@ -156,6 +156,8 @@
   <string name="stripe_fpx_bank_offline">%s - Offline</string>
   <!-- Error message when a payment method gets declined. -->
   <string name="stripe_generic_decline">Your payment method was declined.</string>
+  <!-- Label for the total price in Google Pay -->
+  <string name="stripe_google_pay_total">Total</string>
   <!-- An error message displayed when the customer has not enough funds for payment. -->
   <string name="stripe_insufficient_funds">Your card has insufficient funds.</string>
   <!-- When an internal error is reported when a google pay payment is started. -->
@@ -171,6 +173,8 @@
   <string name="stripe_invalid_shipping_information">Invalid Shipping Address</string>
   <!-- Error message for when postal code in form is incomplete -->
   <string name="stripe_invalid_zip">Your postcode is incomplete.</string>
+  <!-- Label for Payment method text field -->
+  <string name="stripe_label_payment_method">Payment method details</string>
   <!-- Subtitle shown on a button allowing a user to select to pay with Link. -->
   <string name="stripe_link_simple_secure_payments">Simple, secure one-click payments</string>
   <string name="stripe_payment_method_add_new_card">Add new card…</string>

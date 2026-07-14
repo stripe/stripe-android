@@ -52,7 +52,6 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
@@ -110,8 +109,8 @@ internal class WalletViewModel(
             is LinkLaunchMode.Authorization -> null
         }
 
-    private val paymentMethodFilter
-        get() = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilter
+    private val paymentMethodFilters
+        get() = (linkLaunchMode as? LinkLaunchMode.PaymentMethodSelection)?.paymentMethodFilters
 
     private val paymentSelectionHint: ResolvableString?
         get() = R.string.stripe_wallet_prefer_debit_card_hint
@@ -156,7 +155,7 @@ internal class WalletViewModel(
         viewModelScope.launch {
             linkAccountManager.consumerState.filterNotNull().collectLatest { paymentDetailsState ->
                 val filteredPaymentDetails = paymentDetailsState.paymentDetails
-                    .filter { paymentMethodFilter?.invoke(it.details) != false }
+                    .filter { paymentMethodFilters?.any { filter -> filter(it.details) } != false }
                     .toList()
                 val currentState = _uiState.updateAndGet {
                     it.updateWithResponse(filteredPaymentDetails)
@@ -204,7 +203,7 @@ internal class WalletViewModel(
         isAfterAdding: Boolean = false
     ) {
         linkAccountManager.listPaymentDetails(
-            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes(linkAccount)
+            paymentMethodTypes = stripeIntent.supportedPaymentMethodTypes()
         ).fold(
             onSuccess = { response ->
                 _uiState.update {
@@ -435,6 +434,7 @@ internal class WalletViewModel(
                                             details.copy(isDefault = item.id == details.id)
                                         }
                                         is ConsumerPaymentDetails.Passthrough -> details
+                                        is ConsumerPaymentDetails.Generic -> details
                                     }
                                 },
                                 cardBeingUpdated = null

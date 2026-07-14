@@ -6,7 +6,6 @@ class InstrumentationTestReportSplitter {
 
     static void split(File moduleDir, File outDir) {
         def resultRoots = [
-            'build/browserstack-results',
             'build/outputs/androidTest-results/connected',
             'build/outputs/androidTest-results/managedDevice'
         ].collect {
@@ -71,12 +70,8 @@ class InstrumentationTestReportSplitter {
         map
     }
 
-    private static File findLogcatFile(Map<String, File> logcatByTest, String fqcn, String rawName, String strippedName) {
-        def fromStripped = logcatByTest["${fqcn}|${strippedName}"]
-        if (fromStripped) {
-            return fromStripped
-        }
-        return logcatByTest["${fqcn}|${rawName}"]
+    private static File findLogcatFile(Map<String, File> logcatByTest, String fqcn, String testName) {
+        return logcatByTest["${fqcn}|${testName}"]
     }
 
     private static List<File> xmlFilesUnder(List<File> roots) {
@@ -120,13 +115,6 @@ class InstrumentationTestReportSplitter {
         }
     }
 
-    private static String stripBrowserStackRetrySuffix(String testName) {
-        if (!testName) {
-            return testName
-        }
-        return testName.replaceFirst(/_bstackretry\d+$/, '')
-    }
-
     private static void writeReport(File outFile, String className, List rows, Map<String, File> logcatByTest) {
         outFile.parentFile.mkdirs()
         def writer = new StringWriter()
@@ -149,12 +137,11 @@ class InstrumentationTestReportSplitter {
     }
 
     private static void emitTestCase(MarkupBuilder mb, def tc, Map<String, File> logcatByTest, String bucketFqcn) {
-        def rawName = tc.@name?.toString() ?: ''
-        def strippedName = stripBrowserStackRetrySuffix(rawName)
+        def testName = tc.@name?.toString() ?: ''
         def fqcn = tc.@classname?.toString() ?: bucketFqcn
         mb.testcase(
                 classname: fqcn,
-                name: strippedName,
+                name: testName,
                 time: tc.@time.toString(),
         ) {
             tc.failure.each { f ->
@@ -180,7 +167,7 @@ class InstrumentationTestReportSplitter {
                     mkp.yield(se.text().toString())
                 }
             }
-            def logcatFile = findLogcatFile(logcatByTest, fqcn, rawName, strippedName)
+            def logcatFile = findLogcatFile(logcatByTest, fqcn, testName)
             if (logcatFile?.file) {
                 'system-out' {
                     mkp.yield(logcatFile.getText('UTF-8'))

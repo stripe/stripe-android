@@ -1,4 +1,5 @@
 @file:Suppress("LongMethod", "MagicNumber")
+@file:OptIn(LinkControllerPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground
 
@@ -14,7 +15,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -31,11 +31,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -59,6 +56,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 import com.stripe.android.ui.core.R
 
@@ -67,8 +65,9 @@ internal fun LinkControllerUi(
     modifier: Modifier,
     controllerState: LinkController.State,
     playgroundState: LinkControllerPlaygroundState,
-    onPaymentMethodButtonClick: (email: String, filter: LinkController.PaymentMethodType?) -> Unit,
+    onPaymentMethodButtonClick: (email: String, filter: List<LinkController.PaymentMethodType>?) -> Unit,
     onCreatePaymentMethodClick: () -> Unit,
+    onPresentClick: (email: String, phoneNumber: String?, filter: List<LinkController.PaymentMethodType>?) -> Unit,
     onLookupClick: (email: String) -> Unit,
     onAuthenticationClick: (email: String, existingOnly: Boolean) -> Unit,
     onAuthorizeClick: (linkAuthIntentId: String) -> Unit,
@@ -78,6 +77,7 @@ internal fun LinkControllerUi(
     onErrorMessage: (message: String) -> Unit,
 ) {
     var email by rememberSaveable { mutableStateOf("") }
+    var phoneNumber by rememberSaveable { mutableStateOf("") }
     var linkAuthIntentId by rememberSaveable { mutableStateOf("") }
     var existingOnly by rememberSaveable { mutableStateOf(false) }
     var showRegistrationForm by rememberSaveable { mutableStateOf(false) }
@@ -85,7 +85,7 @@ internal fun LinkControllerUi(
     var registrationCountry by rememberSaveable { mutableStateOf("US") }
     var registrationName by rememberSaveable { mutableStateOf("") }
     var updatePhoneNumber by rememberSaveable { mutableStateOf("") }
-    var paymentMethodFilter by remember { mutableStateOf<LinkController.PaymentMethodType?>(null) }
+    var selectedPaymentMethodTypes by remember { mutableStateOf(setOf<LinkController.PaymentMethodType>()) }
     val errorToPresent = playgroundState.linkControllerError()
 
     LaunchedEffect(errorToPresent) {
@@ -112,6 +112,13 @@ internal fun LinkControllerUi(
             value = email,
             label = { Text(text = "Consumer email") },
             onValueChange = { email = it }
+        )
+
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth(),
+            value = phoneNumber,
+            label = { Text(text = "Phone number (optional, E.164)") },
+            onValueChange = { phoneNumber = it }
         )
 
         // Registration Form Section
@@ -248,14 +255,32 @@ internal fun LinkControllerUi(
 
         PaymentMethodTypeSelector(
             modifier = Modifier.fillMaxWidth(),
-            selectedPaymentMethodType = paymentMethodFilter,
-            onSelectionChange = { paymentMethodFilter = it }
+            selectedTypes = selectedPaymentMethodTypes,
+            onSelectionChange = { selectedPaymentMethodTypes = it }
         )
         Divider(Modifier.padding(top = 10.dp, bottom = 20.dp))
 
+        PresentButton(
+            modifier = Modifier.fillMaxWidth(),
+            email = email,
+            onClick = {
+                onPresentClick(
+                    email.trim(),
+                    phoneNumber.trim().takeIf { it.isNotEmpty() },
+                    selectedPaymentMethodTypes.takeIf { it.isNotEmpty() }?.toList(),
+                )
+            },
+        )
+        Spacer(Modifier.height(8.dp))
+
         PaymentMethodButton(
-            preview = controllerState.selectedPaymentMethodPreview,
-            onClick = { onPaymentMethodButtonClick(email, paymentMethodFilter) },
+            preview = playgroundState.selectedPaymentMethodPreview,
+            onClick = {
+                onPaymentMethodButtonClick(
+                    email,
+                    selectedPaymentMethodTypes.takeIf { it.isNotEmpty() }?.toList()
+                )
+            },
         )
         Spacer(Modifier.height(16.dp))
 
@@ -297,6 +322,7 @@ private fun StatusBox(
         add("Consumer lookup" to lookupText)
         add("Consumer verified" to (controllerState.isConsumerVerified?.toString() ?: ""))
         add("Payment Method created" to (controllerState.createdPaymentMethod?.id ?: ""))
+        add("Present result" to (playgroundState.presentResult?.toStatusString() ?: ""))
         add("Authentication result" to (playgroundState.authenticationResult?.toString() ?: ""))
         add("Authorize result" to (playgroundState.authorizeResult?.toString() ?: ""))
         add("Register result" to (playgroundState.registerConsumerResult?.toString() ?: ""))
@@ -341,14 +367,21 @@ private fun StatusBox(
 
 @Composable
 private fun LinkControllerPlaygroundState.linkControllerError(): Throwable? = listOf(
-    (configureResult as? LinkController.ConfigureResult.Failed)?.error,
+    configureResult?.exceptionOrNull(),
     (presentPaymentMethodsResult as? LinkController.PresentPaymentMethodsResult.Failed)?.error,
+    (presentResult as? LinkController.PresentResult.Failed)?.error,
     (lookupConsumerResult as? LinkController.LookupConsumerResult.Failed)?.error,
     (createPaymentMethodResult as? LinkController.CreatePaymentMethodResult.Failed)?.error,
     (authenticationResult as? LinkController.AuthenticationResult.Failed)?.error,
     (authorizeResult as? LinkController.AuthorizeResult.Failed)?.error,
     (logOutResult as? LinkController.LogOutResult.Failed)?.error,
 ).firstOrNull { it != null }
+
+private fun LinkController.PresentResult.toStatusString(): String = when (this) {
+    is LinkController.PresentResult.Completed -> "Completed: ${paymentMethod.id}"
+    is LinkController.PresentResult.Canceled -> "Canceled"
+    is LinkController.PresentResult.Failed -> "Failed: ${error.message}"
+}
 
 @Composable
 @Preview(showBackground = true, heightDp = 1_200)
@@ -360,6 +393,7 @@ private fun LinkControllerUiPreview() {
             playgroundState = LinkControllerPlaygroundState(),
             onPaymentMethodButtonClick = { _, _ -> },
             onCreatePaymentMethodClick = {},
+            onPresentClick = { _, _, _ -> },
             onLookupClick = {},
             onAuthenticationClick = { _, _ -> },
             onAuthorizeClick = {},
@@ -623,62 +657,49 @@ private fun AuthorizeButton(
 
 @Composable
 private fun PaymentMethodTypeSelector(
-    selectedPaymentMethodType: LinkController.PaymentMethodType?,
-    onSelectionChange: (LinkController.PaymentMethodType?) -> Unit,
+    selectedTypes: Set<LinkController.PaymentMethodType>,
+    onSelectionChange: (Set<LinkController.PaymentMethodType>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
-
-    Box(modifier = modifier) {
-        Column {
-            Text(
-                text = "Payment Method Type",
-                style = MaterialTheme.typography.caption,
-                color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.padding(bottom = 4.dp)
-            )
-            OutlinedButton(
-                onClick = { isExpanded = !isExpanded },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(selectedPaymentMethodType?.name ?: "Any")
-                    Icon(
-                        painter = painterResource(com.stripe.android.uicore.R.drawable.stripe_ic_chevron_down),
-                        contentDescription = null
-                    )
-                }
-            }
-        }
-
-        DropdownMenu(
-            expanded = isExpanded,
-            onDismissRequest = { isExpanded = false }
-        ) {
-            DropdownMenuItem(
-                onClick = {
-                    onSelectionChange(null)
-                    isExpanded = false
-                }
-            ) {
-                Text("Any")
-            }
-            LinkController.PaymentMethodType.entries.forEach { type ->
-                DropdownMenuItem(
-                    onClick = {
-                        onSelectionChange(type)
-                        isExpanded = false
+    Column(modifier = modifier) {
+        Text(
+            text = "Payment Method Types",
+            style = MaterialTheme.typography.caption,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f),
+            modifier = Modifier.padding(bottom = 4.dp)
+        )
+        LinkController.PaymentMethodType.entries.forEach { type ->
+            LabeledCheckbox(
+                modifier = Modifier
+                    .clickable {
+                        onSelectionChange(
+                            if (selectedTypes.contains(type)) selectedTypes - type else selectedTypes + type
+                        )
                     }
-                ) {
-                    Text(type.name)
-                }
-            }
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                label = type.name,
+                checked = selectedTypes.contains(type),
+            )
         }
+    }
+}
+
+@Composable
+private fun PresentButton(
+    email: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = onClick,
+        enabled = email.isNotBlank(),
+        modifier = modifier,
+    ) {
+        Text(
+            text = "Present",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }

@@ -33,7 +33,8 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
         return DefaultUpdatePaymentMethodInteractor(
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             canRemove = customerStateHolder.canRemove.value,
-            canUpdateFullPaymentMethodDetails = customerStateHolder.canUpdateFullPaymentMethodDetails.value,
+            canUpdateCardExpiryAndBillingDetails = customerStateHolder.canUpdateCardExpiryAndBillingDetails.value,
+            canChangeCbc = customerStateHolder.canChangeCbc.value,
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
             addressCollectionMode = paymentMethodMetadata.billingDetailsCollectionConfiguration.address,
@@ -83,6 +84,7 @@ internal class DefaultEmbeddedUpdateScreenInteractorFactory @Inject constructor(
             onUpdateSuccess = {
                 embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
+            autocompleteAddressInteractorFactory = null,
         )
     }
 }

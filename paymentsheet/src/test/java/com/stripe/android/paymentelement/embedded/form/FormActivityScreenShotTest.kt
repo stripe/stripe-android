@@ -16,6 +16,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
@@ -131,19 +132,17 @@ internal class FormActivityScreenShotTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             customerStateHolder = FakeCustomerStateHolder(),
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val formHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
-            selectedPaymentMethodCode = "",
         )
         val eventReporter = FakeEventReporter()
         val interactor = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
-            paymentMethodCode = "card",
-            hasSavedPaymentMethods = false,
             embeddedSelectionHolder = selectionHolder,
             embeddedFormHelperFactory = formHelperFactory,
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
@@ -151,7 +150,10 @@ internal class FormActivityScreenShotTest {
             tapToAddHelper = FakeTapToAddHelper.noOp(),
             eventReporter = eventReporter,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
-        ).create()
+        ).create(
+            paymentMethodCode = "card",
+            hasSavedPaymentMethods = false,
+        )
 
         stateHolder.updateMandate(usBankMandate)
         stateHolder.updateSavedPaymentSelectionToConfirm(savedPaymentMethodSelectionToConfirm)

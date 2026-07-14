@@ -18,6 +18,7 @@
     <ID>FunctionOnlyReturningConstant:PaymentSheetLauncherModule.kt:PaymentSheetLauncherModule.Companion$@Provides @Singleton @Named(ALLOWS_MANUAL_CONFIRMATION) fun provideAllowsManualConfirmation</ID>
     <ID>LargeClass:CardDefinitionTest.kt:CardDefinitionTest</ID>
     <ID>LargeClass:CheckoutTest.kt:CheckoutTest</ID>
+    <ID>LargeClass:ConfirmationHandlerOptionKtxTest.kt:ConfirmationHandlerOptionKtxTest</ID>
     <ID>LargeClass:CustomerAdapterTest.kt:CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt:CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt:CustomerSheetViewModelTest</ID>
@@ -33,7 +34,6 @@
     <ID>LargeClass:PaymentMethodMetadataTest.kt:PaymentMethodMetadataTest</ID>
     <ID>LargeClass:PaymentOptionsViewModelTest.kt:PaymentOptionsViewModelTest</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt:PaymentSheetActivityTest</ID>
-    <ID>LargeClass:PaymentSheetViewModel.kt:PaymentSheetViewModel : BaseSheetViewModel</ID>
     <ID>LargeClass:PaymentSheetViewModelTest.kt:PaymentSheetViewModelTest</ID>
     <ID>LargeClass:PlaceholderHelperTest.kt:PlaceholderHelperTest</ID>
     <ID>LargeClass:PrimaryButtonUiStateMapperTest.kt:PrimaryButtonUiStateMapperTest</ID>
@@ -78,6 +78,7 @@
     <ID>LongMethod:UpdatePaymentMethodUI.kt:@Composable internal fun UpdatePaymentMethodUI</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable internal fun WalletBody</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable private fun PaymentMethodSection</ID>
+    <ID>MagicNumber:FlagImageRepository.kt:FlagImageRepository$4</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.4f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.5f</ID>
@@ -117,7 +118,6 @@
     <ID>TooManyFunctions:PaymentMethodMetadata.kt:PaymentMethodMetadata : Parcelable</ID>
     <ID>TooManyFunctions:PaymentMethodsUiExtension.kt:com.stripe.android.paymentsheet.ui.PaymentMethodsUiExtension.kt</ID>
     <ID>TooManyFunctions:PaymentSheet.kt:PaymentSheet.Appearance$Builder</ID>
-    <ID>TooManyFunctions:ShopPayModule.kt:ShopPayModule$Companion</ID>
     <ID>TooManyFunctions:WalletViewModel.kt:WalletViewModel : ViewModel</ID>
     <ID>UnusedPrivateClass:PaymentOptionsViewModelTest.kt:PaymentOptionsViewModelTest$MyHostActivity : AppCompatActivity</ID>
   </CurrentIssues>

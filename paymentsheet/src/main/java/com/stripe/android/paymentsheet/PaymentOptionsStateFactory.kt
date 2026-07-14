@@ -19,7 +19,6 @@ internal object PaymentOptionsStateFactory {
         showLink: Boolean,
         linkBrand: LinkBrand,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
-        isCbcEligible: Boolean,
         defaultPaymentMethodId: String?,
     ): List<PaymentOptionsItem> {
         return listOfNotNull(
@@ -31,7 +30,6 @@ internal object PaymentOptionsStateFactory {
                 DisplayableSavedPaymentMethod.create(
                     displayName = nameProvider(it.type?.code),
                     paymentMethod = it,
-                    isCbcEligible = isCbcEligible,
                     shouldShowDefaultBadge = it.id == defaultPaymentMethodId,
                 ),
             )
@@ -54,7 +52,6 @@ internal object PaymentOptionsStateFactory {
         linkBrand: LinkBrand,
         currentSelection: PaymentSelection?,
         nameProvider: (PaymentMethodCode?) -> ResolvableString,
-        isCbcEligible: Boolean,
         defaultPaymentMethodId: String?
     ): PaymentOptionsState {
         val items = createPaymentOptionsList(
@@ -63,7 +60,6 @@ internal object PaymentOptionsStateFactory {
             showLink = showLink,
             linkBrand = linkBrand,
             nameProvider = nameProvider,
-            isCbcEligible = isCbcEligible,
             defaultPaymentMethodId = defaultPaymentMethodId
         )
 
@@ -94,8 +90,7 @@ private fun List<PaymentOptionsItem>.findSelectedItem(paymentSelection: PaymentS
             }
             is PaymentSelection.New,
             is PaymentSelection.CustomPaymentMethod,
-            is PaymentSelection.ExternalPaymentMethod,
-            is PaymentSelection.ShopPay -> false
+            is PaymentSelection.ExternalPaymentMethod -> false
         }
     }
 }

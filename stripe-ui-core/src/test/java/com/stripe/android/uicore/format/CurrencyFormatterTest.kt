@@ -102,6 +102,7 @@ class CurrencyFormatterTest {
     @Test
     fun `HUF is effectively 0 decimal places, but Stripe treats it as 2`() {
         val amountCurrency = Currency.getInstance("HUF")
+        assertThat(CurrencyFormatter.getDefaultDecimalDigits(amountCurrency)).isEqualTo(2)
         assertThat(
             CurrencyFormatter.format(
                 123412L,

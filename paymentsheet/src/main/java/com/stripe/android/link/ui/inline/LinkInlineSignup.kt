@@ -416,11 +416,7 @@ private fun TextWithLinkLogo(
     linkBrand: LinkBrand,
 ) {
     val brandName = linkBrand.brandName()
-    val label = if (linkBrand == LinkBrand.Link) {
-        stringResource(R.string.stripe_inline_sign_up_toggle)
-    } else {
-        stringResource(R.string.stripe_inline_sign_up_toggle_with_brand, brandName)
-    }
+    val label = stringResource(R.string.stripe_inline_sign_up_toggle_with_brand, brandName)
     val painter = painterResource(linkBrand.logoRes(LinkLogoStyle.InlineKnockout))
     // Slightly smaller Link logo for better visual balance
     val logoHeight = style.fontSize * LINK_LOGO_SCALE

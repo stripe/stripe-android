@@ -18,7 +18,7 @@ internal fun WalletPaymentMethodMenu(
 ) {
     val items = remember(paymentDetails) {
         buildList {
-            if (!paymentDetails.isDefault) {
+            if (paymentDetails.canBeSetAsDefault) {
                 add(WalletPaymentMethodMenuItem.SetAsDefault)
             }
 
@@ -52,4 +52,13 @@ private val ConsumerPaymentDetails.PaymentDetails.removeLabel
         is ConsumerPaymentDetails.Card,
         is ConsumerPaymentDetails.Passthrough -> R.string.stripe_paymentsheet_remove_card
         is ConsumerPaymentDetails.BankAccount -> R.string.stripe_wallet_remove_linked_account
+        is ConsumerPaymentDetails.Generic -> R.string.stripe_paymentsheet_remove_pm_title
+    }
+
+private val ConsumerPaymentDetails.PaymentDetails.canBeSetAsDefault
+    get() = when (this) {
+        is ConsumerPaymentDetails.BankAccount,
+        is ConsumerPaymentDetails.Card,
+        is ConsumerPaymentDetails.Passthrough -> !isDefault
+        is ConsumerPaymentDetails.Generic -> false
     }

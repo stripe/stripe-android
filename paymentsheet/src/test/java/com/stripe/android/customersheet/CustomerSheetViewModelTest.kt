@@ -25,6 +25,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
+import com.stripe.android.model.PaymentMethodFixtures.EXPIRED_CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT_VERIFIED
 import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
@@ -57,6 +58,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
+import com.stripe.android.utils.setHasAutomaticallyLaunchedCardScan
+import com.stripe.android.utils.shouldAutomaticallyLaunchCardScan
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -517,7 +520,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
             )
         )
         viewModel.viewState.test {
@@ -550,14 +553,14 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When canUpdateFullPaymentMethodDetails=true, showEditMenu should be true`() = runTest(testDispatcher) {
+    fun `When canUpdateCardExpiryAndBillingDetails=true, showEditMenu should be true`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
             )
         )
         viewModel.viewState.test {
@@ -573,14 +576,14 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When canUpdateFullPaymentMethodDetails=false, showEditMenu should be false`() = runTest(testDispatcher) {
+    fun `When canUpdateCardExpiryAndBillingDetails=false, showEditMenu should be false`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false,
+                canUpdateCardExpiryAndBillingDetails = false,
             )
         )
         viewModel.viewState.test {
@@ -595,7 +598,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When canUpdateFullPaymentMethodDetails=false, card is cbc eligible, showEditMenu should be true`() =
+    fun `When canUpdateCardExpiryAndBillingDetails=false, card is cbc eligible, showEditMenu should be true`() =
         runTest(testDispatcher) {
             val viewModel = createViewModel(
                 workContext = testDispatcher,
@@ -603,7 +606,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardExpiryAndBillingDetails = false,
                 ),
                 cbcEligibility = CardBrandChoiceEligibility.Eligible(
                     preferredNetworks = listOf(CardBrand.CartesBancaires)
@@ -619,6 +622,32 @@ class CustomerSheetViewModelTest {
                 viewState = awaitViewState()
                 assertThat(viewState.isEditing).isTrue()
                 assertThat(viewState.topBarState {}.showEditMenu).isTrue()
+            }
+        }
+
+    @Test
+    fun `When canUpdateCardExpiryAndBillingDetails=false, expired card is cbc eligible, showEditMenu should be false`() =
+        runTest(testDispatcher) {
+            val viewModel = createViewModel(
+                workContext = testDispatcher,
+                customerPaymentMethods = listOf(EXPIRED_CARD_PAYMENT_METHOD),
+                customerPermissions = CustomerPermissions(
+                    removePaymentMethod = PaymentMethodRemovePermission.None,
+                    canRemoveLastPaymentMethod = false,
+                    canUpdateCardExpiryAndBillingDetails = false,
+                ),
+                cbcEligibility = CardBrandChoiceEligibility.Eligible(
+                    preferredNetworks = listOf(CardBrand.CartesBancaires)
+                ),
+            )
+            viewModel.viewState.test {
+                val viewState = awaitViewState<SelectPaymentMethod>()
+                assertThat(viewState.isEditing).isFalse()
+                assertThat(viewState.topBarState {}.showEditMenu).isFalse()
+
+                viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+                ensureAllEventsConsumed()
             }
         }
 
@@ -2652,9 +2681,7 @@ class CustomerSheetViewModelTest {
                     )
                 )
 
-                val selectPaymentMethodState = awaitViewState<SelectPaymentMethod>()
-
-                assertThat(selectPaymentMethodState.isCbcEligible).isTrue()
+                awaitViewState<SelectPaymentMethod>()
             }
         }
 
@@ -2882,7 +2909,7 @@ class CustomerSheetViewModelTest {
                 permissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardExpiryAndBillingDetails = false,
                 )
             )
 
@@ -3022,7 +3049,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Full,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
             ),
         )
 
@@ -3041,7 +3068,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.None,
                 canRemoveLastPaymentMethod = false,
-                canUpdateFullPaymentMethodDetails = false
+                canUpdateCardExpiryAndBillingDetails = false
             ),
         )
 
@@ -3060,7 +3087,7 @@ class CustomerSheetViewModelTest {
             customerPermissions = CustomerPermissions(
                 removePaymentMethod = PaymentMethodRemovePermission.Partial,
                 canRemoveLastPaymentMethod = true,
-                canUpdateFullPaymentMethodDetails = true,
+                canUpdateCardExpiryAndBillingDetails = true,
             ),
         )
 
@@ -3083,7 +3110,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.None,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = true,
+                    canUpdateCardExpiryAndBillingDetails = true,
                 ),
             )
 
@@ -3103,7 +3130,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = false,
+                    canUpdateCardExpiryAndBillingDetails = false,
                 ),
             )
 
@@ -3126,7 +3153,7 @@ class CustomerSheetViewModelTest {
                 customerPermissions = CustomerPermissions(
                     removePaymentMethod = PaymentMethodRemovePermission.Full,
                     canRemoveLastPaymentMethod = false,
-                    canUpdateFullPaymentMethodDetails = true,
+                    canUpdateCardExpiryAndBillingDetails = true,
                 ),
             )
 
@@ -3317,7 +3344,7 @@ class CustomerSheetViewModelTest {
             assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
 
             val controller = (formElements[0] as CardDetailsSectionElement).controller
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(controller.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 
@@ -3342,7 +3369,7 @@ class CustomerSheetViewModelTest {
             val formElements = item.asAddState().formElements
             assertThat(formElements[0]).isInstanceOf<CardDetailsSectionElement>()
             val controller = (formElements[0] as CardDetailsSectionElement).controller
-            assertThat(controller.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(controller.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 
@@ -3365,9 +3392,9 @@ class CustomerSheetViewModelTest {
 
             val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(firstCardFormController).isNotNull()
-            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
-            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
-            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(firstCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
+            firstCardFormController.cardDetailsAction?.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -3389,7 +3416,7 @@ class CustomerSheetViewModelTest {
                 .isEqualTo("card")
             val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(secondCardFormController).isNotNull()
-            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(secondCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
         }
     }
 
@@ -3411,9 +3438,9 @@ class CustomerSheetViewModelTest {
 
             val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(firstCardFormController).isNotNull()
-            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
-            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
-            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(firstCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
+            firstCardFormController.cardDetailsAction?.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnFormFieldValuesCompleted(
@@ -3450,7 +3477,7 @@ class CustomerSheetViewModelTest {
 
             val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(secondCardFormController).isNotNull()
-            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(secondCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 
@@ -3471,9 +3498,9 @@ class CustomerSheetViewModelTest {
 
             val firstCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(firstCardFormController).isNotNull()
-            assertThat(firstCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
-            firstCardFormController.setHasAutomaticallyLaunchedCardScan()
-            assertThat(firstCardFormController.shouldAutomaticallyLaunchCardScan()).isFalse()
+            assertThat(firstCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
+            firstCardFormController.cardDetailsAction?.setHasAutomaticallyLaunchedCardScan()
+            assertThat(firstCardFormController.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isFalse()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
 
@@ -3486,7 +3513,7 @@ class CustomerSheetViewModelTest {
 
             val secondCardFormController = getAddPaymentMethodCardDetailsSectionController(viewState)
             assertThat(secondCardFormController).isNotNull()
-            assertThat(secondCardFormController!!.shouldAutomaticallyLaunchCardScan()).isTrue()
+            assertThat(secondCardFormController!!.cardDetailsAction?.shouldAutomaticallyLaunchCardScan).isTrue()
         }
     }
 
@@ -3613,7 +3640,7 @@ class CustomerSheetViewModelTest {
         permissions: CustomerPermissions = CustomerPermissions(
             removePaymentMethod = PaymentMethodRemovePermission.Full,
             canRemoveLastPaymentMethod = true,
-            canUpdateFullPaymentMethodDetails = true,
+            canUpdateCardExpiryAndBillingDetails = true,
         )
     ): CustomerSheetViewModel {
         return createViewModel(

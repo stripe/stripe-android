@@ -1,0 +1,114 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
+package com.stripe.android.paymentsheet.example.playground.checkout
+
+import android.app.Application
+import android.util.Log
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.paymentelement.CheckoutSessionPreview
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+
+internal class CheckoutControllerExampleViewModel(
+    private val repository: CheckoutControllerExampleBackendRepository,
+    savedStateHandle: SavedStateHandle,
+    application: Application,
+) : ViewModel() {
+
+    private val _status = MutableStateFlow<Status>(Status.Loading)
+    val status: StateFlow<Status> = _status.asStateFlow()
+
+    private val _sessionComplete = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
+    val sessionComplete: SharedFlow<Unit> = _sessionComplete.asSharedFlow()
+
+    val controller = CheckoutController.Builder(
+        application = application,
+        savedStateHandle = savedStateHandle,
+    ).resultCallback { result ->
+        Log.d(TAG, "Result: $result")
+    }.build()
+
+    init {
+        viewModelScope.launch {
+            fetchAndConfigure()
+        }
+        viewModelScope.launch {
+            controller.checkoutSession.collect { session ->
+                updateConfiguredState { it.copy(checkoutSession = session) }
+                if (session?.status == CheckoutSession.Status.Complete) {
+                    _sessionComplete.tryEmit(Unit)
+                }
+            }
+        }
+    }
+
+    private fun updateConfiguredState(update: (Status.Configured) -> Status.Configured) {
+        val current = _status.value
+        if (current is Status.Configured) {
+            _status.value = update(current)
+        }
+    }
+
+    private suspend fun fetchAndConfigure() {
+        repository.fetchCheckoutSessionClientSecret().fold(
+            onSuccess = { clientSecret ->
+                controller.configure(clientSecret).fold(
+                    onSuccess = {
+                        _status.value = Status.Configured(
+                            checkoutSession = controller.checkoutSession.value,
+                        )
+                    },
+                    onFailure = { error ->
+                        Log.e(TAG, "Failed to configure", error)
+                        _status.value = Status.Error(error.message ?: "Configure failed")
+                    },
+                )
+            },
+            onFailure = { error ->
+                Log.e(TAG, "Failed to fetch checkout session", error)
+                _status.value = Status.Error(error.message ?: "Unknown error")
+            },
+        )
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        controller.destroy()
+    }
+
+    sealed interface Status {
+        data object Loading : Status
+        data class Configured(
+            val checkoutSession: CheckoutSession?,
+        ) : Status
+        data class Error(val message: String) : Status
+    }
+
+    companion object {
+        private const val TAG = "CheckoutControllerExample"
+
+        val factory = viewModelFactory {
+            initializer {
+                val application = this[APPLICATION_KEY] as Application
+                CheckoutControllerExampleViewModel(
+                    repository = CheckoutControllerExampleBackendRepository(application),
+                    savedStateHandle = createSavedStateHandle(),
+                    application = application,
+                )
+            }
+        }
+    }
+}

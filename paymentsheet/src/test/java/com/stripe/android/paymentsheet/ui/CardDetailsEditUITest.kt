@@ -408,7 +408,8 @@ internal class CardDetailsEditUITest {
                 ),
                 onBrandChoiceChanged = {},
                 onCardUpdateParamsChanged = {},
-                requiresModification = true
+                requiresModification = true,
+                autocompleteAddressInteractorFactory = null,
             )
         composeRule.setContent {
             CardDetailsEditUI(

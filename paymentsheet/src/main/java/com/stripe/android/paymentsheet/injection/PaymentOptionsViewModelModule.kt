@@ -2,15 +2,17 @@ package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
 import android.content.Context
-import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromotionsExperimentHandler
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -50,8 +52,20 @@ internal class PaymentOptionsViewModelModule {
     @Provides
     fun providesPaymentMethodMessageHelper(
         args: PaymentOptionContract.Args,
-        experimentHandler: PaymentMethodMessagePromotionsExperimentHandler
+        eventReporter: EventReporter
     ): PaymentMethodMessagePromotionsHelper {
-        return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, experimentHandler)
+        return PrefetchedPaymentMethodMessagePromotionsHelper(args.promotions, eventReporter)
     }
+
+    @Provides
+    fun providePlacesClient(
+        appContext: Context,
+        args: PaymentOptionContract.Args,
+        errorReporter: ErrorReporter,
+    ): PlacesClientProxy? = createInlineAutocompletePlacesClient(
+        context = appContext,
+        googlePlacesApiKey = args.configuration.googlePlacesApiKey,
+        errorReporter = errorReporter,
+        isPlacesAvailable = DefaultIsPlacesAvailable()(),
+    )
 }

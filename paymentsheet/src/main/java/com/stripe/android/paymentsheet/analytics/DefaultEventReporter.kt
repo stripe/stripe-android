@@ -84,7 +84,8 @@ internal class DefaultEventReporter @Inject internal constructor(
                 paymentSelection = paymentSelection,
                 duration = duration,
                 orderedLpms = paymentMethodMetadata.sortedSupportedPaymentMethods().map { it.code },
-                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty()
+                hasCardArt = paymentMethodMetadata.cardArts.isNotEmpty(),
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = paymentMethodMetadata,
         )
@@ -98,9 +99,56 @@ internal class DefaultEventReporter @Inject internal constructor(
             event = PaymentSheetEvent.LoadFailed(
                 duration = duration,
                 error = error,
+                loadTimings = buildLoadTimings(),
             ),
             paymentMethodMetadata = null, // We don't have these details until load is completed successfully.
         )
+    }
+
+    private fun buildLoadTimings(): Map<String, Int> {
+        return DurationProvider.Key.entries.map { entry ->
+            entry to (
+                when (entry) {
+                    // These are all shared with iOS
+                    DurationProvider.Key.PaymentSheetLoadSessionLoad -> "fetchElementsSession"
+                    DurationProvider.Key.PaymentSheetLoadPrefetchPMs -> "fetchSavedPaymentMethods"
+                    DurationProvider.Key.PaymentSheetLoadCreateLinkState -> "lookUpLinkAccount"
+                    DurationProvider.Key.PaymentSheetLoadCreateCustomerState -> "filterPaymentMethods"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveCustomer -> "retrieveCustomer"
+                    DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes -> "computePaymentMethodTypes"
+                    // These are specific to Android
+                    DurationProvider.Key.PaymentSheetLoadIsGooglePaySupported -> "isGooglePaySupported"
+                    DurationProvider.Key.PaymentSheetLoadIsGooglePayReady -> "isGooglePayReady"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveSavedPaymentMethodSelection ->
+                        "retrieveSavedPaymentMethodSelection"
+                    DurationProvider.Key.PaymentSheetLoadRetrieveInitialPaymentSelection ->
+                        "retrieveInitialPaymentSelection"
+                    // We don't send load timings for these.
+                    DurationProvider.Key.Loading,
+                    DurationProvider.Key.Checkout,
+                    DurationProvider.Key.NfcScan,
+                    DurationProvider.Key.NfcScanAttempt,
+                    DurationProvider.Key.LinkSignup,
+                    DurationProvider.Key.ConfirmButtonClicked,
+                    DurationProvider.Key.TapToAdd,
+                    DurationProvider.Key.CardScan,
+                    DurationProvider.Key.Captcha,
+                    DurationProvider.Key.CaptchaAttach,
+                    DurationProvider.Key.PaymentLauncher,
+                    DurationProvider.Key.PrepareAttestation,
+                    DurationProvider.Key.Attest,
+                    DurationProvider.Key.IntentConfirmationChallenge,
+                    DurationProvider.Key.IntentConfirmationChallengeWebViewLoaded,
+                    DurationProvider.Key.PaymentMethodMessaging -> null
+                }
+                )
+        }.mapNotNull { (key, name) ->
+            name?.let {
+                durationProvider.completedDuration(key)?.let { duration ->
+                    name to duration.inWholeMilliseconds.toInt()
+                }
+            }
+        }.toMap()
     }
 
     override fun onElementsSessionLoadFailed(error: Throwable) {
@@ -219,6 +267,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.CardBrandDisallowed(
                 cardBrand = brand,
+            )
+        )
+    }
+
+    override fun onWalletButtonTapped(walletType: String) {
+        fireEvent(
+            PaymentSheetEvent.WalletButtonTapped(
+                walletType = walletType,
             )
         )
     }
@@ -460,22 +516,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    override fun onShopPayWebViewLoadAttempt() {
-        fireEvent(PaymentSheetEvent.ShopPayWebviewLoadAttempt())
-    }
-
-    override fun onShopPayWebViewConfirmSuccess() {
-        fireEvent(PaymentSheetEvent.ShopPayWebviewConfirmSuccess())
-    }
-
-    override fun onShopPayWebViewCancelled(didReceiveECEClick: Boolean) {
-        fireEvent(
-            PaymentSheetEvent.ShopPayWebviewCancelled(
-                didReceiveECEClick = didReceiveECEClick,
-            )
-        )
-    }
-
     override fun onCardScanStarted(implementation: String) {
         durationProvider.start(DurationProvider.Key.CardScan)
         fireEvent(
@@ -542,17 +582,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         }
     }
 
-    override fun onPaymentMethodMessagePromotionsFetched() {
+    override fun onPaymentMethodMessagePromotionsFetchBegin() {
         durationProvider.start(DurationProvider.Key.PaymentMethodMessaging)
         fireEvent(
             PaymentSheetEvent.PaymentMethodMessaging.Fetched()
         )
     }
 
-    override fun onPaymentMethodMessagePromotionsIncomplete() {
-        val duration = durationProvider.end(DurationProvider.Key.PaymentMethodMessaging)
+    override fun onPaymentMethodMessagePromotionDisplayed(displayedSuccessfully: Boolean) {
+        val duration = durationProvider.elapsed(DurationProvider.Key.PaymentMethodMessaging)
         fireEvent(
-            PaymentSheetEvent.PaymentMethodMessaging.Incomplete(duration)
+            PaymentSheetEvent.PaymentMethodMessaging.Displayed(duration, displayedSuccessfully)
         )
     }
 

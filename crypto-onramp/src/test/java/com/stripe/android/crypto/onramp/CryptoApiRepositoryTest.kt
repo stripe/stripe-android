@@ -2,6 +2,7 @@ package com.stripe.android.crypto.onramp
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -237,12 +238,9 @@ class CryptoApiRepositoryTest {
                             {
                                 "regulation": "eu_mica",
                                 "type": "mt_nic"
-                            },
-                            {
-                                "regulation": "eu_carf",
-                                "type": "fr_spi"
                             }
-                        ]
+                        ],
+                        "carf_tin_required": true
                     }
                     """,
                 emptyMap()
@@ -269,10 +267,6 @@ class CryptoApiRepositoryTest {
                     ComplianceIdentifierRequirement(
                         type = ComplianceIdentifierType.MT_NIC,
                         regulation = ComplianceRegulation.EuMica
-                    ),
-                    ComplianceIdentifierRequirement(
-                        type = ComplianceIdentifierType.FR_SPI,
-                        regulation = ComplianceRegulation.EuCarf
                     )
                 )
             assertThat(result.getOrThrow().alternatives)
@@ -282,6 +276,7 @@ class CryptoApiRepositoryTest {
                         alternativeMissingIdentifiers = listOf(ComplianceIdentifierType.MT_PP)
                     )
                 )
+            assertThat(result.getOrThrow().carfTinRequired).isTrue()
         }
     }
 
@@ -304,14 +299,6 @@ class CryptoApiRepositoryTest {
                         ],
                         "identifiers": [
                             {
-                                "regulation": "eu_carf",
-                                "type": "de_stn"
-                            },
-                            {
-                                "regulation": "eu_carf",
-                                "type": "mt_nic"
-                            },
-                            {
                                 "regulation": "eu_mica",
                                 "type": "mt_nic"
                             }
@@ -320,7 +307,8 @@ class CryptoApiRepositoryTest {
                             "de_stn",
                             "mt_nic"
                         ],
-                        "valid": false,
+                        "completed": false,
+                        "carf_tin_required": false,
                         "ignored_field": "ignored"
                     }
                     """,
@@ -350,7 +338,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testSubmitIdentifiersSucceedsWhenValid() {
+    fun testSubmitIdentifiersSucceedsWhenCompleted() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -359,7 +347,8 @@ class CryptoApiRepositoryTest {
                         "alternatives": [],
                         "identifiers": [],
                         "invalid_identifiers": [],
-                        "valid": true
+                        "completed": true,
+                        "carf_tin_required": false
                     }
                     """,
                 emptyMap()
@@ -381,17 +370,18 @@ class CryptoApiRepositoryTest {
             assertThat(result.getOrThrow())
                 .isEqualTo(
                     SubmitIdentifiersResult(
-                        valid = true,
+                        completed = true,
                         identifiers = emptyList(),
                         alternatives = emptyList(),
-                        invalidIdentifiers = emptyList()
+                        invalidIdentifiers = emptyList(),
+                        carfTinRequired = false
                     )
                 )
         }
     }
 
     @Test
-    fun testRetrieveCrsCarfDeclarationSucceeds() {
+    fun testRetrieveUserAttestationSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -407,7 +397,7 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.retrieveCrsCarfDeclaration(
+            val result = cryptoApiRepository.retrieveUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -426,7 +416,7 @@ class CryptoApiRepositoryTest {
     }
 
     @Test
-    fun testConfirmCrsCarfDeclarationSucceeds() {
+    fun testConfirmUserAttestationSucceeds() {
         runTest {
             val stripeResponse = StripeResponse(
                 200,
@@ -437,7 +427,7 @@ class CryptoApiRepositoryTest {
             whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
                 .thenReturn(stripeResponse)
 
-            val result = cryptoApiRepository.confirmCrsCarfDeclaration(
+            val result = cryptoApiRepository.confirmUserAttestation(
                 consumerSessionClientSecret = "test-secret"
             )
 
@@ -780,6 +770,147 @@ class CryptoApiRepositoryTest {
         }
     }
 
+    @Test
+    fun testCollectWalletAddressPreservesTopLevelOnrampErrorFields() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                400,
+                """
+                    {
+                        "error": {
+                            "code": "link_failed_to_attest_request",
+                            "message": "App attestation failed",
+                            "reason": "app_not_play_recognized",
+                            "user_message": "This app couldn't be verified. Install it from Google Play and try again.",
+                            "ignored_top_level_field": "ignored_value",
+                            "extra_fields": {
+                                "legacy_reason": "legacy_value"
+                            }
+                        }
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.setWalletAddress(
+                walletAddress = "0x1234567890abcdef",
+                network = CryptoNetwork.Ethereum,
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            val error = result.exceptionOrNull()
+
+            assertThat(error).isInstanceOf(APIException::class.java)
+
+            val stripeError = (error as APIException).stripeError
+            assertThat(stripeError?.code).isEqualTo("link_failed_to_attest_request")
+            assertThat(stripeError?.extraFields?.get("legacy_reason")).isEqualTo("legacy_value")
+            assertThat(stripeError?.extraFields?.get("reason")).isEqualTo("app_not_play_recognized")
+            assertThat(stripeError?.extraFields?.get("user_message"))
+                .isEqualTo("This app couldn't be verified. Install it from Google Play and try again.")
+            assertThat(stripeError?.extraFields?.get("ignored_top_level_field")).isNull()
+        }
+    }
+
+    @Test
+    fun testGetWalletOwnershipChallengeSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "challenge_id": "woc_123",
+                        "wallet_address": "0x1234567890abcdef",
+                        "network": "ethereum",
+                        "message": "Sign this message",
+                        "expires_at": "2026-06-16T12:00:00Z"
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.getWalletOwnershipChallenge(
+                walletAddress = "0x1234567890abcdef",
+                network = CryptoNetwork.Ethereum,
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet_ownership_challenge")
+
+            val params = apiRequest.params!!
+            assertThat(params["wallet_address"]).isEqualTo("0x1234567890abcdef")
+            assertThat(params["network"]).isEqualTo("ethereum")
+            assertThat(params["credentials"]).isEqualTo(
+                mapOf("consumer_session_client_secret" to "test-secret")
+            )
+
+            val challenge = result.getOrThrow()
+            assertThat(challenge.challengeId).isEqualTo("woc_123")
+            assertThat(challenge.walletAddress).isEqualTo("0x1234567890abcdef")
+            assertThat(challenge.network).isEqualTo(CryptoNetwork.Ethereum)
+            assertThat(challenge.message).isEqualTo("Sign this message")
+            assertThat(challenge.expiresAt).isEqualTo("2026-06-16T12:00:00Z")
+        }
+    }
+
+    @Test
+    fun testSubmitWalletOwnershipSignatureSucceeds() {
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                """
+                    {
+                        "id": "ccw_123",
+                        "object": "crypto.consumer_wallet",
+                        "livemode": false,
+                        "wallet_address": "0x1234567890abcdef",
+                        "network": "ethereum",
+                        "verified_ownership": true
+                    }
+                """.trimIndent(),
+                emptyMap()
+            )
+
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val result = cryptoApiRepository.submitWalletOwnershipSignature(
+                challengeId = "woc_123",
+                signature = "0xsignature",
+                consumerSessionClientSecret = "test-secret"
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val apiRequest = apiRequestArgumentCaptor.firstValue
+
+            assertThat(apiRequest.baseUrl)
+                .isEqualTo("https://api.stripe.com/v1/crypto/internal/wallet_ownership_verification")
+
+            val params = apiRequest.params!!
+            assertThat(params["challenge_id"]).isEqualTo("woc_123")
+            assertThat(params["signature"]).isEqualTo("0xsignature")
+            assertThat(params["credentials"]).isEqualTo(
+                mapOf("consumer_session_client_secret" to "test-secret")
+            )
+
+            val consumerWallet = result.getOrThrow()
+            assertThat(consumerWallet.id).isEqualTo("ccw_123")
+            assertThat(consumerWallet.walletAddress).isEqualTo("0x1234567890abcdef")
+            assertThat(consumerWallet.network).isEqualTo(CryptoNetwork.Ethereum)
+            assertThat(consumerWallet.verifiedOwnership).isTrue()
+        }
+    }
+
     private fun assertKycCollectionRequest(apiRequest: ApiRequest) {
         assertThat(apiRequest.baseUrl)
             .isEqualTo("https://api.stripe.com/v1/crypto/internal/kyc_data_collection")
@@ -829,17 +960,9 @@ class CryptoApiRepositoryTest {
     }
 
     private fun assertSubmitIdentifiersResult(result: SubmitIdentifiersResult) {
-        assertThat(result.valid).isFalse()
+        assertThat(result.completed).isFalse()
         assertThat(result.identifiers)
             .containsExactly(
-                ComplianceIdentifierRequirement(
-                    type = ComplianceIdentifierType.DE_STN,
-                    regulation = ComplianceRegulation.EuCarf
-                ),
-                ComplianceIdentifierRequirement(
-                    type = ComplianceIdentifierType.MT_NIC,
-                    regulation = ComplianceRegulation.EuCarf
-                ),
                 ComplianceIdentifierRequirement(
                     type = ComplianceIdentifierType.MT_NIC,
                     regulation = ComplianceRegulation.EuMica
@@ -854,5 +977,6 @@ class CryptoApiRepositoryTest {
             )
         assertThat(result.invalidIdentifiers)
             .isEqualTo(listOf(ComplianceIdentifierType.DE_STN, ComplianceIdentifierType.MT_NIC))
+        assertThat(result.carfTinRequired).isFalse()
     }
 }

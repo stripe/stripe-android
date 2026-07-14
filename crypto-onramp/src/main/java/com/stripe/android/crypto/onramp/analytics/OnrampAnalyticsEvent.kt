@@ -77,25 +77,43 @@ internal sealed class OnrampAnalyticsEvent(
         name = "identifier_requirements_retrieved"
     )
 
-    class IdentifiersSubmitted(valid: Boolean) : OnrampAnalyticsEvent(
+    class IdentifiersSubmitted(completed: Boolean) : OnrampAnalyticsEvent(
         name = "identifiers_submitted",
         params = mapOf(
-            "valid" to valid.toString()
+            "completed" to completed.toString()
         )
     )
 
-    data object CrsCarfDeclarationStarted : OnrampAnalyticsEvent(
-        name = "crs_carf_declaration_started"
+    data object UserAttestationStarted : OnrampAnalyticsEvent(
+        name = "user_attestation_started"
     )
 
-    data object CrsCarfDeclarationCompleted : OnrampAnalyticsEvent(
-        name = "crs_carf_declaration_completed"
+    data object UserAttestationCompleted : OnrampAnalyticsEvent(
+        name = "user_attestation_completed"
     )
 
     class WalletRegistered(
         network: CryptoNetwork
     ) : OnrampAnalyticsEvent(
         name = "wallet_registered",
+        params = mapOf(
+            "network" to network.value
+        )
+    )
+
+    class WalletOwnershipChallengeRetrieved(
+        network: CryptoNetwork
+    ) : OnrampAnalyticsEvent(
+        name = "wallet_ownership_challenge_retrieved",
+        params = mapOf(
+            "network" to network.value
+        )
+    )
+
+    class WalletOwnershipVerified(
+        network: CryptoNetwork
+    ) : OnrampAnalyticsEvent(
+        name = "wallet_ownership_verified",
         params = mapOf(
             "network" to network.value
         )
@@ -177,13 +195,15 @@ internal sealed class OnrampAnalyticsEvent(
             AttachKycInfo("attach_kyc_info"),
             VerifyIdentity("verify_identity"),
             RegisterWalletAddress("register_wallet_address"),
+            GetWalletOwnershipChallenge("get_wallet_ownership_challenge"),
+            SubmitWalletOwnershipSignature("submit_wallet_ownership_signature"),
             CreateCryptoPaymentToken("create_crypto_payment_token"),
             PerformCheckout("perform_checkout"),
             LogOut("log_out"),
             VerifyKyc("verify_kyc_info"),
             RetrieveMissingIdentifiers("retrieve_missing_identifiers"),
             SubmitIdentifiers("submit_identifiers"),
-            PresentCRSCARFDeclaration("prompt_for_crs_carf_declaration")
+            PresentUserAttestation("present_user_attestation")
         }
     }
 

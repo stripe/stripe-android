@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.common.nfcscan.NfcScanningAction
 import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -27,7 +28,9 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.CardScanAction
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.RenderableFormElement
@@ -127,18 +130,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     cbcEligibility = arguments.cbcEligibility,
                     cardBrandFilter = arguments.cardBrandFilter,
                     cardFundingFilter = arguments.cardFundingFilter,
-                    cardDetailsAction = arguments.tapToAddHelper?.takeIf {
-                        metadata.isTapToAddSupported
-                    }?.let {
-                        TapToAddCardDetailsAction(
-                            tapToAddHelper = it,
-                            paymentMethodMetadata = metadata,
-                        )
-                    },
-                    automaticallyLaunchedCardScanFormDataHelper = arguments.automaticallyLaunchedCardScanFormDataHelper,
-                    isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
-                    enableMlKitCardScan = metadata.enableMlKitCardScan,
-                    disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
+                    cardDetailsAction = createCardDetailsAction(metadata, arguments)
                 )
             )
 
@@ -207,6 +199,28 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     )
                 )
             }
+        }
+    }
+
+    private fun createCardDetailsAction(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+    ): CardDetailsAction {
+        return if (metadata.isTapToAddSupported && arguments.tapToAddHelper != null) {
+            TapToAddCardDetailsAction(
+                tapToAddHelper = arguments.tapToAddHelper,
+                paymentMethodMetadata = metadata,
+            )
+        } else if (metadata.isNfcScanningEnabled) {
+            NfcScanningAction(paymentMethodMetadata = metadata)
+        } else {
+            CardScanAction(
+                isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
+                enableMlKitCardScan = metadata.enableMlKitCardScan,
+                disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
+                automaticallyLaunchedCardScanFormDataHelper =
+                    arguments.automaticallyLaunchedCardScanFormDataHelper,
+            )
         }
     }
 
@@ -328,17 +342,10 @@ internal class CombinedLinkMandateElement(
             // when displaying the mandate from Link UI (add card to Link) we always want the
             // non-signup version of the mandate text.
             mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
-                if (linkBrand == LinkBrand.Link) {
-                    stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3,
-                        formatArgs = arrayOf(merchantName)
-                    )
-                } else {
-                    stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded,
-                        formatArgs = arrayOf(merchantName, linkBrand.brandName())
-                    )
-                }.replaceHyperlinks(linkBrand)
+                stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded,
+                    formatArgs = arrayOf(merchantName, linkBrand.brandName())
+                ).replaceHyperlinks(linkBrand)
             } else {
                 stringResource(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,

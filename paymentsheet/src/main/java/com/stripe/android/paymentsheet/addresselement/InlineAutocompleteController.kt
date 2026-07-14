@@ -1,0 +1,165 @@
+package com.stripe.android.paymentsheet.addresselement
+
+import androidx.appcompat.app.AppCompatDelegate
+import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
+import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
+import java.util.Locale
+
+internal class InlineAutocompleteController(
+    private val placesClient: PlacesClientProxy?,
+    private val config: AutocompleteAddressInteractor.Config,
+    private val coroutineScope: CoroutineScope,
+    private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
+    private val shouldUseAutocompleteProxyEndpoints: Boolean,
+) {
+    private var lastPredictionLine1: String? = null
+    private var observeJob: Job? = null
+    private var selectionJob: Job? = null
+
+    // Keep the server flag plumbed through, but do not switch traffic until the proxy path exists.
+    private val isAutocompleteProxyImplementationAvailable = false
+
+    private val _inlinePredictionsState = MutableStateFlow<AutocompleteAddressInteractor.InlinePredictionsState>(
+        AutocompleteAddressInteractor.InlinePredictionsState.Idle
+    )
+    val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
+        _inlinePredictionsState.asStateFlow()
+
+    private val canUseAutocompleteProxyEndpoints: Boolean
+        get() = shouldUseAutocompleteProxyEndpoints && isAutocompleteProxyImplementationAvailable
+
+    @OptIn(FlowPreview::class)
+    fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
+        if (placesClient == null && !canUseAutocompleteProxyEndpoints) return
+        observeJob?.cancel()
+        observeJob = coroutineScope.launch {
+            combine(query, country) { q, c -> q to (c ?: "") }
+                .debounce(AutocompleteViewModel.SEARCH_DEBOUNCE_MS)
+                .collectLatest { (q, c) ->
+                    if (q == lastPredictionLine1) {
+                        lastPredictionLine1 = null
+                        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                        return@collectLatest
+                    }
+                    if (q.length < AutocompleteViewModel.MIN_CHARS_AUTOCOMPLETE || !isCountrySupported(c)) {
+                        lastPredictionLine1 = null
+                        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                        return@collectLatest
+                    }
+                    fetchPredictions(q, c)
+                }
+        }
+    }
+
+    fun onPredictionSelected(predictionId: String) {
+        selectionJob?.cancel()
+        selectionJob = coroutineScope.launch {
+            if (canUseAutocompleteProxyEndpoints) {
+                fetchPlaceFromStripeProxy(predictionId)
+            } else {
+                fetchPlaceFromGooglePlaces(predictionId)
+            }
+        }
+    }
+
+    @Suppress("UnusedParameter", "UnusedPrivateMember")
+    private suspend fun fetchPlaceFromStripeProxy(predictionId: String) {
+        // Stripe proxy endpoint will be implemented in a follow-up PR.
+    }
+
+    private suspend fun fetchPlaceFromGooglePlaces(predictionId: String) {
+        val client = placesClient ?: return
+        client.fetchPlace(predictionId).fold(
+            onSuccess = { response ->
+                val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+                val address = response.place.transformGoogleToStripeAddress(locale)
+                lastPredictionLine1 = address.line1
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+                eventListenerProvider()?.invoke(
+                    AutocompleteAddressInteractor.Event.OnValues(
+                        mapOf(
+                            IdentifierSpec.Line1 to address.line1,
+                            IdentifierSpec.Line2 to address.line2,
+                            IdentifierSpec.City to address.city,
+                            IdentifierSpec.State to address.state,
+                            IdentifierSpec.PostalCode to address.postalCode,
+                            IdentifierSpec.Country to address.country,
+                        )
+                    )
+                )
+            },
+            onFailure = {
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+            }
+        )
+    }
+
+    fun onDismissed() {
+        selectionJob?.cancel()
+        lastPredictionLine1 = null
+        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+    }
+
+    fun dispose() {
+        observeJob?.cancel()
+        selectionJob?.cancel()
+    }
+
+    private fun isCountrySupported(country: String): Boolean {
+        val supportedCountries = config.autocompleteCountries
+        return supportedCountries.isEmpty() ||
+            supportedCountries.any { it.equals(country, ignoreCase = true) }
+    }
+
+    private suspend fun fetchPredictions(query: String, country: String) {
+        if (canUseAutocompleteProxyEndpoints) {
+            fetchPredictionsFromStripeProxy(query, country)
+        } else {
+            fetchPredictionsFromGooglePlaces(query, country)
+        }
+    }
+
+    @Suppress("UnusedParameter", "UnusedPrivateMember")
+    private suspend fun fetchPredictionsFromStripeProxy(query: String, country: String) {
+        // Stripe proxy endpoint will be implemented in a follow-up PR.
+    }
+
+    private suspend fun fetchPredictionsFromGooglePlaces(query: String, country: String) {
+        val client = placesClient ?: return
+        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
+        val result = client.findAutocompletePredictions(
+            query = query,
+            country = country,
+            limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
+        )
+        result.fold(
+            onSuccess = { response ->
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Results(
+                    query = query,
+                    predictions = response.autocompletePredictions.map { prediction ->
+                        AutocompleteAddressInteractor.InlineAddressPrediction(
+                            id = prediction.placeId,
+                            primaryText = prediction.primaryText.toString(),
+                            secondaryText = prediction.secondaryText.toString(),
+                        )
+                    }
+                )
+            },
+            onFailure = {
+                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+            }
+        )
+    }
+}

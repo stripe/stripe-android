@@ -68,4 +68,4 @@ jobs:
         if: ${{ steps.create-pull-request.outputs.pull-request-url }}
         run: gh pr merge --squash --auto ${{ steps.create-pull-request.outputs.pull-request-url }}
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.generate-app-token.outputs.token }}

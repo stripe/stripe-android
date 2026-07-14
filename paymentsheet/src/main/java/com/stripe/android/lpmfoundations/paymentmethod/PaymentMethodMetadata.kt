@@ -91,9 +91,11 @@ internal data class PaymentMethodMetadata(
     val isTapToAddSupported: Boolean,
     val isStripeCardScanAllowed: Boolean,
     val enableMlKitCardScan: Boolean,
+    val isNfcScanningEnabled: Boolean,
     val elementsSessionId: String? = null,
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
+    val shouldUseAutocompleteProxyEndpoints: Boolean,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
 
@@ -365,6 +367,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata,
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
+            isNfcScanningEnabled: Boolean,
             paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
@@ -380,7 +383,6 @@ internal data class PaymentMethodMetadata(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
                     linkState = linkStateResult as? LinkState,
-                    isShopPayAvailable = configuration.shopPayConfiguration != null
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
@@ -421,11 +423,13 @@ internal data class PaymentMethodMetadata(
                 analyticsMetadata = analyticsMetadata,
                 experimentsData = elementsSession.experimentsData,
                 isTapToAddSupported = isTapToAddAvailable,
+                isNfcScanningEnabled = isNfcScanningEnabled,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
+                shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = paymentMethodLayout,
             )
         }
@@ -436,6 +440,7 @@ internal data class PaymentMethodMetadata(
             configuration: CustomerSheet.Configuration,
             sharedDataSpecs: List<SharedDataSpec>,
             isGooglePayReady: Boolean,
+            isNfcScanningEnabled: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
@@ -449,7 +454,6 @@ internal data class PaymentMethodMetadata(
                     elementsSession = elementsSession,
                     isGooglePayReady = isGooglePayReady,
                     linkState = null,
-                    isShopPayAvailable = false
                 ),
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = CardBrandChoiceEligibility.create(
@@ -492,10 +496,12 @@ internal data class PaymentMethodMetadata(
                 isTapToAddSupported = false, // This is unused in customer sheet.
                 experimentsData = elementsSession.experimentsData,
                 isStripeCardScanAllowed = elementsSession.isStripeCardScanAllowed,
+                isNfcScanningEnabled = isNfcScanningEnabled,
                 enableMlKitCardScan = elementsSession.enableMlKitCardScan,
                 elementsSessionId = elementsSession.elementsSessionId,
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
+                shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }

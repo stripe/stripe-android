@@ -8,7 +8,6 @@
     <ID>LargeClass:IdentityViewModel.kt:IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt:IdentityViewModelTest</ID>
     <ID>LongMethod:AddressSection.kt:@Composable internal fun AddressSection</ID>
-    <ID>LongMethod:ConfirmationScreen.kt:@Composable internal fun ConfirmationScreen</ID>
     <ID>LongMethod:DebugScreen.kt:@Composable internal fun CompleteWithTestDataSection</ID>
     <ID>LongMethod:DebugScreen.kt:@Composable internal fun DebugScreen</ID>
     <ID>LongMethod:DocWarmupScreen.kt:@Composable internal fun DocWarmupView</ID>
@@ -24,7 +23,6 @@
     <ID>LongMethod:OTPScreen.kt:@Composable internal fun OTPScreen</ID>
     <ID>LongMethod:OTPScreen.kt:@Composable private fun OTPViewStateEffect</ID>
     <ID>LongMethod:SelfieScreen.kt:@Composable internal fun SelfieScanScreen</ID>
-    <ID>LongMethod:SelfieScreen.kt:@Composable private fun ResultView</ID>
     <ID>LongMethod:SelfieScreen.kt:@Composable private fun SelfieCaptureScreen</ID>
     <ID>LongMethod:UploadScreen.kt:@Composable internal fun UploadScreen</ID>
     <ID>MagicNumber:DefaultIdentityIO.kt:DefaultIdentityIO$5</ID>

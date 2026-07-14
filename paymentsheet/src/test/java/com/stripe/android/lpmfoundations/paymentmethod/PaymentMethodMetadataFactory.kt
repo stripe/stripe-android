@@ -59,7 +59,7 @@ internal object PaymentMethodMetadataFactory {
         saveConsent: PaymentMethodSaveConsentBehavior =
             PaymentMethodSaveConsentBehavior.Legacy,
         canRemoveLastPaymentMethod: Boolean = true,
-        canUpdateFullPaymentMethodDetails: Boolean = false,
+        canUpdateCardExpiryAndBillingDetails: Boolean = false,
         customerSessionClientSecret: String? = null,
         termsDisplay: Map<PaymentMethod.Type, PaymentSheet.TermsDisplay> = emptyMap(),
         forceSetupFutureUseBehaviorAndNewMandate: Boolean = false,
@@ -73,12 +73,14 @@ internal object PaymentMethodMetadataFactory {
         sellerBusinessName: String? = null,
         analyticsMetadata: AnalyticsMetadata = AnalyticsMetadata(emptyMap()),
         isTapToAddSupported: Boolean = false,
+        isNfcScanningEnabled: Boolean = false,
         experimentsData: ElementsSession.ExperimentsData? = null,
         isStripeCardScanAllowed: Boolean = false,
         enableMlKitCardScan: Boolean = false,
         elementsSessionId: String? = null,
         disableSsdOcrCardScan: Boolean = false,
         cardArts: List<PaymentMethod.Card.CardArt> = emptyList(),
+        shouldUseAutocompleteProxyEndpoints: Boolean = false,
         paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -104,7 +106,7 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                        canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
                     )
                 } else {
                     CustomerMetadata.LegacyEphemeralKey(
@@ -114,7 +116,7 @@ internal object PaymentMethodMetadataFactory {
                         removePaymentMethod = removePaymentMethod,
                         saveConsent = saveConsent,
                         canRemoveLastPaymentMethod = canRemoveLastPaymentMethod,
-                        canUpdateFullPaymentMethodDetails = canUpdateFullPaymentMethodDetails,
+                        canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
                     )
                 }
             } else {
@@ -144,12 +146,14 @@ internal object PaymentMethodMetadataFactory {
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddSupported = isTapToAddSupported,
+            isNfcScanningEnabled = isNfcScanningEnabled,
             experimentsData = experimentsData,
             isStripeCardScanAllowed = isStripeCardScanAllowed,
             enableMlKitCardScan = enableMlKitCardScan,
             elementsSessionId = elementsSessionId,
             disableSsdOcrCardScan = disableSsdOcrCardScan,
             cardArts = cardArts,
+            shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
             paymentMethodLayout = paymentMethodLayout,
         )
     }

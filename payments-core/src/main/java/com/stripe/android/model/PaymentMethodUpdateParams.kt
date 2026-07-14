@@ -15,7 +15,9 @@ sealed class PaymentMethodUpdateParams(
 ) : StripeParamsModel, Parcelable {
 
     internal abstract val allowRedisplay: PaymentMethod.AllowRedisplay?
-    internal abstract val billingDetails: PaymentMethod.BillingDetails?
+
+    @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract val billingDetails: PaymentMethod.BillingDetails?
     internal abstract val productUsageTokens: Set<String>
 
     internal abstract fun generateTypeParams(): Map<String, Any>
@@ -39,6 +41,7 @@ sealed class PaymentMethodUpdateParams(
         val expiryMonth: Int? = null,
         val expiryYear: Int? = null,
         val networks: Networks? = null,
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         override val billingDetails: PaymentMethod.BillingDetails?,
         override val productUsageTokens: Set<String> = emptySet(),
         override val allowRedisplay: PaymentMethod.AllowRedisplay? = null,

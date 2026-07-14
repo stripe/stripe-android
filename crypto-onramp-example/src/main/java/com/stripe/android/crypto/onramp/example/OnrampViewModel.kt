@@ -31,8 +31,8 @@ import com.stripe.android.crypto.onramp.model.OnrampAuthorizeResult
 import com.stripe.android.crypto.onramp.model.OnrampCallbacks
 import com.stripe.android.crypto.onramp.model.OnrampCheckoutResult
 import com.stripe.android.crypto.onramp.model.OnrampCollectPaymentMethodResult
+import com.stripe.android.crypto.onramp.model.OnrampConfigurationResult
 import com.stripe.android.crypto.onramp.model.OnrampCreateCryptoPaymentTokenResult
-import com.stripe.android.crypto.onramp.model.OnrampCrsCarfDeclarationResult
 import com.stripe.android.crypto.onramp.model.OnrampHasLinkAccountResult
 import com.stripe.android.crypto.onramp.model.OnrampLogOutResult
 import com.stripe.android.crypto.onramp.model.OnrampRegisterLinkUserResult
@@ -41,6 +41,7 @@ import com.stripe.android.crypto.onramp.model.OnrampRetrieveMissingIdentifiersRe
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
+import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
@@ -59,6 +60,11 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+internal data class OnrampAlert(
+    val title: String,
+    val message: String,
+)
+
 @Suppress("TooManyFunctions", "LargeClass")
 internal class OnrampViewModel(
     application: Application,
@@ -73,7 +79,7 @@ internal class OnrampViewModel(
         .authorizeCallback(callback = ::onAuthorizeResult)
         .onrampSessionClientSecretProvider(callback = ::checkoutWithBackend)
         .googlePayIsReadyCallback(callback = ::googlePayIsReady)
-        .crsCarfDeclarationCallback(callback = ::onCrsCarfDeclarationResult)
+        .userAttestationCallback(callback = ::onUserAttestationResult)
 
     val onrampCoordinator: OnrampCoordinator =
         OnrampCoordinator.Builder().build(getApplication(), savedStateHandle, callbacks)
@@ -90,6 +96,10 @@ internal class OnrampViewModel(
     private val _message = MutableStateFlow<String?>(null)
     val message: StateFlow<String?> = _message.asStateFlow()
 
+    private val _initializationFailureAlert = MutableStateFlow<OnrampAlert?>(null)
+    val initializationFailureAlert: StateFlow<OnrampAlert?> =
+        _initializationFailureAlert.asStateFlow()
+
     private val _checkoutEvent = MutableStateFlow<CheckoutEvent?>(null)
     val checkoutEvent: StateFlow<CheckoutEvent?> = _checkoutEvent.asStateFlow()
 
@@ -103,7 +113,15 @@ internal class OnrampViewModel(
 
     init {
         viewModelScope.launch {
-            onrampCoordinator.configure(OnrampConfigurationFactory.create())
+            when (val result = onrampCoordinator.configure(OnrampConfigurationFactory.create())) {
+                is OnrampConfigurationResult.Completed -> Unit
+                is OnrampConfigurationResult.Failed -> {
+                    _initializationFailureAlert.value = OnrampAlert(
+                        title = "Failed to initialize CryptoOnrampCoordinator",
+                        message = result.error.message ?: "Unknown error"
+                    )
+                }
+            }
 
             if (savedUiState == null) {
                 val savedUser = userDataStore.load()
@@ -279,6 +297,10 @@ internal class OnrampViewModel(
         _message.value = null
     }
 
+    fun clearInitializationFailureAlert() {
+        _initializationFailureAlert.value = null
+    }
+
     fun onVerifyIdentityResult(result: OnrampVerifyIdentityResult) {
         when (result) {
             is OnrampVerifyIdentityResult.Completed -> {
@@ -302,16 +324,16 @@ internal class OnrampViewModel(
         }
     }
 
-    fun onCrsCarfDeclarationResult(result: OnrampCrsCarfDeclarationResult) {
+    fun onUserAttestationResult(result: OnrampUserAttestationResult) {
         when (result) {
-            is OnrampCrsCarfDeclarationResult.Confirmed -> {
-                _message.value = "CRS CARF Declaration Confirmed"
+            is OnrampUserAttestationResult.Confirmed -> {
+                _message.value = "User Attestation Confirmed"
             }
-            is OnrampCrsCarfDeclarationResult.Failed -> {
-                _message.value = "CRS CARF Declaration failed: ${result.error.message}"
+            is OnrampUserAttestationResult.Failed -> {
+                _message.value = "User Attestation failed: ${result.error.message}"
             }
-            is OnrampCrsCarfDeclarationResult.Cancelled -> {
-                _message.value = "CRS CARF Declaration cancelled, please try again"
+            is OnrampUserAttestationResult.Cancelled -> {
+                _message.value = "User Attestation cancelled, please try again"
             }
         }
     }
@@ -1032,6 +1054,8 @@ internal class OnrampViewModel(
         requirements: ComplianceIdentifierRequirements
     ): String {
         return buildString {
+            append("CARF TIN required: ${requirements.carfTinRequired}")
+            append("\n")
             append("Identifiers: ")
             append(formatIdentifierRequirements(requirements.identifiers))
             append("\nAlternatives: ")
@@ -1041,7 +1065,8 @@ internal class OnrampViewModel(
 
     private fun formatSubmitIdentifiersResult(result: SubmitIdentifiersResult): String {
         return buildString {
-            append("Valid: ${result.valid}")
+            append("Completed: ${result.completed}")
+            append("\nCARF TIN required: ${result.carfTinRequired}")
             append("\nIdentifiers: ")
             append(formatIdentifierRequirements(result.identifiers))
             append("\nAlternatives: ")

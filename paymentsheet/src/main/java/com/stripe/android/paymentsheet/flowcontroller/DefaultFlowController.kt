@@ -47,6 +47,8 @@ import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
+import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationType
 import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfirmationTypeKey
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
@@ -541,7 +543,6 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.ExternalPaymentMethod,
             is PaymentSelection.CustomPaymentMethod,
             is PaymentSelection.New,
-            is PaymentSelection.ShopPay,
             null -> confirmPaymentSelection(
                 paymentSelection = paymentSelection,
                 state = state.paymentSheetState,
@@ -582,7 +583,12 @@ internal class DefaultFlowController @Inject internal constructor(
             val confirmationOption = paymentSelection?.toConfirmationOption(
                 configuration = state.config,
                 linkConfiguration = state.linkConfiguration,
-                cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter
+                cardFundingFilter = state.paymentMethodMetadata.cardFundingFilter,
+                googlePayDisplayItems = GooglePayDisplayItemsFactory.create(state.paymentMethodMetadata),
+                googlePayBillingEmailOverride = GooglePayBillingEmailOverrideProvider.get(
+                    configuration = state.config,
+                    paymentMethodMetadata = state.paymentMethodMetadata,
+                ),
             )
 
             confirmationOption?.let { option ->

@@ -15,6 +15,9 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.SavedPaymentMethod
+import com.stripe.android.paymentsheet.hasMultipleNetworks
+import com.stripe.android.paymentsheet.isModifiable
+import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
@@ -35,10 +38,12 @@ internal interface UpdatePaymentMethodInteractor {
     val isExpiredCard: Boolean
     val isModifiablePaymentMethod: Boolean
     val hasValidBrandChoices: Boolean
+    val shouldShowCardBrandDropdown: Boolean
     val shouldShowSetAsDefaultCheckbox: Boolean
     val setAsDefaultCheckboxEnabled: Boolean
     val shouldShowSaveButton: Boolean
-    val canUpdateFullPaymentMethodDetails: Boolean
+    val canUpdateCardExpiryAndBillingDetails: Boolean
+    val canChangeCbc: Boolean
     val addressCollectionMode: AddressCollectionMode
     val allowedBillingCountries: Set<String>
     val editCardDetailsInteractor: EditCardDetailsInteractor
@@ -82,6 +87,9 @@ internal interface UpdatePaymentMethodInteractor {
                         is LinkPaymentDetails.Card -> {
                             R.string.stripe_paymentsheet_manage_card
                         }
+                        is LinkPaymentDetails.Generic -> {
+                            R.string.stripe_paymentsheet_manage_payment_method
+                        }
                         null -> null
                     }
                 }
@@ -110,7 +118,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
     override val cardBrandFilter: CardBrandFilter,
     override val addressCollectionMode: AddressCollectionMode,
     override val allowedBillingCountries: Set<String>,
-    override val canUpdateFullPaymentMethodDetails: Boolean,
+    override val canUpdateCardExpiryAndBillingDetails: Boolean,
+    override val canChangeCbc: Boolean,
     override val removeMessage: ResolvableString?,
     val isDefaultPaymentMethod: Boolean,
     override val shouldShowSetAsDefaultCheckbox: Boolean,
@@ -121,6 +130,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private val onUpdateSuccess: () -> Unit,
     val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
+    private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
 ) : UpdatePaymentMethodInteractor {
     private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val error = MutableStateFlow(getInitialError())
@@ -135,7 +145,14 @@ internal class DefaultUpdatePaymentMethodInteractor(
         displayableSavedPaymentMethod
     )
     override val isModifiablePaymentMethod: Boolean
-        get() = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
+        get() = displayableSavedPaymentMethod.paymentMethod.isModifiable(
+            canUpdateCardExpiryAndBillingDetails = canUpdateCardExpiryAndBillingDetails,
+            canChangeCbc = canChangeCbc,
+        )
+    override val shouldShowCardBrandDropdown: Boolean
+        get() = isModifiablePaymentMethod &&
+            canChangeCbc &&
+            displayableSavedPaymentMethod.paymentMethod.hasMultipleNetworks()
 
     override val topBarState: PaymentSheetTopBarState = PaymentSheetTopBarStateFactory.create(
         isLiveMode = isLiveMode,
@@ -170,12 +187,12 @@ internal class DefaultUpdatePaymentMethodInteractor(
     private fun createEditCardDetailsInteractorForCard(
         savedPaymentMethodCard: SavedPaymentMethod.Card,
     ): EditCardDetailsInteractor {
-        val isModifiable = displayableSavedPaymentMethod.isModifiable(canUpdateFullPaymentMethodDetails)
         val payload = EditCardPayload.create(savedPaymentMethodCard.card, savedPaymentMethodCard.billingDetails)
         val cardEditConfiguration = CardEditConfiguration(
             cardBrandFilter = cardBrandFilter,
-            isCbcModifiable = isModifiable && displayableSavedPaymentMethod.canChangeCbc(),
-            areExpiryDateAndAddressModificationSupported = isModifiable && canUpdateFullPaymentMethodDetails,
+            isCbcModifiable = shouldShowCardBrandDropdown,
+            areExpiryDateAndAddressModificationSupported =
+                isModifiablePaymentMethod && canUpdateCardExpiryAndBillingDetails,
         )
         return editCardDetailsInteractorFactory.create(
             payload = payload,
@@ -193,7 +210,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 name = CollectionMode.Never,
                 allowedCountries = allowedBillingCountries,
             ),
-            requiresModification = true
+            requiresModification = true,
+            autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
     }
 
@@ -221,7 +239,8 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 name = CollectionMode.Never,
                 allowedCountries = allowedBillingCountries,
             ),
-            requiresModification = true
+            requiresModification = true,
+            autocompleteAddressInteractorFactory = null,
         )
     }
 
