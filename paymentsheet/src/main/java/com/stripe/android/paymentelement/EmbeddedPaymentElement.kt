@@ -14,6 +14,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
@@ -88,7 +89,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        paymentConfigurationHolder.paymentConfiguration = configuration.paymentConfiguration
+        paymentConfigurationHolder.apiConfiguration = configuration.apiConfiguration
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         return configurationCoordinator.configure(configuration, initializationMode)
     }
@@ -106,7 +107,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ): ConfigureResult {
-        paymentConfigurationHolder.paymentConfiguration = configuration.paymentConfiguration
+        paymentConfigurationHolder.apiConfiguration = configuration.apiConfiguration
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         return configurationCoordinator.configure(
             configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)
@@ -310,7 +311,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
-        internal val paymentConfiguration: PaymentConfiguration? = null,
+        internal val apiConfiguration: ApiConfiguration.State? = null,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -348,7 +349,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
-            private var paymentConfiguration: PaymentConfiguration? = null
+            private var apiConfiguration: ApiConfiguration.State? = null
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -591,8 +592,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
              * [EmbeddedPaymentElement] instance. When not set, defaults to the value from
              * [PaymentConfiguration.getInstance].
              */
-            fun paymentConfiguration(paymentConfiguration: PaymentConfiguration) = apply {
-                this.paymentConfiguration = paymentConfiguration
+            fun apiConfiguration(apiConfiguration: ApiConfiguration) = apply {
+                this.apiConfiguration = apiConfiguration.build()
             }
 
             fun build() = Configuration(
@@ -619,7 +620,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
-                paymentConfiguration = paymentConfiguration,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -651,7 +652,9 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .userOverrideCountry(userOverrideCountry)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
-                paymentConfiguration?.let { paymentConfiguration(it) }
+                apiConfiguration?.let {
+                    apiConfiguration(ApiConfiguration(it.publishableKey).stripeAccountId(it.stripeAccountId))
+                }
             }
     }
 

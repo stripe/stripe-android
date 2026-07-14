@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.injection
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -13,21 +14,28 @@ import javax.inject.Provider
 @Module
 class PaymentConfigurationModule {
     @Provides
-    fun providePaymentConfiguration(
+    fun provideApiConfigurationState(
         holder: PaymentConfigurationHolder,
-    ): PaymentConfiguration {
+    ): ApiConfiguration.State {
         return holder.get()
+    }
+
+    @Provides
+    fun providePaymentConfiguration(
+        apiConfigurationState: Provider<ApiConfiguration.State>,
+    ): PaymentConfiguration {
+        return apiConfigurationState.get().toPaymentConfiguration()
     }
 
     @Provides
     @Named(PUBLISHABLE_KEY)
     fun providePublishableKey(
-        paymentConfiguration: Provider<PaymentConfiguration>
-    ): () -> String = { paymentConfiguration.get().publishableKey }
+        apiConfigurationState: Provider<ApiConfiguration.State>,
+    ): () -> String = { apiConfigurationState.get().publishableKey }
 
     @Provides
     @Named(STRIPE_ACCOUNT_ID)
     fun provideStripeAccountId(
-        paymentConfiguration: Provider<PaymentConfiguration>
-    ): () -> String? = { paymentConfiguration.get().stripeAccountId }
+        apiConfigurationState: Provider<ApiConfiguration.State>,
+    ): () -> String? = { apiConfigurationState.get().stripeAccountId }
 }
