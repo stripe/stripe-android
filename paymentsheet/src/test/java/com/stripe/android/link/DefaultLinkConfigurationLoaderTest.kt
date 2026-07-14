@@ -13,6 +13,7 @@ import com.stripe.android.utils.FakePaymentElementLoader
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -122,6 +123,7 @@ internal class DefaultLinkConfigurationLoaderTest {
             initializationMode = any(),
             integrationConfiguration = configCaptor.capture(),
             metadata = any(),
+            reconfigureContext = anyOrNull(),
         )
         val commonConfig = configCaptor.firstValue.commonConfiguration
         assertThat(commonConfig.merchantDisplayName).isEqualTo(TestFactory.MERCHANT_NAME)
@@ -148,6 +150,7 @@ internal class DefaultLinkConfigurationLoaderTest {
             initializationMode = any(),
             integrationConfiguration = any(),
             metadata = metadataCaptor.capture(),
+            reconfigureContext = anyOrNull(),
         )
         assertThat(metadataCaptor.firstValue.isReloadingAfterProcessDeath).isTrue()
     }
@@ -168,6 +171,7 @@ internal class DefaultLinkConfigurationLoaderTest {
             initializationMode = any(),
             integrationConfiguration = any(),
             metadata = metadataCaptor.capture(),
+            reconfigureContext = anyOrNull(),
         )
         assertThat(metadataCaptor.firstValue.isReloadingAfterProcessDeath).isFalse()
     }

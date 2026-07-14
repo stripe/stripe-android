@@ -63,11 +63,13 @@ import com.stripe.android.paymentsheet.state.DefaultPaymentMethodFilter
 import com.stripe.android.paymentsheet.state.DefaultRetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.DefaultTapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.LinkAccountStatusProvider
+import com.stripe.android.paymentsheet.state.LoadedPaymentSelectionResolver
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import dagger.Binds
+import dagger.BindsOptionalOf
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -117,6 +119,9 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsPaymentSheetLoader(impl: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @BindsOptionalOf
+    abstract fun optionalLoadedPaymentSelectionResolver(): LoadedPaymentSelectionResolver
 
     @Binds
     abstract fun bindsTapToAddAvailabilityFactory(

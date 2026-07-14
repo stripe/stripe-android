@@ -105,6 +105,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import java.util.Optional
 import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -329,6 +330,30 @@ internal class DefaultPaymentElementLoaderTest {
             ),
         ).getOrThrow()
         assertThat(result.paymentMethodMetadata.customerMetadata).isNull()
+
+        assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
+        assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `load applies the injected selection resolver to the returned selection`() = runScenario {
+        val loader = createPaymentElementLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+            // Resolver overrides whatever the loader computed.
+            selectionResolver = { _, _, _ -> PaymentSelection.GooglePay },
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            PaymentSheetFixtures.CONFIG_MINIMUM,
+            metadata = PaymentElementLoader.Metadata(
+                initializedViaCompose = false,
+            ),
+        ).getOrThrow()
+
+        assertThat(result.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
 
         assertThat(eventReporter.loadStartedTurbine.awaitItem()).isNotNull()
         assertThat(eventReporter.loadSucceededTurbine.awaitItem()).isNotNull()
@@ -4923,6 +4948,7 @@ internal class DefaultPaymentElementLoaderTest {
             FakePaymentMethodMessagePromotionsExperimentHandler(),
         isNfcScanningAvailable: IsNfcScanningAvailable =
             FakeIsNfcScanningAvailable(result = false),
+        selectionResolver: LoadedPaymentSelectionResolver? = null,
     ): PaymentElementLoader {
         val retrieveCustomerEmailImpl = DefaultRetrieveCustomerEmail(
             customerRepo,
@@ -4977,6 +5003,7 @@ internal class DefaultPaymentElementLoaderTest {
             durationProvider = durationProvider,
             paymentMethodMessagePromotionsExperimentHandler = paymentMethodMessageExperimentHandler,
             isNfcScanningAvailable = isNfcScanningAvailable,
+            selectionResolver = Optional.ofNullable(selectionResolver),
         )
     }
 

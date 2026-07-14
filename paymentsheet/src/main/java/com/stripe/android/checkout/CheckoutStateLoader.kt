@@ -60,8 +60,8 @@ internal class CheckoutStateLoader @Inject constructor(
             ),
         ).getOrThrow()
 
-        // Preserve the customer's existing selection across reloads when it's still valid, rather
-        // than blindly adopting the loader's recomputed selection (reuses the embedded logic).
+        // Keep the chooser outside PaymentElementLoader.load. The loader runs on IO, while the
+        // embedded chooser stores comparison state in SavedStateHandle.
         val selection = selectionChooser.choose(
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             paymentMethods = loaderState.customer?.paymentMethods,

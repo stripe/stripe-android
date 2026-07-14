@@ -7,9 +7,15 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -20,8 +26,10 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALL
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
+import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.PaymentElementCallbackTestRule
@@ -210,6 +218,53 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.previousConfigureRequest).isEqualTo(newConfigureRequest)
         assertThat(configurationHandler.isConfigured).isTrue()
         assertThat(viewModel.paymentSelection).isEqualTo(PaymentSelection.Link(brand = LinkBrand.Link))
+    }
+
+    @Test
+    fun `configure resolves selection with loader reconfigure context`() = runTest {
+        val previousConfig = PaymentSheet.Configuration("Some name")
+        val newConfig = PaymentSheet.Configuration("Some name")
+        val previousSelection = PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(setupFutureUsage = null),
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            brand = CardBrand.Visa,
+        )
+        val loadedState = paymentElementLoaderStateWithSetupFutureUsage(
+            configuration = newConfig,
+            paymentSelection = PaymentSelection.GooglePay,
+        )
+        val loader = ResolvingPaymentElementLoader(loadedState)
+        val configureErrors = Turbine<Throwable?>()
+
+        viewModel.paymentSelection = previousSelection
+        viewModel.walletButtonsRendered = true
+        viewModel.state = DefaultFlowController.State(
+            paymentSheetState = PaymentSheetState.Full(
+                paymentElementLoaderStateWithSetupFutureUsage(
+                    configuration = previousConfig,
+                    paymentSelection = previousSelection,
+                )
+            ),
+            config = previousConfig,
+        )
+
+        createConfigurationHandler(paymentElementLoader = loader).configure(
+            scope = this,
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
+            ),
+            configuration = newConfig,
+            initializedViaCompose = false,
+        ) { _, exception ->
+            configureErrors.add(exception)
+        }
+
+        assertThat(configureErrors.awaitItem()).isNull()
+        assertThat(viewModel.paymentSelection).isNull()
+        assertThat(loader.lastReconfigureContext?.previousSelection).isEqualTo(previousSelection)
+        assertThat(loader.lastReconfigureContext?.previousPaymentSheetConfig).isEqualTo(previousConfig)
+        assertThat(loader.lastReconfigureContext?.walletButtonsAlreadyShown).isTrue()
     }
 
     @Test
@@ -426,7 +481,6 @@ class FlowControllerConfigurationHandlerTest {
                 paymentElementLoader = defaultPaymentSheetLoader(),
                 uiContext = testDispatcher,
                 viewModel = viewModel,
-                paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
                 confirmationHandler = handler,
             )
 
@@ -472,8 +526,56 @@ class FlowControllerConfigurationHandlerTest {
             paymentElementLoader = paymentElementLoader,
             uiContext = testDispatcher,
             viewModel = viewModel,
-            paymentSelectionUpdater = { _, _, newState, _, _ -> newState.paymentSelection },
             confirmationHandler = FakeFlowControllerConfirmationHandler(),
         )
+    }
+
+    private fun paymentElementLoaderStateWithSetupFutureUsage(
+        configuration: PaymentSheet.Configuration,
+        paymentSelection: PaymentSelection?,
+    ): PaymentElementLoader.State {
+        return PaymentElementLoader.State(
+            config = configuration.asCommonConfiguration(),
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            paymentSelection = paymentSelection,
+            validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    setupFutureUsage = StripeIntent.Usage.OffSession,
+                ),
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("card"),
+                ),
+                isGooglePayReady = true,
+            ),
+        )
+    }
+
+    private class ResolvingPaymentElementLoader(
+        private val rawState: PaymentElementLoader.State,
+        private val resolver: PaymentSelectionUpdaterResolver = PaymentSelectionUpdaterResolver(
+            DefaultPaymentSelectionUpdater()
+        ),
+    ) : PaymentElementLoader {
+        var lastReconfigureContext: PaymentElementLoader.ReconfigureContext? = null
+            private set
+
+        override suspend fun load(
+            initializationMode: PaymentElementLoader.InitializationMode,
+            integrationConfiguration: PaymentElementLoader.Configuration,
+            metadata: PaymentElementLoader.Metadata,
+            reconfigureContext: PaymentElementLoader.ReconfigureContext?,
+        ): Result<PaymentElementLoader.State> {
+            lastReconfigureContext = reconfigureContext
+            return Result.success(
+                rawState.copy(
+                    paymentSelection = resolver.resolve(
+                        state = rawState,
+                        integrationConfiguration = integrationConfiguration,
+                        reconfigureContext = reconfigureContext,
+                    )
+                )
+            )
+        }
     }
 }

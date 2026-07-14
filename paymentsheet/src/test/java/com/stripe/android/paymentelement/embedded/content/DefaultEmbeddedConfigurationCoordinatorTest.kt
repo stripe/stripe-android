@@ -76,20 +76,16 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     }
 
     @Test
-    fun `configure sets state to previousSelection`() = testScenario(
-        selectionChooser = {
-            PaymentSelection.GooglePay
-        },
-    ) {
+    fun `configure passes the loaded selection through to the confirmation state`() = testScenario {
+        // Selection resolution (preserving the previous selection when still valid) is applied by
+        // the configuration handler; the coordinator uses whatever selection the handler returns.
+        val selection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         configurationHandler.emit(
             Result.success(
-                createPaymentElementLoaderState(
-                    paymentSelection = PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                )
+                createPaymentElementLoaderState(paymentSelection = selection)
             )
         )
 
-        selectionHolder.set(PaymentSelection.GooglePay)
         assertThat(confirmationStateHolder.state).isNull()
 
         assertThat(
@@ -101,7 +97,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         stateHelper.stateTurbine.awaitItem().let { state ->
             assertThat(state).isNotNull()
             assertThat(state?.confirmationState?.paymentMethodMetadata).isNotNull()
-            assertThat(state?.confirmationState?.selection).isEqualTo(PaymentSelection.GooglePay)
+            assertThat(state?.confirmationState?.selection).isEqualTo(selection)
         }
     }
 
@@ -190,7 +186,6 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
     }
 
     private fun testScenario(
-        selectionChooser: (PaymentSelection?) -> PaymentSelection? = { it },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
@@ -207,10 +202,6 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         val configurationCoordinator = DefaultEmbeddedConfigurationCoordinator(
             confirmationStateHolder = confirmationStateHolder,
             configurationHandler = configurationHandler,
-            selectionHolder = selectionHolder,
-            selectionChooser = { _, _, _, newSelection, _, _ ->
-                selectionChooser(newSelection)
-            },
             stateHelper = stateHelper,
             viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
         )

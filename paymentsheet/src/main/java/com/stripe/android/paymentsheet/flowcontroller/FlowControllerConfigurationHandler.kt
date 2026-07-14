@@ -19,7 +19,6 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     @UIContext private val uiContext: CoroutineContext,
     private val viewModel: FlowControllerViewModel,
-    private val paymentSelectionUpdater: PaymentSelectionUpdater,
     private val confirmationHandler: FlowControllerConfirmationHandler,
 ) {
 
@@ -85,7 +84,14 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = false,
                 initializedViaCompose = initializedViaCompose,
-            )
+            ),
+            // Preserve the customer's existing selection across reconfigures when it's still valid
+            // (the loader applies the payment selection updater via its injected resolver).
+            reconfigureContext = PaymentElementLoader.ReconfigureContext(
+                previousSelection = viewModel.paymentSelection,
+                previousPaymentSheetConfig = viewModel.state?.config,
+                walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
+            ),
         ).fold(
             onSuccess = { state ->
                 if (state.validationError != null) {
@@ -106,13 +112,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         state: PaymentSheetState.Full,
         configuration: PaymentSheet.Configuration,
     ) {
-        viewModel.paymentSelection = paymentSelectionUpdater(
-            selection = viewModel.paymentSelection,
-            previousConfig = viewModel.state?.config,
-            newState = state,
-            newConfig = configuration,
-            walletButtonsAlreadyShown = viewModel.walletButtonsRendered,
-        )
+        // The loader already resolved the selection (preserving the prior one when still valid)
+        // via its injected PaymentSelectionUpdaterResolver.
+        viewModel.paymentSelection = state.paymentSelection
 
         withContext(uiContext) {
             viewModel.state = DefaultFlowController.State(paymentSheetState = state, config = configuration)
