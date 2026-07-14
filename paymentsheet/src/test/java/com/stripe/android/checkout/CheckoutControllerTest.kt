@@ -51,9 +51,13 @@ internal class CheckoutControllerTest {
             .loadLabel(applicationContext.packageManager)
             .toString()
 
+    // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
+    private val controllerRule = CheckoutControllerTestRule()
+
     @get:Rule
     val ruleChain: RuleChain = RuleChain
-        .outerRule(networkRule)
+        .outerRule(controllerRule)
+        .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
 
     @Test
@@ -773,10 +777,12 @@ internal class CheckoutControllerTest {
     private fun createController(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): CheckoutController {
-        return CheckoutController.Builder(
-            application = applicationContext,
-            savedStateHandle = savedStateHandle,
-        ).build()
+        return controllerRule.track(
+            CheckoutController.Builder(
+                application = applicationContext,
+                savedStateHandle = savedStateHandle,
+            ).build()
+        )
     }
 
     private fun runConfigureScenario(
