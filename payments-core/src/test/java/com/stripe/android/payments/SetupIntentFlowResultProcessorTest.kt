@@ -33,6 +33,7 @@ internal class SetupIntentFlowResultProcessorTest {
     private val testDispatcher = UnconfinedTestDispatcher()
 
     private val mockStripeRepository: StripeRepository = mock()
+    private val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
 
     private val processor = SetupIntentFlowResultProcessor(
         ApplicationProvider.getApplicationContext(),
@@ -40,7 +41,7 @@ internal class SetupIntentFlowResultProcessorTest {
         mockStripeRepository,
         Logger.noop(),
         testDispatcher,
-        FakePollingAnalyticsEventReporter(),
+        pollingAnalyticsEventReporter,
     )
 
     @Test
@@ -480,5 +481,63 @@ internal class SetupIntentFlowResultProcessorTest {
             )
 
             assertThat(result).isEqualTo(expectedResult)
+        }
+
+    @Test
+    fun `Reports polling timeout analytics when Swish setup never reaches a terminal state`() =
+        runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.swish()
+            val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = paymentMethod,
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+                FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                    paymentMethodType = "swish",
+                    lastKnownStatus = "RequiresAction",
+                )
+            )
+        }
+
+    @Test
+    fun `Does not report polling timeout analytics when Swish setup succeeds`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = SetupIntentFixtures.SI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.swish(),
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrieveSetupIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            processor.processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            pollingAnalyticsEventReporter.ensureAllEventsConsumed()
         }
 }
