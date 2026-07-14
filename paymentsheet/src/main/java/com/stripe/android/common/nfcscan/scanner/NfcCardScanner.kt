@@ -23,6 +23,7 @@ internal interface NfcCardScanner {
     }
 
     data class Error(
+        val code: String,
         val userMessage: ResolvableString,
     )
 
@@ -68,7 +69,10 @@ internal class DefaultNfcCardScanner @Inject constructor(
                         val state = when (val result = cardValidator.validate(cardData)) {
                             is NfcCardValidator.Result.Validated -> NfcCardScanner.State.Complete(cardData)
                             is NfcCardValidator.Result.Invalid -> NfcCardScanner.State.Failed(
-                                error = NfcCardScanner.Error(result.userMessage)
+                                error = NfcCardScanner.Error(
+                                    code = result.errorCode,
+                                    userMessage = result.userMessage,
+                                )
                             )
                         }
 
@@ -84,6 +88,7 @@ internal class DefaultNfcCardScanner @Inject constructor(
 
     private companion object {
         val GENERIC_ERROR = NfcCardScanner.Error(
+            code = "unknown",
             userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
         )
     }

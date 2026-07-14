@@ -38,6 +38,7 @@ internal class DefaultNfcCardValidatorTest {
 
         assertThat(result).isEqualTo(
             NfcCardValidator.Result.Invalid(
+                errorCode = "cardUnsupportedByMerchant",
                 userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
             ),
         )
@@ -55,6 +56,7 @@ internal class DefaultNfcCardValidatorTest {
 
         assertThat(result).isEqualTo(
             NfcCardValidator.Result.Invalid(
+                errorCode = "expiredCard",
                 userMessage = R.string.stripe_nfc_scan_error_expired_card.resolvableString,
             ),
         )

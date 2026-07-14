@@ -54,15 +54,16 @@ internal class NfcScanningViewModelTest {
     }
 
     @Test
-    fun `card scanner failed reports attempt failed`() = runScenario {
+    fun `card scanner failed reports attempt failed with error code`() = runScenario {
         scannerState.emit(
             NfcCardScanner.State.Failed(
                 error = NfcCardScanner.Error(
+                    code = "expiredCard",
                     userMessage = R.string.stripe_nfc_expired_error.resolvableString,
                 ),
             ),
         )
-        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("expiredCard")
     }
 
     @Test
@@ -115,12 +116,15 @@ internal class NfcScanningViewModelTest {
 
             scannerState.emit(
                 NfcCardScanner.State.Failed(
-                    error = NfcCardScanner.Error(userMessage = errorMessage),
+                    error = NfcCardScanner.Error(
+                        code = "unknown",
+                        userMessage = errorMessage,
+                    ),
                 ),
             )
 
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
-            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("unknown")
         }
     }
 
@@ -133,11 +137,14 @@ internal class NfcScanningViewModelTest {
 
             scannerState.emit(
                 NfcCardScanner.State.Failed(
-                    error = NfcCardScanner.Error(userMessage = errorMessage),
+                    error = NfcCardScanner.Error(
+                        code = "unknown",
+                        userMessage = errorMessage,
+                    ),
                 ),
             )
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
-            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isNotNull()
+            assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("unknown")
 
             scannerState.emit(NfcCardScanner.State.Scanning)
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Scanning)
