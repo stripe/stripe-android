@@ -7,7 +7,6 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.Button
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
@@ -32,7 +29,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.checkout.CheckoutSession
-import com.stripe.android.checkout.PaymentElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.example.playground.PlaygroundTheme
 import com.stripe.android.uicore.format.CurrencyFormatter
@@ -47,7 +43,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val presenter = viewModel.controller.createPresenter(this)
-        val paymentElement = presenter.paymentElement()
+        val expressCheckoutElement = presenter.expressCheckoutElement()
 
         lifecycleScope.launch {
             viewModel.sessionComplete.collect {
@@ -71,32 +67,15 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                         is CheckoutControllerExampleViewModel.Status.Configured -> {
                             val session = currentStatus.checkoutSession
                             if (session != null) {
+                                expressCheckoutElement.Content()
+                                Spacer(modifier = Modifier.height(16.dp))
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
-                                paymentElement.PaymentOptionsContent()
                             }
                         }
                     }
                 },
-                bottomBarContent = {
-                    val configured = status as? CheckoutControllerExampleViewModel.Status.Configured
-//                    PaymentOptionRow(configured?.paymentOption)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { paymentElement.presentPaymentOptions() },
-                        enabled = configured != null,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Select Payment Method")
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Button(
-                        onClick = { presenter.confirm() },
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text("Confirm")
-                    }
-                },
+                bottomBarContent = {},
             )
         }
     }
@@ -126,33 +105,6 @@ private fun ErrorContent(message: String) {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = message)
-    }
-}
-
-@Composable
-private fun PaymentOptionRow(paymentOption: PaymentElement.PaymentOptionDisplayData?) {
-    if (paymentOption != null) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Image(
-                painter = paymentOption.iconPainter,
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-            )
-            Text(
-                text = paymentOption.label,
-                style = MaterialTheme.typography.body1,
-            )
-        }
-    } else {
-        Text(
-            text = "No payment method selected",
-            style = MaterialTheme.typography.body2,
-            color = Color.Gray,
-        )
     }
 }
 

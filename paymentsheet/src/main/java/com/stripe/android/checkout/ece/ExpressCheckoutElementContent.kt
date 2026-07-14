@@ -1,6 +1,5 @@
 package com.stripe.android.checkout.ece
 
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import com.stripe.android.link.ui.LinkButton
@@ -44,5 +43,4 @@ internal fun ExpressCheckoutElementContent(
             )
         }
     }
-    Text("hello world!")
 }

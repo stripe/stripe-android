@@ -24,9 +24,11 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             savedStateHandle[STATE_KEY] = value
         }
 
+    val stateFlow: StateFlow<CheckoutControllerState?>
+        get() = savedStateHandle.getStateFlow(STATE_KEY, null)
+
     val checkoutSession: StateFlow<CheckoutSession?> =
-        savedStateHandle.getStateFlow<CheckoutControllerState?>(STATE_KEY, null)
-            .mapAsStateFlow { it?.asCheckoutSession() }
+        stateFlow.mapAsStateFlow { it?.asCheckoutSession() }
 
     companion object {
         const val STATE_KEY = "CheckoutController_InternalState"

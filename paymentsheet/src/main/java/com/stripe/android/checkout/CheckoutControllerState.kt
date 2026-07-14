@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Parcelable
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -26,6 +27,7 @@ internal data class CheckoutControllerState(
     override val shippingAddress: Address.State?,
     override val billingAddress: Address.State?,
     val integrationLaunched: Boolean,
+    val paymentMethodMetadata: PaymentMethodMetadata?,
 ) : Parcelable, CheckoutSessionData {
     val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
         get() = PaymentElementLoader.InitializationMode.CheckoutSession(
@@ -58,6 +60,7 @@ internal data class CheckoutControllerState(
             shippingAddress = null,
             billingAddress = null,
             integrationLaunched = false,
+            paymentMethodMetadata = null,
         )
     }
 }

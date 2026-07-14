@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.CoroutineScope
@@ -26,7 +27,8 @@ class CheckoutController @Inject internal constructor(
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
-    private val stateHolder: CheckoutControllerStateHolder,
+    private val presenterFactory: CheckoutPresenter.Factory,
+    internal val stateHolder: CheckoutControllerStateHolder,
     internal val confirmationStateHolder: CheckoutConfirmationStateHolder,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
@@ -92,8 +94,9 @@ class CheckoutController @Inject internal constructor(
         TODO("Not yet implemented")
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        TODO("Not yet implemented")
+        return presenterFactory.create(this)
     }
 
     fun destroy() {
@@ -133,6 +136,7 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var adaptivePricingAllowed: Boolean = false
+        private var defaultBillingDetails: PaymentSheet.BillingDetails? = null
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
             CurrencySelectorElement.Configuration()
@@ -145,6 +149,12 @@ class CheckoutController @Inject internal constructor(
             adaptivePricingAllowed: Boolean
         ): Configuration = apply {
             this.adaptivePricingAllowed = adaptivePricingAllowed
+        }
+
+        fun defaultBillingDetails(
+            defaultBillingDetails: PaymentSheet.BillingDetails?
+        ): Configuration = apply {
+            this.defaultBillingDetails = defaultBillingDetails
         }
 
         fun paymentElement(
@@ -174,6 +184,7 @@ class CheckoutController @Inject internal constructor(
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
+            val defaultBillingDetails: PaymentSheet.BillingDetails?,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
@@ -182,6 +193,7 @@ class CheckoutController @Inject internal constructor(
 
         internal fun build(): State = State(
             adaptivePricingAllowed = adaptivePricingAllowed,
+            defaultBillingDetails = defaultBillingDetails,
             paymentElementConfiguration = paymentElementConfiguration.build(),
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),

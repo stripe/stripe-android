@@ -31,13 +31,14 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
-import com.stripe.android.paymentelement.confirmation.injection.ConfirmationHandlerModule
+import com.stripe.android.paymentelement.confirmation.injection.PaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
@@ -101,7 +102,7 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
-        ConfirmationHandlerModule::class,
+        PaymentElementConfirmationModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {
@@ -235,6 +236,10 @@ internal interface CheckoutControllerModule {
         fun provideEventReporterMode(): EventReporter.Mode {
             return EventReporter.Mode.Embedded
         }
+
+        @Provides
+        @Named(STATUS_BAR_COLOR)
+        fun provideStatusBarColor(): Int? = null
 
         @Provides
         @Singleton

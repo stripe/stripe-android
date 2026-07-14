@@ -11,6 +11,7 @@ import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -110,6 +111,14 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure populates controller state with payment method metadata`() = runConfigureScenario {
+        result.getOrThrow()
+        val controllerState = controller.stateHolder.state
+        assertThat(controllerState).isNotNull()
+        assertThat(controllerState!!.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
     fun `configure uses app name as merchant display name, not checkout session data`() =
         runConfigureScenario {
             result.getOrThrow()
@@ -127,6 +136,25 @@ internal class CheckoutControllerTest {
             result.getOrThrow()
             assertThat(controller.confirmationStateHolder.state?.configuration?.embeddedViewDisplaysMandateText)
                 .isFalse()
+        }
+
+    @Test
+    fun `configure succeeds when configuration provides billing email and response omits customer email`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().defaultBillingDetails(
+                PaymentSheet.BillingDetails(email = "merchant@example.com")
+            ),
+            networkSetup = {
+                networkRule.checkoutInit { response ->
+                    response.testBodyFromFile("checkout-session-init.json") { json ->
+                        json.getJSONObject("elements_session").remove("link_settings")
+                    }
+                }
+            },
+        ) {
+            result.getOrThrow()
+            assertThat(controller.confirmationStateHolder.state?.configuration?.defaultBillingDetails?.email)
+                .isEqualTo("merchant@example.com")
         }
 
     @Test
@@ -247,8 +275,7 @@ internal class CheckoutControllerTest {
         return CheckoutController.Builder(
             application = applicationContext,
             savedStateHandle = savedStateHandle,
-            resultCallback = {},
-        ).build()
+        ).resultCallback {}.build()
     }
 
     private fun runConfigureScenario(

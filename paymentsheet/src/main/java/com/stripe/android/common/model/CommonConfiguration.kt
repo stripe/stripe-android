@@ -5,6 +5,7 @@ import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
+import com.stripe.android.link.LinkControllerPreview
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -275,6 +276,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     allowedCardFundingTypes = allowedCardFundingTypes,
 )
 
+@OptIn(LinkControllerPreview::class)
 internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(
     merchantDisplayName = merchantDisplayName,
     customer = null,

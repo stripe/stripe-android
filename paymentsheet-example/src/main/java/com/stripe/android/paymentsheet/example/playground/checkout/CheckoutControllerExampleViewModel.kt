@@ -14,6 +14,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSession
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -65,7 +66,14 @@ internal class CheckoutControllerExampleViewModel(
     private suspend fun fetchAndConfigure() {
         repository.fetchCheckoutSessionClientSecret().fold(
             onSuccess = { clientSecret ->
-                controller.configure(clientSecret).fold(
+                controller.configure(
+                    clientSecret,
+                    configuration = CheckoutController.Configuration()
+                        // The example backend does not populate customer_email on the session.
+                        .defaultBillingDetails(
+                            PaymentSheet.BillingDetails(email = "checkout-controller@example.com")
+                        ),
+                ).fold(
                     onSuccess = {
                         _status.value = Status.Configured(
                             checkoutSession = controller.checkoutSession.value,

@@ -40,6 +40,7 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         val baseConfig = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
+            .defaultBillingDetails(resolvedState.configuration.defaultBillingDetails)
             .embeddedViewDisplaysMandateText(
                 resolvedState.configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
@@ -71,7 +72,7 @@ internal class CheckoutStateLoader @Inject constructor(
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        stateHolder.state = resolvedState
+        stateHolder.state = resolvedState.copy(paymentMethodMetadata = loaderState.paymentMethodMetadata)
         confirmationStateHolder.state = CheckoutConfirmationStateHolder.State(
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             selection = selection,
