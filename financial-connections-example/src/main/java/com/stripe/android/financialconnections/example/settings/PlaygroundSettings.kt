@@ -180,7 +180,6 @@ internal data class PlaygroundSettings(
             NativeSetting(),
             PermissionsSetting(),
             AccountsLimitSetting(),
-            RequireAccountNumbersSetting(),
             RequirePaymentMethodSupportSetting(),
             ManualEntrySetting(),
             EmailSetting(),
