@@ -1105,6 +1105,26 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun close_cancelsCollectors_soLaterSelectionUpdatesAreIgnored() {
+        runScenario(
+            initialSelection = PaymentSelection.Link(brand = LinkBrand.Link),
+            formTypeForCode = { FormHelper.FormType.Empty },
+        ) {
+            // The selection collector is live, so a selection change is reflected in state.
+            selectionSource.value = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+            assertThat(interactor.state.value.selection)
+                .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("cashapp"))
+
+            interactor.close()
+
+            // After close the collector is cancelled, so later selection changes are ignored.
+            selectionSource.value = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+            assertThat(interactor.state.value.selection)
+                .isEqualTo(PaymentMethodVerticalLayoutInteractor.Selection.New("cashapp"))
+        }
+    }
+
+    @Test
     fun verticalModeScreenSelection_isUpdatedToNullWhenCurrentScreen() {
         runScenario(
             initialSelection = PaymentSelection.Link(brand = LinkBrand.Link),

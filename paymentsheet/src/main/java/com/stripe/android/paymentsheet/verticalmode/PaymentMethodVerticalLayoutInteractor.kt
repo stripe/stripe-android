@@ -35,6 +35,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.drop
@@ -51,6 +52,8 @@ internal interface PaymentMethodVerticalLayoutInteractor {
     val showsWalletsHeader: StateFlow<Boolean>
 
     fun handleViewAction(viewAction: ViewAction)
+
+    fun close()
 
     data class State(
         val displayablePaymentMethods: List<DisplayablePaymentMethod>,
@@ -667,5 +670,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private fun shouldExpandOnClick(paymentMethodCode: PaymentMethodCode): Boolean {
         return PromotionSupportedPaymentMethods.supportedPaymentMethods.contains(paymentMethodCode) &&
             !shouldTransitionToFormScreen(paymentMethodCode)
+    }
+
+    override fun close() {
+        coroutineScope.cancel()
     }
 }
