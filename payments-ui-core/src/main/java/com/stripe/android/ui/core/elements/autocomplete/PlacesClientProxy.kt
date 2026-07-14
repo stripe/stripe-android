@@ -97,28 +97,31 @@ internal class DefaultPlacesClientProxy(
         country: String,
         limit: Int
     ): Result<FindAutocompletePredictionsResponse> {
+        // TODO: this looks like where we'd measure latency for the places SDK.
         return try {
-            val response = client.findAutocompletePredictions(
-                FindAutocompletePredictionsRequest
-                    .builder()
-                    .setSessionToken(token)
-                    .setQuery(query)
-                    .setCountries(listOf(country))
-                    .setTypesFilter(listOf(PlaceTypes.ADDRESS))
-                    .build()
-            ).await()
-            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
-            Result.success(
-                FindAutocompletePredictionsResponse(
-                    autocompletePredictions = response.autocompletePredictions.map {
-                        AutocompletePrediction(
-                            primaryText = it.getPrimaryText(StyleSpan(Typeface.BOLD)),
-                            secondaryText = it.getSecondaryText(StyleSpan(Typeface.BOLD)),
-                            placeId = it.placeId
-                        )
-                    }.take(limit)
+            durationProvider.measureDuration(YOUR KEY) {
+                val response = client.findAutocompletePredictions(
+                    FindAutocompletePredictionsRequest
+                        .builder()
+                        .setSessionToken(token)
+                        .setQuery(query)
+                        .setCountries(listOf(country))
+                        .setTypesFilter(listOf(PlaceTypes.ADDRESS))
+                        .build()
+                ).await()
+                errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
+                Result.success(
+                    FindAutocompletePredictionsResponse(
+                        autocompletePredictions = response.autocompletePredictions.map {
+                            AutocompletePrediction(
+                                primaryText = it.getPrimaryText(StyleSpan(Typeface.BOLD)),
+                                secondaryText = it.getSecondaryText(StyleSpan(Typeface.BOLD)),
+                                placeId = it.placeId
+                            )
+                        }.take(limit)
+                    )
                 )
-            )
+            }
         } catch (e: Exception) {
             errorReporter.report(
                 ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR,

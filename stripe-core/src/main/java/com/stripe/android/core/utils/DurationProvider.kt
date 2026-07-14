@@ -48,7 +48,8 @@ interface DurationProvider {
         Attest,
         IntentConfirmationChallenge,
         IntentConfirmationChallengeWebViewLoaded,
-        PaymentMethodMessaging
+        PaymentMethodMessaging,
+        // TODO: add a new duration key.
     }
 }
 
@@ -90,6 +91,7 @@ class DefaultDurationProvider @VisibleForTesting internal constructor(
         return completedStore[key]
     }
 
+    // TODO: use this function.
     override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
         start(key, reset = true)
         return try {
