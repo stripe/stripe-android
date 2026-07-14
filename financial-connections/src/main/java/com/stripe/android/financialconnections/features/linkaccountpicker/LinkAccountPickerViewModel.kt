@@ -366,7 +366,8 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         val selectedAccountIds = when {
             payload.singleAccount -> listOf(partnerAccount.id)
             partnerAccount.id in payload.selectedAccountIds -> payload.selectedAccountIds - partnerAccount.id
-            payload.accountsLimit != null && payload.selectedAccountIds.size >= payload.accountsLimit -> payload.selectedAccountIds
+            payload.accountsLimit != null &&
+                payload.selectedAccountIds.size >= payload.accountsLimit -> payload.selectedAccountIds
             else -> payload.selectedAccountIds + partnerAccount.id
         }
 
