@@ -3,17 +3,14 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling.di
 import android.app.Application
 import android.content.Context
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.DefaultTimeProvider
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.TimeProvider
 import com.stripe.android.polling.DefaultIntentStatusPoller
-import com.stripe.android.polling.DefaultPollingAnalyticsEventReporter
 import com.stripe.android.polling.IntentStatusPoller
-import com.stripe.android.polling.PollingAnalyticsEventReporter
+import com.stripe.android.polling.PollingAnalyticsModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -21,7 +18,7 @@ import javax.inject.Named
 
 @Module(
     subcomponents = [PollingViewModelSubcomponent::class],
-    includes = [PaymentConfigurationModule::class],
+    includes = [PaymentConfigurationModule::class, PollingAnalyticsModule::class],
 )
 internal interface PollingViewModelModule {
 
@@ -30,12 +27,6 @@ internal interface PollingViewModelModule {
 
     @Binds
     fun bindsTimeProvider(impl: DefaultTimeProvider): TimeProvider
-
-    @Binds
-    fun bindsPollingAnalyticsEventReporter(impl: DefaultPollingAnalyticsEventReporter): PollingAnalyticsEventReporter
-
-    @Binds
-    fun bindsAnalyticsRequestFactory(impl: PaymentAnalyticsRequestFactory): AnalyticsRequestFactory
 
     companion object {
 

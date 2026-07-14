@@ -1005,6 +1005,54 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
+    fun `Reports last known status from prior poll when final retrieve fails`() =
+        runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.swish()
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = paymentMethod,
+                paymentMethodTypes = listOf("card", "swish"),
+            )
+
+            // The first retrieve (in processResult, before polling starts) and the second retrieve
+            // (the initial poll inside pollStripeIntentUntilTerminalState) both succeed with a known
+            // status; every retrieve after that (including the final one made after the polling
+            // window closes) fails.
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.failure(APIConnectionException()),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("No expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+            val pollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter()
+
+            // The final retrieve failing means processResult itself fails (this is existing,
+            // unrelated behavior); what this test pins is that the analytics event still reports
+            // the last successfully observed status rather than losing it to the failed call.
+            val result = createProcessor(pollingAnalyticsEventReporter = pollingAnalyticsEventReporter).processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            )
+
+            assertThat(result.isFailure).isTrue()
+
+            assertThat(pollingAnalyticsEventReporter.awaitCall()).isEqualTo(
+                FakePollingAnalyticsEventReporter.Call.PollingTimedOut(
+                    paymentMethodType = "swish",
+                    lastKnownStatus = "RequiresAction",
+                    timeLimitSeconds = REDUCED_POLLING_DURATION / 1000,
+                )
+            )
+        }
+
+    @Test
     fun `Does not report polling timeout analytics when Swish payment succeeds`() =
         runTest(testDispatcher) {
             val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(

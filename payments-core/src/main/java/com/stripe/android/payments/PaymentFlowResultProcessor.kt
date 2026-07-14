@@ -244,18 +244,21 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     ): Result<T> {
         var timeOfLastRequest = initialRetrieveIntentStartTime
         var stripeIntentResult: Result<T>? = null
+        var lastObservedStatus: StripeIntent.Status? = null
 
         val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
             (System.currentTimeMillis() - initialRetrieveIntentStartTime)
 
         withTimeoutOrNull(timeRemaining) {
             stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            lastObservedStatus = stripeIntentResult?.getOrNull()?.status ?: lastObservedStatus
             while (shouldRetry(stripeIntentResult)) {
                 // We want to delay a maximum of 1s between requests, including the time the request took.
                 // e.g. if the previous request took 250ms, the delay will be 750ms
                 delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
                 timeOfLastRequest = System.currentTimeMillis()
                 stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+                lastObservedStatus = stripeIntentResult?.getOrNull()?.status ?: lastObservedStatus
             }
         }
 
@@ -264,11 +267,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // at least once after the polling duration
         if (shouldRetry(stripeIntentResult) || stripeIntentResult == null) {
             stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            lastObservedStatus = stripeIntentResult?.getOrNull()?.status ?: lastObservedStatus
 
             if (shouldRetry(stripeIntentResult)) {
                 pollingAnalyticsEventReporter.onPollingTimedOut(
                     paymentMethodType = originalIntent.paymentMethod?.type?.code ?: "unknown",
-                    lastKnownStatus = stripeIntentResult?.getOrNull()?.status?.name,
+                    lastKnownStatus = lastObservedStatus?.name,
                     timeLimitSeconds = getPollingDurationForPaymentMethod(originalIntent) / 1000,
                 )
             }
