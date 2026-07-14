@@ -77,6 +77,7 @@ internal class FaceDetectorTransitioner(
     private var captureStarted = false
     private var activeCaptureStartedAt: ComparableTimeMark = TimeSource.Monotonic.markNow()
     private var sideCapturePromptCompleted = true
+    private var sideCaptureBestFrameStartedAt: ComparableTimeMark? = null
     private val captureSequence = buildList {
         add(Capture.FRONT)
         if (enable3DFaceCapture) {
@@ -103,6 +104,7 @@ internal class FaceDetectorTransitioner(
         captureStarted = false
         activeCaptureStartedAt = TimeSource.Monotonic.markNow()
         sideCapturePromptCompleted = true
+        sideCaptureBestFrameStartedAt = null
         return this
     }
 
@@ -233,11 +235,6 @@ internal class FaceDetectorTransitioner(
             Log.d(TAG, "Timeout in Initial state: $initialState")
             return IdentityScanState.TimeOut(initialState.type, this)
         }
-        if (shouldWaitForSideCapturePrompt()) {
-            Log.d(TAG, "Showing $activeCapture instruction prompt, stay in Initial")
-            return initialState
-        }
-
         val shouldRefreshInitialAfterSidePrompt = consumeSideCapturePromptCompletion()
         val nowTimestampMs = SystemClock.elapsedRealtime()
         val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
@@ -246,12 +243,16 @@ internal class FaceDetectorTransitioner(
         return when {
             isFrameValidForActiveCapture(analyzerOutput, motionBlurResult) -> {
                 Log.d(TAG, "Valid face found, transition to Found")
+                if (activeCapture != Capture.FRONT) {
+                    sideCapturePromptCompleted = true
+                    sideCaptureBestFrameStartedAt = TimeSource.Monotonic.markNow()
+                }
                 saveFrame(
                     analyzerInput = analyzerInput,
                     analyzerOutput = analyzerOutput,
                     motionBlurResult = motionBlurResult
                 )
-                if (isActiveCaptureCollected()) {
+                if (activeCapture == Capture.FRONT && isActiveCaptureCollected()) {
                     completedCapture = activeCapture
                     Satisfied(initialState.type, this)
                 } else {
@@ -287,6 +288,15 @@ internal class FaceDetectorTransitioner(
 
         val nowTimestampMs = SystemClock.elapsedRealtime()
         val motionBlurResult = determineMotionBlurResult(analyzerOutput, nowTimestampMs)
+
+        if (activeCapture != Capture.FRONT) {
+            return transitionFromFoundForSideCapture(
+                foundState = foundState,
+                analyzerInput = analyzerInput,
+                analyzerOutput = analyzerOutput,
+                motionBlurResult = motionBlurResult
+            )
+        }
 
         return when {
             timeoutAt.hasPassedNow() -> {
@@ -353,11 +363,49 @@ internal class FaceDetectorTransitioner(
         }
     }
 
+    private suspend fun transitionFromFoundForSideCapture(
+        foundState: Found,
+        analyzerInput: AnalyzerInput,
+        analyzerOutput: FaceDetectorOutput,
+        motionBlurResult: MotionBlurDetector.Output?
+    ): IdentityScanState {
+        if (timeoutAt.hasPassedNow()) {
+            return IdentityScanState.TimeOut(foundState.type, this)
+        }
+
+        val bestFrameStartedAt = sideCaptureBestFrameStartedAt
+            ?: TimeSource.Monotonic.markNow().also { sideCaptureBestFrameStartedAt = it }
+
+        if (bestFrameStartedAt.elapsedNow() >= SIDE_CAPTURE_BEST_FRAME_DURATION.milliseconds) {
+            completedCapture = activeCapture
+            return Satisfied(foundState.type, this)
+        }
+
+        if (foundState.reachedStateAt.elapsedNow() < selfieCapturePage.sampleInterval.milliseconds) {
+            return foundState
+        }
+
+        return if (isFrameValidForActiveCapture(analyzerOutput, motionBlurResult)) {
+            saveFrame(
+                analyzerInput = analyzerInput,
+                analyzerOutput = analyzerOutput,
+                motionBlurResult = motionBlurResult
+            )
+            Found(foundState.type, this)
+        } else {
+            foundState
+        }
+    }
+
     override suspend fun transitionFromSatisfied(
         satisfiedState: Satisfied,
         analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
+        if (satisfiedState.reachedStateAt.elapsedNow() < captureAcknowledgementDuration().milliseconds) {
+            return satisfiedState
+        }
+
         val nextCapture = nextCapture()
         return if (nextCapture == null) {
             Finished(satisfiedState.type, this)
@@ -367,6 +415,7 @@ internal class FaceDetectorTransitioner(
             completedCapture = null
             captureGuideProgress = 0f
             sideCapturePromptCompleted = false
+            sideCaptureBestFrameStartedAt = null
             motionBlurDetector.reset()
             Initial(
                 type = satisfiedState.type,
@@ -484,15 +533,30 @@ internal class FaceDetectorTransitioner(
 
     private fun shouldWaitForSideCapturePrompt(): Boolean {
         return activeCapture != Capture.FRONT &&
+            !sideCapturePromptCompleted &&
             activeCaptureStartedAt.elapsedNow() < sideCapturePromptDuration.milliseconds
     }
 
     private fun consumeSideCapturePromptCompletion(): Boolean {
-        if (activeCapture == Capture.FRONT || sideCapturePromptCompleted) {
+        if (activeCapture == Capture.FRONT ||
+            sideCapturePromptCompleted ||
+            activeCaptureStartedAt.elapsedNow() < sideCapturePromptDuration.milliseconds
+        ) {
             return false
         }
         sideCapturePromptCompleted = true
         return true
+    }
+
+    private fun captureAcknowledgementDuration(): Int {
+        if (!uses3DFaceCapture) {
+            return LEGACY_CAPTURE_ACKNOWLEDGEMENT_DURATION
+        }
+        return if (completedCapture == Capture.FRONT) {
+            FRONT_CAPTURE_ACKNOWLEDGEMENT_DURATION
+        } else {
+            SIDE_CAPTURE_ACKNOWLEDGEMENT_DURATION
+        }
     }
 
     private suspend fun saveFrame(
@@ -619,6 +683,7 @@ internal class FaceDetectorTransitioner(
         return poseSequence
             ?.mapNotNull { Capture.fromPoseSequenceValue(it) }
             ?.filter { it != Capture.FRONT }
+            ?.distinct()
             ?.takeIf { it.isNotEmpty() }
             ?: DEFAULT_SIDE_CAPTURE_SEQUENCE
     }
@@ -671,10 +736,14 @@ internal class FaceDetectorTransitioner(
         const val VALUE_LEFT = "left"
         const val VALUE_RIGHT = "right"
         const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
-        const val DEFAULT_SIDE_CAPTURE_PROMPT_DURATION = 900
+        const val DEFAULT_SIDE_CAPTURE_PROMPT_DURATION = 1000
         const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 10000000
 
         private const val SIDE_CAPTURE_NUM_FRAMES = 2
+        private const val SIDE_CAPTURE_BEST_FRAME_DURATION = 1000
+        private const val LEGACY_CAPTURE_ACKNOWLEDGEMENT_DURATION = 550
+        private const val FRONT_CAPTURE_ACKNOWLEDGEMENT_DURATION = 1400
+        private const val SIDE_CAPTURE_ACKNOWLEDGEMENT_DURATION = 1500
         private const val SIDE_CAPTURE_YAW_THRESHOLD_RADIANS = 0.2617994f // 15 degrees
         private const val DEFAULT_MOTION_BLUR_MIN_DURATION_MS = 100L
         private const val DEFAULT_UNKNOWN_STABILITY_SCORE = 0.5f

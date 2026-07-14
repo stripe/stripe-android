@@ -7,6 +7,12 @@ import android.graphics.Shader
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -31,7 +37,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
@@ -46,6 +54,7 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
@@ -136,6 +145,15 @@ private const val CAPTURE_GUIDE_TICK_SHADOW_ALPHA = 0.3f
 private const val CAPTURED_SELFIE_OVERLAY_ALPHA = 0.16f
 private const val STATUS_PILL_TEXT_SHADOW_ALPHA = 0.35f
 private const val STATUS_PILL_BACKGROUND_COLOR = 0x9921252C
+private const val STATUS_PILL_FADE_IN_DURATION = 180
+private const val STATUS_PILL_FADE_OUT_DURATION = 600
+private const val LIVE_PREVIEW_BLUR_IN_DURATION = 300
+private const val LIVE_PREVIEW_BLUR_OUT_DURATION = 600
+private const val TURN_PROMPT_ARROW_DURATION = 450
+private const val CAPTURE_CHECKMARK_GROW_DURATION = 420
+private const val CAPTURE_CHECKMARK_FADE_DURATION = 340
+private const val CAPTURE_CHECKMARK_TOTAL_DURATION =
+    CAPTURE_CHECKMARK_GROW_DURATION + CAPTURE_CHECKMARK_FADE_DURATION
 private val HALF_PI_RADIANS = (PI / 2.0).toFloat()
 private val PI_RADIANS = PI.toFloat()
 private val THREE_HALVES_PI_RADIANS = (PI * 1.5).toFloat()
@@ -244,6 +262,9 @@ private fun SelfieCaptureScreen(
     val faceDetectorTransitioner =
         (selfieScannerState as? IdentityScanViewModel.State.Scanned)
             ?.result?.identityState?.transitioner as? FaceDetectorTransitioner
+    val scanState = (selfieScannerState as? IdentityScanViewModel.State.Scanning)?.scanState
+    val showPreCameraInstruction =
+        selfieScannerState is IdentityScanViewModel.State.Scanning && scanState == null
 
     Column(
         modifier = Modifier
@@ -270,24 +291,25 @@ private fun SelfieCaptureScreen(
                 fontSize = dimensionResourceSp(id = R.dimen.stripe_scan_title_text_size),
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = feedback?.let { stringResource(id = it) } ?: "",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp)
-                    .padding(
-                        top = 20.dp,
-                        bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
-                        start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-                        end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
-                    )
-                    .semantics {
-                        testTag = SELFIE_SCAN_MESSAGE_TAG
-                    },
-                maxLines = 3
-            )
+            if (showPreCameraInstruction) {
+                Text(
+                    text = feedback?.let { stringResource(id = it) } ?: "",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .padding(
+                            top = 20.dp,
+                            bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
+                            start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                            end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
+                        )
+                        .semantics {
+                            testTag = SELFIE_SCAN_MESSAGE_TAG
+                        },
+                    maxLines = 3
+                )
+            }
 
-            val scanState = (selfieScannerState as? IdentityScanViewModel.State.Scanning)?.scanState
             val isCheckingImages = faceDetectorTransitioner != null
             val status = selfieScannerState.status()
             val isShowingSideCapturePrompt = scanState.isWaitingForSideCapturePrompt()
@@ -344,6 +366,28 @@ private fun SelfieCameraViewFinder(
     }
 
     AnnounceSelfieStatus(status)
+    var retainedStatus by remember { mutableStateOf<SelfieStatus?>(null) }
+    val statusOpacity = remember { Animatable(0f) }
+    LaunchedEffect(status) {
+        if (status != null) {
+            retainedStatus = status
+        }
+    }
+    LaunchedEffect(status != null) {
+        if (status != null) {
+            statusOpacity.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = STATUS_PILL_FADE_IN_DURATION)
+            )
+        } else if (retainedStatus != null) {
+            statusOpacity.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = STATUS_PILL_FADE_OUT_DURATION)
+            )
+            retainedStatus = null
+        }
+    }
+    val displayedStatus = status ?: retainedStatus
 
     Box(
         modifier = Modifier
@@ -358,7 +402,7 @@ private fun SelfieCameraViewFinder(
         SelfieCameraViewFinderContent(
             capturedSelfie = capturedSelfie,
             cameraManager = cameraManager,
-            blurCamera = isShowingSideCapturePrompt
+            blurCamera = isShowingSideCapturePrompt || status?.isSideCaptured == true
         )
         if (showCaptureGuide) {
             CaptureGuide(showCaptureGuideShadow, captureGuideState)
@@ -375,20 +419,23 @@ private fun SelfieCameraViewFinder(
                 modifier = Modifier.align(Alignment.Center)
             )
         }
-        status?.let {
+        displayedStatus?.let {
             val statusModifier = when {
                 it == SelfieStatus.CheckingImages ||
                     (it.isSideCaptureInstruction && isShowingSideCapturePrompt) ->
                     Modifier
                         .align(Alignment.Center)
+                        .graphicsLayer { alpha = statusOpacity.value }
 
                 else ->
                     Modifier
                         .align(Alignment.BottomCenter)
-                        .padding(bottom = 32.dp)
+                        .padding(bottom = 40.dp)
+                        .graphicsLayer { alpha = statusOpacity.value }
             }
             SelfieStatusBadge(
                 status = it,
+                showDirectionalArrow = it.isSideCaptureInstruction && isShowingSideCapturePrompt,
                 modifier = statusModifier
             )
         }
@@ -431,13 +478,20 @@ private fun SelfieCameraViewFinderContent(
                 .background(Color.Black.copy(alpha = CAPTURED_SELFIE_OVERLAY_ALPHA))
         )
     } else {
-        val cameraModifier = if (blurCamera) {
-            Modifier
-                .fillMaxSize()
-                .blur(16.dp)
-        } else {
-            Modifier.fillMaxSize()
-        }
+        val blurRadius by animateDpAsState(
+            targetValue = if (blurCamera) 16.dp else 0.dp,
+            animationSpec = tween(
+                durationMillis = if (blurCamera) {
+                    LIVE_PREVIEW_BLUR_IN_DURATION
+                } else {
+                    LIVE_PREVIEW_BLUR_OUT_DURATION
+                }
+            ),
+            label = "selfie_live_preview_blur"
+        )
+        val cameraModifier = Modifier
+            .fillMaxSize()
+            .blur(blurRadius)
         AndroidView(
             modifier = cameraModifier,
             factory = {
@@ -503,6 +557,9 @@ private val SelfieStatus.isCaptured: Boolean
 private val SelfieStatus.isSideCaptureInstruction: Boolean
     get() = this == SelfieStatus.LookLeft || this == SelfieStatus.LookRight
 
+private val SelfieStatus.isSideCaptured: Boolean
+    get() = this == SelfieStatus.CapturedLeft || this == SelfieStatus.CapturedRight
+
 private fun IdentityScanViewModel.State.status(): SelfieStatus? {
     return when (this) {
         is IdentityScanViewModel.State.Scanning -> scanState.status()
@@ -514,7 +571,7 @@ private fun IdentityScanViewModel.State.status(): SelfieStatus? {
 private fun IdentityScanState?.status(): SelfieStatus? {
     val transitioner = this?.transitioner as? FaceDetectorTransitioner
     return when (this) {
-        null -> SelfieStatus.PlaceFace
+        null -> null
         is IdentityScanState.Initial -> when (transitioner?.activeCapture) {
             FaceDetectorTransitioner.Capture.LEFT -> SelfieStatus.LookLeft
             FaceDetectorTransitioner.Capture.RIGHT -> SelfieStatus.LookRight
@@ -522,13 +579,13 @@ private fun IdentityScanState?.status(): SelfieStatus? {
             null -> SelfieStatus.PlaceFace
         }
         is IdentityScanState.Found -> SelfieStatus.HoldStill
-        is IdentityScanState.Satisfied -> when (transitioner?.completedCapture) {
+        is IdentityScanState.Satisfied,
+        is IdentityScanState.Finished -> when (transitioner?.completedCapture) {
             FaceDetectorTransitioner.Capture.LEFT -> SelfieStatus.CapturedLeft
             FaceDetectorTransitioner.Capture.RIGHT -> SelfieStatus.CapturedRight
             FaceDetectorTransitioner.Capture.FRONT,
             null -> SelfieStatus.CapturedFront
         }
-        is IdentityScanState.Finished -> SelfieStatus.CapturedRight
         is IdentityScanState.TimeOut,
         is IdentityScanState.Unsatisfied -> null
     }
@@ -611,32 +668,69 @@ private fun IdentityScanState?.isWaitingForSideCapturePrompt(): Boolean {
 }
 
 private fun FaceDetectorTransitioner.lastCapturedSelfie(): Bitmap {
-    return filteredFrames[FaceDetectorTransitioner.INDEX_LAST].first.cameraPreviewImage.image
+    val frame = when (completedCapture) {
+        FaceDetectorTransitioner.Capture.LEFT -> frameForSelfie(FaceDetectorTransitioner.Selfie.LEFT)
+        FaceDetectorTransitioner.Capture.RIGHT -> frameForSelfie(FaceDetectorTransitioner.Selfie.RIGHT)
+        FaceDetectorTransitioner.Capture.FRONT,
+        null -> filteredFrames[FaceDetectorTransitioner.INDEX_LAST]
+    }
+    return frame.first.cameraPreviewImage.image
 }
 
 @Composable
 private fun CapturedSelfieCheckmark(
     modifier: Modifier = Modifier
 ) {
+    val timeline = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        timeline.animateTo(
+            targetValue = 1f,
+            animationSpec = tween(
+                durationMillis = CAPTURE_CHECKMARK_TOTAL_DURATION,
+                easing = LinearEasing
+            )
+        )
+    }
+    val elapsedMillis = timeline.value * CAPTURE_CHECKMARK_TOTAL_DURATION
+    val growProgress = if (elapsedMillis <= CAPTURE_CHECKMARK_GROW_DURATION) {
+        FastOutSlowInEasing.transform(elapsedMillis / CAPTURE_CHECKMARK_GROW_DURATION)
+    } else {
+        1f
+    }
+    val opacity = if (elapsedMillis <= CAPTURE_CHECKMARK_GROW_DURATION) {
+        growProgress
+    } else {
+        1f - (
+            (elapsedMillis - CAPTURE_CHECKMARK_GROW_DURATION) /
+                CAPTURE_CHECKMARK_FADE_DURATION
+            ).coerceIn(0f, 1f)
+    }
+    val scale = 0.72f + (0.28f * growProgress)
+
     Canvas(
         modifier = modifier
-            .size(36.dp)
+            .size(28.dp)
+            .graphicsLayer {
+                alpha = opacity
+                scaleX = scale
+                scaleY = scale
+            }
             .testTag(SELFIE_CAPTURED_CHECK_TAG)
     ) {
         drawCircle(
-            color = Color.White.copy(alpha = 0.94f),
-            radius = size.minDimension / 2f
+            color = Color.White,
+            radius = (size.minDimension / 2f) - 1.dp.toPx()
         )
         val checkPath = Path().apply {
-            moveTo(size.width * 0.3f, size.height * 0.52f)
-            lineTo(size.width * 0.44f, size.height * 0.66f)
-            lineTo(size.width * 0.72f, size.height * 0.36f)
+            moveTo(size.width * 0.31f, size.height * 0.52f)
+            lineTo(size.width * 0.44f, size.height * 0.65f)
+            lineTo(size.width * 0.70f, size.height * 0.38f)
         }
         drawPath(
             path = checkPath,
-            color = Color(0xFF8F949B),
+            color = Color(CAPTURE_GUIDE_ACTIVE_TICK_COLOR),
             style = Stroke(
-                width = 3.dp.toPx(),
+                width = 2.6.dp.toPx(),
                 cap = StrokeCap.Round,
                 join = StrokeJoin.Round
             )
@@ -760,13 +854,14 @@ private fun centeredGuideShadowPath(
 @Composable
 private fun SelfieStatusBadge(
     status: SelfieStatus,
+    showDirectionalArrow: Boolean,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .background(
                 color = Color(STATUS_PILL_BACKGROUND_COLOR),
-                shape = RoundedCornerShape(4.dp)
+                shape = RoundedCornerShape(8.dp)
             )
             .padding(horizontal = 8.dp, vertical = 6.dp)
             .semantics(mergeDescendants = true) {
@@ -775,6 +870,9 @@ private fun SelfieStatusBadge(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (showDirectionalArrow && status == SelfieStatus.LookLeft) {
+            DirectionalPromptArrow(status)
+        }
         if (status.showsActivityIndicator) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -790,6 +888,7 @@ private fun SelfieStatusBadge(
             color = Color.White,
             fontSize = 12.sp,
             lineHeight = 16.sp,
+            fontWeight = FontWeight.Medium,
             style = MaterialTheme.typography.body2.copy(
                 shadow = Shadow(
                     color = Color.Black.copy(alpha = STATUS_PILL_TEXT_SHADOW_ALPHA),
@@ -798,7 +897,47 @@ private fun SelfieStatusBadge(
                 )
             )
         )
+        if (showDirectionalArrow && status == SelfieStatus.LookRight) {
+            DirectionalPromptArrow(status)
+        }
     }
+}
+
+@Composable
+private fun DirectionalPromptArrow(status: SelfieStatus) {
+    val isLeft = status == SelfieStatus.LookLeft
+    val transition = rememberInfiniteTransition(label = "selfie_turn_prompt_arrow")
+    val outwardOffset by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 5.dp.value,
+        animationSpec = infiniteRepeatable(
+            animation = tween(
+                durationMillis = TURN_PROMPT_ARROW_DURATION,
+                easing = FastOutSlowInEasing
+            ),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "selfie_turn_prompt_arrow_offset"
+    )
+    Text(
+        text = if (isLeft) "←" else "→",
+        modifier = Modifier
+            .padding(
+                start = if (isLeft) 0.dp else 4.dp,
+                end = if (isLeft) 4.dp else 0.dp
+            )
+            .graphicsLayer {
+                translationX = if (isLeft) {
+                    -outwardOffset.dp.toPx()
+                } else {
+                    outwardOffset.dp.toPx()
+                }
+            },
+        color = Color.White,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        fontWeight = FontWeight.Medium
+    )
 }
 
 @Composable
