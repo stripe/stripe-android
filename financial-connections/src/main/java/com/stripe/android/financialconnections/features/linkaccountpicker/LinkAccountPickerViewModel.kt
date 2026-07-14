@@ -121,7 +121,8 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 singleAccount = manifest.singleAccount,
                 acquireConsentOnPrimaryCtaClick = accountsResponse.acquireConsentOnPrimaryCtaClick ?: false,
-                selectedAccountIds = selectedAccountIds
+                selectedAccountIds = selectedAccountIds,
+                accountsLimit = manifest.limits?.accounts,
             )
         }.execute {
             copy(payload = it)
@@ -365,6 +366,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         val selectedAccountIds = when {
             payload.singleAccount -> listOf(partnerAccount.id)
             partnerAccount.id in payload.selectedAccountIds -> payload.selectedAccountIds - partnerAccount.id
+            payload.accountsLimit != null && payload.selectedAccountIds.size >= payload.accountsLimit -> payload.selectedAccountIds
             else -> payload.selectedAccountIds + partnerAccount.id
         }
 
@@ -470,6 +472,7 @@ internal data class LinkAccountPickerState(
         val aboveCta: String?,
         val defaultDataAccessNotice: DataAccessNotice?,
         val acquireConsentOnPrimaryCtaClick: Boolean,
+        val accountsLimit: Int? = null,
     ) {
 
         val selectedAccounts: List<LinkedAccount>

@@ -27,4 +27,12 @@ data class LinkAccountSessionBody(
     val stripeAccountId: String? = null,
     @SerialName("relink_authorization")
     val relinkAuthorization: String? = null,
+    @SerialName("require_payment_method_support")
+    val requirePaymentMethodSupport: String? = null,
+    @SerialName("require_account_numbers")
+    val requireAccountNumbers: String? = null,
+    @SerialName("accounts_limit")
+    val accountsLimit: Int? = null,
+    @SerialName("manual_entry_mode")
+    val manualEntryMode: String? = null,
 )
