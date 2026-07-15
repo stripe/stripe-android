@@ -2,15 +2,19 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
+import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.executeRequestWithResultParser
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
@@ -20,6 +24,8 @@ import javax.inject.Named
 internal class CheckoutSessionRepository @Inject constructor(
     private val clientParams: ElementsSessionClientParams,
     private val stripeNetworkClient: StripeNetworkClient,
+    private val analyticsRequestExecutor: AnalyticsRequestExecutor,
+    private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) {
@@ -184,7 +190,20 @@ internal class CheckoutSessionRepository @Inject constructor(
             "updated_currency" to currencyCode,
             "elements_session_client[is_aggregation_expected]" to "true",
         ),
-    )
+    ).onSuccess {
+        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
+    }.onFailure {
+        fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
+    }
+
+    private fun fireEvent(event: PaymentSheetEvent) {
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = event,
+                additionalParams = event.params,
+            )
+        )
+    }
 
     private companion object {
         private const val UNSUPPORTED_UPDATE_ERROR =

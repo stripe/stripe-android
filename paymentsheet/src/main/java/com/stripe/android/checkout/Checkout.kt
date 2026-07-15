@@ -15,21 +15,16 @@ import com.stripe.android.checkout.Checkout.Companion.configure
 import com.stripe.android.checkout.Checkout.Companion.createWithState
 import com.stripe.android.checkout.injection.CheckoutComponent
 import com.stripe.android.checkout.injection.DaggerCheckoutComponent
-import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import dev.drewhamilton.poko.Poko
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withTimeout
@@ -527,16 +522,8 @@ class Checkout private constructor(
         }
     }
 
-    internal suspend fun updateCurrency(currency: String): Result<Unit> {
-        val result = withInternalState { sessionId ->
-            component.checkoutSessionRepository.updateCurrency(sessionId, currency)
-        }
-        result.onSuccess {
-            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
-        }.onFailure {
-            fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggledFailed(error = it.safeAnalyticsMessage))
-        }
-        return result
+    internal suspend fun updateCurrency(currency: String): Result<Unit> = withInternalState { sessionId ->
+        component.checkoutSessionRepository.updateCurrency(sessionId, currency)
     }
 
     internal fun markIntegrationLaunched() {
@@ -632,16 +619,5 @@ class Checkout private constructor(
             errorMessage = errorMessage?.resolve(),
             appearance = appearanceState,
         )
-    }
-
-    private fun fireEvent(event: PaymentSheetEvent) {
-        CoroutineScope(Dispatchers.IO).launch {
-            component.analyticsRequestExecutor.executeAsync(
-                component.paymentAnalyticsRequestFactory.createRequest(
-                    event = event,
-                    additionalParams = event.params,
-                )
-            )
-        }
     }
 }

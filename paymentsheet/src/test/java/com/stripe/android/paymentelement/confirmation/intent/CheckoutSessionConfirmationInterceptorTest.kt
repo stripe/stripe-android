@@ -28,6 +28,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -42,6 +43,7 @@ import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationO
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
@@ -513,6 +515,11 @@ class CheckoutSessionConfirmationInterceptorTest {
                 mobileSessionIdProvider = { "test_session" },
             ),
             stripeNetworkClient = DefaultStripeNetworkClient(),
+            analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+            paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                context = ApplicationProvider.getApplicationContext(),
+                publishableKey = "pk_test_123",
+            ),
             publishableKeyProvider = { "pk_test_123" },
             stripeAccountIdProvider = { null },
         )
