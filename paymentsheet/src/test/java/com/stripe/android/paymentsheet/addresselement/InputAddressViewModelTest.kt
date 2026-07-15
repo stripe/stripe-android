@@ -8,6 +8,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentelement.AddressElementSameAsBillingPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -48,8 +49,11 @@ class InputAddressViewModelTest {
             navigator,
             eventReporter,
             placesClient = null,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
@@ -963,7 +967,7 @@ class InputAddressViewModelTest {
             navigator,
             eventReporter,
             placesClient = mockPlacesClient,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @Test

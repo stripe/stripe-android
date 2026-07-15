@@ -279,6 +279,7 @@ internal class CreateCustomerMetadataTest {
                     adaptivePricingInfo = null,
                     automaticTaxEnabled = false,
                     taxAddressSource = null,
+                    allowedShippingCountries = null,
                 ),
             )
         }

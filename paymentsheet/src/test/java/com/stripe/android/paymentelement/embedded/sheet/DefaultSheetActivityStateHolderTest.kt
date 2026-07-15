@@ -333,7 +333,7 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form,
+                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
                     )
                 )
             }
@@ -357,7 +357,7 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form,
+                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
                     )
                 )
             }
@@ -387,7 +387,7 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
-                        launchMode = EmbeddedLaunchMode.Form,
+                        launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
                     )
                 )
             }
@@ -450,7 +450,7 @@ class DefaultSheetActivityStateHolderTest {
             confirmationHandler = confirmationHandler,
             tapToAddHelper = tapToAddHelper,
             customerStateHolder = customerStateHolder,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
 
         Scenario(

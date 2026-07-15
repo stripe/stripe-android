@@ -188,6 +188,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             autocompleteConfig = config,
             placesClient = null,
             coroutineScope = this,
+            shouldUseAutocompleteProxyEndpointsProvider = { false },
         )
 
         val interactor = factory.create()
@@ -210,6 +211,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             autocompleteConfig = config,
             placesClient = FakePlacesClientProxy(),
             coroutineScope = this,
+            shouldUseAutocompleteProxyEndpointsProvider = { false },
         )
 
         val interactor = factory.create()
@@ -232,6 +234,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             autocompleteConfig = config,
             placesClient = fakePlaces,
             coroutineScope = backgroundScope,
+            shouldUseAutocompleteProxyEndpointsProvider = { false },
         )
         val queryFlow = MutableStateFlow("")
         val countryFlow = MutableStateFlow<String?>("US")
@@ -263,6 +266,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             autocompleteConfig = config,
             placesClient = null,
             coroutineScope = this,
+            shouldUseAutocompleteProxyEndpointsProvider = { false },
         )
 
         val interactor = factory.create()

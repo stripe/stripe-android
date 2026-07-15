@@ -40,6 +40,11 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
+            automaticallyLaunchedCardScanFormDataHelper =
+                embeddedFormHelperFactory.createAutomaticallyLaunchedCardScanFormDataHelper(
+                    selectedPaymentMethodCode = paymentMethodCode,
+                    paymentMethodMetadata = paymentMethodMetadata,
+                ),
             selectionUpdater = { embeddedSelectionHolder.set(it) },
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
@@ -47,19 +52,9 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
 
-        val usBankAccountFormArguments = USBankAccountFormArguments.createForEmbedded(
-            paymentMethodMetadata = paymentMethodMetadata,
-            selectedPaymentMethodCode = paymentMethodCode,
-            hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::set,
+        val usBankAccountFormArguments = createUsBankAccountFormArguments(
+            paymentMethodCode = paymentMethodCode,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
-            onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
-            onMandateTextChanged = { mandateText, _ ->
-                sheetActivityStateHolder.updateMandate(mandateText)
-            },
-            onUpdatePrimaryButtonUIState = sheetActivityStateHolder::updatePrimaryButton,
-            onError = sheetActivityStateHolder::updateError,
-            onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
         )
 
         val formType = formHelper.formTypeForCode(paymentMethodCode)
@@ -94,6 +89,26 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             validationRequested = MutableSharedFlow(),
             coroutineScope = viewModelScope,
             uiContext = Dispatchers.Main,
+        )
+    }
+
+    private fun createUsBankAccountFormArguments(
+        paymentMethodCode: PaymentMethodCode,
+        hasSavedPaymentMethods: Boolean,
+    ): USBankAccountFormArguments {
+        return USBankAccountFormArguments.createForEmbedded(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selectedPaymentMethodCode = paymentMethodCode,
+            hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
+            setSelection = embeddedSelectionHolder::set,
+            hasSavedPaymentMethods = hasSavedPaymentMethods,
+            onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
+            onMandateTextChanged = { mandateText, _ ->
+                sheetActivityStateHolder.updateMandate(mandateText)
+            },
+            onUpdatePrimaryButtonUIState = sheetActivityStateHolder::updatePrimaryButton,
+            onError = sheetActivityStateHolder::updateError,
+            onFormCompleted = { eventReporter.onPaymentMethodFormCompleted(PaymentMethod.Type.USBankAccount.code) },
         )
     }
 }

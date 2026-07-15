@@ -27,6 +27,7 @@ internal object CheckoutSessionResponseFactory {
         adaptivePricingInfo: CheckoutSessionResponse.AdaptivePricingInfo? = null,
         automaticTaxEnabled: Boolean = false,
         taxAddressSource: CheckoutSessionResponse.TaxAddressSource? = null,
+        allowedShippingCountries: List<String>? = null,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
@@ -48,6 +49,7 @@ internal object CheckoutSessionResponseFactory {
             adaptivePricingInfo = adaptivePricingInfo,
             automaticTaxEnabled = automaticTaxEnabled,
             taxAddressSource = taxAddressSource,
+            allowedShippingCountries = allowedShippingCountries,
         )
     }
 }

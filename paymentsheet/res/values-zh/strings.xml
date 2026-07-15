@@ -79,7 +79,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Subtitle for the Link signup screen -->
   <string name="stripe_link_sign_up_message_v2">在接受 Link 的任何地方更快支付。</string>
   <!-- Subtitle for the Link signup screen. '%s' is a Stripe brand name such as 'Link'. -->
-  <string name="stripe_link_sign_up_message_v2_with_brand">在接受 %s 的任何地方都能更快地支付。</string>
+  <string name="stripe_link_sign_up_message_v2_with_brand">在所有接受 %s 的地方，都能更快地支付。</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_link_sign_up_terms"><![CDATA[继续即表示您同意<terms>条款</terms>和<privacy>隐私政策</privacy>。]]></string>
   <!-- Confirm CTA for the update card screen in Link native -->
@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">退出 %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">出错了。检查您的连接并重试。</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">将卡片放在手机背面</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">或手动输入</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
@@ -157,7 +159,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to Link. -->
   <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3"><![CDATA[继续操作则表示您同意保存您的信息，用于今后在%s和 <link>Link 相关的购物</link> 根据 Link <terms>条款</terms>和<privacy>隐私政策</privacy>。]]></string>
   <!-- Text displayed below a credit card entry form when the card will be saved with the merchant and saved to a non-Link brand. -->
-  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[继续操作，即表示您同意根据 %2$s 的<terms>条款</terms>和<privacy>隐私</privacy>，将您的信息保存至 %1$s 和 <link>%2$s</link>，以便将来购买。]]></string>
+  <string name="stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded"><![CDATA[继续操作，即表示您同意根据 %2$s 的<terms>条款</terms>和<privacy>隐私政策</privacy>，将您的信息保存至 %1$s 和 <link>%2$s</link>，以便将来购买。]]></string>
   <!-- Error message displayed when updating a card fails. -->
   <string name="stripe_paymentsheet_card_updates_failed_error_message">卡未更新，请重试。</string>
   <!-- Title shown above a carousel containing available payment methods -->
@@ -268,7 +270,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">显示菜单</string>
   <!-- Title of the sign-out action. -->
-  <string name="stripe_sign_out_link">退出 Link</string>
   <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_sign_out_with_brand">退出 %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
@@ -282,11 +283,11 @@ to be saved and used in future checkout sessions. -->
   <!-- Legal text shown when creating a Link account in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative"><![CDATA[提供您的电子邮件地址，即表示您同意按照 <terms>Link 条款</terms>和<privacy>隐私政策</privacy>创建 Link 账户并将您的支付信息保存到 Link。]]></string>
   <!-- Legal text shown when creating a non-Link branded account in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[提供您的邮箱，即表示您同意根据 <terms>%1$s 的条款</terms>和<privacy>隐私政策</privacy>，创建一个 %1$s 账户，并将支付信息保存至 %1$s。]]></string>
+  <string name="stripe_sign_up_terms_alternative_branded"><![CDATA[提供您的邮箱，即表示您同意根据 <terms>%1$s 的条款</terms>和<privacy>隐私政策</privacy>，创建一个 %1$s 账户，并将您的支付信息保存至 %1$s。]]></string>
   <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
   <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[提供您的手机号码，即表示您同意按照 <terms>Link 条款</terms>和<privacy>隐私政策</privacy>创建 Link 账户并将您的支付信息保存到 Link。]]></string>
   <!-- Legal text shown when creating a non-Link branded account with a phone number in the alternative flow. -->
-  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[提供您的电话号码，即表示您同意根据 <terms>%1$s 的条款</terms>和<privacy>隐私政策</privacy>，创建一个 %1$s 账户，并将支付信息保存至 %1$s。]]></string>
+  <string name="stripe_sign_up_terms_alternative_with_phone_number_branded"><![CDATA[提供您的电话号码，即表示您同意根据 <terms>%1$s 的条款</terms>和<privacy>隐私政策</privacy>，创建一个 %1$s 账户，并将您的支付信息保存至 %1$s。]]></string>
   <!-- Legal text shown when creating a non-Link branded account. -->
   <string name="stripe_sign_up_terms_branded"><![CDATA[加入 %1$s，即表示您同意<terms>条款</terms>和<privacy>隐私政策</privacy>。]]></string>
   <!-- Legal text shown when creating a Link account in the alternative flow. -->

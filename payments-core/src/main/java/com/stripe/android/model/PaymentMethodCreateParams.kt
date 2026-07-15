@@ -898,7 +898,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createP24(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -916,7 +916,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createBancontact(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -952,7 +952,7 @@ constructor(
         @JvmStatic
         @JvmOverloads
         fun createEps(
-            billingDetails: PaymentMethod.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails? = null,
             metadata: Map<String, String>? = null,
             allowRedisplay: PaymentMethod.AllowRedisplay? = null,
         ): PaymentMethodCreateParams {
@@ -1047,7 +1047,7 @@ constructor(
             return createFromGooglePay(
                 googlePayPaymentData = googlePayPaymentData,
                 clientAttributionMetadata = null,
-                billingEmailFallback = null,
+                billingEmailOverride = null,
             )
         }
 
@@ -1055,7 +1055,7 @@ constructor(
         fun createFromGooglePay(
             googlePayPaymentData: JSONObject,
             clientAttributionMetadata: ClientAttributionMetadata?,
-            billingEmailFallback: String?,
+            billingEmailOverride: String?,
         ): PaymentMethodCreateParams {
             val googlePayResult = GooglePayResult.fromJson(googlePayPaymentData)
             val token = googlePayResult.token
@@ -1069,7 +1069,7 @@ constructor(
                 billingDetails = PaymentMethod.BillingDetails(
                     address = googlePayResult.address,
                     name = googlePayResult.name,
-                    email = googlePayResult.email ?: billingEmailFallback,
+                    email = billingEmailOverride ?: googlePayResult.email,
                     phone = googlePayResult.phoneNumber
                 ),
                 allowRedisplay = null,

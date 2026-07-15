@@ -81,6 +81,9 @@ internal class InputAddressViewModel @Inject constructor(
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
             eventListenerProvider = { eventListener },
+            // The standalone Address Element does not have access to ElementsSession flags.
+            // When the proxy endpoint ships, thread this value through Args.
+            shouldUseAutocompleteProxyEndpoints = false,
         )
     } else {
         null

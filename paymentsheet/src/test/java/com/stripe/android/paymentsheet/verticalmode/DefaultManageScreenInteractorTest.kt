@@ -377,6 +377,7 @@ class DefaultManageScreenInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
+            interactor.close()
         }
     }
 

@@ -16,6 +16,9 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.TAP_TO_BUTTON_UI_TEST_TAG
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.ScannedCardDetails
 import kotlinx.coroutines.test.runTest
@@ -37,7 +40,6 @@ internal class NfcScanningActionTest {
 
     @Test
     fun `when disabled clicking does not launch contract or invoke callback`() = activityResultTest(
-        merchantName = "Cafe Stripe",
         enabled = false,
     ) {
         onLaunchCalls.expectNoEvents()
@@ -46,16 +48,14 @@ internal class NfcScanningActionTest {
 
     @Test
     fun `when enabled click completes forwards scanned card details`() = activityResultTest(
-        merchantName = "River Books",
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFactory.create(),
+        ),
     ) {
         val launch = onLaunchCalls.awaitItem()
 
         assertThat(launch.contract).isEqualTo(NfcScanningContract)
-        assertThat(launch.input).isEqualTo(
-            NfcScanningContract.Args(
-                merchantName = "River Books"
-            )
-        )
+        assertThat(launch.input).isEqualTo(NfcScanningContract.Args(paymentMethodMetadata))
 
         val intent = Intent().apply {
             putExtras(
@@ -96,7 +96,7 @@ internal class NfcScanningActionTest {
     }
 
     private fun activityResultTest(
-        merchantName: String = "Cafe Stripe",
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         enabled: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
@@ -111,7 +111,7 @@ internal class NfcScanningActionTest {
 
         composeTestRule.setContent {
             CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
-                NfcScanningAction(merchantName = merchantName).Content(
+                NfcScanningAction(paymentMethodMetadata).Content(
                     enabled = enabled,
                     onScannedCard = { details ->
                         onScannedCardCalls.add(OnScannedCall(details))
@@ -126,6 +126,7 @@ internal class NfcScanningActionTest {
 
         block(
             Scenario(
+                paymentMethodMetadata = paymentMethodMetadata,
                 onLaunchCalls = onLaunchCalls,
                 onScannedCalls = onScannedCardCalls,
                 resultDispatcher = registry::dispatchResult,
@@ -137,6 +138,7 @@ internal class NfcScanningActionTest {
     }
 
     private class Scenario(
+        val paymentMethodMetadata: PaymentMethodMetadata,
         val onLaunchCalls: ReceiveTurbine<FakeActivityResultRegistry.OnLaunchCall<*, *>>,
         val onScannedCalls: ReceiveTurbine<OnScannedCall>,
         val resultDispatcher: (requestCode: Int, resultCode: Int, data: Intent?) -> Unit,

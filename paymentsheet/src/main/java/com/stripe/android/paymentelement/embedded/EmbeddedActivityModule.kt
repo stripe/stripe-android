@@ -19,11 +19,9 @@ import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
 import com.stripe.android.paymentelement.embedded.manage.DefaultEmbeddedManageScreenInteractorFactory
@@ -48,13 +46,11 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.verticalmode.DefaultSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
-import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import dagger.Binds
-import dagger.Lazy
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
@@ -129,14 +125,14 @@ internal interface EmbeddedActivityModule {
         @Singleton
         fun provideEmbeddedNavigator(
             launchMode: EmbeddedLaunchMode,
-            formScreen: Lazy<EmbeddedNavigator.Screen.Form>,
+            formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
             initialManageScreenFactory: InitialManageScreenFactory,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
             val initialScreen = when (launchMode) {
-                EmbeddedLaunchMode.Form -> formScreen.get()
-                EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
+                is EmbeddedLaunchMode.Form -> formScreenFactory.create(launchMode)
+                is EmbeddedLaunchMode.Manage -> initialManageScreenFactory.createInitialScreen()
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
@@ -158,17 +154,6 @@ internal interface EmbeddedActivityModule {
         fun providesLinkAccountHolder(savedStateHandle: SavedStateHandle): LinkAccountHolder {
             return LinkAccountHolder(savedStateHandle)
         }
-
-        @Provides
-        @Singleton
-        fun provideFormInteractor(
-            interactorFactory: EmbeddedFormInteractorFactory,
-            paymentMethodCode: PaymentMethodCode,
-            hasSavedPaymentMethods: Boolean,
-        ): VerticalModeFormInteractor = interactorFactory.create(
-            paymentMethodCode = paymentMethodCode,
-            hasSavedPaymentMethods = hasSavedPaymentMethods,
-        )
 
         @Provides
         @Singleton

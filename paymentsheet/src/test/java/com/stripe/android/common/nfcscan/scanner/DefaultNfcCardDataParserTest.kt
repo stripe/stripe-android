@@ -135,6 +135,56 @@ internal class DefaultNfcCardDataParserTest {
         assertThat(result).isNull()
     }
 
+    @Test
+    fun `canParse returns true when Track 2 tag is present`() {
+        assertThat(
+            parser.canParse(
+                mapOf(
+                    TAG_TRACK2 to hexToBytes("4111111111111111D2512101"),
+                ),
+            ),
+        ).isTrue()
+    }
+
+    @Test
+    fun `canParse returns true when both PAN and expiry tags are present`() {
+        assertThat(
+            parser.canParse(
+                mapOf(
+                    TAG_PAN to hexToBytes("4111111111111111"),
+                    TAG_EXPIRY to byteArrayOf(0x25, 0x12, 0x01),
+                ),
+            ),
+        ).isTrue()
+    }
+
+    @Test
+    fun `canParse returns false when only PAN tag is present`() {
+        assertThat(
+            parser.canParse(
+                mapOf(
+                    TAG_PAN to hexToBytes("4111111111111111"),
+                ),
+            ),
+        ).isFalse()
+    }
+
+    @Test
+    fun `canParse returns false when only expiry tag is present`() {
+        assertThat(
+            parser.canParse(
+                mapOf(
+                    TAG_EXPIRY to byteArrayOf(0x25, 0x12, 0x01),
+                ),
+            ),
+        ).isFalse()
+    }
+
+    @Test
+    fun `canParse returns false when no recognized tags are present`() {
+        assertThat(parser.canParse(emptyMap())).isFalse()
+    }
+
     private fun hexToBytes(hex: String): ByteArray {
         return hex.chunked(2)
             .map { it.toInt(16).toByte() }

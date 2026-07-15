@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -25,13 +26,16 @@ class PollingViewModelTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Test
     fun `Emits provided time limit as remaining duration`() = runTest(testDispatcher) {
         val timeLimit = 5.minutes
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
     }
@@ -42,7 +46,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
 
@@ -61,7 +65,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
@@ -77,7 +81,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
@@ -95,7 +99,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             poller = fakePoller,
             timeLimit = 10.seconds,
-        )
+        ).also { viewModelStoreRule.track(it) }
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
@@ -117,7 +121,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
@@ -138,7 +142,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
@@ -172,7 +176,7 @@ class PollingViewModelTest {
             timeLimit = timeLimit,
             timeProvider = timeProvider,
             savedStateHandle = savedStateHandle,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         val remainingTime = timeLimit - alreadyPassed
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(remainingTime)
@@ -186,7 +190,7 @@ class PollingViewModelTest {
             timeLimit = 5.minutes,
             poller = fakePoller,
             initialDelay = ZERO,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
@@ -201,7 +205,7 @@ class PollingViewModelTest {
     fun `QR code shown on start when QR code available`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
     }
@@ -210,7 +214,7 @@ class PollingViewModelTest {
     fun `QR code hidden on start when QR code not available`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = null,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
     }
@@ -219,7 +223,7 @@ class PollingViewModelTest {
     fun `QR code hidden on cancel`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         viewModel.handleCancel()
 
@@ -230,7 +234,7 @@ class PollingViewModelTest {
     fun `QR code hidden on hide QR code`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         viewModel.hideQrCode()
 
@@ -243,7 +247,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url",
             poller = fakePoller,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
@@ -261,7 +265,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url",
             poller = fakePoller,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
 

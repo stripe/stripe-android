@@ -4,10 +4,16 @@ import javax.inject.Inject
 import kotlin.collections.joinToString
 
 internal interface NfcCardDataParser {
+    fun canParse(records: Map<String, ByteArray>): Boolean
+
     fun parse(records: Map<String, ByteArray>): ScannedCardData?
 }
 
 internal class DefaultNfcCardDataParser @Inject constructor() : NfcCardDataParser {
+    override fun canParse(records: Map<String, ByteArray>): Boolean {
+        return TAG_TRACK2 in records || (TAG_PAN in records && TAG_EXPIRY in records)
+    }
+
     override fun parse(records: Map<String, ByteArray>): ScannedCardData? {
         // Tag 0x57 — Track 2 Equivalent Data. Preferred when present because it encodes PAN and
         // expiry together in the same format used on magnetic-stripe Track 2.

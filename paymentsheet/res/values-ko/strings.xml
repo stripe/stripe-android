@@ -100,6 +100,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">%s에서 로그아웃</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">오류가 발생했습니다. 연결을 확인하고 다시 시도하십시오.</string>
+  <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
+  <string name="stripe_nfc_scan_hold_card_behind_phone">휴대폰 뒷면에 카드를 대십시오</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">또는 수동으로 입력</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
@@ -266,7 +268,6 @@ to be saved and used in future checkout sessions. -->
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">메뉴 표시</string>
   <!-- Title of the sign-out action. -->
-  <string name="stripe_sign_out_link">Link에서 로그아웃</string>
   <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_sign_out_with_brand">%s에서 로그아웃</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->

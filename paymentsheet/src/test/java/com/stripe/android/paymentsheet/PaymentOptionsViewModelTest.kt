@@ -63,6 +63,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
@@ -99,6 +100,9 @@ internal class PaymentOptionsViewModelTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val standardTestDispatcher = StandardTestDispatcher()
@@ -1466,7 +1470,7 @@ internal class PaymentOptionsViewModelTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             placesClient = null,
         )
-    }
+    }.also { viewModelStoreRule.track(it) }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()

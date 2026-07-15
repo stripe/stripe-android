@@ -51,6 +51,7 @@ android {
         compilerOptions {
             freeCompilerArgs.addAll([
                     "-opt-in=com.stripe.android.crypto.onramp.ExperimentalCryptoOnramp",
+                    "-opt-in=com.stripe.android.link.LinkControllerPreview",
             ])
         }
     }

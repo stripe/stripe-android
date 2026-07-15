@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -12,6 +13,9 @@ import org.junit.Test
 class BacsMandateConfirmationViewModelTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `on init, view model state should be initialized properly`() {
@@ -70,6 +74,6 @@ class BacsMandateConfirmationViewModelTest {
                 email = "email@email.com",
                 nameOnAccount = "John Doe"
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

@@ -1218,6 +1218,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -1379,6 +1380,7 @@ internal class PaymentMethodMetadataTest {
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
+            shouldUseAutocompleteProxyEndpoints = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)

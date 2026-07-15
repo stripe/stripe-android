@@ -546,6 +546,7 @@ class DefaultSelectSavedPaymentMethodsInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
+            interactor.close()
         }
     }
 

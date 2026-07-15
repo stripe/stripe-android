@@ -1270,4 +1270,83 @@ class CheckoutSessionResponseJsonParserTest {
         assertThat(result?.automaticTaxEnabled).isFalse()
         assertThat(result?.taxAddressSource).isNull()
     }
+
+    @Test
+    fun `parse allowedShippingCountries from shipping_address_collection`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "shipping_address_collection": {
+                    "allowed_countries": ["US", "CA", "GB"]
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.allowedShippingCountries).isEqualTo(listOf("US", "CA", "GB"))
+    }
+
+    @Test
+    fun `parse allowedShippingCountries is null when shipping_address_collection is absent`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.allowedShippingCountries).isNull()
+    }
+
+    @Test
+    fun `parse allowedShippingCountries is null when allowed_countries key is absent`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "shipping_address_collection": {}
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.allowedShippingCountries).isNull()
+    }
+
+    @Test
+    fun `parse allowedShippingCountries is empty list when allowed_countries is empty array`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "shipping_address_collection": {
+                    "allowed_countries": []
+                }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.allowedShippingCountries).isEqualTo(emptyList<String>())
+    }
 }

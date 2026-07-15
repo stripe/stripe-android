@@ -75,7 +75,6 @@ import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
 import com.stripe.android.link.LinkController
-import com.stripe.android.link.LinkController.ConfigureResult
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.model.DateOfBirth
 import com.stripe.android.model.PaymentIntent
@@ -120,7 +119,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testConfigureIsSuccessful() = runTest {
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
 
         val result = interactor.configure(createConfigurationState())
 
@@ -130,10 +129,7 @@ class OnrampInteractorTest {
     @Test
     fun testConfigureMapsLinkAppAttestationExceptionToRichAttestationError() = runTest {
         val linkError = LinkAppAttestationException(IllegalStateException("Attestation failed"))
-        val failedResult = mock<ConfigureResult.Failed> {
-            on { error } doReturn linkError
-        }
-        whenever(linkController.configure(any())).thenReturn(failedResult)
+        whenever(linkController.configure(any())).thenReturn(Result.failure(linkError))
 
         val result = interactor.configure(createConfigurationState())
 
@@ -153,10 +149,7 @@ class OnrampInteractorTest {
     @Test
     fun testConfigureMapsLinkUnavailableExceptionToRichAttestationError() = runTest {
         val linkError = LinkUnavailableException(IllegalStateException("Native Link is not available"))
-        val failedResult = mock<ConfigureResult.Failed> {
-            on { error } doReturn linkError
-        }
-        whenever(linkController.configure(any())).thenReturn(failedResult)
+        whenever(linkController.configure(any())).thenReturn(Result.failure(linkError))
 
         val result = interactor.configure(createConfigurationState())
 
@@ -324,7 +317,7 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsInvalidSignatureError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -369,7 +362,7 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsChallengeExpiredError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -413,12 +406,13 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsInvalidChallengeError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
                 code = "crypto_onramp_invalid_wallet_ownership_challenge",
-                message = "The wallet ownership challenge is invalid.",
+                message = "The challenge does not exist, belongs to a different authenticated consumer, was already " +
+                    "consumed, or is otherwise invalid.",
             ),
             requestId = "req_invalid_challenge",
             statusCode = 400,
@@ -441,12 +435,15 @@ class OnrampInteractorTest {
 
         val challengeError = error as InvalidWalletOwnershipChallengeException
         assertThat(challengeError.userMessage)
-            .isEqualTo("This wallet verification request is no longer valid. Please try again.")
+            .isEqualTo("This wallet verification request is invalid. Please try again.")
         assertThat(challengeError.message)
-            .isEqualTo("This wallet verification request is no longer valid. Please try again.")
+            .isEqualTo("This wallet verification request is invalid. Please try again.")
         assertThat(challengeError.code).isEqualTo("crypto_onramp_invalid_wallet_ownership_challenge")
         assertThat(challengeError.underlyingError).isSameInstanceAs(backendError)
-        assertThat(challengeError.developerMessage).contains("The wallet ownership challenge is invalid.")
+        assertThat(challengeError.developerMessage).contains(
+            "The challenge does not exist, belongs to a different authenticated consumer, was already consumed, " +
+                "or is otherwise invalid."
+        )
         assertThat(challengeError.developerMessage).contains("Code: crypto_onramp_invalid_wallet_ownership_challenge")
         assertThat(challengeError.developerMessage).contains("Next step: Request a new challenge")
         assertThat(challengeError.developerMessage).contains("operation: submit_wallet_ownership_signature")
@@ -457,7 +454,7 @@ class OnrampInteractorTest {
     @Test
     fun testGetWalletOwnershipChallengeMapsWalletNotFoundError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -503,7 +500,7 @@ class OnrampInteractorTest {
     @Test
     fun testSubmitWalletOwnershipSignatureMapsUnsupportedNetworkError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = InvalidRequestException(
             stripeError = StripeError(
                 type = "invalid_request_error",
@@ -551,7 +548,7 @@ class OnrampInteractorTest {
     @Test
     fun testRegisterWalletAddressMapsBackendAttestationError() = runTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val backendError = APIException(
             stripeError = StripeError(
                 type = "api_error",
@@ -593,7 +590,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testHasLinkAccountMapsAttestationInvalidRequestError() = runTest {
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
             on { email } doReturn "test@example.com"
             on { error } doReturn InvalidRequestException(
@@ -640,7 +637,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testHasLinkAccountMapsUncategorizedInvalidRequestError() = runTest {
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
             on { email } doReturn "test@example.com"
             on { error } doReturn InvalidRequestException(
@@ -701,7 +698,7 @@ class OnrampInteractorTest {
 
     @Test
     fun testHasLinkAccountIncludesAdditionalSdkVersionsInDeveloperMessage() = runTest {
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
             on { email } doReturn "test@example.com"
             on { error } doReturn InvalidRequestException(
@@ -754,7 +751,7 @@ class OnrampInteractorTest {
             savedStateHandle = SavedStateHandle()
         )
 
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
             on { email } doReturn "test@example.com"
             on { error } doReturn InvalidRequestException(
@@ -805,7 +802,7 @@ class OnrampInteractorTest {
             savedStateHandle = SavedStateHandle()
         )
 
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         val failedResult = mock<LinkController.LookupConsumerResult.Failed> {
             on { email } doReturn "test@example.com"
             on { error } doReturn InvalidRequestException(
@@ -985,7 +982,7 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithSelectedPaymentPreview()))
         interactor.onLinkControllerState(mockLinkStateWithSelectedPaymentPreview())
 
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
@@ -1025,7 +1022,7 @@ class OnrampInteractorTest {
         whenever(linkController.state(any())).thenReturn(MutableStateFlow(mockLinkStateWithAccount()))
         interactor.onLinkControllerState(mockLinkStateWithAccount())
 
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
@@ -1368,7 +1365,7 @@ class OnrampInteractorTest {
     @Test
     fun startCheckout_requiresPaymentMethod_returnsFailedAndTracksError() = runTest {
         interactor.onLinkControllerState(mockLinkStateWithAccount())
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()
@@ -1742,7 +1739,7 @@ class OnrampInteractorTest {
         walletOwnershipChallengeExpiredUserMessage: String =
             "This wallet verification request expired. Please try again.",
         invalidWalletOwnershipChallengeUserMessage: String =
-            "This wallet verification request is no longer valid. Please try again.",
+            "This wallet verification request is invalid. Please try again.",
     ): Application {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 
@@ -1855,7 +1852,7 @@ class OnrampInteractorTest {
     }
 
     private suspend fun stubCheckoutRequiresNextAction() {
-        whenever(linkController.configure(any())).thenReturn(ConfigureResult.Success)
+        whenever(linkController.configure(any())).thenReturn(Result.success(Unit))
         interactor.configure(createConfigurationState(cryptoCustomerId = "cpt_123"))
 
         val mockPlatformSettings = mock<GetPlatformSettingsResponse>()

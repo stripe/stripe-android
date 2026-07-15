@@ -25,7 +25,6 @@ import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -138,7 +137,7 @@ internal class DefaultEmbeddedContentHelperTest {
     private fun testScenario(
         setup: SavedStateHandle.() -> Unit = {},
         block: suspend Scenario.() -> Unit,
-    ) = runTest {
+    ) = runTest(UnconfinedTestDispatcher()) {
         val savedStateHandle = SavedStateHandle().apply { setup() }
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
@@ -146,18 +145,17 @@ internal class DefaultEmbeddedContentHelperTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
-            selectedPaymentMethodCode = "",
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
         val errorReporter = FakeErrorReporter()
         val immediateActionHandler = DefaultEmbeddedRowSelectionImmediateActionHandler(
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = backgroundScope,
             internalRowSelectionCallback = { null }
         )
 
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
-            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+            coroutineScope = backgroundScope,
             savedStateHandle = savedStateHandle,
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
@@ -181,7 +179,7 @@ internal class DefaultEmbeddedContentHelperTest {
             confirmationStateHolder = EmbeddedConfirmationStateHolder(
                 savedStateHandle = savedStateHandle,
                 selectionHolder = selectionHolder,
-                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                coroutineScope = backgroundScope,
             ),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = errorReporter,

@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -106,7 +107,7 @@ internal class EmbeddedNavigator private constructor(
 
         abstract fun title(): StateFlow<ResolvableString?>
 
-        abstract fun isPerformingNetworkOperation(): Boolean
+        abstract fun isPerformingNetworkOperation(): StateFlow<Boolean>
 
         class ManageAll(
             private val interactor: ManageScreenInteractor,
@@ -123,8 +124,8 @@ internal class EmbeddedNavigator private constructor(
                 }
             }
 
-            override fun isPerformingNetworkOperation(): Boolean {
-                return false
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return stateFlowOf(false)
             }
 
             @Composable
@@ -140,15 +141,15 @@ internal class EmbeddedNavigator private constructor(
 
         class ManageUpdate(
             private val interactor: UpdatePaymentMethodInteractor,
-        ) : Screen() {
+        ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
 
             override fun title(): StateFlow<ResolvableString?> {
                 return stateFlowOf(interactor.screenTitle)
             }
 
-            override fun isPerformingNetworkOperation(): Boolean {
-                return interactor.state.value.status.isPerformingNetworkOperation
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return interactor.state.mapAsStateFlow { it.status.isPerformingNetworkOperation }
             }
 
             @Composable
@@ -156,18 +157,22 @@ internal class EmbeddedNavigator private constructor(
                 UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
                 PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
             }
+
+            override fun close() {
+                interactor.close()
+            }
         }
 
-        class Form @Inject constructor(
-            private val formInteractor: VerticalModeFormInteractor,
+        class Form(
+            val formInteractor: VerticalModeFormInteractor,
             private val eventReporter: EventReporter,
             private val sheetActivityStateHolder: SheetActivityStateHolder,
             private val confirmationHelper: SheetActivityConfirmationHelper,
             private val embeddedSelectionHolder: EmbeddedSelectionHolder,
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
-            private val launchMode: EmbeddedLaunchMode,
-        ) : Screen() {
+            private val launchMode: EmbeddedLaunchMode.Form,
+        ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                     PaymentSheetTopBarState(
                     showTestModeLabel = !formInteractor.isLiveMode,
@@ -179,8 +184,8 @@ internal class EmbeddedNavigator private constructor(
 
             override fun title(): StateFlow<ResolvableString?> = stateFlowOf(null)
 
-            override fun isPerformingNetworkOperation(): Boolean {
-                return sheetActivityStateHolder.state.value.isProcessing
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing }
             }
 
             @Composable
@@ -207,6 +212,39 @@ internal class EmbeddedNavigator private constructor(
                     updateSelection = embeddedSelectionHolder::set,
                     savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                 )
+            }
+
+            override fun close() {
+                formInteractor.close()
+            }
+
+            class Factory @Inject constructor(
+                private val interactorFactory: EmbeddedFormInteractorFactory,
+                private val eventReporter: EventReporter,
+                private val sheetActivityStateHolder: SheetActivityStateHolder,
+                private val confirmationHelper: SheetActivityConfirmationHelper,
+                private val embeddedSelectionHolder: EmbeddedSelectionHolder,
+                private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
+                private val customerStateHolder: CustomerStateHolder,
+            ) {
+                fun create(launchMode: EmbeddedLaunchMode.Form): Form {
+                    val hasSavedPaymentMethods = customerStateHolder.paymentMethods.value.any {
+                        it.type?.code == launchMode.selectedPaymentMethodCode
+                    }
+                    return Form(
+                        formInteractor = interactorFactory.create(
+                            paymentMethodCode = launchMode.selectedPaymentMethodCode,
+                            hasSavedPaymentMethods = hasSavedPaymentMethods,
+                        ),
+                        eventReporter = eventReporter,
+                        sheetActivityStateHolder = sheetActivityStateHolder,
+                        confirmationHelper = confirmationHelper,
+                        embeddedSelectionHolder = embeddedSelectionHolder,
+                        savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
+                        customerStateHolder = customerStateHolder,
+                        launchMode = launchMode,
+                    )
+                }
             }
         }
     }

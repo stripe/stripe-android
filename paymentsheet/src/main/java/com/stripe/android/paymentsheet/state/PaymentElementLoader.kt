@@ -98,7 +98,7 @@ internal interface PaymentElementLoader {
         }
 
         data class CryptoOnramp(
-            val configuration: LinkController.Configuration
+            val configuration: LinkController.Configuration.State
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }

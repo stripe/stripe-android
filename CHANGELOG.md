@@ -1,13 +1,24 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+### Payments
+* [FIXED][7581](https://github.com/stripe/stripe-android/issues/7581) Declined card error messages from 3DS2 payment flows are now localized instead of always displaying the raw English message from the server.
+
+## 23.12.0 - 2026-07-13
 
 ### Connect
 * [CHANGED] The Payments and Payouts embedded components are now generally available. Removed `@PreviewConnectSDK` annotations and refactored `PaymentsProps` to use the builder pattern.
 
 ### CryptoOnramp
 * [ADDED] A new `AppAttestationUnavailableException` was added when configuring onramp for additional information when an error occurs.
+
+### PaymentSheet
+* [ADDED] Standalone Link wallet APIs in private preview via `LinkController`.
+
+### CustomerSheet
+* [FIXED][13383](https://github.com/stripe/stripe-android/issues/13383) `CustomerSheet` no longer reports a failure when the sheet is torn down by the OS without returning a result (e.g. when a `singleTask` host activity is relaunched). The result callback is now a no-op in that case, leaving the merchant's state unchanged.
 
 ## 23.11.1 - 2026-06-30
 

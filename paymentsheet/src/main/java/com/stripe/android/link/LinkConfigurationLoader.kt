@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.LinkGate
@@ -8,22 +9,30 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 internal interface LinkConfigurationLoader {
-    suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata>
+    suspend fun load(configuration: LinkController.Configuration.State): Result<LinkMetadata>
 }
 
 internal class DefaultLinkConfigurationLoader @Inject constructor(
     private val logger: Logger,
     private val paymentElementLoader: PaymentElementLoader,
     private val linkGateFactory: LinkGate.Factory,
+    private val savedStateHandle: SavedStateHandle,
 ) : LinkConfigurationLoader {
     private val tag = "LinkConfigurationLoader"
 
-    override suspend fun load(configuration: LinkController.Configuration): Result<LinkMetadata> {
+    override suspend fun load(configuration: LinkController.Configuration.State): Result<LinkMetadata> {
+        val initializationMode = if (configuration.setupIntentClientSecret != null) {
+            PaymentElementLoader.InitializationMode.SetupIntent(configuration.setupIntentClientSecret)
+        } else {
+            PaymentElementLoader.InitializationMode.CryptoOnramp
+        }
         return paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp,
+            initializationMode = initializationMode,
             integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(configuration),
             metadata = PaymentElementLoader.Metadata(
-                isReloadingAfterProcessDeath = false,
+                isReloadingAfterProcessDeath = savedStateHandle.contains(
+                    LinkControllerInteractor.LINK_CONFIGURED_KEY
+                ),
                 initializedViaCompose = false,
             )
         ).mapCatching { state ->

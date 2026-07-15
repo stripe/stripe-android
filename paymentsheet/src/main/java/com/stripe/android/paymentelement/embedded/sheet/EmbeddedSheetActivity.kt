@@ -97,7 +97,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         }
 
         onBackPressedDispatcher.addCallback {
-            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation()) {
+            if (!embeddedNavigator.screen.value.isPerformingNetworkOperation().value) {
                 embeddedNavigator.performAction(EmbeddedNavigator.Action.Back)
             }
         }
@@ -114,7 +114,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     private fun SheetContent() {
         val screen by embeddedNavigator.screen.collectAsState()
         val bottomSheetState = rememberStripeBottomSheetState(
-            confirmValueChange = { !screen.isPerformingNetworkOperation() }
+            confirmValueChange = { !screen.isPerformingNetworkOperation().value }
         )
         ElementsBottomSheetLayout(
             state = bottomSheetState,
@@ -129,8 +129,8 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                     embeddedNavigator.result.collect { result ->
                         hasResult = true
                         when (args?.launchMode) {
-                            EmbeddedLaunchMode.Form -> dismissAndFinish()
-                            EmbeddedLaunchMode.Manage, null -> {
+                            is EmbeddedLaunchMode.Form -> dismissAndFinish()
+                            is EmbeddedLaunchMode.Manage, null -> {
                                 setManageResult(shouldInvokeSelectionCallback = result == true)
                                 finish()
                             }
@@ -154,10 +154,13 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
                 val topBarState by remember(screen) {
                     screen.topBarState()
                 }.collectAsState()
+                val isPerformingNetworkOperation by remember(screen) {
+                    screen.isPerformingNetworkOperation()
+                }.collectAsState()
                 PaymentSheetTopBar(
                     state = topBarState,
                     canNavigateBack = navigator.canGoBack,
-                    isEnabled = true,
+                    isEnabled = !isPerformingNetworkOperation,
                     handleBackPressed = { embeddedNavigator.performAction(EmbeddedNavigator.Action.Back) },
                 )
             },
@@ -203,16 +206,16 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     }
 
     private fun dismissAndFinish() {
-        when (args?.launchMode) {
-            EmbeddedLaunchMode.Form -> {
+        when (val launchMode = args?.launchMode) {
+            is EmbeddedLaunchMode.Form -> {
                 setActivityResult(
                     EmbeddedActivityResult.Cancelled(
                         customerState = customerStateHolder.customer.value,
-                        launchMode = EmbeddedLaunchMode.Form,
+                        launchMode = launchMode,
                     )
                 )
             }
-            EmbeddedLaunchMode.Manage, null -> {
+            is EmbeddedLaunchMode.Manage, null -> {
                 setManageResult(shouldInvokeSelectionCallback = false)
             }
         }

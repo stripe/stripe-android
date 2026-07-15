@@ -437,6 +437,7 @@ class DefaultAddPaymentMethodInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
+            interactor.close()
         }
     }
 

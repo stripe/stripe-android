@@ -1,10 +1,11 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
-public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilKt {
-	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilKt;
+public final class com/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt {
+	public static final field INSTANCE Lcom/stripe/android/common/nfcscan/ui/ComposableSingletons$NfcCoilTextLayoutKt;
 	public fun <init> ()V
-	public final fun getLambda$2050971960$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda$-1325870959$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda$-298415252$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 
 public final class com/stripe/android/common/taptoadd/ui/ComposableSingletons$TapToAddDelayScreenKt {
@@ -228,6 +229,117 @@ public final class com/stripe/android/customersheet/PaymentOptionSelection$Payme
 
 public abstract interface class com/stripe/android/customersheet/SetupIntentClientSecretProvider {
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+}
+
+public final class com/stripe/android/link/LinkController {
+	public static final field $stable I
+	public final fun configure-gIAlu-s (Lcom/stripe/android/link/LinkController$Configuration;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
+	public final fun createPresenter (Landroidx/activity/ComponentActivity;Lcom/stripe/android/link/LinkController$PresentCallback;)Lcom/stripe/android/link/LinkController$Presenter;
+	public final fun getPaymentMethodPreview ()Lkotlinx/coroutines/flow/StateFlow;
+}
+
+public final class com/stripe/android/link/LinkController$Builder {
+	public static final field $stable I
+	public fun <init> (Landroid/app/Application;Landroidx/lifecycle/SavedStateHandle;)V
+	public final fun build ()Lcom/stripe/android/link/LinkController;
+}
+
+public final class com/stripe/android/link/LinkController$Configuration {
+	public static final field $stable I
+	public fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V
+	public synthetic fun <init> (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public final fun allowLogout (Z)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun email (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun phoneNumber (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun setupIntentClientSecret (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$Configuration;
+	public final fun supportedPaymentMethodTypes (Ljava/util/List;)Lcom/stripe/android/link/LinkController$Configuration;
+}
+
+public abstract interface class com/stripe/android/link/LinkController$ConfirmSetupIntentCallback {
+	public abstract fun onConfirmSetupIntentResult (Lcom/stripe/android/link/LinkController$ConfirmSetupIntentResult;)V
+}
+
+public abstract interface class com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+}
+
+public final class com/stripe/android/link/LinkController$ConfirmSetupIntentResult$Canceled : com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+	public static final field $stable I
+	public static final field INSTANCE Lcom/stripe/android/link/LinkController$ConfirmSetupIntentResult$Canceled;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$ConfirmSetupIntentResult$Failed : com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$ConfirmSetupIntentResult$Success : com/stripe/android/link/LinkController$ConfirmSetupIntentResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$PaymentMethodPreview {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getIcon ()Landroid/graphics/drawable/Drawable;
+	public final fun getIconPainter (Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
+	public final fun getLabel ()Ljava/lang/String;
+	public final fun getSublabel ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$PaymentMethodType : java/lang/Enum {
+	public static final field BankAccount Lcom/stripe/android/link/LinkController$PaymentMethodType;
+	public static final field Card Lcom/stripe/android/link/LinkController$PaymentMethodType;
+	public static final field Generic Lcom/stripe/android/link/LinkController$PaymentMethodType;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
+	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/link/LinkController$PaymentMethodType;
+	public static fun values ()[Lcom/stripe/android/link/LinkController$PaymentMethodType;
+}
+
+public abstract interface class com/stripe/android/link/LinkController$PresentCallback {
+	public abstract fun onPresentResult (Lcom/stripe/android/link/LinkController$PresentResult;)V
+}
+
+public abstract interface class com/stripe/android/link/LinkController$PresentResult {
+}
+
+public final class com/stripe/android/link/LinkController$PresentResult$Canceled : com/stripe/android/link/LinkController$PresentResult {
+	public static final field $stable I
+}
+
+public final class com/stripe/android/link/LinkController$PresentResult$Completed : com/stripe/android/link/LinkController$PresentResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getPaymentMethod ()Lcom/stripe/android/model/PaymentMethod;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$PresentResult$Failed : com/stripe/android/link/LinkController$PresentResult {
+	public static final field $stable I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getError ()Ljava/lang/Throwable;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+}
+
+public final class com/stripe/android/link/LinkController$Presenter {
+	public static final field $stable I
+	public final fun createPaymentMethodAndConfirmSetupIntent ()V
+	public final fun present ()V
+}
+
+public abstract interface annotation class com/stripe/android/link/LinkControllerPreview : java/lang/annotation/Annotation {
 }
 
 public final class com/stripe/android/link/onramp/ui/ComposableSingletons$OnrampKYCRefreshScreenKt {

@@ -23,6 +23,7 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -64,6 +65,8 @@ internal interface UpdatePaymentMethodInteractor {
     }
 
     fun handleViewAction(viewAction: ViewAction)
+
+    fun close()
 
     sealed class ViewAction {
         data object RemovePaymentMethod : ViewAction()
@@ -283,6 +286,10 @@ internal class DefaultUpdatePaymentMethodInteractor(
                 onCardUpdateParamsChanged(viewAction.cardUpdateParams)
             }
         }
+    }
+
+    override fun close() {
+        coroutineScope.cancel()
     }
 
     private fun removePaymentMethod() {

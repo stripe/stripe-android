@@ -212,7 +212,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 paymentMethodMetadata = metadata,
             )
         } else if (metadata.isNfcScanningEnabled) {
-            NfcScanningAction(merchantName = metadata.merchantName)
+            NfcScanningAction(paymentMethodMetadata = metadata)
         } else {
             CardScanAction(
                 isStripeCardScanAllowed = metadata.isStripeCardScanAllowed,
@@ -342,17 +342,10 @@ internal class CombinedLinkMandateElement(
             // when displaying the mandate from Link UI (add card to Link) we always want the
             // non-signup version of the mandate text.
             mandateText = if (linkState?.isExpanded == true && isLinkUI.not()) {
-                if (linkBrand == LinkBrand.Link) {
-                    stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3,
-                        formatArgs = arrayOf(merchantName)
-                    )
-                } else {
-                    stringResource(
-                        id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded,
-                        formatArgs = arrayOf(merchantName, linkBrand.brandName())
-                    )
-                }.replaceHyperlinks(linkBrand)
+                stringResource(
+                    id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_on_v3_branded,
+                    formatArgs = arrayOf(merchantName, linkBrand.brandName())
+                ).replaceHyperlinks(linkBrand)
             } else {
                 stringResource(
                     id = PaymentSheetR.string.stripe_paymentsheet_card_mandate_signup_toggle_off,

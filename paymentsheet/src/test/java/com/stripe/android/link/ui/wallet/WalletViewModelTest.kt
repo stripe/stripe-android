@@ -40,6 +40,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -65,6 +66,9 @@ class WalletViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
@@ -995,7 +999,7 @@ class WalletViewModelTest {
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.Card
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card)
             )
         )
 
@@ -1010,7 +1014,7 @@ class WalletViewModelTest {
 
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
-            linkLaunchMode = createPaymentMethodSelectionMode(paymentMethodFilter = null)
+            linkLaunchMode = createPaymentMethodSelectionMode(paymentMethodFilters = null)
         )
 
         advanceUntilIdle()
@@ -1030,7 +1034,7 @@ class WalletViewModelTest {
         createViewModel(
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.Card
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.Card)
             ),
             navigateAndClearStack = { screen -> navigatedScreen = screen }
         )
@@ -1058,7 +1062,7 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
             ),
             navigateAndClearStack = {}
         )
@@ -1084,7 +1088,7 @@ class WalletViewModelTest {
             configuration = configuration,
             linkAccountManager = linkAccountManager,
             linkLaunchMode = createPaymentMethodSelectionMode(
-                paymentMethodFilter = LinkPaymentMethodFilter.BankAccount
+                paymentMethodFilters = listOf(LinkPaymentMethodFilter.BankAccount)
             ),
             dismissWithResult = { result -> dismissResult = result }
         )
@@ -1133,10 +1137,10 @@ class WalletViewModelTest {
 
     private fun createPaymentMethodSelectionMode(
         selectedPayment: ConsumerPaymentDetails.PaymentDetails? = null,
-        paymentMethodFilter: LinkPaymentMethodFilter? = null
+        paymentMethodFilters: List<LinkPaymentMethodFilter>? = null
     ) = LinkLaunchMode.PaymentMethodSelection(
         selectedPayment = selectedPayment,
-        paymentMethodFilter = paymentMethodFilter
+        paymentMethodFilters = paymentMethodFilters
     )
 
     private fun createViewModel(
@@ -1172,7 +1176,7 @@ class WalletViewModelTest {
                 configuration = configuration,
                 linkLaunchMode = linkLaunchMode
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private suspend fun testAddBankAccount(

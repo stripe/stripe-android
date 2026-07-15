@@ -28,6 +28,7 @@ internal data class CheckoutSessionResponse(
     val adaptivePricingInfo: AdaptivePricingInfo?,
     val automaticTaxEnabled: Boolean,
     val taxAddressSource: TaxAddressSource?,
+    val allowedShippingCountries: List<String>?,
 ) : StripeModel {
 
     val shouldDisableWalletsForAutomaticTaxBilling: Boolean
@@ -133,5 +134,16 @@ internal data class CheckoutSessionResponse(
         REQUIRES_SHIPPING_ADDRESS,
         REQUIRES_BILLING_ADDRESS,
         UNKNOWN,
+    }
+}
+
+internal fun CheckoutSessionResponse.validateShippingCountry(country: String): Result<Unit> {
+    val allowed = allowedShippingCountries ?: return Result.success(Unit)
+    return if (country in allowed) {
+        Result.success(Unit)
+    } else {
+        Result.failure(
+            IllegalArgumentException("Country code '$country' is not in allowedShippingCountries")
+        )
     }
 }

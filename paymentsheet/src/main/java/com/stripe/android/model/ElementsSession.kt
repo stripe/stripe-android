@@ -108,6 +108,9 @@ internal data class ElementsSession(
     val forceVerticalPaymentMethodLayout: Boolean
         get() = flags[Flag.ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT] == true
 
+    val shouldUseAutocompleteProxyEndpoints: Boolean
+        get() = flags[Flag.OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS] == true
+
     @Parcelize
     data class LinkSettings(
         val linkFundingSources: List<String>,
@@ -250,6 +253,9 @@ internal data class ElementsSession(
         ELEMENTS_MOBILE_CARDSCAN_DISABLE_SSDOCR("elements_mobile_cardscan_disable_ssdocr"),
         ELEMENTS_MOBILE_FORCE_VERTICAL_PAYMENT_METHOD_LAYOUT(
             "elements_mobile_force_vertical_payment_method_layout"
+        ),
+        OCS_MOBILE_SHOULD_USE_AUTOCOMPLETE_PROXY_ENDPOINTS(
+            "ocs_mobile_should_use_autocomplete_proxy_endpoints"
         ),
     }
 

@@ -145,7 +145,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         val params = PaymentMethodCreateParams.createFromGooglePay(
             googlePayPaymentData = paymentDataJson,
             clientAttributionMetadata = args.clientAttributionMetadata,
-            billingEmailFallback = args.billingEmailFallback,
+            billingEmailOverride = args.billingEmailOverride,
         )
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(

@@ -7,8 +7,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -49,7 +47,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
         val selectionHolder = EmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())
         Scenario(
             paymentOptionDisplayDataHolder = DefaultPaymentOptionDisplayDataHolder(
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                coroutineScope = backgroundScope,
                 selectionHolder = selectionHolder,
                 confirmationStateSupplier = confirmationStateSupplier,
                 paymentOptionDisplayDataFactory = paymentOptionDisplayDataFactory,

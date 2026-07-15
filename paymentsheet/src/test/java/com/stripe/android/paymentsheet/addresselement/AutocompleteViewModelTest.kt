@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
@@ -44,7 +45,10 @@ class AutocompleteViewModelTest {
             ),
             mockEventReporter,
             application
-        )
+        ).also { viewModelStoreRule.track(it) }
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()

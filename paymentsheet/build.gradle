@@ -157,6 +157,7 @@ android {
             freeCompilerArgs.addAll([
                     "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
                     "-opt-in=kotlinx.coroutines.FlowPreview",
+                    "-opt-in=com.stripe.android.link.LinkControllerPreview",
                     "-Xcontext-parameters",
                     "-Xannotation-default-target=param-property",
                     "-Xconsistent-data-class-copy-visibility"

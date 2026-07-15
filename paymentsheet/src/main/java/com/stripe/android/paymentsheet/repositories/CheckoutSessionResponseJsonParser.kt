@@ -82,6 +82,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         val adaptivePricingInfo = parseAdaptivePricingInfo(
             json.optJSONObject(FIELD_ADAPTIVE_PRICING_INFO)
         )
+        val allowedShippingCountries = parseAllowedShippingCountries(json)
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -103,6 +104,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             adaptivePricingInfo = adaptivePricingInfo,
             automaticTaxEnabled = automaticTaxEnabled,
             taxAddressSource = taxAddressSource,
+            allowedShippingCountries = allowedShippingCountries,
         )
     }
 
@@ -515,6 +517,12 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         }
     }
 
+    private fun parseAllowedShippingCountries(json: JSONObject): List<String>? {
+        val shippingCollection = json.optJSONObject(FIELD_SHIPPING_ADDRESS_COLLECTION) ?: return null
+        val countries = shippingCollection.optJSONArray(FIELD_ALLOWED_COUNTRIES) ?: return null
+        return jsonArrayToList(countries)
+    }
+
     private const val FIELD_SESSION_ID = "session_id"
     private const val FIELD_UI_MODE = "ui_mode"
     private const val UI_MODE_CUSTOM = "custom"
@@ -572,4 +580,6 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_LOCAL_CURRENCY_OPTIONS = "local_currency_options"
     private const val FIELD_CONVERSION_MARKUP_BPS = "conversion_markup_bps"
     private const val FIELD_PRESENTMENT_EXCHANGE_RATE = "presentment_exchange_rate"
+    private const val FIELD_SHIPPING_ADDRESS_COLLECTION = "shipping_address_collection"
+    private const val FIELD_ALLOWED_COUNTRIES = "allowed_countries"
 }

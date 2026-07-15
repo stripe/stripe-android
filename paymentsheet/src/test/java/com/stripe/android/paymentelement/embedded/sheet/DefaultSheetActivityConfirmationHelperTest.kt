@@ -86,7 +86,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
                 hasBeenConfirmed = false,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
-                launchMode = EmbeddedLaunchMode.Form,
+                launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             )
         )
 
@@ -123,7 +123,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             eventReporter = eventReporter,
             customerStateHolder = customerStateHolder,
             coroutineScope = backgroundScope,
-            launchMode = EmbeddedLaunchMode.Form,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
 
         Scenario(

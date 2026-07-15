@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.core.content.IntentCompat
 import androidx.core.os.BundleCompat
 import androidx.core.os.bundleOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.view.ActivityStarter
 import kotlinx.parcelize.Parcelize
 
@@ -17,7 +18,7 @@ internal object NfcScanningContract : ActivityResultContract<NfcScanningContract
 
     @Parcelize
     data class Args(
-        val merchantName: String,
+        val paymentMethodMetadata: PaymentMethodMetadata,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

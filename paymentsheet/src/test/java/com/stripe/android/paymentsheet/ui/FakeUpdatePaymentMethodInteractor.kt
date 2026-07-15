@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import app.cash.turbine.Turbine
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.core.strings.ResolvableString
@@ -44,6 +45,8 @@ internal class FakeUpdatePaymentMethodInteractor(
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
 ) : UpdatePaymentMethodInteractor {
+    val closeCalls = Turbine<Unit>()
+
     override val state: StateFlow<UpdatePaymentMethodInteractor.State> = MutableStateFlow(initialState)
     override val screenTitle: ResolvableString? = UpdatePaymentMethodInteractor.screenTitle(
         displayableSavedPaymentMethod
@@ -83,5 +86,9 @@ internal class FakeUpdatePaymentMethodInteractor(
 
     override fun handleViewAction(viewAction: UpdatePaymentMethodInteractor.ViewAction) {
         viewActionRecorder?.record(viewAction)
+    }
+
+    override fun close() {
+        closeCalls.add(Unit)
     }
 }

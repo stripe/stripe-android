@@ -26,6 +26,39 @@ class PaymentMethodCreateParamsTest {
     }
 
     @Test
+    fun createFromGooglePay_withBillingEmailOverride_overridesGooglePayEmail() {
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS,
+            clientAttributionMetadata = null,
+            billingEmailOverride = "checkout@example.com",
+        )
+
+        assertThat(params.billingDetails?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun createFromGooglePay_withBillingEmailOverride_usedWhenGooglePayHasNoEmail() {
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS,
+            clientAttributionMetadata = null,
+            billingEmailOverride = "checkout@example.com",
+        )
+
+        assertThat(params.billingDetails?.email).isEqualTo("checkout@example.com")
+    }
+
+    @Test
+    fun createFromGooglePay_withNullOverride_keepsGooglePayEmail() {
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS,
+            clientAttributionMetadata = null,
+            billingEmailOverride = null,
+        )
+
+        assertThat(params.billingDetails?.email).isEqualTo("stripe@example.com")
+    }
+
+    @Test
     fun createFromGooglePay_withFullBillingAddress() {
         assertThat(
             PaymentMethodCreateParams.createFromGooglePay(
@@ -76,6 +109,24 @@ class PaymentMethodCreateParamsTest {
                     "sepa_debit" to mapOf("iban" to "my_iban")
                 )
             )
+    }
+
+    @Test
+    fun `createEps() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createEps().toParamMap())
+            .isEqualTo(mapOf("type" to "eps"))
+    }
+
+    @Test
+    fun `createBancontact() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createBancontact().toParamMap())
+            .isEqualTo(mapOf("type" to "bancontact"))
+    }
+
+    @Test
+    fun `createP24() without billing details creates expected map`() {
+        assertThat(PaymentMethodCreateParams.createP24().toParamMap())
+            .isEqualTo(mapOf("type" to "p24"))
     }
 
     @Test
