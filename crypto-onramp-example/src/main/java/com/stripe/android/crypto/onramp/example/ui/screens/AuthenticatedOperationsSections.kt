@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.Button
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
@@ -24,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.CHECKOUT_BUTTON_TAG
@@ -481,11 +484,20 @@ private fun SourceCurrencySelector(
             .padding(bottom = 12.dp)
     ) {
         SourceCurrency.entries.forEach { currency ->
-            Button(
-                onClick = { onSelectSourceCurrency(currency) },
-                enabled = currency != sourceCurrency,
-                modifier = Modifier.weight(1f)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .weight(1f)
+                    .selectable(
+                        selected = currency == sourceCurrency,
+                        onClick = { onSelectSourceCurrency(currency) },
+                        role = Role.RadioButton
+                    )
             ) {
+                RadioButton(
+                    selected = currency == sourceCurrency,
+                    onClick = null
+                )
                 Text("${currency.symbol} ${currency.value.uppercase()}")
             }
         }

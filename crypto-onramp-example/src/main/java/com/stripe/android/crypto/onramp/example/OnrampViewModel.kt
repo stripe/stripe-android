@@ -591,6 +591,11 @@ internal class OnrampViewModel(
             _uiState.update {
                 it.copy(
                     screen = Screen.Loading,
+                    walletOwnershipChallengeId = null,
+                    walletOwnershipChallengeMessage = null,
+                    walletOwnershipChallengeExpiresAt = null,
+                    walletOwnershipSignatureInput = "",
+                    walletOwnershipVerified = null,
                     loadingMessage = "Getting wallet ownership challenge..."
                 )
             }
@@ -950,9 +955,13 @@ internal class OnrampViewModel(
             return
         }
 
+        val sessionForCheckout = onrampSession.copy(
+            transactionDetails = onrampSession.transactionDetails.copy(lastError = null)
+        )
         _uiState.update {
             it.copy(
                 screen = Screen.Loading,
+                onrampSession = sessionForCheckout,
                 loadingMessage = "Performing checkout..."
             )
         }
