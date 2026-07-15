@@ -366,14 +366,14 @@ class CheckoutController @Inject internal constructor(
 
         fun googlePayConfiguration(
             configuration: GooglePayConfiguration?,
-        ) {
+        ): Configuration = apply {
             this.googlePayConfiguration = configuration
         }
 
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
-            val googlePayConfiguration: GooglePayConfiguration?,
+            val googlePayConfiguration: GooglePayConfiguration.State?,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
@@ -386,7 +386,7 @@ class CheckoutController @Inject internal constructor(
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
-            googlePayConfiguration = googlePayConfiguration,
+            googlePayConfiguration = googlePayConfiguration?.build(),
         )
     }
 

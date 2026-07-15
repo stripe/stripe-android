@@ -3,41 +3,93 @@ package com.stripe.android.checkout
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
 /**
+ * Builder for Google Pay configuration used by checkout.
+ *
  * @param environment The Google Pay environment to use. See
  * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
  * for more information.
  * @param countryCode The two-letter ISO 3166 code of the country of your business, e.g. "US".
  * See your account's country value [here](https://dashboard.stripe.com/settings/account).
- * @param currencyCode The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
- * Required in order to support Google Pay when processing a Setup Intent.
- * @param amount An optional amount to display for setup intents. Google Pay may or may not
- * display this amount depending on its own internal logic. Defaults to 0 if none is provided.
- * @param label An optional label to display with the amount. Google Pay may or may not display
- * this label depending on its own internal logic. Defaults to a generic label if none is
- * provided.
- * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
- * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
- * for more information on button types.
- * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
- * display additional enabled networks (e.g. 'INTERAC')
  */
-@Parcelize
-@Poko
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class GooglePayConfiguration @JvmOverloads constructor(
-    internal val environment: Environment,
-    internal val countryCode: String,
-    internal val currencyCode: String? = null,
-    internal val amount: Long? = null,
-    internal val label: String? = null,
-    internal val buttonType: ButtonType = ButtonType.Pay,
-    internal val additionalEnabledNetworks: List<String> = emptyList()
-) : Parcelable {
+class GooglePayConfiguration(
+    private val environment: Environment,
+    private val countryCode: String,
+) {
+   private var currencyCode: String? = null
+    private var amount: Long? = null
+    private var label: String? = null
+    private var buttonType: ButtonType = ButtonType.Pay
+    private var additionalEnabledNetworks: List<String> = emptyList()
+
+    /**
+     * @param currencyCode The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
+     * Required in order to support Google Pay when processing a Setup Intent.
+     */
+    fun currencyCode(currencyCode: String?): GooglePayConfiguration = apply {
+        this.currencyCode = currencyCode
+    }
+
+    /**
+     * @param amount An optional amount to display for setup intents. Google Pay may or may not
+     * display this amount depending on its own internal logic. Defaults to 0 if none is provided.
+     */
+    fun amount(amount: Long?): GooglePayConfiguration = apply {
+        this.amount = amount
+    }
+
+    /**
+     * @param label An optional label to display with the amount. Google Pay may or may not display
+     * this label depending on its own internal logic. Defaults to a generic label if none is
+     * provided.
+     */
+    fun label(label: String?): GooglePayConfiguration = apply {
+        this.label = label
+    }
+
+    /**
+     * @param buttonType The Google Pay button type to use. Set to "Pay" by default. See
+     * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
+     * for more information on button types.
+     */
+    fun buttonType(buttonType: ButtonType): GooglePayConfiguration = apply {
+        this.buttonType = buttonType
+    }
+
+    /**
+     * @param additionalEnabledNetworks An optional List<String> to signal GooglePay to
+     * display additional enabled networks (e.g. 'INTERAC')
+     */
+    fun additionalEnabledNetworks(
+        additionalEnabledNetworks: List<String>
+    ): GooglePayConfiguration = apply {
+        this.additionalEnabledNetworks = additionalEnabledNetworks
+    }
+
+    @Parcelize
+    internal data class State(
+        val environment: Environment,
+        val countryCode: String,
+        val currencyCode: String?,
+        val amount: Long?,
+        val label: String?,
+        val buttonType: ButtonType,
+        val additionalEnabledNetworks: List<String>,
+    ) : Parcelable
+
+    internal fun build(): State = State(
+        environment = environment,
+        countryCode = countryCode,
+        currencyCode = currencyCode,
+        amount = amount,
+        label = label,
+        buttonType = buttonType,
+        additionalEnabledNetworks = additionalEnabledNetworks.toList(),
+    )
 
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
