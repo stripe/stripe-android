@@ -14,6 +14,8 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.utils.DefaultDurationProvider
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
@@ -49,14 +51,16 @@ interface PlacesClientProxy {
             isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
             initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
-            errorReporter: ErrorReporter
+            errorReporter: ErrorReporter,
+            durationProvider: DurationProvider = DefaultDurationProvider.instance,
         ): PlacesClientProxy {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isPlacesAvailable()) {
                 override ?: run {
                     initializer()
                     DefaultPlacesClientProxy(
                         clientFactory(context),
-                        errorReporter
+                        errorReporter,
+                        durationProvider,
                     )
                 }
             } else {
@@ -88,7 +92,8 @@ interface PlacesClientProxy {
 
 internal class DefaultPlacesClientProxy(
     private val client: PlacesClient,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
+    private val durationProvider: DurationProvider,
 ) : PlacesClientProxy {
     private val token = AutocompleteSessionToken.newInstance()
 
@@ -97,9 +102,8 @@ internal class DefaultPlacesClientProxy(
         country: String,
         limit: Int
     ): Result<FindAutocompletePredictionsResponse> {
-        // TODO: this looks like where we'd measure latency for the places SDK.
         return try {
-            durationProvider.measureDuration(YOUR KEY) {
+            durationProvider.measureDuration(DurationProvider.Key.AutocompleteFindPredictions) {
                 val response = client.findAutocompletePredictions(
                     FindAutocompletePredictionsRequest
                         .builder()

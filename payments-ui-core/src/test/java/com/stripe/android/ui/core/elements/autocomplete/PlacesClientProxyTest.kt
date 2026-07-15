@@ -25,6 +25,7 @@ import com.google.android.libraries.places.api.net.SearchNearbyRequest
 import com.google.android.libraries.places.api.net.SearchNearbyResponse
 import com.google.android.libraries.places.internal.zzmy
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.elements.IsPlacesAvailable
@@ -103,6 +104,7 @@ class PlacesClientProxyTest {
     @Test
     fun `findAutocompletePredictions returns results with limit`() =
         runTest(UnconfinedTestDispatcher()) {
+            val durationProvider = RecordingDurationProvider()
             val client = createGooglePlacesClient(
                 onFindAutocompletePredictions = {
                     Tasks.forResult(
@@ -129,6 +131,7 @@ class PlacesClientProxyTest {
                 clientFactory = { client },
                 initializer = { /* no-op */ },
                 errorReporter = FakeErrorReporter(),
+                durationProvider = durationProvider,
             )
 
             val predictions = proxy.findAutocompletePredictions(
@@ -141,6 +144,52 @@ class PlacesClientProxyTest {
 
             assertThat(predictions.getOrNull()?.autocompletePredictions?.size)
                 .isEqualTo(3)
+            assertThat(
+                durationProvider.calls
+            ).containsExactly(
+                RecordingDurationProvider.Call.Start(DurationProvider.Key.AutocompleteFindPredictions, reset = true),
+                RecordingDurationProvider.Call.End(DurationProvider.Key.AutocompleteFindPredictions),
+            ).inOrder()
+        }
+
+    @Test
+    fun `findAutocompletePredictions measures duration on failure`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val durationProvider = RecordingDurationProvider()
+            val client = createGooglePlacesClient(
+                onFindAutocompletePredictions = {
+                    Tasks.forException(RuntimeException("boom"))
+                }
+            )
+            val proxy = PlacesClientProxy.create(
+                context = mock(),
+                googlePlacesApiKey = "abc123",
+                isPlacesAvailable = object : IsPlacesAvailable {
+                    override fun invoke(): Boolean {
+                        return true
+                    }
+                },
+                clientFactory = { client },
+                initializer = { /* no-op */ },
+                errorReporter = FakeErrorReporter(),
+                durationProvider = durationProvider,
+            )
+
+            val predictions = proxy.findAutocompletePredictions(
+                "some query",
+                "country",
+                3
+            )
+
+            runCurrent()
+
+            assertThat(predictions.isFailure).isTrue()
+            assertThat(
+                durationProvider.calls
+            ).containsExactly(
+                RecordingDurationProvider.Call.Start(DurationProvider.Key.AutocompleteFindPredictions, reset = true),
+                RecordingDurationProvider.Call.End(DurationProvider.Key.AutocompleteFindPredictions),
+            ).inOrder()
         }
 
     @Test
@@ -325,5 +374,37 @@ class PlacesClientProxyTest {
             }
         }
         return client
+    }
+
+    private class RecordingDurationProvider : DurationProvider {
+        val calls = mutableListOf<Call>()
+
+        override fun start(key: DurationProvider.Key, reset: Boolean) {
+            calls.add(Call.Start(key, reset))
+        }
+
+        override fun elapsed(key: DurationProvider.Key) = null
+
+        override fun end(key: DurationProvider.Key): kotlin.time.Duration? {
+            calls.add(Call.End(key))
+            return null
+        }
+
+        override fun completedDuration(key: DurationProvider.Key) = null
+
+        override suspend fun <T> measureDuration(key: DurationProvider.Key, block: suspend () -> T): T {
+            start(key, reset = true)
+            return try {
+                block()
+            } finally {
+                end(key)
+            }
+        }
+
+        sealed interface Call {
+            data class Start(val key: DurationProvider.Key, val reset: Boolean) : Call
+
+            data class End(val key: DurationProvider.Key) : Call
+        }
     }
 }

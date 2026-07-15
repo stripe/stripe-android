@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.paymentsheet.injection.HostedPlacesClientProxyProvider
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.CoroutineScope
@@ -13,12 +14,18 @@ internal class BillingInlineAutocompleteAddressInteractor(
 ) : AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
+    private val stripeHostedProxy: PlacesClientProxy? = if (shouldUseAutocompleteProxyEndpoints) {
+        (placesClient as? HostedPlacesClientProxyProvider)?.createStripeHostedProxy()
+    } else {
+        null
+    }
+
     private val inlineController = InlineAutocompleteController(
-        placesClient = placesClient,
+        placesClient = if (stripeHostedProxy != null) null else placesClient,
+        stripeHostedProxy = stripeHostedProxy,
         config = autocompleteConfig,
         coroutineScope = coroutineScope,
         eventListenerProvider = { eventListener },
-        shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
     )
 
     override val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
