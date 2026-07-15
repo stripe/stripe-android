@@ -194,7 +194,7 @@ internal class DefaultTapToAddConnectionManager(
                             reportError(
                                 error = e,
                                 errorEvent =
-                                    ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
+                                ErrorReporter.ExpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CALL_FAILURE,
                             )
 
                             continuation.resumeWith(Result.failure(e))
@@ -220,7 +220,7 @@ internal class DefaultTapToAddConnectionManager(
                             reportError(
                                 error = e,
                                 errorEvent =
-                                    ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE,
+                                ErrorReporter.UnexpectedErrorEvent.TAP_TO_ADD_DISCOVER_READERS_CANCEL_FAILURE,
                             )
                         }
                     }

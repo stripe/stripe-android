@@ -50,7 +50,7 @@ internal object TapToAddErrorMessageBuilder {
              * https://stripe.sourcegraphcloud.com/r/stripe-internal/android/-/blob/terminalsdk/cots/modules/common/src/main/kotlin/com/stripe/cots/common/CotsError.kt?L13-16
              */
             TerminalErrorCode.TAP_TO_PAY_INSECURE_ENVIRONMENT
-                if error.errorMessage.contains(DEVELOPER_OPTIONS_SUBSTRING) -> {
+            if error.errorMessage.contains(DEVELOPER_OPTIONS_SUBSTRING) -> {
                 TapToAddErrorMessage(
                     title = StripeCoreR.string.stripe_error.resolvableString,
                     action = R.string.stripe_tap_to_add_developer_options_error_action.resolvableString,

@@ -422,8 +422,8 @@ internal class OnrampViewModel(
                         screen = Screen.AuthenticatedOperations,
                         linkAuthIntentId = null,
                         consentedLinkAuthIntentIds =
-                            currentState.consentedLinkAuthIntentIds +
-                                listOfNotNull(currentState.linkAuthIntentId),
+                        currentState.consentedLinkAuthIntentIds +
+                            listOfNotNull(currentState.linkAuthIntentId),
                         loadingMessage = null
                     )
                 }
@@ -600,7 +600,7 @@ internal class OnrampViewModel(
                             screen = Screen.AuthenticatedOperations,
                             loadingMessage = null,
                             missingIdentifiersSummary =
-                                formatIdentifierRequirements(result.requirements)
+                            formatIdentifierRequirements(result.requirements)
                         )
                     }
                 }
@@ -636,7 +636,7 @@ internal class OnrampViewModel(
                             screen = Screen.AuthenticatedOperations,
                             loadingMessage = null,
                             submitIdentifiersSummary =
-                                formatSubmitIdentifiersResult(result.result)
+                            formatSubmitIdentifiersResult(result.result)
                         )
                     }
                 }

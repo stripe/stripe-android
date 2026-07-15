@@ -386,7 +386,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkPaymentLauncher = walletsButtonLinkLauncher,
                 linkAccountHolder = flowControllerViewModel.flowControllerStateComponent.linkAccountHolder,
                 analyticsCallbackProvider =
-                    flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
+                flowControllerViewModel.flowControllerStateComponent.analyticEventCallbackProvider,
                 onWalletButtonsRenderStateChanged = { isRendered ->
                     flowControllerViewModel.walletButtonsRendered = isRendered
                 }

@@ -558,7 +558,7 @@ class OnrampInteractorTest {
                     "reason" to "app_not_play_recognized",
                     "user_message" to
                         "This app couldn't be verified. Install it from Google Play " +
-                            "and try again."
+                        "and try again."
                 )
             ),
             requestId = "req_123",

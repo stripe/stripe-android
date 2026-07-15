@@ -19,14 +19,14 @@ class PrefetchedPaymentMethodMessagePromotionsHelperTest {
             PaymentMethod.Type.Affirm.code,
             PaymentMethodMetadataFactory.create(
                 experimentsData = ElementsSession.ExperimentsData(
-                        arbId = "arb_123",
-                        experimentAssignments = mapOf(
-                            ElementsSession.ExperimentAssignment
-                                .OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
-                        )
+                    arbId = "arb_123",
+                    experimentAssignments = mapOf(
+                        ElementsSession.ExperimentAssignment
+                            .OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS to "treatment"
                     )
                 )
             )
+        )
 
         assertThat(result).isEqualTo(promotion)
     }

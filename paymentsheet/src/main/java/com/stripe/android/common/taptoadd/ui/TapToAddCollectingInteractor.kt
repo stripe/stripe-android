@@ -64,7 +64,7 @@ internal class DefaultTapToAddCollectingInteractor(
             is TapToAddCollectionHandler.CollectionState.Collected -> {
                 eventReporter.onCardAddedWithTapToAdd(
                     canCollectLinkInput =
-                        linkInlineSignupAvailability.availability() is LinkInlineSignupAvailability.Result.Available
+                    linkInlineSignupAvailability.availability() is LinkInlineSignupAvailability.Result.Available
                 )
 
                 onCollected(collectionState.paymentMethod)

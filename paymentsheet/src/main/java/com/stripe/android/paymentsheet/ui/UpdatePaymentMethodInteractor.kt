@@ -195,7 +195,7 @@ internal class DefaultUpdatePaymentMethodInteractor(
             cardBrandFilter = cardBrandFilter,
             isCbcModifiable = shouldShowCardBrandDropdown,
             areExpiryDateAndAddressModificationSupported =
-                isModifiablePaymentMethod && canUpdateCardExpiryAndBillingDetails,
+            isModifiablePaymentMethod && canUpdateCardExpiryAndBillingDetails,
         )
         return editCardDetailsInteractorFactory.create(
             payload = payload,

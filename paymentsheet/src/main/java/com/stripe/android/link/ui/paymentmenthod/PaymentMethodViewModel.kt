@@ -209,7 +209,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                     googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
                                     autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                                     isInlineAutocompleteEnabled =
-                                        FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                                    FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
                                 ),
                                 placesClient = null,
                                 coroutineScope = null,

@@ -4,7 +4,6 @@ root = true
 ktlint_standard_import-ordering = disabled
 ktlint_standard_trailing-comma-on-call-site = disabled
 ktlint_standard_trailing-comma-on-declaration-site = disabled
-ktlint_standard_indent = disabled
 ktlint_standard_string-template-indent = disabled
 ktlint_standard_no-semi = disabled
 ktlint_standard_multiline-expression-wrapping = disabled

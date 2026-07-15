@@ -219,7 +219,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 enableMlKitCardScan = metadata.enableMlKitCardScan,
                 disableSsdOcrCardScan = metadata.disableSsdOcrCardScan,
                 automaticallyLaunchedCardScanFormDataHelper =
-                    arguments.automaticallyLaunchedCardScanFormDataHelper,
+                arguments.automaticallyLaunchedCardScanFormDataHelper,
             )
         }
     }

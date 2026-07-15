@@ -301,9 +301,9 @@ internal class CreateCustomerMetadataTest {
                         mobilePaymentElement = ElementsSession.Customer.Components.MobilePaymentElement.Enabled(
                             isPaymentMethodSaveEnabled = false,
                             paymentMethodRemove =
-                                ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
+                            ElementsSession.Customer.Components.PaymentMethodRemoveFeature.Enabled,
                             paymentMethodRemoveLast =
-                                ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
+                            ElementsSession.Customer.Components.PaymentMethodRemoveLastFeature.Enabled,
                             allowRedisplayOverride = null,
                             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSetAsDefaultEnabled,
                         ),

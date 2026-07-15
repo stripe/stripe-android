@@ -41,10 +41,10 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
             automaticallyLaunchedCardScanFormDataHelper =
-                embeddedFormHelperFactory.createAutomaticallyLaunchedCardScanFormDataHelper(
-                    selectedPaymentMethodCode = paymentMethodCode,
-                    paymentMethodMetadata = paymentMethodMetadata,
-                ),
+            embeddedFormHelperFactory.createAutomaticallyLaunchedCardScanFormDataHelper(
+                selectedPaymentMethodCode = paymentMethodCode,
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
             selectionUpdater = { embeddedSelectionHolder.setSelection(it) },
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default

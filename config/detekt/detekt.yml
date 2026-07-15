@@ -679,7 +679,7 @@ ktlint:
   ImportOrdering:
     active: true
   Indentation:
-    active: false
+    active: true
   Kdoc:
     active: false
   MaximumLineLength:

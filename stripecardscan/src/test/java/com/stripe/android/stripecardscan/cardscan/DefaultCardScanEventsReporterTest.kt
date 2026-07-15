@@ -115,85 +115,85 @@ internal class DefaultCardScanEventsReporterTest {
     @Test
     fun testMlKitFoundPanSentOncePerSession() =
         runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
-        defaultCardScanEventsReporter.scanStarted()
-        ShadowSystemClock.advanceBy(2, TimeUnit.SECONDS)
+            defaultCardScanEventsReporter.scanStarted()
+            ShadowSystemClock.advanceBy(2, TimeUnit.SECONDS)
 
-        defaultCardScanEventsReporter.scanMlKitFoundPan()
-        defaultCardScanEventsReporter.scanMlKitFoundPan()
+            defaultCardScanEventsReporter.scanMlKitFoundPan()
+            defaultCardScanEventsReporter.scanMlKitFoundPan()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
+            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_mlkit_found_pan")
-        assertThat(loggedParams["duration"]).isEqualTo(2f)
-        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
-    }
+            assertThat(loggedRequests).hasSize(2)
+            val loggedParams = loggedRequests.last().params
+            assertThat(loggedParams["event"]).isEqualTo("cardscan_mlkit_found_pan")
+            assertThat(loggedParams["duration"]).isEqualTo(2f)
+            assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
+        }
 
     @Test
     fun testMlKitFoundExpSentOncePerSession() =
         runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
-        defaultCardScanEventsReporter.scanStarted()
-        ShadowSystemClock.advanceBy(3, TimeUnit.SECONDS)
+            defaultCardScanEventsReporter.scanStarted()
+            ShadowSystemClock.advanceBy(3, TimeUnit.SECONDS)
 
-        defaultCardScanEventsReporter.scanMlKitFoundExp()
-        defaultCardScanEventsReporter.scanMlKitFoundExp()
+            defaultCardScanEventsReporter.scanMlKitFoundExp()
+            defaultCardScanEventsReporter.scanMlKitFoundExp()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
+            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_mlkit_found_exp")
-        assertThat(loggedParams["duration"]).isEqualTo(3f)
-        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
-    }
+            assertThat(loggedRequests).hasSize(2)
+            val loggedParams = loggedRequests.last().params
+            assertThat(loggedParams["event"]).isEqualTo("cardscan_mlkit_found_exp")
+            assertThat(loggedParams["duration"]).isEqualTo(3f)
+            assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
+        }
 
     @Test
     fun testDarkniteFoundPanSentOncePerSession() =
         runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
-        defaultCardScanEventsReporter.scanStarted()
-        ShadowSystemClock.advanceBy(4, TimeUnit.SECONDS)
+            defaultCardScanEventsReporter.scanStarted()
+            ShadowSystemClock.advanceBy(4, TimeUnit.SECONDS)
 
-        defaultCardScanEventsReporter.scanDarkniteFoundPan()
-        defaultCardScanEventsReporter.scanDarkniteFoundPan()
+            defaultCardScanEventsReporter.scanDarkniteFoundPan()
+            defaultCardScanEventsReporter.scanDarkniteFoundPan()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
+            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_darknite_found_pan")
-        assertThat(loggedParams["duration"]).isEqualTo(4f)
-        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
-    }
+            assertThat(loggedRequests).hasSize(2)
+            val loggedParams = loggedRequests.last().params
+            assertThat(loggedParams["event"]).isEqualTo("cardscan_darknite_found_pan")
+            assertThat(loggedParams["duration"]).isEqualTo(4f)
+            assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
+        }
 
     @Test
     fun testModelsDisagreeSentOncePerSession() =
         runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
-        defaultCardScanEventsReporter.scanStarted()
-        ShadowSystemClock.advanceBy(5, TimeUnit.SECONDS)
+            defaultCardScanEventsReporter.scanStarted()
+            ShadowSystemClock.advanceBy(5, TimeUnit.SECONDS)
 
-        defaultCardScanEventsReporter.scanModelsDisagree()
-        defaultCardScanEventsReporter.scanModelsDisagree()
+            defaultCardScanEventsReporter.scanModelsDisagree()
+            defaultCardScanEventsReporter.scanModelsDisagree()
 
-        val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
+            val loggedRequests = fakeAnalyticsRequestExecutor.getExecutedRequests()
 
-        assertThat(loggedRequests).hasSize(2)
-        val loggedParams = loggedRequests.last().params
-        assertThat(loggedParams["event"]).isEqualTo("cardscan_models_disagree")
-        assertThat(loggedParams["duration"]).isEqualTo(5f)
-        assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
-    }
+            assertThat(loggedRequests).hasSize(2)
+            val loggedParams = loggedRequests.last().params
+            assertThat(loggedParams["event"]).isEqualTo("cardscan_models_disagree")
+            assertThat(loggedParams["duration"]).isEqualTo(5f)
+            assertThat(loggedParams["elements_session_id"]).isEqualTo(ELEMENTS_SESSION_ID)
+        }
 
     @Test
     fun testMilestonesDoNotEmitWithoutActiveSession() =
         runScenario { defaultCardScanEventsReporter, fakeAnalyticsRequestExecutor ->
-        defaultCardScanEventsReporter.scanMlKitFoundPan()
-        defaultCardScanEventsReporter.scanMlKitFoundExp()
-        defaultCardScanEventsReporter.scanDarkniteFoundPan()
-        defaultCardScanEventsReporter.scanModelsDisagree()
+            defaultCardScanEventsReporter.scanMlKitFoundPan()
+            defaultCardScanEventsReporter.scanMlKitFoundExp()
+            defaultCardScanEventsReporter.scanDarkniteFoundPan()
+            defaultCardScanEventsReporter.scanModelsDisagree()
 
-        assertThat(fakeAnalyticsRequestExecutor.getExecutedRequests()).isEmpty()
-    }
+            assertThat(fakeAnalyticsRequestExecutor.getExecutedRequests()).isEmpty()
+        }
 
     private fun runScenario(
         testBlock: (DefaultCardScanEventsReporter, FakeAnalyticsRequestExecutor) -> Unit

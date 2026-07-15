@@ -46,9 +46,9 @@ class TapToAddCardCollectionTestHelper(
                 readerSupportResult = ReaderSupportResult.Supported,
                 retrieveSetupIntentResult = TerminalTestDelegate.SetupIntentResult.Success(setupIntent),
                 collectSetupIntentPaymentMethodResult =
-                    TerminalTestDelegate.SetupIntentResult.Success(setupIntent),
+                TerminalTestDelegate.SetupIntentResult.Success(setupIntent),
                 confirmSetupIntentResult =
-                    TerminalTestDelegate.SetupIntentResult.Success(confirmedIntent),
+                TerminalTestDelegate.SetupIntentResult.Success(confirmedIntent),
             )
         )
 

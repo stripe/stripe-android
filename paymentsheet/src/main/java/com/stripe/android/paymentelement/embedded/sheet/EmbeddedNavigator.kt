@@ -174,7 +174,7 @@ internal class EmbeddedNavigator private constructor(
             private val launchMode: EmbeddedLaunchMode.Form,
         ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
-                    PaymentSheetTopBarState(
+                PaymentSheetTopBarState(
                     showTestModeLabel = !formInteractor.isLiveMode,
                     showEditMenu = false,
                     isEditing = false,

@@ -669,7 +669,7 @@ internal class OnrampInteractor @Inject constructor(
                         sublabel = it.sublabel,
                         type = it.type.toDisplayType()
                     ),
-                        kycInfo = null
+                    kycInfo = null
                 )
             } ?: run {
                 val error = mapError(

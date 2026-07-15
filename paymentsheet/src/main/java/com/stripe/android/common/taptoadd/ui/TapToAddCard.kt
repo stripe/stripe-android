@@ -66,7 +66,7 @@ private fun Card(
     val imageRepository = LocalTapToAddImageRepository.current
 
     val state: MutableState<TapToAddImageRepository.CardArt?> = remember {
-       mutableStateOf(imageRepository?.get(cardBrand))
+        mutableStateOf(imageRepository?.get(cardBrand))
     }
 
     imageRepository?.let { repository ->

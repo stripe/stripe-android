@@ -297,7 +297,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         allowDefaultOptIn = elementsSession.allowLinkDefaultOptIn,
         googlePlacesApiKey = configuration.googlePlacesApiKey,
         collectMissingBillingDetailsForExistingPaymentMethods =
-            configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
+        configuration.link.collectMissingBillingDetailsForExistingPaymentMethods,
         allowUserEmailEdits = configuration.link.allowUserEmailEdits,
         allowLogOut = configuration.link.allowLogOut,
         customerId = elementsSession.customer?.session?.customerId,
@@ -306,7 +306,7 @@ internal class DefaultCreateLinkState @Inject constructor(
         forceSetupFutureUseBehaviorAndNewMandate = elementsSession
             .flags[ELEMENTS_MOBILE_FORCE_SETUP_FUTURE_USE_BEHAVIOR_AND_NEW_MANDATE_TEXT] == true,
         linkSupportedPaymentMethodsOnboardingEnabled =
-            elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
+        elementsSession.linkSettings?.linkSupportedPaymentMethodsOnboardingEnabled.orEmpty(),
         clientAttributionMetadata = clientAttributionMetadata,
         linkBrand = elementsSession.linkBrand,
     )

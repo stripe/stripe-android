@@ -69,7 +69,7 @@ internal class FakePaymentElementLoader(
             linkState = linkState,
             passiveCaptchaParams = passiveCaptchaParams,
             clientAttributionMetadata =
-                clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+            clientAttributionMetadata ?: PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             shippingDetails = shippingDetails,
             experimentsData = experimentsData,
             integrationMetadata = integrationMetadata
@@ -81,7 +81,7 @@ internal class FakePaymentElementLoader(
                     integrationConfiguration.configuration.paymentMethodLayout
             }
         )
-        }
+    }
 
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,
