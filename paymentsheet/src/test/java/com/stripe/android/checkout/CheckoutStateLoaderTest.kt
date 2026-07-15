@@ -5,6 +5,9 @@ import android.graphics.Bitmap
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration
+import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+import com.stripe.android.checkout.PaymentElement.Configuration.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -33,6 +36,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -76,6 +80,40 @@ internal class CheckoutStateLoaderTest {
             assertThat(confirmationStateHolder.state?.configuration?.embeddedViewDisplaysMandateText)
                 .isFalse()
         }
+
+    @Test
+    fun `load propagates billingDetailsCollectionConfiguration from the payment element configuration`() =
+        runScenario {
+            val configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().billingDetailsCollectionConfiguration(bdcc(address = Full))
+                )
+                .build()
+
+            loader.load(checkoutControllerState(configuration = configuration))
+
+            assertThat(
+                confirmationStateHolder.state?.configuration?.billingDetailsCollectionConfiguration?.address
+            ).isEqualTo(PSFull)
+        }
+
+    @Test
+    fun `load forces attachDefaultsToPaymentMethod true`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .paymentElement(
+                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
+                    bdcc(attachDefaultsToPaymentMethod = false)
+                )
+            )
+            .build()
+
+        loader.load(checkoutControllerState(configuration = configuration))
+
+        assertThat(
+            confirmationStateHolder.state?.configuration?.billingDetailsCollectionConfiguration
+                ?.attachDefaultsToPaymentMethod
+        ).isTrue()
+    }
 
     @Test
     fun `load routes the selection through the chooser`() = runScenario(
@@ -171,6 +209,14 @@ internal class CheckoutStateLoaderTest {
 
         imageLoader.ensureAllEventsConsumed()
     }
+
+    private fun bdcc(
+        address: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
+        attachDefaultsToPaymentMethod: Boolean = false,
+    ) = BillingDetailsCollectionConfiguration(
+        address = address,
+        attachDefaultsToPaymentMethod = attachDefaultsToPaymentMethod,
+    )
 
     private fun checkoutControllerState(
         configuration: CheckoutController.Configuration.State = CheckoutController.Configuration().build(),
