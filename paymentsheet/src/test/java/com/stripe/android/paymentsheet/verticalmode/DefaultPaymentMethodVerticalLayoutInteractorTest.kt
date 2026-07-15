@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotio
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor.ViewAction
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -42,7 +43,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import com.stripe.android.paymentsheet.R as PaymentSheetR
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -51,6 +54,12 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
+
+    private val closeInteractorRule = CleanupTestRule(PaymentMethodVerticalLayoutInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(closeInteractorRule)
 
     @Test
     fun state_updatesWhenProcessingUpdates() = runScenario {
@@ -1913,6 +1922,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
             },
             paymentMethodMessagePromotionsHelper = promotionsHelper
         )
+        closeInteractorRule.track(interactor)
 
         TestParams(
             selection = selection,
