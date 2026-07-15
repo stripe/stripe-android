@@ -38,7 +38,6 @@ class CheckoutController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
-    internal val confirmationStateHolder: CheckoutConfirmationStateHolder,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
@@ -64,11 +63,9 @@ class CheckoutController @Inject internal constructor(
             sessionId = sessionId,
             adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
         ).mapCatching { response ->
-            checkoutStateLoader.load(
-                CheckoutControllerState.defaultState(
-                    configuration = configurationState,
-                    checkoutSessionResponse = response,
-                )
+            checkoutStateLoader.loadInitial(
+                configuration = configurationState,
+                checkoutSessionResponse = response,
             )
         }
     }
@@ -135,7 +132,13 @@ class CheckoutController @Inject internal constructor(
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure(it) }
         return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
-            copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = name,
+                    shippingPhoneNumber = phoneNumber,
+                    shippingAddress = it,
+                ),
+            )
         }
     }
 
@@ -168,7 +171,13 @@ class CheckoutController @Inject internal constructor(
         phoneNumber: String?,
         address: Address,
     ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = it)
+        copy(
+            collectedDetails = collectedDetails.copy(
+                billingName = name,
+                billingPhoneNumber = phoneNumber,
+                billingAddress = it,
+            ),
+        )
     }
 
     /**
@@ -245,9 +254,9 @@ class CheckoutController @Inject internal constructor(
                 val newState = state
                     .copy(checkoutSessionResponse = response)
                     .additionalStateMutations()
-                // load resolves flag images (reusing newState's carried-over cache) and
-                // atomically commits the reloaded state to the holders.
-                checkoutStateLoader.load(newState)
+                // reload resolves flag images (reusing newState's carried-over cache) and commits
+                // the fully reloaded state to the holder.
+                checkoutStateLoader.reload(newState)
             }
         }
     }
