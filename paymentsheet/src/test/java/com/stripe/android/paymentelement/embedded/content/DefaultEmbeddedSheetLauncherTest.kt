@@ -727,7 +727,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `paymentOptionsResult cancelled clears stale saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
-        selectionHolder.set(savedSelection)
+        selectionHolder.setSelection(savedSelection)
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
         sheetStateHolder.sheetIsOpen = true
@@ -746,7 +746,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `paymentOptionsResult cancelled preserves valid saved selection`() = testScenario {
         val paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
         val savedSelection = PaymentSelection.Saved(paymentMethod)
-        selectionHolder.set(savedSelection)
+        selectionHolder.setSelection(savedSelection)
         customerStateHolder.setCustomerState(createCustomerState(paymentMethods = listOf(paymentMethod)))
 
         sheetStateHolder.sheetIsOpen = true

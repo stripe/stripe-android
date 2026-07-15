@@ -176,7 +176,7 @@ internal class DefaultEmbeddedContentHelperTest {
                     )
                 )
                 set(CustomerStateHolder.SAVED_CUSTOMER, customerState)
-                set(EmbeddedSelectionHolder.EMBEDDED_SELECTION_KEY, selection)
+                set(DefaultEmbeddedSelectionHolder.EMBEDDED_SELECTION_KEY, selection)
             }
         ) {
             val fakeLauncher = RecordingEmbeddedSheetLauncher()
