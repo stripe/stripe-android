@@ -141,7 +141,7 @@ internal class EmbeddedNavigator private constructor(
 
         class ManageUpdate(
             private val interactor: UpdatePaymentMethodInteractor,
-        ) : Screen(), Closeable {
+        ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(interactor.topBarState)
 
             override fun title(): StateFlow<ResolvableString?> {
@@ -157,10 +157,6 @@ internal class EmbeddedNavigator private constructor(
                 UpdatePaymentMethodUI(interactor = interactor, modifier = Modifier.Companion)
                 PaymentSheetContentPadding(subtractingExtraPadding = 16.dp)
             }
-
-            override fun close() {
-                interactor.close()
-            }
         }
 
         class Form(
@@ -172,7 +168,7 @@ internal class EmbeddedNavigator private constructor(
             private val savedPaymentMethodConfirmInteractorFactory: SavedPaymentMethodConfirmInteractor.Factory,
             private val customerStateHolder: CustomerStateHolder,
             private val launchMode: EmbeddedLaunchMode.Form,
-        ) : Screen(), Closeable {
+        ) : Screen() {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                     PaymentSheetTopBarState(
                     showTestModeLabel = !formInteractor.isLiveMode,
@@ -212,10 +208,6 @@ internal class EmbeddedNavigator private constructor(
                     updateSelection = embeddedSelectionHolder::set,
                     savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                 )
-            }
-
-            override fun close() {
-                formInteractor.close()
             }
 
             class Factory @Inject constructor(
