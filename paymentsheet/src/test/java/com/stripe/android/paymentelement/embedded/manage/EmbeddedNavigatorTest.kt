@@ -227,7 +227,7 @@ internal class EmbeddedNavigatorTest {
     @Test
     fun `ManageAll isPerformingNetworkOperation returns false`() {
         val screen = EmbeddedNavigator.Screen.ManageAll(FakeManageScreenInteractor())
-        assertThat(screen.isPerformingNetworkOperation()).isFalse()
+        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
     }
 
     @Test
@@ -269,7 +269,7 @@ internal class EmbeddedNavigatorTest {
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
-        assertThat(screen.isPerformingNetworkOperation()).isFalse()
+        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
     }
 
     @Test
@@ -283,7 +283,7 @@ internal class EmbeddedNavigatorTest {
             )
         )
         val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
-        assertThat(screen.isPerformingNetworkOperation()).isTrue()
+        assertThat(screen.isPerformingNetworkOperation().value).isTrue()
     }
 
     @Test
