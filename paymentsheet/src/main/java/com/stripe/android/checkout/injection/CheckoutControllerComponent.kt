@@ -117,7 +117,7 @@ internal interface CheckoutControllerComponent {
 }
 
 @Suppress("TooManyFunctions")
-@Module
+@Module(subcomponents = [CheckoutPresenterSubcomponent::class])
 internal interface CheckoutControllerModule {
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader

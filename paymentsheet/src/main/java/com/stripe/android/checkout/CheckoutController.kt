@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -38,6 +39,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
@@ -285,7 +287,7 @@ class CheckoutController @Inject internal constructor(
     }
 
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        TODO("Not yet implemented")
+        return checkoutPresenterSubcomponentFactory.create().presenter
     }
 
     fun destroy() {

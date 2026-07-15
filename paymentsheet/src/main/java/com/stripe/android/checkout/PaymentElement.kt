@@ -12,10 +12,11 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentElement internal constructor() {
+class PaymentElement @Inject internal constructor() {
 
     @Composable
     fun PaymentOptionsContent() {

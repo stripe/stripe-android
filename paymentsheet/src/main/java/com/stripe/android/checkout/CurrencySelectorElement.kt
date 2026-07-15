@@ -9,10 +9,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CurrencySelectorElement internal constructor() {
+class CurrencySelectorElement @Inject internal constructor() {
 
     @Composable
     fun Content() {
