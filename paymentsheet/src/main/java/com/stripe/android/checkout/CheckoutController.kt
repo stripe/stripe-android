@@ -365,7 +365,7 @@ class CheckoutController @Inject internal constructor(
         }
 
         fun googlePayConfiguration(
-            configuration: GooglePayConfiguration?,
+            configuration: GooglePayConfiguration,
         ): Configuration = apply {
             this.googlePayConfiguration = configuration
         }
