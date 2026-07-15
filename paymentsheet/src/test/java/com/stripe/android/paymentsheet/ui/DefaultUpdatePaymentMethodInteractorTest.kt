@@ -784,6 +784,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
         ).apply {
             runTest { testBlock() }
             ensureAllEventsConsumed()
+            interactor.close()
         }
     }
 
