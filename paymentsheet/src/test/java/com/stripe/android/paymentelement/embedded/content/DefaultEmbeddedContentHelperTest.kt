@@ -7,15 +7,21 @@ import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
+import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import com.stripe.android.paymentsheet.createCustomerState
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -127,10 +133,73 @@ internal class DefaultEmbeddedContentHelperTest {
         }
     }
 
+    @Test
+    fun `presentPaymentOptions reports error when state is null`() = testScenario {
+        embeddedContentHelper.presentPaymentOptions()
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            "unexpected_error.embedded.present_payment_options.not_configured"
+        )
+    }
+
+    @Test
+    fun `presentPaymentOptions reports error when launcher is null`() = testScenario(
+        setup = {
+            set(
+                STATE_KEY_EMBEDDED_CONTENT,
+                DefaultEmbeddedContentHelper.State(
+                    PaymentMethodMetadataFactory.create(),
+                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                    embeddedViewDisplaysMandateText = true,
+                )
+            )
+        }
+    ) {
+        embeddedContentHelper.presentPaymentOptions()
+        assertThat(errorReporter.getLoggedErrors()).containsExactly(
+            "unexpected_error.embedded.present_payment_options.no_launcher"
+        )
+    }
+
+    @Test
+    fun `presentPaymentOptions launches with the current state, customer, and selection`() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val customerState = createCustomerState()
+        val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        testScenario(
+            setup = {
+                set(
+                    STATE_KEY_EMBEDDED_CONTENT,
+                    DefaultEmbeddedContentHelper.State(
+                        paymentMethodMetadata,
+                        Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                        embeddedViewDisplaysMandateText = true,
+                    )
+                )
+                set(CustomerStateHolder.SAVED_CUSTOMER, customerState)
+                set(DefaultEmbeddedSelectionHolder.EMBEDDED_SELECTION_KEY, selection)
+            }
+        ) {
+            val fakeLauncher = RecordingEmbeddedSheetLauncher()
+            embeddedContentHelper.setSheetLauncher(fakeLauncher)
+            embeddedContentHelper.presentPaymentOptions()
+
+            assertThat(fakeLauncher.launchPaymentOptionsCalls.single()).isEqualTo(
+                RecordingEmbeddedSheetLauncher.LaunchPaymentOptionsCall(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    customerState = customerState,
+                    selection = selection,
+                    embeddedConfirmationState = null,
+                )
+            )
+            assertThat(errorReporter.getLoggedErrors()).isEmpty()
+        }
+    }
+
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val savedStateHandle: SavedStateHandle,
         val eventReporter: FakeEventReporter,
+        val errorReporter: FakeErrorReporter,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -193,8 +262,51 @@ internal class DefaultEmbeddedContentHelperTest {
             embeddedContentHelper = embeddedContentHelper,
             savedStateHandle = savedStateHandle,
             eventReporter = eventReporter,
+            errorReporter = errorReporter,
         ).block()
         confirmationHandler.validate()
         eventReporter.validate()
+    }
+
+    private class RecordingEmbeddedSheetLauncher : EmbeddedSheetLauncher {
+        val launchPaymentOptionsCalls = mutableListOf<LaunchPaymentOptionsCall>()
+
+        override fun launchForm(
+            code: String,
+            paymentMethodMetadata: PaymentMethodMetadata,
+            embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+            customerState: CustomerState?,
+            promotion: PaymentMethodMessagePromotion?,
+        ) = error("Not expected.")
+
+        override fun launchManage(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            customerState: CustomerState,
+            selection: PaymentSelection?,
+            embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        ) = error("Not expected.")
+
+        override fun launchPaymentOptions(
+            paymentMethodMetadata: PaymentMethodMetadata,
+            customerState: CustomerState?,
+            selection: PaymentSelection?,
+            embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        ) {
+            launchPaymentOptionsCalls.add(
+                LaunchPaymentOptionsCall(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    customerState = customerState,
+                    selection = selection,
+                    embeddedConfirmationState = embeddedConfirmationState,
+                )
+            )
+        }
+
+        data class LaunchPaymentOptionsCall(
+            val paymentMethodMetadata: PaymentMethodMetadata,
+            val customerState: CustomerState?,
+            val selection: PaymentSelection?,
+            val embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        )
     }
 }

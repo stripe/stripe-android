@@ -1,16 +1,22 @@
 package com.stripe.android.paymentelement.embedded.sheet
 
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
@@ -19,8 +25,12 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.utils.collectAsState
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
@@ -88,6 +98,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> eventReporter.onShowManageSavedPaymentMethods()
             is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
             is Screen.Form -> Unit
+            is Screen.PaymentOptions -> eventReporter.onShowNewPaymentOptions()
         }
     }
 
@@ -96,6 +107,7 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageAll -> Unit
             is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
             is Screen.Form -> Unit
+            is Screen.PaymentOptions -> Unit
         }
     }
 
@@ -245,6 +257,47 @@ internal class EmbeddedNavigator private constructor(
                         launchMode = launchMode,
                     )
                 }
+            }
+        }
+
+        class PaymentOptions(
+            private val interactor: PaymentMethodVerticalLayoutInteractor,
+            private val isLiveMode: Boolean,
+            private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val onContinueClick: () -> Unit,
+        ) : Screen(), Closeable {
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
+                PaymentSheetTopBarState(
+                    showTestModeLabel = !isLiveMode,
+                    showEditMenu = false,
+                    isEditing = false,
+                    onEditIconPressed = {},
+                )
+            )
+
+            override fun title(): StateFlow<ResolvableString?> = stateFlowOf(
+                R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+            )
+
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
+
+            @Composable
+            override fun Content() {
+                PaymentMethodVerticalLayoutUI(
+                    interactor = interactor,
+                    modifier = Modifier.padding(StripeTheme.getOuterFormInsets()),
+                )
+                Spacer(Modifier.height(40.dp))
+                val state by sheetActivityState.collectAsState()
+                FormActivityPrimaryButton(
+                    state = state,
+                    onClick = onContinueClick,
+                )
+                PaymentSheetContentPadding()
+            }
+
+            override fun close() {
+                interactor.close()
             }
         }
     }
