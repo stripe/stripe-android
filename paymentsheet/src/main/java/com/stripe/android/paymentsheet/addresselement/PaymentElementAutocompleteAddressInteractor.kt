@@ -46,6 +46,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
         private val placesClient: PlacesClientProxy?,
         private val coroutineScope: CoroutineScope?,
+        private val shouldUseAutocompleteProxyEndpointsProvider: () -> Boolean,
     ) : AutocompleteAddressInteractor.Factory {
         private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
 
@@ -56,6 +57,7 @@ internal class PaymentElementAutocompleteAddressInteractor(
                     placesClient = placesClient,
                     autocompleteConfig = autocompleteConfig,
                     coroutineScope = coroutineScope,
+                    shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpointsProvider(),
                 ).also { activeInlineInteractor = it }
             }
             return PaymentElementAutocompleteAddressInteractor(

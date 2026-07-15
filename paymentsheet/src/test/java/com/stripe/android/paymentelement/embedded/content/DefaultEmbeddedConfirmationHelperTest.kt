@@ -21,9 +21,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.CoroutineTestRule
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.mockito.Mockito.mock
@@ -145,7 +143,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = backgroundScope,
         )
         confirmationStateHolder.state = loadedState
         val stateHelper = FakeEmbeddedStateHelper()

@@ -36,7 +36,7 @@ internal fun NfcCoilContactlessIcon(
     status: NfcScanningStatus,
     modifier: Modifier = Modifier,
 ) {
-    if (LocalInspectionMode.current || status != NfcScanningStatus.Idle) {
+    if (LocalInspectionMode.current || status !is NfcScanningStatus.Idle) {
         NfcCoilStaticIcon(modifier = modifier)
         return
     }

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import app.cash.turbine.Turbine
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -52,7 +53,17 @@ internal class FakePaymentMethodVerticalLayoutInteractor(
     override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlowOf(initialState)
     override val showsWalletsHeader: StateFlow<Boolean> = stateFlowOf(initialShowsWalletsHeader)
 
+    val closeCalls = Turbine<Unit>()
+
     override fun handleViewAction(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
         viewActionRecorder.record(viewAction)
+    }
+
+    override fun close() {
+        closeCalls.add(Unit)
+    }
+
+    fun validate() {
+        closeCalls.ensureAllEventsConsumed()
     }
 }

@@ -288,7 +288,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    class VerticalMode(private val interactor: PaymentMethodVerticalLayoutInteractor) : PaymentSheetScreen {
+    class VerticalMode(private val interactor: PaymentMethodVerticalLayoutInteractor) : PaymentSheetScreen, Closeable {
 
         override val buyButtonState = stateFlowOf(
             BuyButtonState(visible = true)
@@ -330,6 +330,10 @@ internal sealed interface PaymentSheetScreen {
                 interactor,
                 modifier.padding(StripeTheme.getOuterFormInsets())
             )
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 

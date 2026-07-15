@@ -390,6 +390,7 @@ internal class DefaultVerticalModeFormInteractorTest {
         verifyNoMoreInteractions(formArguments, usBankAccountArguments)
         onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
         reportFieldInteractionTurbine.ensureAllEventsConsumed()
+        interactor.close()
     }
 
     private class TestParams(

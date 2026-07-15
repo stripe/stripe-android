@@ -29,8 +29,10 @@ internal interface NfcScanningEventReporter {
     /**
      * User attempt to scan their card with NFC failed meaning the scanner was NOT able to produce valid card
      * details from the NFC card held against the device.
+     *
+     * @param errorCode code generated from NFC scanning flow indicating the error
      */
-    fun onNfcScanAttemptFailed()
+    fun onNfcScanAttemptFailed(errorCode: String)
 
     /**
      * NFC scan flow completed successfully meaning the user is being returned to the calling payment flow after
@@ -70,9 +72,13 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         fireEvent(eventName = SCAN_ATTEMPT_SUCCEEDED_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
     }
 
-    override fun onNfcScanAttemptFailed() {
+    override fun onNfcScanAttemptFailed(errorCode: String) {
         val duration = durationProvider.end(DurationProvider.Key.NfcScanAttempt)
-        fireEvent(eventName = SCAN_ATTEMPT_FAILED_EVENT_NAME, additionalParams = duration.mapOfDurationInSeconds())
+        fireEvent(
+            eventName = SCAN_ATTEMPT_FAILED_EVENT_NAME,
+            additionalParams = duration.mapOfDurationInSeconds() +
+                mapOf(FIELD_ERROR_CODE to errorCode)
+        )
     }
 
     override fun onNfcScanCancelled() {
@@ -96,6 +102,8 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
     }
 
     private companion object {
+        const val FIELD_ERROR_CODE = "error_code"
+
         const val SCAN_STARTED_EVENT_NAME = "nfc_scan_started"
         const val SCAN_SUCCESS_EVENT_NAME = "nfc_scan_success"
         const val SCAN_CANCELED_EVENT_NAME = "nfc_scan_canceled"

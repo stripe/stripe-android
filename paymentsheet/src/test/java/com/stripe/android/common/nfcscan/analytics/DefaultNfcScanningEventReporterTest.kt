@@ -70,10 +70,10 @@ internal class DefaultNfcScanningEventReporterTest {
     }
 
     @Test
-    fun `onNfcScanAttemptFailed ends duration and fires event with duration`() = runScenario {
+    fun `onNfcScanAttemptFailed ends duration and fires event with duration and error code`() = runScenario {
         durationProvider.start(DurationProvider.Key.NfcScanAttempt)
 
-        reporter.onNfcScanAttemptFailed()
+        reporter.onNfcScanAttemptFailed(errorCode = "expiredCard")
 
         assertThat(durationProvider.has(FakeDurationProvider.Call.End(DurationProvider.Key.NfcScanAttempt)))
             .isTrue()
@@ -81,6 +81,7 @@ internal class DefaultNfcScanningEventReporterTest {
         val loggedParams = executor.getExecutedRequests().single().params
         assertThat(loggedParams).containsEntry("event", "mc_nfc_scan_attempt_failed")
         assertThat(loggedParams).containsEntry("duration", 1.0f)
+        assertThat(loggedParams).containsEntry("error_code", "expiredCard")
     }
 
     @Test

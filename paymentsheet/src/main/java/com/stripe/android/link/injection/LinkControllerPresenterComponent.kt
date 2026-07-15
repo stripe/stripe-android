@@ -22,6 +22,7 @@ internal interface LinkControllerPresenterComponent {
             @BindsInstance authenticationCallback: LinkController.AuthenticationCallback,
             @BindsInstance authorizeCallback: LinkController.AuthorizeCallback,
             @BindsInstance presentCallback: LinkController.PresentCallback,
+            @BindsInstance confirmSetupIntentCallback: LinkController.ConfirmSetupIntentCallback,
         ): LinkControllerPresenterComponent
     }
 }

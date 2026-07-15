@@ -6,6 +6,7 @@ import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
 import com.stripe.android.core.injection.IOContext
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
+import kotlin.collections.plusAssign
 import kotlin.coroutines.CoroutineContext
 
 internal interface NfcCardReader {
@@ -25,14 +26,18 @@ internal class ApduCardReader @Inject constructor(
 
             val records = mutableMapOf<String, ByteArray>()
 
-            for (sfi in PROBE_SFIS) {
+            probeFiles@ for (sfi in PROBE_SFIS) {
                 for (record in 1..MAX_RECORDS_PER_SFI) {
                     val result = ReadRecordCommand(record, sfi)
                         .transceiveWith(transceiver)
 
-                    if (result.isFailure) continue
+                    result.onSuccess { result ->
+                        records += result
 
-                    records += result.getOrThrow()
+                        if (cardDataParser.canParse(records)) {
+                            break@probeFiles
+                        }
+                    }
                 }
             }
 

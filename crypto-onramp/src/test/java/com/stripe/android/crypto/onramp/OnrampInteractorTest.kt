@@ -411,7 +411,8 @@ class OnrampInteractorTest {
             stripeError = StripeError(
                 type = "invalid_request_error",
                 code = "crypto_onramp_invalid_wallet_ownership_challenge",
-                message = "The wallet ownership challenge is invalid.",
+                message = "The challenge does not exist, belongs to a different authenticated consumer, was already " +
+                    "consumed, or is otherwise invalid.",
             ),
             requestId = "req_invalid_challenge",
             statusCode = 400,
@@ -434,12 +435,15 @@ class OnrampInteractorTest {
 
         val challengeError = error as InvalidWalletOwnershipChallengeException
         assertThat(challengeError.userMessage)
-            .isEqualTo("This wallet verification request is no longer valid. Please try again.")
+            .isEqualTo("This wallet verification request is invalid. Please try again.")
         assertThat(challengeError.message)
-            .isEqualTo("This wallet verification request is no longer valid. Please try again.")
+            .isEqualTo("This wallet verification request is invalid. Please try again.")
         assertThat(challengeError.code).isEqualTo("crypto_onramp_invalid_wallet_ownership_challenge")
         assertThat(challengeError.underlyingError).isSameInstanceAs(backendError)
-        assertThat(challengeError.developerMessage).contains("The wallet ownership challenge is invalid.")
+        assertThat(challengeError.developerMessage).contains(
+            "The challenge does not exist, belongs to a different authenticated consumer, was already consumed, " +
+                "or is otherwise invalid."
+        )
         assertThat(challengeError.developerMessage).contains("Code: crypto_onramp_invalid_wallet_ownership_challenge")
         assertThat(challengeError.developerMessage).contains("Next step: Request a new challenge")
         assertThat(challengeError.developerMessage).contains("operation: submit_wallet_ownership_signature")
@@ -1735,7 +1739,7 @@ class OnrampInteractorTest {
         walletOwnershipChallengeExpiredUserMessage: String =
             "This wallet verification request expired. Please try again.",
         invalidWalletOwnershipChallengeUserMessage: String =
-            "This wallet verification request is no longer valid. Please try again.",
+            "This wallet verification request is invalid. Please try again.",
     ): Application {
         val runtimeApplication = RuntimeEnvironment.getApplication()
 

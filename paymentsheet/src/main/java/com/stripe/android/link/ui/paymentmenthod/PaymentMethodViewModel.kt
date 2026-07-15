@@ -213,6 +213,7 @@ internal class PaymentMethodViewModel @Inject constructor(
                                 ),
                                 placesClient = null,
                                 coroutineScope = null,
+                                shouldUseAutocompleteProxyEndpointsProvider = { false },
                             ),
                             isLinkUI = true,
                         ),

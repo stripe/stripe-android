@@ -1240,6 +1240,149 @@ class CheckoutTest {
         assertThat(afterRefresh.id).isEqualTo("cs_test_after_address")
     }
 
+    // region allowedShippingCountries validation
+
+    @Test
+    fun `updateShippingAddress succeeds when country is in allowedShippingCountries`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                allowedShippingCountries = listOf("US", "CA"),
+            ),
+        ) {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "US"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            checkoutSessionTurbine.awaitItem()
+
+            val address = Address()
+                .country("US")
+                .postalCode("80202")
+            val result = checkout.updateShippingAddress(address = address)
+
+            checkoutSessionTurbine.awaitItem()
+            result.getOrThrow()
+        }
+
+    @Test
+    fun `updateShippingAddress fails with IllegalArgumentException for disallowed country`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.SHIPPING,
+                allowedShippingCountries = listOf("US", "CA"),
+            ),
+            shouldValidateEvents = false,
+        ) {
+            val initial = checkoutSessionTurbine.awaitItem()
+
+            val address = Address()
+                .country("DE")
+                .postalCode("10115")
+            val result = checkout.updateShippingAddress(address = address)
+
+            assertThat(result.isFailure).isTrue()
+            val exception = result.exceptionOrNull()
+            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception).hasMessageThat().isEqualTo(
+                "Country code 'DE' is not in allowedShippingCountries"
+            )
+            assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+        }
+
+    @Test
+    fun `updateShippingAddress succeeds when allowedShippingCountries is null`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                allowedShippingCountries = null,
+            ),
+            shouldValidateEvents = false,
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val address = Address()
+                .country("DE")
+            val result = checkout.updateShippingAddress(address = address)
+
+            result.getOrThrow()
+        }
+
+    @Test
+    fun `updateShippingAddress fails for all countries when allowedShippingCountries is empty`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                allowedShippingCountries = emptyList(),
+            ),
+            shouldValidateEvents = false,
+        ) {
+            val initial = checkoutSessionTurbine.awaitItem()
+
+            val address = Address()
+                .country("US")
+            val result = checkout.updateShippingAddress(address = address)
+
+            assertThat(result.isFailure).isTrue()
+            val exception = result.exceptionOrNull()
+            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception).hasMessageThat().isEqualTo(
+                "Country code 'US' is not in allowedShippingCountries"
+            )
+            assertThat(checkout.checkoutSession.value).isEqualTo(initial)
+        }
+
+    @Test
+    fun `updateBillingAddress is not gated by allowedShippingCountries`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = true,
+                taxAddressSource = CheckoutSessionResponse.TaxAddressSource.BILLING,
+                allowedShippingCountries = listOf("US"),
+            ),
+        ) {
+            networkRule.checkoutUpdate(
+                bodyPart("tax_region[country]", "DE"),
+            ) { response ->
+                response.testBodyFromFile("checkout-session-update-shipping-address.json")
+            }
+
+            checkoutSessionTurbine.awaitItem()
+
+            val address = Address()
+                .country("DE")
+            val result = checkout.updateBillingAddress(address = address)
+
+            checkoutSessionTurbine.awaitItem()
+            result.getOrThrow()
+        }
+
+    @Test
+    fun `updateShippingAddress with missing country throws IllegalArgumentException before allowlist check`() =
+        runCreateWithStateScenario(
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
+                automaticTaxEnabled = false,
+                allowedShippingCountries = listOf("US"),
+            ),
+            shouldValidateEvents = false,
+        ) {
+            checkoutSessionTurbine.awaitItem()
+
+            val address = Address()
+            val result = runCatching { checkout.updateShippingAddress(address = address) }
+
+            assertThat(result.isFailure).isTrue()
+            val exception = result.exceptionOrNull()
+            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception).hasMessageThat().isEqualTo("Country is required.")
+        }
+
+    // endregion
+
     private fun runCreateWithStateScenario(
         checkoutSessionResponse: CheckoutSessionResponse = taxEnabledForShipping(),
         shouldValidateEvents: Boolean = true,

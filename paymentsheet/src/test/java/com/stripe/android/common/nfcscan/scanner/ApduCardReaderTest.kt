@@ -78,8 +78,31 @@ internal class ApduCardReaderTest {
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
 
-        assertReadRecordProbes(startingAtIndex = 1)
         assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
+    }
+
+    @Test
+    fun `readCard stops probing when parser can parse records`() = runScenario(
+        parseResult = SCANNED_CARD_DATA,
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(byteArrayOf()),
+            apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
+        ),
+        transceiveResult = RECORD_NOT_FOUND_RESPONSE,
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result.getOrNull()).isEqualTo(SCANNED_CARD_DATA)
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
+
+        assertThat(cardDataParser.canParseCalls.awaitItem()).containsKey("57")
+        assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
+
+        cardDataParser.canParseCalls.ensureAllEventsConsumed()
     }
 
     @Test
@@ -87,8 +110,8 @@ internal class ApduCardReaderTest {
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
-            apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
             apduSuccessResponse(tlv(tag = 0x5A, value = PAN_DATA)),
+            apduSuccessResponse(tlv(tag = 0x5F, tagContinuation = 0x24, value = EXPIRY_DATA)),
         ),
         transceiveResult = RECORD_NOT_FOUND_RESPONSE,
     ) {
@@ -101,13 +124,14 @@ internal class ApduCardReaderTest {
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS[1])
 
-        assertReadRecordProbes(startingAtIndex = 2)
+        assertThat(cardDataParser.canParseCalls.awaitItem()).containsKey("5A")
+        assertThat(cardDataParser.canParseCalls.awaitItem()).containsKey("5F24")
 
         val parsedRecords = cardDataParser.parseCalls.awaitItem()
-        assertThat(parsedRecords).containsKey("57")
-        assertThat(parsedRecords.getValue("57").contentEquals(TRACK_2_DATA)).isTrue()
         assertThat(parsedRecords).containsKey("5A")
         assertThat(parsedRecords.getValue("5A").contentEquals(PAN_DATA)).isTrue()
+        assertThat(parsedRecords).containsKey("5F24")
+        assertThat(parsedRecords.getValue("5F24").contentEquals(EXPIRY_DATA)).isTrue()
     }
 
     private fun runScenario(
@@ -184,6 +208,12 @@ internal class ApduCardReaderTest {
             0x11,
             0x11,
             0x11,
+        )
+
+        val EXPIRY_DATA = byteArrayOf(
+            0x25,
+            0x12,
+            0x01,
         )
 
         val READ_RECORD_REQUESTS = buildList {

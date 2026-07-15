@@ -3,6 +3,7 @@ package com.stripe.android.link
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
@@ -35,18 +36,21 @@ internal class LinkControllerCoordinatorTest {
     private val authenticationResultFlow = MutableSharedFlow<LinkController.AuthenticationResult>()
     private val authorizeResultFlow = MutableSharedFlow<LinkController.AuthorizeResult>()
     private val presentResultFlow = MutableSharedFlow<LinkController.PresentResult>()
+    private val confirmSetupIntentResultFlow = MutableSharedFlow<LinkController.ConfirmSetupIntentResult>()
 
     private val viewModel: LinkControllerInteractor = mock {
         on { presentPaymentMethodsResultFlow } doReturn presentPaymentMethodsResultFlow
         on { authenticationResultFlow } doReturn authenticationResultFlow
         on { authorizeResultFlow } doReturn authorizeResultFlow
         on { presentResultFlow } doReturn presentResultFlow
+        on { confirmSetupIntentResultFlow } doReturn confirmSetupIntentResultFlow
     }
 
     private val presentPaymentMethodsResults = mutableListOf<LinkController.PresentPaymentMethodsResult>()
     private val authenticationResults = mutableListOf<LinkController.AuthenticationResult>()
     private val authorizeResults = mutableListOf<LinkController.AuthorizeResult>()
     private val presentResults = mutableListOf<LinkController.PresentResult>()
+    private val confirmSetupIntentResults = mutableListOf<LinkController.ConfirmSetupIntentResult>()
 
     private val lifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.INITIALIZED)
 
@@ -59,6 +63,7 @@ internal class LinkControllerCoordinatorTest {
         }
 
         return LinkControllerCoordinator(
+            application = ApplicationProvider.getApplicationContext(),
             interactor = viewModel,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
@@ -67,6 +72,7 @@ internal class LinkControllerCoordinatorTest {
             authenticationCallback = { authenticationResults.add(it) },
             authorizeCallback = { authorizeResults.add(it) },
             presentCallback = { presentResults.add(it) },
+            confirmSetupIntentCallback = { confirmSetupIntentResults.add(it) },
         )
     }
 

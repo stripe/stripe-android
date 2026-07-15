@@ -228,6 +228,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         onContinueCalls.ensureAllEventsConsumed()
         onConfirmCalls.ensureAllEventsConsumed()
         fakeEventReporter.validate()
+        scenario.interactor.close()
     }
 
     private class Scenario(

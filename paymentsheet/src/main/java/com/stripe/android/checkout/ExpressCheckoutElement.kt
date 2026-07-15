@@ -3,17 +3,21 @@ package com.stripe.android.checkout
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
+import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ExpressCheckoutElement internal constructor() {
+class ExpressCheckoutElement internal constructor(
+    private val interactor: ExpressCheckoutElementInteractor,
+) {
 
     @Composable
     fun Content() {
-        TODO("Not yet implemented")
+        ExpressCheckoutElementContent(interactor = interactor)
     }
 
     @CheckoutSessionPreview

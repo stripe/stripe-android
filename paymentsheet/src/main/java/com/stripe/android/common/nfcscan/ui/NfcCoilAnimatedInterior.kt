@@ -83,7 +83,7 @@ private fun rememberNfcCoilRingState(
     if (LocalInspectionMode.current) {
         return when (status) {
             NfcScanningStatus.Scanned -> NfcCoilRingProgress.Complete
-            NfcScanningStatus.Idle,
+            is NfcScanningStatus.Idle,
             NfcScanningStatus.Scanning -> NfcCoilRingProgress.Zero
         }
     }
@@ -97,7 +97,7 @@ private fun rememberNfcCoilRingState(
 
     LaunchedEffect(status) {
         when (status) {
-            NfcScanningStatus.Idle,
+            is NfcScanningStatus.Idle,
             NfcScanningStatus.Scanning -> {
                 animatables.snapTo(NfcCoilRingProgress.Zero)
                 savedState = NfcCoilRingSavedState()

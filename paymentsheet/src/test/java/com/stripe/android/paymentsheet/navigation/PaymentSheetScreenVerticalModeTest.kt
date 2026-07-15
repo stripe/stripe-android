@@ -31,4 +31,11 @@ internal class PaymentSheetScreenVerticalModeTest {
             assertThat(awaitItem()).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method.resolvableString)
         }
     }
+
+    @Test
+    fun `screen close delegates to interactor close`() = runTest {
+        PaymentSheetScreen.VerticalMode(interactor).close()
+        interactor.closeCalls.awaitItem()
+        interactor.validate()
+    }
 }
