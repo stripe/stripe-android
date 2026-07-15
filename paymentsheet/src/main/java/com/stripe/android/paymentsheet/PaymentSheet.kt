@@ -9,6 +9,7 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
@@ -1220,6 +1221,35 @@ class PaymentSheet internal constructor(
         Automatic
     }
 
+    /**
+     * Determines which color set Payment Element should use.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class ThemeMode {
+        /**
+         * Use the system light or dark mode setting. This will use value from [AppCompatDelegate.getDefaultNightMode].
+         */
+        Automatic,
+
+        /**
+         * Always use the light color set. This will override value from [AppCompatDelegate.getDefaultNightMode]
+         * for Payment Element only.
+         */
+        AlwaysLight,
+
+        /**
+         * Always use the dark color set. This will override value from [AppCompatDelegate.getDefaultNightMode] for
+         * Payment Element only.
+         */
+        AlwaysDark;
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            val default = Automatic
+        }
+    }
+
     @Parcelize
     @Poko
     class Appearance
@@ -1234,6 +1264,10 @@ class PaymentSheet internal constructor(
          * Describes the colors used while the system is in dark mode.
          */
         internal val colorsDark: Colors = Colors.defaultDark,
+        /**
+         * Determines which color set Payment Element should use.
+         */
+        internal val themeMode: ThemeMode = ThemeMode.default,
         /**
          * Describes the appearance of shapes.
          */
@@ -2003,6 +2037,7 @@ class PaymentSheet internal constructor(
         class Builder {
             private var colorsLight = Colors.defaultLight
             private var colorsDark = Colors.defaultDark
+            private var themeMode = ThemeMode.default
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
@@ -2027,6 +2062,15 @@ class PaymentSheet internal constructor(
 
             fun colorsDark(colors: Colors) = apply {
                 this.colorsDark = colors
+            }
+
+            /**
+             * Determines which color set Payment Element should use.
+             * Defaults to [ThemeMode.Automatic], which follows the system light/dark mode setting.
+             */
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun themeMode(themeMode: ThemeMode) = apply {
+                this.themeMode = themeMode
             }
 
             fun shapes(shapes: Shapes) = apply {
@@ -2074,6 +2118,7 @@ class PaymentSheet internal constructor(
                 return Appearance(
                     colorsLight = colorsLight,
                     colorsDark = colorsDark,
+                    themeMode = themeMode,
                     shapes = shapes,
                     typography = typography,
                     primaryButton = primaryButton,

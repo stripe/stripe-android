@@ -68,6 +68,35 @@ class PaymentSheetConfigurationTest {
     }
 
     @Test
+    fun `Appearance uses automatic theme mode by default`() {
+        assertThat(PaymentSheet.Appearance().themeMode)
+            .isEqualTo(PaymentSheet.ThemeMode.Automatic)
+    }
+
+    @Test
+    fun `Appearance Builder stores theme mode`() {
+        val appearance = PaymentSheet.Appearance.Builder()
+            .themeMode(PaymentSheet.ThemeMode.AlwaysDark)
+            .build()
+
+        assertThat(appearance.themeMode)
+            .isEqualTo(PaymentSheet.ThemeMode.AlwaysDark)
+    }
+
+    @Test
+    fun `Appearance equality includes theme mode`() {
+        val automaticAppearance = PaymentSheet.Appearance.Builder()
+            .themeMode(PaymentSheet.ThemeMode.Automatic)
+            .build()
+        val darkAppearance = PaymentSheet.Appearance.Builder()
+            .themeMode(PaymentSheet.ThemeMode.AlwaysDark)
+            .build()
+
+        assertThat(automaticAppearance)
+            .isNotEqualTo(darkAppearance)
+    }
+
+    @Test
     fun `Configuration property count matches expected - update newBuilder when this fails`() {
         val propertyCount = PaymentSheet.Configuration::class.java.declaredFields
             .filterNot { it.isSynthetic }
