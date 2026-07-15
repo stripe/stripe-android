@@ -37,7 +37,7 @@ internal class EmbeddedSheetViewModel @Inject constructor(
             )
 
             component.customerStateHolder.setCustomerState(args.customerState)
-            component.selectionHolder.set(args.selection)
+            component.selectionHolder.setSelection(args.selection)
 
             return component.viewModel as T
         }

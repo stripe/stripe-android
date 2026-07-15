@@ -10,8 +10,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixt
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -139,7 +139,7 @@ internal class DefaultEmbeddedContentHelperTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
         val savedStateHandle = SavedStateHandle().apply { setup() }
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val embeddedFormHelperFactory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,

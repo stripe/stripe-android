@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
+import android.os.Bundle
 import com.stripe.android.checkout.injection.MerchantDisplayName
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -11,16 +12,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
-/**
- * Loads the payment element for a checkout session and, on success, commits the fully resolved
- * [CheckoutControllerState] — the single source of truth — to the [stateHolder]. Because the
- * resolved [CheckoutControllerState.paymentMethodMetadata] and
- * [CheckoutControllerState.embeddedConfiguration] are only known after a load, this loader is the
- * sole builder of committed states: [loadInitial] builds the first one for a freshly configured
- * session, and [reload] rebuilds it after a mutation, carrying the previously collected data
- * forward. Extracted from [CheckoutController] so the load-and-commit flow can be unit tested in
- * isolation from the controller.
- */
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
     @MerchantDisplayName private val merchantDisplayName: String,
@@ -36,9 +27,7 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = configuration,
             sessionData = InitialSessionData(checkoutSessionResponse),
-            cachedFlagImages = null,
-            previousSelection = null,
-            integrationLaunched = false,
+            carryForward = CarryForward.initial(),
         )
     }
 
@@ -46,24 +35,20 @@ internal class CheckoutStateLoader @Inject constructor(
         commit(
             configuration = state.configuration,
             sessionData = state,
-            cachedFlagImages = state.flagImages,
-            previousSelection = state.paymentSelection,
-            integrationLaunched = state.integrationLaunched,
+            carryForward = CarryForward.from(state),
         )
     }
 
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
         sessionData: CheckoutSessionData,
-        cachedFlagImages: Map<String, Bitmap>?,
-        previousSelection: PaymentSelection?,
-        integrationLaunched: Boolean,
+        carryForward: CarryForward,
     ) {
         val response = sessionData.checkoutSessionResponse
 
-        // [cachedFlagImages] carries the previously resolved images forward, so they're reused when
-        // the currencies haven't changed.
-        val flagImages = flagImageResolver.resolve(response, cached = cachedFlagImages)
+        // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
+        // reused when the currencies haven't changed.
+        val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
         val baseConfig = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
             .embeddedViewDisplaysMandateText(
@@ -95,7 +80,7 @@ internal class CheckoutStateLoader @Inject constructor(
         val selection = selectionChooser.choose(
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             paymentMethods = loaderState.customer?.paymentMethods,
-            previousSelection = previousSelection,
+            previousSelection = carryForward.previousSelection,
             newSelection = loaderState.paymentSelection,
             newConfiguration = embeddedConfig.asCommonConfiguration(),
             formSheetAction = embeddedConfig.formSheetAction,
@@ -107,11 +92,44 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             flagImages = flagImages,
             collectedDetails = sessionData.toCollectedDetails(),
-            integrationLaunched = integrationLaunched,
+            integrationLaunched = carryForward.integrationLaunched,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
+            temporarySelection = carryForward.temporarySelection,
+            previousNewSelections = carryForward.previousNewSelections,
         )
+    }
+
+    /**
+     * The fields carried from the prior state (or fresh defaults) into the next committed state, so a
+     * [reload] preserves everything the load itself doesn't recompute. Collapses [commit]'s parameter
+     * list into a single carrier.
+     */
+    private data class CarryForward(
+        val cachedFlagImages: Map<String, Bitmap>?,
+        val previousSelection: PaymentSelection?,
+        val temporarySelection: String?,
+        val previousNewSelections: Bundle,
+        val integrationLaunched: Boolean,
+    ) {
+        companion object {
+            fun initial() = CarryForward(
+                cachedFlagImages = null,
+                previousSelection = null,
+                temporarySelection = null,
+                previousNewSelections = Bundle(),
+                integrationLaunched = false,
+            )
+
+            fun from(state: CheckoutControllerState) = CarryForward(
+                cachedFlagImages = state.flagImages,
+                previousSelection = state.paymentSelection,
+                temporarySelection = state.temporarySelection,
+                previousNewSelections = state.previousNewSelections,
+                integrationLaunched = state.integrationLaunched,
+            )
+        }
     }
 
     /** The [CheckoutSessionData] for a first load: the session response with no collected details. */

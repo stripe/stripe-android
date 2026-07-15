@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.app.Application
 import android.graphics.Bitmap
+import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -15,7 +16,6 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
@@ -106,7 +107,7 @@ internal class CheckoutStateLoaderTest {
                 savedStateHandle = savedStateHandle,
                 formHelperFactory = EmbeddedFormHelperFactory(
                     linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                    embeddedSelectionHolder = EmbeddedSelectionHolder(savedStateHandle),
+                    embeddedSelectionHolder = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter()),
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     savedStateHandle = savedStateHandle,
                 ),
@@ -168,6 +169,39 @@ internal class CheckoutStateLoaderTest {
         imageLoader.ensureAllEventsConsumed()
     }
 
+    @Test
+    fun `reload carries the temporary selection and previous new selections forward`() = runScenario {
+        val seeded = committedState(
+            temporarySelection = "card",
+            previousNewSelections = Bundle().apply {
+                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+            },
+        )
+
+        loader.reload(seeded)
+
+        assertThat(stateHolder.state?.temporarySelection).isEqualTo("card")
+        assertThat(stateHolder.getPreviousNewSelection("cashapp"))
+            .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+    }
+
+    @Test
+    fun `loadInitial resets the temporary selection and previous new selections`() = runScenario {
+        // A prior state carries a temporary selection and a stashed new payment method; a fresh
+        // configuration load must start from a clean slate rather than carrying them forward.
+        stateHolder.state = committedState(
+            temporarySelection = "card",
+            previousNewSelections = Bundle().apply {
+                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+            },
+        )
+
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        assertThat(stateHolder.state?.temporarySelection).isNull()
+        assertThat(stateHolder.getPreviousNewSelection("cashapp")).isNull()
+    }
+
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
     private fun response() = CheckoutSessionResponseFactory.create()
@@ -176,6 +210,8 @@ internal class CheckoutStateLoaderTest {
     // resolved metadata/configuration are placeholders; reload recomputes and overwrites them.
     private fun committedState(
         paymentSelection: PaymentSelection? = null,
+        temporarySelection: String? = null,
+        previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
     ) = CheckoutControllerState(
         key = checkoutSessionResponse.id,
@@ -187,6 +223,8 @@ internal class CheckoutStateLoaderTest {
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
+        temporarySelection = temporarySelection,
+        previousNewSelections = previousNewSelections,
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.
@@ -228,7 +266,7 @@ internal class CheckoutStateLoaderTest {
             ),
         )
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateHolder(savedStateHandle)
+        val stateHolder = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter())
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
         val loader = CheckoutStateLoader(

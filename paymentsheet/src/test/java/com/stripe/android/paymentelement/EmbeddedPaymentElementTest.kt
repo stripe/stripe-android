@@ -9,7 +9,7 @@ import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfigurationCoordinator
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationHelper
 import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
@@ -70,7 +70,7 @@ internal class EmbeddedPaymentElementTest {
                 override fun confirm() = error("Not expected")
             },
             contentHelper = FakeEmbeddedContentHelper(),
-            selectionHolder = EmbeddedSelectionHolder(SavedStateHandle()),
+            selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             paymentOptionDisplayDataHolder = object : PaymentOptionDisplayDataHolder {
                 override val paymentOption = MutableStateFlow<EmbeddedPaymentElement.PaymentOptionDisplayData?>(null)
             },

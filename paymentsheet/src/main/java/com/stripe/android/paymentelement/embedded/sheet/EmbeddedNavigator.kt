@@ -209,7 +209,7 @@ internal class EmbeddedNavigator private constructor(
                         )
                     },
                     state = state,
-                    updateSelection = embeddedSelectionHolder::set,
+                    updateSelection = embeddedSelectionHolder::setSelection,
                     savedPaymentMethodConfirmInteractorFactory = savedPaymentMethodConfirmInteractorFactory,
                 )
             }

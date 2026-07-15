@@ -61,6 +61,11 @@ import kotlin.coroutines.CoroutineContext
 )
 internal interface EmbeddedCommonModule {
     @Binds
+    fun bindsEmbeddedSelectionHolder(
+        selectionHolder: DefaultEmbeddedSelectionHolder,
+    ): EmbeddedSelectionHolder
+
+    @Binds
     @Singleton
     fun bindsEventReporter(eventReporter: DefaultEventReporter): EventReporter
 

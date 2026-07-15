@@ -17,6 +17,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
@@ -199,7 +200,7 @@ internal class CheckoutControllerTest {
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
         assertThat(controller.checkoutSession.value).isNull()
-        assertThat(CheckoutControllerStateHolder(savedStateHandle).state).isNull()
+        assertThat(CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter()).state).isNull()
     }
 
     @Test
@@ -224,7 +225,7 @@ internal class CheckoutControllerTest {
 
         // A fresh state holder over the same SavedStateHandle simulates the controller being
         // rebuilt after process death: the committed state is read back from persisted storage.
-        val state = CheckoutControllerStateHolder(savedStateHandle).state
+        val state = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter()).state
         assertThat(state).isNotNull()
         assertThat(state!!.embeddedConfiguration.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
@@ -920,7 +921,7 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         val committedState: CheckoutControllerState?
-            get() = CheckoutControllerStateHolder(savedStateHandle).state
+            get() = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter()).state
     }
 
     // Configures a controller from a fresh init, then hands it to [block] alongside the shared
@@ -977,12 +978,12 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState =
-            requireNotNull(CheckoutControllerStateHolder(savedStateHandle).state)
+            requireNotNull(CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter()).state)
 
         // Simulates a presented payment flow by flipping the committed state's integrationLaunched
         // flag, which the mutation guard reads back through the same SavedStateHandle.
         fun markIntegrationLaunched() {
-            val stateHolder = CheckoutControllerStateHolder(savedStateHandle)
+            val stateHolder = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter())
             stateHolder.state = committedState().copy(integrationLaunched = true)
         }
     }

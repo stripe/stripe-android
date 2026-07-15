@@ -12,9 +12,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
@@ -251,7 +251,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             hasCustomerConfiguration = true,
             isPaymentMethodSetAsDefaultEnabled = true,
         )
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,
@@ -305,8 +305,8 @@ internal class DefaultVerticalModeFormInteractorTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             openCardScanAutomatically = true,
         )
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
-        selectionHolder.set(paymentSelection)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
+        selectionHolder.setSelection(paymentSelection)
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,

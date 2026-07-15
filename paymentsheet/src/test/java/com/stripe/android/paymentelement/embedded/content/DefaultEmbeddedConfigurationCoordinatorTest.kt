@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -89,7 +90,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             )
         )
 
-        selectionHolder.set(PaymentSelection.GooglePay)
+        selectionHolder.setSelection(PaymentSelection.GooglePay)
         assertThat(confirmationStateHolder.state).isNull()
 
         assertThat(
@@ -196,7 +197,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         val confirmationHandler = FakeConfirmationHandler()
         val configurationHandler = FakeEmbeddedConfigurationHandler()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,

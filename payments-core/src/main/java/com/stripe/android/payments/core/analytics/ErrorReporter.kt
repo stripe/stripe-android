@@ -342,6 +342,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         PREFETCHED_PMS_NULL_FOR_EPHEMERAL_KEY(
             partialEventName = "payment_methods_prefetch.null_for_ephemeral_key"
+        ),
+        CHECKOUT_SELECTION_SET_BEFORE_LOAD(
+            partialEventName = "checkout.selection_set_before_load"
         );
 
         override val eventName: String

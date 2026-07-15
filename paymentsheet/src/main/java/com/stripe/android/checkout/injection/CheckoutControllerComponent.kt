@@ -32,6 +32,7 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
+import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
@@ -181,6 +182,9 @@ internal interface CheckoutControllerModule {
 
     @Binds
     fun bindsEmbeddedSelectionChooser(impl: DefaultEmbeddedSelectionChooser): EmbeddedSelectionChooser
+
+    @Binds
+    fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
 
     companion object {
         private const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"

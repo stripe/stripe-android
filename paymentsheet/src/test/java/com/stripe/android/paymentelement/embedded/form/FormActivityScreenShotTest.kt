@@ -15,9 +15,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateFixtures
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
@@ -119,7 +119,7 @@ internal class FormActivityScreenShotTest {
         savedPaymentMethodSelectionToConfirm: PaymentSelection.Saved? = null,
     ) {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val confirmationHandler = FakeConfirmationHandler()
         confirmationHandler.state.value = confirmationState
         val stateHolder = DefaultSheetActivityStateHolder(
