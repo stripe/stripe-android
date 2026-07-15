@@ -154,6 +154,7 @@ internal class EmbeddedNavigatorTest {
             assertThat(awaitItem()).isEqualTo(formScreen)
             navigator.performAction(EmbeddedNavigator.Action.Back)
             assertThat(awaitItem()).isEqualTo(initialScreen)
+            assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
         }
         formInteractor.validate()
     }
@@ -284,6 +285,24 @@ internal class EmbeddedNavigatorTest {
         )
         val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
         assertThat(screen.isPerformingNetworkOperation()).isTrue()
+    }
+
+    @Test
+    fun `ManageUpdate close calls interactor close`() = runTest {
+        val interactor = FakeUpdatePaymentMethodInteractor()
+        val screen = EmbeddedNavigator.Screen.ManageUpdate(interactor)
+
+        screen.close()
+        assertThat(interactor.closeCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
+    fun `Form close calls interactor close`() = runTest {
+        val (formScreen, formInteractor) = createFormScreen()
+
+        formScreen.close()
+        assertThat(formInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        formInteractor.validate()
     }
 
     @Test
