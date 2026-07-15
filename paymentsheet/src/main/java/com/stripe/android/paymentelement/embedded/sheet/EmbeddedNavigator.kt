@@ -107,7 +107,7 @@ internal class EmbeddedNavigator private constructor(
 
         abstract fun title(): StateFlow<ResolvableString?>
 
-        abstract fun isPerformingNetworkOperation(): Boolean
+        abstract fun isPerformingNetworkOperation(): StateFlow<Boolean>
 
         class ManageAll(
             private val interactor: ManageScreenInteractor,
@@ -124,8 +124,8 @@ internal class EmbeddedNavigator private constructor(
                 }
             }
 
-            override fun isPerformingNetworkOperation(): Boolean {
-                return false
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return stateFlowOf(false)
             }
 
             @Composable
@@ -148,8 +148,8 @@ internal class EmbeddedNavigator private constructor(
                 return stateFlowOf(interactor.screenTitle)
             }
 
-            override fun isPerformingNetworkOperation(): Boolean {
-                return interactor.state.value.status.isPerformingNetworkOperation
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return interactor.state.mapAsStateFlow { it.status.isPerformingNetworkOperation }
             }
 
             @Composable
@@ -180,8 +180,8 @@ internal class EmbeddedNavigator private constructor(
 
             override fun title(): StateFlow<ResolvableString?> = stateFlowOf(null)
 
-            override fun isPerformingNetworkOperation(): Boolean {
-                return sheetActivityStateHolder.state.value.isProcessing
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> {
+                return sheetActivityStateHolder.state.mapAsStateFlow { it.isProcessing }
             }
 
             @Composable
