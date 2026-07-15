@@ -18,7 +18,7 @@ internal interface ExpressCheckoutElementInteractor {
 }
 
 internal class DefaultExpressCheckoutElementInteractor(
-    @VisibleForTesting internal val availableExpressButtonTypes: List<WalletType>,
+    @get:VisibleForTesting internal val availableExpressButtonTypes: List<WalletType>,
     paymentMethodMetadata: PaymentMethodMetadata,
 ) : ExpressCheckoutElementInteractor {
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = stateFlowOf(
