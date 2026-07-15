@@ -4,20 +4,29 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 class CvcRecollectionScreenScreenshotTest {
-    @get:Rule
-    val paparazziRule = PaparazziRule(
+    private val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
         PaymentSheetAppearance.entries,
         FontSize.entries
     )
+
+    private val scopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(scopeCleanupRule)
+        .around(paparazziRule)
 
     private fun interactor(cvc: String = "", isTestMode: Boolean = true): CvcRecollectionInteractor {
         return DefaultCvcRecollectionInteractor(
@@ -26,7 +35,7 @@ class CvcRecollectionScreenScreenshotTest {
             cvc = cvc,
             isTestMode = isTestMode,
             processing = stateFlowOf(false),
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = scopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         )
     }
 
