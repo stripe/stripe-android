@@ -73,7 +73,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
-                    selectionHolder.setTemporary(null)
+                    selectionHolder.setTemporarySelection(null)
                     handleFormResult(result)
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
@@ -84,7 +84,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.set(result.selection)
+                selectionHolder.setSelection(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
@@ -107,7 +107,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.set(result.selection)
+                selectionHolder.setSelection(result.selection)
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
                 }
@@ -137,7 +137,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        selectionHolder.setTemporary(code)
+        selectionHolder.setTemporarySelection(code)
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)

@@ -28,12 +28,12 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `set updates paymentSelection on the state and emits`() = testScenario {
+    fun `setSelection updates paymentSelection on the state and emits`() = testScenario {
         stateHolder.state = committedState()
 
         stateHolder.selection.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.set(PaymentSelection.GooglePay)
+            stateHolder.setSelection(PaymentSelection.GooglePay)
             assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay)
         }
 
@@ -41,13 +41,13 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `set with a new selection emits on selection and stashes it into previousNewSelections`() = testScenario {
+    fun `setSelection with a new selection emits and stashes it into previousNewSelections`() = testScenario {
         val originalPreviousNewSelections = Bundle()
         stateHolder.state = committedState(previousNewSelections = originalPreviousNewSelections)
 
         stateHolder.selection.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.set(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+            stateHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
             assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         }
 
@@ -59,12 +59,12 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
-    fun `setTemporary updates temporarySelection on the state and emits`() = testScenario {
+    fun `setTemporarySelection updates temporarySelection on the state and emits`() = testScenario {
         stateHolder.state = committedState()
 
         stateHolder.temporarySelection.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.setTemporary("card")
+            stateHolder.setTemporarySelection("card")
             assertThat(awaitItem()).isEqualTo("card")
         }
 
@@ -96,8 +96,8 @@ internal class CheckoutControllerStateHolderTest {
 
     @Test
     fun `selection setters no-op before the state is committed`() = testScenario {
-        stateHolder.set(PaymentSelection.GooglePay)
-        stateHolder.setTemporary("card")
+        stateHolder.setSelection(PaymentSelection.GooglePay)
+        stateHolder.setTemporarySelection("card")
         stateHolder.setPreviousNewSelections(
             Bundle().apply { putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION) },
         )

@@ -19,7 +19,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     fun `setting selection emits value in selection state flow`() = testScenario {
         selectionHolder.selection.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.set(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay)
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
     }
@@ -28,7 +28,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     fun `setting selection updates savedStateHandle`() = testScenario {
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
             .isNull()
-        selectionHolder.set(PaymentSelection.GooglePay)
+        selectionHolder.setSelection(PaymentSelection.GooglePay)
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
             .isEqualTo(PaymentSelection.GooglePay)
     }
@@ -36,7 +36,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     @Test
     fun `setting selection updates previousNewSelections`() = testScenario {
         assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
-        selectionHolder.set(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         assertThat(selectionHolder.previousNewSelections.isEmpty).isFalse()
         assertThat(selectionHolder.previousNewSelections.size()).isEqualTo(1)
     }
@@ -51,7 +51,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
 
     @Test
     fun `setting new selection persists previousNewSelections in savedStateHandle`() = testScenario {
-        selectionHolder.set(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
 
         val savedBundle = savedStateHandle.get<Bundle>(EMBEDDED_PREVIOUS_SELECTIONS_KEY)
         assertThat(savedBundle?.previousNewSelection("cashapp"))
@@ -70,7 +70,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     ) {
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
             .isEqualTo(PaymentSelection.GooglePay)
-        selectionHolder.set(null)
+        selectionHolder.setSelection(null)
         assertThat(savedStateHandle.get<PaymentSelection?>(EMBEDDED_SELECTION_KEY))
             .isNull()
     }
@@ -94,7 +94,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     fun `setting temporarySelection emits value in temporarySelection state flow`() = testScenario {
         selectionHolder.temporarySelection.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.setTemporary("card")
+            selectionHolder.setTemporarySelection("card")
             assertThat(awaitItem()).isEqualTo("card")
         }
     }
@@ -103,7 +103,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     fun `setting temporarySelection updates savedStateHandle`() = testScenario {
         assertThat(savedStateHandle.get<PaymentMethodCode?>(EMBEDDED_TEMPORARY_SELECTION_KEY))
             .isNull()
-        selectionHolder.setTemporary("card")
+        selectionHolder.setTemporarySelection("card")
         assertThat(savedStateHandle.get<PaymentMethodCode?>(EMBEDDED_TEMPORARY_SELECTION_KEY))
             .isEqualTo("card")
     }
@@ -116,7 +116,7 @@ internal class DefaultEmbeddedSelectionHolderTest {
     ) {
         assertThat(savedStateHandle.get<PaymentMethodCode?>(EMBEDDED_TEMPORARY_SELECTION_KEY))
             .isEqualTo("card")
-        selectionHolder.setTemporary(null)
+        selectionHolder.setTemporarySelection(null)
         assertThat(savedStateHandle.get<PaymentMethodCode?>(EMBEDDED_TEMPORARY_SELECTION_KEY))
             .isNull()
     }

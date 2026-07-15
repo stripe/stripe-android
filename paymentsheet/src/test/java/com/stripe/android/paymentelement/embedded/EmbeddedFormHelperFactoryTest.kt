@@ -99,7 +99,7 @@ internal class EmbeddedFormHelperFactoryTest {
         openCardScanAutomatically: Boolean,
     ): AutomaticallyLaunchedCardScanFormDataHelper {
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        selectionHolder.set(selection)
+        selectionHolder.setSelection(selection)
         val factory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
             embeddedSelectionHolder = selectionHolder,

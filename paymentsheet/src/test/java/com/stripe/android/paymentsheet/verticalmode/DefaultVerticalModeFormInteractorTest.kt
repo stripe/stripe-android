@@ -306,7 +306,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             openCardScanAutomatically = true,
         )
         val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
-        selectionHolder.set(paymentSelection)
+        selectionHolder.setSelection(paymentSelection)
         val stateHolder = DefaultSheetActivityStateHolder(
             paymentMethodMetadata = paymentMethodMetadata,
             selectionHolder = selectionHolder,

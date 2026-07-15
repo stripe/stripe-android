@@ -139,7 +139,7 @@ internal class DefaultEmbeddedConfirmationHelperTest {
         val confirmationHandler = FakeConfirmationHandler()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
-        selectionHolder.set(loadedState?.selection)
+        selectionHolder.setSelection(loadedState?.selection)
         val confirmationStateHolder = EmbeddedConfirmationStateHolder(
             savedStateHandle = savedStateHandle,
             selectionHolder = selectionHolder,

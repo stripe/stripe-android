@@ -45,7 +45,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
         onClickDelegate.set { }
         onClickDelegate.clear()
 
-        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         confirmationHelper.confirm()
 
         assertThat(confirmationHandler.startTurbine.awaitItem()).isNotNull()
@@ -55,7 +55,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
 
     @Test
     fun `confirm starts confirmation with correct option when selection is not null`() = testScenario {
-        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         confirmationHelper.confirm()
 
@@ -77,7 +77,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
     fun `when formSheetAction=continue confirm returns result`() = testScenario(
         configurationModifier = { formSheetAction(EmbeddedPaymentElement.FormSheetAction.Continue) }
     ) {
-        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         confirmationHelper.confirm()
 

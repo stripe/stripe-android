@@ -323,7 +323,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     }
 
     private fun setSelection(paymentSelection: PaymentSelection?) {
-        selectionHolder.set(paymentSelection)
+        selectionHolder.setSelection(paymentSelection)
     }
 
     @Parcelize

@@ -21,13 +21,13 @@ internal class DefaultEmbeddedSelectionHolder @Inject constructor(
             savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = it
         }
 
-    override fun set(updatedSelection: PaymentSelection?) {
+    override fun setSelection(updatedSelection: PaymentSelection?) {
         savedStateHandle[EMBEDDED_SELECTION_KEY] = updatedSelection
         previousNewSelections.stashNewSelection(updatedSelection)
         savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] = previousNewSelections
     }
 
-    override fun setTemporary(code: PaymentMethodCode?) {
+    override fun setTemporarySelection(code: PaymentMethodCode?) {
         savedStateHandle[EMBEDDED_TEMPORARY_SELECTION_KEY] = code
     }
 

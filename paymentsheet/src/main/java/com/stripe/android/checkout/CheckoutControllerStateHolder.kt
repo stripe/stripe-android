@@ -52,8 +52,8 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     override val previousNewSelections: Bundle
         get() = state?.previousNewSelections ?: Bundle()
 
-    override fun set(updatedSelection: PaymentSelection?) {
-        val current = requireState(operation = "set") ?: return
+    override fun setSelection(updatedSelection: PaymentSelection?) {
+        val current = requireState(operation = "setSelection") ?: return
         val previousNewSelections = Bundle(current.previousNewSelections).apply {
             stashNewSelection(updatedSelection)
         }
@@ -63,8 +63,8 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         )
     }
 
-    override fun setTemporary(code: PaymentMethodCode?) {
-        val current = requireState(operation = "setTemporary") ?: return
+    override fun setTemporarySelection(code: PaymentMethodCode?) {
+        val current = requireState(operation = "setTemporarySelection") ?: return
         state = current.copy(temporarySelection = code)
     }
 
