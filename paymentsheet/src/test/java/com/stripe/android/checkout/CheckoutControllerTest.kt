@@ -231,6 +231,18 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `destroy clears the committed state`() = runConfigureScenario {
+        result.getOrThrow()
+        // Pre-condition: configure committed a non-null state so the clear is observable.
+        assertThat(committedState).isNotNull()
+
+        controller.destroy()
+
+        assertThat(committedState).isNull()
+        assertThat(controller.checkoutSession.value).isNull()
+    }
+
+    @Test
     fun `callback identifier is generated and stored when absent`() = runTest {
         val savedStateHandle = SavedStateHandle()
         createController(savedStateHandle)

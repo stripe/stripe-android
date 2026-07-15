@@ -290,6 +290,7 @@ class CheckoutController @Inject internal constructor(
 
     fun destroy() {
         viewModelScope.cancel()
+        stateHolder.state = null
     }
 
     fun clearPaymentOption() {
