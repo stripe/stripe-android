@@ -16,8 +16,6 @@ internal class GooglePayConfigurationTest {
 
         assertThat(state.environment).isEqualTo(GooglePayConfiguration.Environment.Test)
         assertThat(state.countryCode).isEqualTo("US")
-        assertThat(state.currencyCode).isNull()
-        assertThat(state.amount).isNull()
         assertThat(state.label).isNull()
         assertThat(state.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Pay)
         assertThat(state.additionalEnabledNetworks).isEmpty()
@@ -29,8 +27,6 @@ internal class GooglePayConfigurationTest {
             GooglePayConfiguration.Environment.Production,
             "CA",
         )
-            .currencyCode("CAD")
-            .amount(1099L)
             .label("Total")
             .buttonType(GooglePayConfiguration.ButtonType.Checkout)
             .additionalEnabledNetworks(listOf("INTERAC"))
@@ -38,8 +34,6 @@ internal class GooglePayConfigurationTest {
 
         assertThat(state.environment).isEqualTo(GooglePayConfiguration.Environment.Production)
         assertThat(state.countryCode).isEqualTo("CA")
-        assertThat(state.currencyCode).isEqualTo("CAD")
-        assertThat(state.amount).isEqualTo(1099L)
         assertThat(state.label).isEqualTo("Total")
         assertThat(state.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Checkout)
         assertThat(state.additionalEnabledNetworks).containsExactly("INTERAC")
