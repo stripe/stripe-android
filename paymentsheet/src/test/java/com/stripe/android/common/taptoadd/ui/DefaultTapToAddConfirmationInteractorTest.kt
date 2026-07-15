@@ -568,6 +568,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
             eventReporter.validate()
             onCompleteCalls.ensureAllEventsConsumed()
+            interactor.close()
         }
     }
 
