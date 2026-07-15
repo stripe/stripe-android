@@ -20,6 +20,7 @@ import javax.inject.Inject
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CurrencySelectorElement @Inject internal constructor(
     private val checkoutController: CheckoutController,
+    private val viewModelFactory: CurrencySelectorViewModel.Factory,
 ) {
     private val viewModelKey = "CurrencySelectorViewModel:${System.identityHashCode(checkoutController)}"
 
@@ -28,12 +29,7 @@ class CurrencySelectorElement @Inject internal constructor(
         val appearanceState = Checkout.CurrencySelectorContentAppearance().build()
         val viewModel: CurrencySelectorViewModel = viewModel(
             key = viewModelKey,
-            factory = CurrencySelectorViewModel.Factory(
-                checkoutSession = checkoutController.checkoutSession,
-                updateCurrency = checkoutController::updateCurrency,
-                analyticsRequestExecutor = checkoutController.analyticsRequestExecutor,
-                paymentAnalyticsRequestFactory = checkoutController.paymentAnalyticsRequestFactory,
-            )
+            factory = viewModelFactory,
         )
         val isLoading by checkoutController.isLoading.collectAsState()
         val checkoutSession by checkoutController.checkoutSession.collectAsState()
