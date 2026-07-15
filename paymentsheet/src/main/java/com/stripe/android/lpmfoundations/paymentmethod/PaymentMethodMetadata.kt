@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
@@ -96,6 +97,7 @@ internal data class PaymentMethodMetadata(
     val disableSsdOcrCardScan: Boolean,
     val cardArts: List<PaymentMethod.Card.CardArt>,
     val shouldUseAutocompleteProxyEndpoints: Boolean,
+    val requiresBillingAddressForAutomaticTax: Boolean,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
 ) : Parcelable {
 
@@ -430,6 +432,10 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
+                requiresBillingAddressForAutomaticTax = (initializationMode as? PaymentElementLoader
+                    .InitializationMode.CheckoutSession)
+                    ?.checkoutSessionResponse
+                    ?.taxStatus == CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
                 paymentMethodLayout = paymentMethodLayout,
             )
         }
@@ -502,6 +508,7 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty(),
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
+                requiresBillingAddressForAutomaticTax = false,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
             )
         }

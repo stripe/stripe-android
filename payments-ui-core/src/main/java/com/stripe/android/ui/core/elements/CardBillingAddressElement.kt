@@ -49,6 +49,7 @@ class CardBillingAddressElement(
     private val collectionConfiguration: BillingDetailsCollectionConfiguration =
         BillingDetailsCollectionConfiguration(),
     private val shouldHideCountryOnNoAddressCollection: Boolean = true,
+    private val automaticTaxRequiredFieldsLookup: ((countryCode: String) -> Set<IdentifierSpec>)? = null,
 ) : AddressFieldsElement {
     private val nameConfig = if (collectionConfiguration.collectName) {
         AddressFieldConfiguration.REQUIRED
@@ -174,24 +175,21 @@ class CardBillingAddressElement(
                     emptySet()
                 }
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-                    when (countryCode) {
-                        "US", "GB", "CA" -> {
-                            FieldType.entries
-                                // Filtering name causes the field to be hidden even outside
-                                // of this form.
-                                .filterNot { it == FieldType.PostalCode || it == FieldType.Name }
-                                .map { it.identifierSpec }
-                                .toSet()
-                        }
-                        else -> {
-                            FieldType.entries
-                                // Filtering name causes the field to be hidden even outside
-                                // of this form.
-                                .filterNot { it == FieldType.Name }
-                                .map { it.identifierSpec }
-                                .toSet()
-                        }
+                    val avsShownFields = when (countryCode) {
+                        "US", "GB", "CA" -> setOf(FieldType.PostalCode.identifierSpec)
+                        else -> emptySet()
                     }
+                    val automaticTaxShownFields = countryCode?.let {
+                        automaticTaxRequiredFieldsLookup?.invoke(it)
+                    }.orEmpty()
+                    val shownFields = avsShownFields + automaticTaxShownFields
+
+                    FieldType.entries
+                        // Filtering name causes the field to be hidden even outside
+                        // of this form.
+                        .filterNot { it == FieldType.Name || it.identifierSpec in shownFields }
+                        .map { it.identifierSpec }
+                        .toSet()
                 }
             }
         }

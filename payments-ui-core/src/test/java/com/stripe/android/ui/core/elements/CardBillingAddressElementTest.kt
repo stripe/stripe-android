@@ -66,6 +66,107 @@ internal class CardBillingAddressElementTest {
     }
 
     @Test
+    fun `Verify that automatic tax fields lookup is unioned with AVS defaults for DE`() = runTest {
+        val cardBillingElementWithTaxFields = CardBillingAddressElement(
+            identifier = IdentifierSpec.Generic("billing_element"),
+            rawValuesMap = emptyMap(),
+            countryCodes = emptySet(),
+            countryDropdownFieldController = dropdownFieldController,
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+            automaticTaxRequiredFieldsLookup = { setOf(IdentifierSpec.PostalCode) },
+        )
+
+        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+            dropdownFieldController.onRawValueChange("DE")
+            val hiddenIdentifiers = expectMostRecentItem()
+
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
+            assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
+            assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line2)
+            assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
+            assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+        }
+    }
+
+    @Test
+    fun `Verify that automatic tax fields lookup does not hide fields it requires shown for US`() = runTest {
+        val cardBillingElementWithTaxFields = CardBillingAddressElement(
+            identifier = IdentifierSpec.Generic("billing_element"),
+            rawValuesMap = emptyMap(),
+            countryCodes = emptySet(),
+            countryDropdownFieldController = dropdownFieldController,
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+            automaticTaxRequiredFieldsLookup = {
+                setOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.State, IdentifierSpec.PostalCode)
+            },
+        )
+
+        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+            dropdownFieldController.onRawValueChange("US")
+            val hiddenIdentifiers = expectMostRecentItem()
+
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Line1)
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.City)
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.State)
+            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
+        }
+    }
+
+    @Test
+    fun `Verify that automatic tax fields lookup has no effect when address collection is Never`() = runTest {
+        val cardBillingElementWithTaxFields = CardBillingAddressElement(
+            identifier = IdentifierSpec.Generic("billing_element"),
+            rawValuesMap = emptyMap(),
+            countryCodes = emptySet(),
+            countryDropdownFieldController = dropdownFieldController,
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+            collectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
+            ),
+            automaticTaxRequiredFieldsLookup = { setOf(IdentifierSpec.PostalCode) },
+        )
+
+        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+            dropdownFieldController.onRawValueChange("DE")
+            val hiddenIdentifiers = expectMostRecentItem()
+
+            assertThat(hiddenIdentifiers).contains(IdentifierSpec.PostalCode)
+        }
+    }
+
+    @Test
+    fun `Verify that automatic tax fields lookup has no effect when address collection is Full`() = runTest {
+        val cardBillingElementWithTaxFields = CardBillingAddressElement(
+            identifier = IdentifierSpec.Generic("billing_element"),
+            rawValuesMap = emptyMap(),
+            countryCodes = emptySet(),
+            countryDropdownFieldController = dropdownFieldController,
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+            collectionConfiguration = BillingDetailsCollectionConfiguration(
+                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            ),
+            automaticTaxRequiredFieldsLookup = { setOf(IdentifierSpec.PostalCode) },
+        )
+
+        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+            dropdownFieldController.onRawValueChange("DE")
+            val hiddenIdentifiers = expectMostRecentItem()
+
+            assertThat(hiddenIdentifiers).isEmpty()
+        }
+    }
+
+    @Test
     fun `Verify that AutocompleteAddressElement is used when billing details collection is Full`() =
         autocompleteTest(
             configuration = BillingDetailsCollectionConfiguration(
