@@ -12,15 +12,24 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 class DefaultManageScreenInteractorTest {
+
+    private val closeInteractorRule = CleanupTestRule(DefaultManageScreenInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(closeInteractorRule)
 
     @Test
     fun initializeState_nullCurrentSelection() {
@@ -362,6 +371,7 @@ class DefaultManageScreenInteractorTest {
             defaultPaymentMethodId = defaultPaymentMethodId,
             dispatcher = dispatcher
         )
+        closeInteractorRule.track(interactor)
 
         TestParams(
             interactor = interactor,
@@ -377,7 +387,6 @@ class DefaultManageScreenInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
-            interactor.close()
         }
     }
 

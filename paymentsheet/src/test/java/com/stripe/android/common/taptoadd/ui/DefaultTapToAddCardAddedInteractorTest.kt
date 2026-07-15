@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
 import com.stripe.android.uicore.elements.Controller
@@ -25,10 +26,18 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class DefaultTapToAddCardAddedInteractorTest {
+    private val cleanupRule = CleanupTestRule(DefaultTapToAddCardAddedInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(cleanupRule)
+
     @Test
     fun `Continue mode with Link disabled`() = runScenario(
         paymentMethod = PaymentMethodFactory.card().update(
@@ -217,7 +226,7 @@ internal class DefaultTapToAddCardAddedInteractorTest {
                 savedPaymentMethodLinkFormHelper = fakeLinkFormHelper,
                 onContinue = { onContinueCalls.add(it) },
                 onConfirm = { pm, linkInput -> onConfirmCalls.add(pm to linkInput) },
-            ),
+            ).also { cleanupRule.track(it) },
             fakeLinkFormHelper = fakeLinkFormHelper,
             fakeEventReporter = fakeEventReporter,
             onContinueCalls = onContinueCalls,
@@ -228,7 +237,6 @@ internal class DefaultTapToAddCardAddedInteractorTest {
         onContinueCalls.ensureAllEventsConsumed()
         onConfirmCalls.ensureAllEventsConsumed()
         fakeEventReporter.validate()
-        scenario.interactor.close()
     }
 
     private class Scenario(
