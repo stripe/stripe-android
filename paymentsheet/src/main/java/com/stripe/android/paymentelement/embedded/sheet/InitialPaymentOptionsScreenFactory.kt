@@ -75,7 +75,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             // Card scan auto-launch is only relevant in the form, not the list (as the form helper is used here).
             automaticallyLaunchedCardScanFormDataHelper = null,
             tapToAddHelper = null,
-            selectionUpdater = { selectionHolder.set(it) },
+            selectionUpdater = { selectionHolder.setSelection(it) },
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
@@ -102,7 +102,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             canChangeCbc = customerStateHolder.canChangeCbc,
             walletsState = stateFlowOf(walletsState()),
             updateSelection = { updatedSelection, _ ->
-                selectionHolder.set(updatedSelection)
+                selectionHolder.setSelection(updatedSelection)
             },
             isCurrentScreen = stateFlowOf(true),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,

@@ -129,7 +129,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.set(result.selection)
+                selectionHolder.setSelection(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
@@ -150,7 +150,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             val paymentMethodId = currentSelection.paymentMethod.id
             val stillExists = customerStateHolder.paymentMethods.value.any { it.id == paymentMethodId }
             if (!stillExists) {
-                selectionHolder.set(null)
+                selectionHolder.setSelection(null)
             }
         }
     }
