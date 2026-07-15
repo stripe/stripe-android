@@ -11,6 +11,7 @@ class CheckoutPresenter @Inject internal constructor(
     private val paymentElementProvider: Provider<PaymentElement>,
     private val currencySelectorElementProvider: Provider<CurrencySelectorElement>,
     private val shippingAddressElementProvider: Provider<ShippingAddressElement>,
+    private val expressCheckoutElement: ExpressCheckoutElement,
 ) {
 
     fun paymentElement(): PaymentElement {
@@ -26,7 +27,7 @@ class CheckoutPresenter @Inject internal constructor(
     }
 
     fun expressCheckoutElement(): ExpressCheckoutElement {
-        TODO("Not yet implemented")
+        return expressCheckoutElement
     }
 
     fun confirm() {

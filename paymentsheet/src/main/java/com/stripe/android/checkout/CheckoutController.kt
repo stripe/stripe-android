@@ -8,6 +8,7 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -43,6 +44,12 @@ class CheckoutController @Inject internal constructor(
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
+
+    internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?>
+        get() = stateHolder.paymentMethodMetadata
+
+    internal val configuration: StateFlow<Configuration.State?>
+        get() = stateHolder.configuration
 
     private val mutex = Mutex()
     private val pendingMutations = AtomicInteger(0)
