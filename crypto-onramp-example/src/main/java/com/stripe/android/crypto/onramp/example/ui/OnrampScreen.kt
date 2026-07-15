@@ -93,8 +93,6 @@ internal fun OnrampScreen(
                     onRegisterWalletAddress = onRegisterWalletAddress,
                     onGetWalletOwnershipChallenge = viewModel::getWalletOwnershipChallenge,
                     onSubmitWalletOwnershipSignature = viewModel::submitWalletOwnershipSignature,
-                    onSubmitDeterministicWalletOwnershipSignature =
-                        viewModel::submitDeterministicWalletOwnershipSignature,
                     onWalletOwnershipSignatureChange = viewModel::updateWalletOwnershipSignatureInput,
                     onCollectKyc = viewModel::collectKycInfo,
                     onVerifyKyc = onVerifyKyc,

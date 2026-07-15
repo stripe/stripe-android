@@ -36,7 +36,6 @@ internal fun AuthenticatedOperationsScreen(
     onRegisterWalletAddress: (String, CryptoNetwork) -> Unit,
     onGetWalletOwnershipChallenge: (String, CryptoNetwork) -> Unit,
     onSubmitWalletOwnershipSignature: (String) -> Unit,
-    onSubmitDeterministicWalletOwnershipSignature: () -> Unit,
     onWalletOwnershipSignatureChange: (String) -> Unit,
     onCollectKyc: (KycInfo) -> Unit,
     onVerifyKyc: () -> Unit,
@@ -135,8 +134,7 @@ internal fun AuthenticatedOperationsScreen(
             },
             onSubmitWalletOwnershipSignature = {
                 onSubmitWalletOwnershipSignature(uiState.walletOwnershipSignatureInput)
-            },
-            onSubmitDeterministicWalletOwnershipSignature = onSubmitDeterministicWalletOwnershipSignature
+            }
         )
 
         KycSection(

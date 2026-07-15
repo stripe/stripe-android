@@ -134,7 +134,6 @@ internal class OnrampViewModel(
                         currentState.copy(
                             email = it.email,
                             authToken = it.authToken,
-                            cryptoCustomerId = it.cryptoCustomerId,
                             screen = Screen.SeamlessSignIn
                         )
                     } ?: currentState.copy(screen = Screen.LoginSignup)
@@ -289,7 +288,6 @@ internal class OnrampViewModel(
             OnrampUiState(
                 email = it.email,
                 authToken = it.authToken,
-                cryptoCustomerId = it.cryptoCustomerId,
                 screen = Screen.SeamlessSignIn,
                 googlePayIsReady = googlePayIsReady
             )
@@ -420,20 +418,12 @@ internal class OnrampViewModel(
                             cryptoCustomerId = result.customerId,
                             tokenWithLAI = authToken
                         )
-                        userDataStore.save(
-                            OnrampUserData(
-                                email = _uiState.value.email,
-                                authToken = authToken,
-                                cryptoCustomerId = result.customerId
-                            )
-                        )
                     }
                 }
 
                 _uiState.update { currentState ->
                     currentState.copy(
                         screen = Screen.AuthenticatedOperations,
-                        cryptoCustomerId = result.customerId,
                         linkAuthIntentId = null,
                         consentedLinkAuthIntentIds =
                             currentState.consentedLinkAuthIntentIds +
@@ -534,7 +524,6 @@ internal class OnrampViewModel(
                         it.copy(
                             screen = Screen.Authentication,
                             email = userInfo.email,
-                            cryptoCustomerId = result.customerId,
                             loadingMessage = null
                         )
                     }
@@ -609,11 +598,6 @@ internal class OnrampViewModel(
             when (val result = onrampCoordinator.getWalletOwnershipChallenge(trimmedWalletAddress, network)) {
                 is OnrampGetWalletOwnershipChallengeResult.Completed -> {
                     val challenge = result.challenge
-                    val deterministicSignature = buildDeterministicTestSignature(
-                        walletAddress = challenge.walletAddress,
-                        challengeId = challenge.challengeId,
-                        cryptoCustomerId = _uiState.value.cryptoCustomerId
-                    )
                     _message.value = "Wallet ownership challenge created"
                     _uiState.update {
                         it.copy(
@@ -623,7 +607,7 @@ internal class OnrampViewModel(
                             walletOwnershipChallengeId = challenge.challengeId,
                             walletOwnershipChallengeMessage = challenge.message,
                             walletOwnershipChallengeExpiresAt = challenge.expiresAt,
-                            walletOwnershipSignatureInput = deterministicSignature.orEmpty(),
+                            walletOwnershipSignatureInput = TEST_MODE_WALLET_OWNERSHIP_SIGNATURE,
                             loadingMessage = null
                         )
                     }
@@ -658,33 +642,6 @@ internal class OnrampViewModel(
             submitWalletOwnershipSignatureInternal(
                 challengeId = challengeId,
                 signature = trimmedSignature
-            )
-        }
-    }
-
-    fun submitDeterministicWalletOwnershipSignature() {
-        viewModelScope.launch {
-            val state = _uiState.value
-            val challengeId = state.walletOwnershipChallengeId
-            if (challengeId.isNullOrBlank()) {
-                _message.value = "Please get a wallet ownership challenge first"
-                return@launch
-            }
-
-            val signature = buildDeterministicTestSignature(
-                walletAddress = state.walletAddress,
-                challengeId = challengeId,
-                cryptoCustomerId = state.cryptoCustomerId
-            )
-            if (signature == null) {
-                _message.value = "No crypto customer ID available for deterministic test signature"
-                return@launch
-            }
-
-            _uiState.update { it.copy(walletOwnershipSignatureInput = signature) }
-            submitWalletOwnershipSignatureInternal(
-                challengeId = challengeId,
-                signature = signature
             )
         }
     }
@@ -1086,8 +1043,7 @@ internal class OnrampViewModel(
                 userDataStore.save(
                     OnrampUserData(
                         email = _uiState.value.email,
-                        authToken = result.value.token,
-                        cryptoCustomerId = _uiState.value.cryptoCustomerId
+                        authToken = result.value.token
                     )
                 )
                 result.value.authIntentId
@@ -1177,18 +1133,6 @@ internal class OnrampViewModel(
 
         _message.value = "Please enter a valid password (at least 8 characters)"
         return false
-    }
-
-    private fun buildDeterministicTestSignature(
-        walletAddress: String?,
-        challengeId: String?,
-        cryptoCustomerId: String?,
-    ): String? {
-        if (walletAddress.isNullOrBlank() || challengeId.isNullOrBlank() || cryptoCustomerId.isNullOrBlank()) {
-            return null
-        }
-
-        return "$walletAddress+$cryptoCustomerId+$challengeId"
     }
 
     private val OnrampSessionResponse.requiresWalletOwnershipVerification: Boolean
@@ -1345,6 +1289,10 @@ internal class OnrampViewModel(
 
 private const val DEFAULT_DESTINATION_NETWORK = "ethereum"
 private const val WALLET_OWNERSHIP_VERIFICATION_REQUIRED = "wallet_ownership_verification_required"
+
+// This constant signature is accepted in test mode. Live mode requires signing the challenge
+// message with the wallet.
+private const val TEST_MODE_WALLET_OWNERSHIP_SIGNATURE = "abcd"
 
 private fun List<String>.joinToStringOrNone(): String {
     return takeIf { it.isNotEmpty() }?.joinToString(", ") ?: "None"

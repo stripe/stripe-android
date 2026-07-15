@@ -32,7 +32,6 @@ import com.stripe.android.crypto.onramp.example.CREATE_CRYPTO_TOKEN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_SESSION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.GET_WALLET_OWNERSHIP_CHALLENGE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
-import com.stripe.android.crypto.onramp.example.SUBMIT_DETERMINISTIC_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
@@ -250,7 +249,6 @@ internal fun WalletOwnershipSection(
     onSignatureInputChange: (String) -> Unit,
     onGetWalletOwnershipChallenge: () -> Unit,
     onSubmitWalletOwnershipSignature: () -> Unit,
-    onSubmitDeterministicWalletOwnershipSignature: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -312,22 +310,11 @@ internal fun WalletOwnershipSection(
                 value = signatureInput,
                 onValueChange = onSignatureInputChange,
                 label = { Text("Wallet Ownership Signature") },
-                placeholder = { Text("Signature or deterministic test signature") },
+                placeholder = { Text("Signature") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp)
             )
-
-            Button(
-                onClick = onSubmitDeterministicWalletOwnershipSignature,
-                enabled = challengeId != null,
-                modifier = Modifier
-                    .testTag(SUBMIT_DETERMINISTIC_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG)
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            ) {
-                Text("Submit Deterministic Test Signature")
-            }
 
             Button(
                 onClick = onSubmitWalletOwnershipSignature,

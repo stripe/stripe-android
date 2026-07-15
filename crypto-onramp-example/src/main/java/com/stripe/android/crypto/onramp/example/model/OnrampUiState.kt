@@ -22,7 +22,6 @@ internal data class OnrampUiState(
     @TypeParceler<PaymentMethodDisplayData?, NullPaymentMethodDisplayDataParceler>
     val selectedPaymentData: PaymentMethodDisplayData? = null,
     val cryptoPaymentToken: String? = null,
-    val cryptoCustomerId: String? = null,
     val walletAddress: String? = null,
     val network: CryptoNetwork? = null,
     val walletOwnershipChallengeId: String? = null,
