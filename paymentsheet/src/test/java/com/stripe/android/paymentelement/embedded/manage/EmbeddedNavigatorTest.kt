@@ -31,6 +31,9 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -100,6 +103,55 @@ internal class EmbeddedNavigatorTest {
         navigator.result.test {
             ensureAllEventsConsumed()
         }
+    }
+
+    @Test
+    fun `cancelling the coroutine scope closes the root screen when nothing was navigated to`() = runTest {
+        val scope = CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler))
+        val eventReporter = FakeEventReporter()
+        val manageInteractor = FakeManageScreenInteractor()
+        EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialScreen = EmbeddedNavigator.Screen.ManageAll(manageInteractor),
+        )
+        assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
+
+        scope.cancel()
+
+        assertThat(manageInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        manageInteractor.validate()
+        eventReporter.validate()
+    }
+
+    @Test
+    fun `cancelling the coroutine scope closes every screen remaining on the back stack`() = runTest {
+        val scope = CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler))
+        val eventReporter = FakeEventReporter()
+        val manageInteractor = FakeManageScreenInteractor()
+        val updateInteractor = FakeUpdatePaymentMethodInteractor()
+        val initialScreen = EmbeddedNavigator.Screen.ManageAll(manageInteractor)
+        val navigator = EmbeddedNavigator(
+            coroutineScope = scope,
+            eventReporter = eventReporter,
+            initialScreen = initialScreen,
+        )
+        assertThat(eventReporter.showManageSavedPaymentMethods.awaitItem()).isEqualTo(Unit)
+
+        val manageUpdateScreen = EmbeddedNavigator.Screen.ManageUpdate(updateInteractor)
+        navigator.screen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            navigator.performAction(EmbeddedNavigator.Action.GoToScreen(manageUpdateScreen))
+            assertThat(awaitItem()).isEqualTo(manageUpdateScreen)
+        }
+        assertThat(eventReporter.showEditablePaymentOptionCalls.awaitItem()).isEqualTo(Unit)
+
+        scope.cancel()
+
+        assertThat(updateInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(manageInteractor.closeCalls.awaitItem()).isEqualTo(Unit)
+        manageInteractor.validate()
+        eventReporter.validate()
     }
 
     @Test

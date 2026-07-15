@@ -68,7 +68,6 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionsActivity
                     viewModel.paymentOptionsActivityResult.filterNotNull().collect { sheetResult ->
                         setActivityResult(sheetResult)
                         bottomSheetState.hide()
-                        viewModel.navigationHandler.closeScreens()
                         finish()
                     }
                 }
