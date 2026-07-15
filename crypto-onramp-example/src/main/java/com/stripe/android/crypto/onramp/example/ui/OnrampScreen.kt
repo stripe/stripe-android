@@ -107,6 +107,7 @@ internal fun OnrampScreen(
                     onLogOut = viewModel::logOut,
                     onBack = viewModel::onBackToLoginSignup,
                     onSelectSettlementSpeed = viewModel::updateSettlementSpeed,
+                    onSelectSourceCurrency = viewModel::updateSourceCurrency,
                     onKycFirstNameChange = viewModel::updateKycFirstName,
                     onKycLastNameChange = viewModel::updateKycLastName,
                     onKycBirthCountryChange = viewModel::updateKycBirthCountry,

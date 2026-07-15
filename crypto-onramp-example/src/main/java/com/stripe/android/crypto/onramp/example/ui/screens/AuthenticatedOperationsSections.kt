@@ -34,6 +34,7 @@ import com.stripe.android.crypto.onramp.example.GET_WALLET_OWNERSHIP_CHALLENGE_B
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.SUBMIT_DETERMINISTIC_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.SUBMIT_WALLET_OWNERSHIP_SIGNATURE_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
@@ -375,12 +376,19 @@ internal fun VerificationSection(
 @Composable
 internal fun PaymentSection(
     googlePayIsReady: Boolean,
+    sourceCurrency: SourceCurrency,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
     onCollectPayment: (PaymentMethodSelection) -> Unit
 ) {
     Text(
         text = "Payment",
         fontWeight = FontWeight.Bold,
         modifier = Modifier.padding(bottom = 16.dp)
+    )
+
+    SourceCurrencySelector(
+        sourceCurrency = sourceCurrency,
+        onSelectSourceCurrency = onSelectSourceCurrency
     )
 
     Button(
@@ -416,7 +424,7 @@ internal fun PaymentSection(
         onClick = {
             onCollectPayment(
                 PaymentMethodSelection.GooglePay(
-                    currencyCode = "USD",
+                    currencyCode = sourceCurrency.value.uppercase(),
                     amount = 0L
                 )
             )
@@ -466,5 +474,33 @@ internal fun CheckoutSection(
             .padding(bottom = 8.dp)
     ) {
         Text(if (hasSession) "Checkout" else "Checkout (Create session first)")
+    }
+}
+
+@Composable
+private fun SourceCurrencySelector(
+    sourceCurrency: SourceCurrency,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
+) {
+    Text(
+        text = "Source Currency",
+        fontWeight = FontWeight.Bold,
+        modifier = Modifier.padding(bottom = 8.dp)
+    )
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    ) {
+        SourceCurrency.entries.forEach { currency ->
+            Button(
+                onClick = { onSelectSourceCurrency(currency) },
+                enabled = currency != sourceCurrency,
+                modifier = Modifier.weight(1f)
+            ) {
+                Text("${currency.symbol} ${currency.value.uppercase()}")
+            }
+        }
     }
 }

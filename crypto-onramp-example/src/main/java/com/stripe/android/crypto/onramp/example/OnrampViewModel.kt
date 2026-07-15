@@ -19,6 +19,7 @@ import com.stripe.android.crypto.onramp.example.model.KEY_UI_STATE
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.model.OnrampUserData
 import com.stripe.android.crypto.onramp.example.model.Screen
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.LoginSignUpResponse
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
@@ -936,6 +937,7 @@ internal class OnrampViewModel(
                     walletAddress = walletAddress,
                     authToken = authToken,
                     destinationNetwork = destinationNetwork,
+                    sourceCurrency = currentState.sourceCurrency.value,
                     settlementSpeed = settlementSpeed
                 )
             ) {
@@ -989,6 +991,10 @@ internal class OnrampViewModel(
 
     fun updateSettlementSpeed(settlementSpeed: SettlementSpeed) {
         _uiState.update { it.copy(settlementSpeed = settlementSpeed) }
+    }
+
+    fun updateSourceCurrency(sourceCurrency: SourceCurrency) {
+        _uiState.update { it.copy(sourceCurrency = sourceCurrency) }
     }
 
     fun updateKycFirstName(value: String) {

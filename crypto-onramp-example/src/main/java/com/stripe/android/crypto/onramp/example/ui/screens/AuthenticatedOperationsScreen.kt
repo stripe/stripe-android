@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
+import com.stripe.android.crypto.onramp.example.model.SourceCurrency
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -48,6 +49,7 @@ internal fun AuthenticatedOperationsScreen(
     onLogOut: () -> Unit,
     onBack: () -> Unit,
     onSelectSettlementSpeed: (SettlementSpeed) -> Unit,
+    onSelectSourceCurrency: (SourceCurrency) -> Unit,
     onKycFirstNameChange: (String) -> Unit,
     onKycLastNameChange: (String) -> Unit,
     onKycBirthCountryChange: (String) -> Unit,
@@ -176,6 +178,8 @@ internal fun AuthenticatedOperationsScreen(
         )
         PaymentSection(
             googlePayIsReady = uiState.googlePayIsReady,
+            sourceCurrency = uiState.sourceCurrency,
+            onSelectSourceCurrency = onSelectSourceCurrency,
             onCollectPayment = onCollectPayment
         )
         CheckoutSection(
