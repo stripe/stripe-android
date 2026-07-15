@@ -154,16 +154,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
     }
 
     /**
-     * Present a sheet where the customer chooses how to pay, either by selecting an existing
-     * payment method or adding a new one.
-     * Call this when your "Select a payment method" button is tapped.
-     */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun presentPaymentOptions() {
-        contentHelper.presentPaymentOptions()
-    }
-
-    /**
      * Builder used in the creation of the [EmbeddedPaymentElement].
      *
      * Creation can be completed with [rememberEmbeddedPaymentElement].

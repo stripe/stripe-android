@@ -265,7 +265,7 @@ internal class EmbeddedNavigator private constructor(
             private val isLiveMode: Boolean,
             private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
             private val onContinueClick: () -> Unit,
-        ) : Screen() {
+        ) : Screen(), Closeable {
             override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
                 PaymentSheetTopBarState(
                     showTestModeLabel = !isLiveMode,
@@ -294,6 +294,10 @@ internal class EmbeddedNavigator private constructor(
                     onClick = onContinueClick,
                 )
                 PaymentSheetContentPadding()
+            }
+
+            override fun close() {
+                interactor.close()
             }
         }
     }
