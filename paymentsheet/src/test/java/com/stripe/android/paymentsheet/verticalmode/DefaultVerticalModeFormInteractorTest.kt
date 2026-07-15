@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.utils.errorTest
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor.ViewAction
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
@@ -53,15 +54,18 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TestRule
+import org.junit.rules.RuleChain
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoMoreInteractions
 import com.stripe.android.uicore.R as UiCoreR
 
 internal class DefaultVerticalModeFormInteractorTest {
 
+    private val closeInteractorRule = CleanupTestRule(DefaultVerticalModeFormInteractor::close)
+
     @get:Rule
-    val rule: TestRule = CoroutineTestRule()
+    val ruleChain: RuleChain = RuleChain.outerRule(CoroutineTestRule())
+        .around(closeInteractorRule)
 
     @Test
     fun `state is updated when processing emits`() = runScenario(selectedPaymentMethodCode = "card") {
@@ -374,6 +378,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             paymentMethodIncentive = stateFlowOf(null),
             uiContext = UnconfinedTestDispatcher(),
         )
+        closeInteractorRule.track(interactor)
 
         TestParams(
             interactor = interactor,
@@ -390,7 +395,6 @@ internal class DefaultVerticalModeFormInteractorTest {
         verifyNoMoreInteractions(formArguments, usBankAccountArguments)
         onFormFieldValuesChangedTurbine.ensureAllEventsConsumed()
         reportFieldInteractionTurbine.ensureAllEventsConsumed()
-        interactor.close()
     }
 
     private class TestParams(

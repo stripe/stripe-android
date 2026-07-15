@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.PaymentMethodFactory.update
@@ -33,10 +34,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class DefaultTapToAddConfirmationInteractorTest {
+    private val cleanupRule = CleanupTestRule(DefaultTapToAddConfirmationInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(cleanupRule)
+
     @Test
     fun `CancelPressed reports tap to add canceled with confirmation source`() = runScenario(
         paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
@@ -553,6 +562,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                     onCompleteCalls.add(Unit)
                 },
             )
+            cleanupRule.track(interactor)
 
             block(
                 Scenario(
@@ -568,7 +578,6 @@ internal class DefaultTapToAddConfirmationInteractorTest {
 
             eventReporter.validate()
             onCompleteCalls.ensureAllEventsConsumed()
-            interactor.close()
         }
     }
 
