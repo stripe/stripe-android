@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -25,6 +26,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @Poko
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GooglePayConfiguration @JvmOverloads constructor(
     internal val environment: Environment,
     internal val countryCode: String,
@@ -35,16 +37,19 @@ class GooglePayConfiguration @JvmOverloads constructor(
     internal val additionalEnabledNetworks: List<String> = emptyList()
 ) : Parcelable {
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Environment {
         Production,
         Test,
     }
 
-    @Suppress("MaxLineLength")
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     /**
      * Google Pay button type options
      *
-     * See [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions) for more information on button types.
+     * See
+     * [Google's documentation](https://developers.google.com/pay/api/android/reference/request-objects#ButtonOptions)
+     * for more information on button types.
      */
     enum class ButtonType {
         /**
