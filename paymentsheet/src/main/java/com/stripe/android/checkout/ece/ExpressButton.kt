@@ -29,7 +29,7 @@ internal sealed interface ExpressButton {
                         paymentDetails = null,
                     ),
                     theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
-                    linkBrand = LinkBrand.Link,
+                    linkBrand = paymentMethodMetadata.linkBrand,
                 )
             }
         }
@@ -50,11 +50,9 @@ internal sealed interface ExpressButton {
                 return GooglePay(
                     allowCreditCards = true,
                     googlePayButtonType = GooglePayButtonType.Pay,
-                    cardBrandFilter = PaymentSheetCardBrandFilter(
-                        cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all()
-                    ),
+                    cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                     cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
-                    billingAddressParameters = PaymentSheet.BillingDetailsCollectionConfiguration()
+                    billingAddressParameters = paymentMethodMetadata.billingDetailsCollectionConfiguration
                         .toBillingAddressParameters(),
                     additionalEnabledNetworks = emptyList(),
                 )
