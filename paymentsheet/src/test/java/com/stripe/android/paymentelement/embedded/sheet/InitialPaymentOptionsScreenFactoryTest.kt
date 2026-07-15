@@ -55,7 +55,7 @@ internal class InitialPaymentOptionsScreenFactoryTest {
     @Test
     fun `screen isPerformingNetworkOperation returns false`() = testScenario {
         val screen = factory.createInitialScreen()
-        assertThat(screen.isPerformingNetworkOperation()).isFalse()
+        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
     }
 
     @Suppress("LongMethod")

@@ -361,7 +361,7 @@ internal class EmbeddedNavigatorTest {
     @Test
     fun `PaymentOptions isPerformingNetworkOperation returns false`() {
         val screen = createPaymentOptionsScreen()
-        assertThat(screen.isPerformingNetworkOperation()).isFalse()
+        assertThat(screen.isPerformingNetworkOperation().value).isFalse()
     }
 
     @Test
