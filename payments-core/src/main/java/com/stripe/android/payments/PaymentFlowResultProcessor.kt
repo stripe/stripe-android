@@ -246,19 +246,23 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         var stripeIntentResult: Result<T>? = null
         var lastObservedStatus: StripeIntent.Status? = null
 
+        suspend fun retrieveAndTrackStatus(): Result<T> {
+            val result = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
+            lastObservedStatus = result.getOrNull()?.status ?: lastObservedStatus
+            return result
+        }
+
         val timeRemaining = getPollingDurationForPaymentMethod(originalIntent) -
             (System.currentTimeMillis() - initialRetrieveIntentStartTime)
 
         withTimeoutOrNull(timeRemaining) {
-            stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
-            lastObservedStatus = stripeIntentResult?.getOrNull()?.status ?: lastObservedStatus
+            stripeIntentResult = retrieveAndTrackStatus()
             while (shouldRetry(stripeIntentResult)) {
                 // We want to delay a maximum of 1s between requests, including the time the request took.
                 // e.g. if the previous request took 250ms, the delay will be 750ms
                 delay(POLLING_DELAY - (System.currentTimeMillis() - timeOfLastRequest))
                 timeOfLastRequest = System.currentTimeMillis()
-                stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
-                lastObservedStatus = stripeIntentResult?.getOrNull()?.status ?: lastObservedStatus
+                stripeIntentResult = retrieveAndTrackStatus()
             }
         }
 
@@ -266,8 +270,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         // request took longer than the polling duration for the payment method. Ensures we always call retrieve
         // at least once after the polling duration
         if (shouldRetry(stripeIntentResult) || stripeIntentResult == null) {
-            stripeIntentResult = retrieveStripeIntent(clientSecret, requestOptions, EXPAND_PAYMENT_METHOD)
-            lastObservedStatus = stripeIntentResult?.getOrNull()?.status ?: lastObservedStatus
+            stripeIntentResult = retrieveAndTrackStatus()
 
             if (shouldRetry(stripeIntentResult)) {
                 pollingAnalyticsEventReporter.onPollingTimedOut(
