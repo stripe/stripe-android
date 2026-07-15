@@ -1092,6 +1092,8 @@ internal class PaymentIntentFlowResultProcessorTest {
     fun `Does not report polling timeout analytics for PromptPay`() =
         assertNoPollingTimeoutAnalyticsFor(PaymentMethod.Type.PromptPay)
 
+    // PayNow/PromptPay poll via the dedicated PollingActivity UI, not this generic processor;
+    // pins that a future afterRedirectAction change can't reintroduce a double-fire here.
     private fun assertNoPollingTimeoutAnalyticsFor(type: PaymentMethod.Type) =
         runTest(testDispatcher) {
             val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
