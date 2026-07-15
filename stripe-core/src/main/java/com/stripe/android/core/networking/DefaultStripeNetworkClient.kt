@@ -20,7 +20,6 @@ class DefaultStripeNetworkClient @JvmOverloads constructor(
     private val logger: Logger = Logger.noop()
 ) : StripeNetworkClient {
     override suspend fun executeRequest(request: StripeRequest): StripeResponse<String> {
-        println("YEET execute request headers: ${request.headers}")
         return executeInternal(maxRetries, request.retryResponseCodes) {
             makeRequest(request)
         }
