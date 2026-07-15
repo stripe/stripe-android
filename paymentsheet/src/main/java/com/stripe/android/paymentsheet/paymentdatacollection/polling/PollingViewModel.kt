@@ -14,7 +14,9 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.polling.PollingAnalyticsEventReporter
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -88,6 +90,7 @@ internal class PollingViewModel @Inject constructor(
     private val poller: IntentStatusPoller,
     private val timeProvider: TimeProvider,
     private val savedStateHandle: SavedStateHandle,
+    private val pollingAnalyticsEventReporter: PollingAnalyticsEventReporter,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(
@@ -98,6 +101,8 @@ internal class PollingViewModel @Inject constructor(
         )
     )
     val uiState: StateFlow<PollingUiState> = _uiState
+
+    private var timeoutJob: Job? = null
 
     init {
         val timeRemaining = computeTimeRemaining()
@@ -110,7 +115,7 @@ internal class PollingViewModel @Inject constructor(
             observePollingResults()
         }
 
-        viewModelScope.launch {
+        timeoutJob = viewModelScope.launch {
             delay(timeRemaining)
             handleTimeLimitReached()
         }
@@ -122,18 +127,32 @@ internal class PollingViewModel @Inject constructor(
     }
 
     private suspend fun handleTimeLimitReached() {
+        if (_uiState.value.pollingState != PollingState.Active) {
+            // The outcome was already decided (canceled, succeeded, or failed) before this
+            // delayed job ran; don't force-poll or report a timeout for an already-resolved payment.
+            return
+        }
+
         poller.stopPolling()
         delay(3.seconds)
-        performOneOffPoll()
-    }
 
-    private suspend fun performOneOffPoll() {
+        if (_uiState.value.pollingState != PollingState.Active) {
+            // The outcome was decided while we were in the grace delay above (e.g. the user
+            // canceled); don't clobber it or report a timeout.
+            return
+        }
+
         val intentStatus = poller.forcePoll()
         if (intentStatus == StripeIntent.Status.Succeeded) {
             _uiState.update {
                 it.copy(pollingState = PollingState.Success)
             }
         } else {
+            pollingAnalyticsEventReporter.onPollingTimedOut(
+                paymentMethodType = args.paymentMethodType,
+                lastKnownStatus = intentStatus?.name,
+                timeLimitSeconds = args.timeLimit.inWholeSeconds,
+            )
             _uiState.update {
                 it.copy(pollingState = PollingState.Failed)
             }
@@ -178,6 +197,7 @@ internal class PollingViewModel @Inject constructor(
             )
         }
         poller.stopPolling()
+        timeoutJob?.cancel()
     }
 
     fun hideQrCode() {
@@ -208,6 +228,11 @@ internal class PollingViewModel @Inject constructor(
     }
 
     private fun updatePollingState(pollingState: PollingState) {
+        if (pollingState == PollingState.Success || pollingState == PollingState.Failed) {
+            // The outcome was already decided by the poller itself; cancel the pending
+            // deadline job so it doesn't clobber this state or report a stale timeout later.
+            timeoutJob?.cancel()
+        }
         _uiState.update {
             it.copy(
                 pollingState = pollingState,
@@ -250,6 +275,7 @@ internal class PollingViewModel @Inject constructor(
         @StringRes val ctaText: Int,
         val stripeAccountId: String?,
         val qrCodeUrl: String?,
+        val paymentMethodType: String,
     )
 }
 

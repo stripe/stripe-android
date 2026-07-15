@@ -24,6 +24,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.testing.FakePollingAnalyticsEventReporter
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
@@ -249,12 +250,13 @@ internal class PollingActivityTest {
 
         val viewModel = createViewModel(
             args = PollingViewModel.Args(
-                args.clientSecret,
-                args.timeLimitInSeconds.seconds,
-                args.initialDelayInSeconds.seconds,
-                args.ctaText,
-                args.stripeAccountId,
-                args.qrCodeUrl,
+                clientSecret = args.clientSecret,
+                timeLimit = args.timeLimitInSeconds.seconds,
+                initialDelay = args.initialDelayInSeconds.seconds,
+                ctaText = args.ctaText,
+                stripeAccountId = args.stripeAccountId,
+                qrCodeUrl = args.qrCodeUrl,
+                paymentMethodType = args.paymentMethodType,
             ),
             poller = poller,
             timeProvider = timeProvider,
@@ -278,7 +280,7 @@ internal class PollingActivityTest {
         timeProvider: TimeProvider = TimeProvider { System.currentTimeMillis() },
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): PollingViewModel {
-        return PollingViewModel(args, poller, timeProvider, savedStateHandle)
+        return PollingViewModel(args, poller, timeProvider, savedStateHandle, FakePollingAnalyticsEventReporter())
     }
 
     private fun waitForActivityFinish() {
@@ -314,6 +316,7 @@ internal class PollingActivityTest {
             ctaText = R.string.stripe_blik_confirm_payment,
             stripeAccountId = null,
             qrCodeUrl = null,
+            paymentMethodType = "blik",
         )
     }
 }
