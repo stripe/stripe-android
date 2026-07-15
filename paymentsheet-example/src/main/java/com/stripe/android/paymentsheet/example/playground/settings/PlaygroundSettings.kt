@@ -180,7 +180,7 @@ internal class PlaygroundSettings private constructor(
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, embeddedConfigurationData)
             }
-            return builder.apiConfiguration(ApiConfiguration("pk_test_51KmkHbGoesj9fw9QAZJlz1qY4dns8nFmLKc7rXiWKAIj8QU7NPFPwSY1h8mqRaFRKQ9njs9pVJoo2jhN6ZKSDA4h00mjcbGF7b")).build()
+            return builder.build()
         }
 
         fun linkControllerConfiguration(
