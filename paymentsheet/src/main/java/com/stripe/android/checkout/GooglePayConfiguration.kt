@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import dev.drewhamilton.poko.Poko
 import kotlinx.parcelize.Parcelize
 
@@ -26,6 +27,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @Poko
+@CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GooglePayConfiguration @JvmOverloads constructor(
     internal val environment: Environment,
@@ -37,12 +39,14 @@ class GooglePayConfiguration @JvmOverloads constructor(
     internal val additionalEnabledNetworks: List<String> = emptyList()
 ) : Parcelable {
 
+    @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Environment {
         Production,
         Test,
     }
 
+    @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     /**
      * Google Pay button type options
