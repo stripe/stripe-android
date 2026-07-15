@@ -8,6 +8,7 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.core.utils.FeatureFlags
@@ -179,7 +180,7 @@ internal class PlaygroundSettings private constructor(
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, embeddedConfigurationData)
             }
-            return builder.build()
+            return builder.apiConfiguration(ApiConfiguration("pk_test_51KmkHbGoesj9fw9QAZJlz1qY4dns8nFmLKc7rXiWKAIj8QU7NPFPwSY1h8mqRaFRKQ9njs9pVJoo2jhN6ZKSDA4h00mjcbGF7b")).build()
         }
 
         fun linkControllerConfiguration(

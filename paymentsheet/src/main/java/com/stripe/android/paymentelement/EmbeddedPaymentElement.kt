@@ -18,7 +18,7 @@ import com.stripe.android.ApiConfiguration
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.payments.core.injection.PaymentConfigurationHolder
+import com.stripe.android.payments.core.injection.ApiConfigurationHolder
 import com.stripe.android.checkout.Checkout
 import com.stripe.android.checkout.CheckoutConfigurationMerger
 import com.stripe.android.checkout.CheckoutInstances
@@ -62,7 +62,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
     paymentOptionDisplayDataHolder: PaymentOptionDisplayDataHolder,
     private val configurationCoordinator: EmbeddedConfigurationCoordinator,
     stateHelper: EmbeddedStateHelper,
-    private val paymentConfigurationHolder: PaymentConfigurationHolder,
+    private val apiConfigurationHolder: ApiConfigurationHolder,
 ) {
 
     /**
@@ -89,7 +89,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         intentConfiguration: PaymentSheet.IntentConfiguration,
         configuration: Configuration,
     ): ConfigureResult {
-        paymentConfigurationHolder.apiConfiguration = configuration.apiConfiguration
+        apiConfigurationHolder.apiConfiguration = configuration.apiConfiguration
         val initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(intentConfiguration)
         return configurationCoordinator.configure(configuration, initializationMode)
     }
@@ -107,7 +107,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         checkout: Checkout,
         configuration: Configuration,
     ): ConfigureResult {
-        paymentConfigurationHolder.apiConfiguration = configuration.apiConfiguration
+        apiConfigurationHolder.apiConfiguration = configuration.apiConfiguration
         CheckoutInstances.ensureNoMutationInFlight(checkout.internalState.key)
         return configurationCoordinator.configure(
             configuration = CheckoutConfigurationMerger.EmbeddedConfiguration(configuration)

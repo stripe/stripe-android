@@ -92,6 +92,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         )
 
         val options = requestOptions
+        println("YEET pk sessions repo: ${options.apiKey}")
         val elementsSession = retrieveElementsSession(params, options)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->

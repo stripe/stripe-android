@@ -22,7 +22,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.payments.core.injection.PaymentConfigurationHolder
+import com.stripe.android.payments.core.injection.ApiConfigurationHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.form.OnClickDelegateOverrideImpl
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
@@ -123,8 +123,8 @@ internal interface EmbeddedActivityModule {
         fun providePaymentConfigurationHolder(
             context: Context,
             configuration: EmbeddedPaymentElement.Configuration,
-        ): PaymentConfigurationHolder {
-            return PaymentConfigurationHolder(context).apply {
+        ): ApiConfigurationHolder {
+            return ApiConfigurationHolder(context).apply {
                 apiConfiguration = configuration.apiConfiguration
             }
         }

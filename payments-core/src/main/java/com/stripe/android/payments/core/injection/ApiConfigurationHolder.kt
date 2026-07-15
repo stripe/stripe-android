@@ -13,17 +13,12 @@ import javax.inject.Inject
  * singleton the SDK has always used. Setting a non-null value overrides the singleton for all
  * network requests bound to this component (i.e., this [EmbeddedPaymentElement] instance).
  */
-class PaymentConfigurationHolder @Inject constructor(
+class ApiConfigurationHolder @Inject constructor(
     private val context: Context,
 ) {
     @Volatile
     var apiConfiguration: ApiConfiguration.State? = null
 
-    fun get(): ApiConfiguration.State =
-        apiConfiguration ?: PaymentConfiguration.getInstance(context).toApiConfigurationState()
+    fun get(): PaymentConfiguration =
+        apiConfiguration?.toPaymentConfiguration() ?: PaymentConfiguration.getInstance(context)
 }
-
-private fun PaymentConfiguration.toApiConfigurationState() = ApiConfiguration.State(
-    publishableKey = publishableKey,
-    stripeAccountId = stripeAccountId,
-)

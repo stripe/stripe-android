@@ -1,6 +1,7 @@
 package com.stripe.android.common.model
 
 import android.os.Parcelable
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.link.LinkAppearance
@@ -42,6 +43,7 @@ internal data class CommonConfiguration(
     val opensCardScannerAutomatically: Boolean,
     val userOverrideCountry: String?,
     val appearance: PaymentSheet.Appearance,
+    val apiConfiguration: ApiConfiguration.State? = null
 ) : Parcelable {
 
     fun allowedCardFundingTypes(enabled: Boolean): List<PaymentSheet.CardFundingType> {
@@ -273,6 +275,7 @@ internal fun EmbeddedPaymentElement.Configuration.asCommonConfiguration(): Commo
     userOverrideCountry = userOverrideCountry,
     appearance = appearance,
     allowedCardFundingTypes = allowedCardFundingTypes,
+    apiConfiguration = apiConfiguration
 )
 
 internal fun LinkController.Configuration.asCommonConfiguration(): CommonConfiguration = CommonConfiguration(

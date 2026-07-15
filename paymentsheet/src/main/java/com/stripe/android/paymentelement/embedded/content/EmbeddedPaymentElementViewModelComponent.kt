@@ -17,7 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.payments.core.injection.PaymentConfigurationHolder
+import com.stripe.android.payments.core.injection.ApiConfigurationHolder
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
@@ -194,8 +194,8 @@ internal interface EmbeddedPaymentElementViewModelModule {
         @Singleton
         fun providePaymentConfigurationHolder(
             context: Context,
-        ): PaymentConfigurationHolder {
-            return PaymentConfigurationHolder(context)
+        ): ApiConfigurationHolder {
+            return ApiConfigurationHolder(context)
         }
 
         @Provides

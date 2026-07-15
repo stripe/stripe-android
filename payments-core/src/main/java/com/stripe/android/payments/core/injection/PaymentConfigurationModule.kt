@@ -13,29 +13,23 @@ import javax.inject.Provider
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Module
 class PaymentConfigurationModule {
-    @Provides
-    fun provideApiConfigurationState(
-        holder: PaymentConfigurationHolder,
-    ): ApiConfiguration.State {
-        return holder.get()
-    }
 
     @Provides
     fun providePaymentConfiguration(
-        apiConfigurationState: Provider<ApiConfiguration.State>,
+        holder: ApiConfigurationHolder,
     ): PaymentConfiguration {
-        return apiConfigurationState.get().toPaymentConfiguration()
+        return holder.get()
     }
 
     @Provides
     @Named(PUBLISHABLE_KEY)
     fun providePublishableKey(
-        apiConfigurationState: Provider<ApiConfiguration.State>,
-    ): () -> String = { apiConfigurationState.get().publishableKey }
+        paymentConfiguration: Provider<PaymentConfiguration>,
+    ): () -> String = { paymentConfiguration.get().publishableKey }
 
     @Provides
     @Named(STRIPE_ACCOUNT_ID)
     fun provideStripeAccountId(
-        apiConfigurationState: Provider<ApiConfiguration.State>,
-    ): () -> String? = { apiConfigurationState.get().stripeAccountId }
+        paymentConfiguration: Provider<PaymentConfiguration>,
+    ): () -> String? = { paymentConfiguration.get().stripeAccountId }
 }
