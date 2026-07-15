@@ -741,6 +741,70 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
+    fun `proxy fetchPlace failure after prior query includes query and country in expand form`() = runScenario(
+        usePlacesClient = false,
+        useStripeHostedProxy = true,
+    ) {
+        fakeStripeHostedProxy.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(
+                listOf(
+                    AutocompletePrediction(
+                        SpannableString("123 Main St"),
+                        SpannableString("City, ST"),
+                        "place-id-abc",
+                    )
+                )
+            )
+        )
+        fakeStripeHostedProxy.fetchPlaceResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        fakeStripeHostedProxy.findPredictionsCalls.awaitItem()
+        delegate.onPredictionSelected("place-id-abc")
+
+        fakeStripeHostedProxy.fetchPlaceCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `proxy prediction failure with null country only includes Line1 in expand form`() = runScenario(
+        usePlacesClient = false,
+        useStripeHostedProxy = true,
+    ) {
+        fakeStripeHostedProxy.findPredictionsResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
+        countryFlow.value = null
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        fakeStripeHostedProxy.findPredictionsCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main",
+                )
+            )
+        )
+    }
+
+    @Test
     fun `null placesClient and no proxy stays Idle`() = runScenario(
         usePlacesClient = false,
     ) {
