@@ -1,28 +1,55 @@
 package com.stripe.android.common.nfcscan.scanner
 
+import com.stripe.android.common.nfcscan.scanner.apdu.ApduResponseError
 import com.stripe.android.common.nfcscan.scanner.apdu.ReadRecordCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.strings.ResolvableString
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.collections.plusAssign
 import kotlin.coroutines.CoroutineContext
 
 internal interface NfcCardReader {
-    suspend fun readCard(transceiver: NfcTagTransceiver): Result<ScannedCardData>
+    interface ErrorCreator {
+        fun create(error: Throwable): Result.Error
+    }
+
+    suspend fun readCard(transceiver: NfcTagTransceiver): Result
+
+    sealed interface Result {
+        data class Found(val scannedCardData: ScannedCardData) : Result
+        data class Error(
+            val errorCode: String,
+            val userMessage: ResolvableString,
+        ) : Result
+    }
 }
 
 internal class ApduCardReader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
+    private val errorMapper: NfcCardReader.ErrorCreator,
     private val cardDataParser: NfcCardDataParser,
 ) : NfcCardReader {
-    override suspend fun readCard(
+    override suspend fun readCard(transceiver: NfcTagTransceiver): NfcCardReader.Result {
+        return runCatching {
+            readFromTransceiver(transceiver)
+        }.fold(
+            onSuccess = { cardData ->
+                NfcCardReader.Result.Found(scannedCardData = cardData)
+            },
+            onFailure = errorMapper::create,
+        )
+    }
+
+    private suspend fun readFromTransceiver(
         transceiver: NfcTagTransceiver
-    ): Result<ScannedCardData> = withContext(workContext) {
-        runCatching {
+    ): ScannedCardData = withContext(workContext) {
+        try {
+            transceiver.open()
             val applicationIdentifier = SelectPpseCommand.transceiveWith(transceiver).getOrThrow()
-            SelectApplicationCommand(applicationIdentifier).transceiveWith(transceiver)
+            SelectApplicationCommand(applicationIdentifier).transceiveWith(transceiver).getOrThrow()
 
             val records = mutableMapOf<String, ByteArray>()
 
@@ -37,18 +64,32 @@ internal class ApduCardReader @Inject constructor(
                         if (cardDataParser.canParse(records)) {
                             break@probeFiles
                         }
+                    }.onFailure { error ->
+                        if (!isRecordNotFoundError(error)) {
+                            throw error
+                        }
                     }
                 }
             }
 
             cardDataParser.parse(records)
                 ?: throw IllegalStateException("Could not parse card data from NFC tag")
+        } finally {
+            transceiver.close()
         }
+    }
+
+    private fun isRecordNotFoundError(error: Throwable): Boolean {
+        return error is ApduResponseError.Command &&
+            error.sw1 == RECORD_NOT_FOUND_SW1 && error.sw2 == RECORD_NOT_FOUND_SW2
     }
 
     private companion object {
         // SFIs 1-3 cover virtually all Visa/Mastercard/Amex/Discover payment records.
         val PROBE_SFIS = 1..3
         const val MAX_RECORDS_PER_SFI = 8
+
+        const val RECORD_NOT_FOUND_SW1 = 0x6A.toByte()
+        const val RECORD_NOT_FOUND_SW2 = 0x83.toByte()
     }
 }

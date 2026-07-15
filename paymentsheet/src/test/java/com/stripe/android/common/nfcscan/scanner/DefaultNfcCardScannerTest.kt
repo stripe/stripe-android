@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
-import java.io.IOException
 
 internal class DefaultNfcCardScannerTest {
     private val dispatcher = UnconfinedTestDispatcher()
@@ -24,11 +23,13 @@ internal class DefaultNfcCardScannerTest {
 
     @Test
     fun `scanner emits Scanning then Complete when card read & validator succeeds`() = runScenario(
-        cardData = ScannedCardData(
-            cardNumber = "4242424242424242",
-            expirationMonth = 12,
-            expirationYear = 2030,
-        ),
+        cardReadResult = NfcCardReader.Result.Found(
+            scannedCardData = ScannedCardData(
+                cardNumber = "4242424242424242",
+                expirationMonth = 12,
+                expirationYear = 2030,
+            ),
+        )
     ) {
         scanner.state.test {
             scanner.start(activity)
@@ -49,12 +50,7 @@ internal class DefaultNfcCardScannerTest {
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
-
-        val transceiver = requireNotNull(fakeTransceiver)
-
-        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
         assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
-        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
         assertThat(fakeCardValidator.validateCalls.awaitItem()).isEqualTo(
             ScannedCardData(
                 cardNumber = "4242424242424242",
@@ -66,7 +62,10 @@ internal class DefaultNfcCardScannerTest {
 
     @Test
     fun `start emits Failed when card reader fails`() = runScenario(
-        cardReadError = IllegalStateException("read failed"),
+        cardReadResult = NfcCardReader.Result.Error(
+            errorCode = "cardUnsupportedByNfc",
+            userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+        ),
     ) {
         scanner.state.test {
             scanner.start(activity)
@@ -78,20 +77,15 @@ internal class DefaultNfcCardScannerTest {
             assertThat(awaitItem()).isEqualTo(
                 NfcCardScanner.State.Failed(
                     error = NfcCardScanner.Error(
-                        code = "unknown",
-                        userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+                        code = "cardUnsupportedByNfc",
+                        userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
                     ),
                 ),
             )
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
-
-        val transceiver = requireNotNull(fakeTransceiver)
-
-        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
         assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
-        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
     }
 
     @Test
@@ -111,73 +105,13 @@ internal class DefaultNfcCardScannerTest {
     }
 
     @Test
-    fun `start emits Failed when transceiver open fails`() = runScenario(
-        openException = IOException("open failed"),
-    ) {
-        scanner.state.test {
-            scanner.start(activity)
-
-            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
-            startCall.onTagDiscovered.invoke(tag)
-
-            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
-            assertThat(awaitItem()).isEqualTo(
-                NfcCardScanner.State.Failed(
-                    error = NfcCardScanner.Error(
-                        code = "unknown",
-                        userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-                    ),
-                ),
-            )
-        }
-
-        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
-
-        val transceiver = requireNotNull(fakeTransceiver)
-
-        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
-    }
-
-    @Test
-    fun `start emits Failed when transceiver close fails`() = runScenario(
-        cardData = ScannedCardData(
-            cardNumber = "4242424242424242",
-            expirationMonth = 12,
-            expirationYear = 2030,
-        ),
-        closeException = IOException("close failed"),
-    ) {
-        scanner.state.test {
-            scanner.start(activity)
-
-            val startCall = fakeHardwareDelegate.startCalls.awaitItem()
-            startCall.onTagDiscovered.invoke(tag)
-
-            assertThat(awaitItem()).isEqualTo(NfcCardScanner.State.Scanning)
-            val failedState = awaitItem() as NfcCardScanner.State.Failed
-            assertThat(failedState.error).isEqualTo(
-                NfcCardScanner.Error(
-                    code = "unknown",
-                    userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-                ),
-            )
-        }
-
-        assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
-
-        val transceiver = requireNotNull(fakeTransceiver)
-
-        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
-        assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
-        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
-    }
-
-    @Test
     fun `scanner emits Failed when card validation fails`() = runScenario(
-        cardData = ScannedCardData(
-            cardNumber = "4242424242424242",
-            expirationMonth = 12,
-            expirationYear = 2030,
+        cardReadResult = NfcCardReader.Result.Found(
+            scannedCardData = ScannedCardData(
+                cardNumber = "4242424242424242",
+                expirationMonth = 12,
+                expirationYear = 2030,
+            ),
         ),
         validationResult = NfcCardValidator.Result.Invalid(
             errorCode = "cardUnsupportedByMerchant",
@@ -202,12 +136,7 @@ internal class DefaultNfcCardScannerTest {
         }
 
         assertThat(fakeTransceiverFactory.createCalls.awaitItem()).isEqualTo(tag)
-
-        val transceiver = requireNotNull(fakeTransceiver)
-
-        assertThat(transceiver.openCalls.awaitItem()).isNotNull()
         assertThat(fakeCardReader.readCardCalls.awaitItem()).isEqualTo(fakeTransceiver)
-        assertThat(transceiver.closeCalls.awaitItem()).isNotNull()
         assertThat(fakeCardValidator.validateCalls.awaitItem()).isEqualTo(
             ScannedCardData(
                 cardNumber = "4242424242424242",
@@ -219,27 +148,17 @@ internal class DefaultNfcCardScannerTest {
 
     private fun runScenario(
         isHardwareAvailable: Boolean = true,
-        cardData: ScannedCardData? = null,
-        cardReadError: Throwable? = null,
-        openException: Throwable? = null,
-        closeException: Throwable? = null,
-        transceiver: NfcTagTransceiver? = FakeNfcTagTransceiver(
-            openException = openException,
-            closeException = closeException,
+        transceiver: FakeNfcTagTransceiver? = FakeNfcTagTransceiver(),
+        cardReadResult: NfcCardReader.Result = NfcCardReader.Result.Error(
+            errorCode = "notImplemented",
+            userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
         ),
         validationResult: NfcCardValidator.Result = NfcCardValidator.Result.Validated,
         block: suspend Scenario.() -> Unit,
     ) = runTest(dispatcher) {
         val fakeHardwareDelegate = FakeNfcHardwareDelegate(result = isHardwareAvailable)
         val fakeTransceiverFactory = FakeNfcTagTransceiverFactory(transceiver = transceiver)
-        val fakeTransceiver = transceiver as? FakeNfcTagTransceiver
-        val fakeCardReader = FakeNfcCardReader(
-            result = when {
-                cardData != null -> Result.success(cardData)
-                cardReadError != null -> Result.failure(cardReadError)
-                else -> Result.failure(NotImplementedError())
-            },
-        )
+        val fakeCardReader = FakeNfcCardReader(result = cardReadResult)
         val fakeCardValidator = FakeNfcCardValidator(result = validationResult)
         val activity = mock<AppCompatActivity>()
         val tag = mock<Tag>()
@@ -261,14 +180,14 @@ internal class DefaultNfcCardScannerTest {
             fakeTransceiverFactory = fakeTransceiverFactory,
             fakeCardReader = fakeCardReader,
             fakeCardValidator = fakeCardValidator,
-            fakeTransceiver = fakeTransceiver,
+            fakeTransceiver = transceiver,
         ).block()
 
         fakeHardwareDelegate.ensureAllEventsConsumed()
         fakeTransceiverFactory.ensureAllEventsConsumed()
         fakeCardReader.ensureAllEventsConsumed()
         fakeCardValidator.ensureAllEventsConsumed()
-        fakeTransceiver?.ensureAllEventsConsumed()
+        transceiver?.ensureAllEventsConsumed()
     }
 
     private class Scenario(
