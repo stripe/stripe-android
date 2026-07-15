@@ -88,7 +88,7 @@ class OnrampConfiguration {
             publishableKey = requireNotNull(publishableKey) {
                 "publishableKey must not be null"
             },
-            appearance = appearance ?: LinkAppearance(),
+            appearance = (appearance ?: LinkAppearance()).reduceLinkBranding(true),
             cryptoCustomerId = cryptoCustomerId,
             googlePayConfig = googlePayConfig,
             additionalSdkVersions = additionalSdkVersions
