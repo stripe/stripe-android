@@ -20,7 +20,7 @@ class GooglePayConfiguration(
     private val environment: Environment,
     private val countryCode: String,
 ) {
-   private var currencyCode: String? = null
+    private var currencyCode: String? = null
     private var amount: Long? = null
     private var label: String? = null
     private var buttonType: ButtonType = ButtonType.Pay
@@ -30,7 +30,7 @@ class GooglePayConfiguration(
      * @param currencyCode The three-letter ISO 4217 alphabetic currency code, e.g. "USD" or "EUR".
      * Required in order to support Google Pay when processing a Setup Intent.
      */
-    fun currencyCode(currencyCode: String?): GooglePayConfiguration = apply {
+    fun currencyCode(currencyCode: String): GooglePayConfiguration = apply {
         this.currencyCode = currencyCode
     }
 
@@ -38,7 +38,7 @@ class GooglePayConfiguration(
      * @param amount An optional amount to display for setup intents. Google Pay may or may not
      * display this amount depending on its own internal logic. Defaults to 0 if none is provided.
      */
-    fun amount(amount: Long?): GooglePayConfiguration = apply {
+    fun amount(amount: Long): GooglePayConfiguration = apply {
         this.amount = amount
     }
 
@@ -47,7 +47,7 @@ class GooglePayConfiguration(
      * this label depending on its own internal logic. Defaults to a generic label if none is
      * provided.
      */
-    fun label(label: String?): GooglePayConfiguration = apply {
+    fun label(label: String): GooglePayConfiguration = apply {
         this.label = label
     }
 
