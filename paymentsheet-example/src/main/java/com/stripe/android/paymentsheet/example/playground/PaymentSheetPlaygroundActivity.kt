@@ -590,7 +590,6 @@ internal class PaymentSheetPlaygroundActivity :
     }
 
     @Composable
-    @Suppress("LongMethod")
     fun EmbeddedUi(
         playgroundState: PlaygroundState.Payment,
     ) {
