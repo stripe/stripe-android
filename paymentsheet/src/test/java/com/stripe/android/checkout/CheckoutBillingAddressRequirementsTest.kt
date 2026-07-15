@@ -57,4 +57,23 @@ class CheckoutBillingAddressRequirementsTest {
             .containsExactly(Field.LINE1, Field.CITY, Field.STATE, Field.POSTAL_CODE)
             .inOrder()
     }
+
+    @Test
+    fun `only the five expected countries require additional fields`() {
+        val countriesWithFields = listOf("CA", "GB", "IN", "PR", "US")
+            .associateWith { CheckoutBillingAddressRequirements.requiredFields(it) }
+            .filterValues { it.isNotEmpty() }
+
+        assertThat(countriesWithFields.keys)
+            .containsExactly("CA", "GB", "IN", "PR", "US")
+    }
+
+    @Test
+    fun `every returned field is a known Field enum value`() {
+        val allReturned = listOf("CA", "GB", "IN", "PR", "US")
+            .flatMap { CheckoutBillingAddressRequirements.requiredFields(it) }
+            .toSet()
+
+        assertThat(Field.entries).containsAtLeastElementsIn(allReturned)
+    }
 }
