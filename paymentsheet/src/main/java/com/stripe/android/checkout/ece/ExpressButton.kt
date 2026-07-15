@@ -3,6 +3,7 @@ package com.stripe.android.checkout.ece
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.LinkBrand
@@ -18,14 +19,16 @@ internal sealed interface ExpressButton {
     ) : ExpressButton {
         companion object {
             fun create(
-                paymentMethodMetadata: PaymentMethodMetadata
+                paymentMethodMetadata: PaymentMethodMetadata,
+                linkAccountInfo: LinkAccountUpdate.Value,
             ): Link {
                 val linkConfiguration = paymentMethodMetadata.linkState?.configuration
+                val linkAccount = linkAccountInfo.account
                 return Link(
                     state = LinkButtonState.create(
                         enableDefaultValues = linkConfiguration?.enableDisplayableDefaultValuesInEce == true,
-                        linkEmail = null,
-                        paymentDetails = null,
+                        linkEmail = linkAccount?.email,
+                        paymentDetails = linkAccount?.displayablePaymentDetails,
                     ),
                     theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
                     linkBrand = paymentMethodMetadata.linkBrand,
