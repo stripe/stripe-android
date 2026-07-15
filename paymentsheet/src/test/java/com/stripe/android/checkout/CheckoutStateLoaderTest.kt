@@ -6,6 +6,9 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.BillingDetailsCollectionConfiguration
+import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -35,6 +38,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -77,6 +81,21 @@ internal class CheckoutStateLoaderTest {
 
             assertThat(stateHolder.state?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
                 .isFalse()
+        }
+
+    @Test
+    fun `loadInitial propagates billingDetailsCollectionConfiguration from the payment element configuration`() =
+        runScenario {
+            val configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().billingDetailsCollectionConfiguration(bdcc(address = Full))
+                )
+                .build()
+
+            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+            assertThat(stateHolder.state?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+                .isEqualTo(PSFull)
         }
 
     @Test
@@ -205,6 +224,10 @@ internal class CheckoutStateLoaderTest {
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
     private fun response() = CheckoutSessionResponseFactory.create()
+
+    private fun bdcc(
+        address: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
+    ) = BillingDetailsCollectionConfiguration().address(address)
 
     // A committed state as [CheckoutStateLoader] would produce it, for exercising reloads. The
     // resolved metadata/configuration are placeholders; reload recomputes and overwrites them.
