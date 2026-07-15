@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -39,59 +40,56 @@ import kotlin.test.assertFailsWith
 internal class CheckoutStateLoaderTest {
 
     @Test
-    fun `load commits confirmation state with payment method metadata`() = runScenario {
-        loader.load(checkoutControllerState())
+    fun `loadInitial commits state with payment method metadata`() = runScenario {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(confirmationStateHolder.state?.paymentMethodMetadata).isNotNull()
+        assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
     }
 
     @Test
-    fun `load uses the provided merchant display name`() = runScenario(
+    fun `loadInitial uses the provided merchant display name`() = runScenario(
         merchantDisplayName = "Acme Corp",
     ) {
-        loader.load(checkoutControllerState())
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        assertThat(confirmationStateHolder.state?.configuration?.merchantDisplayName).isEqualTo("Acme Corp")
+        assertThat(stateHolder.state?.embeddedConfiguration?.merchantDisplayName).isEqualTo("Acme Corp")
     }
 
     @Test
-    fun `load sources the billing email from the checkout session customer email`() = runScenario {
+    fun `loadInitial sources the billing email from the checkout session customer email`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com")
 
-        loader.load(checkoutControllerState(checkoutSessionResponse = response))
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response)
 
-        assertThat(confirmationStateHolder.state?.configuration?.defaultBillingDetails?.email)
+        assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.email)
             .isEqualTo("checkout@example.com")
     }
 
     @Test
-    fun `load propagates embeddedViewDisplaysMandateText from the payment element configuration`() =
+    fun `loadInitial propagates embeddedViewDisplaysMandateText from the payment element configuration`() =
         runScenario {
             val configuration = CheckoutController.Configuration()
                 .paymentElement(PaymentElement.Configuration().embeddedViewDisplaysMandateText(false))
                 .build()
 
-            loader.load(checkoutControllerState(configuration = configuration))
+            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
 
-            assertThat(confirmationStateHolder.state?.configuration?.embeddedViewDisplaysMandateText)
+            assertThat(stateHolder.state?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
                 .isFalse()
         }
 
     @Test
-    fun `load routes the selection through the chooser`() = runScenario(
+    fun `reload routes the selection through the chooser`() = runScenario(
         loaderSelection = PaymentSelection.GooglePay,
         chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
     ) {
-        // The customer's prior selection is what the chooser must be offered as the previous value.
-        selectionHolder.set(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-
-        loader.load(checkoutControllerState())
+        // The committed state's selection is what the chooser must be offered as the previous
+        // value, sourced from the incoming state rather than a separate holder.
+        loader.reload(committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
 
         // The committed state adopts whatever the chooser returned, not the loader's recomputed
-        // selection, and the selection holder is updated to match.
-        assertThat(confirmationStateHolder.state?.selection)
-            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
-        assertThat(selectionHolder.selection.value)
+        // selection.
+        assertThat(stateHolder.state?.paymentSelection)
             .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         val call = chooser.lastCall
         assertThat(call?.previousSelection).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
@@ -99,7 +97,7 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `load preserves a non-default selection across a mutation`() = runScenario(
+    fun `reload preserves a non-default selection across a mutation`() = runScenario(
         // The loader would recompute a card selection, but the customer's Google Pay pick must win.
         loaderSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
         isGooglePayAvailable = true,
@@ -119,22 +117,22 @@ internal class CheckoutStateLoaderTest {
         },
     ) {
         // Initial load seeds the chooser's stored previous configuration.
-        loader.load(checkoutControllerState())
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
-        // The customer picks Google Pay after the initial load.
-        selectionHolder.set(PaymentSelection.GooglePay)
+        // The customer picks Google Pay after the initial load; in the single-state model that pick
+        // lives on the committed state rather than a separate selection holder.
+        val afterPick = requireNotNull(stateHolder.state).copy(paymentSelection = PaymentSelection.GooglePay)
 
         // A mutation reloads with the same configuration, so the chooser keeps the customer's
         // selection rather than adopting the loader's recomputed one.
-        loader.load(requireNotNull(stateHolder.state))
+        loader.reload(afterPick)
 
-        assertThat(confirmationStateHolder.state?.selection).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(stateHolder.state?.paymentSelection).isEqualTo(PaymentSelection.GooglePay)
     }
 
     @Test
-    fun `load commits state that exposes the checkout session`() = runScenario {
-        loader.load(checkoutControllerState())
+    fun `loadInitial commits state that exposes the checkout session`() = runScenario {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         assertThat(stateHolder.state?.key).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
@@ -143,41 +141,52 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
-    fun `load throws and commits nothing when the payment element loader fails`() = runScenario(
+    fun `loadInitial throws and commits nothing when the payment element loader fails`() = runScenario(
         shouldFail = true,
     ) {
         assertFailsWith<IllegalStateException> {
-            loader.load(checkoutControllerState())
+            loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
         }
 
         assertThat(stateHolder.state).isNull()
-        assertThat(confirmationStateHolder.state).isNull()
     }
 
     @Test
-    fun `load reuses cached flag images when the currencies are unchanged`() = runScenario {
+    fun `reload reuses cached flag images when the currencies are unchanged`() = runScenario {
         val response = CheckoutSessionResponseFactory.create(adaptivePricingInfo = adaptivePricingInfo())
 
-        loader.load(checkoutControllerState(checkoutSessionResponse = response))
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response)
 
         // Both currency flags are downloaded on the initial load.
         imageLoader.awaitLoadCall()
         imageLoader.awaitLoadCall()
 
-        // A mutation reloads with the previously resolved images carried forward (a copy of the
-        // committed state) and the same currencies, so the cache is reused and nothing re-downloads.
-        val reloaded = requireNotNull(stateHolder.state).copy(checkoutSessionResponse = response)
-        loader.load(reloaded)
+        // A mutation reloads with the previously resolved images carried forward (on the committed
+        // state) and the same currencies, so the cache is reused and nothing re-downloads.
+        loader.reload(requireNotNull(stateHolder.state))
 
         imageLoader.ensureAllEventsConsumed()
     }
 
-    private fun checkoutControllerState(
-        configuration: CheckoutController.Configuration.State = CheckoutController.Configuration().build(),
+    private fun defaultConfiguration() = CheckoutController.Configuration().build()
+
+    private fun response() = CheckoutSessionResponseFactory.create()
+
+    // A committed state as [CheckoutStateLoader] would produce it, for exercising reloads. The
+    // resolved metadata/configuration are placeholders; reload recomputes and overwrites them.
+    private fun committedState(
+        paymentSelection: PaymentSelection? = null,
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
-    ) = CheckoutControllerState.defaultState(
-        configuration = configuration,
+    ) = CheckoutControllerState(
+        key = checkoutSessionResponse.id,
+        configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
+        flagImages = null,
+        collectedDetails = CheckoutCollectedDetails(),
+        integrationLaunched = false,
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        paymentSelection = paymentSelection,
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.
@@ -218,14 +227,7 @@ internal class CheckoutStateLoaderTest {
                 publishableKey = "pk_test_123",
             ),
         )
-        // All holders share one SavedStateHandle, mirroring the singleton graph in production.
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle)
-        val confirmationStateHolder = CheckoutConfirmationStateHolder(
-            savedStateHandle = savedStateHandle,
-            selectionHolder = selectionHolder,
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
-        )
         val stateHolder = CheckoutControllerStateHolder(savedStateHandle)
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
@@ -238,16 +240,12 @@ internal class CheckoutStateLoaderTest {
                 isGooglePayAvailable = isGooglePayAvailable,
             ),
             selectionChooser = chooser,
-            selectionHolder = selectionHolder,
-            confirmationStateHolder = confirmationStateHolder,
             stateHolder = stateHolder,
         )
 
         Scenario(
             loader = loader,
             stateHolder = stateHolder,
-            confirmationStateHolder = confirmationStateHolder,
-            selectionHolder = selectionHolder,
             chooser = recordingChooser,
             imageLoader = imageLoader,
         ).block()
@@ -258,14 +256,12 @@ internal class CheckoutStateLoaderTest {
     private class Scenario(
         val loader: CheckoutStateLoader,
         val stateHolder: CheckoutControllerStateHolder,
-        val confirmationStateHolder: CheckoutConfirmationStateHolder,
-        val selectionHolder: EmbeddedSelectionHolder,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,
-    // so tests can verify the loader threads the holder's previous selection and the loader's new
+    // so tests can verify the loader threads the state's previous selection and the loader's new
     // selection into the chooser.
     private class RecordingSelectionChooser(
         private val result: PaymentSelection?,

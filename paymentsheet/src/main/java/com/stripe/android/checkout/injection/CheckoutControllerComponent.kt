@@ -6,8 +6,8 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.checkout.CheckoutConfirmationStateHolder
 import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -242,9 +242,9 @@ internal interface CheckoutControllerModule {
 
         @Provides
         fun providePaymentMethodMetadata(
-            confirmationStateHolder: CheckoutConfirmationStateHolder,
+            stateHolder: CheckoutControllerStateHolder,
         ): PaymentMethodMetadata? {
-            return confirmationStateHolder.state?.paymentMethodMetadata
+            return stateHolder.state?.paymentMethodMetadata
         }
 
         @OptIn(ExperimentalAnalyticEventCallbackApi::class)

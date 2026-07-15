@@ -8,9 +8,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Owns [CheckoutController]'s [CheckoutControllerState], persisting it in [SavedStateHandle] so it
- * survives process death, and derives the observable [checkoutSession] from it. Kept separate from
- * the controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
+ * Owns [CheckoutController]'s [CheckoutControllerState] — the single source of truth for the
+ * controller — persisting it in [SavedStateHandle] so it survives process death. All observable
+ * projections (e.g. [checkoutSession]) are derived from the one [stateFlow]. Kept separate from the
+ * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
  * into the controller.
  */
 @OptIn(CheckoutSessionPreview::class)
@@ -24,9 +25,11 @@ internal class CheckoutControllerStateHolder @Inject constructor(
             savedStateHandle[STATE_KEY] = value
         }
 
+    val stateFlow: StateFlow<CheckoutControllerState?> =
+        savedStateHandle.getStateFlow(STATE_KEY, null)
+
     val checkoutSession: StateFlow<CheckoutSession?> =
-        savedStateHandle.getStateFlow<CheckoutControllerState?>(STATE_KEY, null)
-            .mapAsStateFlow { it?.asCheckoutSession() }
+        stateFlow.mapAsStateFlow { it?.asCheckoutSession() }
 
     companion object {
         const val STATE_KEY = "CheckoutController_InternalState"
