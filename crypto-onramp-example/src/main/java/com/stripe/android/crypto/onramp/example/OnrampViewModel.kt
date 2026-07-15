@@ -942,15 +942,7 @@ internal class OnrampViewModel(
                 )
             ) {
                 is Result.Success -> {
-                    _message.value =
-                        "Onramp session created successfully! Session ID: ${result.value.id}"
-                    _uiState.update {
-                        it.copy(
-                            onrampSession = result.value,
-                            screen = Screen.AuthenticatedOperations,
-                            loadingMessage = null
-                        )
-                    }
+                    handleSessionCreated(result.value)
                 }
                 is Result.Failure -> {
                     _message.value =
@@ -963,6 +955,28 @@ internal class OnrampViewModel(
                     }
                 }
             }
+        }
+    }
+
+    private fun handleSessionCreated(session: OnrampSessionResponse) {
+        val requiresWalletOwnershipVerification =
+            session.requiresWalletOwnershipVerification
+        _message.value = if (requiresWalletOwnershipVerification) {
+            "Onramp session requires wallet ownership verification before checkout"
+        } else {
+            "Onramp session created successfully! Session ID: ${session.id}"
+        }
+        _uiState.update {
+            it.copy(
+                onrampSession = session,
+                screen = Screen.AuthenticatedOperations,
+                walletOwnershipVerified = if (requiresWalletOwnershipVerification) {
+                    false
+                } else {
+                    it.walletOwnershipVerified
+                },
+                loadingMessage = null
+            )
         }
     }
 
