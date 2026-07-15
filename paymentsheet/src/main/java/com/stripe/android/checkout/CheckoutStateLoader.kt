@@ -12,18 +12,6 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
-/**
- * Loads the payment element for a checkout session and, on success, commits the fully resolved
- * [CheckoutControllerState] — the single source of truth — to the [stateHolder]. Because the
- * resolved [CheckoutControllerState.paymentMethodMetadata] and
- * [CheckoutControllerState.embeddedConfiguration] are only known after a load, this loader is the
- * sole builder of load-resolved states: [loadInitial] builds the first one for a freshly configured
- * session, and [reload] rebuilds it after a mutation, carrying the previously collected data
- * forward. (The selection setters on [CheckoutControllerStateHolder] also commit states, by copying
- * an already-loaded one to update the selection fields, without going through this loader.) Extracted
- * from [CheckoutController] so the load-and-commit flow can be unit tested in isolation from the
- * controller.
- */
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
     @MerchantDisplayName private val merchantDisplayName: String,

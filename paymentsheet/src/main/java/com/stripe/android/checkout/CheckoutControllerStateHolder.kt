@@ -20,10 +20,6 @@ import javax.inject.Singleton
  * projections (e.g. [checkoutSession]) are derived from the one [stateFlow]. Kept separate from the
  * controller so [CheckoutStateLoader] can commit loaded state directly rather than reaching back
  * into the controller.
- *
- * Implements [EmbeddedSelectionHolder] so the checkout Dagger graph resolves that interface to this
- * holder: the payment element's selection state reads from and writes to [CheckoutControllerState]
- * rather than a separate holder, keeping a single source of truth.
  */
 @OptIn(CheckoutSessionPreview::class)
 @Singleton

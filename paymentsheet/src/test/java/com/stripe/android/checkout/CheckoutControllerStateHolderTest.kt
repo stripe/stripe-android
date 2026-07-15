@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.previousNewSelection
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeErrorReporter
@@ -97,10 +98,15 @@ internal class CheckoutControllerStateHolderTest {
     @Test
     fun `selection setters no-op before the state is committed`() = testScenario {
         stateHolder.setSelection(PaymentSelection.GooglePay)
+        assertSetBeforeLoadError(operation = "setSelection")
+
         stateHolder.setTemporarySelection("card")
+        assertSetBeforeLoadError(operation = "setTemporarySelection")
+
         stateHolder.setPreviousNewSelections(
             Bundle().apply { putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION) },
         )
+        assertSetBeforeLoadError(operation = "setPreviousNewSelections")
 
         assertThat(stateHolder.state).isNull()
         assertThat(stateHolder.selection.value).isNull()
@@ -151,13 +157,24 @@ internal class CheckoutControllerStateHolderTest {
     private fun testScenario(
         block: suspend Scenario.() -> Unit,
     ) = runTest {
+        val errorReporter = FakeErrorReporter()
         Scenario(
-            stateHolder = CheckoutControllerStateHolder(SavedStateHandle(), FakeErrorReporter()),
+            stateHolder = CheckoutControllerStateHolder(SavedStateHandle(), errorReporter),
+            errorReporter = errorReporter,
         ).block()
+        errorReporter.ensureAllEventsConsumed()
+    }
+
+    private suspend fun Scenario.assertSetBeforeLoadError(operation: String) {
+        val call = errorReporter.awaitCall()
+        assertThat(call.errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.CHECKOUT_SELECTION_SET_BEFORE_LOAD)
+        assertThat(call.additionalNonPiiParams).isEqualTo(mapOf("operation" to operation))
     }
 
     private class Scenario(
         val stateHolder: CheckoutControllerStateHolder,
+        val errorReporter: FakeErrorReporter,
     )
 
     private companion object {
