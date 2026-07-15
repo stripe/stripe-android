@@ -106,6 +106,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -1336,8 +1337,7 @@ internal class PaymentSheetActivityTest {
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-                    intentConfirmationInterceptorFactory =
-                    object : IntentConfirmationInterceptor.Factory {
+                    intentConfirmationInterceptorFactory = object : IntentConfirmationInterceptor.Factory {
                         override suspend fun create(
                             integrationMetadata: IntegrationMetadata,
                             customerMetadata: CustomerMetadata?,
@@ -1370,6 +1370,7 @@ internal class PaymentSheetActivityTest {
                     }
                 },
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,

@@ -15,6 +15,7 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.common.taptoadd.TapToAddNextStep
@@ -102,6 +103,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val cvcRecollectionHandler: CvcRecollectionHandler,
     private val cvcRecollectionInteractorFactory: CvcRecollectionInteractor.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
+    override val isNfcScanningAvailable: IsNfcScanningAvailable,
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,

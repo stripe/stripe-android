@@ -24,6 +24,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.AnalyticEventCallbackRule
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
@@ -140,6 +141,7 @@ internal class EmbeddedContentUiTest {
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             embeddedSelectionHolder = selectionHolder,
             savedStateHandle = savedStateHandle,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()

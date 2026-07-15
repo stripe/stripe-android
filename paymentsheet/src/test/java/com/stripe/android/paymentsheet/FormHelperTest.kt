@@ -718,7 +718,8 @@ internal class FormHelperTest {
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = null,
             tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            isNfcScanningAvailable = null,
         )
     }
 

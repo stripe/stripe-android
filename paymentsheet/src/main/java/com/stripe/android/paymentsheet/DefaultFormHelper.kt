@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -47,7 +48,8 @@ internal class DefaultFormHelper(
     private val isLinkUI: Boolean = false,
     private val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper?,
     private val tapToAddHelper: TapToAddHelper?,
-    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
+    private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?,
+    private val isNfcScanningAvailable: IsNfcScanningAvailable?,
 ) : FormHelper {
     companion object {
         internal const val PREVIOUSLY_COMPLETED_PAYMENT_FORM = "previously_completed_payment_form"
@@ -89,7 +91,8 @@ internal class DefaultFormHelper(
                     null
                 },
                 tapToAddHelper = viewModel.tapToAddHelper,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                isNfcScanningAvailable = viewModel.isNfcScanningAvailable,
             )
         }
 
@@ -117,7 +120,8 @@ internal class DefaultFormHelper(
                 isLinkUI = isLinkUI,
                 automaticallyLaunchedCardScanFormDataHelper = null,
                 tapToAddHelper = null,
-                paymentMethodMessagePromotionsHelper = null
+                paymentMethodMessagePromotionsHelper = null,
+                isNfcScanningAvailable = null,
             )
         }
     }
@@ -247,7 +251,8 @@ internal class DefaultFormHelper(
             isLinkUI = isLinkUI,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagingPromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagingPromotionsHelper = paymentMethodMessagePromotionsHelper,
+            isNfcScanningAvailable = isNfcScanningAvailable,
         )
     }
 }

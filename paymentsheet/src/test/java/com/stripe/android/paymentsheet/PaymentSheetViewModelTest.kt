@@ -126,6 +126,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -3489,6 +3490,7 @@ internal class PaymentSheetViewModelTest {
                     }
                 },
                 tapToAddHelperFactory = tapToAddHelperFactory,
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = object : CustomerStateHolder.Factory {
                     override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {

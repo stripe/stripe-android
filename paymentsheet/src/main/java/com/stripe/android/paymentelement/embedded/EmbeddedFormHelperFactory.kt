@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -23,6 +24,7 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
     private val embeddedSelectionHolder: EmbeddedSelectionHolder,
     private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     private val savedStateHandle: SavedStateHandle,
+    private val isNfcScanningAvailable: IsNfcScanningAvailable,
 ) {
     fun create(
         coroutineScope: CoroutineScope,
@@ -61,7 +63,8 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
             tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            isNfcScanningAvailable = isNfcScanningAvailable,
         )
     }
 

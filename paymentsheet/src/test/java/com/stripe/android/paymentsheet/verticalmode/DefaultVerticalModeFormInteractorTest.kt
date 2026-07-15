@@ -42,6 +42,7 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -273,6 +274,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(
@@ -328,6 +330,7 @@ internal class DefaultVerticalModeFormInteractorTest {
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         val eventReporter = FakeEventReporter()
         val setAsDefaultInteractor = EmbeddedFormInteractorFactory(

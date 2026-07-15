@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -503,8 +504,9 @@ internal class EmbeddedNavigatorTest {
                 linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
                 embeddedSelectionHolder = selectionHolder,
                 cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
-                savedStateHandle = SavedStateHandle(),
-            ),
+            savedStateHandle = SavedStateHandle(),
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
+        ),
             viewModelScope = TestScope(UnconfinedTestDispatcher()),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             tapToAddHelper = FakeTapToAddHelper.noOp(),

@@ -12,6 +12,7 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.elements.AutomaticallyLaunchedCardScanFormDataHelper
 import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.shouldAutomaticallyLaunchCardScan
@@ -105,6 +106,7 @@ internal class EmbeddedFormHelperFactoryTest {
             embeddedSelectionHolder = selectionHolder,
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         return factory.createAutomaticallyLaunchedCardScanFormDataHelper(
             selectedPaymentMethodCode = selectedPaymentMethodCode,
@@ -122,6 +124,7 @@ internal class EmbeddedFormHelperFactoryTest {
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         val formHelper = factory.create(
             coroutineScope = TestScope(UnconfinedTestDispatcher()),

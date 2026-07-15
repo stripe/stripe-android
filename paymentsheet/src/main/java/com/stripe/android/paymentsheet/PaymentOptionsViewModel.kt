@@ -12,6 +12,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.exception.stripeErrorMessage
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.common.taptoadd.TapToAddNextStep
@@ -80,6 +81,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler: LinkHandler,
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     tapToAddHelperFactory: TapToAddHelper.Factory,
+    override val isNfcScanningAvailable: IsNfcScanningAvailable,
     mode: EventReporter.Mode,
     customerStateHolderFactory: CustomerStateHolder.Factory,
     @ViewModelScope customViewModelScope: CoroutineScope,

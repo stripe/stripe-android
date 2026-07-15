@@ -9,6 +9,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -169,6 +170,7 @@ internal interface CustomerSheetTestHelper {
                 ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
+            isNfcScanningAvailable = NoOpIsNfcScanningAvailable(),
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
             userFacingLogger = FakeUserFacingLogger(),

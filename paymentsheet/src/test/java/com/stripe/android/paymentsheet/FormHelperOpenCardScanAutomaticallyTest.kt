@@ -34,6 +34,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.elements.CardDetailsSectionController
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -175,6 +176,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 linkPaymentLauncher = mock<LinkPaymentLauncher>(),
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
@@ -230,6 +232,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                     }
                 },
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
