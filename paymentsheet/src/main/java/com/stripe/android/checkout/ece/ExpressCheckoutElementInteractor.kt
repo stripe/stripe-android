@@ -3,11 +3,13 @@ package com.stripe.android.checkout.ece
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.checkout.ExpressCheckoutElement
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
 internal interface ExpressCheckoutElementInteractor {
     val state: StateFlow<State>
@@ -20,23 +22,28 @@ internal interface ExpressCheckoutElementInteractor {
 internal class DefaultExpressCheckoutElementInteractor(
     @get:VisibleForTesting internal val availableExpressButtonTypes: List<WalletType>,
     paymentMethodMetadata: PaymentMethodMetadata,
+    linkAccountHolder: LinkAccountHolder,
 ) : ExpressCheckoutElementInteractor {
-    override val state: StateFlow<ExpressCheckoutElementInteractor.State> = stateFlowOf(
-        ExpressCheckoutElementInteractor.State(
-            expressButtons = availableExpressButtonTypes.map { walletType ->
-                when (walletType) {
-                    WalletType.Link -> ExpressButton.Link.create(
-                        paymentMethodMetadata = paymentMethodMetadata,
-                    )
-                    WalletType.GooglePay -> ExpressButton.GooglePay.create(
-                        paymentMethodMetadata = paymentMethodMetadata,
-                    )
-                }
-            },
-        )
-    )
+    override val state: StateFlow<ExpressCheckoutElementInteractor.State> =
+        linkAccountHolder.linkAccountInfo.mapAsStateFlow { linkAccountInfo ->
+            ExpressCheckoutElementInteractor.State(
+                expressButtons = availableExpressButtonTypes.map { walletType ->
+                    when (walletType) {
+                        WalletType.Link -> ExpressButton.Link.create(
+                            paymentMethodMetadata = paymentMethodMetadata,
+                            linkAccountInfo = linkAccountInfo,
+                        )
+                        WalletType.GooglePay -> ExpressButton.GooglePay.create(
+                            paymentMethodMetadata = paymentMethodMetadata,
+                        )
+                    }
+                },
+            )
+        }
 
-    companion object {
+    class Factory @Inject constructor(
+        private val linkAccountHolder: LinkAccountHolder,
+    ) {
         fun create(
             paymentMethodMetadata: PaymentMethodMetadata,
             expressCheckoutElementConfig: ExpressCheckoutElement.Configuration.State,
@@ -55,6 +62,7 @@ internal class DefaultExpressCheckoutElementInteractor(
                     }
                 },
                 paymentMethodMetadata = paymentMethodMetadata,
+                linkAccountHolder = linkAccountHolder,
             )
         }
     }
