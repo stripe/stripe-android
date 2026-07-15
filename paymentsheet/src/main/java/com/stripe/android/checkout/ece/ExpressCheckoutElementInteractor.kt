@@ -17,11 +17,21 @@ internal interface ExpressCheckoutElementInteractor {
 }
 
 internal class DefaultExpressCheckoutElementInteractor(
-    availableExpressButtons: List<ExpressButton>,
+    availableExpressButtonTypes: List<WalletType>,
+    paymentMethodMetadata: PaymentMethodMetadata,
 ) : ExpressCheckoutElementInteractor {
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = stateFlowOf(
         ExpressCheckoutElementInteractor.State(
-            expressButtons = availableExpressButtons,
+            expressButtons = availableExpressButtonTypes.map { walletType ->
+                when (walletType) {
+                    WalletType.Link -> ExpressButton.Link.create(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                    )
+                    WalletType.GooglePay -> ExpressButton.GooglePay.create(
+                        paymentMethodMetadata = paymentMethodMetadata,
+                    )
+                }
+            },
         )
     )
 
@@ -30,18 +40,19 @@ internal class DefaultExpressCheckoutElementInteractor(
         expressCheckoutElementConfig: ExpressCheckoutElement.Configuration.State,
     ): DefaultExpressCheckoutElementInteractor {
         return DefaultExpressCheckoutElementInteractor(
-            availableExpressButtons = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
+            availableExpressButtonTypes = paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
                 when (walletType) {
-                    WalletType.GooglePay -> ExpressButton.GooglePay.takeIf {
+                    WalletType.GooglePay -> WalletType.GooglePay.takeIf {
                         expressCheckoutElementConfig.googlePayVisibility !=
                             ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
                     }
-                    WalletType.Link -> ExpressButton.Link.takeIf {
+                    WalletType.Link -> WalletType.Link.takeIf {
                         expressCheckoutElementConfig.linkVisibility !=
                             ExpressCheckoutElement.Configuration.LinkVisibility.Never
                     }
                 }
-            }
+            },
+            paymentMethodMetadata = paymentMethodMetadata,
         )
     }
 }

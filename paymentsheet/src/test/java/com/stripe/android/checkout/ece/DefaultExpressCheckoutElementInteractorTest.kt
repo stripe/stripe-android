@@ -12,7 +12,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     @Test
     fun `state contains provided express buttons`() {
         val interactor = DefaultExpressCheckoutElementInteractor(
-            availableExpressButtons = listOf(
+            availableExpressButtonTypes = listOf(
                 ExpressButton.Link,
                 ExpressButton.GooglePay,
             )
