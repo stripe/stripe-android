@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan.scanner
 
+import com.stripe.android.common.nfcscan.scanner.apdu.ApduErrorCreator
 import dagger.Binds
 import dagger.Module
 
@@ -15,6 +16,9 @@ internal interface NfcCardScannerModule {
 
     @Binds
     fun bindsNfcCardReader(reader: ApduCardReader): NfcCardReader
+
+    @Binds
+    fun bindsNfcCardReaderErrorCreator(errorMapper: ApduErrorCreator): NfcCardReader.ErrorCreator
 
     @Binds
     fun bindsNfcCardDataParser(parser: DefaultNfcCardDataParser): NfcCardDataParser
