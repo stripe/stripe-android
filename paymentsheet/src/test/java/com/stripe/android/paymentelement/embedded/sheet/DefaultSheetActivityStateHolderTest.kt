@@ -16,6 +16,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -437,7 +438,7 @@ class DefaultSheetActivityStateHolderTest {
         block: suspend Scenario.() -> Unit
     ) = runTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val onClickOverrideDelegate = OnClickDelegateOverrideImpl()
         val confirmationHandler = FakeConfirmationHandler()
         val stateHolder = DefaultSheetActivityStateHolder(

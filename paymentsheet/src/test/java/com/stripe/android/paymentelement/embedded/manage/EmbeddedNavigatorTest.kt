@@ -12,9 +12,9 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentelement.embedded.sheet.FakeSheetActivityConfirmationHelper
@@ -424,7 +424,7 @@ internal class EmbeddedNavigatorTest {
         savedPaymentMethods: List<PaymentMethod>,
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ): EmbeddedNavigator.Screen.Form.Factory {
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         val interactorFactory = EmbeddedFormInteractorFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             embeddedSelectionHolder = selectionHolder,
@@ -458,7 +458,7 @@ internal class EmbeddedNavigatorTest {
             eventReporter = FakeEventReporter(),
             sheetActivityStateHolder = FakeSheetActivityStateHolder(),
             confirmationHelper = FakeSheetActivityConfirmationHelper(),
-            embeddedSelectionHolder = EmbeddedSelectionHolder(SavedStateHandle()),
+            embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             savedPaymentMethodConfirmInteractorFactory = FakeSavedPaymentMethodConfirmInteractor.Factory(),
             customerStateHolder = FakeCustomerStateHolder(),
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),

@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
+import android.os.Bundle
 import android.os.Parcelable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -16,6 +17,10 @@ import kotlinx.parcelize.Parcelize
  * [configuration]. It is only ever built by [CheckoutStateLoader] after a payment element load, so
  * the resolved [paymentMethodMetadata] and [embeddedConfiguration] are always present; everything
  * the controller and its collaborators observe is derived from this one value.
+ *
+ * [CheckoutStateLoader] builds every committed state after a load, but the selection setters on
+ * [CheckoutControllerStateHolder] (which implements [EmbeddedSelectionHolder]) also [copy] it to
+ * update [paymentSelection]/[temporarySelection]/[previousNewSelections] without a reload.
  */
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
@@ -29,6 +34,8 @@ internal data class CheckoutControllerState(
     val paymentMethodMetadata: PaymentMethodMetadata,
     val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
     val paymentSelection: PaymentSelection?,
+    val temporarySelection: String?,
+    val previousNewSelections: Bundle,
 ) : Parcelable, CheckoutSessionData {
     override val shippingName: String? get() = collectedDetails.shippingName
     override val billingName: String? get() = collectedDetails.billingName

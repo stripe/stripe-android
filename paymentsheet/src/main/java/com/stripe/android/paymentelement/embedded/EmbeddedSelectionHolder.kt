@@ -1,46 +1,36 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.os.Bundle
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.paymentMethodType
 import kotlinx.coroutines.flow.StateFlow
-import javax.inject.Inject
-import javax.inject.Singleton
 
-@Singleton
-internal class EmbeddedSelectionHolder @Inject constructor(
-    private val savedStateHandle: SavedStateHandle,
-) {
-    val selection: StateFlow<PaymentSelection?> = savedStateHandle.getStateFlow(EMBEDDED_SELECTION_KEY, null)
-    val temporarySelection: StateFlow<String?> = savedStateHandle.getStateFlow(EMBEDDED_TEMPORARY_SELECTION_KEY, null)
-    val previousNewSelections: Bundle = savedStateHandle[EMBEDDED_PREVIOUS_SELECTIONS_KEY] ?: Bundle()
+/**
+ * Holds the payment element's current [selection] and [temporarySelection], plus the stash of
+ * previously entered new payment methods ([previousNewSelections]).
+ *
+ * Two implementations exist and their contracts differ in ways callers must respect:
+ * - [DefaultEmbeddedSelectionHolder] is standalone, backed directly by `SavedStateHandle`.
+ * - [com.stripe.android.checkout.CheckoutControllerStateHolder] projects the selection off the single
+ *   `CheckoutControllerState`. Its mutators ([set], [setTemporary], [setPreviousNewSelections]) require
+ *   a committed backing state; calls made before the element has loaded are dropped (and reported), so
+ *   do not mutate selection before load.
+ *
+ * Durability of [previousNewSelections] across process death is implementation-defined: the
+ * `CheckoutControllerState`-backed impl persists it, whereas [DefaultEmbeddedSelectionHolder] keeps it
+ * in memory only.
+ */
+// TODO: Rename methods since it's an interface now.
+internal interface EmbeddedSelectionHolder {
+    val selection: StateFlow<PaymentSelection?>
+    val temporarySelection: StateFlow<String?>
+    val previousNewSelections: Bundle
 
-    fun set(updatedSelection: PaymentSelection?) {
-        savedStateHandle[EMBEDDED_SELECTION_KEY] = updatedSelection
+    fun set(updatedSelection: PaymentSelection?)
 
-        if (updatedSelection != null && updatedSelection is PaymentSelection.New) {
-            previousNewSelections.putParcelable(updatedSelection.paymentMethodType, updatedSelection)
-        }
-    }
+    fun setTemporary(code: PaymentMethodCode?)
 
-    fun setTemporary(code: PaymentMethodCode?) {
-        savedStateHandle[EMBEDDED_TEMPORARY_SELECTION_KEY] = code
-    }
+    fun setPreviousNewSelections(bundle: Bundle)
 
-    fun setPreviousNewSelections(bundle: Bundle) {
-        this.previousNewSelections.putAll(bundle)
-    }
-
-    fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New? {
-        @Suppress("DEPRECATION")
-        return previousNewSelections.getParcelable(code) as PaymentSelection.New?
-    }
-
-    companion object {
-        const val EMBEDDED_SELECTION_KEY = "EMBEDDED_SELECTION_KEY"
-        const val EMBEDDED_TEMPORARY_SELECTION_KEY = "EMBEDDED_TEMPORARY_SELECTION_KEY"
-        const val EMBEDDED_PREVIOUS_SELECTIONS_KEY = "EMBEDDED_PREVIOUS_SELECTIONS_KEY"
-    }
+    fun getPreviousNewSelection(code: PaymentMethodCode): PaymentSelection.New?
 }

@@ -98,7 +98,7 @@ internal class EmbeddedFormHelperFactoryTest {
         selection: PaymentSelection?,
         openCardScanAutomatically: Boolean,
     ): AutomaticallyLaunchedCardScanFormDataHelper {
-        val selectionHolder = EmbeddedSelectionHolder(SavedStateHandle())
+        val selectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle())
         selectionHolder.set(selection)
         val factory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
@@ -119,7 +119,7 @@ internal class EmbeddedFormHelperFactoryTest {
     ): CardDetailsAction? {
         val factory = EmbeddedFormHelperFactory(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-            embeddedSelectionHolder = EmbeddedSelectionHolder(SavedStateHandle()),
+            embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(SavedStateHandle()),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = SavedStateHandle(),
         )
