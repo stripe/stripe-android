@@ -279,7 +279,7 @@ internal class EmbeddedNavigator private constructor(
                 R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
             )
 
-            override fun isPerformingNetworkOperation(): Boolean = false
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
 
             @Composable
             override fun Content() {
