@@ -5,19 +5,48 @@ import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorToggle
+import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.utils.collectAsState
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class CurrencySelectorElement @Inject internal constructor() {
+class CurrencySelectorElement @Inject internal constructor(
+    private val checkoutController: CheckoutController,
+    private val viewModelFactory: CurrencySelectorViewModel.Factory,
+) {
+    private val viewModelKey = "CurrencySelectorViewModel:${System.identityHashCode(checkoutController)}"
 
     @Composable
     fun Content() {
-        TODO("Not yet implemented")
+        val appearanceState = Checkout.CurrencySelectorContentAppearance().build()
+        val viewModel: CurrencySelectorViewModel = viewModel(
+            key = viewModelKey,
+            factory = viewModelFactory,
+        )
+        val isLoading by checkoutController.isLoading.collectAsState()
+        val checkoutSession by checkoutController.checkoutSession.collectAsState()
+        val currencySelectorOptions = checkoutSession?.currencySelectorOptions ?: return
+        val showCurrencyCode =
+            appearanceState.labelContent == Checkout.CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE
+        val errorMessage by viewModel.errorMessage.collectAsState()
+        CurrencySelectorToggle(
+            options = currencySelectorOptions,
+            onCurrencySelected = { currencyOption ->
+                viewModel.onCurrencySelected(currencyOption.code)
+            },
+            isEnabled = !isLoading,
+            showCurrencyCode = showCurrencyCode,
+            errorMessage = errorMessage?.resolve(),
+            appearance = appearanceState,
+        )
     }
 
     @CheckoutSessionPreview

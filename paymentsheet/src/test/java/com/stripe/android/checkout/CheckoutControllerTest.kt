@@ -345,6 +345,35 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("updated_currency", "usd"),
+            responseFactory = successResponseFactory { json ->
+                json.put("total_summary", totalSummaryJson(due = 5099))
+            },
+        )
+
+        val result = controller.updateCurrency("usd")
+
+        result.getOrThrow()
+        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(5099)
+    }
+
+    @Test
+    fun `updateCurrency returns failure and preserves session on error`() = runMutationScenario {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid currency"}}""")
+        }
+        val before = controller.checkoutSession.value
+
+        val result = controller.updateCurrency("invalid")
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(controller.checkoutSession.value).isEqualTo(before)
+    }
+
+    @Test
     fun `selectShippingOption sends shipping rate on success`() = runMutationScenario {
         networkRule.checkoutUpdate(
             bodyPart("shipping_rate", "shr_express"),

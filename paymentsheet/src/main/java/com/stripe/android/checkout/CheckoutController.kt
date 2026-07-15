@@ -286,6 +286,12 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
+    internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
+        return withCheckoutState { sessionId ->
+            checkoutSessionRepository.updateCurrency(sessionId, currency)
+        }
+    }
+
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
         return checkoutPresenterSubcomponentFactory.create().presenter
     }

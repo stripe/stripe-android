@@ -18,7 +18,7 @@ import kotlinx.coroutines.launch
 
 @CheckoutSessionPreview
 internal class CurrencySelectorViewModel(
-    private val checkoutSession: StateFlow<CheckoutSession>,
+    private val checkoutSession: StateFlow<CheckoutSession?>,
     private val updateCurrency: suspend (String) -> Result<Unit>,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
@@ -67,7 +67,7 @@ internal class CurrencySelectorViewModel(
     }
 
     internal class Factory(
-        private val checkoutSession: StateFlow<CheckoutSession>,
+        private val checkoutSession: StateFlow<CheckoutSession?>,
         private val updateCurrency: suspend (String) -> Result<Unit>,
         private val analyticsRequestExecutor: AnalyticsRequestExecutor,
         private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
