@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
@@ -53,11 +54,11 @@ internal class CheckoutControllerTest {
             .toString()
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
-    private val controllerRule = CheckoutControllerTestRule()
+    private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
 
     @get:Rule
-    val ruleChain: RuleChain = RuleChain
-        .outerRule(controllerRule)
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(destroyControllerRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
 
@@ -889,7 +890,7 @@ internal class CheckoutControllerTest {
     private fun createController(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): CheckoutController {
-        return controllerRule.track(
+        return destroyControllerRule.track(
             CheckoutController.Builder(
                 application = applicationContext,
                 savedStateHandle = savedStateHandle,

@@ -54,6 +54,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
@@ -96,6 +97,9 @@ internal class PaymentOptionsActivityTest {
         .around(networkRule)
         .around(CheckoutInstancesTestRule())
         .around(RetryRule(3))
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -572,7 +576,7 @@ internal class PaymentOptionsActivityTest {
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
             )
-        }
+        }.also { viewModelStoreRule.track(it) }
 
         val scenario = injectableActivityScenario<PaymentOptionsActivity> {
             injectActivity {

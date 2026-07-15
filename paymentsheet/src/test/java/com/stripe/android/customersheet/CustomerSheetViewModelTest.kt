@@ -15,7 +15,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.data.CustomerSheetDataResult
 import com.stripe.android.customersheet.data.FakeCustomerSheetPaymentMethodDataSource
 import com.stripe.android.customersheet.data.FakeCustomerSheetSavedSelectionDataSource
-import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
@@ -44,6 +44,7 @@ import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.ui.editCardDetailsInteractorHelper
 import com.stripe.android.paymentsheet.ui.updateCardBrand
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
@@ -76,12 +77,16 @@ import kotlin.test.assertFailsWith
 import com.stripe.android.ui.core.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
-class CustomerSheetViewModelTest {
+@Suppress("LargeClass")
+class CustomerSheetViewModelTest : CustomerSheetTestHelper {
 
     private val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    override val viewModelStoreTestRule = ViewModelStoreTestRule()
 
     @Test
     fun `init emits CustomerSheetViewState#AddPaymentMethod when no payment methods available`() = runTest(testDispatcher) {

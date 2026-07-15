@@ -42,6 +42,7 @@ import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionL
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -54,10 +55,13 @@ import org.mockito.kotlin.mock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-internal object CustomerSheetTestHelper {
-    internal val application = ApplicationProvider.getApplicationContext<Application>()
+internal interface CustomerSheetTestHelper {
+    val application: Application
+        get() = ApplicationProvider.getApplicationContext()
 
-    internal fun createViewModel(
+    val viewModelStoreTestRule: ViewModelStoreTestRule
+
+    fun createViewModel(
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         integrationType: CustomerSheetIntegration.Type = CustomerSheetIntegration.Type.CustomerAdapter,
@@ -170,6 +174,6 @@ internal object CustomerSheetTestHelper {
             userFacingLogger = FakeUserFacingLogger(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
-        }
+        }.also { viewModelStoreTestRule.track(it) }
     }
 }
