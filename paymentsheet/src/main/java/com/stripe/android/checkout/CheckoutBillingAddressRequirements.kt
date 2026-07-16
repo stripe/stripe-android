@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 /**
  * Static lookup for the minimum billing address fields, beyond the country picker, that a
@@ -14,24 +15,12 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object CheckoutBillingAddressRequirements {
 
-    /**
-     * A billing address field required in addition to the country.
-     */
-    @CheckoutSessionPreview
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    enum class Field {
-        LINE1,
-        CITY,
-        STATE,
-        POSTAL_CODE,
-    }
-
-    private val additionalFieldsByCountry: Map<String, List<Field>> = mapOf(
-        "CA" to listOf(Field.POSTAL_CODE),
-        "GB" to listOf(Field.POSTAL_CODE),
-        "IN" to listOf(Field.POSTAL_CODE),
-        "PR" to listOf(Field.LINE1, Field.CITY, Field.POSTAL_CODE),
-        "US" to listOf(Field.LINE1, Field.CITY, Field.STATE, Field.POSTAL_CODE),
+    private val additionalFieldsByCountry: Map<String, List<IdentifierSpec>> = mapOf(
+        "CA" to listOf(IdentifierSpec.PostalCode),
+        "GB" to listOf(IdentifierSpec.PostalCode),
+        "IN" to listOf(IdentifierSpec.PostalCode),
+        "PR" to listOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.PostalCode),
+        "US" to listOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.State, IdentifierSpec.PostalCode),
     )
 
     /**
@@ -40,7 +29,7 @@ object CheckoutBillingAddressRequirements {
      *
      * @param countryCode a two-letter ISO 3166-1 alpha-2 country code (case insensitive).
      */
-    fun requiredFields(countryCode: String): List<Field> {
+    fun requiredFields(countryCode: String): List<IdentifierSpec> {
         return additionalFieldsByCountry[countryCode.uppercase()].orEmpty()
     }
 }

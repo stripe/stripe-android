@@ -226,7 +226,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         }
     }
 
-    @OptIn(CheckoutSessionPreview::class)
     private fun MutableList<FormElement>.addCardBillingElements(
         arguments: UiDefinitionFactory.Arguments,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -237,16 +236,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
             billingDetailsCollectionConfiguration.collectsEmail ||
             billingDetailsCollectionConfiguration.collectsPhone
         ) {
-            val automaticTaxRequiredFieldsLookup = if (arguments.requiresBillingAddressForAutomaticTax) {
-                { countryCode: String ->
-                    CheckoutBillingAddressRequirements.requiredFields(countryCode)
-                        .map { it.toIdentifierSpec() }
-                        .toSet()
-                }
-            } else {
-                null
-            }
-
             addAll(
                 cardBillingElements(
                     billingDetailsCollectionConfiguration.allowedBillingCountries,
@@ -254,20 +243,10 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
-                    automaticTaxRequiredFieldsLookup,
+                    arguments.requiresBillingAddressForAutomaticTax,
                 )
             )
         }
-    }
-}
-
-@OptIn(CheckoutSessionPreview::class)
-private fun CheckoutBillingAddressRequirements.Field.toIdentifierSpec(): IdentifierSpec {
-    return when (this) {
-        CheckoutBillingAddressRequirements.Field.LINE1 -> IdentifierSpec.Line1
-        CheckoutBillingAddressRequirements.Field.CITY -> IdentifierSpec.City
-        CheckoutBillingAddressRequirements.Field.STATE -> IdentifierSpec.State
-        CheckoutBillingAddressRequirements.Field.POSTAL_CODE -> IdentifierSpec.PostalCode
     }
 }
 
@@ -291,13 +270,14 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): Bi
     )
 }
 
+@OptIn(CheckoutSessionPreview::class)
 private fun cardBillingElements(
     allowedCountries: Set<String>,
     collectionConfiguration: BillingDetailsCollectionConfiguration,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
-    automaticTaxRequiredFieldsLookup: ((countryCode: String) -> Set<IdentifierSpec>)? = null,
+    requiresBillingAddressForAutomaticTax: Boolean = false,
 ): List<FormElement> {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
@@ -316,7 +296,11 @@ private fun cardBillingElements(
         shippingValuesMap = shippingValues,
         collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-        automaticTaxRequiredFieldsLookup = automaticTaxRequiredFieldsLookup,
+        automaticTaxRequiredFieldsLookup = if (requiresBillingAddressForAutomaticTax) {
+            { countryCode -> CheckoutBillingAddressRequirements.requiredFields(countryCode).toSet() }
+        } else {
+            null
+        },
     )
 
     val title = when {
