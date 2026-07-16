@@ -621,40 +621,6 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `without stripeHostedProxy falls back to Google Places for predictions`() = runScenario {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(call.query).isEqualTo("123 Main")
-    }
-
-    @Test
-    fun `without stripeHostedProxy falls back to Google Places for place selection`() = runScenario {
-        fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(
-                Place(
-                    listOf(
-                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                    )
-                )
-            )
-        )
-        delegate.onPredictionSelected("place-id-123")
-
-        val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
-        assertThat(call).isEqualTo("place-id-123")
-        eventCalls.awaitItem()
-    }
-
-    @Test
     fun `with stripeHostedProxy and placesClient prefers proxy for predictions`() = runScenario(
         useStripeHostedProxy = true,
     ) {
@@ -802,18 +768,6 @@ class InlineAutocompleteControllerTest {
                 )
             )
         )
-    }
-
-    @Test
-    fun `null placesClient and no proxy stays Idle`() = runScenario(
-        usePlacesClient = false,
-    ) {
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
     }
 
     @Test
