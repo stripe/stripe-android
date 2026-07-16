@@ -173,6 +173,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     @Binds
+    fun bindsEmbeddedConfirmationStateDataSource(
+        holder: EmbeddedConfirmationStateHolder
+    ): EmbeddedConfirmationStateDataSource
+
+    @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler

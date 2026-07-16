@@ -5,6 +5,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
+import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.parseAppearance
 import javax.inject.Inject
 import javax.inject.Provider
@@ -17,7 +18,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
-    private val embeddedContentHelper: EmbeddedContentHelper,
+    private val eventReporter: EventReporter,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val confirmationHandler: ConfirmationHandler
 ) : EmbeddedStateHelper {
@@ -51,11 +52,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)
         selectionHolder.setSelection(state.confirmationState.selection)
-        embeddedContentHelper.dataLoaded(
-            paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
-            appearance = state.confirmationState.configuration.appearance.embeddedAppearance,
-            embeddedViewDisplaysMandateText = state.confirmationState.configuration.embeddedViewDisplaysMandateText,
-        )
+        eventReporter.onShowNewPaymentOptions()
         confirmationHandler.bootstrap(state.confirmationState.paymentMethodMetadata)
     }
 
@@ -78,7 +75,6 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     }
 
     private fun clearState() {
-        embeddedContentHelper.clearEmbeddedContent()
         confirmationStateHolder.state = null
         selectionHolder.setSelection(null)
         selectionHolder.previousNewSelections.clear()
