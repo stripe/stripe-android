@@ -60,6 +60,7 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val publishableKey: String? = null,
         internal val displayItems: List<GooglePayJsonFactory.DisplayItem> = emptyList(),
         internal val billingEmailOverride: String? = null,
+        internal val allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     ) : Parcelable {
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 

@@ -6,6 +6,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.isInstanceOf
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.confirmation.CONFIRMATION_PARAMETERS
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationMediator
@@ -74,6 +75,7 @@ class GooglePayConfirmationFlowTest {
                     label = null,
                     clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                     isElements = true,
+                    allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
                 )
             }
         }

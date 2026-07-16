@@ -31,6 +31,7 @@ class PaymentMethodCreateParamsTest {
             googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS,
             clientAttributionMetadata = null,
             billingEmailOverride = "checkout@example.com",
+            allowRedisplay = null,
         )
 
         assertThat(params.billingDetails?.email).isEqualTo("checkout@example.com")
@@ -42,6 +43,7 @@ class PaymentMethodCreateParamsTest {
             googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_NO_BILLING_ADDRESS,
             clientAttributionMetadata = null,
             billingEmailOverride = "checkout@example.com",
+            allowRedisplay = null,
         )
 
         assertThat(params.billingDetails?.email).isEqualTo("checkout@example.com")
@@ -53,9 +55,22 @@ class PaymentMethodCreateParamsTest {
             googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS,
             clientAttributionMetadata = null,
             billingEmailOverride = null,
+            allowRedisplay = null,
         )
 
         assertThat(params.billingDetails?.email).isEqualTo("stripe@example.com")
+    }
+
+    @Test
+    fun createFromGooglePay_setsAllowRedisplayWhenProvided() {
+        val params = PaymentMethodCreateParams.createFromGooglePay(
+            googlePayPaymentData = GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS,
+            clientAttributionMetadata = null,
+            billingEmailOverride = null,
+            allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
+        )
+
+        assertThat(params.allowRedisplay).isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
     }
 
     @Test

@@ -146,6 +146,7 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
             googlePayPaymentData = paymentDataJson,
             clientAttributionMetadata = args.clientAttributionMetadata,
             billingEmailOverride = args.billingEmailOverride,
+            allowRedisplay = args.allowRedisplay,
         )
 
         return stripeRepository.createPaymentMethod(params, requestOptions).fold(
