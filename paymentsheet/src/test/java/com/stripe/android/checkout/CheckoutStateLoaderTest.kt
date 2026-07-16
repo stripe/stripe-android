@@ -17,7 +17,9 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
+import com.stripe.android.paymentelement.embedded.content.FakeEmbeddedContentHelper
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -45,6 +47,37 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
+    }
+
+    @Test
+    fun `loadInitial syncs the content helper and confirmation state with the committed state`() = runScenario {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        val committed = requireNotNull(stateHolder.state)
+
+        val dataLoaded = embeddedContentHelper.dataLoadedTurbine.awaitItem()
+        assertThat(dataLoaded.paymentMethodMetadata).isEqualTo(committed.paymentMethodMetadata)
+        assertThat(dataLoaded.appearance)
+            .isEqualTo(committed.embeddedConfiguration.appearance.embeddedAppearance)
+        assertThat(dataLoaded.embeddedViewDisplaysMandateText)
+            .isEqualTo(committed.embeddedConfiguration.embeddedViewDisplaysMandateText)
+
+        val confirmationState = requireNotNull(embeddedConfirmationStateHolder.state)
+        assertThat(confirmationState.paymentMethodMetadata).isEqualTo(committed.paymentMethodMetadata)
+        assertThat(confirmationState.configuration).isEqualTo(committed.embeddedConfiguration)
+        assertThat(confirmationState.selection).isEqualTo(committed.paymentSelection)
+    }
+
+    @Test
+    fun `reload re-syncs the confirmation state with the reloaded selection`() = runScenario(
+        chosenSelection = PaymentSelection.GooglePay,
+    ) {
+        loader.reload(committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
+
+        val committed = requireNotNull(stateHolder.state)
+        val confirmationState = requireNotNull(embeddedConfirmationStateHolder.state)
+        assertThat(confirmationState.selection).isEqualTo(PaymentSelection.GooglePay)
+        assertThat(confirmationState.selection).isEqualTo(committed.paymentSelection)
     }
 
     @Test
@@ -269,6 +302,12 @@ internal class CheckoutStateLoaderTest {
         val stateHolder = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter())
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
+        val embeddedContentHelper = FakeEmbeddedContentHelper()
+        val embeddedConfirmationStateHolder = EmbeddedConfirmationStateHolder(
+            savedStateHandle = savedStateHandle,
+            selectionHolder = stateHolder,
+            coroutineScope = backgroundScope,
+        )
         val loader = CheckoutStateLoader(
             merchantDisplayName = merchantDisplayName,
             flagImageResolver = flagImageResolver,
@@ -279,6 +318,8 @@ internal class CheckoutStateLoaderTest {
             ),
             selectionChooser = chooser,
             stateHolder = stateHolder,
+            embeddedContentHelper = embeddedContentHelper,
+            embeddedConfirmationStateHolder = embeddedConfirmationStateHolder,
         )
 
         Scenario(
@@ -286,6 +327,8 @@ internal class CheckoutStateLoaderTest {
             stateHolder = stateHolder,
             chooser = recordingChooser,
             imageLoader = imageLoader,
+            embeddedContentHelper = embeddedContentHelper,
+            embeddedConfirmationStateHolder = embeddedConfirmationStateHolder,
         ).block()
 
         imageLoader.ensureAllEventsConsumed()
@@ -296,6 +339,8 @@ internal class CheckoutStateLoaderTest {
         val stateHolder: CheckoutControllerStateHolder,
         val chooser: RecordingSelectionChooser,
         val imageLoader: FakeStripeImageLoader,
+        val embeddedContentHelper: FakeEmbeddedContentHelper,
+        val embeddedConfirmationStateHolder: EmbeddedConfirmationStateHolder,
     )
 
     // Records the arguments of the most recent choose() call and returns a preconfigured selection,

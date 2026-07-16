@@ -6,6 +6,8 @@ import com.stripe.android.checkout.injection.MerchantDisplayName
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -19,6 +21,8 @@ internal class CheckoutStateLoader @Inject constructor(
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val embeddedContentHelper: EmbeddedContentHelper,
+    private val embeddedConfirmationStateHolder: EmbeddedConfirmationStateHolder,
 ) {
     suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
@@ -98,6 +102,20 @@ internal class CheckoutStateLoader @Inject constructor(
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
+        )
+
+        // Mirror DefaultEmbeddedStateHelper.handleLoadedState: keep the embedded confirmation state
+        // and content helper in sync with the committed state so PaymentElement can render the
+        // payment-method list and present the payment options sheet.
+        embeddedConfirmationStateHolder.state = EmbeddedConfirmationStateHolder.State(
+            paymentMethodMetadata = loaderState.paymentMethodMetadata,
+            selection = selection,
+            configuration = embeddedConfig,
+        )
+        embeddedContentHelper.dataLoaded(
+            paymentMethodMetadata = loaderState.paymentMethodMetadata,
+            appearance = embeddedConfig.appearance.embeddedAppearance,
+            embeddedViewDisplaysMandateText = embeddedConfig.embeddedViewDisplaysMandateText,
         )
     }
 

@@ -16,6 +16,8 @@ internal class FakeEmbeddedContentHelper(
     val dataLoadedTurbine: ReceiveTurbine<DefaultEmbeddedContentHelper.State> = _dataLoadedTurbine
     private val _clearEmbeddedContentTurbine = Turbine<Unit>()
     val clearEmbeddedContentTurbine: ReceiveTurbine<Unit> = _clearEmbeddedContentTurbine
+    private val _presentPaymentOptionsTurbine = Turbine<Unit>()
+    val presentPaymentOptionsTurbine: ReceiveTurbine<Unit> = _presentPaymentOptionsTurbine
 
     var testSheetLauncher: EmbeddedSheetLauncher? = null
 
@@ -45,10 +47,13 @@ internal class FakeEmbeddedContentHelper(
         testSheetLauncher = null
     }
 
-    override fun presentPaymentOptions() = Unit
+    override fun presentPaymentOptions() {
+        _presentPaymentOptionsTurbine.add(Unit)
+    }
 
     fun validate() {
         dataLoadedTurbine.ensureAllEventsConsumed()
         clearEmbeddedContentTurbine.ensureAllEventsConsumed()
+        presentPaymentOptionsTurbine.ensureAllEventsConsumed()
     }
 }

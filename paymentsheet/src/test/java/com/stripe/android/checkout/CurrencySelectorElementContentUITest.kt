@@ -29,6 +29,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -139,7 +140,11 @@ internal class CurrencySelectorElementContentUITest {
 
         runBlocking { controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow() }
 
-        val element = controller.createPresenter(composeRule.activity).currencySelectorElement()
+        // createPresenter registers an ActivityResultLauncher, which must happen before the activity
+        // is STARTED. The compose rule's activity is already RESUMED, so build a CREATED activity for
+        // presenter creation (the currency selector Content is still rendered by the compose rule).
+        val presenterActivity = Robolectric.buildActivity(ComponentActivity::class.java).create().get()
+        val element = controller.createPresenter(presenterActivity).currencySelectorElement()
         if (setContent) {
             composeRule.setContent {
                 element.Content()

@@ -293,7 +293,12 @@ class CheckoutController @Inject internal constructor(
     }
 
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        return checkoutPresenterSubcomponentFactory.create().presenter
+        val subcomponent = checkoutPresenterSubcomponentFactory.create(
+            activityResultCaller = activity,
+            lifecycleOwner = activity,
+        )
+        subcomponent.initializer.initialize()
+        return subcomponent.presenter
     }
 
     fun destroy() {
