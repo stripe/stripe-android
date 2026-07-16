@@ -83,6 +83,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             json.optJSONObject(FIELD_ADAPTIVE_PRICING_INFO)
         )
         val allowedShippingCountries = parseAllowedShippingCountries(json)
+        val requiresBillingAddress = json.optString(FIELD_BILLING_ADDRESS_COLLECTION) == "required"
 
         return CheckoutSessionResponse(
             id = sessionId,
@@ -105,6 +106,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             automaticTaxEnabled = automaticTaxEnabled,
             taxAddressSource = taxAddressSource,
             allowedShippingCountries = allowedShippingCountries,
+            requiresBillingAddress = requiresBillingAddress,
         )
     }
 
@@ -582,4 +584,5 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     private const val FIELD_PRESENTMENT_EXCHANGE_RATE = "presentment_exchange_rate"
     private const val FIELD_SHIPPING_ADDRESS_COLLECTION = "shipping_address_collection"
     private const val FIELD_ALLOWED_COUNTRIES = "allowed_countries"
+    private const val FIELD_BILLING_ADDRESS_COLLECTION = "billing_address_collection"
 }

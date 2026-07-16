@@ -3,6 +3,21 @@ package com.stripe.android.checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
+/**
+ * Upgrades [address] to [BillingDetailsCollectionConfiguration.AddressCollectionMode.Full] when the
+ * checkout session requires a billing address but the merchant only asked for [Automatic][BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic]
+ * collection, so the required address is still collected. Leaves the config untouched otherwise.
+ */
+@OptIn(CheckoutSessionPreview::class)
+internal fun BillingDetailsCollectionConfiguration.State.reconcile(
+    requiresBillingAddress: Boolean,
+): BillingDetailsCollectionConfiguration.State =
+    if (requiresBillingAddress && address == BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic) {
+        copy(address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+    } else {
+        this
+    }
+
 @OptIn(CheckoutSessionPreview::class)
 internal fun BillingDetailsCollectionConfiguration.State.asPaymentSheet():
     PaymentSheet.BillingDetailsCollectionConfiguration =

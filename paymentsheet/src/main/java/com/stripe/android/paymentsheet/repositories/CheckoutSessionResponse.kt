@@ -29,6 +29,7 @@ internal data class CheckoutSessionResponse(
     val automaticTaxEnabled: Boolean,
     val taxAddressSource: TaxAddressSource?,
     val allowedShippingCountries: List<String>?,
+    val requiresBillingAddress: Boolean,
 ) : StripeModel {
 
     val shouldDisableWalletsForAutomaticTaxBilling: Boolean

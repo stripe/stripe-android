@@ -39,6 +39,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
+import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
 @OptIn(CheckoutSessionPreview::class)
@@ -124,6 +125,38 @@ internal class CheckoutStateLoaderTest {
             .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
         assertThat(actual.additionalEnabledNetworks).containsExactly("INTERAC")
     }
+
+    @Test
+    fun `loadInitial upgrades Automatic to Full when the session requires a billing address`() =
+        runScenario {
+            val configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().billingDetailsCollectionConfiguration(bdcc(address = Automatic))
+                )
+                .build()
+            val response = CheckoutSessionResponseFactory.create(requiresBillingAddress = true)
+
+            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response)
+
+            assertThat(stateHolder.state?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+                .isEqualTo(PSFull)
+        }
+
+    @Test
+    fun `loadInitial leaves Automatic unchanged when the session does not require a billing address`() =
+        runScenario {
+            val configuration = CheckoutController.Configuration()
+                .paymentElement(
+                    PaymentElement.Configuration().billingDetailsCollectionConfiguration(bdcc(address = Automatic))
+                )
+                .build()
+            val response = CheckoutSessionResponseFactory.create(requiresBillingAddress = false)
+
+            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response)
+
+            assertThat(stateHolder.state?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+                .isEqualTo(PSAutomatic)
+        }
 
     @Test
     fun `reload routes the selection through the chooser`() = runScenario(
