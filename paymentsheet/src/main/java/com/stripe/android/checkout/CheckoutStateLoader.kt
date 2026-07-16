@@ -54,6 +54,10 @@ internal class CheckoutStateLoader @Inject constructor(
             .embeddedViewDisplaysMandateText(
                 configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
+            .billingDetailsCollectionConfiguration(
+                configuration.paymentElementConfiguration.billingDetailsCollectionConfiguration
+                    .asPaymentSheet()
+            )
             .build()
 
         val embeddedConfig = CheckoutConfigurationMerger.EmbeddedConfiguration(baseConfig)

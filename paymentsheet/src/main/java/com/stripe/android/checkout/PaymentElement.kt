@@ -31,6 +31,8 @@ class PaymentElement @Inject internal constructor() {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var embeddedViewDisplaysMandateText: Boolean = true
+        private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
+            BillingDetailsCollectionConfiguration()
 
         fun embeddedViewDisplaysMandateText(
             embeddedViewDisplaysMandateText: Boolean
@@ -38,13 +40,21 @@ class PaymentElement @Inject internal constructor() {
             this.embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText
         }
 
+        fun billingDetailsCollectionConfiguration(
+            billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+        ): Configuration = apply {
+            this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
+        }
+
         @Parcelize
         internal data class State(
             val embeddedViewDisplaysMandateText: Boolean,
+            val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
         ) : Parcelable
 
         internal fun build(): State = State(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
         )
     }
 
