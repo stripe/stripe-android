@@ -81,7 +81,7 @@ internal class FakePaymentElementLoader(
                     integrationConfiguration.configuration.paymentMethodLayout
             }
         )
-        }
+    }
 
     override suspend fun load(
         initializationMode: PaymentElementLoader.InitializationMode,

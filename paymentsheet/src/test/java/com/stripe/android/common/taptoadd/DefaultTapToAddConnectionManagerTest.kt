@@ -310,7 +310,7 @@ class DefaultTapToAddConnectionManagerTest {
             )
         }
     ) {
-       val connectionResult = testScope.async {
+        val connectionResult = testScope.async {
             assertFailsWith<IllegalStateException> {
                 manager.connect(testConnectionConfig)
             }
