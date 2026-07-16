@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -38,6 +39,9 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     val checkoutSession: StateFlow<CheckoutSession?> =
         stateFlow.mapAsStateFlow { it?.asCheckoutSession() }
+
+    val isExpressCheckoutElementAvailable: StateFlow<Boolean> =
+        stateFlow.mapAsStateFlow { it?.availableExpressButtonTypes?.isNotEmpty() == true }
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }

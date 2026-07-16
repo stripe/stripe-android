@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Parcelable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -36,6 +37,7 @@ internal data class CheckoutControllerState(
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
+    val availableExpressButtonTypes: List<WalletType>,
 ) : Parcelable, CheckoutSessionData {
     override val shippingName: String? get() = collectedDetails.shippingName
     override val billingName: String? get() = collectedDetails.billingName

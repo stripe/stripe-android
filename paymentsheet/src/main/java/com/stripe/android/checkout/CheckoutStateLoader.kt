@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import com.stripe.android.checkout.injection.MerchantDisplayName
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
@@ -106,7 +108,29 @@ internal class CheckoutStateLoader @Inject constructor(
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
+            availableExpressButtonTypes = computeAvailableExpressButtonTypes(
+                paymentMethodMetadata = loaderState.paymentMethodMetadata,
+                configuration = configuration,
+            )
         )
+    }
+
+    private fun computeAvailableExpressButtonTypes(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        configuration: CheckoutController.Configuration.State,
+    ): List<WalletType> {
+        return paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
+            when (walletType) {
+                WalletType.GooglePay -> WalletType.GooglePay.takeIf {
+                    configuration.expressCheckoutElementConfiguration.googlePayVisibility !=
+                        ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
+                }
+                WalletType.Link -> WalletType.Link.takeIf {
+                    configuration.expressCheckoutElementConfiguration.linkVisibility !=
+                        ExpressCheckoutElement.Configuration.LinkVisibility.Never
+                }
+            }
+        }
     }
 
     /**

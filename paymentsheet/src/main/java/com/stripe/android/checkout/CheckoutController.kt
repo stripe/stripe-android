@@ -54,6 +54,9 @@ class CheckoutController @Inject internal constructor(
      */
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
+    val isExpressCheckoutElementAvailable: StateFlow<Boolean>
+        get() = stateHolder.isExpressCheckoutElementAvailable
+
     suspend fun configure(
         checkoutSessionClientSecret: String,
         configuration: Configuration = Configuration(),
