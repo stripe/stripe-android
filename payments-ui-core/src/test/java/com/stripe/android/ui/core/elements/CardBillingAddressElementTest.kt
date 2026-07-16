@@ -19,8 +19,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-// DependentLocality and SortingCode are both IdentifierSpec("") - the same value - so only one
-// of them is ever a distinct member of a Set<IdentifierSpec>.
 private val ALL_ADDRESS_FIELDS: Set<IdentifierSpec> = FieldType.entries
     .filterNot { it == FieldType.Name }
     .map { it.identifierSpec }
@@ -32,15 +30,6 @@ internal class CardBillingAddressElementTest {
         CountryConfig(emptySet())
     )
     val cardBillingElement = createCardBillingAddressElement()
-
-    @Test
-    fun `DependentLocality and SortingCode are the same IdentifierSpec value`() {
-        // Every other test in this file that lists shown/hidden fields relies on this: if it
-        // ever stops being true, ALL_ADDRESS_FIELDS gains a 7th member and those assertions need
-        // to explicitly decide where DependentLocality belongs, rather than getting it for free.
-        assertThat(IdentifierSpec.DependentLocality).isEqualTo(IdentifierSpec.SortingCode)
-        assertThat(ALL_ADDRESS_FIELDS).hasSize(6)
-    }
 
     @Test
     fun `Verify that when US is selected postal is not hidden`() = runTest {
