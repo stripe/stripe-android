@@ -2,8 +2,6 @@ package com.stripe.android.common.nfcscan
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Looper
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
@@ -14,16 +12,14 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.createComposeCleanupRule
-import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowNfcAdapter
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -47,7 +43,7 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `activity returns canceled result when moved to background`() = test {
-        activity.finish()
+        moveToState(Lifecycle.State.CREATED)
 
         waitForActivityFinish()
 
@@ -90,57 +86,64 @@ internal class NfcScanningActivityTest {
         assertThat(nfcAdapter?.isInReaderMode).isTrue()
     }
 
-    private fun test(
-        block: suspend Scenario.() -> Unit,
-    ) {
-        shadowOf(context.packageManager)
-            .setSystemFeature(PackageManager.FEATURE_NFC, true)
-        getNfcAdapter()?.setEnabled(true)
-
-        val intent = NfcScanningContract.createIntent(
-            context = context,
-            input = NfcScanningContract.Args(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            ),
+    @Test
+    fun `successful card scan returns complete result`() = test {
+        NfcScanningActivityTestHelpers.completeSuccessfulScan(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.successResponses(),
         )
 
-        ActivityScenario.launchActivityForResult<NfcScanningActivity>(intent).use { scenario ->
-            scenario.onActivity { activity ->
-                runTest {
-                    val waitForIdle = {
-                        shadowOf(Looper.getMainLooper()).idle()
-                        Espresso.onIdle()
-                        composeRule.waitForIdle()
-                    }
+        waitForActivityFinish()
 
-                    block(
-                        Scenario(
-                            activity = activity,
-                            nfcAdapter = getNfcAdapter(),
-                            moveToState = scenario::moveToState,
-                            waitForIdle = waitForIdle,
-                            waitForActivityFinish = waitForIdle,
-                            getResult = {
-                                NfcScanningContract.parseResult(
-                                    resultCode = scenario.result.resultCode,
-                                    intent = scenario.result.resultData,
-                                )
-                            },
-                        )
-                    )
-                }
-            }
-        }
+        assertThat(getResult()).isEqualTo(
+            NfcScanningContract.Result.Complete(
+                cardNumber = "4242424242424242",
+                expirationMonth = 12,
+                expirationYear = 2030,
+            ),
+        )
     }
 
-    private fun getNfcAdapter() = NfcAdapter.getDefaultAdapter(context)?.let { shadowOf(it) }
+    @Test
+    fun `declined card shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.declinedCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_error_declined_card),
+        )
 
-    private class Scenario(
-        val activity: NfcScanningActivity,
-        val nfcAdapter: ShadowNfcAdapter?,
-        val moveToState: (Lifecycle.State) -> Unit,
-        val waitForIdle: () -> Unit,
-        val waitForActivityFinish: () -> Unit,
-        val getResult: () -> NfcScanningContract.Result,
-    )
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `unsupported card shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.unsupportedCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_unsupported_card),
+        )
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `expired card shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.expiredCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_error_expired_card),
+        )
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    private fun test(
+        block: NfcScanningActivityTestHelpers.Scenario.() -> Unit,
+    ) {
+        NfcScanningActivityTestHelpers.launchScenario(
+            context = context,
+            composeRule = composeRule,
+            block = block,
+        )
+    }
 }
