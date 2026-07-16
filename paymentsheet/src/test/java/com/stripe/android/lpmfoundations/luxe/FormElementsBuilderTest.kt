@@ -308,6 +308,7 @@ class FormElementsBuilderTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            requiresBillingAddressForAutomaticTax = false,
             requiresMandate = false,
             linkConfigurationCoordinator = null,
             onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },

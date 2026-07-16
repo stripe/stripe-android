@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.stripe.android.checkout.CheckoutBillingAddressRequirements
 import com.stripe.android.common.nfcscan.NfcScanningAction
 import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.core.strings.resolvableString
@@ -24,6 +25,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -224,6 +226,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
         }
     }
 
+    @OptIn(CheckoutSessionPreview::class)
     private fun MutableList<FormElement>.addCardBillingElements(
         arguments: UiDefinitionFactory.Arguments,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
@@ -234,6 +237,16 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
             billingDetailsCollectionConfiguration.collectsEmail ||
             billingDetailsCollectionConfiguration.collectsPhone
         ) {
+            val automaticTaxRequiredFieldsLookup = if (arguments.requiresBillingAddressForAutomaticTax) {
+                { countryCode: String ->
+                    CheckoutBillingAddressRequirements.requiredFields(countryCode)
+                        .map { it.toIdentifierSpec() }
+                        .toSet()
+                }
+            } else {
+                null
+            }
+
             addAll(
                 cardBillingElements(
                     billingDetailsCollectionConfiguration.allowedBillingCountries,
@@ -241,9 +254,20 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                     arguments.autocompleteAddressInteractorFactory,
                     arguments.initialValues,
                     arguments.shippingValues,
+                    automaticTaxRequiredFieldsLookup,
                 )
             )
         }
+    }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutBillingAddressRequirements.Field.toIdentifierSpec(): IdentifierSpec {
+    return when (this) {
+        CheckoutBillingAddressRequirements.Field.LINE1 -> IdentifierSpec.Line1
+        CheckoutBillingAddressRequirements.Field.CITY -> IdentifierSpec.City
+        CheckoutBillingAddressRequirements.Field.STATE -> IdentifierSpec.State
+        CheckoutBillingAddressRequirements.Field.POSTAL_CODE -> IdentifierSpec.PostalCode
     }
 }
 
@@ -273,6 +297,7 @@ private fun cardBillingElements(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
+    automaticTaxRequiredFieldsLookup: ((countryCode: String) -> Set<IdentifierSpec>)? = null,
 ): List<FormElement> {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
@@ -291,6 +316,7 @@ private fun cardBillingElements(
         shippingValuesMap = shippingValues,
         collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+        automaticTaxRequiredFieldsLookup = automaticTaxRequiredFieldsLookup,
     )
 
     val title = when {
