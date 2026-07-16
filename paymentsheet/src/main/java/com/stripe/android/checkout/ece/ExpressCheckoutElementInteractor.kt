@@ -3,7 +3,7 @@
 package com.stripe.android.checkout.ece
 
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -24,13 +24,13 @@ internal interface ExpressCheckoutElementInteractor {
 
 internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
-    checkoutController: CheckoutController,
+    stateHolder: CheckoutControllerStateHolder,
 ) : ExpressCheckoutElementInteractor {
 
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
         linkAccountHolder.linkAccountInfo,
-        checkoutController.paymentMethodMetadata,
-        checkoutController.configuration,
+        stateHolder.paymentMethodMetadata,
+        stateHolder.configuration,
     ) { linkAccountInfo, paymentMethodMetadata, configuration ->
         if (paymentMethodMetadata == null || configuration == null) {
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
