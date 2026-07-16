@@ -274,7 +274,7 @@ private fun cardBillingElements(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
     initialValues: Map<IdentifierSpec, String?>,
     shippingValues: Map<IdentifierSpec, String?>?,
-    requiresBillingAddressForAutomaticTax: Boolean = false,
+    requiresBillingAddressForAutomaticTax: Boolean,
 ): List<FormElement> {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
