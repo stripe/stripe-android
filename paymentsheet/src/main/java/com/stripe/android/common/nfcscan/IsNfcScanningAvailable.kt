@@ -25,6 +25,7 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
         customerMetadata: CustomerMetadata?
     ): Boolean {
         return enableNfcScanning.isEnabled &&
+            elementsSession.isNfcScanningEnabled &&
             !tapToAddAvailabilityFactory.isAvailable(elementsSession, customerMetadata) &&
             isDeviceSecureForNfc.get() &&
             nfcHardwareDelegate.isAvailable()

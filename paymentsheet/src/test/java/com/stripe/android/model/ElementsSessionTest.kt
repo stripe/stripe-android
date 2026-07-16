@@ -196,6 +196,36 @@ class ElementsSessionTest {
     }
 
     @Test
+    fun `isNfcScanningEnabled returns true when flag is enabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED to true)
+        )
+
+        assertThat(session.isNfcScanningEnabled).isTrue()
+    }
+
+    @Test
+    fun `isNfcScanningEnabled returns false when flag is disabled`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = mapOf(ElementsSession.Flag.ELEMENTS_MOBILE_ANDROID_NFC_SCANNING_ENABLED to false)
+        )
+
+        assertThat(session.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
+    fun `isNfcScanningEnabled returns false when flag is missing`() {
+        val session = createElementsSession(
+            passiveCaptcha = null,
+            flags = emptyMap()
+        )
+
+        assertThat(session.isNfcScanningEnabled).isFalse()
+    }
+
+    @Test
     fun `isLinkInlineSignupWithSavedPaymentMethodsEnabled returns true when flag is enabled`() {
         val session = createElementsSession(
             passiveCaptcha = null,
