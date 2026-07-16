@@ -28,6 +28,7 @@ internal object CheckoutSessionResponseFactory {
         automaticTaxEnabled: Boolean = false,
         taxAddressSource: CheckoutSessionResponse.TaxAddressSource? = null,
         allowedShippingCountries: List<String>? = null,
+        requiresBillingAddress: Boolean = false,
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
@@ -50,6 +51,7 @@ internal object CheckoutSessionResponseFactory {
             automaticTaxEnabled = automaticTaxEnabled,
             taxAddressSource = taxAddressSource,
             allowedShippingCountries = allowedShippingCountries,
+            requiresBillingAddress = requiresBillingAddress,
         )
     }
 }

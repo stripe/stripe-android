@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -150,6 +151,28 @@ internal class CheckoutControllerTest {
             result.getOrThrow()
             assertThat(committedState?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
                 .isFalse()
+        }
+
+    @Test
+    fun `configure upgrades Automatic to Full when session requires billing address`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().paymentElement(
+                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
+                    BillingDetailsCollectionConfiguration()
+                        .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+                )
+            ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory { json ->
+                        json.put("billing_address_collection", "required")
+                    },
+                )
+            },
+        ) {
+            result.getOrThrow()
+            assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
         }
 
     @Test

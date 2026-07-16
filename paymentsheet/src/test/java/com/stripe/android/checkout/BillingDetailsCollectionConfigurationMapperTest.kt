@@ -80,4 +80,49 @@ internal class BillingDetailsCollectionConfigurationMapperTest {
         assertThat(mapped.address)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
     }
+
+    @Test
+    fun `reconcile upgrades Automatic to Full when the session requires a billing address`() {
+        val state = BillingDetailsCollectionConfiguration()
+            .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+            .build()
+
+        val reconciled = state.reconcile(requiresBillingAddress = true)
+
+        assertThat(reconciled.address).isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+    }
+
+    @Test
+    fun `reconcile leaves Full unchanged when the session requires a billing address`() {
+        val state = BillingDetailsCollectionConfiguration()
+            .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+            .build()
+
+        val reconciled = state.reconcile(requiresBillingAddress = true)
+
+        assertThat(reconciled.address).isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+    }
+
+    @Test
+    fun `reconcile leaves Automatic unchanged when the session does not require a billing address`() {
+        val state = BillingDetailsCollectionConfiguration()
+            .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+            .build()
+
+        val reconciled = state.reconcile(requiresBillingAddress = false)
+
+        assertThat(reconciled.address)
+            .isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+    }
+
+    @Test
+    fun `reconcile leaves Full unchanged when the session does not require a billing address`() {
+        val state = BillingDetailsCollectionConfiguration()
+            .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+            .build()
+
+        val reconciled = state.reconcile(requiresBillingAddress = false)
+
+        assertThat(reconciled.address).isEqualTo(BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
+    }
 }

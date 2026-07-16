@@ -56,6 +56,7 @@ internal class CheckoutStateLoader @Inject constructor(
             )
             .billingDetailsCollectionConfiguration(
                 configuration.paymentElementConfiguration.billingDetailsCollectionConfiguration
+                    .reconcile(response.requiresBillingAddress)
                     .asPaymentSheet()
             )
             .googlePay(
