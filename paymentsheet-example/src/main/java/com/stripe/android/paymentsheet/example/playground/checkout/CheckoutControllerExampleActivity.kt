@@ -73,6 +73,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
+                                presenter.expressCheckoutElement().Content()
                                 paymentElement.PaymentOptionsContent()
                             }
                         }
