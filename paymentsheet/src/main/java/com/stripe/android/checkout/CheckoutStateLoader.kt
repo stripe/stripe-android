@@ -58,6 +58,9 @@ internal class CheckoutStateLoader @Inject constructor(
                 configuration.paymentElementConfiguration.billingDetailsCollectionConfiguration
                     .asPaymentSheet()
             )
+            .googlePay(
+                googlePay = configuration.googlePayConfiguration.asPaymentSheet()
+            )
             .build()
 
         val embeddedConfig = CheckoutConfigurationMerger.EmbeddedConfiguration(baseConfig)
