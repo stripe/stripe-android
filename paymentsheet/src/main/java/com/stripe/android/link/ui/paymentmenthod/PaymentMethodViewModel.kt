@@ -203,18 +203,18 @@ internal class PaymentMethodViewModel @Inject constructor(
                             eventReporter = parentComponent.eventReporter,
                             savedStateHandle = parentComponent.viewModel.savedStateHandle,
                             autocompleteAddressInteractorFactory =
-                            PaymentElementAutocompleteAddressInteractor.Factory(
-                                launcher = parentComponent.autocompleteLauncher,
-                                autocompleteConfig = AutocompleteAddressInteractor.Config(
-                                    googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
-                                    autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
-                                    isInlineAutocompleteEnabled =
-                                        FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                                PaymentElementAutocompleteAddressInteractor.Factory(
+                                    launcher = parentComponent.autocompleteLauncher,
+                                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                                        googlePlacesApiKey = parentComponent.configuration.googlePlacesApiKey,
+                                        autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
+                                        isInlineAutocompleteEnabled =
+                                            FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
+                                    ),
+                                    placesClient = null,
+                                    coroutineScope = null,
+                                    shouldUseAutocompleteProxyEndpointsProvider = { false },
                                 ),
-                                placesClient = null,
-                                coroutineScope = null,
-                                shouldUseAutocompleteProxyEndpointsProvider = { false },
-                            ),
                             isLinkUI = true,
                         ),
                         logger = parentComponent.logger,

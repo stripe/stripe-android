@@ -49,7 +49,7 @@ internal class CreateCustomerState @Inject constructor(
                 }
             }
             is CustomerMetadata.LegacyEphemeralKey -> {
-               createForLegacyEphemeralKey(
+                createForLegacyEphemeralKey(
                     paymentMethods = retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         prefetchedPaymentMethods = prefetchedPaymentMethods,

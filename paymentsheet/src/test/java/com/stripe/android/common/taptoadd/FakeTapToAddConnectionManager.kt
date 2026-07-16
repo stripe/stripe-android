@@ -32,7 +32,7 @@ internal class FakeTapToAddConnectionManager private constructor(
             connectResult: Result<Unit> = Result.success(Unit),
             block: suspend Scenario.() -> Unit
         ) {
-           test(isSupported, listOf(connectResult), block)
+            test(isSupported, listOf(connectResult), block)
         }
 
         suspend fun test(

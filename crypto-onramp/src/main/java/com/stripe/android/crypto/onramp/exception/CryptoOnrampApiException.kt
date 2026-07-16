@@ -24,7 +24,7 @@ abstract class CryptoOnrampApiException internal constructor(
     cause = apiErrorContext.underlyingError,
     message = userMessage,
 ),
-StripeCryptoOnrampError {
+    StripeCryptoOnrampError {
     final override val docUrl: String?
         get() = apiErrorContext.docUrl
 

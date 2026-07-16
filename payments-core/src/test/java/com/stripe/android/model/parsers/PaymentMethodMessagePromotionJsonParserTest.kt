@@ -27,9 +27,9 @@ class PaymentMethodMessagePromotionJsonParserTest {
         assertThat(promotions.promotions[0].learnMore.message).isEqualTo("Learn more")
         assertThat(promotions.promotions[0].learnMore.url).isEqualTo(
             "https://b.stripecdn.com/payment-method-" +
-            "messaging-statics-srv/assets/learn-more/index.html?amount=10000&country=US&currency=USD&key=" +
-            "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
-            "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=klarna"
+                "messaging-statics-srv/assets/learn-more/index.html?amount=10000&country=US&currency=USD&key=" +
+                "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
+                "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=klarna"
         )
     }
 
@@ -46,9 +46,9 @@ class PaymentMethodMessagePromotionJsonParserTest {
         assertThat(promotions.promotions[0].learnMore.message).isEqualTo("Learn more")
         assertThat(promotions.promotions[0].learnMore.url).isEqualTo(
             "https://b.stripecdn.com/payment-method-" +
-            "messaging-statics-srv/assets/learn-more/index.html?amount=9000&country=US&currency=USD&key=" +
-            "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
-            "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=afterpay_clearpay"
+                "messaging-statics-srv/assets/learn-more/index.html?amount=9000&country=US&currency=USD&key=" +
+                "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
+                "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=afterpay_clearpay"
         )
 
         assertThat(promotions.promotions[1].paymentMethodType).isEqualTo("AFFIRM")
@@ -56,9 +56,9 @@ class PaymentMethodMessagePromotionJsonParserTest {
         assertThat(promotions.promotions[1].learnMore.message).isEqualTo("Learn more")
         assertThat(promotions.promotions[1].learnMore.url).isEqualTo(
             "https://b.stripecdn.com/payment-method-" +
-            "messaging-statics-srv/assets/learn-more/index.html?amount=9000&country=US&currency=USD&key=" +
-            "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
-            "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=affirm"
+                "messaging-statics-srv/assets/learn-more/index.html?amount=9000&country=US&currency=USD&key=" +
+                "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
+                "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=affirm"
         )
 
         assertThat(promotions.promotions[2].paymentMethodType).isEqualTo("KLARNA")
@@ -66,9 +66,9 @@ class PaymentMethodMessagePromotionJsonParserTest {
         assertThat(promotions.promotions[2].learnMore.message).isEqualTo("Learn more")
         assertThat(promotions.promotions[2].learnMore.url).isEqualTo(
             "https://b.stripecdn.com/payment-method-" +
-            "messaging-statics-srv/assets/learn-more/index.html?amount=9000&country=US&currency=USD&key=" +
-            "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
-            "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=klarna"
+                "messaging-statics-srv/assets/learn-more/index.html?amount=9000&country=US&currency=USD&key=" +
+                "pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFf" +
+                "B7cY9WG4a00ZnDtiC2C&locale=en&payment_methods%5B0%5D=klarna"
         )
     }
 
