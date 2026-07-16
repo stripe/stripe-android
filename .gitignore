@@ -66,4 +66,3 @@ example/gen
 
 # Git worktrees
 .worktrees/
-.gradle-local/
