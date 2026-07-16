@@ -81,14 +81,7 @@ internal class CardBillingAddressElementTest {
         cardBillingElementWithTaxFields.hiddenIdentifiers.test {
             // IN has no AVS default fields, but requires a postal code for automatic tax.
             dropdownFieldController.onRawValueChange("IN")
-            val hiddenIdentifiers = expectMostRecentItem()
-
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
-            assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
-            assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line2)
-            assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
-            assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+            verifyPostalShown(expectMostRecentItem())
         }
     }
 
@@ -109,10 +102,11 @@ internal class CardBillingAddressElementTest {
             dropdownFieldController.onRawValueChange("PR")
             val hiddenIdentifiers = expectMostRecentItem()
 
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Line1)
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.City)
-            assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
+            assertThat(hiddenIdentifiers).containsExactly(
+                IdentifierSpec.Line2,
+                IdentifierSpec.SortingCode,
+                IdentifierSpec.State,
+            )
         }
     }
 
@@ -133,11 +127,10 @@ internal class CardBillingAddressElementTest {
             dropdownFieldController.onRawValueChange("US")
             val hiddenIdentifiers = expectMostRecentItem()
 
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Line1)
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.City)
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.State)
-            assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
+            assertThat(hiddenIdentifiers).containsExactly(
+                IdentifierSpec.Line2,
+                IdentifierSpec.SortingCode,
+            )
         }
     }
 
@@ -159,9 +152,7 @@ internal class CardBillingAddressElementTest {
 
         cardBillingElementWithTaxFields.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            val hiddenIdentifiers = expectMostRecentItem()
-
-            assertThat(hiddenIdentifiers).contains(IdentifierSpec.PostalCode)
+            verifyPostalHidden(expectMostRecentItem())
         }
     }
 
@@ -326,21 +317,26 @@ internal class CardBillingAddressElementTest {
     }
 
     fun verifyPostalShown(hiddenIdentifiers: Set<IdentifierSpec>) {
-        Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
-        Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line2)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+        // DependentLocality and SortingCode are both IdentifierSpec("") - the same value - so
+        // only one of them is a distinct member of this set.
+        Truth.assertThat(hiddenIdentifiers).containsExactly(
+            IdentifierSpec.Line1,
+            IdentifierSpec.Line2,
+            IdentifierSpec.City,
+            IdentifierSpec.SortingCode,
+            IdentifierSpec.State,
+        )
     }
 
     fun verifyPostalHidden(hiddenIdentifiers: Set<IdentifierSpec>) {
-        Truth.assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.Country)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.PostalCode)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line2)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
-        Truth.assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+        Truth.assertThat(hiddenIdentifiers).containsExactly(
+            IdentifierSpec.Line1,
+            IdentifierSpec.Line2,
+            IdentifierSpec.City,
+            IdentifierSpec.PostalCode,
+            IdentifierSpec.SortingCode,
+            IdentifierSpec.State,
+        )
     }
 
     private fun nonAutocompleteEmailAndPhoneTest(
