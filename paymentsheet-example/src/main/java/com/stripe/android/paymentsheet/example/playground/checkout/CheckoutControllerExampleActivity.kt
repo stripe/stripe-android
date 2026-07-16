@@ -73,7 +73,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
-                                presenter.expressCheckoutElement().Content()
+                                // TODO: you'd probably want to animate content in.
+                                if (session.isExpressCheckoutElementAvailable) {
+                                    presenter.expressCheckoutElement().Content()
+                                }
                                 paymentElement.PaymentOptionsContent()
                             }
                         }
