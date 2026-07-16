@@ -2181,30 +2181,14 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax true when checkout session requires it`() {
-        val elementsSession = createElementsSession(
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val metadata = PaymentMethodMetadata.createForPaymentElement(
-            elementsSession = elementsSession,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
-            externalPaymentMethodSpecs = emptyList(),
-            isGooglePayReady = false,
-            linkStateResult = null,
-            customerMetadata = null,
+        val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     taxStatus = CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
                 ),
             ),
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
-            analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isTrue()
@@ -2212,30 +2196,14 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false when tax status is ready`() {
-        val elementsSession = createElementsSession(
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val metadata = PaymentMethodMetadata.createForPaymentElement(
-            elementsSession = elementsSession,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
-            externalPaymentMethodSpecs = emptyList(),
-            isGooglePayReady = false,
-            linkStateResult = null,
-            customerMetadata = null,
+        val metadata = createPaymentElementMetadata(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
                 instancesKey = "key",
                 checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                     taxStatus = CheckoutSessionResponse.TaxStatus.READY,
                 ),
             ),
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
             integrationMetadata = IntegrationMetadata.CheckoutSession(id = "cs_123", instancesKey = "key"),
-            analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
@@ -2243,26 +2211,7 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false for non-checkout modes`() {
-        val elementsSession = createElementsSession(
-            intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        )
-
-        val metadata = PaymentMethodMetadata.createForPaymentElement(
-            elementsSession = elementsSession,
-            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
-            sharedDataSpecs = emptyList(),
-            externalPaymentMethodSpecs = emptyList(),
-            isGooglePayReady = false,
-            linkStateResult = null,
-            customerMetadata = null,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
-            clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
-            analyticsMetadata = AnalyticsMetadata(emptyMap()),
-            isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
-            paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
-        )
+        val metadata = createPaymentElementMetadata()
 
         assertThat(metadata.requiresBillingAddressForAutomaticTax).isFalse()
     }
@@ -2277,6 +2226,9 @@ internal class PaymentMethodMetadataTest {
     private fun createPaymentElementMetadata(
         attestOnIntentConfirmationFlag: Boolean? = null,
         elementsSession: ElementsSession? = null,
+        initializationMode: PaymentElementLoader.InitializationMode =
+            PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+        integrationMetadata: IntegrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
     ): PaymentMethodMetadata {
         val elementsSession = (
             elementsSession
@@ -2301,9 +2253,9 @@ internal class PaymentMethodMetadataTest {
             isGooglePayReady = false,
             linkStateResult = null,
             customerMetadata = null,
-            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent("cs_123"),
+            initializationMode = initializationMode,
             clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
-            integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
+            integrationMetadata = integrationMetadata,
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
             isNfcScanningEnabled = false,

@@ -120,6 +120,12 @@ internal interface PaymentElementLoader {
             }
         }
 
+        fun requiresBillingAddressForAutomaticTax(): Boolean {
+            val checkoutSession = this as? CheckoutSession ?: return false
+            return checkoutSession.checkoutSessionResponse.taxStatus ==
+                CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
+        }
+
         enum class WalletsDisabledReason {
             AutomaticTaxBillingAddress;
 

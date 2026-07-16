@@ -32,7 +32,6 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.toPaymentMethodIncentive
-import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.LinkDisabledState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.LinkStateResult
@@ -510,10 +509,4 @@ internal data class PaymentMethodMetadata(
             )
         }
     }
-}
-
-private fun PaymentElementLoader.InitializationMode.requiresBillingAddressForAutomaticTax(): Boolean {
-    val checkoutSession = this as? PaymentElementLoader.InitializationMode.CheckoutSession ?: return false
-    return checkoutSession.checkoutSessionResponse.taxStatus ==
-        CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
 }
