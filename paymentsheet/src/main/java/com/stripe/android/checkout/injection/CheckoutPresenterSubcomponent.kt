@@ -6,7 +6,10 @@ import com.stripe.android.checkout.CheckoutPresenter
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import dagger.Subcomponent
 
-@Subcomponent(modules = [CurrencySelectorElementModule::class])
+@Subcomponent(modules = [
+    CurrencySelectorElementModule::class,
+    ExpressCheckoutElementModule::class,
+])
 internal interface CheckoutPresenterSubcomponent {
     val presenter: CheckoutPresenter
 
