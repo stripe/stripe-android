@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.gpay
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -160,6 +161,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
                     ?: config.merchantName,
                 isEmailRequired = config.isEmailRequired,
                 billingAddressConfig = config.billingDetailsCollectionConfiguration.toBillingAddressConfig(),
+                existingPaymentMethodRequired = !FeatureFlags.allowNoExistingPaymentMethodForGooglePay.isEnabled,
                 additionalEnabledNetworks = config.additionalEnabledNetworks
             ),
             readyCallback = {

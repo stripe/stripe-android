@@ -7,6 +7,7 @@ import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.UserFacingLogger
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -36,12 +37,14 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
 import com.stripe.android.testing.DummyActivityResultCaller
+import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SetupIntentFactory
 import com.stripe.android.utils.FakeActivityResultLauncher
 import kotlinx.coroutines.test.runTest
 import kotlinx.parcelize.Parcelize
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
@@ -49,6 +52,12 @@ import org.mockito.kotlin.verify
 import com.stripe.android.R as PaymentsCoreR
 
 class GooglePayConfirmationDefinitionTest {
+    @get:Rule
+    val allowNoExistingPaymentMethodForGooglePayRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.allowNoExistingPaymentMethodForGooglePay,
+        isEnabled = false,
+    )
+
     @Test
     fun `'key' should be 'GooglePay`() {
         val definition = createGooglePayConfirmationDefinition()
@@ -294,6 +303,20 @@ class GooglePayConfirmationDefinitionTest {
                 .isEqualTo(GooglePayPaymentMethodLauncher.BillingAddressConfig.Format.Full)
         }
     }
+
+    @Test
+    fun `when allowNoExistingPaymentMethodForGooglePay is disabled, existingPaymentMethodRequired should be true`() =
+        runExistingPaymentMethodRequiredTest(
+            allowNoExistingPaymentMethodForGooglePay = false,
+            existingPaymentMethodRequired = true,
+        )
+
+    @Test
+    fun `when allowNoExistingPaymentMethodForGooglePay is enabled, existingPaymentMethodRequired should be false`() =
+        runExistingPaymentMethodRequiredTest(
+            allowNoExistingPaymentMethodForGooglePay = true,
+            existingPaymentMethodRequired = false,
+        )
 
     @Test
     fun `On 'launch', should create google pay launcher properly with excepted parameters`() =
@@ -612,6 +635,30 @@ class GooglePayConfirmationDefinitionTest {
                 .isEqualTo(phoneNumberShouldBeRequired)
             assertThat(createGooglePayLauncherCall.config.billingAddressConfig.format)
                 .isEqualTo(billingAddressFormatShouldBe)
+        }
+    }
+
+    private fun runExistingPaymentMethodRequiredTest(
+        allowNoExistingPaymentMethodForGooglePay: Boolean,
+        existingPaymentMethodRequired: Boolean,
+    ) {
+        allowNoExistingPaymentMethodForGooglePayRule.setEnabled(allowNoExistingPaymentMethodForGooglePay)
+
+        RecordingGooglePayPaymentMethodLauncherFactory.test(mock()) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION,
+                confirmationArgs = CONFIRMATION_PARAMETERS,
+                arguments = EmptyConfirmationLauncherArgs,
+                launcher = launcher,
+            )
+
+            val createGooglePayLauncherCall = createGooglePayPaymentMethodLauncherCalls.awaitItem()
+
+            assertThat(createGooglePayLauncherCall.config.existingPaymentMethodRequired)
+                .isEqualTo(existingPaymentMethodRequired)
         }
     }
 
