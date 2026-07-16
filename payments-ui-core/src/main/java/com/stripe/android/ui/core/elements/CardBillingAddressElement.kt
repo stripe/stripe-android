@@ -218,6 +218,13 @@ class CardBillingAddressElement(
  * Billing address fields required in addition to the country, for a Checkout Session using
  * automatic tax with the billing address as the tax source. Most countries only need the
  * country. Source: https://docs.stripe.com/tax/customer-locations
+ *
+ * Billing-only, intentionally: unlike billing, shipping address is always collected in full for
+ * delivery regardless of tax, so there is no omittable "Automatic" mode for tax to rescue on the
+ * shipping side (Stripe's web Checkout Sessions implementation draws the same distinction). If a
+ * second Automatic-mode, omittable-fields payment method (e.g. ACH/SEPA) needs this under
+ * automatic tax, extract this table to a shared location instead of duplicating it - Card is the
+ * only consumer today.
  */
 private val additionalAutomaticTaxFieldsByCountry: Map<String, Set<IdentifierSpec>> = mapOf(
     "CA" to setOf(IdentifierSpec.PostalCode),
