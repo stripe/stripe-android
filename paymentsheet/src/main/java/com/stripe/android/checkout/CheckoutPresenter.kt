@@ -11,7 +11,7 @@ class CheckoutPresenter @Inject internal constructor(
     private val paymentElementProvider: Provider<PaymentElement>,
     private val currencySelectorElementProvider: Provider<CurrencySelectorElement>,
     private val shippingAddressElementProvider: Provider<ShippingAddressElement>,
-    private val expressCheckoutElement: ExpressCheckoutElement,
+    private val expressCheckoutElementProvider: Provider<ExpressCheckoutElement>,
 ) {
 
     fun paymentElement(): PaymentElement {
@@ -27,7 +27,7 @@ class CheckoutPresenter @Inject internal constructor(
     }
 
     fun expressCheckoutElement(): ExpressCheckoutElement {
-        return expressCheckoutElement
+        return expressCheckoutElementProvider.get()
     }
 
     fun confirm() {
