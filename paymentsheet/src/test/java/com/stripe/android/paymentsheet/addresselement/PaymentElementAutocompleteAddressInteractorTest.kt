@@ -217,7 +217,10 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val interactor = factory.create()
 
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
-        assertThat(interactor.autocompleteConfig).isEqualTo(config)
+        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("test-key")
+        assertThat(interactor.autocompleteConfig.autocompleteCountries).isEqualTo(setOf("US"))
+        assertThat(interactor.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
+        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
     }
 
     @Test

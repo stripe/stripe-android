@@ -32,16 +32,11 @@ class AutocompleteAddressController(
 
     private val config = interactor.autocompleteConfig
 
-    private val inlineAutocompleteConfigured = config.shouldUseStripeHostedAutocomplete ||
-        !config.googlePlacesApiKey.isNullOrBlank()
-
-    private val inlineAutocompletePlatformAvailable = config.shouldUseStripeHostedAutocomplete ||
-        config.isPlacesAvailable
-
     private val inlineAutocompleteActive =
-        config.isInlineAutocompleteEnabled &&
-            inlineAutocompleteConfigured &&
-            inlineAutocompletePlatformAvailable
+        config.isInlineAutocompleteEnabled && (
+            config.shouldUseStripeHostedAutocomplete ||
+                (!config.googlePlacesApiKey.isNullOrBlank() && config.isPlacesAvailable)
+            )
 
     private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
         if (inlineAutocompleteActive) {

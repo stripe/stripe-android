@@ -69,13 +69,11 @@ internal class InputAddressViewModel @Inject constructor(
 
     private val isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled
 
-    private val shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true
-
     override val autocompleteConfig: AutocompleteAddressInteractor.Config = AutocompleteAddressInteractor.Config(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
-        shouldUseStripeHostedAutocomplete = shouldUseStripeHostedAutocomplete,
+        shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
     )
 
     private val inlineAutocompleteController = if (isInlineAutocompleteEnabled && placesClient != null) {

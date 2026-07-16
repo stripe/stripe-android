@@ -61,27 +61,20 @@ internal class PaymentElementAutocompleteAddressInteractor(
                 activeInlineInteractor?.dispose()
                 return BillingInlineAutocompleteAddressInteractor(
                     placesClient = resolvedClient,
-                    autocompleteConfig = createInlineAutocompleteConfig(shouldUseProxy),
+                    autocompleteConfig = AutocompleteAddressInteractor.Config(
+                        googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
+                        autocompleteCountries = autocompleteConfig.autocompleteCountries,
+                        isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
+                        isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
+                        shouldUseStripeHostedAutocomplete = shouldUseProxy ||
+                            autocompleteConfig.shouldUseStripeHostedAutocomplete,
+                    ),
                     coroutineScope = coroutineScope,
                 ).also { activeInlineInteractor = it }
             }
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
                 autocompleteConfig = autocompleteConfig,
-            )
-        }
-
-        private fun createInlineAutocompleteConfig(shouldUseProxy: Boolean): AutocompleteAddressInteractor.Config {
-            if (!shouldUseProxy || autocompleteConfig.shouldUseStripeHostedAutocomplete) {
-                return autocompleteConfig
-            }
-
-            return AutocompleteAddressInteractor.Config(
-                googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
-                autocompleteCountries = autocompleteConfig.autocompleteCountries,
-                isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
-                isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
-                shouldUseStripeHostedAutocomplete = true,
             )
         }
     }
