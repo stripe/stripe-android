@@ -2,11 +2,8 @@
 
 package com.stripe.android.checkout.ece
 
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.checkout.CheckoutControllerStateHolder
-import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -35,13 +32,8 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
         }
 
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            paymentMethodMetadata = state.paymentMethodMetadata,
-            expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration,
-        )
-
         ExpressCheckoutElementInteractor.State(
-            expressButtons = availableExpressButtonTypes.map { walletType ->
+            expressButtons = state.asCheckoutSession().availableExpressButtonTypes.map { walletType ->
                 when (walletType) {
                     WalletType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
@@ -53,24 +45,5 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             },
         )
-    }
-
-    @VisibleForTesting
-    fun computeAvailableExpressButtonTypes(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
-    ): List<WalletType> {
-        return paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
-            when (walletType) {
-                WalletType.GooglePay -> WalletType.GooglePay.takeIf {
-                    expressCheckoutElementConfiguration.googlePayVisibility !=
-                        ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
-                }
-                WalletType.Link -> WalletType.Link.takeIf {
-                    expressCheckoutElementConfiguration.linkVisibility !=
-                        ExpressCheckoutElement.Configuration.LinkVisibility.Never
-                }
-            }
-        }
     }
 }
