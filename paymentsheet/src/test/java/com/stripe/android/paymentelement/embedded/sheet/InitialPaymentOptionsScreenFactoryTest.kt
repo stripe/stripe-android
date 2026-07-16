@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedVerticalLayoutInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedManageScreenInteractorFactory
 import com.stripe.android.paymentelement.embedded.manage.EmbeddedUpdateScreenInteractorFactory
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -110,18 +111,24 @@ internal class InitialPaymentOptionsScreenFactoryTest {
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
 
+        val embeddedVerticalLayoutInteractorFactory = EmbeddedVerticalLayoutInteractorFactory(
+            coroutineScope = testScope,
+            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            eventReporter = eventReporter,
+            embeddedFormHelperFactory = formHelperFactory,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+        )
+
         val factory = InitialPaymentOptionsScreenFactory(
             paymentMethodMetadata = paymentMethodMetadata,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
-            eventReporter = eventReporter,
             embeddedNavigatorProvider = Provider { navigator },
-            embeddedFormHelperFactory = formHelperFactory,
-            viewModelScope = testScope,
+            embeddedVerticalLayoutInteractorFactory = embeddedVerticalLayoutInteractorFactory,
             configuration = configuration,
             manageInteractorFactory = manageInteractorFactory,
             updateScreenInteractorFactory = updateScreenInteractorFactory,
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             sheetActivityStateHolder = sheetActivityStateHolder,
             formScreenFactory = formScreenFactory,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
