@@ -29,27 +29,26 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
 
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
         linkAccountHolder.linkAccountInfo,
-        stateHolder.paymentMethodMetadata,
-        stateHolder.configuration,
-    ) { linkAccountInfo, paymentMethodMetadata, configuration ->
-        if (paymentMethodMetadata == null || configuration == null) {
+        stateHolder.stateFlow,
+    ) { linkAccountInfo, state ->
+        if (state == null) {
             return@combineAsStateFlow ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
         }
 
         val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            paymentMethodMetadata = paymentMethodMetadata,
-            expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
+            paymentMethodMetadata = state.paymentMethodMetadata,
+            expressCheckoutElementConfiguration = state.configuration.expressCheckoutElementConfiguration,
         )
 
         ExpressCheckoutElementInteractor.State(
             expressButtons = availableExpressButtonTypes.map { walletType ->
                 when (walletType) {
                     WalletType.Link -> ExpressButton.Link.create(
-                        paymentMethodMetadata = paymentMethodMetadata,
+                        paymentMethodMetadata = state.paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
                     )
                     WalletType.GooglePay -> ExpressButton.GooglePay.create(
-                        paymentMethodMetadata = paymentMethodMetadata,
+                        paymentMethodMetadata = state.paymentMethodMetadata,
                     )
                 }
             },
