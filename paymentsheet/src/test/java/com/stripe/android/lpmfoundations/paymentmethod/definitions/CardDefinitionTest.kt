@@ -422,32 +422,10 @@ class CardDefinitionTest {
 
     @Test
     fun `createFormElements shows only postal code for CA when automatic tax billing address is required`() {
-        val formElements = CardDefinition.formElements(
-            metadata = PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                ),
-                requiresBillingAddressForAutomaticTax = true,
-            )
-        )
-
-        val cardBillingElement = formElements.filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<CardBillingAddressElement>()
-            .first()
-
+        val cardBillingElement = createAutomaticCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
         cardBillingElement.countryElement.controller.onRawValueChange("CA")
 
-        val shownIdentifiers = cardBillingElement.addressController.value.fieldsFlowable.value
-            .filterOutHiddenIdentifiers(cardBillingElement.hiddenIdentifiers.value)
-            .flatMap { field ->
-                when (field) {
-                    is RowElement -> field.fields.map { it.identifier.v1 }
-                    else -> listOf(field.identifier.v1)
-                }
-            }
-
-        assertThat(shownIdentifiers).containsExactly(
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly(
             "billing_details[address][country]",
             "billing_details[address][postal_code]",
         )
@@ -455,32 +433,10 @@ class CardDefinitionTest {
 
     @Test
     fun `createFormElements shows line1, city, state, and postal code for US when automatic tax billing is required`() {
-        val formElements = CardDefinition.formElements(
-            metadata = PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                ),
-                requiresBillingAddressForAutomaticTax = true,
-            )
-        )
-
-        val cardBillingElement = formElements.filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<CardBillingAddressElement>()
-            .first()
-
+        val cardBillingElement = createAutomaticCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
         cardBillingElement.countryElement.controller.onRawValueChange("US")
 
-        val shownIdentifiers = cardBillingElement.addressController.value.fieldsFlowable.value
-            .filterOutHiddenIdentifiers(cardBillingElement.hiddenIdentifiers.value)
-            .flatMap { field ->
-                when (field) {
-                    is RowElement -> field.fields.map { it.identifier.v1 }
-                    else -> listOf(field.identifier.v1)
-                }
-            }
-
-        assertThat(shownIdentifiers).containsExactly(
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly(
             "billing_details[address][country]",
             "billing_details[address][line1]",
             "billing_details[address][city]",
@@ -491,62 +447,18 @@ class CardDefinitionTest {
 
     @Test
     fun `createFormElements does not show additional fields for a country not requiring them`() {
-        val formElements = CardDefinition.formElements(
-            metadata = PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                ),
-                requiresBillingAddressForAutomaticTax = true,
-            )
-        )
-
-        val cardBillingElement = formElements.filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<CardBillingAddressElement>()
-            .first()
-
+        val cardBillingElement = createAutomaticCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
         cardBillingElement.countryElement.controller.onRawValueChange("FR")
 
-        val shownIdentifiers = cardBillingElement.addressController.value.fieldsFlowable.value
-            .filterOutHiddenIdentifiers(cardBillingElement.hiddenIdentifiers.value)
-            .flatMap { field ->
-                when (field) {
-                    is RowElement -> field.fields.map { it.identifier.v1 }
-                    else -> listOf(field.identifier.v1)
-                }
-            }
-
-        assertThat(shownIdentifiers).containsExactly("billing_details[address][country]")
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly("billing_details[address][country]")
     }
 
     @Test
     fun `createFormElements does not union tax fields when requiresBillingAddressForAutomaticTax is false`() {
-        val formElements = CardDefinition.formElements(
-            metadata = PaymentMethodMetadataFactory.create(
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
-                ),
-                requiresBillingAddressForAutomaticTax = false,
-            )
-        )
-
-        val cardBillingElement = formElements.filterIsInstance<SectionElement>()
-            .flatMap { it.fields }
-            .filterIsInstance<CardBillingAddressElement>()
-            .first()
-
+        val cardBillingElement = createAutomaticCardBillingAddressElement(requiresBillingAddressForAutomaticTax = false)
         cardBillingElement.countryElement.controller.onRawValueChange("FR")
 
-        val shownIdentifiers = cardBillingElement.addressController.value.fieldsFlowable.value
-            .filterOutHiddenIdentifiers(cardBillingElement.hiddenIdentifiers.value)
-            .flatMap { field ->
-                when (field) {
-                    is RowElement -> field.fields.map { it.identifier.v1 }
-                    else -> listOf(field.identifier.v1)
-                }
-            }
-
-        assertThat(shownIdentifiers).containsExactly("billing_details[address][country]")
+        assertThat(cardBillingElement.shownIdentifierParamPaths()).containsExactly("billing_details[address][country]")
     }
 
     @Test
@@ -866,6 +778,35 @@ class CardDefinitionTest {
         val controller = (formElements[0] as CardDetailsSectionElement).controller
 
         block(controller.cardDetailsAction)
+    }
+
+    private fun createAutomaticCardBillingAddressElement(
+        requiresBillingAddressForAutomaticTax: Boolean,
+    ): CardBillingAddressElement {
+        val formElements = CardDefinition.formElements(
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+                ),
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
+            )
+        )
+
+        return formElements.filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<CardBillingAddressElement>()
+            .first()
+    }
+
+    private fun CardBillingAddressElement.shownIdentifierParamPaths(): List<String> {
+        return addressController.value.fieldsFlowable.value
+            .filterOutHiddenIdentifiers(hiddenIdentifiers.value)
+            .flatMap { field ->
+                when (field) {
+                    is RowElement -> field.fields.map { it.identifier.v1 }
+                    else -> listOf(field.identifier.v1)
+                }
+            }
     }
 
     private fun createLinkConfiguration(): LinkConfiguration {
