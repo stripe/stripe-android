@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptions
 import dev.drewhamilton.poko.Poko
@@ -52,6 +53,11 @@ class CheckoutSession internal constructor(
      */
     val shippingOptions: List<ShippingRate>,
     internal val currencySelectorOptions: CurrencySelectorOptions?,
+    internal val availableExpressButtonTypes: List<WalletType>,
+    /**
+     * Whether Express Checkout Element is available and has payment methods to display.
+     */
+    val isExpressCheckoutElementAvailable: Boolean = availableExpressButtonTypes.isNotEmpty(),
 ) {
 
     /**

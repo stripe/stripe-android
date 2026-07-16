@@ -52,6 +52,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
             adaptivePricingInfo = adaptivePricingInfo,
             flagImages = flagImages,
         ),
+        availableExpressButtonTypes = emptyList(),
     )
 }
 

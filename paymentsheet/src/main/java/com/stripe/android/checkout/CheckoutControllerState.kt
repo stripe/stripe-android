@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Parcelable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -60,6 +61,28 @@ internal data class CheckoutControllerState(
                 adaptivePricingInfo = checkoutSessionResponse.adaptivePricingInfo,
                 flagImages = flagImages,
             ),
+            availableExpressButtonTypes = computeAvailableExpressButtonTypes(
+                paymentMethodMetadata = paymentMethodMetadata,
+                expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
+            )
         )
+    }
+
+    private fun computeAvailableExpressButtonTypes(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
+    ): List<WalletType> {
+        return paymentMethodMetadata.availableWallets.mapNotNull { walletType ->
+            when (walletType) {
+                WalletType.GooglePay -> WalletType.GooglePay.takeIf {
+                    expressCheckoutElementConfiguration.googlePayVisibility !=
+                        ExpressCheckoutElement.Configuration.GooglePayVisibility.Never
+                }
+                WalletType.Link -> WalletType.Link.takeIf {
+                    expressCheckoutElementConfiguration.linkVisibility !=
+                        ExpressCheckoutElement.Configuration.LinkVisibility.Never
+                }
+            }
+        }
     }
 }
