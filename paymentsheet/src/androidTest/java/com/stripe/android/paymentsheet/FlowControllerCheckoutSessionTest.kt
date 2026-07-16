@@ -57,6 +57,7 @@ internal class FlowControllerCheckoutSessionTest {
     @Test
     fun testSuccessfulCardSetupWithCheckoutSession() = runFlowControllerTest(
         networkRule = networkRule,
+        callConfirmOnPaymentOptionCallback = false,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
@@ -76,10 +77,7 @@ internal class FlowControllerCheckoutSessionTest {
             response.testBodyFromFile("checkout-session-confirm-setup.json")
         }
 
-        page.clickPrimaryButton()
-
-        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
+        confirmAfterPaymentOptionsDismissed(testContext)
     }
 
     /**
@@ -95,6 +93,7 @@ internal class FlowControllerCheckoutSessionTest {
     @Test
     fun testSuccessfulCardPaymentWithCheckoutSession() = runFlowControllerTest(
         networkRule = networkRule,
+        callConfirmOnPaymentOptionCallback = false,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
@@ -113,9 +112,24 @@ internal class FlowControllerCheckoutSessionTest {
             response.testBodyFromFile("checkout-session-confirm.json")
         }
 
+        confirmAfterPaymentOptionsDismissed(testContext)
+    }
+
+    /**
+     * Drives the shared "select then confirm" tail of the checkout confirm tests: observes
+     * PaymentOptionsActivity destruction, clicks the primary button to dismiss the sheet, and only
+     * confirms once the sheet is gone (so integrationLaunched is cleared) — matching real usage.
+     */
+    private suspend fun confirmAfterPaymentOptionsDismissed(testContext: FlowControllerTestRunnerContext) {
+        val destroyHandle = testContext.observePaymentOptionsActivityDestroyed()
+
         page.clickPrimaryButton()
 
         testContext.consumePaymentOptionEventForFlowController("card", "4242")
+
+        destroyHandle.await()
+        testContext.flowController.confirm()
+
         testContext.consumeNullPaymentOptionEventForFlowController()
     }
 
@@ -223,6 +237,7 @@ internal class FlowControllerCheckoutSessionTest {
         expectedAllowRedisplay: String,
     ) = runFlowControllerTest(
         networkRule = networkRule,
+        callConfirmOnPaymentOptionCallback = false,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
@@ -258,10 +273,7 @@ internal class FlowControllerCheckoutSessionTest {
             response.testBodyFromFile(confirmFile)
         }
 
-        page.clickPrimaryButton()
-
-        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
+        confirmAfterPaymentOptionsDismissed(testContext)
     }
 
     // region customer_email billing details tests
@@ -292,6 +304,7 @@ internal class FlowControllerCheckoutSessionTest {
         expectedEmail: String,
     ) = runFlowControllerTest(
         networkRule = networkRule,
+        callConfirmOnPaymentOptionCallback = false,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.checkoutInit { response ->
@@ -337,10 +350,7 @@ internal class FlowControllerCheckoutSessionTest {
             response.testBodyFromFile("checkout-session-confirm.json")
         }
 
-        page.clickPrimaryButton()
-
-        testContext.consumePaymentOptionEventForFlowController("card", "4242")
-        testContext.consumeNullPaymentOptionEventForFlowController()
+        confirmAfterPaymentOptionsDismissed(testContext)
     }
 
     // endregion

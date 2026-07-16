@@ -542,6 +542,47 @@ class Checkout private constructor(
         }
     }
 
+    /**
+     * Runs a confirmation [block] while holding the mutation queue. A mutation triggered during
+     * confirmation waits until the confirmation completes, so the two never overlap.
+     *
+     * Fails fast with [IllegalStateException] if a payment flow is presented, or if a mutation
+     * (or another confirmation) is already in flight: a confirmation may only be enqueued when
+     * the queue is empty.
+     */
+    internal suspend fun <T> withConfirmation(
+        block: suspend () -> T,
+    ): T {
+        // Confirmation, like mutations, is blocked while a payment flow is presented. The
+        // integration is marked dismissed when the presenting sheet returns its result (e.g.
+        // DefaultFlowController.onPaymentOptionResult), which precedes the confirm() call.
+        if (internalState.integrationLaunched) {
+            throw IllegalStateException(
+                "Cannot confirm checkout session while a payment flow is presented."
+            )
+        }
+        // A confirmation may only be enqueued when the queue is empty. tryLock atomically
+        // checks-and-acquires, so there is no check-then-acquire race. Unlike mutations a
+        // confirmation never waits for the lock (it fails fast instead), so it is always the
+        // 0 -> 1 transition and we increment the pending counter only after acquiring.
+        if (!mutex.tryLock()) {
+            throw IllegalStateException(
+                "Cannot confirm while a checkout session mutation is in flight."
+            )
+        }
+        if (pendingMutations.incrementAndGet() == 1) {
+            _isLoading.value = true
+        }
+        return try {
+            block()
+        } finally {
+            if (pendingMutations.decrementAndGet() == 0) {
+                _isLoading.value = false
+            }
+            mutex.unlock()
+        }
+    }
+
     internal fun updateWithResponse(response: CheckoutSessionResponse) {
         internalState = internalState.copy(checkoutSessionResponse = response)
         _checkoutSession.value = internalState.asCheckoutSession()

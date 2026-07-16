@@ -116,28 +116,33 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun confirmCheckoutSession(
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
-        try {
-            CheckoutInstances.ensureNoMutationInFlight(integrationMetadata.instancesKey)
+        return try {
+            CheckoutInstances.withConfirmation(integrationMetadata.instancesKey) {
+                checkoutSessionRepository.confirm(
+                    id = integrationMetadata.id,
+                    params = params,
+                ).fold(
+                    onSuccess = ::handleConfirmResponse,
+                    onFailure = { error ->
+                        ConfirmationDefinition.Action.Fail(
+                            cause = error,
+                            message = error.stripeErrorMessage(),
+                            errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+                        )
+                    }
+                )
+            }
         } catch (e: IllegalStateException) {
-            return ConfirmationDefinition.Action.Fail(
+            // withConfirmation throws when the queue precondition fails (a payment flow is
+            // presented, or a mutation/confirmation is already in flight). Repository/confirm
+            // failures arrive as Result.failure and are mapped to Payment above, so they do not
+            // reach here.
+            ConfirmationDefinition.Action.Fail(
                 cause = e,
                 message = e.stripeErrorMessage(),
                 errorType = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
             )
         }
-        return checkoutSessionRepository.confirm(
-            id = integrationMetadata.id,
-            params = params,
-        ).fold(
-            onSuccess = ::handleConfirmResponse,
-            onFailure = { error ->
-                ConfirmationDefinition.Action.Fail(
-                    cause = error,
-                    message = error.stripeErrorMessage(),
-                    errorType = ConfirmationHandler.Result.Failed.ErrorType.Payment,
-                )
-            }
-        )
     }
 
     private fun handleConfirmResponse(
