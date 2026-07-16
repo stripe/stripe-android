@@ -31,6 +31,8 @@ import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
@@ -38,6 +40,7 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
@@ -45,8 +48,6 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
-import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandlerImpl
 import com.stripe.android.paymentsheet.injection.LinkHoldbackExposureModule
 import com.stripe.android.paymentsheet.injection.PaymentMethodMessagePromotionsExperimentHandlerModule
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
@@ -101,6 +102,7 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
+        ExtendedPaymentElementConfirmationModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {
@@ -234,14 +236,23 @@ internal interface CheckoutControllerModule {
         fun provideAllowsManualConfirmation(): Boolean = true
 
         @Provides
-        fun provideEventReporterMode(): EventReporter.Mode {
-            return EventReporter.Mode.Embedded
+        @Singleton
+        fun provideConfirmationHandler(
+            confirmationHandlerFactory: ConfirmationHandler.Factory,
+            @ViewModelScope coroutineScope: CoroutineScope,
+        ): ConfirmationHandler {
+            return confirmationHandlerFactory.create(coroutineScope)
         }
 
+        // Checkout is not launched with a status-bar-color argument; the payment launcher treats a
+        // null color as "don't override".
         @Provides
-        @Singleton
-        fun provideCvcRecollectionHandler(): CvcRecollectionHandler {
-            return CvcRecollectionHandlerImpl()
+        @Named(STATUS_BAR_COLOR)
+        fun provideStatusBarColor(): Int? = null
+
+        @Provides
+        fun provideEventReporterMode(): EventReporter.Mode {
+            return EventReporter.Mode.Embedded
         }
 
         @Provides

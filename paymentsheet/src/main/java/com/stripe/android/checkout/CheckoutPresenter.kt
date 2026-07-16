@@ -12,6 +12,9 @@ class CheckoutPresenter @Inject internal constructor(
     private val currencySelectorElementProvider: Provider<CurrencySelectorElement>,
     private val shippingAddressElementProvider: Provider<ShippingAddressElement>,
     private val expressCheckoutElementProvider: Provider<ExpressCheckoutElement>,
+    // Injected eagerly (not a Provider) so its init registers the confirmation handler with the
+    // activity as soon as the presenter is created.
+    private val confirmationHelper: CheckoutConfirmationHelper,
 ) {
 
     fun paymentElement(): PaymentElement {
@@ -31,6 +34,6 @@ class CheckoutPresenter @Inject internal constructor(
     }
 
     fun confirm() {
-        TODO("Not yet implemented")
+        confirmationHelper.confirm()
     }
 }
