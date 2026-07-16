@@ -15,17 +15,18 @@ import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.link.ui.wallet.LinkInline2FASection
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.WalletButtonsViewClickHandler
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnButtonPressed
 import com.stripe.android.paymentsheet.ui.WalletButtonsInteractor.ViewAction.OnResendCode
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.utils.collectAsState
 
 @OptIn(WalletButtonsPreview::class)
 @Immutable
 internal class WalletButtonsContent(
     private val interactor: WalletButtonsInteractor,
+    private val appearanceProvider: () -> PaymentSheet.Appearance = { PaymentSheet.Appearance() },
 ) {
     @Composable
     fun Content(
@@ -45,7 +46,7 @@ internal class WalletButtonsContent(
 
         // Render the wallet buttons and 2FA section if they exist
         if (state.hasContent) {
-            StripeTheme {
+            PaymentElementTheme(appearance = appearanceProvider()) {
                 Column(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {

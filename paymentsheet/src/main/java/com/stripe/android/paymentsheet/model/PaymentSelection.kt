@@ -281,10 +281,16 @@ internal sealed class PaymentSelection : Parcelable {
         private val resources: Resources,
         private val imageLoader: StripeImageLoader,
     ) {
-        private fun isDarkTheme(): Boolean {
-            return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
-                Configuration.UI_MODE_NIGHT_YES ||
-                isCustomDarkTheme()
+        private fun isDarkTheme(themeMode: PaymentSheet.ThemeMode): Boolean {
+            return when (themeMode) {
+                PaymentSheet.ThemeMode.Automatic -> {
+                    resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
+                        Configuration.UI_MODE_NIGHT_YES ||
+                        isCustomDarkTheme()
+                }
+                PaymentSheet.ThemeMode.AlwaysLight -> false
+                PaymentSheet.ThemeMode.AlwaysDark -> true
+            }
         }
 
         /**
@@ -299,13 +305,19 @@ internal sealed class PaymentSelection : Parcelable {
             @DrawableRes drawableResourceIdNight: Int?,
             lightThemeIconUrl: String?,
             darkThemeIconUrl: String?,
+            themeMode: PaymentSheet.ThemeMode = PaymentSheet.ThemeMode.Automatic,
         ): Drawable {
             fun loadResource(): Drawable {
                 @Suppress("DEPRECATION")
                 return runCatching {
+                    val iconResourceId = if (!isDarkTheme(themeMode)) {
+                        drawableResourceId
+                    } else {
+                        drawableResourceIdNight ?: drawableResourceId
+                    }
                     ResourcesCompat.getDrawable(
                         resources,
-                        if (!isDarkTheme()) drawableResourceId else drawableResourceIdNight ?: drawableResourceId,
+                        iconResourceId,
                         null
                     )
                 }.getOrNull() ?: emptyDrawable
@@ -319,7 +331,7 @@ internal sealed class PaymentSelection : Parcelable {
 
             // If the payment option has an icon URL, we prefer it.
             // Some payment options don't have an icon URL, and are loaded locally via resource.
-            return if (isDarkTheme() && darkThemeIconUrl != null) {
+            return if (isDarkTheme(themeMode) && darkThemeIconUrl != null) {
                 loadIcon(darkThemeIconUrl)
             } else if (lightThemeIconUrl != null) {
                 loadIcon(lightThemeIconUrl)

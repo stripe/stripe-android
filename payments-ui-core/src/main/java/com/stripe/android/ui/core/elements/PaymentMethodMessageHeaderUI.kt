@@ -1,7 +1,6 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +13,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.uicore.stripeThemeIsDark
 
 @Composable
 internal fun PaymentMethodMessageHeaderUI(
@@ -59,5 +59,5 @@ private fun String.maybeAddPeriod(): String {
 
 @Composable
 private fun getThemeParam(): String {
-    return if (isSystemInDarkTheme()) "&theme=night" else "&theme=stripe"
+    return if (MaterialTheme.stripeThemeIsDark) "&theme=night" else "&theme=stripe"
 }

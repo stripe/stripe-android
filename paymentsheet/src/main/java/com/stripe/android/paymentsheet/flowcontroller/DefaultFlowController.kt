@@ -272,7 +272,11 @@ internal class DefaultFlowController @Inject internal constructor(
             val linkBrand = viewModel.state?.paymentSheetState?.paymentMethodMetadata?.effectiveLinkBrand(
                 linkAccountHolder.linkAccountInfo.value.account
             )
-            paymentOptionFactory.create(it, linkBrand)
+            paymentOptionFactory.create(
+                selection = it,
+                linkBrand = linkBrand,
+                appearance = viewModel.state?.config?.appearance ?: PaymentSheet.Appearance(),
+            )
         }
     }
 
@@ -444,7 +448,11 @@ internal class DefaultFlowController @Inject internal constructor(
                 viewModel.paymentSelection = selection
                 paymentOptionResultCallback.onPaymentOptionResult(
                     PaymentOptionResult(
-                        paymentOption = paymentOptionFactory.create(selection, effectiveBrand),
+                        paymentOption = paymentOptionFactory.create(
+                            selection = selection,
+                            linkBrand = effectiveBrand,
+                            appearance = viewModel.state?.config?.appearance ?: PaymentSheet.Appearance(),
+                        ),
                         didCancel = false,
                     )
                 )
@@ -504,7 +512,11 @@ internal class DefaultFlowController @Inject internal constructor(
             val paymentOption = newSelection?.let {
                 val linkBrand = viewModel.state?.linkConfiguration
                     ?.effectiveLinkBrand(linkAccountHolder.linkAccountInfo.value.account)
-                paymentOptionFactory.create(it, linkBrand)
+                paymentOptionFactory.create(
+                    selection = it,
+                    linkBrand = linkBrand,
+                    appearance = viewModel.state?.config?.appearance ?: PaymentSheet.Appearance(),
+                )
             }
             val result = PaymentOptionResult(
                 paymentOption = paymentOption,
@@ -651,7 +663,11 @@ internal class DefaultFlowController @Inject internal constructor(
         val linkAccount = linkAccountHolder.linkAccountInfo.value.account
         val paymentOption = paymentSelection?.let {
             val linkBrand = viewModel.state?.linkConfiguration?.effectiveLinkBrand(linkAccount)
-            paymentOptionFactory.create(it, linkBrand)
+            paymentOptionFactory.create(
+                selection = it,
+                linkBrand = linkBrand,
+                appearance = viewModel.state?.config?.appearance ?: PaymentSheet.Appearance(),
+            )
         }
 
         paymentOptionResultCallback.onPaymentOptionResult(

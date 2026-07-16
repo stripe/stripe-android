@@ -67,6 +67,7 @@ import com.godaddy.android.colorpicker.ClassicColorPicker
 import com.godaddy.android.colorpicker.HsvColor
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import kotlin.math.roundToInt
 
@@ -129,6 +130,12 @@ private fun AppearancePicker(
 
             CustomizationCard("Icons") {
                 Icons(
+                    currentAppearance = currentAppearance,
+                    updateAppearance = updateAppearance,
+                )
+            }
+            CustomizationCard("Theme") {
+                ThemeMode(
                     currentAppearance = currentAppearance,
                     updateAppearance = updateAppearance,
                 )
@@ -255,6 +262,22 @@ private fun Icons(
         updateAppearance(
             currentAppearance.copy(
                 iconStyle = it
+            )
+        )
+    }
+}
+
+@Composable
+private fun ThemeMode(
+    currentAppearance: AppearanceStore.State,
+    updateAppearance: (AppearanceStore.State) -> Unit,
+) {
+    ThemeModeDropDown(
+        themeMode = currentAppearance.themeMode,
+    ) {
+        updateAppearance(
+            currentAppearance.copy(
+                themeMode = it
             )
         )
     }
@@ -1336,6 +1359,46 @@ private fun IconStyleDropDown(
                     onClick = {
                         expanded = false
                         onIconStyleSelected(it)
+                    }
+                ) {
+                    Text(it.name)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ThemeModeDropDown(
+    themeMode: PaymentSheet.ThemeMode,
+    onThemeModeSelected: (PaymentSheet.ThemeMode) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(all = BASE_PADDING)
+            .wrapContentSize(Alignment.TopStart)
+    ) {
+        Text(
+            text = "ThemeMode: $themeMode",
+            fontSize = BASE_FONT_SIZE,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable(onClick = { expanded = true })
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            PaymentSheet.ThemeMode.entries.forEach {
+                DropdownMenuItem(
+                    onClick = {
+                        expanded = false
+                        onThemeModeSelected(it)
                     }
                 ) {
                     Text(it.name)

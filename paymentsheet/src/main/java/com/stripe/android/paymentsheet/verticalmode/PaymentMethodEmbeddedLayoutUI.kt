@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.annotation.RestrictTo
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -38,6 +37,7 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.Mandate
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.utils.collectAsState
 import org.jetbrains.annotations.VisibleForTesting
@@ -174,7 +174,7 @@ internal fun PaymentMethodEmbeddedLayoutUI(
 @Composable
 private fun OptionalEmbeddedDivider(rowStyle: Embedded.RowStyle) {
     if (rowStyle.hasSeparators()) {
-        val color = Color(rowStyle.separatorColor(isSystemInDarkTheme()))
+        val color = Color(rowStyle.separatorColor(MaterialTheme.stripeThemeIsDark))
         val thickness = rowStyle.separatorThickness()
         Divider(
             color = color,

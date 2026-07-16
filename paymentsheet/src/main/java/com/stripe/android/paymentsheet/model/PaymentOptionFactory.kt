@@ -12,7 +12,11 @@ internal class PaymentOptionFactory @Inject constructor(
     private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
 ) {
-    fun create(selection: PaymentSelection, linkBrand: LinkBrand?): PaymentOption {
+    fun create(
+        selection: PaymentSelection,
+        linkBrand: LinkBrand?,
+        appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+    ): PaymentOption {
         val drawableResourceId = selection.drawableResourceId
         val lightThemeIconUrl = selection.lightThemeIconUrl
         val darkThemeIconUrl = selection.darkThemeIconUrl
@@ -30,6 +34,7 @@ internal class PaymentOptionFactory @Inject constructor(
                     drawableResourceIdNight = drawableResourceId,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
+                    themeMode = appearance.themeMode,
                 )
             },
         )
