@@ -37,7 +37,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when US is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
         }
     }
 
@@ -45,7 +45,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when GB is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("GB")
-            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
         }
     }
 
@@ -53,7 +53,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when CA is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("CA")
-            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
         }
     }
 
@@ -61,7 +61,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when DE is selected postal IS hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("DE")
-            verifyFieldsShown(expectMostRecentItem())
+            expectMostRecentItem().verifyFieldsShown()
         }
     }
 
@@ -72,7 +72,7 @@ internal class CardBillingAddressElementTest {
         element.hiddenIdentifiers.test {
             // IN has no AVS default fields, but requires a postal code for automatic tax.
             dropdownFieldController.onRawValueChange("IN")
-            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
+            expectMostRecentItem().verifyFieldsShown(IdentifierSpec.PostalCode)
         }
     }
 
@@ -82,8 +82,7 @@ internal class CardBillingAddressElementTest {
 
         element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("PR")
-            verifyFieldsShown(
-                expectMostRecentItem(),
+            expectMostRecentItem().verifyFieldsShown(
                 IdentifierSpec.Line1,
                 IdentifierSpec.City,
                 IdentifierSpec.PostalCode,
@@ -97,8 +96,7 @@ internal class CardBillingAddressElementTest {
 
         element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            verifyFieldsShown(
-                expectMostRecentItem(),
+            expectMostRecentItem().verifyFieldsShown(
                 IdentifierSpec.Line1,
                 IdentifierSpec.City,
                 IdentifierSpec.State,
@@ -118,7 +116,7 @@ internal class CardBillingAddressElementTest {
 
         element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            verifyFieldsShown(expectMostRecentItem())
+            expectMostRecentItem().verifyFieldsShown()
         }
     }
 
@@ -274,12 +272,12 @@ internal class CardBillingAddressElementTest {
     }
 
     /**
-     * Asserts which fields are shown to the customer - the complement of [hiddenIdentifiers] -
-     * rather than which are hidden, since that's what a human reviewing a test failure actually
-     * wants to check against the expected UX.
+     * Asserts which fields are shown to the customer - the complement of this hidden-identifiers
+     * set - rather than which are hidden, since that's what a human reviewing a test failure
+     * actually wants to check against the expected UX.
      */
-    private fun verifyFieldsShown(hiddenIdentifiers: Set<IdentifierSpec>, vararg shownFields: IdentifierSpec) {
-        Truth.assertThat(ALL_ADDRESS_FIELDS - hiddenIdentifiers).containsExactlyElementsIn(shownFields.toSet())
+    private fun Set<IdentifierSpec>.verifyFieldsShown(vararg shownFields: IdentifierSpec) {
+        Truth.assertThat(ALL_ADDRESS_FIELDS - this).containsExactlyElementsIn(shownFields.toSet())
     }
 
     private fun createCardBillingAddressElement(
