@@ -172,13 +172,7 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled) {
-            AddressInputMode.NoAutocomplete(
-                phoneNumberConfig = phoneNumberConfig,
-                nameConfig = nameConfig,
-                emailConfig = emailConfig,
-            )
-        } else if (googlePlacesApiKey == null) {
+        } else if (config.isInlineAutocompleteEnabled || googlePlacesApiKey == null) {
             AddressInputMode.NoAutocomplete(
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,

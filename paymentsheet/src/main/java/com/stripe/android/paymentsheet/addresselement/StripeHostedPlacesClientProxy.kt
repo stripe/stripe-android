@@ -4,9 +4,7 @@ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 
-internal class StripeHostedPlacesClientProxy(
-    private val googleApiKey: String?
-) : PlacesClientProxy {
+internal class StripeHostedPlacesClientProxy : PlacesClientProxy {
     override suspend fun findAutocompletePredictions(
         query: String?,
         country: String,

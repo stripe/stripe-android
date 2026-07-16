@@ -49,10 +49,11 @@ internal class AddressElementViewModelModule {
         context: Context,
         args: AddressElementActivityContract.Args
     ): PlacesClientProxy? {
-        if (args.config?.useStripeHostedAutocomplete == true) {
-            return StripeHostedPlacesClientProxy(googleApiKey = args.config?.googlePlacesApiKey)
+        val config = args.config ?: return null
+        if (config.useStripeHostedAutocomplete) {
+            return StripeHostedPlacesClientProxy()
         }
-        return args.config?.googlePlacesApiKey?.let {
+        return config.googlePlacesApiKey?.let {
             PlacesClientProxy.create(
                 context,
                 it,

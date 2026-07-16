@@ -7,21 +7,7 @@ import org.junit.Test
 class StripeHostedPlacesClientProxyTest {
     @Test
     fun `findAutocompletePredictions returns failure`() = runTest {
-        val proxy = StripeHostedPlacesClientProxy(googleApiKey = "test-key")
-
-        val result = proxy.findAutocompletePredictions(
-            query = "123 Main",
-            country = "US",
-            limit = 4,
-        )
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(NotImplementedError::class.java)
-    }
-
-    @Test
-    fun `findAutocompletePredictions returns failure when googleApiKey is null`() = runTest {
-        val proxy = StripeHostedPlacesClientProxy(googleApiKey = null)
+        val proxy = StripeHostedPlacesClientProxy()
 
         val result = proxy.findAutocompletePredictions(
             query = "123 Main",
@@ -35,17 +21,7 @@ class StripeHostedPlacesClientProxyTest {
 
     @Test
     fun `fetchPlace returns failure`() = runTest {
-        val proxy = StripeHostedPlacesClientProxy(googleApiKey = "test-key")
-
-        val result = proxy.fetchPlace(placeId = "ChIJ123")
-
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(NotImplementedError::class.java)
-    }
-
-    @Test
-    fun `fetchPlace returns failure when googleApiKey is null`() = runTest {
-        val proxy = StripeHostedPlacesClientProxy(googleApiKey = null)
+        val proxy = StripeHostedPlacesClientProxy()
 
         val result = proxy.fetchPlace(placeId = "ChIJ123")
 
