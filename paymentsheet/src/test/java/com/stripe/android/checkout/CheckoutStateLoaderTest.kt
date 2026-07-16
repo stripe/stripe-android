@@ -115,15 +115,14 @@ internal class CheckoutStateLoaderTest {
 
         loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
 
-        assertThat(stateHolder.state?.embeddedConfiguration?.googlePay).isEqualTo(
-            PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                countryCode = "CA",
-                label = "Total",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
-                additionalEnabledNetworks = listOf("INTERAC"),
-            )
-        )
+        val actual = requireNotNull(stateHolder.state?.embeddedConfiguration?.googlePay)
+        assertThat(actual.environment)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
+        assertThat(actual.countryCode).isEqualTo("CA")
+        assertThat(actual.label).isEqualTo("Total")
+        assertThat(actual.buttonType)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
+        assertThat(actual.additionalEnabledNetworks).containsExactly("INTERAC")
     }
 
     @Test

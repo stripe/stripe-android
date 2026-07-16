@@ -9,25 +9,15 @@ import org.junit.Test
 internal class GooglePayConfigurationMapperTest {
 
     @Test
-    fun `null config maps to null`() {
-        val mapped = (null as GooglePayConfiguration.State?).asPaymentSheet()
-
-        assertThat(mapped).isNull()
-    }
-
-    @Test
     fun `default owned config maps to PaymentSheet defaults`() {
         val mapped = GooglePayConfiguration(
             GooglePayConfiguration.Environment.Test,
             "US",
         ).build().asPaymentSheet()
 
-        assertThat(mapped).isEqualTo(
-            PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
-                countryCode = "US",
-            )
-        )
+        assertThat(mapped.environment).isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
+        assertThat(mapped.countryCode).isEqualTo("US")
+        assertThat(mapped.buttonType).isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Pay)
     }
 
     @Test
@@ -42,15 +32,13 @@ internal class GooglePayConfigurationMapperTest {
             .build()
             .asPaymentSheet()
 
-        assertThat(mapped).isEqualTo(
-            PaymentSheet.GooglePayConfiguration(
-                environment = PaymentSheet.GooglePayConfiguration.Environment.Production,
-                countryCode = "CA",
-                label = "Total",
-                buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
-                additionalEnabledNetworks = listOf("INTERAC"),
-            )
-        )
+        assertThat(mapped.environment)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
+        assertThat(mapped.countryCode).isEqualTo("CA")
+        assertThat(mapped.label).isEqualTo("Total")
+        assertThat(mapped.buttonType)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
+        assertThat(mapped.additionalEnabledNetworks).containsExactly("INTERAC")
     }
 
     @Test
@@ -64,7 +52,7 @@ internal class GooglePayConfigurationMapperTest {
                 .build()
                 .asPaymentSheet()
 
-            assertThat(mapped?.buttonType?.name).isEqualTo(buttonType.name)
+            assertThat(mapped.buttonType.name).isEqualTo(buttonType.name)
         }
     }
 }
