@@ -20,8 +20,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 internal class InlineAutocompleteController(
-    private val placesClient: PlacesClientProxy?,
-    private val stripeHostedProxy: PlacesClientProxy?,
+    private val placesClient: PlacesClientProxy,
     private val config: AutocompleteAddressInteractor.Config,
     private val coroutineScope: CoroutineScope,
     private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
@@ -38,12 +37,8 @@ internal class InlineAutocompleteController(
     val inlinePredictionsState: StateFlow<AutocompleteAddressInteractor.InlinePredictionsState> =
         _inlinePredictionsState.asStateFlow()
 
-    private val shouldUseGooglePlaces: Boolean
-        get() = stripeHostedProxy == null && placesClient != null
-
     @OptIn(FlowPreview::class)
     fun observeQueryChanges(query: StateFlow<String>, country: StateFlow<String?>) {
-        if (placesClient == null && stripeHostedProxy == null) return
         observeJob?.cancel()
         observeJob = coroutineScope.launch {
             combine(query, country) { q, c -> q to (c ?: "") }
@@ -69,33 +64,11 @@ internal class InlineAutocompleteController(
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
         selectionJob = coroutineScope.launch {
-            if (shouldUseGooglePlaces) {
-                fetchPlaceFromGooglePlaces(predictionId)
-            } else {
-                fetchPlaceFromStripeProxy(predictionId)
-            }
+            placesClient.fetchPlace(predictionId).fold(
+                onSuccess = ::handleFetchPlaceSuccess,
+                onFailure = { handleFailure() }
+            )
         }
-    }
-
-    private suspend fun fetchPlaceFromStripeProxy(predictionId: String) {
-        val proxy = stripeHostedProxy ?: return
-        proxy.fetchPlace(predictionId).fold(
-            onSuccess = ::handleFetchPlaceSuccess,
-            onFailure = {
-                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                expandFormForHostedFailure()
-            }
-        )
-    }
-
-    private suspend fun fetchPlaceFromGooglePlaces(predictionId: String) {
-        val client = placesClient ?: return
-        client.fetchPlace(predictionId).fold(
-            onSuccess = ::handleFetchPlaceSuccess,
-            onFailure = {
-                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-            }
-        )
     }
 
     private fun handleFetchPlaceSuccess(response: FetchPlaceResponse) {
@@ -137,43 +110,15 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        if (shouldUseGooglePlaces) {
-            fetchPredictionsFromGooglePlaces(query, country)
-        } else {
-            fetchPredictionsFromStripeProxy(query, country)
-        }
-    }
-
-    private suspend fun fetchPredictionsFromStripeProxy(query: String, country: String) {
-        val proxy = stripeHostedProxy ?: return
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        val result = proxy.findAutocompletePredictions(
+        val result = placesClient.findAutocompletePredictions(
             query = query,
             country = country,
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
         )
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = {
-                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-                expandFormForHostedFailure()
-            }
-        )
-    }
-
-    private suspend fun fetchPredictionsFromGooglePlaces(query: String, country: String) {
-        val client = placesClient ?: return
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        val result = client.findAutocompletePredictions(
-            query = query,
-            country = country,
-            limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
-        )
-        result.fold(
-            onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = {
-                _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-            }
+            onFailure = { handleFailure() }
         )
     }
 
@@ -191,6 +136,13 @@ internal class InlineAutocompleteController(
                 )
             }
         )
+    }
+
+    private fun handleFailure() {
+        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+        if (config.shouldUseStripeHostedAutocomplete) {
+            expandFormForHostedFailure()
+        }
     }
 
     private fun expandFormForHostedFailure() {

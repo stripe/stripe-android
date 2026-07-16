@@ -7,6 +7,7 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementNavigator
 import com.stripe.android.paymentsheet.addresselement.NavHostAddressElementNavigator
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -47,12 +48,17 @@ internal class AddressElementViewModelModule {
     internal fun provideGooglePlacesClient(
         context: Context,
         args: AddressElementActivityContract.Args
-    ): PlacesClientProxy? = args.config?.googlePlacesApiKey?.let {
-        PlacesClientProxy.create(
-            context,
-            it,
-            errorReporter = ErrorReporter.createFallbackInstance(context),
-        )
+    ): PlacesClientProxy? {
+        if (args.config?.useStripeHostedAutocomplete == true) {
+            return StripeHostedPlacesClientProxy(googleApiKey = args.config?.googlePlacesApiKey)
+        }
+        return args.config?.googlePlacesApiKey?.let {
+            PlacesClientProxy.create(
+                context,
+                it,
+                errorReporter = ErrorReporter.createFallbackInstance(context),
+            )
+        }
     }
 
     @Provides

@@ -78,16 +78,9 @@ internal class InputAddressViewModel @Inject constructor(
         shouldUseStripeHostedAutocomplete = shouldUseStripeHostedAutocomplete,
     )
 
-    private val stripeHostedProxy: PlacesClientProxy? = if (shouldUseStripeHostedAutocomplete) {
-        StripeHostedPlacesClientProxy(googleApiKey = args.config?.googlePlacesApiKey)
-    } else {
-        null
-    }
-
-    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled) {
+    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled && placesClient != null) {
         InlineAutocompleteController(
             placesClient = placesClient,
-            stripeHostedProxy = stripeHostedProxy,
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
             eventListenerProvider = { eventListener },

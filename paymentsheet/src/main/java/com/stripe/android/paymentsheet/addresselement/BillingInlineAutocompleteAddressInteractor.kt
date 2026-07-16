@@ -6,23 +6,14 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 internal class BillingInlineAutocompleteAddressInteractor(
-    placesClient: PlacesClientProxy?,
+    placesClient: PlacesClientProxy,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
     coroutineScope: CoroutineScope,
-    shouldUseAutocompleteProxyEndpoints: Boolean,
-    googleApiKey: String?,
 ) : AutocompleteAddressInteractor {
     private var eventListener: ((AutocompleteAddressInteractor.Event) -> Unit)? = null
 
-    private val stripeHostedProxy: PlacesClientProxy? = if (shouldUseAutocompleteProxyEndpoints) {
-        StripeHostedPlacesClientProxy(googleApiKey = googleApiKey)
-    } else {
-        null
-    }
-
     private val inlineController = InlineAutocompleteController(
         placesClient = placesClient,
-        stripeHostedProxy = stripeHostedProxy,
         config = autocompleteConfig,
         coroutineScope = coroutineScope,
         eventListenerProvider = { eventListener },
