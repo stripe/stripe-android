@@ -11,8 +11,9 @@ This skill describes how to structure tests in the Stripe Android SDK using fake
 1. **Use fakes over mocks** - Leverage fake implementations for dependencies (see `create-fake` skill)
 2. **Create test scenarios** - Use Scenario classes with `runScenario` functions to organize test setup
 3. **Verify all events consumed** - Call `ensureAllEventsConsumed()` on fakes after test block
-4. **Use Truth assertions** - Always use `assertThat(actual).isEqualTo(expected)` from Google Truth
-5. **Use Turbine for Flow testing** - Test Flow emissions with Turbine's `.test { }` syntax
+4. **Use Truth assertions** - Use Google Truth assertions throughout tests
+5. **Assert relevant fields on complex objects** - Prefer asserting only the fields relevant to the behavior under test rather than comparing against a fully constructed object; use full-object equality only when complete structural equality is the behavior being verified
+6. **Use Turbine for Flow testing** - Test Flow emissions with Turbine's `.test { }` syntax
 
 ## Basic Test Structure
 
@@ -143,7 +144,7 @@ fun `state updates when data changes`() = runScenario {
 | What | Pattern |
 |------|---------|
 | Test entry point | `fun \`test name\`() = runScenario { }` |
-| Assertions | `assertThat(actual).isEqualTo(expected)` |
+| Assertions | Use Truth assertions that match the behavior under test |
 | Flow testing | `flow.test { assertThat(awaitItem()).isEqualTo(x) }` |
 | Fake call tracking | `assertThat(fake.calls.awaitItem()).isEqualTo(call)` |
 | Fake validation | `ensureAllEventsConsumed()` — automatic in runScenario |
