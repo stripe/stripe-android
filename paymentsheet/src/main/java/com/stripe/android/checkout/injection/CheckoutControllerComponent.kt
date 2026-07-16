@@ -186,7 +186,6 @@ internal interface CheckoutControllerModule {
     @Binds
     fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
 
-
     companion object {
         private const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"
 
