@@ -18,13 +18,11 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.state.LinkState
-import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
@@ -32,12 +30,9 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultExpressCheckoutElementInteractorTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
-    private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
 
     @get:Rule
-    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
-        .around(destroyControllerRule)
-        .around(PaymentConfigurationTestRule(applicationContext))
+    val paymentConfigurationRule = PaymentConfigurationTestRule(applicationContext)
 
     @Test
     fun `state contains provided express buttons`() {
@@ -159,16 +154,11 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
     ): DefaultExpressCheckoutElementInteractor {
         val savedStateHandle = SavedStateHandle()
-        val checkoutController = destroyControllerRule.track(
-            CheckoutController.Builder(
-                application = applicationContext,
-                savedStateHandle = savedStateHandle,
-            ).build()
-        )
-        CheckoutControllerStateHolder(
+        val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = FakeErrorReporter(),
-        ).state = CheckoutControllerStateFactory.create(
+        )
+        stateHolder.state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = CheckoutController.Configuration()
                 .expressCheckoutElement(configuration)
@@ -177,7 +167,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
         return DefaultExpressCheckoutElementInteractor(
             linkAccountHolder = linkAccountHolder,
-            checkoutController = checkoutController,
+            stateHolder = stateHolder,
         )
     }
 
