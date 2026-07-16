@@ -56,7 +56,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.Status.asStatus(): CheckoutSession.Status {
+internal fun CheckoutSessionResponse.Status.asStatus(): CheckoutSession.Status {
     return when (this) {
         CheckoutSessionResponse.Status.OPEN -> CheckoutSession.Status.Open
         CheckoutSessionResponse.Status.COMPLETE -> CheckoutSession.Status.Complete
@@ -66,7 +66,7 @@ private fun CheckoutSessionResponse.Status.asStatus(): CheckoutSession.Status {
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.TaxStatus.asTax(): CheckoutSession.Tax {
+internal fun CheckoutSessionResponse.TaxStatus.asTax(): CheckoutSession.Tax {
     val status = when (this) {
         CheckoutSessionResponse.TaxStatus.READY -> {
             CheckoutSession.Tax.Status.Ready
@@ -85,7 +85,7 @@ private fun CheckoutSessionResponse.TaxStatus.asTax(): CheckoutSession.Tax {
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): CheckoutSession.TotalSummary {
+internal fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): CheckoutSession.TotalSummary {
     return CheckoutSession.TotalSummary(
         subtotal = subtotal,
         totalDueToday = totalDueToday,
@@ -98,7 +98,7 @@ private fun CheckoutSessionResponse.TotalSummaryResponse.asTotalSummary(): Check
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.DiscountAmount.asDiscountAmount(): CheckoutSession.DiscountAmount {
+internal fun CheckoutSessionResponse.DiscountAmount.asDiscountAmount(): CheckoutSession.DiscountAmount {
     return CheckoutSession.DiscountAmount(
         amount = amount,
         displayName = displayName,
@@ -116,7 +116,7 @@ private fun CheckoutSessionResponse.TaxAmount.asTaxAmount(): CheckoutSession.Tax
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSession.ShippingRate {
+internal fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSession.ShippingRate {
     return CheckoutSession.ShippingRate(
         id = id,
         amount = amount,
@@ -126,7 +126,7 @@ private fun CheckoutSessionResponse.ShippingRate.asShippingRate(): CheckoutSessi
 }
 
 @OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionResponse.LineItem.asLineItem(): CheckoutSession.LineItem {
+internal fun CheckoutSessionResponse.LineItem.asLineItem(): CheckoutSession.LineItem {
     return CheckoutSession.LineItem(
         id = id,
         name = name,

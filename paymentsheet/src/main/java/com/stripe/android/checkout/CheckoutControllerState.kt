@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -45,6 +46,20 @@ internal data class CheckoutControllerState(
     override val billingAddress: Address.State? get() = collectedDetails.billingAddress
 
     fun asCheckoutSession(): CheckoutSession {
-        return checkoutSessionResponse.asCheckoutSession(flagImages)
+        return CheckoutSession(
+            id = checkoutSessionResponse.id,
+            status = checkoutSessionResponse.status.asStatus(),
+            liveMode = checkoutSessionResponse.liveMode,
+            currency = checkoutSessionResponse.currency,
+            customerEmail = checkoutSessionResponse.customerEmail,
+            tax = checkoutSessionResponse.taxStatus.asTax(),
+            totalSummary = checkoutSessionResponse.totalSummary?.asTotalSummary(),
+            lineItems = checkoutSessionResponse.lineItems.map { it.asLineItem() },
+            shippingOptions = checkoutSessionResponse.shippingOptions.map { it.asShippingRate() },
+            currencySelectorOptions = CurrencySelectorOptionsFactory.create(
+                adaptivePricingInfo = checkoutSessionResponse.adaptivePricingInfo,
+                flagImages = flagImages,
+            ),
+        )
     }
 }
