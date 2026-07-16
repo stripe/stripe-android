@@ -58,6 +58,7 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
 
         setContent {
             val status by viewModel.status.collectAsState()
+            val isExpressCheckoutElementAvailable by viewModel.controller.isExpressCheckoutElementAvailable.collectAsState()
 
             PlaygroundTheme(
                 content = {
@@ -73,7 +74,10 @@ internal class CheckoutControllerExampleActivity : AppCompatActivity() {
                             if (session != null) {
                                 LineItemsSection(session)
                                 TotalSummarySection(session)
-                                presenter.expressCheckoutElement().Content()
+                                // TODO: you'd probably want to animate in content.
+                                if (isExpressCheckoutElementAvailable) {
+                                    presenter.expressCheckoutElement().Content()
+                                }
                                 paymentElement.PaymentOptionsContent()
                             }
                         }
