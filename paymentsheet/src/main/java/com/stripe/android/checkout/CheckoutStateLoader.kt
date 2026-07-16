@@ -59,7 +59,7 @@ internal class CheckoutStateLoader @Inject constructor(
                     .asPaymentSheet()
             )
             .googlePay(
-                googlePay = configuration.googlePayConfiguration.asPaymentSheet()
+                googlePay = configuration.googlePayConfiguration?.asPaymentSheet()
             )
             .build()
 

@@ -2,7 +2,6 @@ package com.stripe.android.checkout
 
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
-import kotlin.jvm.JvmName
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun GooglePayConfiguration.State.asPaymentSheet(): PaymentSheet.GooglePayConfiguration =
@@ -13,11 +12,6 @@ internal fun GooglePayConfiguration.State.asPaymentSheet(): PaymentSheet.GoogleP
         buttonType = buttonType.asPaymentSheet(),
         additionalEnabledNetworks = additionalEnabledNetworks,
     )
-
-@OptIn(CheckoutSessionPreview::class)
-@JvmName("asNullablePaymentSheet")
-internal fun GooglePayConfiguration.State?.asPaymentSheet(): PaymentSheet.GooglePayConfiguration? =
-    this?.asPaymentSheet()
 
 @OptIn(CheckoutSessionPreview::class)
 private fun GooglePayConfiguration.Environment.asPaymentSheet():
