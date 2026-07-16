@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
@@ -27,8 +28,10 @@ import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilterFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -71,6 +74,7 @@ import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @SuppressWarnings("TooManyFunctions")
@@ -221,6 +225,16 @@ internal abstract class PaymentSheetCommonModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+
+        @Provides
+        fun provideApiRequestOptionsProvider(
+            paymentConfig: Provider<PaymentConfiguration>,
+        ): ApiRequestOptionsProvider = ApiRequestOptionsProvider {
+            ApiRequest.Options(
+                apiKey = paymentConfig.get().publishableKey,
+                stripeAccount = paymentConfig.get().stripeAccountId,
+            )
         }
     }
 }

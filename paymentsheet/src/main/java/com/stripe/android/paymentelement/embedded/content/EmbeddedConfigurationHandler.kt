@@ -6,6 +6,7 @@ import com.stripe.android.common.coroutines.CoalescingOrchestrator
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.MutableApiRequestOptionsProvider
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -27,6 +28,7 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val sheetStateHolder: SheetStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
+    private val apiRequestOptionsProvider: MutableApiRequestOptionsProvider,
 ) : EmbeddedConfigurationHandler {
 
     private var cache: ConfigurationCache?
@@ -44,6 +46,8 @@ internal class DefaultEmbeddedConfigurationHandler @Inject constructor(
         configuration: EmbeddedPaymentElement.Configuration,
         initializationMode: PaymentElementLoader.InitializationMode,
     ): Result<PaymentElementLoader.State> {
+        apiRequestOptionsProvider.update(configuration.apiConfiguration)
+
         val targetConfiguration = configuration.asCommonConfiguration()
 
         val arguments = Arguments(

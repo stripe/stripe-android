@@ -3,14 +3,18 @@ package com.stripe.android.paymentelement.embedded.content
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ApiConfiguration
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.MutableApiRequestOptionsProvider
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedConfigurationHandler.ConfigurationCache
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -315,6 +319,45 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         assertThat(second.await()).isEqualTo(expectedResult.getOrThrow())
     }
 
+    @Test
+    fun `update is called with apiConfiguration before load`() = runScenario {
+        val apiConfiguration = ApiConfiguration(publishableKey = "pk_test_custom")
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .apiConfiguration(apiConfiguration)
+            .build()
+        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
+
+        handler.configure(
+            configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
+        )
+
+        val options = apiRequestOptionsProvider.get()
+        assertThat(options.apiKey).isEqualTo(apiConfiguration.publishableKey)
+    }
+
+    @Test
+    fun `update is called with null apiConfiguration when configuration has no apiConfiguration`() = runScenario {
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
+        loader.emit(loader.createSuccess(configuration.asCommonConfiguration()))
+
+        handler.configure(
+            configuration = configuration,
+            initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
+                PaymentSheet.IntentConfiguration(
+                    mode = PaymentSheet.IntentConfiguration.Mode.Setup(currency = "USD"),
+                )
+            ),
+        )
+
+        val options = apiRequestOptionsProvider.get()
+        assertThat(options.apiKey).isEqualTo(FALLBACK_PUBLISHABLE_KEY)
+    }
+
     private fun runScenario(
         block: suspend Scenario.() -> Unit
     ) {
@@ -322,11 +365,15 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             val loader = FakePaymentElementLoader()
             val savedStateHandle = SavedStateHandle()
             val sheetStateHolder = SheetStateHolder(savedStateHandle)
+            val apiRequestOptionsProvider = MutableApiRequestOptionsProvider(
+                paymentConfig = { PaymentConfiguration(publishableKey = FALLBACK_PUBLISHABLE_KEY) }
+            )
             val handler = DefaultEmbeddedConfigurationHandler(
                 loader,
                 savedStateHandle,
                 sheetStateHolder,
                 internalRowSelectionCallback = { null },
+                apiRequestOptionsProvider = apiRequestOptionsProvider,
             )
             Scenario(
                 loader = loader,
@@ -334,6 +381,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
                 handler = handler,
                 testScope = this,
                 sheetStateHolder = sheetStateHolder,
+                apiRequestOptionsProvider = apiRequestOptionsProvider,
             ).apply {
                 block()
             }
@@ -347,6 +395,7 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
         val handler: DefaultEmbeddedConfigurationHandler,
         val testScope: TestScope,
         val sheetStateHolder: SheetStateHolder,
+        val apiRequestOptionsProvider: MutableApiRequestOptionsProvider,
     )
 
     private class FakePaymentElementLoader : PaymentElementLoader {
@@ -393,5 +442,9 @@ internal class DefaultEmbeddedConfigurationHandlerTest {
             loadCalledTurbine.add(initializationMode)
             return resultTurbine.awaitItem()
         }
+    }
+
+    companion object {
+        private const val FALLBACK_PUBLISHABLE_KEY = "pk_test_fallback"
     }
 }

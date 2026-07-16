@@ -13,10 +13,13 @@ import com.stripe.android.common.spms.LinkInlineSignupAvailability
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.taptoadd.TapToAddMode
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
@@ -59,6 +62,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
@@ -244,5 +248,19 @@ internal interface EmbeddedActivityModule {
             listOfNotNull(promotion),
             eventReporter
         )
+
+        @Provides
+        @Singleton
+        fun provideApiRequestOptionsProvider(
+            configuration: EmbeddedPaymentElement.Configuration,
+            fallback: Provider<PaymentConfiguration>,
+        ): ApiRequestOptionsProvider = ApiRequestOptionsProvider {
+            configuration.apiConfiguration?.let {
+                ApiRequest.Options(apiKey = it.publishableKey, stripeAccount = it.stripeAccountId)
+            } ?: ApiRequest.Options(
+                apiKey = fallback.get().publishableKey,
+                stripeAccount = fallback.get().stripeAccountId,
+            )
+        }
     }
 }
