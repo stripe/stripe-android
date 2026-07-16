@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -140,6 +141,9 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        embeddedConfiguration: EmbeddedPaymentElement.Configuration =
+            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
     ) = CheckoutControllerState(
         key = DEFAULT_KEY,
         configuration = CheckoutController.Configuration().build(),
@@ -147,8 +151,8 @@ internal class CheckoutControllerStateHolderTest {
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         integrationLaunched = false,
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-        embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        paymentMethodMetadata = paymentMethodMetadata,
+        embeddedConfiguration = embeddedConfiguration,
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,

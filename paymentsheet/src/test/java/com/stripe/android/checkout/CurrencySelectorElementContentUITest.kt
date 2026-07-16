@@ -9,6 +9,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
@@ -139,7 +140,16 @@ internal class CurrencySelectorElementContentUITest {
 
         runBlocking { controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow() }
 
-        val element = controller.createPresenter(composeRule.activity).currencySelectorElement()
+        // Creating the presenter wires the embedded sheet launcher, which registers an
+        // ActivityResultLauncher — that must happen before the activity is STARTED, mirroring how a
+        // host registers the presenter during onCreate. Drop to CREATED to register, then resume.
+        val scenario = composeRule.activityRule.scenario
+        scenario.moveToState(Lifecycle.State.CREATED)
+        lateinit var element: CurrencySelectorElement
+        scenario.onActivity { activity ->
+            element = controller.createPresenter(activity).currencySelectorElement()
+        }
+        scenario.moveToState(Lifecycle.State.RESUMED)
         if (setContent) {
             composeRule.setContent {
                 element.Content()

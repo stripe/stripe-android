@@ -35,6 +35,7 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateDataSource
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
@@ -101,6 +102,7 @@ import javax.inject.Singleton
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
         NfcScanningAvailabilityModule::class,
         PaymentOptionCardArtModule::class,
+        PaymentElementModule::class,
     ],
 )
 internal interface CheckoutControllerComponent {
@@ -185,6 +187,11 @@ internal interface CheckoutControllerModule {
 
     @Binds
     fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
+
+    @Binds
+    fun bindsEmbeddedConfirmationStateDataSource(
+        impl: CheckoutControllerStateHolder
+    ): EmbeddedConfirmationStateDataSource
 
     companion object {
         private const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"

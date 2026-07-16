@@ -1,7 +1,5 @@
 package com.stripe.android.paymentelement.embedded.content
 
-import android.os.Parcelable
-import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
@@ -20,7 +18,6 @@ import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -42,7 +39,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 import javax.inject.Provider
 import javax.inject.Singleton
@@ -51,14 +47,6 @@ import kotlin.coroutines.CoroutineContext
 internal interface EmbeddedContentHelper {
     val embeddedContent: StateFlow<EmbeddedContent?>
     val walletButtonsContent: StateFlow<WalletButtonsContent?>
-
-    fun dataLoaded(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        appearance: Embedded,
-        embeddedViewDisplaysMandateText: Boolean,
-    )
-
-    fun clearEmbeddedContent()
 
     fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher)
 
@@ -71,7 +59,6 @@ internal interface EmbeddedContentHelper {
 @Singleton
 internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
@@ -86,16 +73,14 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     private val confirmationHandler: ConfirmationHandler,
-    private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
+    private val confirmationStateDataSource: EmbeddedConfirmationStateDataSource,
     private val linkPaymentLauncher: LinkPaymentLauncher,
     private val linkAccountHolder: LinkAccountHolder,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper
 ) : EmbeddedContentHelper {
 
-    private val state: StateFlow<State?> = savedStateHandle.getStateFlow(
-        key = STATE_KEY_EMBEDDED_CONTENT,
-        initialValue = null
-    )
+    private val state: StateFlow<EmbeddedContentState?> =
+        confirmationStateDataSource.embeddedConfirmationState.mapAsStateFlow { it?.toEmbeddedContentState() }
 
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
@@ -143,23 +128,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         }
     }
 
-    override fun dataLoaded(
-        paymentMethodMetadata: PaymentMethodMetadata,
-        appearance: Embedded,
-        embeddedViewDisplaysMandateText: Boolean,
-    ) {
-        eventReporter.onShowNewPaymentOptions()
-        savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
-            paymentMethodMetadata = paymentMethodMetadata,
-            appearance = appearance,
-            embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
-        )
-    }
-
-    override fun clearEmbeddedContent() {
-        savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = null
-    }
-
     override fun setSheetLauncher(sheetLauncher: EmbeddedSheetLauncher) {
         this.sheetLauncher = sheetLauncher
     }
@@ -187,7 +155,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             paymentMethodMetadata = state.paymentMethodMetadata,
             customerState = customerStateHolder.customer.value,
             selection = selectionHolder.selection.value,
-            embeddedConfirmationState = confirmationStateHolder.state,
+            embeddedConfirmationState = confirmationStateDataSource.embeddedConfirmationState.value,
         )
     }
 
@@ -196,7 +164,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     ): WalletButtonsInteractor {
         return DefaultWalletButtonsInteractor.create(
             embeddedLinkHelper = embeddedLinkHelper,
-            confirmationStateHolder = confirmationStateHolder,
+            confirmationStateDataSource = confirmationStateDataSource,
             confirmationHandler = confirmationHandler,
             coroutineScope = coroutineScope,
             errorReporter = errorReporter,
@@ -243,7 +211,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = combineAsStateFlow(
                 confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
-                confirmationStateHolder.stateFlow.mapAsStateFlow { it != null },
+                confirmationStateDataSource.embeddedConfirmationState.mapAsStateFlow { it != null },
             ) { confirmationStateValid, configurationStateValid ->
                 confirmationStateValid && configurationStateValid
             },
@@ -259,14 +227,14 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
-                    embeddedConfirmationState = confirmationStateHolder.state,
+                    embeddedConfirmationState = confirmationStateDataSource.embeddedConfirmationState.value,
                 )
             },
             transitionToFormScreen = { code ->
                 sheetLauncher?.launchForm(
                     code = code,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    embeddedConfirmationState = confirmationStateHolder.state,
+                    embeddedConfirmationState = confirmationStateDataSource.embeddedConfirmationState.value,
                     customerState = customerStateHolder.customer.value,
                     promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(
                         code = code,
@@ -288,8 +256,8 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             shouldUpdateVerticalModeSelection = { paymentMethodCode ->
-                val isConfirmFlow = confirmationStateHolder.state?.configuration?.formSheetAction ==
-                    EmbeddedPaymentElement.FormSheetAction.Confirm
+                val isConfirmFlow = confirmationStateDataSource.embeddedConfirmationState.value
+                    ?.configuration?.formSheetAction == EmbeddedPaymentElement.FormSheetAction.Confirm
                 if (isConfirmFlow) {
                     val requiresFormScreen = paymentMethodCode != null &&
                         formHelper.formTypeForCode(paymentMethodCode) == FormType.UserInteractionRequired
@@ -334,7 +302,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
-                    embeddedConfirmationState = confirmationStateHolder.state,
+                    embeddedConfirmationState = confirmationStateDataSource.embeddedConfirmationState.value,
                 )
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
@@ -350,15 +318,12 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private fun setSelection(paymentSelection: PaymentSelection?) {
         selectionHolder.setSelection(paymentSelection)
     }
+}
 
-    @Parcelize
-    class State(
-        val paymentMethodMetadata: PaymentMethodMetadata,
-        val appearance: Embedded,
-        val embeddedViewDisplaysMandateText: Boolean,
-    ) : Parcelable
-
-    companion object {
-        const val STATE_KEY_EMBEDDED_CONTENT = "STATE_KEY_EMBEDDED_CONTENT"
-    }
+private fun EmbeddedConfirmationStateHolder.State.toEmbeddedContentState(): EmbeddedContentState {
+    return EmbeddedContentState(
+        paymentMethodMetadata = paymentMethodMetadata,
+        appearance = configuration.appearance.embeddedAppearance,
+        embeddedViewDisplaysMandateText = configuration.embeddedViewDisplaysMandateText,
+    )
 }

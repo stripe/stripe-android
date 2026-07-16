@@ -52,6 +52,29 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial projects confirmation state from the committed state`() = runScenario {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        // The reused embedded sheet launcher reads this projection to build its launch args, so it
+        // must mirror the committed state's metadata, configuration, and selection.
+        val confirmationState = requireNotNull(stateHolder.embeddedConfirmationState.value)
+        assertThat(confirmationState.paymentMethodMetadata).isEqualTo(stateHolder.state?.paymentMethodMetadata)
+        assertThat(confirmationState.configuration).isEqualTo(stateHolder.state?.embeddedConfiguration)
+        assertThat(confirmationState.selection).isEqualTo(stateHolder.state?.paymentSelection)
+    }
+
+    @Test
+    fun `reload projects the chosen selection into the confirmation state`() = runScenario(
+        loaderSelection = PaymentSelection.GooglePay,
+        chosenSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+    ) {
+        loader.reload(committedState(paymentSelection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION))
+
+        assertThat(stateHolder.embeddedConfirmationState.value?.selection)
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+    }
+
+    @Test
     fun `loadInitial uses the provided merchant display name`() = runScenario(
         merchantDisplayName = "Acme Corp",
     ) {

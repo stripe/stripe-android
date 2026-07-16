@@ -292,8 +292,15 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
+    /**
+     * Creates a [CheckoutPresenter] bound to [activity]. Registers the activity result launchers the
+     * presented sheets need, so this must be called before [activity] is `STARTED` (e.g. from
+     * `onCreate`); calling it once the activity is started throws from `registerForActivityResult`.
+     */
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        return checkoutPresenterSubcomponentFactory.create().presenter
+        val subcomponent = checkoutPresenterSubcomponentFactory.create(activity)
+        subcomponent.initializer.initialize()
+        return subcomponent.presenter
     }
 
     fun destroy() {

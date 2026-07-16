@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -44,7 +45,8 @@ internal class DefaultEmbeddedStateHelperTest {
         }
 
         confirmationHandler.bootstrapTurbine.awaitItem()
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem().appearance)
+        eventReporter.showNewPaymentOptionsCalls.awaitItem()
+        assertThat(confirmationStateHolder.state?.configuration?.appearance?.embeddedAppearance)
             .isEqualTo(Embedded(Embedded.RowStyle.FlatWithRadio.default))
     }
 
@@ -64,6 +66,7 @@ internal class DefaultEmbeddedStateHelperTest {
         }
 
         confirmationHandler.bootstrapTurbine.awaitItem()
+        eventReporter.showNewPaymentOptionsCalls.awaitItem()
         assertThat(StripeTheme.colorsLightMutable.componentBorder)
             .isEqualTo(
                 Color(
@@ -73,7 +76,7 @@ internal class DefaultEmbeddedStateHelperTest {
 
         // Reset appearance
         PaymentSheet.Appearance().parseAppearance()
-        embeddedContentHelper.dataLoadedTurbine.awaitItem()
+        assertThat(confirmationStateHolder.state).isNotNull()
     }
 
     @Test
@@ -89,11 +92,11 @@ internal class DefaultEmbeddedStateHelperTest {
         selectionHolder.previousNewSelections.putParcelable("card", PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
 
         confirmationHandler.bootstrapTurbine.awaitItem()
+        eventReporter.showNewPaymentOptionsCalls.awaitItem()
         assertThat(stateHelper.state).isNotNull()
         assertThat(confirmationStateHolder.state).isNotNull()
         assertThat(customerStateHolder.customer.value).isEqualTo(PaymentSheetFixtures.EMPTY_CUSTOMER_STATE)
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
 
         stateHelper.state = null
 
@@ -102,7 +105,6 @@ internal class DefaultEmbeddedStateHelperTest {
         assertThat(customerStateHolder.customer.value).isNull()
         assertThat(selectionHolder.selection.value).isNull()
         assertThat(selectionHolder.previousNewSelections.isEmpty).isTrue()
-        assertThat(embeddedContentHelper.clearEmbeddedContentTurbine.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
@@ -117,7 +119,8 @@ internal class DefaultEmbeddedStateHelperTest {
         }
 
         confirmationHandler.bootstrapTurbine.awaitItem()
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        eventReporter.showNewPaymentOptionsCalls.awaitItem()
+        assertThat(confirmationStateHolder.state).isNotNull()
     }
 
     @Test
@@ -136,7 +139,8 @@ internal class DefaultEmbeddedStateHelperTest {
         }
 
         confirmationHandler.bootstrapTurbine.awaitItem()
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        eventReporter.showNewPaymentOptionsCalls.awaitItem()
+        assertThat(confirmationStateHolder.state).isNotNull()
     }
 
     @Test
@@ -156,7 +160,8 @@ internal class DefaultEmbeddedStateHelperTest {
         }
 
         confirmationHandler.bootstrapTurbine.awaitItem()
-        assertThat(embeddedContentHelper.dataLoadedTurbine.awaitItem()).isNotNull()
+        eventReporter.showNewPaymentOptionsCalls.awaitItem()
+        assertThat(confirmationStateHolder.state).isNotNull()
     }
 
     @Test
@@ -200,7 +205,7 @@ internal class DefaultEmbeddedStateHelperTest {
     fun `confirmation handler is bootstrapped when state is set`() = testScenario {
         setState()
         assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata).isNotNull()
-        embeddedContentHelper.dataLoadedTurbine.awaitItem()
+        eventReporter.showNewPaymentOptionsCalls.awaitItem()
     }
 
     private fun testScenario(
@@ -222,13 +227,13 @@ internal class DefaultEmbeddedStateHelperTest {
             selectionHolder = selectionHolder,
             coroutineScope = backgroundScope,
         )
-        val embeddedContentHelper = FakeEmbeddedContentHelper()
+        val eventReporter = FakeEventReporter()
         val confirmationHandler = FakeConfirmationHandler()
         val stateHelper = DefaultEmbeddedStateHelper(
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             confirmationStateHolder = confirmationStateHolder,
-            embeddedContentHelper = embeddedContentHelper,
+            eventReporter = eventReporter,
             internalRowSelectionCallback = { rowSelectionCallback },
             confirmationHandler = confirmationHandler,
         )
@@ -237,20 +242,20 @@ internal class DefaultEmbeddedStateHelperTest {
             confirmationStateHolder = confirmationStateHolder,
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
-            embeddedContentHelper = embeddedContentHelper,
+            eventReporter = eventReporter,
             stateHelper = stateHelper,
             confirmationHandler = confirmationHandler,
         ).block()
 
-        embeddedContentHelper.validate()
         confirmationHandler.validate()
+        eventReporter.validate()
     }
 
     private class Scenario(
         val confirmationStateHolder: EmbeddedConfirmationStateHolder,
         val customerStateHolder: CustomerStateHolder,
         val selectionHolder: EmbeddedSelectionHolder,
-        val embeddedContentHelper: FakeEmbeddedContentHelper,
+        val eventReporter: FakeEventReporter,
         val stateHelper: EmbeddedStateHelper,
         val confirmationHandler: FakeConfirmationHandler,
     ) {

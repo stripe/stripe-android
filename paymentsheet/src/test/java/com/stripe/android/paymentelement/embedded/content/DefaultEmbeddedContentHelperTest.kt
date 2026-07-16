@@ -9,15 +9,14 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
-import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -43,93 +42,71 @@ internal class DefaultEmbeddedContentHelperTest {
     val coroutineTestRule = CoroutineTestRule()
 
     @Test
-    fun `dataLoaded updates savedStateHandle with paymentMethodMetadata`() = testScenario {
-        assertThat(savedStateHandle.get<PaymentMethodMetadata?>(STATE_KEY_EMBEDDED_CONTENT))
-            .isNull()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
-        embeddedContentHelper.dataLoaded(paymentMethodMetadata, appearance, embeddedViewDisplaysMandateText = true)
-        val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
-        assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
-        assertThat(state?.appearance).isEqualTo(appearance)
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `dataLoaded emits embeddedContent event`() = testScenario {
+    fun `embeddedContent emits content when state is present`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-            )
+            confirmationStateHolder.state = confirmationState()
             assertThat(awaitItem()).isNotNull()
         }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
-    fun `dataLoaded emits walletButtonsContent event`() = testScenario {
+    fun `walletButtonsContent emits content when state is present`() = testScenario {
         embeddedContentHelper.walletButtonsContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-            )
+            confirmationStateHolder.state = confirmationState()
             assertThat(awaitItem()).isNotNull()
         }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
-    fun `embeddedContent emits null when clearEmbeddedContent is called`() = testScenario {
+    fun `embeddedContent emits null when state is cleared`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-            )
+            confirmationStateHolder.state = confirmationState()
             assertThat(awaitItem()).isNotNull()
-            embeddedContentHelper.clearEmbeddedContent()
+            confirmationStateHolder.state = null
             assertThat(awaitItem()).isNull()
         }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
-    fun `walletButtonsContent emits null when clearEmbeddedContent is called`() = testScenario {
+    fun `walletButtonsContent emits null when state is cleared`() = testScenario {
         embeddedContentHelper.walletButtonsContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-            )
+            confirmationStateHolder.state = confirmationState()
             assertThat(awaitItem()).isNotNull()
-            embeddedContentHelper.clearEmbeddedContent()
+            confirmationStateHolder.state = null
             assertThat(awaitItem()).isNull()
         }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
 
     @Test
-    fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
-        setup = {
-            set(
-                STATE_KEY_EMBEDDED_CONTENT,
-                DefaultEmbeddedContentHelper.State(
-                    PaymentMethodMetadataFactory.create(),
-                    Embedded(Embedded.RowStyle.FloatingButton.default),
-                    embeddedViewDisplaysMandateText = true,
-                )
-            )
-        }
+    fun `initializing with existing state emits content`() = testScenario(
+        initialConfirmationState = confirmationState(),
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNotNull()
+        }
+    }
+
+    @Test
+    fun `embeddedContent is not rebuilt on a selection-only confirmation state change`() = testScenario(
+        initialConfirmationState = confirmationState(selection = null),
+    ) {
+        embeddedContentHelper.embeddedContent.test {
+            assertThat(awaitItem()).isNotNull()
+
+            // A selection-only change projects to an equal EmbeddedContentState, so the content flow
+            // dedupes via mapAsStateFlow's distinctUntilChanged and doesn't rebuild the payment method list.
+            confirmationStateHolder.state = confirmationStateHolder.state?.copy(
+                selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION,
+            )
+
+            expectNoEvents()
+            // The underlying state genuinely changed, so the absence of a re-emission is meaningful.
+            assertThat(confirmationStateHolder.state?.selection)
+                .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         }
     }
 
@@ -143,16 +120,7 @@ internal class DefaultEmbeddedContentHelperTest {
 
     @Test
     fun `presentPaymentOptions reports error when launcher is null`() = testScenario(
-        setup = {
-            set(
-                STATE_KEY_EMBEDDED_CONTENT,
-                DefaultEmbeddedContentHelper.State(
-                    PaymentMethodMetadataFactory.create(),
-                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                    embeddedViewDisplaysMandateText = true,
-                )
-            )
-        }
+        initialConfirmationState = confirmationState(),
     ) {
         embeddedContentHelper.presentPaymentOptions()
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
@@ -165,16 +133,13 @@ internal class DefaultEmbeddedContentHelperTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = createCustomerState()
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        val confirmationState = confirmationState(
+            paymentMethodMetadata = paymentMethodMetadata,
+            selection = selection,
+        )
         testScenario(
+            initialConfirmationState = confirmationState,
             setup = {
-                set(
-                    STATE_KEY_EMBEDDED_CONTENT,
-                    DefaultEmbeddedContentHelper.State(
-                        paymentMethodMetadata,
-                        Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                        embeddedViewDisplaysMandateText = true,
-                    )
-                )
                 set(CustomerStateHolder.SAVED_CUSTOMER, customerState)
                 set(DefaultEmbeddedSelectionHolder.EMBEDDED_SELECTION_KEY, selection)
             }
@@ -188,22 +153,33 @@ internal class DefaultEmbeddedContentHelperTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = customerState,
                     selection = selection,
-                    embeddedConfirmationState = null,
+                    embeddedConfirmationState = confirmationState,
                 )
             )
             assertThat(errorReporter.getLoggedErrors()).isEmpty()
         }
     }
 
+    private fun confirmationState(
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        selection: PaymentSelection? = null,
+        configuration: EmbeddedPaymentElement.Configuration =
+            EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+    ) = EmbeddedConfirmationStateHolder.State(
+        paymentMethodMetadata = paymentMethodMetadata,
+        selection = selection,
+        configuration = configuration,
+    )
+
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
-        val savedStateHandle: SavedStateHandle,
-        val eventReporter: FakeEventReporter,
+        val confirmationStateHolder: EmbeddedConfirmationStateHolder,
         val errorReporter: FakeErrorReporter,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
     private fun testScenario(
+        initialConfirmationState: EmbeddedConfirmationStateHolder.State? = null,
         setup: SavedStateHandle.() -> Unit = {},
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
@@ -218,6 +194,12 @@ internal class DefaultEmbeddedContentHelperTest {
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
         val errorReporter = FakeErrorReporter()
+        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
+            savedStateHandle = savedStateHandle,
+            selectionHolder = selectionHolder,
+            coroutineScope = backgroundScope,
+        )
+        confirmationStateHolder.state = initialConfirmationState
         val immediateActionHandler = DefaultEmbeddedRowSelectionImmediateActionHandler(
             coroutineScope = backgroundScope,
             internalRowSelectionCallback = { null }
@@ -225,7 +207,6 @@ internal class DefaultEmbeddedContentHelperTest {
 
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = backgroundScope,
-            savedStateHandle = savedStateHandle,
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
             uiContext = Dispatchers.Unconfined,
@@ -238,18 +219,12 @@ internal class DefaultEmbeddedContentHelperTest {
             customerStateHolder = DefaultCustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
-                customerMetadata = stateFlowOf(
-                    PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
-                ),
+                customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
                 paymentMethodMetadataFlow = stateFlowOf(null),
             ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,
-            confirmationStateHolder = EmbeddedConfirmationStateHolder(
-                savedStateHandle = savedStateHandle,
-                selectionHolder = selectionHolder,
-                coroutineScope = backgroundScope,
-            ),
+            confirmationStateDataSource = confirmationStateHolder,
             rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = errorReporter,
             internalRowSelectionCallback = { null },
@@ -260,8 +235,7 @@ internal class DefaultEmbeddedContentHelperTest {
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
+            confirmationStateHolder = confirmationStateHolder,
             errorReporter = errorReporter,
         ).block()
         confirmationHandler.validate()

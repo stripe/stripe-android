@@ -5,6 +5,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateDataSource
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -26,7 +28,7 @@ import javax.inject.Singleton
 internal class CheckoutControllerStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-) : EmbeddedSelectionHolder {
+) : EmbeddedSelectionHolder, EmbeddedConfirmationStateDataSource {
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
         set(value) {
@@ -38,6 +40,21 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     val checkoutSession: StateFlow<CheckoutSession?> =
         stateFlow.mapAsStateFlow { it?.asCheckoutSession() }
+
+    // The reused embedded sheet launcher and wallet buttons read this to build their launch args. It
+    // projects the already-owned state rather than duplicating it in a separate holder: the selection
+    // comes straight from [CheckoutControllerState.paymentSelection], so later row picks stay in sync
+    // without a collector.
+    override val embeddedConfirmationState: StateFlow<EmbeddedConfirmationStateHolder.State?> =
+        stateFlow.mapAsStateFlow { state ->
+            state?.let {
+                EmbeddedConfirmationStateHolder.State(
+                    paymentMethodMetadata = it.paymentMethodMetadata,
+                    selection = it.paymentSelection,
+                    configuration = it.embeddedConfiguration,
+                )
+            }
+        }
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }

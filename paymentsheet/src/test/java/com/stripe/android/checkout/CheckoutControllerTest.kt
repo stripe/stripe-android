@@ -16,6 +16,7 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
@@ -234,12 +235,15 @@ internal class CheckoutControllerTest {
     @Test
     fun `destroy clears the committed state`() = runConfigureScenario {
         result.getOrThrow()
-        // Pre-condition: configure committed a non-null state so the clear is observable.
+        // Pre-condition: configure committed a non-null state (and the confirmation state the sheet
+        // launcher reads) so the clear is observable.
         assertThat(committedState).isNotNull()
+        assertThat(committedConfirmationState).isNotNull()
 
         controller.destroy()
 
         assertThat(committedState).isNull()
+        assertThat(committedConfirmationState).isNull()
         assertThat(controller.checkoutSession.value).isNull()
     }
 
@@ -963,6 +967,12 @@ internal class CheckoutControllerTest {
         // SavedStateHandle in the production graph.
         val committedState: CheckoutControllerState?
             get() = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter()).state
+
+        // The confirmation state the reused sheet launcher reads, projected from the committed
+        // controller state in the shared SavedStateHandle (no longer a separate persisted key).
+        val committedConfirmationState: EmbeddedConfirmationStateHolder.State?
+            get() = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter())
+                .embeddedConfirmationState.value
     }
 
     // Configures a controller from a fresh init, then hands it to [block] alongside the shared
