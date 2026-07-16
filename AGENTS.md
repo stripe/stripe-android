@@ -35,3 +35,4 @@ Multi-module Android library for payment processing and financial services.
 - `create-fake` — fake implementations with Turbine call tracking
 - `compose-tests` — Compose UI tests with composeRule, Robolectric, node assertions
 - `network-tests` — NetworkRule integration tests with testBodyFromFile and fixture patterns
+- When asserting complex objects in tests, prefer asserting only the fields relevant to the behavior under test rather than comparing against a fully constructed object. Use full-object equality only when complete structural equality is the behavior being verified.
