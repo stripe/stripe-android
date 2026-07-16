@@ -21,6 +21,7 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -97,6 +98,32 @@ internal class CheckoutStateLoaderTest {
             assertThat(stateHolder.state?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
                 .isEqualTo(PSFull)
         }
+
+    @Test
+    fun `loadInitial propagates googlePayConfiguration from the checkout configuration`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .googlePayConfiguration(
+                GooglePayConfiguration(
+                    GooglePayConfiguration.Environment.Production,
+                    "CA",
+                )
+                    .label("Total")
+                    .buttonType(GooglePayConfiguration.ButtonType.Checkout)
+                    .additionalEnabledNetworks(listOf("INTERAC"))
+            )
+            .build()
+
+        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+
+        val actual = requireNotNull(stateHolder.state?.embeddedConfiguration?.googlePay)
+        assertThat(actual.environment)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
+        assertThat(actual.countryCode).isEqualTo("CA")
+        assertThat(actual.label).isEqualTo("Total")
+        assertThat(actual.buttonType)
+            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
+        assertThat(actual.additionalEnabledNetworks).containsExactly("INTERAC")
+    }
 
     @Test
     fun `reload routes the selection through the chooser`() = runScenario(
