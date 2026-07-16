@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressElement
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -18,26 +19,25 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+// DependentLocality and SortingCode are both IdentifierSpec("") - the same value - so only one
+// of them is ever a distinct member of a Set<IdentifierSpec>.
+private val ALL_ADDRESS_FIELDS: Set<IdentifierSpec> = FieldType.entries
+    .filterNot { it == FieldType.Name }
+    .map { it.identifierSpec }
+    .toSet()
+
 @RunWith(RobolectricTestRunner::class)
 internal class CardBillingAddressElementTest {
     val dropdownFieldController = DropdownFieldController(
         CountryConfig(emptySet())
     )
-    val cardBillingElement = CardBillingAddressElement(
-        IdentifierSpec.Generic("billing_element"),
-        rawValuesMap = emptyMap(),
-        emptySet(),
-        dropdownFieldController,
-        null,
-        null,
-        null
-    )
+    val cardBillingElement = createCardBillingAddressElement()
 
     @Test
     fun `Verify that when US is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            verifyPostalShown(expectMostRecentItem())
+            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
         }
     }
 
@@ -45,7 +45,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when GB is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("GB")
-            verifyPostalShown(expectMostRecentItem())
+            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
         }
     }
 
@@ -53,7 +53,7 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when CA is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("CA")
-            verifyPostalShown(expectMostRecentItem())
+            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
         }
     }
 
@@ -61,122 +61,79 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when DE is selected postal IS hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("DE")
-            verifyPostalHidden(expectMostRecentItem())
+            verifyFieldsShown(expectMostRecentItem())
         }
     }
 
     @Test
     fun `Verify that automatic tax fields are unioned with AVS defaults for IN`() = runTest {
-        val cardBillingElementWithTaxFields = CardBillingAddressElement(
-            identifier = IdentifierSpec.Generic("billing_element"),
-            rawValuesMap = emptyMap(),
-            countryCodes = emptySet(),
-            countryDropdownFieldController = dropdownFieldController,
-            autocompleteAddressInteractorFactory = null,
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
-            requiresBillingAddressForAutomaticTax = true,
-        )
+        val element = createCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
 
-        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+        element.hiddenIdentifiers.test {
             // IN has no AVS default fields, but requires a postal code for automatic tax.
             dropdownFieldController.onRawValueChange("IN")
-            verifyPostalShown(expectMostRecentItem())
+            verifyFieldsShown(expectMostRecentItem(), IdentifierSpec.PostalCode)
         }
     }
 
     @Test
     fun `Verify that automatic tax fields for PR do not require state`() = runTest {
-        val cardBillingElementWithTaxFields = CardBillingAddressElement(
-            identifier = IdentifierSpec.Generic("billing_element"),
-            rawValuesMap = emptyMap(),
-            countryCodes = emptySet(),
-            countryDropdownFieldController = dropdownFieldController,
-            autocompleteAddressInteractorFactory = null,
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
-            requiresBillingAddressForAutomaticTax = true,
-        )
+        val element = createCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
 
-        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+        element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("PR")
-            val hiddenIdentifiers = expectMostRecentItem()
-
-            assertThat(hiddenIdentifiers).containsExactly(
-                IdentifierSpec.Line2,
-                IdentifierSpec.SortingCode,
-                IdentifierSpec.State,
+            verifyFieldsShown(
+                expectMostRecentItem(),
+                IdentifierSpec.Line1,
+                IdentifierSpec.City,
+                IdentifierSpec.PostalCode,
             )
         }
     }
 
     @Test
-    fun `Verify that automatic tax fields are not hidden for US`() = runTest {
-        val cardBillingElementWithTaxFields = CardBillingAddressElement(
-            identifier = IdentifierSpec.Generic("billing_element"),
-            rawValuesMap = emptyMap(),
-            countryCodes = emptySet(),
-            countryDropdownFieldController = dropdownFieldController,
-            autocompleteAddressInteractorFactory = null,
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
-            requiresBillingAddressForAutomaticTax = true,
-        )
+    fun `Verify that automatic tax fields are shown for US`() = runTest {
+        val element = createCardBillingAddressElement(requiresBillingAddressForAutomaticTax = true)
 
-        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+        element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            val hiddenIdentifiers = expectMostRecentItem()
-
-            assertThat(hiddenIdentifiers).containsExactly(
-                IdentifierSpec.Line2,
-                IdentifierSpec.SortingCode,
+            verifyFieldsShown(
+                expectMostRecentItem(),
+                IdentifierSpec.Line1,
+                IdentifierSpec.City,
+                IdentifierSpec.State,
+                IdentifierSpec.PostalCode,
             )
         }
     }
 
     @Test
     fun `Verify that automatic tax fields have no effect when address collection is Never`() = runTest {
-        val cardBillingElementWithTaxFields = CardBillingAddressElement(
-            identifier = IdentifierSpec.Generic("billing_element"),
-            rawValuesMap = emptyMap(),
-            countryCodes = emptySet(),
-            countryDropdownFieldController = dropdownFieldController,
-            autocompleteAddressInteractorFactory = null,
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
+        val element = createCardBillingAddressElement(
+            requiresBillingAddressForAutomaticTax = true,
             collectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Never,
             ),
-            requiresBillingAddressForAutomaticTax = true,
         )
 
-        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+        element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            verifyPostalHidden(expectMostRecentItem())
+            verifyFieldsShown(expectMostRecentItem())
         }
     }
 
     @Test
     fun `Verify that automatic tax fields have no effect when address collection is Full`() = runTest {
-        val cardBillingElementWithTaxFields = CardBillingAddressElement(
-            identifier = IdentifierSpec.Generic("billing_element"),
-            rawValuesMap = emptyMap(),
-            countryCodes = emptySet(),
-            countryDropdownFieldController = dropdownFieldController,
-            autocompleteAddressInteractorFactory = null,
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
+        val element = createCardBillingAddressElement(
+            requiresBillingAddressForAutomaticTax = true,
             collectionConfiguration = BillingDetailsCollectionConfiguration(
                 address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             ),
-            requiresBillingAddressForAutomaticTax = true,
         )
 
-        cardBillingElementWithTaxFields.hiddenIdentifiers.test {
+        element.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            val hiddenIdentifiers = expectMostRecentItem()
-
-            assertThat(hiddenIdentifiers).isEmpty()
+            assertThat(expectMostRecentItem()).isEmpty()
         }
     }
 
@@ -316,26 +273,29 @@ internal class CardBillingAddressElementTest {
         return null
     }
 
-    fun verifyPostalShown(hiddenIdentifiers: Set<IdentifierSpec>) {
-        // DependentLocality and SortingCode are both IdentifierSpec("") - the same value - so
-        // only one of them is a distinct member of this set.
-        Truth.assertThat(hiddenIdentifiers).containsExactly(
-            IdentifierSpec.Line1,
-            IdentifierSpec.Line2,
-            IdentifierSpec.City,
-            IdentifierSpec.SortingCode,
-            IdentifierSpec.State,
-        )
+    /**
+     * Asserts which fields are shown to the customer - the complement of [hiddenIdentifiers] -
+     * rather than which are hidden, since that's what a human reviewing a test failure actually
+     * wants to check against the expected UX.
+     */
+    private fun verifyFieldsShown(hiddenIdentifiers: Set<IdentifierSpec>, vararg shownFields: IdentifierSpec) {
+        Truth.assertThat(ALL_ADDRESS_FIELDS - hiddenIdentifiers).containsExactlyElementsIn(shownFields.toSet())
     }
 
-    fun verifyPostalHidden(hiddenIdentifiers: Set<IdentifierSpec>) {
-        Truth.assertThat(hiddenIdentifiers).containsExactly(
-            IdentifierSpec.Line1,
-            IdentifierSpec.Line2,
-            IdentifierSpec.City,
-            IdentifierSpec.PostalCode,
-            IdentifierSpec.SortingCode,
-            IdentifierSpec.State,
+    private fun createCardBillingAddressElement(
+        requiresBillingAddressForAutomaticTax: Boolean = false,
+        collectionConfiguration: BillingDetailsCollectionConfiguration = BillingDetailsCollectionConfiguration(),
+    ): CardBillingAddressElement {
+        return CardBillingAddressElement(
+            identifier = IdentifierSpec.Generic("billing_element"),
+            rawValuesMap = emptyMap(),
+            countryCodes = emptySet(),
+            countryDropdownFieldController = dropdownFieldController,
+            autocompleteAddressInteractorFactory = null,
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+            collectionConfiguration = collectionConfiguration,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 
