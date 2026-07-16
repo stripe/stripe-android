@@ -454,7 +454,7 @@ class CardDefinitionTest {
     }
 
     @Test
-    fun `createFormElements shows line1, city, state, and postal code for US when automatic tax billing address is required`() {
+    fun `createFormElements shows line1, city, state, and postal code for US when automatic tax billing is required`() {
         val formElements = CardDefinition.formElements(
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(

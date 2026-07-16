@@ -432,10 +432,7 @@ internal data class PaymentMethodMetadata(
                 disableSsdOcrCardScan = elementsSession.disableSsdOcrCardScan,
                 cardArts = cardArts,
                 shouldUseAutocompleteProxyEndpoints = elementsSession.shouldUseAutocompleteProxyEndpoints,
-                requiresBillingAddressForAutomaticTax = (initializationMode as? PaymentElementLoader
-                    .InitializationMode.CheckoutSession)
-                    ?.checkoutSessionResponse
-                    ?.taxStatus == CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS,
+                requiresBillingAddressForAutomaticTax = initializationMode.requiresBillingAddressForAutomaticTax(),
                 paymentMethodLayout = paymentMethodLayout,
             )
         }
@@ -513,4 +510,10 @@ internal data class PaymentMethodMetadata(
             )
         }
     }
+}
+
+private fun PaymentElementLoader.InitializationMode.requiresBillingAddressForAutomaticTax(): Boolean {
+    val checkoutSession = this as? PaymentElementLoader.InitializationMode.CheckoutSession ?: return false
+    return checkoutSession.checkoutSessionResponse.taxStatus ==
+        CheckoutSessionResponse.TaxStatus.REQUIRES_BILLING_ADDRESS
 }

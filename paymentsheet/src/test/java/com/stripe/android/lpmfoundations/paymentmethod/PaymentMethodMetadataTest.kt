@@ -2180,7 +2180,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax true for checkout session requiring billing address`() {
+    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax true when checkout session requires it`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
@@ -2211,7 +2211,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false for checkout session ready for tax`() {
+    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false when tax status is ready`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
@@ -2242,7 +2242,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false for non-checkout initialization modes`() {
+    fun `createForPaymentElement sets requiresBillingAddressForAutomaticTax false for non-checkout modes`() {
         val elementsSession = createElementsSession(
             intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         )
