@@ -74,6 +74,7 @@ import com.stripe.android.crypto.onramp.ui.UserAttestationScreenAction
 import com.stripe.android.crypto.onramp.ui.VerifyKycActivityResult
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.identity.IdentityVerificationSheet.VerificationFlowResult
+import com.stripe.android.link.LinkAppearance
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.model.DateOfBirth
@@ -1702,7 +1703,7 @@ class OnrampInteractorTest {
         OnrampConfiguration()
             .merchantDisplayName("merchant-display-name")
             .publishableKey("pk_test_12345")
-            .appearance(mock())
+            .appearance(LinkAppearance())
             .cryptoCustomerId(cryptoCustomerId)
             .additionalSdkVersions(additionalSdkVersions)
             .build()
