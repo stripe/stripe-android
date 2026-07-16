@@ -112,42 +112,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         }
     }
 
-    @Test
-    fun `computeAvailableExpressButtonTypes keeps only wallets returned by metadata`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            availableWallets = listOf(WalletType.GooglePay),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(
-            WalletType.GooglePay
-        )
-    }
-
-    @Test
-    fun `computeAvailableExpressButtonTypes filters out wallets disabled by configuration`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
-            configuration = ExpressCheckoutElement.Configuration()
-                .linkVisibility(ExpressCheckoutElement.Configuration.LinkVisibility.Never),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(
-            WalletType.GooglePay
-        )
-    }
-
-    @Test
-    fun `computeAvailableExpressButtonTypes returns all available wallets`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(
-            WalletType.Link,
-            WalletType.GooglePay,
-        )
-    }
-
     private fun createInteractor(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
@@ -168,23 +132,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         return DefaultExpressCheckoutElementInteractor(
             linkAccountHolder = linkAccountHolder,
             stateHolder = stateHolder,
-        )
-    }
-
-    private fun computeAvailableExpressButtonTypes(
-        availableWallets: List<WalletType> = emptyList(),
-        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
-    ): List<WalletType> {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            availableWallets = availableWallets,
-        )
-
-        return createInteractor(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
-        ).computeAvailableExpressButtonTypes(
-            paymentMethodMetadata = paymentMethodMetadata,
-            expressCheckoutElementConfiguration = configuration.build(),
         )
     }
 }
