@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.CheckoutBillingAddressRequirements
 import com.stripe.android.common.nfcscan.NfcScanningAction
 import com.stripe.android.common.taptoadd.TapToAddCardDetailsAction
 import com.stripe.android.core.strings.resolvableString
@@ -25,7 +24,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.lpmfoundations.paymentmethod.link.LinkFormElement
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentMethodIncentive
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -270,7 +268,6 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.toInternal(): Bi
     )
 }
 
-@OptIn(CheckoutSessionPreview::class)
 private fun cardBillingElements(
     allowedCountries: Set<String>,
     collectionConfiguration: BillingDetailsCollectionConfiguration,
@@ -296,11 +293,7 @@ private fun cardBillingElements(
         shippingValuesMap = shippingValues,
         collectionConfiguration = collectionConfiguration,
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-        automaticTaxRequiredFieldsLookup = if (requiresBillingAddressForAutomaticTax) {
-            { countryCode -> CheckoutBillingAddressRequirements.requiredFields(countryCode).toSet() }
-        } else {
-            null
-        },
+        requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
     )
 
     val title = when {

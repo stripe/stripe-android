@@ -49,7 +49,7 @@ class CardBillingAddressElement(
     private val collectionConfiguration: BillingDetailsCollectionConfiguration =
         BillingDetailsCollectionConfiguration(),
     private val shouldHideCountryOnNoAddressCollection: Boolean = true,
-    private val automaticTaxRequiredFieldsLookup: ((countryCode: String) -> Set<IdentifierSpec>)? = null,
+    private val requiresBillingAddressForAutomaticTax: Boolean = false,
 ) : AddressFieldsElement {
     private val nameConfig = if (collectionConfiguration.collectName) {
         AddressFieldConfiguration.REQUIRED
@@ -179,9 +179,11 @@ class CardBillingAddressElement(
                         "US", "GB", "CA" -> setOf(FieldType.PostalCode.identifierSpec)
                         else -> emptySet()
                     }
-                    val automaticTaxShownFields = countryCode?.let {
-                        automaticTaxRequiredFieldsLookup?.invoke(it)
-                    }.orEmpty()
+                    val automaticTaxShownFields = if (requiresBillingAddressForAutomaticTax && countryCode != null) {
+                        automaticTaxRequiredFields(countryCode)
+                    } else {
+                        emptySet()
+                    }
                     val shownFields = avsShownFields + automaticTaxShownFields
 
                     FieldType.entries
@@ -210,4 +212,21 @@ class CardBillingAddressElement(
     override fun onValidationStateChanged(isValidating: Boolean) {
         addressElement.onValidationStateChanged(isValidating)
     }
+}
+
+/**
+ * Billing address fields required in addition to the country, for a Checkout Session using
+ * automatic tax with the billing address as the tax source. Most countries only need the
+ * country. Source: https://docs.stripe.com/tax/customer-locations
+ */
+private val additionalAutomaticTaxFieldsByCountry: Map<String, Set<IdentifierSpec>> = mapOf(
+    "CA" to setOf(IdentifierSpec.PostalCode),
+    "GB" to setOf(IdentifierSpec.PostalCode),
+    "IN" to setOf(IdentifierSpec.PostalCode),
+    "PR" to setOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.PostalCode),
+    "US" to setOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.State, IdentifierSpec.PostalCode),
+)
+
+private fun automaticTaxRequiredFields(countryCode: String): Set<IdentifierSpec> {
+    return additionalAutomaticTaxFieldsByCountry[countryCode.uppercase()].orEmpty()
 }
