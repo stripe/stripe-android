@@ -1,8 +1,13 @@
 package com.stripe.android.checkout.ece
 
+import android.app.Application
 import androidx.lifecycle.SavedStateHandle
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.CheckoutController
+import com.stripe.android.checkout.CheckoutControllerStateFactory
+import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
@@ -13,11 +18,27 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.testing.CleanupTestRule
+import com.stripe.android.testing.FakeErrorReporter
+import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
 @OptIn(CheckoutSessionPreview::class)
+@RunWith(RobolectricTestRunner::class)
 internal class DefaultExpressCheckoutElementInteractorTest {
+    private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
+    private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(destroyControllerRule)
+        .around(PaymentConfigurationTestRule(applicationContext))
+
     @Test
     fun `state contains provided express buttons`() {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
@@ -97,54 +118,83 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `create keeps only wallets returned by metadata`() {
-        val interactor = createInteractor(
+    fun `computeAvailableExpressButtonTypes keeps only wallets returned by metadata`() {
+        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
             availableWallets = listOf(WalletType.GooglePay),
         )
 
-        assertThat(interactor.availableExpressButtonTypes).containsExactly(
+        assertThat(availableExpressButtonTypes).containsExactly(
             WalletType.GooglePay
         )
     }
 
     @Test
-    fun `create filters out wallets disabled by configuration`() {
-        val interactor = createInteractor(
+    fun `computeAvailableExpressButtonTypes filters out wallets disabled by configuration`() {
+        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
             configuration = ExpressCheckoutElement.Configuration()
                 .linkVisibility(ExpressCheckoutElement.Configuration.LinkVisibility.Never),
         )
 
-        assertThat(interactor.availableExpressButtonTypes).containsExactly(
+        assertThat(availableExpressButtonTypes).containsExactly(
             WalletType.GooglePay
         )
     }
 
     @Test
-    fun `create returns all available wallets()`() {
-        val interactor = createInteractor(
+    fun `computeAvailableExpressButtonTypes returns all available wallets`() {
+        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
         )
 
-        assertThat(interactor.availableExpressButtonTypes).containsExactly(
+        assertThat(availableExpressButtonTypes).containsExactly(
             WalletType.Link,
             WalletType.GooglePay,
         )
     }
 
     private fun createInteractor(
-        availableWallets: List<WalletType> = emptyList(),
-        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            availableWallets = availableWallets,
-        ),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
     ): DefaultExpressCheckoutElementInteractor {
-        return DefaultExpressCheckoutElementInteractor.Factory(
-            linkAccountHolder = linkAccountHolder,
-        ).create(
+        val savedStateHandle = SavedStateHandle()
+        val checkoutController = destroyControllerRule.track(
+            CheckoutController.Builder(
+                application = applicationContext,
+                savedStateHandle = savedStateHandle,
+            ).build()
+        )
+        CheckoutControllerStateHolder(
+            savedStateHandle = savedStateHandle,
+            errorReporter = FakeErrorReporter(),
+        ).state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
-            expressCheckoutElementConfig = configuration.build(),
+            configuration = CheckoutController.Configuration()
+                .expressCheckoutElement(configuration)
+                .build(),
+        )
+
+        return DefaultExpressCheckoutElementInteractor(
+            linkAccountHolder = linkAccountHolder,
+            checkoutController = checkoutController,
+        )
+    }
+
+    private fun computeAvailableExpressButtonTypes(
+        availableWallets: List<WalletType> = emptyList(),
+        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+    ): List<WalletType> {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = availableWallets,
+        )
+
+        return createInteractor(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = configuration,
+        ).computeAvailableExpressButtonTypes(
+            paymentMethodMetadata = paymentMethodMetadata,
+            expressCheckoutElementConfiguration = configuration.build(),
         )
     }
 }

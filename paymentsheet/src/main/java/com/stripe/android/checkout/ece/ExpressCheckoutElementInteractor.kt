@@ -2,6 +2,7 @@
 
 package com.stripe.android.checkout.ece
 
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
@@ -55,6 +56,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         )
     }
 
+    @VisibleForTesting
     fun computeAvailableExpressButtonTypes(
         paymentMethodMetadata: PaymentMethodMetadata,
         expressCheckoutElementConfiguration: ExpressCheckoutElement.Configuration.State,
