@@ -29,6 +29,7 @@ pipelines:
         parallel: 5
         depends_on:
           - build-paymentsheet-e2e
+      run-paymentsheet-google-pay-e2e: { }
       check-dependencies: { }
       verify-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
@@ -417,6 +418,37 @@ workflows:
           title: Export PaymentSheet E2E test results
           inputs:
             - test_title: "PaymentSheet E2E tests (shard $PAYMENTSHEET_E2E_SHARD_DISPLAY)"
+    meta:
+      bitrise.io:
+        stack: ubuntu-resolute-26.04-bitrise-2026-android
+        machine_type_id: g2.linux.x-large
+  run-paymentsheet-google-pay-e2e:
+    before_run:
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - android-build-for-ui-testing@0:
+          title: Build PaymentSheet Google Pay E2E test APKs
+          timeout: 1200
+          inputs:
+            - module: paymentsheet-example
+            - variant: baseDebug
+            - arguments: -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN
+      - virtual-device-testing-for-android@1:
+          title: Run TestGooglePay on virtual devices
+          timeout: 3600
+          inputs:
+            - test_type: instrumentation
+            - auto_google_login: "true"
+            - inst_test_targets: class com.stripe.android.lpm.TestGooglePay
+            - download_test_results: "true"
+            - test_timeout: "2700"
+      - deploy-to-bitrise-io@2:
+          title: Deploy Google Pay E2E test results
+          inputs:
+            - notify_user_groups: none
+            - is_enable_public_page: "false"
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android

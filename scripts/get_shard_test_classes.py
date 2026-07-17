@@ -39,11 +39,16 @@ def class_names_from_test_files(test_directory, test_file_names):
     return class_names
 
 
+EXCLUDED_TEST_CLASSES = {
+    'com.stripe.android.lpm.TestGooglePay',
+}
+
 def get_all_test_class_names():
     directory = 'paymentsheet-example/src/androidTest/java/'
     _, kotlin_file_names = run_fast_scandir(directory, [".kt"])
     test_file_names = test_files_from_kotlin_files(kotlin_file_names)
-    return sorted(class_names_from_test_files(directory, test_file_names))
+    class_names = class_names_from_test_files(directory, test_file_names)
+    return sorted(c for c in class_names if c not in EXCLUDED_TEST_CLASSES)
 
 
 def get_shard_classes(shard_index, num_shards):
