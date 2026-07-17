@@ -693,19 +693,11 @@ internal class DefaultEditCardDetailsInteractorTest {
     }
 
     @Test
-    fun whenRequiresBillingAddressForAutomaticTaxIsTrueForCaThenOnlyPostalCodeIsRequired() = runTest {
+    fun whenRequiresBillingAddressForAutomaticTaxIsTrueForInThenOnlyPostalCodeIsRequired() = runTest {
+        // IN is deliberately chosen over CA/US: it is NOT in the AVS postal-code list, so postal
+        // code is only ever shown via the automatic-tax path. That isolates the tax logic from AVS.
         val handler = handler(
-            billingDetails = PaymentMethod.BillingDetails(
-                address = Address(
-                    line1 = "1234 Main Street",
-                    city = "Toronto",
-                    country = "CA",
-                    postalCode = "M5H 2N2",
-                ),
-                email = "jenny.rosen@example.com",
-                name = "Jenny Rosen",
-                phone = "123-456-7890",
-            ),
+            billingDetails = inBillingDetails(),
             addressCollectionMode = AddressCollectionMode.Automatic,
             requiresBillingAddressForAutomaticTax = true,
         )
@@ -717,8 +709,33 @@ internal class DefaultEditCardDetailsInteractorTest {
             billingDetailsForm.hiddenElements.test {
                 val hiddenIdentifiers = awaitItem()
 
-                // CA only needs postal code in addition to country; line1/city/state stay hidden.
+                // IN only needs postal code in addition to country; line1/city/state stay hidden.
                 assertThat(hiddenIdentifiers).doesNotContain(IdentifierSpec.PostalCode)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
+            }
+        }
+    }
+
+    @Test
+    fun whenRequiresBillingAddressForAutomaticTaxIsFalseForInThenPostalCodeIsHidden() = runTest {
+        // Without the flag IN falls back to AVS, which does not include IN, so postal code is hidden.
+        // This is the half of the pair that CA could not prove (CA is in AVS, so it shows postal either way).
+        val handler = handler(
+            billingDetails = inBillingDetails(),
+            addressCollectionMode = AddressCollectionMode.Automatic,
+            requiresBillingAddressForAutomaticTax = false,
+        )
+
+        handler.state.test {
+            val state = awaitItem()
+            val billingDetailsForm = requireNotNull(state.billingDetailsForm)
+
+            billingDetailsForm.hiddenElements.test {
+                val hiddenIdentifiers = awaitItem()
+
+                assertThat(hiddenIdentifiers).contains(IdentifierSpec.PostalCode)
                 assertThat(hiddenIdentifiers).contains(IdentifierSpec.Line1)
                 assertThat(hiddenIdentifiers).contains(IdentifierSpec.City)
                 assertThat(hiddenIdentifiers).contains(IdentifierSpec.State)
@@ -764,6 +781,18 @@ internal class DefaultEditCardDetailsInteractorTest {
             assertThat(validatingBillingForm.addressSectionElement.controller.validationMessage.value).isNotNull()
         }
     }
+
+    private fun inBillingDetails() = PaymentMethod.BillingDetails(
+        address = Address(
+            line1 = "1 MG Road",
+            city = "Bengaluru",
+            country = "IN",
+            postalCode = "560001",
+        ),
+        email = "jenny.rosen@example.com",
+        name = "Jenny Rosen",
+        phone = "123-456-7890",
+    )
 
     private val EditCardDetailsInteractor.uiState
         get() = this.state.value

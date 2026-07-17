@@ -706,6 +706,18 @@ class DefaultUpdatePaymentMethodInteractorTest {
     }
 
     @Test
+    fun editCardDetailsInteractorFactory_forwardsRequiresBillingAddressForAutomaticTax() {
+        val fakeEditCardFactory = FakeEditCardDetailsInteractorFactory()
+        runScenario(
+            editCardDetailsInteractorFactory = fakeEditCardFactory,
+            requiresBillingAddressForAutomaticTax = true,
+        ) {
+            interactor.editCardDetailsInteractor
+            assertThat(fakeEditCardFactory.requiresBillingAddressForAutomaticTax).isTrue()
+        }
+    }
+
+    @Test
     fun editCardDetailsInteractorFactory_forwardsAutocompleteAddressInteractorFactory() {
         val fakeEditCardFactory = FakeEditCardDetailsInteractorFactory()
         val fakeAutocompleteFactory = AutocompleteAddressInteractor.Factory {
