@@ -48,6 +48,9 @@ internal class DefaultPaymentMethodFilter @Inject constructor() : PaymentMethodF
             params.cardBrandFilter.isAccepted(paymentMethod) &&
                 fundingAccepted &&
                 paymentMethod.isSupportedWithBillingConfig(params.billingDetailsCollectionConfiguration) &&
+                // Intentionally applies to every saved PM type, not just cards: pay-server's
+                // confirm-time tax guard (finalize_payment_taxes) is not payment-method-type gated,
+                // so any SPM whose billing address can't resolve a tax location 400s at confirm.
                 (
                     !params.requiresBillingAddressForAutomaticTax ||
                         paymentMethod.hasSufficientBillingDetailsForAutomaticTax()

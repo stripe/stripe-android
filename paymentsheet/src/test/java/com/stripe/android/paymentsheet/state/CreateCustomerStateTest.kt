@@ -192,6 +192,29 @@ internal class CreateCustomerStateTest {
 
             val filterCall = filterCalls.awaitItem()
             assertThat(filterCall.paymentMethods).isEqualTo(cards)
+            // Default metadata does not require a billing address for automatic tax.
+            assertThat(filterCall.params.requiresBillingAddressForAutomaticTax).isFalse()
+        }
+    }
+
+    @Test
+    fun `Threads requiresBillingAddressForAutomaticTax into the filter params`() = runScenario {
+        val cards = PaymentMethodFactory.cards(3)
+
+        FakePaymentMethodFilter.test(filteredPaymentMethods = cards) {
+            createCustomerState(
+                initializationMode = DEFAULT_INITIALIZATION_MODE,
+                elementsSession = DEFAULT_ELEMENTS_SESSION.copy(
+                    customer = createElementsSessionCustomer(paymentMethods = cards),
+                ),
+                metadata = PaymentMethodMetadataFactory.create(requiresBillingAddressForAutomaticTax = true)
+                    .copy(customerMetadata = CUSTOMER_SESSION_METADATA),
+                savedSelection = CompletableDeferred(SavedSelection.None),
+                paymentMethodFilter = paymentMethodFilter,
+            )
+
+            val filterCall = filterCalls.awaitItem()
+            assertThat(filterCall.params.requiresBillingAddressForAutomaticTax).isTrue()
         }
     }
 

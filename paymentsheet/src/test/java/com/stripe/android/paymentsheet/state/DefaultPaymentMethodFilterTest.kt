@@ -270,6 +270,62 @@ class DefaultPaymentMethodFilterTest {
         assertThat(observed).isEmpty()
     }
 
+    @Test
+    fun `Applies automatic-tax filter to non-card SPMs too`() = runTest {
+        // pay-server's confirm-time tax guard is not payment-method-type gated, so a bank-account
+        // SPM with an insufficient tax address 400s at confirm just like a card; the filter must
+        // drop it as well. Guards against a future card-only regression.
+        val completeBank = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_bank_complete",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    line1 = "1 Market St",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94111",
+                    country = "US",
+                ),
+            ),
+        )
+        val incompleteBank = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_bank_incomplete",
+            billingDetails = PaymentMethod.BillingDetails(
+                // Missing line1 and state for a US address.
+                address = Address(city = "San Francisco", postalCode = "94111", country = "US"),
+            ),
+        )
+
+        val observed = filter(
+            paymentMethods = listOf(completeBank, incompleteBank),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(completeBank)
+    }
+
+    @Test
+    fun `Applies per-country automatic-tax fields at the filter boundary`() = runTest {
+        // CA requires only a postal code (not the US line1/city/state set), proving the per-country
+        // lookup is consulted at the filter boundary rather than hardcoding US behavior.
+        val caComplete = PaymentMethodFactory.card(id = "pm_ca_complete").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(billingDetails = PaymentMethod.BillingDetails(address = Address(postalCode = "K1A0B1", country = "CA")))
+        val caMissingPostal = PaymentMethodFactory.card(id = "pm_ca_missing").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(billingDetails = PaymentMethod.BillingDetails(address = Address(country = "CA")))
+
+        val observed = filter(
+            paymentMethods = listOf(caComplete, caMissingPostal),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(caComplete)
+    }
+
     private suspend fun filter(
         paymentMethods: List<PaymentMethod>,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
