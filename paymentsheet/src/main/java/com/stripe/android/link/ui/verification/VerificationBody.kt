@@ -1,7 +1,6 @@
 package com.stripe.android.link.ui.verification
 
 import android.content.Context
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
