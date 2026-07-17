@@ -268,6 +268,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.CryptoOnramp -> {
             val intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                paymentMethodTypes = listOf("link"),
             )
             ElementsSessionParams.DeferredIntentType(
                 locale = clientParams.locale,

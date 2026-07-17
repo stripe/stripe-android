@@ -10,6 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.link.injection.LinkControllerPresenterScope
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.payments.paymentlauncher.PaymentLauncher
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import kotlinx.coroutines.launch
@@ -100,6 +101,7 @@ internal class LinkControllerCoordinator @Inject constructor(
                 ConfirmSetupIntentParams.create(
                     paymentMethodId = paymentMethod.id,
                     clientSecret = clientSecret,
+                    mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
                 )
             )
         }
