@@ -639,6 +639,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .termsDisplay(termsDisplay)
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .userOverrideCountry(userOverrideCountry)
+            .apiConfiguration(apiConfiguration)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
             }
