@@ -16,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -203,5 +204,17 @@ internal class LinkControllerCoordinatorTest {
         presentResultFlow.emit(result)
 
         assertThat(presentResults).containsExactly(result)
+    }
+
+    @Test
+    fun `confirmSetupIntent() emits Failed when no payment method is available`() = runTest {
+        lifecycleOwner.setCurrentState(Lifecycle.State.STARTED)
+        val coordinator = createCoordinator()
+
+        coordinator.confirmSetupIntent("seti_test_secret")
+
+        val captor = argumentCaptor<LinkController.ConfirmSetupIntentResult>()
+        verify(viewModel).emitConfirmSetupIntentResult(captor.capture())
+        assertThat(captor.firstValue).isInstanceOf(LinkController.ConfirmSetupIntentResult.Failed::class.java)
     }
 }

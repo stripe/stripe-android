@@ -1367,6 +1367,30 @@ class LinkControllerInteractorTest {
     }
 
     @Test
+    fun `onLinkActivityResult() with present flow Completed stores createdPaymentMethod in state`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        interactor.presentFull(FakeActivityResultLauncher())
+
+        val expectedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+        linkAccountManager.createPaymentMethodResult = Result.success(expectedPaymentMethod)
+
+        interactor.presentResultFlow.test {
+            interactor.onLinkActivityResult(
+                LinkActivityResult.Completed(
+                    linkAccountUpdate = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
+                    selectedPayment = createTestPaymentMethod(),
+                    shippingAddress = null,
+                )
+            )
+            awaitItem() // wait for PresentResult
+        }
+
+        assertThat(interactor.lastCreatedPaymentMethod).isEqualTo(expectedPaymentMethod)
+    }
+
+    @Test
     fun `onLinkActivityResult() with present flow Failed emits PresentResult Failed`() = runTest {
         val interactor = createInteractor()
         configure(interactor)

@@ -118,7 +118,9 @@ internal class LinkControllerInteractor @Inject constructor(
     init {
         coroutineScope.launch {
             _presentSelectionSucceededFlow.collect {
-                val presentResult = performCreatePaymentMethod(apiKey = null).fold(
+                val pmResult = performCreatePaymentMethod(apiKey = null)
+                updateState { it.copy(createdPaymentMethod = pmResult.getOrNull()) }
+                val presentResult = pmResult.fold(
                     onSuccess = { pm -> LinkController.PresentResult.Completed(pm) },
                     onFailure = { error -> LinkController.PresentResult.Failed(error) }
                 )
@@ -137,8 +139,8 @@ internal class LinkControllerInteractor @Inject constructor(
         MutableSharedFlow<LinkController.ConfirmSetupIntentResult>(extraBufferCapacity = 1)
     val confirmSetupIntentResultFlow = _confirmSetupIntentResultFlow.asSharedFlow()
 
-    internal val setupIntentClientSecret: String?
-        get() = _state.value.setupIntentClientSecret
+    internal val lastCreatedPaymentMethod: PaymentMethod?
+        get() = _state.value.createdPaymentMethod
 
     val paymentMethodMetadata: PaymentMethodMetadata?
         get() = _state.value.paymentMethodMetadata
@@ -194,7 +196,6 @@ internal class LinkControllerInteractor @Inject constructor(
                         it.copy(
                             linkComponent = component,
                             paymentMethodMetadata = paymentMethodMetadata,
-                            setupIntentClientSecret = config.setupIntentClientSecret,
                         )
                     }
                     savedStateHandle[LINK_CONFIGURED_KEY] = true
@@ -590,12 +591,6 @@ internal class LinkControllerInteractor @Inject constructor(
         )
     }
 
-    internal suspend fun performCreatePaymentMethodForConfirmation(): Result<PaymentMethod> {
-        val result = performCreatePaymentMethod(apiKey = null)
-        updateState { it.copy(createdPaymentMethod = result.getOrNull()) }
-        return result
-    }
-
     internal fun onSetupIntentConfirmationResult(result: InternalPaymentResult) {
         val confirmResult = when (result) {
             is InternalPaymentResult.Completed -> {
@@ -794,7 +789,6 @@ internal class LinkControllerInteractor @Inject constructor(
     internal data class State(
         val linkComponent: LinkComponent? = null,
         val paymentMethodMetadata: PaymentMethodMetadata? = null,
-        val setupIntentClientSecret: String? = null,
         val emailInput: String? = null,
         val selectedPaymentMethod: LinkPaymentMethod? = null,
         val createdPaymentMethod: PaymentMethod? = null,
