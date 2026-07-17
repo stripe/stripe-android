@@ -27,14 +27,14 @@ import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
