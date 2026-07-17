@@ -731,7 +731,7 @@ internal class LinkActivityViewModelTest {
             linkAccountManager = linkAccountManager,
             linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
                 selectedPayment = null,
-                shouldShowSecondaryCta = true,
+                canContinueWithoutLink = true,
             ),
         )
 
@@ -761,7 +761,7 @@ internal class LinkActivityViewModelTest {
             linkAccountHolder = linkAccountHolder,
             linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
                 selectedPayment = null,
-                shouldShowSecondaryCta = false,
+                canContinueWithoutLink = false,
             ),
         )
 

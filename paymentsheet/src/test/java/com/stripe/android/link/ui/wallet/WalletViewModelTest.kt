@@ -981,11 +981,11 @@ class WalletViewModelTest {
     fun `secondaryButtonLabel is present based on shouldShowSecondaryCta`() = runTest(dispatcher) {
         val launchMode = LinkLaunchMode.PaymentMethodSelection(
             selectedPayment = null,
-            shouldShowSecondaryCta = true
+            canContinueWithoutLink = true
         )
         listOf(
             launchMode to resolvableString(R.string.stripe_wallet_continue_another_way),
-            launchMode.copy(shouldShowSecondaryCta = false) to null,
+            launchMode.copy(canContinueWithoutLink = false) to null,
         ).forEach { (mode, expected) ->
             assertThat(createViewModel(linkLaunchMode = mode).uiState.value.secondaryButtonLabel)
                 .isEqualTo(expected)

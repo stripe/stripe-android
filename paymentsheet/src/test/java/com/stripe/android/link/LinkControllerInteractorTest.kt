@@ -474,7 +474,7 @@ class LinkControllerInteractorTest {
                 LinkLaunchMode.PaymentMethodSelection(
                     selectedPayment = null,
                     sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
+                    canContinueWithoutLink = false,
                 )
             )
 

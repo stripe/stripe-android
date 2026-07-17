@@ -45,7 +45,6 @@ import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -54,7 +53,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -169,7 +167,7 @@ internal class LinkActivityViewModel @Inject constructor(
     @OptIn(DelicateCoroutinesApi::class)
     private fun handleLogoutClicked() {
         val shouldDismiss = when (val mode = linkLaunchMode) {
-            is LinkLaunchMode.PaymentMethodSelection -> mode.shouldShowSecondaryCta
+            is LinkLaunchMode.PaymentMethodSelection -> mode.canContinueWithoutLink
             else -> true
         }
 
