@@ -7,8 +7,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.hardware.FakeNfcHardwareDelegate
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -20,6 +22,9 @@ internal class DefaultNfcCardScannerTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `scanner emits Scanning then Complete when card read & validator succeeds`() = runScenario(
@@ -168,7 +173,7 @@ internal class DefaultNfcCardScannerTest {
             cardReader = fakeCardReader,
             cardValidator = fakeCardValidator,
             transceiverFactory = fakeTransceiverFactory,
-            viewModelScope = CoroutineScope(dispatcher),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)),
             workContext = dispatcher,
         )
 

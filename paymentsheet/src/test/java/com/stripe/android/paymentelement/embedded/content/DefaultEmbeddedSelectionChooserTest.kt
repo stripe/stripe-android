@@ -18,12 +18,14 @@ import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelecti
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -31,6 +33,9 @@ import org.junit.Test
 internal class DefaultEmbeddedSelectionChooserTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     private val defaultConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
         .build()
@@ -487,7 +492,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             chooser = DefaultEmbeddedSelectionChooser(
                 savedStateHandle = savedStateHandle,
                 formHelperFactory = formHelperFactory,
-                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 eventReporter = FakeEventReporter(),
                 internalRowSelectionCallback = { internalRowSelectionCallback }
             ),

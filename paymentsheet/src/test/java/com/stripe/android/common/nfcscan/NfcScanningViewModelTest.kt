@@ -13,9 +13,12 @@ import com.stripe.android.common.nfcscan.tapzone.TapZone
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -29,6 +32,12 @@ internal class NfcScanningViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `viewState contains tap zone from resolver`() = runScenario(
@@ -184,13 +193,13 @@ internal class NfcScanningViewModelTest {
 
     @Test
     fun `onCleared cancels view model scope`() = runTest(dispatcher) {
-        val viewModelScope = CoroutineScope(dispatcher + Job())
+        val viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher + Job()))
         val viewModel = NfcScanningViewModel(
             viewModelScope = viewModelScope,
             tapZoneResolver = FakeTapZoneResolver(),
             cardScanner = FakeNfcCardScanner(),
             eventReporter = FakeNfcScanningEventReporter(),
-        )
+        ).also { viewModelStoreRule.track(it) }
         val viewModelStore = ViewModelStore().apply {
             put("test", viewModel)
         }
@@ -208,11 +217,11 @@ internal class NfcScanningViewModelTest {
         val fakeCardScanner = FakeNfcCardScanner(stateFlow = scannerState)
         val fakeEventReporter = FakeNfcScanningEventReporter()
         val viewModel = NfcScanningViewModel(
-            viewModelScope = CoroutineScope(dispatcher),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)),
             tapZoneResolver = FakeTapZoneResolver(tapZone),
             cardScanner = fakeCardScanner,
             eventReporter = fakeEventReporter,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(fakeEventReporter.onNfcScanStartedCalls.awaitItem()).isNotNull()
 

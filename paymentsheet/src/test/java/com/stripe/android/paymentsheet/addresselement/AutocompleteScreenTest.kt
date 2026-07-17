@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
@@ -26,9 +27,11 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class AutocompleteScreenTest {
     val composeTestRule = createComposeRule()
+    private val viewModelStoreRule = ViewModelStoreTestRule()
 
     @get:Rule
     val rules: RuleChain = RuleChain.emptyRuleChain()
+        .around(viewModelStoreRule)
         .around(createComposeCleanupRule())
         .around(composeTestRule)
         .around(CoroutineTestRule())
@@ -112,7 +115,7 @@ class AutocompleteScreenTest {
         application = ApplicationProvider.getApplicationContext(),
         eventReporter = TestAddressLauncherEventReporter,
         autocompleteArgs = AutocompleteViewModel.Args(country = "US")
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private class TestPlacesClientProxy(
         private val findAutocompletePredictionsResponse: Result<FindAutocompletePredictionsResponse> =

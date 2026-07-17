@@ -19,21 +19,27 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 
 @Suppress("LargeClass")
 class SavedPaymentMethodMutatorTest {
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `canEdit is correct when no payment methods`() = runScenario {
@@ -971,7 +977,7 @@ class SavedPaymentMethodMutatorTest {
             val savedPaymentMethodMutator = SavedPaymentMethodMutator(
                 paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
                 eventReporter = eventReporter,
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 workContext = coroutineContext,
                 uiContext = coroutineContext,
                 savedPaymentMethodRepository = savedPaymentMethodRepository,
