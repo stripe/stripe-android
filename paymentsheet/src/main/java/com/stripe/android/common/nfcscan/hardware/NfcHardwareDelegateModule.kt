@@ -1,12 +1,13 @@
 package com.stripe.android.common.nfcscan.hardware
 
-import dagger.Binds
+import android.app.Application
 import dagger.Module
+import dagger.Provides
 
 @Module
-internal interface NfcHardwareDelegateModule {
-    @Binds
-    fun bindsNfcHardwareDelegate(
-        delegate: DefaultNfcHardwareDelegate
-    ): NfcHardwareDelegate
+internal class NfcHardwareDelegateModule {
+    @Provides
+    fun providesNfcHardwareDelegate(
+        application: Application
+    ): NfcHardwareDelegate = NfcHardwareDelegate.create(application)
 }
