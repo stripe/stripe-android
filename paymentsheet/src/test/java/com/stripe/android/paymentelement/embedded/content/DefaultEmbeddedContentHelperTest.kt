@@ -240,9 +240,7 @@ internal class DefaultEmbeddedContentHelperTest {
             customerStateHolder = DefaultCustomerStateHolder(
                 savedStateHandle = savedStateHandle,
                 selection = selectionHolder.selection,
-                customerMetadata = stateFlowOf(
-                    PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
-                ),
+                customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
                 paymentMethodMetadataFlow = stateFlowOf(null),
             ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,

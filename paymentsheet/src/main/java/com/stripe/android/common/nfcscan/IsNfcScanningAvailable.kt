@@ -3,11 +3,9 @@ package com.stripe.android.common.nfcscan
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.common.nfcscan.security.IsDeviceSecureForNfc
-import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 
 internal interface IsNfcScanningAvailable {
@@ -20,10 +18,8 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
     private val eventReporter: EventReporter,
     private val mode: EventReporter.Mode,
 ) : IsNfcScanningAvailable {
-    private val exposureLogged = AtomicBoolean(false)
-
     override fun get(metadata: PaymentMethodMetadata): Boolean {
-        val hasRequirements = enableNfcScanning.isEnabled && !metadata.isTapToAddSupported
+        val hasRequirements = metadata.isNfcScanningEnabled && !metadata.isTapToAddSupported
 
         if (!hasRequirements) {
             return false
@@ -35,9 +31,9 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
 
         logExposureIfNeeded(variant, metadata)
 
-        val assignedToTreatment = variant == "treatment"
+        val canUseNfcScanning = variant == "treatment" || variant == null
 
-        return assignedToTreatment &&
+        return canUseNfcScanning &&
             isDeviceSecureForNfc.get() &&
             nfcHardwareDelegate.isAvailable()
     }
@@ -47,10 +43,6 @@ internal class DefaultIsNfcScanningAvailable @Inject constructor(
         metadata: PaymentMethodMetadata,
     ) {
         if (variant == null) {
-            return
-        }
-
-        if (!exposureLogged.compareAndSet(false, true)) {
             return
         }
 
