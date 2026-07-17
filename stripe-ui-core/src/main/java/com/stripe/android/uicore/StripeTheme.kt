@@ -491,9 +491,6 @@ val LocalTextFieldInsets = staticCompositionLocalOf { StripeTheme.textFieldInset
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val LocalStripeThemeIsDark = staticCompositionLocalOf { false }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val LocalStripeThemeIsDarkOverride = staticCompositionLocalOf<Boolean?> { null }
-
 /**
  * Base Theme for Stripe Composables.
  * CAUTION: This theme is mutable by merchant configurations. You shouldn't be passing colors,
@@ -502,7 +499,8 @@ val LocalStripeThemeIsDarkOverride = staticCompositionLocalOf<Boolean?> { null }
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun StripeTheme(
-    colors: StripeColors = StripeTheme.getColors(isSystemInDarkTheme()),
+    isDark: Boolean = isSystemInDarkTheme(),
+    colors: StripeColors = StripeTheme.getColors(isDark),
     shapes: StripeShapes = StripeTheme.shapesMutable,
     typography: StripeTypography = StripeTheme.typographyMutable,
     sectionSpacing: Float? = StripeTheme.customSectionSpacing,
@@ -526,7 +524,6 @@ fun StripeTheme(
     }.getOrDefault(false)
 
     val inspectionMode = LocalInspectionMode.current || isRobolectricTest
-    val isDark = LocalStripeThemeIsDarkOverride.current ?: isSystemInDarkTheme()
 
     CompositionLocalProvider(
         LocalColors provides colors,
@@ -634,6 +631,7 @@ fun MaterialTheme.getBorderStroke(isSelected: Boolean): BorderStroke =
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object StripeTheme {
     const val minContrastForWhite = 2.2
+
     var colorsDarkMutable = StripeThemeDefaults.colorsDark
     var colorsLightMutable = StripeThemeDefaults.colorsLight
 

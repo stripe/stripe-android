@@ -4,9 +4,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.uicore.LocalStripeThemeIsDarkOverride
 import com.stripe.android.uicore.SectionStyle
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
@@ -181,32 +179,32 @@ internal fun StripeThemeForLink(
     sectionStyle: SectionStyle = SectionStyle.Borderless,
     content: @Composable () -> Unit
 ) {
-    val stripeDefaultColors = StripeThemeDefaults.colors(isDark = LinkTheme.colors.isDark)
+    val isDark = LinkTheme.colors.isDark
+    val stripeDefaultColors = StripeThemeDefaults.colors(isDark = isDark)
 
-    CompositionLocalProvider(LocalStripeThemeIsDarkOverride provides LinkTheme.colors.isDark) {
-        StripeTheme(
-            colors = stripeDefaultColors.copy(
-                component = LinkTheme.colors.surfaceSecondary,
-                onComponent = LinkTheme.colors.textPrimary,
-                placeholderText = LinkTheme.colors.textTertiary,
-                componentDivider = LinkTheme.colors.borderDefault,
-                componentBorder = LinkTheme.colors.surfaceSecondary,
-                materialColors = stripeDefaultColors.materialColors.copy(
-                    primary = LinkTheme.colors.borderSelected,
-                    error = LinkTheme.colors.textCritical,
-                )
-            ),
-            shapes = StripeThemeDefaults.shapes.copy(
-                cornerRadius = 12f,
-                bottomSheetCornerRadius = 24f,
-            ),
-            typography = StripeThemeDefaults.typography,
-            sectionSpacing = StripeThemeDefaults.sectionSpacing,
-            sectionStyle = sectionStyle,
-            textFieldInsets = StripeThemeDefaults.textFieldInsets,
-            iconStyle = StripeThemeDefaults.iconStyle,
-        ) {
-            content()
-        }
+    StripeTheme(
+        isDark = isDark,
+        colors = stripeDefaultColors.copy(
+            component = LinkTheme.colors.surfaceSecondary,
+            onComponent = LinkTheme.colors.textPrimary,
+            placeholderText = LinkTheme.colors.textTertiary,
+            componentDivider = LinkTheme.colors.borderDefault,
+            componentBorder = LinkTheme.colors.surfaceSecondary,
+            materialColors = stripeDefaultColors.materialColors.copy(
+                primary = LinkTheme.colors.borderSelected,
+                error = LinkTheme.colors.textCritical,
+            )
+        ),
+        shapes = StripeThemeDefaults.shapes.copy(
+            cornerRadius = 12f,
+            bottomSheetCornerRadius = 24f,
+        ),
+        typography = StripeThemeDefaults.typography,
+        sectionSpacing = StripeThemeDefaults.sectionSpacing,
+        sectionStyle = sectionStyle,
+        textFieldInsets = StripeThemeDefaults.textFieldInsets,
+        iconStyle = StripeThemeDefaults.iconStyle,
+    ) {
+        content()
     }
 }

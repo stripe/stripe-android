@@ -11,7 +11,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.uicore.LocalStripeThemeIsDarkOverride
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.isSystemDarkTheme
 
@@ -36,9 +35,11 @@ internal fun PaymentElementTheme(
 
     CompositionLocalProvider(
         LocalContext provides styleContext,
-        LocalStripeThemeIsDarkOverride provides isDark,
     ) {
-        StripeTheme(colors = StripeTheme.getColors(isDark)) {
+        StripeTheme(
+            isDark = isDark,
+            colors = StripeTheme.getColors(isDark),
+        ) {
             content()
         }
     }
