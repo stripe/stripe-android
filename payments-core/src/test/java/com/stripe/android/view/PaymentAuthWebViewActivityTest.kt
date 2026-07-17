@@ -9,6 +9,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.R
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
@@ -72,6 +73,78 @@ internal class PaymentAuthWebViewActivityTest {
                         sourceId = ""
                     )
                 )
+        }
+    }
+
+    @Test
+    fun `cancelIntentSource sets canceled result for 3DS URL with setatt source`() {
+        val args3ds = ARGS.copy(
+            url = "https://hooks.stripe.com/redirect/authenticate/src_1234/setatt_abc",
+            clientSecret = "seti_xyz_secret_123",
+            shouldCancelSource = true
+        )
+        ActivityScenario.launchActivityForResult<PaymentAuthWebViewActivity>(
+            contract.createIntent(context, args3ds)
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.onOptionsItemSelected(
+                    activity.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+                        .menu.findItem(R.id.action_close)
+                )
+            }
+            val resultIntent = contract.parseResult(REQUEST_CODE, activityScenario.result.resultData)
+            assertThat(resultIntent.flowOutcome)
+                .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+            assertThat(resultIntent.canCancelSource)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `cancelIntentSource sets canceled result for non-3DS URL without network call`() {
+        val argsNon3ds = ARGS.copy(
+            url = "https://example.com/some-other-flow",
+            clientSecret = "pi_abc_secret_456",
+            shouldCancelSource = true
+        )
+        ActivityScenario.launchActivityForResult<PaymentAuthWebViewActivity>(
+            contract.createIntent(context, argsNon3ds)
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.onOptionsItemSelected(
+                    activity.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+                        .menu.findItem(R.id.action_close)
+                )
+            }
+            val resultIntent = contract.parseResult(REQUEST_CODE, activityScenario.result.resultData)
+            assertThat(resultIntent.flowOutcome)
+                .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+            assertThat(resultIntent.canCancelSource)
+                .isTrue()
+        }
+    }
+
+    @Test
+    fun `cancelIntentSource handles payment intent URL with src_ prefix`() {
+        val argsPi = ARGS.copy(
+            url = "https://hooks.stripe.com/redirect/authenticate/src_5678/src_9xyz",
+            clientSecret = "pi_abc_secret_456",
+            shouldCancelSource = true
+        )
+        ActivityScenario.launchActivityForResult<PaymentAuthWebViewActivity>(
+            contract.createIntent(context, argsPi)
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.onOptionsItemSelected(
+                    activity.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
+                        .menu.findItem(R.id.action_close)
+                )
+            }
+            val resultIntent = contract.parseResult(REQUEST_CODE, activityScenario.result.resultData)
+            assertThat(resultIntent.flowOutcome)
+                .isEqualTo(StripeIntentResult.Outcome.CANCELED)
+            assertThat(resultIntent.canCancelSource)
+                .isTrue()
         }
     }
 
