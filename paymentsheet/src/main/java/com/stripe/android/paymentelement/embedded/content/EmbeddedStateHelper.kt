@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.embedded.EmbeddedApiConfigurationHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -19,7 +20,8 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val embeddedContentHelper: EmbeddedContentHelper,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
-    private val confirmationHandler: ConfirmationHandler
+    private val confirmationHandler: ConfirmationHandler,
+    private val apiConfigurationHolder: EmbeddedApiConfigurationHolder,
 ) : EmbeddedStateHelper {
     override var state: EmbeddedPaymentElement.State?
         get() {
@@ -47,6 +49,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         )
 
         state.confirmationState.configuration.appearance.parseAppearance()
+        apiConfigurationHolder.update(state.confirmationState.configuration.apiConfiguration)
         confirmationStateHolder.state = state.confirmationState
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)

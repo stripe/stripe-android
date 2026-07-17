@@ -5,13 +5,16 @@ import android.os.Bundle
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.ApiConfiguration
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedApiConfigurationHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -203,6 +206,20 @@ internal class DefaultEmbeddedStateHelperTest {
         embeddedContentHelper.dataLoadedTurbine.awaitItem()
     }
 
+    @Test
+    fun `handleLoadedState calls apiConfigurationHolder update before setting confirmationState`() = testScenario {
+        val apiConfig = ApiConfiguration(publishableKey = "pk_test_api", stripeAccountId = "acct_api")
+        setState {
+            apiConfiguration(apiConfig)
+        }
+
+        confirmationHandler.bootstrapTurbine.awaitItem()
+        embeddedContentHelper.dataLoadedTurbine.awaitItem()
+
+        assertThat(apiConfigurationHolder.publishableKey).isEqualTo("pk_test_api")
+        assertThat(apiConfigurationHolder.stripeAccountId).isEqualTo("acct_api")
+    }
+
     private fun testScenario(
         rowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
@@ -224,6 +241,10 @@ internal class DefaultEmbeddedStateHelperTest {
         )
         val embeddedContentHelper = FakeEmbeddedContentHelper()
         val confirmationHandler = FakeConfirmationHandler()
+        val apiConfigurationHolder = EmbeddedApiConfigurationHolder(
+            confirmationStateHolder = confirmationStateHolder,
+            paymentConfig = { PaymentConfiguration(publishableKey = "pk_test_fallback") },
+        )
         val stateHelper = DefaultEmbeddedStateHelper(
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
@@ -231,6 +252,7 @@ internal class DefaultEmbeddedStateHelperTest {
             embeddedContentHelper = embeddedContentHelper,
             internalRowSelectionCallback = { rowSelectionCallback },
             confirmationHandler = confirmationHandler,
+            apiConfigurationHolder = apiConfigurationHolder,
         )
 
         Scenario(
@@ -240,6 +262,7 @@ internal class DefaultEmbeddedStateHelperTest {
             embeddedContentHelper = embeddedContentHelper,
             stateHelper = stateHelper,
             confirmationHandler = confirmationHandler,
+            apiConfigurationHolder = apiConfigurationHolder,
         ).block()
 
         embeddedContentHelper.validate()
@@ -253,6 +276,7 @@ internal class DefaultEmbeddedStateHelperTest {
         val embeddedContentHelper: FakeEmbeddedContentHelper,
         val stateHelper: EmbeddedStateHelper,
         val confirmationHandler: FakeConfirmationHandler,
+        val apiConfigurationHolder: EmbeddedApiConfigurationHolder,
     ) {
         fun setState(
             paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),

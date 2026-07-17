@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.state
 import android.os.Parcelable
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -14,6 +13,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.FeatureFlag
 import com.stripe.android.core.utils.FeatureFlags
@@ -60,7 +60,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Provider
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -266,7 +266,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
@@ -305,7 +305,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
-            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            isLiveMode = publishableKeyProvider().isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
         )
 
@@ -487,7 +487,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
-                    silentlyFail = paymentConfiguration.get().isLiveMode(),
+                    silentlyFail = publishableKeyProvider().isLiveMode(),
                 )
             }
         }
@@ -898,6 +898,8 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         paymentMethodMessagePromotionsExperimentHandler.logExposure(metadata)
     }
 }
+
+private fun String.isLiveMode(): Boolean = startsWith("pk_live_")
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)

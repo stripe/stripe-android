@@ -46,6 +46,7 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.image.rememberDrawablePainter
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.paymentelement.embedded.ApiConfiguration
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.parcelize.Parcelize
@@ -305,6 +306,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val apiConfiguration: ApiConfiguration? = null,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -342,6 +344,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var apiConfiguration: ApiConfiguration? = null
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -578,6 +581,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            internal fun apiConfiguration(apiConfiguration: ApiConfiguration?) = apply {
+                this.apiConfiguration = apiConfiguration
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -602,6 +609,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                apiConfiguration = apiConfiguration,
             )
         }
 

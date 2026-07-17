@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -22,7 +23,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Provider
+import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -50,7 +51,8 @@ internal interface PaymentMethodMessagePromotionsHelper {
 @Singleton
 internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val eventReporter: EventReporter
@@ -68,8 +70,8 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 country = intent.countryCode,
                 locale = Locale.getDefault().language,
                 requestOptions = ApiRequest.Options(
-                    apiKey = lazyPaymentConfig.get().publishableKey,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId
+                    apiKey = publishableKeyProvider(),
+                    stripeAccount = stripeAccountIdProvider()
                 )
             )
         }

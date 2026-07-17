@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.state
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -159,9 +158,8 @@ class DefaultPaymentMethodMessagePromotionsHelperTest {
 
         val helper = DefaultPaymentMethodMessagePromotionsHelper(
             stripeRepository = fakeRepository,
-            lazyPaymentConfig = {
-                PaymentConfiguration("pk_123")
-            },
+            publishableKeyProvider = { "pk_123" },
+            stripeAccountIdProvider = { null },
             viewModelScope = this,
             workContext = testDispatcher,
             eventReporter = eventReporter

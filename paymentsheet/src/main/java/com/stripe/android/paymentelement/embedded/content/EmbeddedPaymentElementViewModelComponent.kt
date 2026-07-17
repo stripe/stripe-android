@@ -73,6 +73,7 @@ import javax.inject.Singleton
         LinkHoldbackExposureModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        EmbeddedViewModelCredentialsModule::class,
     ],
 )
 internal interface EmbeddedPaymentElementViewModelComponent {

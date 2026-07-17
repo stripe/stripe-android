@@ -5,6 +5,7 @@ import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.EmbeddedPaymentElement.ConfigureResult
+import com.stripe.android.paymentelement.embedded.EmbeddedApiConfigurationHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +27,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHelper: EmbeddedStateHelper,
+    private val apiConfigurationHolder: EmbeddedApiConfigurationHolder,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : EmbeddedConfigurationCoordinator {
     override suspend fun configure(
@@ -33,6 +35,7 @@ internal class DefaultEmbeddedConfigurationCoordinator @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
     ): ConfigureResult {
         return viewModelScope.async {
+            apiConfigurationHolder.update(configuration.apiConfiguration)
             confirmationStateHolder.state = null
             configurationHandler.configure(
                 configuration = configuration,

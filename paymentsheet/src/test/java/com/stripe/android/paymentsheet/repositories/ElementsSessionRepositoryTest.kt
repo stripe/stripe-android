@@ -5,7 +5,6 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
@@ -137,7 +136,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         ).get(
@@ -172,7 +172,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         ).get(
@@ -248,7 +249,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         ).get(
@@ -282,7 +284,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -317,7 +320,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -352,7 +356,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -384,7 +389,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -433,7 +439,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -476,7 +483,8 @@ internal class ElementsSessionRepositoryTest {
             ApplicationProvider.getApplicationContext(),
             stripeNetworkClient,
             stripeRepository,
-            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            { ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY },
+            { null },
             testDispatcher,
             clientParams = TEST_CLIENT_PARAMS
         )
@@ -1011,7 +1019,8 @@ internal class ElementsSessionRepositoryTest {
         ApplicationProvider.getApplicationContext(),
         stripeNetworkClient,
         stripeRepository,
-        { PaymentConfiguration(publishableKey) },
+        { publishableKey },
+        { null },
         testDispatcher,
         clientParams = TEST_CLIENT_PARAMS,
     )

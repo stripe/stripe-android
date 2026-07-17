@@ -53,10 +53,15 @@ import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
+import javax.inject.Named
+import javax.inject.Provider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Singleton
@@ -121,6 +126,26 @@ internal interface EmbeddedActivityModule {
         @Provides
         fun providesContext(application: Application): Context {
             return application
+        }
+
+        @Provides
+        @Named(PUBLISHABLE_KEY)
+        fun providePublishableKey(
+            configuration: EmbeddedPaymentElement.Configuration,
+            paymentConfig: Provider<PaymentConfiguration>,
+        ): () -> String = {
+            configuration.apiConfiguration?.publishableKey
+                ?: paymentConfig.get().publishableKey
+        }
+
+        @Provides
+        @Named(STRIPE_ACCOUNT_ID)
+        fun provideStripeAccountId(
+            configuration: EmbeddedPaymentElement.Configuration,
+            paymentConfig: Provider<PaymentConfiguration>,
+        ): () -> String? = {
+            configuration.apiConfiguration?.stripeAccountId
+                ?: paymentConfig.get().stripeAccountId
         }
 
         @Provides

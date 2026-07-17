@@ -2,11 +2,12 @@ package com.stripe.android.paymentsheet.repositories
 
 import android.app.Application
 import com.stripe.android.DefaultFraudDetectionDataRepository
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HTTP_INTERNAL_SERVER_ERROR
@@ -28,7 +29,7 @@ import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Provider
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 internal interface ElementsSessionRepository {
@@ -47,7 +48,8 @@ internal class RealElementsSessionRepository @Inject constructor(
     application: Application,
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
@@ -62,12 +64,10 @@ internal class RealElementsSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    // The PaymentConfiguration can change after initialization, so this needs to get a new
-    // request options each time requested.
     private val requestOptions: ApiRequest.Options
         get() = ApiRequest.Options(
-            apiKey = lazyPaymentConfig.get().publishableKey,
-            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+            apiKey = publishableKeyProvider(),
+            stripeAccount = stripeAccountIdProvider(),
         )
 
     override suspend fun get(

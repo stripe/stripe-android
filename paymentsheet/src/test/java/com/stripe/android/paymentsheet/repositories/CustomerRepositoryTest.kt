@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ListPaymentMethodsParams
@@ -40,7 +39,7 @@ internal class CustomerRepositoryTest {
 
     private val repository = CustomerApiRepository(
         stripeRepository,
-        { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
+        { "acct_123" },
         Logger.getInstance(false),
         workContext = testDispatcher,
         errorReporter = errorReporter
@@ -274,7 +273,7 @@ internal class CustomerRepositoryTest {
             val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
-                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                { null },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
                 errorReporter = errorReporter
@@ -307,7 +306,7 @@ internal class CustomerRepositoryTest {
             val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
-                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                { null },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
                 errorReporter = errorReporter
@@ -577,7 +576,7 @@ internal class CustomerRepositoryTest {
             workContext = coroutineContext,
             errorReporter = errorReporter,
             stripeRepository = stripeRepository,
-            lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
+            stripeAccountIdProvider = { "acct_123" },
             logger = Logger.getInstance(false),
         )
     }

@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.Turbine
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -11,7 +12,9 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.embedded.ApiConfiguration
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.EmbeddedApiConfigurationHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -196,6 +199,28 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         ).isEqualTo(EmbeddedPaymentElement.ConfigureResult.Failed(exception))
     }
 
+    @Test
+    fun `configure calls apiConfigurationHolder update before clearing confirmationState`() = testScenario {
+        val apiConfig = ApiConfiguration(publishableKey = "pk_test_api")
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
+            .apiConfiguration(apiConfig)
+            .build()
+
+        configurationHandler.emit(Result.success(createPaymentElementLoaderState()))
+
+        // Before configure, holder uses the fallback key
+        assertThat(apiConfigurationHolder.publishableKey).isEqualTo("pk_test_fallback")
+
+        configurationCoordinator.configure(
+            configuration = configuration,
+            initializationMode = defaultInitializationMode,
+        )
+
+        // After configure, holder reflects the configuration's apiConfiguration
+        assertThat(apiConfigurationHolder.publishableKey).isEqualTo("pk_test_api")
+        stateHelper.stateTurbine.awaitItem()
+    }
+
     private fun testScenario(
         selectionChooser: (PaymentSelection?) -> PaymentSelection? = { it },
         block: suspend Scenario.() -> Unit,
@@ -210,6 +235,10 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         )
         val stateHelper = FakeEmbeddedStateHelper()
+        val apiConfigurationHolder = EmbeddedApiConfigurationHolder(
+            confirmationStateHolder = confirmationStateHolder,
+            paymentConfig = { PaymentConfiguration(publishableKey = "pk_test_fallback") },
+        )
 
         val configurationCoordinator = DefaultEmbeddedConfigurationCoordinator(
             confirmationStateHolder = confirmationStateHolder,
@@ -219,6 +248,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
                 selectionChooser(newSelection)
             },
             stateHelper = stateHelper,
+            apiConfigurationHolder = apiConfigurationHolder,
             viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         )
 
@@ -228,6 +258,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
             selectionHolder = selectionHolder,
             confirmationStateHolder = confirmationStateHolder,
             stateHelper = stateHelper,
+            apiConfigurationHolder = apiConfigurationHolder,
             testScope = this,
         ).block()
 
@@ -242,6 +273,7 @@ internal class DefaultEmbeddedConfigurationCoordinatorTest {
         val selectionHolder: EmbeddedSelectionHolder,
         val confirmationStateHolder: EmbeddedConfirmationStateHolder,
         val stateHelper: FakeEmbeddedStateHelper,
+        val apiConfigurationHolder: EmbeddedApiConfigurationHolder,
         val testScope: TestScope,
     )
 
