@@ -27,19 +27,23 @@ import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
     @VisibleForTesting
     internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
+
+    private companion object {
+        private const val SOURCE_CANCEL_TIMEOUT_MS = 10_000
+    }
 
     private val viewBinding: StripePaymentAuthWebViewActivityBinding by lazy {
         StripePaymentAuthWebViewActivityBinding.inflate(layoutInflater)
@@ -218,8 +222,8 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
                         }
                         val url = "https://api.stripe.com/v1/$intentType/$intentId/source_cancel"
                         val conn = URL(url).openConnection() as HttpURLConnection
-                        conn.connectTimeout = 10_000
-                        conn.readTimeout = 10_000
+                        conn.connectTimeout = SOURCE_CANCEL_TIMEOUT_MS
+                        conn.readTimeout = SOURCE_CANCEL_TIMEOUT_MS
                         conn.requestMethod = "POST"
                         conn.setRequestProperty("Authorization", "Bearer ${args.publishableKey}")
                         conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
