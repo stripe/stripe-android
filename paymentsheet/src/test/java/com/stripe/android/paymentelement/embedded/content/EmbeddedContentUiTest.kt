@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.verticalmode.TEST_TAG_PAYMENT_METHOD_EMBEDDED_LAYOUT
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
@@ -31,6 +32,7 @@ import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -53,6 +55,9 @@ internal class EmbeddedContentUiTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `rowStyle FlatWithDisclosure, dataLoaded emits embeddedContent event that passes validation`() =
@@ -146,13 +151,13 @@ internal class EmbeddedContentUiTest {
         val errorReporter = FakeErrorReporter()
         val immediateActionHandler =
             DefaultEmbeddedRowSelectionImmediateActionHandler(
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 internalRowSelectionCallback = { null }
             )
 
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
-                coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 savedStateHandle = savedStateHandle,
                 eventReporter = eventReporter,
                 workContext = Dispatchers.Unconfined,
@@ -176,7 +181,7 @@ internal class EmbeddedContentUiTest {
                 confirmationStateHolder = EmbeddedConfirmationStateHolder(
                     savedStateHandle = savedStateHandle,
                     selectionHolder = selectionHolder,
-                    coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+                    coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 ),
                 rowSelectionImmediateActionHandler = immediateActionHandler,
                 errorReporter = errorReporter,

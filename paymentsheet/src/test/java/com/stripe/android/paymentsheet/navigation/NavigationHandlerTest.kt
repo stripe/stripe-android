@@ -2,12 +2,14 @@ package com.stripe.android.paymentsheet.navigation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.CleanupTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -16,6 +18,9 @@ import java.io.Closeable
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class NavigationHandlerTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @Test
     fun `currentScreen is initialized to Loading`() = runTest {
         val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
@@ -332,7 +337,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `cancelling the coroutine scope closes all closable screens in the backstack`() = runTest {
-        val scope = CoroutineScope(Job())
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job()))
         val navigationHandler = NavigationHandler<PaymentSheetScreen>(scope, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
@@ -380,7 +385,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `cancelling the coroutine scope closes a pending delayed transition that has not been applied`() = runTest {
-        val scope = CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler))
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
         val navigationHandler = NavigationHandler<PaymentSheetScreen>(
             coroutineScope = scope,
             initialScreen = PaymentSheetScreen.Loading,
@@ -417,7 +422,7 @@ internal class NavigationHandlerTest {
 
     @Test
     fun `cancelling the coroutine scope closes the screens on the backstack`() = runTest {
-        val scope = CoroutineScope(Job())
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job()))
         val initialScreen = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
         NavigationHandler<PaymentSheetScreen>(scope, initialScreen) {}
 

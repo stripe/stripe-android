@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.verticalmode.FakePaymentMethodVerticalLay
 import com.stripe.android.paymentsheet.verticalmode.FakeSavedPaymentMethodConfirmInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
@@ -50,6 +51,9 @@ internal class EmbeddedNavigatorTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `initial state is correct`() = testScenario {
@@ -111,7 +115,7 @@ internal class EmbeddedNavigatorTest {
 
     @Test
     fun `cancelling the coroutine scope closes the root screen when nothing was navigated to`() = runTest {
-        val scope = CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler))
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
         val eventReporter = FakeEventReporter()
         val manageInteractor = FakeManageScreenInteractor()
         EmbeddedNavigator(
@@ -130,7 +134,7 @@ internal class EmbeddedNavigatorTest {
 
     @Test
     fun `cancelling the coroutine scope closes every screen remaining on the back stack`() = runTest {
-        val scope = CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler))
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
         val eventReporter = FakeEventReporter()
         val manageInteractor = FakeManageScreenInteractor()
         val updateInteractor = FakeUpdatePaymentMethodInteractor()

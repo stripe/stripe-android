@@ -116,6 +116,7 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.utils.prefillCreate
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -135,6 +136,7 @@ import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -175,8 +177,11 @@ internal class PaymentSheetViewModelTest {
 
     private val viewModelStoreRule = ViewModelStoreTestRule()
 
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
+        .around(coroutineScopeCleanupRule)
         .around(viewModelStoreRule)
         .around(InstantTaskExecutorRule())
         .around(SessionTestRule())
@@ -3495,7 +3500,7 @@ internal class PaymentSheetViewModelTest {
                         return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
                     }
                 },
-                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
             )

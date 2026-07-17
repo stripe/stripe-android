@@ -34,6 +34,7 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
@@ -41,6 +42,7 @@ import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -59,9 +61,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
     private val networkRule = NetworkRule()
 
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
+        .around(coroutineScopeCleanupRule)
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(CheckoutInstancesTestRule())
 
@@ -795,7 +800,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             stateHelper = stateHelper
         )
         val immediateActionHandler = DefaultEmbeddedRowSelectionImmediateActionHandler(
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             internalRowSelectionCallback = { { rowSelectionCallbackInvoked = true } }
         )
 

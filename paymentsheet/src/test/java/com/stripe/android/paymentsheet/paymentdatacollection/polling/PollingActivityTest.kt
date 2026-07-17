@@ -23,6 +23,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.polling.IntentStatusPoller
 import com.stripe.android.testing.FakePollingAnalyticsEventReporter
 import com.stripe.android.utils.InjectableActivityScenario
@@ -40,6 +41,9 @@ internal class PollingActivityTest {
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `Displays loading screen when activity is opened`() {
@@ -281,6 +285,7 @@ internal class PollingActivityTest {
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): PollingViewModel {
         return PollingViewModel(args, poller, timeProvider, savedStateHandle, FakePollingAnalyticsEventReporter())
+            .also { viewModelStoreRule.track(it) }
     }
 
     private fun waitForActivityFinish() {

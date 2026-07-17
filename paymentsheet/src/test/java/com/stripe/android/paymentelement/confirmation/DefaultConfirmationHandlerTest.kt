@@ -16,6 +16,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
@@ -23,6 +24,7 @@ import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.PaymentMethodFactory
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -38,6 +40,9 @@ import kotlin.time.Duration.Companion.seconds
 class DefaultConfirmationHandlerTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `On initial register, should create launchers for each definition`() = test(shouldRegister = false) {
@@ -603,7 +608,7 @@ class DefaultConfirmationHandlerTest {
         ) {
             confirmationHandler.start(createArguments(SomeConfirmationDefinition.Option))
 
-            val job = CoroutineScope(dispatcher).launch {
+            val job = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)).launch {
                 val result = confirmationHandler.awaitResult().assertSucceeded()
 
                 assertThat(result.intent).isEqualTo(PAYMENT_INTENT)
@@ -781,7 +786,7 @@ class DefaultConfirmationHandlerTest {
                             definition = someOtherDefinitionScenario.definition,
                         ),
                     ),
-                    coroutineScope = CoroutineScope(dispatcher),
+                    coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)),
                     errorReporter = errorReporter,
                     savedStateHandle = savedStateHandle,
                     ioContext = dispatcher,

@@ -9,15 +9,21 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentmethodmessaging.element.analytics.FakeEventReporter
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class DefaultPaymentMethodMessagingCoordinatorTest {
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `configure returns no content if single and multi partner null`() = runScenario {
@@ -133,7 +139,7 @@ internal class DefaultPaymentMethodMessagingCoordinatorTest {
             stripeRepository = repository,
             paymentConfiguration = paymentConfig,
             eventReporter = FakeEventReporter(),
-            viewModelScope = CoroutineScope(UnconfinedTestDispatcher()),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             errorReporter = errorReporter
         )
 

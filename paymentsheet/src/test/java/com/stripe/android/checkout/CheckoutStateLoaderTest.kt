@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -33,8 +34,10 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -45,6 +48,9 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutStateLoaderTest {
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `loadInitial commits state with payment method metadata`() = runScenario {
@@ -191,7 +197,7 @@ internal class CheckoutStateLoaderTest {
                     savedStateHandle = savedStateHandle,
                 ),
                 eventReporter = FakeEventReporter(),
-                coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 internalRowSelectionCallback = { null },
             )
         },

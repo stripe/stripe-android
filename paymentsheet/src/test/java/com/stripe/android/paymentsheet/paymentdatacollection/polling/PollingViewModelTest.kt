@@ -36,7 +36,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
     }
@@ -47,7 +47,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             timeLimit = timeLimit,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(timeLimit)
 
@@ -66,7 +66,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
@@ -82,7 +82,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
 
@@ -100,7 +100,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             poller = fakePoller,
             timeLimit = 10.seconds,
-        ).also { viewModelStoreRule.track(it) }
+        )
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
@@ -122,7 +122,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
@@ -143,7 +143,7 @@ class PollingViewModelTest {
 
         val viewModel = createPollingViewModel(
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         advanceTimeBy(5.seconds + 1.milliseconds)
 
@@ -177,7 +177,7 @@ class PollingViewModelTest {
             timeLimit = timeLimit,
             timeProvider = timeProvider,
             savedStateHandle = savedStateHandle,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         val remainingTime = timeLimit - alreadyPassed
         assertThat(viewModel.uiState.value.durationRemaining).isEqualTo(remainingTime)
@@ -191,7 +191,7 @@ class PollingViewModelTest {
             timeLimit = 5.minutes,
             poller = fakePoller,
             initialDelay = ZERO,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
 
@@ -423,7 +423,7 @@ class PollingViewModelTest {
     fun `QR code shown on start when QR code available`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
     }
@@ -432,7 +432,7 @@ class PollingViewModelTest {
     fun `QR code hidden on start when QR code not available`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = null,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
     }
@@ -441,7 +441,7 @@ class PollingViewModelTest {
     fun `QR code hidden on cancel`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         viewModel.handleCancel()
 
@@ -452,7 +452,7 @@ class PollingViewModelTest {
     fun `QR code hidden on hide QR code`() = runTest(testDispatcher) {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url"
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         viewModel.hideQrCode()
 
@@ -465,7 +465,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url",
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
         assertThat(fakePoller.pollingTurbine.awaitItem()).isTrue()
@@ -482,7 +482,7 @@ class PollingViewModelTest {
         val viewModel = createPollingViewModel(
             qrCodeUrl = "valid_url",
             poller = fakePoller,
-        ).also { viewModelStoreRule.track(it) }
+        )
 
         assertThat(viewModel.uiState.value.shouldShowQrCode).isTrue()
 
@@ -495,31 +495,31 @@ class PollingViewModelTest {
         assertThat(viewModel.uiState.value.pollingState).isEqualTo(PollingState.Active)
         assertThat(viewModel.uiState.value.shouldShowQrCode).isFalse()
     }
-}
 
-private fun createPollingViewModel(
-    timeLimit: Duration = 5.minutes,
-    initialDelay: Duration = 5.seconds,
-    poller: IntentStatusPoller = FakeIntentStatusPoller(),
-    timeProvider: TimeProvider = FakeTimeProvider(),
-    savedStateHandle: SavedStateHandle = SavedStateHandle(),
-    qrCodeUrl: String? = null,
-    pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
-    paymentMethodType: String = "blik",
-): PollingViewModel {
-    return PollingViewModel(
-        args = PollingViewModel.Args(
-            clientSecret = "secret",
-            timeLimit = timeLimit,
-            initialDelay = initialDelay,
-            ctaText = R.string.stripe_blik_confirm_payment,
-            stripeAccountId = null,
-            qrCodeUrl = qrCodeUrl,
-            paymentMethodType = paymentMethodType,
-        ),
-        poller = poller,
-        timeProvider = timeProvider,
-        savedStateHandle = savedStateHandle,
-        pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
-    )
+    private fun createPollingViewModel(
+        timeLimit: Duration = 5.minutes,
+        initialDelay: Duration = 5.seconds,
+        poller: IntentStatusPoller = FakeIntentStatusPoller(),
+        timeProvider: TimeProvider = FakeTimeProvider(),
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        qrCodeUrl: String? = null,
+        pollingAnalyticsEventReporter: FakePollingAnalyticsEventReporter = FakePollingAnalyticsEventReporter(),
+        paymentMethodType: String = "blik",
+    ): PollingViewModel {
+        return PollingViewModel(
+            args = PollingViewModel.Args(
+                clientSecret = "secret",
+                timeLimit = timeLimit,
+                initialDelay = initialDelay,
+                ctaText = R.string.stripe_blik_confirm_payment,
+                stripeAccountId = null,
+                qrCodeUrl = qrCodeUrl,
+                paymentMethodType = paymentMethodType,
+            ),
+            poller = poller,
+            timeProvider = timeProvider,
+            savedStateHandle = savedStateHandle,
+            pollingAnalyticsEventReporter = pollingAnalyticsEventReporter,
+        ).also { viewModelStoreRule.track(it) }
+    }
 }
