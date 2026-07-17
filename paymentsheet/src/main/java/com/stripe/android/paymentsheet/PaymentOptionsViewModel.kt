@@ -36,6 +36,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteApiService
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
@@ -87,6 +88,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     placesClient: PlacesClientProxy?,
+    stripeAutocompleteApiService: StripeAutocompleteApiService,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -100,6 +102,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
+    stripeAutocompleteApiService = stripeAutocompleteApiService,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

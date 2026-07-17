@@ -82,6 +82,8 @@ internal class InputAddressViewModel @Inject constructor(
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
             eventListenerProvider = { eventListener },
+            shouldUseAutocompleteProxyEndpoints = false,
+            stripeAutocompleteApiService = null,
         )
     } else {
         null

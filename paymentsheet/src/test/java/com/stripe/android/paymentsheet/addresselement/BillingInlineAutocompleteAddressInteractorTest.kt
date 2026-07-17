@@ -61,6 +61,8 @@ class BillingInlineAutocompleteAddressInteractorTest {
             placesClient = fakePlaces,
             autocompleteConfig = config,
             coroutineScope = backgroundScope,
+            shouldUseAutocompleteProxyEndpoints = false,
+            stripeAutocompleteApiService = null,
         )
         interactor.register { event -> eventCalls.add(event) }
 

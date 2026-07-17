@@ -49,6 +49,7 @@ import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteApiService
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -1476,6 +1477,7 @@ internal class PaymentOptionsViewModelTest {
             customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             placesClient = null,
+            stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
         )
     }.also { viewModelStoreRule.track(it) }
 

@@ -47,20 +47,19 @@ internal class PaymentElementAutocompleteAddressInteractor(
         private val placesClient: PlacesClientProxy?,
         private val coroutineScope: CoroutineScope?,
         private val shouldUseAutocompleteProxyEndpointsProvider: () -> Boolean,
+        private val stripeAutocompleteApiService: StripeAutocompleteApiService?,
     ) : AutocompleteAddressInteractor.Factory {
         private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
 
         override fun create(): AutocompleteAddressInteractor {
             val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()
-            val resolvedClient = if (useStripeHosted) {
-                StripeHostedPlacesClientProxy()
-            } else {
-                placesClient
-            }
-            if (resolvedClient != null && coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
+            val canCreateInline = (placesClient != null || useStripeHosted) &&
+                coroutineScope != null &&
+                autocompleteConfig.isInlineAutocompleteEnabled
+            if (canCreateInline) {
                 activeInlineInteractor?.dispose()
                 return BillingInlineAutocompleteAddressInteractor(
-                    placesClient = resolvedClient,
+                    placesClient = placesClient,
                     autocompleteConfig = AutocompleteAddressInteractor.Config(
                         googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
                         autocompleteCountries = autocompleteConfig.autocompleteCountries,
@@ -69,7 +68,9 @@ internal class PaymentElementAutocompleteAddressInteractor(
                         shouldUseStripeHostedAutocomplete = useStripeHosted ||
                             autocompleteConfig.shouldUseStripeHostedAutocomplete,
                     ),
-                    coroutineScope = coroutineScope,
+                    coroutineScope = coroutineScope!!,
+                    shouldUseAutocompleteProxyEndpoints = useStripeHosted,
+                    stripeAutocompleteApiService = stripeAutocompleteApiService,
                 ).also { activeInlineInteractor = it }
             }
             return PaymentElementAutocompleteAddressInteractor(

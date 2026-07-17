@@ -189,6 +189,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             placesClient = null,
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
+            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
@@ -212,6 +213,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             placesClient = FakePlacesClientProxy(),
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
+            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
@@ -238,6 +240,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             placesClient = fakePlaces,
             coroutineScope = backgroundScope,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
+            stripeAutocompleteApiService = null,
         )
         val queryFlow = MutableStateFlow("")
         val countryFlow = MutableStateFlow<String?>("US")
@@ -270,6 +273,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             placesClient = null,
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
+            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
@@ -292,6 +296,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
             placesClient = null,
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { true },
+            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
