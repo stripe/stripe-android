@@ -90,6 +90,29 @@ class CardUiDefinitionFactoryTest {
     }
 
     @Test
+    fun testCardWithScannedCardPillAndCustomInsets() {
+        val formElements = CardDefinition.formElements(metadata = metadata)
+        val cardDetailsSection = formElements.filterIsInstance<CardDetailsSectionElement>().first()
+
+        cardDetailsSection.controller.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationYear = 2030,
+                expirationMonth = 6,
+            )
+        )
+
+        customTextFieldsPaparazziRule.snapshot {
+            FormUI(
+                hiddenIdentifiers = emptySet(),
+                enabled = true,
+                elements = formElements,
+                lastTextFieldIdentifier = null,
+            )
+        }
+    }
+
+    @Test
     fun testCardWithValidation() {
         paparazziRule.snapshot {
             CardDefinition.CreateFormUi(
