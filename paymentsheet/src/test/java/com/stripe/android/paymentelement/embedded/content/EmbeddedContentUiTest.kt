@@ -155,40 +155,64 @@ internal class EmbeddedContentUiTest {
         val dataSource =
             DefaultEmbeddedContentHelperDataSource(
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
-                eventReporter = eventReporter,
-                workContext = Dispatchers.Unconfined,
-                uiContext = Dispatchers.Unconfined,
-                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
-                selectionHolder = selectionHolder,
-                embeddedLinkHelper = object : EmbeddedLinkHelper {
-                    override val linkEmail: StateFlow<String?> = stateFlowOf(null)
-                },
-                embeddedWalletsHelper = { stateFlowOf(null) },
-                customerStateHolder = DefaultCustomerStateHolder(
-                    savedStateHandle = savedStateHandle,
-                    selection = selectionHolder.selection,
-                    customerMetadata = stateFlowOf(
-                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
-                    ),
-                    paymentMethodMetadataFlow = stateFlowOf(null),
-                ),
-                embeddedFormHelperFactory = embeddedFormHelperFactory,
-                confirmationHandler = confirmationHandler,
                 confirmationStateHolder = confirmationStateHolder,
-                rowSelectionImmediateActionHandler = immediateActionHandler,
-                errorReporter = errorReporter,
-                internalRowSelectionCallback = { internalRowSelectionCallback },
-                linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
-                analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
-                sheetLauncherHolder = EmbeddedSheetLauncherHolder(),
+                contentBuilder = createContentBuilder(
+                    savedStateHandle = savedStateHandle,
+                    selectionHolder = selectionHolder,
+                    embeddedFormHelperFactory = embeddedFormHelperFactory,
+                    confirmationHandler = confirmationHandler,
+                    eventReporter = eventReporter,
+                    errorReporter = errorReporter,
+                    immediateActionHandler = immediateActionHandler,
+                    internalRowSelectionCallback = internalRowSelectionCallback,
+                ),
             )
         Scenario(
             dataSource = dataSource,
             confirmationStateHolder = confirmationStateHolder,
         ).block()
     }
+
+    @Suppress("LongParameterList")
+    @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    private fun createContentBuilder(
+        savedStateHandle: SavedStateHandle,
+        selectionHolder: DefaultEmbeddedSelectionHolder,
+        embeddedFormHelperFactory: EmbeddedFormHelperFactory,
+        confirmationHandler: FakeConfirmationHandler,
+        eventReporter: FakeEventReporter,
+        errorReporter: FakeErrorReporter,
+        immediateActionHandler: DefaultEmbeddedRowSelectionImmediateActionHandler,
+        internalRowSelectionCallback: InternalRowSelectionCallback?,
+    ) = EmbeddedContentBuilder(
+        eventReporter = eventReporter,
+        workContext = Dispatchers.Unconfined,
+        uiContext = Dispatchers.Unconfined,
+        savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
+        selectionHolder = selectionHolder,
+        embeddedLinkHelper = object : EmbeddedLinkHelper {
+            override val linkEmail: StateFlow<String?> = stateFlowOf(null)
+        },
+        embeddedWalletsHelper = { stateFlowOf(null) },
+        customerStateHolder = DefaultCustomerStateHolder(
+            savedStateHandle = savedStateHandle,
+            selection = selectionHolder.selection,
+            customerMetadata = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
+        ),
+        embeddedFormHelperFactory = embeddedFormHelperFactory,
+        confirmationHandler = confirmationHandler,
+        rowSelectionImmediateActionHandler = immediateActionHandler,
+        errorReporter = errorReporter,
+        internalRowSelectionCallback = { internalRowSelectionCallback },
+        linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+        analyticsCallbackProvider = { AnalyticEventCallbackRule() },
+        linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+        sheetLauncherHolder = EmbeddedSheetLauncherHolder(),
+    )
 
     private fun confirmationState(
         appearance: Embedded,

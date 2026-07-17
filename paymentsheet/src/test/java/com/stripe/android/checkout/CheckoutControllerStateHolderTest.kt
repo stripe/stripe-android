@@ -125,9 +125,8 @@ internal class CheckoutControllerStateHolderTest {
                 putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
             },
         )
-        val stateHolder = CheckoutControllerStateHolder(
+        val stateHolder = createTestCheckoutControllerStateHolder(
             savedStateHandle = SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restored)),
-            errorReporter = FakeErrorReporter(),
         )
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
@@ -159,7 +158,7 @@ internal class CheckoutControllerStateHolderTest {
     ) = runTest {
         val errorReporter = FakeErrorReporter()
         Scenario(
-            stateHolder = CheckoutControllerStateHolder(SavedStateHandle(), errorReporter),
+            stateHolder = createTestCheckoutControllerStateHolder(errorReporter = errorReporter),
             errorReporter = errorReporter,
         ).block()
         errorReporter.ensureAllEventsConsumed()

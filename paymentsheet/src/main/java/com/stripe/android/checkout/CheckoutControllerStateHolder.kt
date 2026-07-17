@@ -2,16 +2,24 @@ package com.stripe.android.checkout
 
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContent
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentBuilder
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperDataSource
 import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.paymentelement.embedded.stashNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -26,7 +34,12 @@ import javax.inject.Singleton
 internal class CheckoutControllerStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
-) : EmbeddedSelectionHolder {
+    @ViewModelScope private val coroutineScope: CoroutineScope,
+    // Provider + lazy break the DI/construction cycle: EmbeddedContentBuilder -> CustomerStateHolder
+    // -> EmbeddedSelectionHolder, which is this class. Building lazily defers construction of the
+    // builder until after this singleton is cached, so the selection-holder edge resolves to it.
+    private val contentBuilder: Provider<EmbeddedContentBuilder>,
+) : EmbeddedSelectionHolder, EmbeddedContentHelperDataSource {
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
         set(value) {
@@ -38,6 +51,31 @@ internal class CheckoutControllerStateHolder @Inject constructor(
 
     val checkoutSession: StateFlow<CheckoutSession?> =
         stateFlow.mapAsStateFlow { it?.asCheckoutSession() }
+
+    override val embeddedConfirmationState: StateFlow<EmbeddedConfirmationStateHolder.State?> =
+        stateFlow.mapAsStateFlow { state ->
+            state?.let {
+                EmbeddedConfirmationStateHolder.State(
+                    paymentMethodMetadata = it.paymentMethodMetadata,
+                    selection = it.paymentSelection,
+                    configuration = it.embeddedConfiguration,
+                )
+            }
+        }
+
+    private val contentFlows: EmbeddedContentBuilder.ContentFlows by lazy {
+        contentBuilder.get().build(
+            coroutineScope = coroutineScope,
+            dataSource = this,
+            embeddedConfirmationState = embeddedConfirmationState,
+        )
+    }
+
+    override val embeddedContent: StateFlow<EmbeddedContent?>
+        get() = contentFlows.embeddedContent
+
+    override val walletButtonsContent: StateFlow<WalletButtonsContent?>
+        get() = contentFlows.walletButtonsContent
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }

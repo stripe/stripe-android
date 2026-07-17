@@ -148,8 +148,7 @@ internal class DefaultEmbeddedContentHelperDataSourceTest {
             internalRowSelectionCallback = { null }
         )
 
-        val dataSource = DefaultEmbeddedContentHelperDataSource(
-            coroutineScope = backgroundScope,
+        val contentBuilder = EmbeddedContentBuilder(
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
             uiContext = Dispatchers.Unconfined,
@@ -167,7 +166,6 @@ internal class DefaultEmbeddedContentHelperDataSourceTest {
             ),
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,
-            confirmationStateHolder = confirmationStateHolder,
             rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = FakeErrorReporter(),
             internalRowSelectionCallback = { null },
@@ -176,6 +174,11 @@ internal class DefaultEmbeddedContentHelperDataSourceTest {
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             sheetLauncherHolder = EmbeddedSheetLauncherHolder(),
+        )
+        val dataSource = DefaultEmbeddedContentHelperDataSource(
+            coroutineScope = backgroundScope,
+            confirmationStateHolder = confirmationStateHolder,
+            contentBuilder = contentBuilder,
         )
         Scenario(
             dataSource = dataSource,

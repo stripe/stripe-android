@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.FakeStripeImageLoader
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
@@ -126,7 +125,7 @@ internal class CheckoutStateLoaderTest {
                 savedStateHandle = savedStateHandle,
                 formHelperFactory = EmbeddedFormHelperFactory(
                     linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
-                    embeddedSelectionHolder = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter()),
+                    embeddedSelectionHolder = createTestCheckoutControllerStateHolder(savedStateHandle),
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     savedStateHandle = savedStateHandle,
                 ),
@@ -289,7 +288,7 @@ internal class CheckoutStateLoaderTest {
             ),
         )
         val savedStateHandle = SavedStateHandle()
-        val stateHolder = CheckoutControllerStateHolder(savedStateHandle, FakeErrorReporter())
+        val stateHolder = createTestCheckoutControllerStateHolder(savedStateHandle)
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
         val loader = CheckoutStateLoader(
