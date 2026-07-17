@@ -3,6 +3,7 @@ package com.stripe.android.view
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -26,8 +27,13 @@ import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.OutputStreamWriter
+import java.net.HttpURLConnection
+import java.net.URL
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
 
@@ -192,8 +198,42 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
     }
 
     private fun cancelIntentSource() {
-        setResult(Activity.RESULT_OK, viewModel.cancellationResult)
-        finish()
+        val args = _args
+        val sourceId = args?.url?.let { Uri.parse(it).lastPathSegment }
+            ?.takeIf { it.startsWith("setatt_") || it.startsWith("src_") }
+        val intentId = args?.clientSecret?.substringBefore("_secret_")
+
+        if (args != null && sourceId != null && intentId != null) {
+            lifecycleScope.launch {
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        val intentType = if (intentId.startsWith("seti_")) {
+                            "setup_intents"
+                        } else {
+                            "payment_intents"
+                        }
+                        val url = "https://api.stripe.com/v1/$intentType/$intentId/source_cancel"
+                        val conn = URL(url).openConnection() as HttpURLConnection
+                        conn.connectTimeout = 10_000
+                        conn.readTimeout = 10_000
+                        conn.requestMethod = "POST"
+                        conn.setRequestProperty("Authorization", "Bearer ${args.publishableKey}")
+                        conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded")
+                        conn.doOutput = true
+                        OutputStreamWriter(conn.outputStream).use { it.write("source=$sourceId") }
+                        conn.responseCode
+                        conn.disconnect()
+                    }
+                }.onFailure { e ->
+                    logger.error("cancelIntentSource: source_cancel request failed", e)
+                }
+                setResult(Activity.RESULT_OK, viewModel.cancellationResult)
+                finish()
+            }
+        } else {
+            setResult(Activity.RESULT_OK, viewModel.cancellationResult)
+            finish()
+        }
     }
 
     private fun customizeToolbar() {
