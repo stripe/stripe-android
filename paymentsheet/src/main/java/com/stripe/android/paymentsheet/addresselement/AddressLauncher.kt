@@ -112,6 +112,7 @@ class AddressLauncher internal constructor(
         internal val googlePlacesApiKey: String? = null,
         internal val autocompleteCountries: Set<String> = AUTOCOMPLETE_DEFAULT_COUNTRIES,
         internal val billingAddress: PaymentSheet.BillingDetails?,
+        internal val useStripeHostedAutocomplete: Boolean = false,
     ) : Parcelable {
         @JvmOverloads
         constructor(

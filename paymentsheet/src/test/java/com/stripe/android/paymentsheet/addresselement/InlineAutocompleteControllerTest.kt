@@ -23,6 +23,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
 class InlineAutocompleteControllerTest {
 
@@ -527,28 +528,6 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `null placesClient results in no fetches and stays Idle`() = runScenario(
-        usePlacesClient = false
-    ) {
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-    }
-
-    @Test
-    fun `null placesClient on prediction selected does not crash`() = runScenario(
-        usePlacesClient = false
-    ) {
-        delegate.onPredictionSelected("place_1")
-        advanceTimeBy(100)
-
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-    }
-
-    @Test
     fun `country change triggers re-evaluation`() = runScenario(
         autocompleteCountries = setOf("US")
     ) {
@@ -620,11 +599,11 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy flag true keeps Google Places enabled for predictions until proxy is implemented`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = true
+    fun `stripe-hosted config expands form on prediction failure`() = runScenario(
+        shouldUseStripeHostedAutocomplete = true,
     ) {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
+        fakePlacesClient.findPredictionsResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
         )
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
@@ -633,47 +612,98 @@ class InlineAutocompleteControllerTest {
 
         val call = fakePlacesClient.findPredictionsCalls.awaitItem()
         assertThat(call.query).isEqualTo("123 Main")
+        assertThat(call.country).isEqualTo("US")
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
     }
 
     @Test
-    fun `proxy flag true keeps Google Places enabled for place selection until proxy is implemented`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = true
+    fun `stripe-hosted config expands form on place selection failure`() = runScenario(
+        shouldUseStripeHostedAutocomplete = true,
     ) {
-        fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(
-                Place(
-                    listOf(
-                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                    )
-                )
-            )
+        fakePlacesClient.fetchPlaceResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
         )
         delegate.onPredictionSelected("place-id-123")
 
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
         assertThat(call).isEqualTo("place-id-123")
-        eventCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem())
+            .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))
     }
 
     @Test
-    fun `proxy flag true with null placesClient stays Idle until proxy is implemented`() = runScenario(
-        usePlacesClient = false,
-        shouldUseAutocompleteProxyEndpoints = true
+    fun `stripe-hosted fetchPlace failure after prior query includes query and country`() = runScenario(
+        shouldUseStripeHostedAutocomplete = true,
     ) {
+        fakePlacesClient.findPredictionsResult = Result.success(
+            FindAutocompletePredictionsResponse(
+                listOf(
+                    AutocompletePrediction(
+                        SpannableString("123 Main St"),
+                        SpannableString("City, ST"),
+                        "place-id-abc",
+                    )
+                )
+            )
+        )
+        fakePlacesClient.fetchPlaceResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
         delegate.observeQueryChanges(queryFlow, countryFlow)
 
         queryFlow.value = "123 Main"
         advanceTimeBy(500)
 
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+        delegate.onPredictionSelected("place-id-abc")
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main",
+                    IdentifierSpec.Country to "US",
+                )
+            )
+        )
     }
 
     @Test
-    fun `proxy flag false calls Google Places for predictions`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = false
+    fun `stripe-hosted prediction failure with null country only includes Line1`() = runScenario(
+        shouldUseStripeHostedAutocomplete = true,
     ) {
+        fakePlacesClient.findPredictionsResult = Result.failure(
+            RuntimeException("Hosted proxy unavailable")
+        )
+        countryFlow.value = null
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
+
+        fakePlacesClient.findPredictionsCalls.awaitItem()
+        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
+        assertThat(eventCalls.awaitItem()).isEqualTo(
+            AutocompleteAddressInteractor.Event.OnExpandForm(
+                values = mapOf(
+                    IdentifierSpec.Line1 to "123 Main",
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `no proxy calls Google Places for predictions`() = runScenario {
         fakePlacesClient.findPredictionsResult = Result.success(
             FindAutocompletePredictionsResponse(emptyList())
         )
@@ -687,9 +717,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy flag false calls Google Places for place selection`() = runScenario(
-        shouldUseAutocompleteProxyEndpoints = false
-    ) {
+    fun `no proxy calls Google Places for place selection`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
             FetchPlaceResponse(
                 Place(
@@ -712,50 +740,46 @@ class InlineAutocompleteControllerTest {
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),
-        usePlacesClient: Boolean = true,
-        shouldUseAutocompleteProxyEndpoints: Boolean = false,
+        shouldUseStripeHostedAutocomplete: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val fakePlaces = if (usePlacesClient) FakePlacesClientProxy() else null
+        val fakePlaces = FakePlacesClientProxy()
         val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
             autocompleteCountries = autocompleteCountries,
             isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
+            shouldUseStripeHostedAutocomplete = shouldUseStripeHostedAutocomplete,
         )
         val delegate = InlineAutocompleteController(
             placesClient = fakePlaces,
             config = config,
             coroutineScope = backgroundScope,
             eventListenerProvider = { { event -> eventCalls.add(event) } },
-            shouldUseAutocompleteProxyEndpoints = shouldUseAutocompleteProxyEndpoints,
         )
 
         Scenario(
             delegate = delegate,
-            fakePlacesClientOrNull = fakePlaces,
+            fakePlacesClient = fakePlaces,
             eventCalls = eventCalls,
             queryFlow = MutableStateFlow(""),
             countryFlow = MutableStateFlow("US"),
             testScope = this,
         ).apply { block() }
 
-        fakePlaces?.ensureAllEventsConsumed()
+        fakePlaces.ensureAllEventsConsumed()
         eventCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val delegate: InlineAutocompleteController,
-        private val fakePlacesClientOrNull: FakePlacesClientProxy?,
+        val fakePlacesClient: FakePlacesClientProxy,
         val eventCalls: Turbine<AutocompleteAddressInteractor.Event>,
         val queryFlow: MutableStateFlow<String>,
         val countryFlow: MutableStateFlow<String?>,
         val testScope: TestScope,
     ) {
-        val fakePlacesClient: FakePlacesClientProxy
-            get() = requireNotNull(fakePlacesClientOrNull)
-
         fun advanceTimeBy(millis: Long) = testScope.advanceTimeBy(millis)
     }
 }

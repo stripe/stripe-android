@@ -217,7 +217,10 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val interactor = factory.create()
 
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
-        assertThat(interactor.autocompleteConfig).isEqualTo(config)
+        assertThat(interactor.autocompleteConfig.googlePlacesApiKey).isEqualTo("test-key")
+        assertThat(interactor.autocompleteConfig.autocompleteCountries).isEqualTo(setOf("US"))
+        assertThat(interactor.autocompleteConfig.isInlineAutocompleteEnabled).isTrue()
+        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
     }
 
     @Test
@@ -275,6 +278,30 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
+    fun `Factory creates inline interactor when proxy flag is on and placesClient is null`() = test { scenario ->
+        val config = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = null,
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = false,
+            isInlineAutocompleteEnabled = true,
+        )
+
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
+            launcher = scenario.launcher,
+            autocompleteConfig = config,
+            placesClient = null,
+            coroutineScope = this,
+            shouldUseAutocompleteProxyEndpointsProvider = { true },
+        )
+
+        val interactor = factory.create()
+
+        assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
+        assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+        assertThat(interactor.autocompleteConfig.isPlacesAvailable).isFalse()
+    }
+
+    @Test
     fun `multiple onAutocomplete calls with different countries`() = test { scenario ->
         val interactor = createInteractor(launcher = scenario.launcher)
 
@@ -314,7 +341,7 @@ class PaymentElementAutocompleteAddressInteractorTest {
         ),
     ) = PaymentElementAutocompleteAddressInteractor(
         launcher = launcher,
-        autocompleteConfig = autocompleteConfig
+        autocompleteConfig = autocompleteConfig,
     )
 
     private fun createTestAddress() = PaymentSheet.Address(

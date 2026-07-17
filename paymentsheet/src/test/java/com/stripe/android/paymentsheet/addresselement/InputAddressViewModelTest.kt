@@ -130,6 +130,18 @@ class InputAddressViewModelTest {
     }
 
     @Test
+    fun `internal config can enable stripe-hosted autocomplete`() = runTest(UnconfinedTestDispatcher()) {
+        val viewModel = createViewModel(
+            config = AddressLauncher.Configuration(
+                billingAddress = null,
+                useStripeHostedAutocomplete = true,
+            )
+        )
+
+        assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+    }
+
+    @Test
     fun `viewModel emits onComplete event`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
             AddressDetails(

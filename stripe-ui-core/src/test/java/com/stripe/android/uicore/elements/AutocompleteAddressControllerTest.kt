@@ -182,6 +182,32 @@ class AutocompleteAddressControllerTest {
     )
 
     @Test
+    fun `Element uses inline autocomplete when stripe-hosted is enabled without Google key or Places`() =
+        elementsTest(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = null,
+                autocompleteCountries = setOf("US"),
+                isPlacesAvailable = false,
+                isInlineAutocompleteEnabled = true,
+                shouldUseStripeHostedAutocomplete = true,
+            ),
+        ) { elements ->
+            assertThat(elements.filterIsInstance<AddressTextFieldElement>()).hasSize(1)
+            assertThat(elements.any { it.identifier == IdentifierSpec.Line1 }).isFalse()
+        }
+
+    @Test
+    fun `Element does not use full-screen autocomplete when stripe-hosted is enabled without inline autocomplete`() =
+        noAutocompleteTest(
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = null,
+                autocompleteCountries = setOf("US"),
+                isPlacesAvailable = false,
+                shouldUseStripeHostedAutocomplete = true,
+            ),
+        )
+
+    @Test
     fun `Element does not use autocomplete if autocomplete country not supported`() = noAutocompleteTest(
         autocompleteConfig = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "123",

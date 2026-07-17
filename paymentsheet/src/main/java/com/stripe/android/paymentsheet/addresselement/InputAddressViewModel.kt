@@ -73,17 +73,15 @@ internal class InputAddressViewModel @Inject constructor(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
+        shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
     )
 
-    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled) {
+    private val inlineAutocompleteController = if (isInlineAutocompleteEnabled && placesClient != null) {
         InlineAutocompleteController(
             placesClient = placesClient,
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
             eventListenerProvider = { eventListener },
-            // The standalone Address Element does not have access to ElementsSession flags.
-            // When the proxy endpoint ships, thread this value through Args.
-            shouldUseAutocompleteProxyEndpoints = false,
         )
     } else {
         null
