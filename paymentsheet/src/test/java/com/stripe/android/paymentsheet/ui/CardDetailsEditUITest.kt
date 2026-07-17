@@ -410,6 +410,7 @@ internal class CardDetailsEditUITest {
                 onCardUpdateParamsChanged = {},
                 requiresModification = true,
                 autocompleteAddressInteractorFactory = null,
+                requiresBillingAddressForAutomaticTax = false,
             )
         composeRule.setContent {
             CardDetailsEditUI(

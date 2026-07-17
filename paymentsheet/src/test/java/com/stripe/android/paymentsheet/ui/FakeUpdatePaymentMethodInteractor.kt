@@ -44,6 +44,7 @@ internal class FakeUpdatePaymentMethodInteractor(
     override val canChangeCbc: Boolean = true,
     private val editCardDetailsInteractorFactory: EditCardDetailsInteractor.Factory = DefaultEditCardDetailsInteractor
         .Factory(),
+    private val requiresBillingAddressForAutomaticTax: Boolean = false,
 ) : UpdatePaymentMethodInteractor {
     val closeCalls = Turbine<Unit>()
 
@@ -76,6 +77,7 @@ internal class FakeUpdatePaymentMethodInteractor(
             onBrandChoiceChanged = {},
             onCardUpdateParamsChanged = {},
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 

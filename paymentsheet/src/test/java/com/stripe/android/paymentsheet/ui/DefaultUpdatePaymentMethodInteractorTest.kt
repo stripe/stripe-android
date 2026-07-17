@@ -757,6 +757,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             .Factory(),
         onBrandChoiceSelected: (CardBrand) -> Unit = {},
         autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
+        requiresBillingAddressForAutomaticTax: Boolean = false,
         testBlock: suspend TestParams.() -> Unit
     ) {
         val onUpdateSuccessTurbine = Turbine<Unit>()
@@ -781,6 +782,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             removeMessage = null,
             allowedBillingCountries = allowedBillingCountries,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
         cleanupRule.track(interactor)
 

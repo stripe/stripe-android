@@ -23,6 +23,7 @@
     <ID>LargeClass:CustomerSheetViewModel.kt:CustomerSheetViewModel : ViewModel</ID>
     <ID>LargeClass:CustomerSheetViewModelTest.kt:CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultConfirmationHandlerTest.kt:DefaultConfirmationHandlerTest</ID>
+    <ID>LargeClass:DefaultEditCardDetailsInteractorTest.kt:DefaultEditCardDetailsInteractorTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt:DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt:DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentElementLoaderTest.kt:DefaultPaymentElementLoaderTest</ID>

@@ -601,6 +601,8 @@ internal class CustomerSheetViewModel(
                         )
                     },
                     autocompleteAddressInteractorFactory = null,
+                    // CustomerSheet has no automatic tax / checkout session concept.
+                    requiresBillingAddressForAutomaticTax = false,
                 ),
                 isLiveMode = isLiveMode,
             )

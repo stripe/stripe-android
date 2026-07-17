@@ -227,6 +227,8 @@ internal class UpdateCardScreenViewModel @Inject constructor(
             // already be complete on first render. The user can submit without modifying.
             requiresModification = state.value.isBillingDetailsUpdateFlow.not(),
             autocompleteAddressInteractorFactory = null,
+            // Link's update card flow has no Checkout Session automatic tax concept.
+            requiresBillingAddressForAutomaticTax = false,
         )
     }
 

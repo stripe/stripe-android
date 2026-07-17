@@ -370,6 +370,7 @@ private fun PreviewUpdatePaymentMethodUI() {
             isDefaultPaymentMethod = false,
             onUpdateSuccess = {},
             autocompleteAddressInteractorFactory = null,
+            requiresBillingAddressForAutomaticTax = false,
         ),
         modifier = Modifier
     )
