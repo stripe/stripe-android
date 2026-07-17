@@ -11,7 +11,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 internal fun PaymentMethod.hasSufficientBillingDetailsForAutomaticTax(): Boolean {
     val address = billingDetails?.address ?: return false
     // Saved-PM billing details come from the API and are not guaranteed uppercase, unlike the
-    // CountryConfig-sourced value the CardBillingAddressElement form passes. Uppercase before the
+    // CountryConfig-sourced value the billing-address form passes. Uppercase before the
     // map lookup; do not "simplify" this away.
     val country = address.country?.uppercase()
     if (country.isNullOrBlank()) return false
