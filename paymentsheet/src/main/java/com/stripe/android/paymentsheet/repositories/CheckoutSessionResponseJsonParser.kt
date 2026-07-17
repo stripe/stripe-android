@@ -174,7 +174,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
                             ?: return null,
                         paymentMethodTypes = jsonArrayToList(
                             deferredIntentJson.optJSONArray("payment_method_types")
-                        ),
+                        ).takeIf { it.isNotEmpty() },
                         paymentMethodConfigurationId = deferredIntentJson
                             .optString("payment_method_configuration"),
                         onBehalfOf = deferredIntentJson.optString("on_behalf_of")

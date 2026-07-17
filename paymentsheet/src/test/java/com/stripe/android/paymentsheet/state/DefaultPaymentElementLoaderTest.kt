@@ -1937,7 +1937,7 @@ internal class DefaultPaymentElementLoaderTest {
 
     @Test
     fun `integrationMetadata returns cryptoOnramp`() = runScenario {
-        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp
+        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp()
         assertThat(initializationMode.integrationMetadata(null))
             .isEqualTo(IntegrationMetadata.CryptoOnramp)
         assertThat(initializationMode.integrationMetadata(PaymentElementCallbacks.Builder().build()))
@@ -4424,7 +4424,7 @@ internal class DefaultPaymentElementLoaderTest {
         val loader = createPaymentElementLoader(
             linkSettings = createLinkSettings(passthroughModeEnabled = false),
         )
-        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp
+        val initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp()
 
         val result = loader.load(
             initializationMode = initializationMode,

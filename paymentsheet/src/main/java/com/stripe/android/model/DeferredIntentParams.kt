@@ -9,7 +9,7 @@ import org.json.JSONObject
 @Parcelize
 internal data class DeferredIntentParams(
     val mode: Mode,
-    val paymentMethodTypes: List<String>,
+    val paymentMethodTypes: List<String>?,
     val paymentMethodConfigurationId: String?,
     val onBehalfOf: String?,
 ) : StripeModel {
@@ -51,7 +51,7 @@ internal data class DeferredIntentParams(
             "deferred_intent[payment_method_options]" to (mode as? Mode.Payment)?.paymentMethodOptionsJsonString?.let {
                 StripeJsonUtils.jsonObjectToMap(JSONObject(it))
             },
-        ) + paymentMethodTypes.mapIndexed { index, paymentMethodType ->
+        ) + paymentMethodTypes.orEmpty().mapIndexed { index, paymentMethodType ->
             "deferred_intent[payment_method_types][$index]" to paymentMethodType
         }
     }

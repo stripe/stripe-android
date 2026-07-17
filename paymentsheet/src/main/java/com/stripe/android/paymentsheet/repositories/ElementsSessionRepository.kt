@@ -268,7 +268,7 @@ internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams(
         is PaymentElementLoader.InitializationMode.CryptoOnramp -> {
             val intentConfiguration = PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                paymentMethodTypes = listOf("link"),
+                paymentMethodTypes = paymentMethodTypes ?: emptyList(),
             )
             ElementsSessionParams.DeferredIntentType(
                 locale = clientParams.locale,
@@ -329,7 +329,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
     return when (val deferredIntentMode = deferredIntentParams.mode) {
         is DeferredIntentParams.Mode.Payment -> PaymentIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,
-            paymentMethodTypes = deferredIntentParams.paymentMethodTypes,
+            paymentMethodTypes = deferredIntentParams.paymentMethodTypes.orEmpty(),
             amount = deferredIntentMode.amount,
             clientSecret = this.clientSecret,
             countryCode = null,
@@ -338,7 +338,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             isLiveMode = options.apiKeyIsLiveMode,
             unactivatedPaymentMethods = emptyList(),
             paymentMethodOptionsJsonString = deferredIntentMode.paymentMethodOptionsJsonString,
-            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isEmpty(),
+            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isNullOrEmpty(),
         )
         is DeferredIntentParams.Mode.Setup -> SetupIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,
@@ -351,11 +351,11 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             linkFundingSources = emptyList(),
             nextActionData = null,
             paymentMethodId = null,
-            paymentMethodTypes = deferredIntentParams.paymentMethodTypes,
+            paymentMethodTypes = deferredIntentParams.paymentMethodTypes.orEmpty(),
             status = null,
             unactivatedPaymentMethods = emptyList(),
             usage = null,
-            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isEmpty(),
+            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isNullOrEmpty(),
         )
     }
 }
