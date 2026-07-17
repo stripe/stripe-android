@@ -32,6 +32,8 @@ import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.utils.renderEdgeToEdge
 import com.stripe.android.ui.core.elements.H4Text
@@ -76,11 +78,13 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val args = args
         if (args == null) {
             finish()
             return
         }
 
+        args.configuration.appearance.parseAppearance()
         renderEdgeToEdge()
         viewModel.component.inject(this)
 
@@ -103,7 +107,7 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         }
 
         setContent {
-            StripeTheme {
+            PaymentElementTheme(appearance = args.configuration.appearance) {
                 SheetContent()
             }
         }

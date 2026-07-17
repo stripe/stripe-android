@@ -12,6 +12,7 @@ internal fun StripeThemeForConnections(
     // Financial Connections does not currently support dark mode.
     val stripeDefaultColors = StripeThemeDefaults.colors(isDark = false)
     StripeTheme(
+        isDark = false,
         colors = stripeDefaultColors.copy(
             component = colors.background,
             onComponent = colors.textDefault,

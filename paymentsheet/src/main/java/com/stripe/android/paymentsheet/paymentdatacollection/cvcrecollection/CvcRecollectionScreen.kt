@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +55,7 @@ import com.stripe.android.uicore.elements.TextFieldColors
 import com.stripe.android.uicore.elements.TrailingIcon
 import com.stripe.android.uicore.getOuterFormInsets
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.utils.collectAsState
 
 @Composable
@@ -122,7 +122,7 @@ internal fun CvcRecollectionField(
     cvcState: CvcState,
     onValueChanged: (String) -> Unit
 ) {
-    val backgroundColor = if (isSystemInDarkTheme()) {
+    val backgroundColor = if (MaterialTheme.stripeThemeIsDark) {
         Color.White.copy(alpha = 0.075f)
     } else {
         Color.Black.copy(alpha = 0.075f)

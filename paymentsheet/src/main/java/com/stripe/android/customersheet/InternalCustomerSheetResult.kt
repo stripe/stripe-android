@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.bundleOf
 import com.stripe.android.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.view.ActivityStarter
@@ -13,6 +14,7 @@ import kotlinx.parcelize.Parcelize
 internal sealed class InternalCustomerSheetResult : Parcelable {
     abstract fun toPublicResult(
         paymentOptionFactory: PaymentOptionFactory,
+        appearance: PaymentSheet.Appearance,
     ): CustomerSheetResult
 
     /**
@@ -24,9 +26,14 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
+            appearance: PaymentSheet.Appearance,
         ): CustomerSheetResult {
             return CustomerSheetResult.Selected(
-                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
+                selection = paymentSelection?.toPaymentOptionSelection(
+                    paymentOptionFactory = paymentOptionFactory,
+                    canUseGooglePay = true,
+                    appearance = appearance,
+                )
             )
         }
     }
@@ -40,9 +47,14 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
+            appearance: PaymentSheet.Appearance,
         ): CustomerSheetResult {
             return CustomerSheetResult.Canceled(
-                selection = paymentSelection?.toPaymentOptionSelection(paymentOptionFactory, canUseGooglePay = true)
+                selection = paymentSelection?.toPaymentOptionSelection(
+                    paymentOptionFactory = paymentOptionFactory,
+                    canUseGooglePay = true,
+                    appearance = appearance,
+                )
             )
         }
     }
@@ -56,6 +68,7 @@ internal sealed class InternalCustomerSheetResult : Parcelable {
     ) : InternalCustomerSheetResult() {
         override fun toPublicResult(
             paymentOptionFactory: PaymentOptionFactory,
+            appearance: PaymentSheet.Appearance,
         ): CustomerSheetResult {
             return CustomerSheetResult.Failed(exception)
         }

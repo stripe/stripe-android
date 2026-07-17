@@ -22,8 +22,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
@@ -86,7 +87,7 @@ internal class AddressElementActivity : ComponentActivity() {
         bottomSheetState: StripeBottomSheetState,
         navController: NavHostController,
     ) {
-        StripeTheme {
+        PaymentElementTheme(appearance = starterArgs?.config?.appearance ?: PaymentSheet.Appearance()) {
             ElementsBottomSheetLayout(
                 state = bottomSheetState,
                 onDismissed = viewModel.navigator::dismiss,

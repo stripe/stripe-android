@@ -7,8 +7,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
@@ -16,6 +16,7 @@ import androidx.core.view.WindowCompat
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.stripeThemeIsDark
 import kotlinx.coroutines.flow.collectLatest
 
 internal class AutocompleteActivity : AppCompatActivity() {
@@ -80,7 +81,7 @@ internal class AutocompleteActivity : AppCompatActivity() {
                             isRootScreen = true,
                             appearanceContext = appearanceContext,
                             attributionDrawable =
-                            PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme()),
+                            PlacesClientProxy.getPlacesPoweredByGoogleDrawable(MaterialTheme.stripeThemeIsDark),
                         )
                     }
                 }

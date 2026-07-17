@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.verticalmode
 import android.content.res.Configuration
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -56,6 +55,7 @@ import com.stripe.android.uicore.DefaultStripeTheme
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.stripeThemeIsDark
 import com.stripe.android.uicore.R as StripeUiCoreR
 
 @Suppress("LongMethod")
@@ -243,7 +243,7 @@ private fun RowButtonRadioOuterContent(
     style: RowStyle.FlatWithRadio,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val colors = style.getColors(isSystemInDarkTheme())
+    val colors = style.getColors(MaterialTheme.stripeThemeIsDark)
     Row(
         modifier = modifier.padding(contentPaddingValues)
     ) {
@@ -292,7 +292,7 @@ private fun RowButtonCheckmarkOuterContent(
                         .align(Alignment.CenterVertically)
                         .padding(end = style.checkmarkInsetDp.dp)
                         .offset(3.dp),
-                    tint = Color(style.getColors(isSystemInDarkTheme()).checkmarkColor)
+                    tint = Color(style.getColors(MaterialTheme.stripeThemeIsDark).checkmarkColor)
                 )
             }
         },
@@ -318,7 +318,7 @@ private fun RowButtonDisclosureOuterContent(
                 contentDescription = null,
                 modifier = Modifier
                     .align(Alignment.CenterVertically),
-                tint = Color(style.getColors(isSystemInDarkTheme()).disclosureColor)
+                tint = Color(style.getColors(MaterialTheme.stripeThemeIsDark).disclosureColor)
             )
         },
         content = content

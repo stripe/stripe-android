@@ -20,6 +20,7 @@ import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.FormHelper.FormType
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -56,6 +57,7 @@ internal interface EmbeddedContentHelper {
         paymentMethodMetadata: PaymentMethodMetadata,
         appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
+        paymentSheetAppearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     )
 
     fun clearEmbeddedContent()
@@ -123,6 +125,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         appearance = state.appearance,
                         isImmediateAction = isImmediateAction,
+                        paymentSheetAppearance = state.paymentSheetAppearance,
                     )
                 }
             }
@@ -137,6 +140,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                         interactor = createWalletButtonsInteractor(
                             coroutineScope = coroutineScope,
                         ),
+                        appearanceProvider = { state.paymentSheetAppearance },
                     )
                 }
             }
@@ -147,10 +151,12 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         appearance: Embedded,
         embeddedViewDisplaysMandateText: Boolean,
+        paymentSheetAppearance: PaymentSheet.Appearance,
     ) {
         eventReporter.onShowNewPaymentOptions()
         savedStateHandle[STATE_KEY_EMBEDDED_CONTENT] = State(
             paymentMethodMetadata = paymentMethodMetadata,
+            paymentSheetAppearance = paymentSheetAppearance,
             appearance = appearance,
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
         )
@@ -356,6 +362,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val appearance: Embedded,
         val embeddedViewDisplaysMandateText: Boolean,
+        val paymentSheetAppearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
     ) : Parcelable
 
     companion object {

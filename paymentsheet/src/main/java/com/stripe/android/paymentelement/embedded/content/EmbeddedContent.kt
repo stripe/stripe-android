@@ -6,10 +6,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
+import com.stripe.android.paymentsheet.ui.PaymentElementTheme
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodEmbeddedLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
-import com.stripe.android.uicore.StripeTheme
 
 @Immutable
 internal data class EmbeddedContent(
@@ -17,6 +18,7 @@ internal data class EmbeddedContent(
     private val embeddedViewDisplaysMandateText: Boolean,
     private val appearance: Embedded,
     private val isImmediateAction: Boolean,
+    private val paymentSheetAppearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
 ) {
     @Composable
     fun Content() {
@@ -40,7 +42,7 @@ internal data class EmbeddedContent(
             }
         }
 
-        StripeTheme {
+        PaymentElementTheme(appearance = paymentSheetAppearance) {
             Column(
                 modifier = Modifier
                     .animateContentSize()
