@@ -32,7 +32,7 @@ import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmail
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayIsEmailRequiredProvider
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
-import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateDataSource
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperDataSource
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -396,7 +396,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         fun create(
             linkInlineInteractor: LinkInlineInteractor,
             embeddedLinkHelper: EmbeddedLinkHelper,
-            confirmationStateDataSource: EmbeddedConfirmationStateDataSource,
+            contentHelperDataSource: EmbeddedContentHelperDataSource,
             confirmationHandler: ConfirmationHandler,
             coroutineScope: CoroutineScope,
             errorReporter: ErrorReporter,
@@ -410,7 +410,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 eventReporter = eventReporter,
                 arguments = combineAsStateFlow(
                     embeddedLinkHelper.linkEmail,
-                    confirmationStateDataSource.embeddedConfirmationState,
+                    contentHelperDataSource.embeddedConfirmationState,
                 ) { linkEmail, confirmationState ->
                     confirmationState?.let { state ->
                         Arguments(

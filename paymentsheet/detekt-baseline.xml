@@ -53,7 +53,7 @@
     <ID>LongMethod:ElementsSessionJsonParserTest.kt:ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response if 'customer_sheet' is null`</ID>
     <ID>LongMethod:ElementsSessionJsonParserTest.kt:ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response`</ID>
     <ID>LongMethod:ElementsSessionRepository.kt:internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams: ElementsSessionParams</ID>
-    <ID>LongMethod:EmbeddedContentHelper.kt:DefaultEmbeddedContentHelper$private fun createInteractor: PaymentMethodVerticalLayoutInteractor</ID>
+    <ID>LongMethod:EmbeddedContentHelperDataSource.kt:DefaultEmbeddedContentHelperDataSource$private fun createInteractor: PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:FormViewModelTest.kt:FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`</ID>
     <ID>LongMethod:FormViewModelTest.kt:FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`</ID>
     <ID>LongMethod:FullScreenContent.kt:@Composable internal fun FullScreenContent</ID>

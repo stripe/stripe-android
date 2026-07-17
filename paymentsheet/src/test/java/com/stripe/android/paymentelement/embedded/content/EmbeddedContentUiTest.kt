@@ -59,7 +59,7 @@ internal class EmbeddedContentUiTest {
     @Test
     fun `rowStyle FlatWithDisclosure, dataLoaded emits embeddedContent event that passes validation`() =
         runScenario(internalRowSelectionCallback = {}) {
-            embeddedContentHelper.embeddedContent.test {
+            dataSource.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
                 confirmationStateHolder.state = confirmationState(
                     appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
@@ -80,7 +80,7 @@ internal class EmbeddedContentUiTest {
     fun `rowStyle not FlatWithDisclosure, dataLoaded emits event that passes validation`() = runScenario(
         internalRowSelectionCallback = null
     ) {
-        embeddedContentHelper.embeddedContent.test {
+        dataSource.embeddedContent.test {
             assertThat(awaitItem()).isNull()
             confirmationStateHolder.state = confirmationState(
                 appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
@@ -101,7 +101,7 @@ internal class EmbeddedContentUiTest {
     fun `dataLoaded emits embeddedContent event that fails validation`() = runScenario(
         internalRowSelectionCallback = null
     ) {
-        embeddedContentHelper.embeddedContent.test {
+        dataSource.embeddedContent.test {
             assertThat(awaitItem()).isNull()
             confirmationStateHolder.state = confirmationState(
                 appearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
@@ -121,7 +121,7 @@ internal class EmbeddedContentUiTest {
     }
 
     private class Scenario(
-        val embeddedContentHelper: DefaultEmbeddedContentHelper,
+        val dataSource: DefaultEmbeddedContentHelperDataSource,
         val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     )
 
@@ -152,8 +152,8 @@ internal class EmbeddedContentUiTest {
             selectionHolder = selectionHolder,
             coroutineScope = CoroutineScope(Dispatchers.Unconfined),
         )
-        val embeddedContentHelper =
-            DefaultEmbeddedContentHelper(
+        val dataSource =
+            DefaultEmbeddedContentHelperDataSource(
                 coroutineScope = CoroutineScope(Dispatchers.Unconfined),
                 eventReporter = eventReporter,
                 workContext = Dispatchers.Unconfined,
@@ -174,17 +174,18 @@ internal class EmbeddedContentUiTest {
                 ),
                 embeddedFormHelperFactory = embeddedFormHelperFactory,
                 confirmationHandler = confirmationHandler,
-                confirmationStateDataSource = confirmationStateHolder,
+                confirmationStateHolder = confirmationStateHolder,
                 rowSelectionImmediateActionHandler = immediateActionHandler,
                 errorReporter = errorReporter,
                 internalRowSelectionCallback = { internalRowSelectionCallback },
                 linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
                 analyticsCallbackProvider = { AnalyticEventCallbackRule() },
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+                sheetLauncherHolder = EmbeddedSheetLauncherHolder(),
             )
         Scenario(
-            embeddedContentHelper = embeddedContentHelper,
+            dataSource = dataSource,
             confirmationStateHolder = confirmationStateHolder,
         ).block()
     }

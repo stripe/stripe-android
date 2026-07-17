@@ -15,22 +15,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Supplies the confirmation-launch state the reused embedded UI reads to build its launch args — the
- * sheet launcher (via [DefaultEmbeddedContentHelper]) and the wallet buttons. Each integration owns
- * its own source: [EmbeddedPaymentElement][com.stripe.android.paymentelement.EmbeddedPaymentElement]
- * uses [EmbeddedConfirmationStateHolder] (written imperatively as it loads), while checkout has
- * [com.stripe.android.checkout.CheckoutControllerStateHolder] project its already-owned state.
+ * Owns the confirmation-launch state for
+ * [EmbeddedPaymentElement][com.stripe.android.paymentelement.EmbeddedPaymentElement], written
+ * imperatively as it loads and persisted in [SavedStateHandle]. It's the raw-state input to
+ * [DefaultEmbeddedContentHelperDataSource] (which projects it into the rendered content) and is read
+ * directly for the sheet-launch args and the wallet buttons.
  */
-internal interface EmbeddedConfirmationStateDataSource {
-    val embeddedConfirmationState: StateFlow<EmbeddedConfirmationStateHolder.State?>
-}
-
 @Singleton
 internal class EmbeddedConfirmationStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val selectionHolder: EmbeddedSelectionHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-) : EmbeddedConfirmationStateDataSource {
+) {
     var state: State?
         get() = savedStateHandle[CONFIRMATION_STATE_KEY]
         set(value) {
@@ -39,9 +35,6 @@ internal class EmbeddedConfirmationStateHolder @Inject constructor(
 
     val stateFlow: StateFlow<State?>
         get() = savedStateHandle.getStateFlow(CONFIRMATION_STATE_KEY, null)
-
-    override val embeddedConfirmationState: StateFlow<State?>
-        get() = stateFlow
 
     init {
         coroutineScope.launch {
