@@ -25,6 +25,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -46,8 +47,12 @@ internal class CardFormViewTest {
     @get:Rule
     val testActivityRule = createTestActivityRule<CardFormViewTestActivity>(useMaterial = true)
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Before
     fun setup() {
+        CardFormViewTestActivity.viewModelStoreTestRule = viewModelStoreRule
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
     }
 
@@ -587,7 +592,10 @@ internal class CardFormViewTestActivity : AppCompatActivity() {
         CardFormView(this, attributes).apply {
             id = VIEW_ID
 
-            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(isCbcEligible = args.isCbcEligible)
+            val storeOwner = CardElementTestHelper.createViewModelStoreOwner(
+                isCbcEligible = args.isCbcEligible,
+                viewModelStoreTestRule = viewModelStoreTestRule,
+            )
             viewModelStoreOwner = storeOwner
         }
     }
@@ -604,5 +612,7 @@ internal class CardFormViewTestActivity : AppCompatActivity() {
 
     companion object {
         const val VIEW_ID = 12345
+
+        lateinit var viewModelStoreTestRule: ViewModelStoreTestRule
     }
 }

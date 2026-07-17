@@ -24,8 +24,10 @@ import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.O
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -39,6 +41,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 
 @RunWith(RobolectricTestRunner::class)
 class CollectBankAccountViewModelTest {
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val createFinancialConnectionsSession: CreateFinancialConnectionsSession = mock()
     private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession = mock()
@@ -514,7 +519,7 @@ class CollectBankAccountViewModelTest {
         logger = Logger.noop(),
         savedStateHandle = SavedStateHandle(),
         _viewEffect = viewEffect
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private fun paymentIntentConfiguration(
         attachToIntent: Boolean = true

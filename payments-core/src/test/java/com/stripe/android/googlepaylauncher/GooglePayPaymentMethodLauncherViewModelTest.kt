@@ -28,8 +28,10 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodSelectionFlow
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -41,6 +43,9 @@ import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayPaymentMethodLauncherViewModelTest {
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val stripeRepository = FakeStripeRepository()
     private val googlePayJsonFactory = GooglePayJsonFactory(
@@ -71,7 +76,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
         googlePayJsonFactory,
         googlePayRepository,
         SavedStateHandle()
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `createPaymentMethod() should return expected result`() = runTest {
@@ -110,7 +115,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             googlePayJsonFactory,
             googlePayRepository,
             SavedStateHandle()
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         viewModelWithEmail.createPaymentMethod(
             PaymentData.fromJson(
@@ -133,7 +138,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             googlePayJsonFactory,
             googlePayRepository,
             SavedStateHandle()
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         viewModelWithEmail.createPaymentMethod(
             PaymentData.fromJson(
@@ -246,7 +251,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             googlePayJsonFactory,
             googlePayRepository,
             SavedStateHandle()
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         val paymentDataRequest = viewModel.createPaymentDataRequest()
 
@@ -268,7 +273,7 @@ class GooglePayPaymentMethodLauncherViewModelTest {
             googlePayJsonFactory,
             googlePayRepository,
             SavedStateHandle()
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         val paymentDataRequest = viewModel.createPaymentDataRequest()
 

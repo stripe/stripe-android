@@ -9,6 +9,7 @@ import com.stripe.android.hcaptcha.FakeHCaptchaService
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -20,6 +21,9 @@ internal class PassiveChallengeWarmerViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val fakeHCaptchaService = FakeHCaptchaService()
     private val fakeActivity = object : FragmentActivity() {}
@@ -70,5 +74,5 @@ internal class PassiveChallengeWarmerViewModelTest {
     ) = PassiveChallengeWarmerViewModel(
         passiveCaptchaParams = passiveCaptchaParams,
         hCaptchaService = hCaptchaService
-    )
+    ).also { viewModelStoreRule.track(it) }
 }

@@ -17,6 +17,7 @@ import app.cash.turbine.Turbine
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.cardscan.CardScanGoogleLauncher.Companion.rememberCardScanGoogleLauncher
 import com.stripe.android.ui.core.cardscan.CardScanLauncher
 import com.stripe.android.ui.core.cardscan.FakeCardScanEventsReporter
@@ -35,6 +36,9 @@ import org.robolectric.RobolectricTestRunner
 internal class ScanCardButtonUITest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun `ScanCardButtonUI should launch Google launcher when GPCR is available`() = runScenario(

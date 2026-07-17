@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.repository.CoreAuthorizationPendi
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -48,6 +49,9 @@ internal class SupportabilityViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val applicationId = "com.sample.applicationid"
     private val getOrFetchSync = mock<GetOrFetchSync>()
@@ -325,6 +329,6 @@ internal class SupportabilityViewModelTest {
                 logger = Logger.noop(),
             ),
             repairAuthSession = mock(),
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

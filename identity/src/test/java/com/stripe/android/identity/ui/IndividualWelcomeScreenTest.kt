@@ -23,6 +23,7 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualWelcomePage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -40,6 +41,9 @@ import org.robolectric.annotation.Config
 class IndividualWelcomeScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val mockVerificationArgs = mock<IdentityVerificationSheetContract.Args> {
         on { brandLogo } doReturn mock()

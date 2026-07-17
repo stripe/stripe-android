@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.repository.CachedConsumerSession
 import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -41,6 +42,9 @@ class NetworkingLinkVerificationViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
@@ -70,7 +74,7 @@ class NetworkingLinkVerificationViewModelTest {
         isLinkWithStripe = { isLinkWithStripe },
         attachConsumerToLinkAccountSession = attachConsumerToLinkAccountSession,
         handleError = handleError,
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - starts SMS verification with consumer session secret`() = runTest {

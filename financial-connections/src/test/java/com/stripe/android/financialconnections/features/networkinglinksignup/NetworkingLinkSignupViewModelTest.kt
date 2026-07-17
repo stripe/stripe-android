@@ -35,6 +35,7 @@ import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.LinkMode
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.NavigationIntent
 import com.stripe.android.uicore.navigation.NavigationManagerImpl
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -54,6 +55,9 @@ class NetworkingLinkSignupViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val getOrFetchSync = mock<GetOrFetchSync>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -79,7 +83,7 @@ class NetworkingLinkSignupViewModelTest {
         linkSignupHandler = signupHandler,
         elementsSessionContext = elementsSessionContext,
         handleError = handleError,
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - creates controllers with prefilled account holder email`() = runTest {
