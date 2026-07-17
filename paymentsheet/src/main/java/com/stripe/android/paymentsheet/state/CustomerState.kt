@@ -70,6 +70,7 @@ internal class CreateCustomerState @Inject constructor(
                         cardFundingFilter = metadata.cardFundingFilter,
                         remoteDefaultPaymentMethodId = state.defaultPaymentMethodId,
                         localSavedSelection = savedSelection,
+                        requiresBillingAddressForAutomaticTax = metadata.requiresBillingAddressForAutomaticTax,
                     )
                 )
             )

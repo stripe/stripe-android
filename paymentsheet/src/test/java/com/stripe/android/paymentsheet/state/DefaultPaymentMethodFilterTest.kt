@@ -190,6 +190,86 @@ class DefaultPaymentMethodFilterTest {
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
+    private fun usCard(id: String, state: String?): PaymentMethod = PaymentMethodFactory.card(id = id).update(
+        last4 = "1000",
+        addCbcNetworks = false,
+        brand = CardBrand.Visa,
+    ).copy(
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "123 Main St",
+                city = "San Francisco",
+                state = state,
+                postalCode = "94111",
+                country = "US",
+            ),
+        ),
+    )
+
+    @Test
+    fun `Drops SPM lacking automatic-tax-required fields when automatic tax requires a billing address`() = runTest {
+        val complete = usCard(id = "pm_complete", state = "CA")
+        val incomplete = usCard(id = "pm_incomplete", state = null)
+
+        val observed = filter(
+            paymentMethods = listOf(complete, incomplete),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(complete)
+    }
+
+    @Test
+    fun `Does not filter by automatic-tax fields when automatic tax does not require a billing address`() = runTest {
+        val complete = usCard(id = "pm_complete", state = "CA")
+        val incomplete = usCard(id = "pm_incomplete", state = null)
+
+        val observed = filter(
+            paymentMethods = listOf(complete, incomplete),
+            requiresBillingAddressForAutomaticTax = false,
+        )
+
+        assertThat(observed).containsExactly(complete, incomplete)
+    }
+
+    @Test
+    fun `Keeps a country-only-sufficient SPM when automatic tax requires a billing address`() = runTest {
+        // FR has no additional automatic-tax fields, so country alone is sufficient. Proves the
+        // clause does not over-drop valid cards.
+        val frCard = PaymentMethodFactory.card(id = "pm_fr").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(country = "FR"),
+            ),
+        )
+
+        val observed = filter(
+            paymentMethods = listOf(frCard),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(frCard)
+    }
+
+    @Test
+    fun `Drops SPM with null billing address when automatic tax requires a billing address`() = runTest {
+        val noAddress = PaymentMethodFactory.card(id = "pm_no_addr").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(billingDetails = PaymentMethod.BillingDetails(address = null))
+
+        val observed = filter(
+            paymentMethods = listOf(noAddress),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).isEmpty()
+    }
+
     private suspend fun filter(
         paymentMethods: List<PaymentMethod>,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
@@ -197,6 +277,7 @@ class DefaultPaymentMethodFilterTest {
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
         remoteDefaultPaymentMethodId: String? = null,
         localSavedSelection: SavedSelection = SavedSelection.None,
+        requiresBillingAddressForAutomaticTax: Boolean = false,
         cardBrandFilter: PaymentSheetCardBrandFilter = PaymentSheetCardBrandFilter(
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         ),
@@ -222,6 +303,7 @@ class DefaultPaymentMethodFilterTest {
                 localSavedSelection = CompletableDeferred(localSavedSelection),
                 cardBrandFilter = cardBrandFilter,
                 cardFundingFilter = cardFundingFilter,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             )
         )
     }

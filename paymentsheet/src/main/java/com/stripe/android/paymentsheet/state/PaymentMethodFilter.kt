@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.common.validation.hasSufficientBillingDetailsForAutomaticTax
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE
@@ -26,6 +27,7 @@ internal interface PaymentMethodFilter {
         val cardBrandFilter: CardBrandFilter,
         val cardFundingFilter: CardFundingFilter,
         val localSavedSelection: Deferred<SavedSelection>,
+        val requiresBillingAddressForAutomaticTax: Boolean,
     )
 }
 
@@ -45,7 +47,11 @@ internal class DefaultPaymentMethodFilter @Inject constructor() : PaymentMethodF
             } ?: true
             params.cardBrandFilter.isAccepted(paymentMethod) &&
                 fundingAccepted &&
-                paymentMethod.isSupportedWithBillingConfig(params.billingDetailsCollectionConfiguration)
+                paymentMethod.isSupportedWithBillingConfig(params.billingDetailsCollectionConfiguration) &&
+                (
+                    !params.requiresBillingAddressForAutomaticTax ||
+                        paymentMethod.hasSufficientBillingDetailsForAutomaticTax()
+                    )
         }
     }
 }
