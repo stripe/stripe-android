@@ -45,6 +45,7 @@ import com.stripe.android.uicore.navigation.NavBackStackEntryUpdate
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -167,16 +168,32 @@ internal class LinkActivityViewModel @Inject constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun handleLogoutClicked() {
-        GlobalScope.launch {
-            linkAccountManager.logOut()
+        val shouldDismiss = when (val mode = linkLaunchMode) {
+            is LinkLaunchMode.PaymentMethodSelection -> mode.shouldShowSecondaryCta
+            else -> true
         }
 
-        dismissWithResult(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+        if (shouldDismiss) {
+            GlobalScope.launch {
+                linkAccountManager.logOut()
+            }
+            dismissWithResult(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+                )
             )
-        )
+        } else {
+            savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
+            navigate(LinkScreen.SignUp, clearStack = true)
+            viewModelScope.launch {
+                linkAccountManager.logOut()
+            }
+            viewModelScope.launch {
+                delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+                linkAccountHolder.set(LinkAccountUpdate.Value(null, LoggedOut))
+            }
+        }
     }
 
     fun onNavEntryChanged(entry: NavBackStackEntryUpdate) {
