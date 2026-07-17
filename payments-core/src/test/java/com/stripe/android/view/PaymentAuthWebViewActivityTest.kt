@@ -14,6 +14,7 @@ import com.stripe.android.StripeIntentResult
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.payments.PaymentFlowResult
+import kotlinx.coroutines.Dispatchers
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -87,6 +88,7 @@ internal class PaymentAuthWebViewActivityTest {
             contract.createIntent(context, args3ds)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
+                activity.ioDispatcher = Dispatchers.Unconfined
                 activity.onOptionsItemSelected(
                     activity.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
                         .menu.findItem(R.id.action_close)
@@ -135,6 +137,7 @@ internal class PaymentAuthWebViewActivityTest {
             contract.createIntent(context, argsPi)
         ).use { activityScenario ->
             activityScenario.onActivity { activity ->
+                activity.ioDispatcher = Dispatchers.Unconfined
                 activity.onOptionsItemSelected(
                     activity.findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar)
                         .menu.findItem(R.id.action_close)

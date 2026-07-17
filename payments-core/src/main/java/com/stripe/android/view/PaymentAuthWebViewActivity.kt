@@ -27,6 +27,7 @@ import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -36,6 +37,9 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class PaymentAuthWebViewActivity : AppCompatActivity() {
+
+    @VisibleForTesting
+    internal var ioDispatcher: CoroutineDispatcher = Dispatchers.IO
 
     private val viewBinding: StripePaymentAuthWebViewActivityBinding by lazy {
         StripePaymentAuthWebViewActivityBinding.inflate(layoutInflater)
@@ -206,7 +210,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (args != null && sourceId != null && intentId != null) {
             lifecycleScope.launch {
                 runCatching {
-                    withContext(Dispatchers.IO) {
+                    withContext(ioDispatcher) {
                         val intentType = if (intentId.startsWith("seti_")) {
                             "setup_intents"
                         } else {
