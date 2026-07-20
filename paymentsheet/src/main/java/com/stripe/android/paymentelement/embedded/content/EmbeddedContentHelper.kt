@@ -33,7 +33,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val customerStateHolder: CustomerStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
-    private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val errorReporter: ErrorReporter,
 ) : EmbeddedContentHelper {
 
@@ -97,7 +96,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             paymentMethodMetadata = state.paymentMethodMetadata,
             customerState = customerStateHolder.customer.value,
             selection = selectionHolder.selection.value,
-            embeddedConfirmationState = confirmationStateHolder.state,
+            configuration = state.configuration,
         )
     }
 }

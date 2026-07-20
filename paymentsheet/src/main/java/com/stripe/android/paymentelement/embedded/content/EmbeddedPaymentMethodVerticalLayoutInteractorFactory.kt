@@ -93,14 +93,14 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
-                    embeddedConfirmationState = confirmationStateHolder.state,
+                    configuration = confirmationStateHolder.state?.configuration,
                 )
             },
             transitionToFormScreen = { code ->
                 sheetLauncherHolder.sheetLauncher?.launchForm(
                     code = code,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    embeddedConfirmationState = confirmationStateHolder.state,
+                    configuration = confirmationStateHolder.state?.configuration,
                     customerState = customerStateHolder.customer.value,
                     promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(
                         code = code,

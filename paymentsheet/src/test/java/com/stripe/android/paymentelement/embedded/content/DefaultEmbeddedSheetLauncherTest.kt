@@ -100,7 +100,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
             customerState = customerState,
             promotion = promotion,
         )
@@ -119,7 +119,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -137,7 +137,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -154,7 +154,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -171,7 +171,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -187,7 +187,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfirmationState = null,
+            configuration = null,
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -208,7 +208,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -401,7 +401,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = PaymentSelection.GooglePay,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
@@ -419,7 +419,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = PaymentSelection.GooglePay,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
         )
     }
 
@@ -569,7 +569,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetLauncher.launchForm(
                 code = "card",
                 paymentMethodMetadata = paymentMethodMetadata,
-                embeddedConfirmationState = state,
+                configuration = state.configuration,
                 customerState = createCustomerState(),
                 promotion = null,
             )
@@ -604,7 +604,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerState = customerState,
                 selection = PaymentSelection.GooglePay,
-                embeddedConfirmationState = state,
+                configuration = state.configuration,
             )
         }.exceptionOrNull()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
@@ -635,7 +635,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = selection,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
@@ -651,7 +651,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = null,
             selection = null,
-            embeddedConfirmationState = null,
+            configuration = null,
         )
         val loggedErrors = errorReporter.getLoggedErrors()
         assertThat(loggedErrors.size).isEqualTo(1)
@@ -669,7 +669,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = null,
             selection = null,
-            embeddedConfirmationState = state,
+            configuration = state.configuration,
         )
     }
 
@@ -860,7 +860,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetLauncher.launchForm(
                 code = code,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                embeddedConfirmationState = EmbeddedConfirmationStateFixtures.defaultState(),
+                configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
                 customerState = null,
                 promotion = null,
             )

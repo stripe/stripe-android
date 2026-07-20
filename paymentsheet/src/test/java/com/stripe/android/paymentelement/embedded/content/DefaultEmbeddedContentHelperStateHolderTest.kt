@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -17,15 +18,18 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
             assertThat(awaitItem()).isNull()
             val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
             val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
+            val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
             stateHolder.dataLoaded(
                 paymentMethodMetadata = paymentMethodMetadata,
                 appearance = appearance,
                 embeddedViewDisplaysMandateText = true,
+                configuration = configuration,
             )
             val state = awaitItem()
             assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
             assertThat(state?.appearance).isEqualTo(appearance)
             assertThat(state?.embeddedViewDisplaysMandateText).isTrue()
+            assertThat(state?.configuration).isEqualTo(configuration)
         }
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
     }
@@ -36,6 +40,7 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
             embeddedViewDisplaysMandateText = true,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         )
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
         assertThat(stateHolder.state.value).isNotNull()
@@ -54,6 +59,7 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
                     appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = false,
+                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
             )
         }
