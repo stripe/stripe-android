@@ -4,7 +4,6 @@ package com.stripe.android.checkout.ece
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
