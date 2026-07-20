@@ -2,10 +2,13 @@ package com.stripe.android.common.nfcscan
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.common.taptoadd.TapToButtonUI
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.ui.core.elements.CardDetailsAction
 import com.stripe.android.ui.core.elements.ScannedCardDetails
+import com.stripe.android.uicore.utils.AnimationConstants
 
 internal class NfcScanningAction(
     private val paymentMethodMetadata: PaymentMethodMetadata,
@@ -15,6 +18,8 @@ internal class NfcScanningAction(
         enabled: Boolean,
         onScannedCard: (ScannedCardDetails) -> Unit
     ) {
+        val context = LocalContext.current
+
         val launcher = rememberLauncherForActivityResult(NfcScanningContract) { result ->
             if (result is NfcScanningContract.Result.Complete) {
                 onScannedCard(
@@ -28,7 +33,14 @@ internal class NfcScanningAction(
         }
 
         TapToButtonUI(enabled = enabled) {
-            launcher.launch(NfcScanningContract.Args(paymentMethodMetadata))
+            launcher.launch(
+                NfcScanningContract.Args(paymentMethodMetadata),
+                ActivityOptionsCompat.makeCustomAnimation(
+                    context,
+                    AnimationConstants.FADE_IN,
+                    AnimationConstants.FADE_OUT,
+                ),
+            )
         }
     }
 }

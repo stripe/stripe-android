@@ -31,7 +31,6 @@ import org.robolectric.annotation.Config
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class NfcScanningActionTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 
@@ -56,6 +55,7 @@ internal class NfcScanningActionTest {
 
         assertThat(launch.contract).isEqualTo(NfcScanningContract)
         assertThat(launch.input).isEqualTo(NfcScanningContract.Args(paymentMethodMetadata))
+        assertThat(launch.options).isNotNull()
 
         val intent = Intent().apply {
             putExtras(
@@ -162,6 +162,7 @@ internal class NfcScanningActionTest {
                     requestCode = requestCode,
                     contract = contract,
                     input = input,
+                    options = options,
                 ),
             )
         }
@@ -170,6 +171,7 @@ internal class NfcScanningActionTest {
             val requestCode: Int,
             val contract: ActivityResultContract<I, O>,
             val input: I,
+            val options: ActivityOptionsCompat?,
         )
     }
 }

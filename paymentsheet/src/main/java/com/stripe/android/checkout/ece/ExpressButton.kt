@@ -9,6 +9,7 @@ import com.stripe.android.checkout.asGooglePayButtonType
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -36,7 +37,7 @@ internal sealed interface ExpressButton {
                         paymentDetails = linkAccount?.displayablePaymentDetails,
                     ),
                     theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
-                    linkBrand = paymentMethodMetadata.linkBrand,
+                    linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccount),
                 )
             }
         }

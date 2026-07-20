@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.nfcscan.hardware.FakeNfcHardwareDelegate
 import com.stripe.android.common.nfcscan.security.FakeIsDeviceSecureForNfc
+import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
@@ -121,6 +122,8 @@ internal class IsNfcScanningAvailableTest {
             as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
         assertThat(exposure.group).isEqualTo("treatment")
         assertThat(exposure.experiment).isEqualTo(ExperimentAssignment.OCS_MOBILE_NFC_SCANNING_FEATURE_HOLDBACK)
+        assertThat(exposure.canUseNfcScanner).isTrue()
+        assertThat(exposure.dimensions).containsEntry("can_use_nfc_scanning", "true")
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
 
@@ -138,6 +141,57 @@ internal class IsNfcScanningAvailableTest {
         val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
             as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
         assertThat(exposure.group).isEqualTo("control")
+        assertThat(exposure.canUseNfcScanner).isTrue()
+        assertThat(exposure.dimensions).containsEntry("can_use_nfc_scanning", "true")
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `logs canUseNfcScanner as false when device is not secure`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
+            eventReporter = eventReporter,
+            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
+        )
+
+        isNfcScanningAvailable.get(
+            metadata = createMetadata(
+                isNfcScanningEnabled = true,
+                experimentVariant = "treatment",
+            )
+        )
+
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+        assertThat(exposure).isInstanceOf<LoggableExperiment.OcsMobileNfcScanningFeatureHoldback>()
+        val featureHoldback = exposure as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
+
+        assertThat(featureHoldback.canUseNfcScanner).isFalse()
+        assertThat(featureHoldback.dimensions).containsEntry("can_use_nfc_scanning", "false")
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `logs canUseNfcScanner as false when NFC hardware is unavailable`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
+            eventReporter = eventReporter,
+            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = false),
+        )
+
+        isNfcScanningAvailable.get(
+            metadata = createMetadata(
+                isNfcScanningEnabled = true,
+                experimentVariant = "control",
+            )
+        )
+
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+        assertThat(exposure).isInstanceOf<LoggableExperiment.OcsMobileNfcScanningFeatureHoldback>()
+        val featureHoldback = exposure as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
+
+        assertThat(featureHoldback.canUseNfcScanner).isFalse()
+        assertThat(featureHoldback.dimensions).containsEntry("can_use_nfc_scanning", "false")
         eventReporter.experimentExposureCalls.expectNoEvents()
     }
 

@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -33,6 +34,23 @@ internal class ExpressButtonTest {
         )
 
         assertThat(button.linkBrand).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `Link create uses link brand from account when logged in`() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkBrand = LinkBrand.Onelink,
+        )
+        val linkAccount = LinkAccount(
+            consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Link)
+        )
+
+        val button = ExpressButton.Link.create(
+            paymentMethodMetadata = paymentMethodMetadata,
+            linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
+        )
+
+        assertThat(button.linkBrand).isEqualTo(LinkBrand.Link)
     }
 
     @Test
