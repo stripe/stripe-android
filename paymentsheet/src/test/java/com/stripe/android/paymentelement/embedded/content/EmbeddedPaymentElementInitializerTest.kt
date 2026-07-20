@@ -19,11 +19,11 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     @Test
     fun `initialize init and clear sheetLauncher`() = testScenario {
-        assertThat(contentHelper.testSheetLauncher).isNull()
+        assertThat(sheetLauncherHolder.sheetLauncher).isNull()
         initializer.initialize(true)
-        assertThat(contentHelper.testSheetLauncher).isNotNull()
+        assertThat(sheetLauncherHolder.sheetLauncher).isNotNull()
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(contentHelper.testSheetLauncher).isNull()
+        assertThat(sheetLauncherHolder.sheetLauncher).isNull()
     }
 
     @Test
@@ -79,11 +79,11 @@ internal class EmbeddedPaymentElementInitializerTest {
         paymentElementCallbackIdentifier: String = PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val contentHelper = FakeEmbeddedContentHelper()
+        val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
         val eventReporter = FakeEventReporter()
         val initializer = EmbeddedPaymentElementInitializer(
             sheetLauncher = FakeEmbeddedSheetLauncher(),
-            contentHelper = contentHelper,
+            sheetLauncherHolder = sheetLauncherHolder,
             lifecycleOwner = lifecycleOwner,
             savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
@@ -91,7 +91,7 @@ internal class EmbeddedPaymentElementInitializerTest {
         )
         Scenario(
             initializer = initializer,
-            contentHelper = contentHelper,
+            sheetLauncherHolder = sheetLauncherHolder,
             lifecycleOwner = lifecycleOwner,
             eventReporter = eventReporter,
         ).block()
@@ -100,7 +100,7 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     private class Scenario(
         val initializer: EmbeddedPaymentElementInitializer,
-        val contentHelper: FakeEmbeddedContentHelper,
+        val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val eventReporter: FakeEventReporter,
     )
