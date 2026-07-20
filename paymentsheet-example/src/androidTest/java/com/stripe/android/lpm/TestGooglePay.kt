@@ -6,15 +6,15 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.Merchant
 import com.stripe.android.testing.FeatureFlagTestRule
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
-internal class TestGooglePay : BasePlaygroundTest() {
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(FeatureFlags.allowNoExistingPaymentMethodForGooglePay, true)
-
+internal class TestGooglePay : BasePlaygroundTest(
+    block = {
+        around(FeatureFlagTestRule(FeatureFlags.allowNoExistingPaymentMethodForGooglePay, true))
+    }
+) {
     @Test
     fun testUnitedStates() {
         testDriver.confirmWithGooglePay(Merchant.US)
