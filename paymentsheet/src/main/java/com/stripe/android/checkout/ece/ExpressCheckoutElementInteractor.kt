@@ -9,7 +9,6 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import kotlin.collections.emptyList
-import kotlin.math.exp
 
 internal interface ExpressCheckoutElementInteractor {
     val state: StateFlow<State>

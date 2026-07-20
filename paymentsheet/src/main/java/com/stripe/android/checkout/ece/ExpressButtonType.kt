@@ -9,5 +9,5 @@ internal sealed class ExpressButtonType {
     data object Link : ExpressButtonType()
     data class GooglePay(
         val googlePayConfiguration: GooglePayConfiguration.State,
-    ): ExpressButtonType()
+    ) : ExpressButtonType()
 }
