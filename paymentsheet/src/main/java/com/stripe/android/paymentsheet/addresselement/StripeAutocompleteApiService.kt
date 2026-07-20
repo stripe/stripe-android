@@ -1,9 +1,12 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.responseJson
+import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -22,17 +25,20 @@ internal interface StripeAutocompleteApiService {
     ): Result<PlaceDetailsResult>
 }
 
+@Parcelize
 internal data class AutocompletePredictionsResult(
     val predictions: List<AutocompleteSuggestion>
-)
+) : StripeModel
 
+@Parcelize
 internal data class AutocompleteSuggestion(
     val placeId: String,
     val primaryText: String,
     val secondaryText: String,
     val address: StripeProxyAddress?
-)
+) : StripeModel
 
+@Parcelize
 internal data class StripeProxyAddress(
     val line1: String?,
     val line2: String?,
@@ -40,11 +46,12 @@ internal data class StripeProxyAddress(
     val state: String?,
     val postalCode: String?,
     val country: String?
-)
+) : StripeModel
 
+@Parcelize
 internal data class PlaceDetailsResult(
     val address: StripeProxyAddress
-)
+) : StripeModel
 
 internal class DefaultStripeAutocompleteApiService(
     private val stripeNetworkClient: StripeNetworkClient,
@@ -75,7 +82,7 @@ internal class DefaultStripeAutocompleteApiService(
             }
         }
         return executePost(AUTOCOMPLETE_URL, params) { json ->
-            parseAutocompletePredictionsResponse(json)
+            AutocompletePredictionsResponseJsonParser.parse(json)
         }
     }
 
@@ -90,7 +97,7 @@ internal class DefaultStripeAutocompleteApiService(
             "source" to "google",
         )
         return executePost(DETAILS_URL, params) { json ->
-            parsePlaceDetailsResponse(json)
+            PlaceDetailsResponseJsonParser.parse(json)
         }
     }
 
@@ -150,33 +157,36 @@ internal class DefaultStripeAutocompleteApiService(
     }
 }
 
-internal fun parseAutocompletePredictionsResponse(
-    json: JSONObject
-): AutocompletePredictionsResult? {
-    val suggestionsArray = json.optJSONArray("suggestions") ?: return null
-    val predictions = (0 until suggestionsArray.length()).mapNotNull { i ->
-        val suggestion = suggestionsArray.getJSONObject(i)
-        val displayData = suggestion.optJSONObject("display_data")
-        val primaryText = suggestion.optString("primary_text").ifEmpty {
-            displayData?.optString("title").orEmpty()
+internal object AutocompletePredictionsResponseJsonParser :
+    ModelJsonParser<AutocompletePredictionsResult> {
+    override fun parse(json: JSONObject): AutocompletePredictionsResult? {
+        val suggestionsArray = json.optJSONArray("suggestions") ?: return null
+        val predictions = (0 until suggestionsArray.length()).mapNotNull { i ->
+            val suggestion = suggestionsArray.getJSONObject(i)
+            val displayData = suggestion.optJSONObject("display_data")
+            val primaryText = suggestion.optString("primary_text").ifEmpty {
+                displayData?.optString("title").orEmpty()
+            }
+            val placeId = suggestion.optString("place_id")
+            if (primaryText.isBlank() || placeId.isBlank()) return@mapNotNull null
+            AutocompleteSuggestion(
+                placeId = placeId,
+                primaryText = primaryText,
+                secondaryText = suggestion.optString("secondary_text").ifEmpty {
+                    displayData?.optString("subtitle").orEmpty()
+                },
+                address = suggestion.optJSONObject("address")?.let { parseAddress(it) },
+            )
         }
-        val placeId = suggestion.optString("place_id")
-        if (primaryText.isBlank() || placeId.isBlank()) return@mapNotNull null
-        AutocompleteSuggestion(
-            placeId = placeId,
-            primaryText = primaryText,
-            secondaryText = suggestion.optString("secondary_text").ifEmpty {
-                displayData?.optString("subtitle").orEmpty()
-            },
-            address = suggestion.optJSONObject("address")?.let { parseAddress(it) },
-        )
+        return AutocompletePredictionsResult(predictions = predictions)
     }
-    return AutocompletePredictionsResult(predictions = predictions)
 }
 
-private fun parsePlaceDetailsResponse(json: JSONObject): PlaceDetailsResult? {
-    val addressJson = json.optJSONObject("address") ?: return null
-    return PlaceDetailsResult(address = parseAddress(addressJson))
+internal object PlaceDetailsResponseJsonParser : ModelJsonParser<PlaceDetailsResult> {
+    override fun parse(json: JSONObject): PlaceDetailsResult? {
+        val addressJson = json.optJSONObject("address") ?: return null
+        return PlaceDetailsResult(address = parseAddress(addressJson))
+    }
 }
 
 private fun parseAddress(json: JSONObject): StripeProxyAddress {

@@ -40,7 +40,7 @@ class StripeAutocompleteApiServiceTest {
             """.trimIndent()
         )
 
-        val result = parseAutocompletePredictionsResponse(json)
+        val result = AutocompletePredictionsResponseJsonParser.parse(json)
 
         assertThat(result?.predictions).hasSize(1)
         assertThat(result?.predictions?.single()).isEqualTo(
@@ -74,7 +74,7 @@ class StripeAutocompleteApiServiceTest {
             """.trimIndent()
         )
 
-        val result = parseAutocompletePredictionsResponse(json)
+        val result = AutocompletePredictionsResponseJsonParser.parse(json)
 
         assertThat(result?.predictions).hasSize(1)
         assertThat(result?.predictions?.single()).isEqualTo(
