@@ -98,8 +98,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Tanca la sessió de %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">S\'ha produït un error. Comproveu la vostra connexió i torneu-ho a provar.</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">Targeta caducada. Proveu-ho amb una altra targeta.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">Targeta rebutjada. Proveu-ho amb una altra targeta.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">Targeta caducada. Proveu-ho amb una altra targeta.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Mantingueu la targeta darrere del telèfon</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">No s\'admet la targeta. Proveu-ho amb una altra targeta.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">o introduir manualment</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
@@ -268,6 +276,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Mostra el menú</string>
   <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Tanqueu la sessió de Link</string>
   <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_sign_out_with_brand">Tanqueu la sessió de %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
