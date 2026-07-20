@@ -65,7 +65,7 @@ internal class EmbeddedContentUiTest {
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
-                embeddedContentHelper.dataLoaded(
+                stateHolder.dataLoaded(
                     PaymentMethodMetadataFactory.create(),
                     Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
@@ -88,7 +88,7 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
+            stateHolder.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
@@ -111,7 +111,7 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
+            stateHolder.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
@@ -132,9 +132,11 @@ internal class EmbeddedContentUiTest {
 
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
+        val stateHolder: EmbeddedContentHelperStateHolder,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @Suppress("LongMethod")
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
@@ -151,50 +153,88 @@ internal class EmbeddedContentUiTest {
         val confirmationHandler = FakeConfirmationHandler()
         val eventReporter = FakeEventReporter()
         val errorReporter = FakeErrorReporter()
+        val viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined))
         val immediateActionHandler =
             DefaultEmbeddedRowSelectionImmediateActionHandler(
                 coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 internalRowSelectionCallback = { null }
             )
+        val customerStateHolder = DefaultCustomerStateHolder(
+            savedStateHandle = savedStateHandle,
+            selection = selectionHolder.selection,
+            customerMetadata = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
+        )
+        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
+            savedStateHandle = savedStateHandle,
+            selectionHolder = selectionHolder,
+            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
+        )
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
+
+        val stateHolder = DefaultEmbeddedContentHelperStateHolder(
+            savedStateHandle = savedStateHandle,
+            eventReporter = eventReporter,
+        )
+        val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
+            eventReporter = eventReporter,
+            workContext = Dispatchers.Unconfined,
+            uiContext = Dispatchers.Unconfined,
+            savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
+            selectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            confirmationStateHolder = confirmationStateHolder,
+            linkAccountHolder = linkAccountHolder,
+            coroutineScope = viewModelScope,
+            sheetLauncherHolder = sheetLauncherHolder,
+        )
+        val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
+            eventReporter = eventReporter,
+            embeddedFormHelperFactory = embeddedFormHelperFactory,
+            confirmationHandler = confirmationHandler,
+            confirmationStateHolder = confirmationStateHolder,
+            selectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            rowSelectionImmediateActionHandler = immediateActionHandler,
+            coroutineScope = viewModelScope,
+            sheetLauncherHolder = sheetLauncherHolder,
+            savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
+        )
+        val walletButtonsInteractorFactory = DefaultEmbeddedWalletButtonsInteractorFactory(
+            embeddedLinkHelper = object : EmbeddedLinkHelper {
+                override val linkEmail: StateFlow<String?> = stateFlowOf(null)
+            },
+            confirmationStateHolder = confirmationStateHolder,
+            confirmationHandler = confirmationHandler,
+            errorReporter = errorReporter,
+            eventReporter = eventReporter,
+            linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+            linkAccountHolder = linkAccountHolder,
+            analyticsCallbackProvider = { AnalyticEventCallbackRule() },
+            coroutineScope = viewModelScope,
+        )
 
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
-                coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
-                savedStateHandle = savedStateHandle,
-                eventReporter = eventReporter,
-                workContext = Dispatchers.Unconfined,
-                uiContext = Dispatchers.Unconfined,
-                savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
-                selectionHolder = selectionHolder,
-                embeddedLinkHelper = object : EmbeddedLinkHelper {
-                    override val linkEmail: StateFlow<String?> = stateFlowOf(null)
-                },
+                coroutineScope = viewModelScope,
+                stateHolder = stateHolder,
+                verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
+                walletButtonsInteractorFactory = walletButtonsInteractorFactory,
+                sheetLauncherHolder = sheetLauncherHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },
-                customerStateHolder = DefaultCustomerStateHolder(
-                    savedStateHandle = savedStateHandle,
-                    selection = selectionHolder.selection,
-                    customerMetadata = stateFlowOf(
-                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
-                    ),
-                    paymentMethodMetadataFlow = stateFlowOf(null),
-                ),
-                embeddedFormHelperFactory = embeddedFormHelperFactory,
-                confirmationHandler = confirmationHandler,
-                confirmationStateHolder = EmbeddedConfirmationStateHolder(
-                    savedStateHandle = savedStateHandle,
-                    selectionHolder = selectionHolder,
-                    coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
-                ),
-                rowSelectionImmediateActionHandler = immediateActionHandler,
-                errorReporter = errorReporter,
                 internalRowSelectionCallback = { internalRowSelectionCallback },
-                linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
-                analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-                paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+                customerStateHolder = customerStateHolder,
+                selectionHolder = selectionHolder,
+                confirmationStateHolder = confirmationStateHolder,
+                errorReporter = errorReporter,
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
+            stateHolder = stateHolder,
         ).block()
     }
 }

@@ -14,7 +14,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
-import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper.Companion.STATE_KEY_EMBEDDED_CONTENT
+import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder.Companion.STATE_KEY_EMBEDDED_CONTENT
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -49,8 +49,8 @@ internal class DefaultEmbeddedContentHelperTest {
             .isNull()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
-        embeddedContentHelper.dataLoaded(paymentMethodMetadata, appearance, embeddedViewDisplaysMandateText = true)
-        val state = savedStateHandle.get<DefaultEmbeddedContentHelper.State?>(STATE_KEY_EMBEDDED_CONTENT)
+        stateHolder.dataLoaded(paymentMethodMetadata, appearance, embeddedViewDisplaysMandateText = true)
+        val state = savedStateHandle.get<EmbeddedContentHelperStateHolder.State?>(STATE_KEY_EMBEDDED_CONTENT)
         assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
         assertThat(state?.appearance).isEqualTo(appearance)
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
@@ -60,7 +60,7 @@ internal class DefaultEmbeddedContentHelperTest {
     fun `dataLoaded emits embeddedContent event`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
+            stateHolder.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
@@ -74,7 +74,7 @@ internal class DefaultEmbeddedContentHelperTest {
     fun `dataLoaded emits walletButtonsContent event`() = testScenario {
         embeddedContentHelper.walletButtonsContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
+            stateHolder.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
@@ -88,13 +88,13 @@ internal class DefaultEmbeddedContentHelperTest {
     fun `embeddedContent emits null when clearEmbeddedContent is called`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
+            stateHolder.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
-            embeddedContentHelper.clearEmbeddedContent()
+            stateHolder.clearEmbeddedContent()
             assertThat(awaitItem()).isNull()
         }
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
@@ -104,13 +104,13 @@ internal class DefaultEmbeddedContentHelperTest {
     fun `walletButtonsContent emits null when clearEmbeddedContent is called`() = testScenario {
         embeddedContentHelper.walletButtonsContent.test {
             assertThat(awaitItem()).isNull()
-            embeddedContentHelper.dataLoaded(
+            stateHolder.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
             )
             assertThat(awaitItem()).isNotNull()
-            embeddedContentHelper.clearEmbeddedContent()
+            stateHolder.clearEmbeddedContent()
             assertThat(awaitItem()).isNull()
         }
         assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
@@ -121,7 +121,7 @@ internal class DefaultEmbeddedContentHelperTest {
         setup = {
             set(
                 STATE_KEY_EMBEDDED_CONTENT,
-                DefaultEmbeddedContentHelper.State(
+                EmbeddedContentHelperStateHolder.State(
                     PaymentMethodMetadataFactory.create(),
                     Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = true,
@@ -147,7 +147,7 @@ internal class DefaultEmbeddedContentHelperTest {
         setup = {
             set(
                 STATE_KEY_EMBEDDED_CONTENT,
-                DefaultEmbeddedContentHelper.State(
+                EmbeddedContentHelperStateHolder.State(
                     PaymentMethodMetadataFactory.create(),
                     Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
@@ -170,7 +170,7 @@ internal class DefaultEmbeddedContentHelperTest {
             setup = {
                 set(
                     STATE_KEY_EMBEDDED_CONTENT,
-                    DefaultEmbeddedContentHelper.State(
+                    EmbeddedContentHelperStateHolder.State(
                         paymentMethodMetadata,
                         Embedded(Embedded.RowStyle.FlatWithRadio.default),
                         embeddedViewDisplaysMandateText = true,
@@ -181,7 +181,7 @@ internal class DefaultEmbeddedContentHelperTest {
             }
         ) {
             val fakeLauncher = RecordingEmbeddedSheetLauncher()
-            embeddedContentHelper.setSheetLauncher(fakeLauncher)
+            sheetLauncherHolder.sheetLauncher = fakeLauncher
             embeddedContentHelper.presentPaymentOptions()
 
             assertThat(fakeLauncher.launchPaymentOptionsCalls.single()).isEqualTo(
@@ -198,12 +198,15 @@ internal class DefaultEmbeddedContentHelperTest {
 
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
+        val stateHolder: EmbeddedContentHelperStateHolder,
+        val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
         val savedStateHandle: SavedStateHandle,
         val eventReporter: FakeEventReporter,
         val errorReporter: FakeErrorReporter,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @Suppress("LongMethod")
     private fun testScenario(
         setup: SavedStateHandle.() -> Unit = {},
         block: suspend Scenario.() -> Unit,
@@ -224,42 +227,82 @@ internal class DefaultEmbeddedContentHelperTest {
             coroutineScope = backgroundScope,
             internalRowSelectionCallback = { null }
         )
-
-        val embeddedContentHelper = DefaultEmbeddedContentHelper(
-            coroutineScope = backgroundScope,
+        val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
+            selection = selectionHolder.selection,
+            customerMetadata = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
+        )
+        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
+            savedStateHandle = savedStateHandle,
+            selectionHolder = selectionHolder,
+            coroutineScope = backgroundScope,
+        )
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
+
+        val stateHolder = DefaultEmbeddedContentHelperStateHolder(
+            savedStateHandle = savedStateHandle,
+            eventReporter = eventReporter,
+        )
+        val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
             uiContext = Dispatchers.Unconfined,
             savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            confirmationStateHolder = confirmationStateHolder,
+            linkAccountHolder = linkAccountHolder,
+            coroutineScope = backgroundScope,
+            sheetLauncherHolder = sheetLauncherHolder,
+        )
+        val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
+            eventReporter = eventReporter,
+            embeddedFormHelperFactory = embeddedFormHelperFactory,
+            confirmationHandler = confirmationHandler,
+            confirmationStateHolder = confirmationStateHolder,
+            selectionHolder = selectionHolder,
+            customerStateHolder = customerStateHolder,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+            rowSelectionImmediateActionHandler = immediateActionHandler,
+            coroutineScope = backgroundScope,
+            sheetLauncherHolder = sheetLauncherHolder,
+            savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
+        )
+        val walletButtonsInteractorFactory = DefaultEmbeddedWalletButtonsInteractorFactory(
             embeddedLinkHelper = object : EmbeddedLinkHelper {
                 override val linkEmail: StateFlow<String?> = stateFlowOf(null)
             },
-            embeddedWalletsHelper = { stateFlowOf(null) },
-            customerStateHolder = DefaultCustomerStateHolder(
-                savedStateHandle = savedStateHandle,
-                selection = selectionHolder.selection,
-                customerMetadata = stateFlowOf(PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA),
-                paymentMethodMetadataFlow = stateFlowOf(null),
-            ),
-            embeddedFormHelperFactory = embeddedFormHelperFactory,
+            confirmationStateHolder = confirmationStateHolder,
             confirmationHandler = confirmationHandler,
-            confirmationStateHolder = EmbeddedConfirmationStateHolder(
-                savedStateHandle = savedStateHandle,
-                selectionHolder = selectionHolder,
-                coroutineScope = backgroundScope,
-            ),
-            rowSelectionImmediateActionHandler = immediateActionHandler,
             errorReporter = errorReporter,
-            internalRowSelectionCallback = { null },
+            eventReporter = eventReporter,
             linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
+            linkAccountHolder = linkAccountHolder,
             analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper()
+            coroutineScope = backgroundScope,
+        )
+
+        val embeddedContentHelper = DefaultEmbeddedContentHelper(
+            coroutineScope = backgroundScope,
+            stateHolder = stateHolder,
+            verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
+            walletButtonsInteractorFactory = walletButtonsInteractorFactory,
+            sheetLauncherHolder = sheetLauncherHolder,
+            embeddedWalletsHelper = { stateFlowOf(null) },
+            internalRowSelectionCallback = { null },
+            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            confirmationStateHolder = confirmationStateHolder,
+            errorReporter = errorReporter,
         )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
+            stateHolder = stateHolder,
+            sheetLauncherHolder = sheetLauncherHolder,
             savedStateHandle = savedStateHandle,
             eventReporter = eventReporter,
             errorReporter = errorReporter,

@@ -173,6 +173,21 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsEmbeddedContentHelper(helper: DefaultEmbeddedContentHelper): EmbeddedContentHelper
 
     @Binds
+    fun bindsEmbeddedContentHelperStateHolder(
+        stateHolder: DefaultEmbeddedContentHelperStateHolder
+    ): EmbeddedContentHelperStateHolder
+
+    @Binds
+    fun bindsEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
+        factory: DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory
+    ): EmbeddedPaymentMethodVerticalLayoutInteractorFactory
+
+    @Binds
+    fun bindsEmbeddedWalletButtonsInteractorFactory(
+        factory: DefaultEmbeddedWalletButtonsInteractorFactory
+    ): EmbeddedWalletButtonsInteractorFactory
+
+    @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler
