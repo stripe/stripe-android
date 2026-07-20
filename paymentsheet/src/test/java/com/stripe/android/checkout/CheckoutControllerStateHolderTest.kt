@@ -187,9 +187,9 @@ internal class CheckoutControllerStateHolderTest {
         val errorReporter = FakeErrorReporter()
         Scenario(
             stateHolder = CheckoutControllerStateHolder(
-                SavedStateHandle(),
-                errorReporter,
-                paymentOptionFactory,
+                savedStateHandle = SavedStateHandle(),
+                errorReporter = errorReporter,
+                paymentOptionFactory = paymentOptionFactory,
                 availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
             ),
             errorReporter = errorReporter,
