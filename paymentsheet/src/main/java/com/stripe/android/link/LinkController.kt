@@ -226,6 +226,7 @@ class LinkController @Inject internal constructor(
             ConfigurationDefaults.billingDetailsCollectionConfiguration
         private var allowUserEmailEdits: Boolean = true
         private var allowLogout: Boolean = true
+        private var paymentMethodTypes: List<String>? = null
 
         constructor(
             publishableKey: String,
@@ -282,6 +283,11 @@ class LinkController @Inject internal constructor(
 
         fun allowLogout(allowLogout: Boolean) = apply { this.allowLogout = allowLogout }
 
+        @LinkControllerPreview
+        fun paymentMethodTypes(paymentMethodTypes: List<String>?) = apply {
+            this.paymentMethodTypes = paymentMethodTypes
+        }
+
         @Parcelize
         @Poko
         internal class State(
@@ -297,6 +303,7 @@ class LinkController @Inject internal constructor(
             internal val email: String?,
             internal val phoneNumber: String?,
             internal val supportedPaymentMethodTypes: List<PaymentMethodType>?,
+            internal val paymentMethodTypes: List<String>? = null,
         ) : Parcelable
 
         internal fun build(): State = State(
@@ -312,6 +319,7 @@ class LinkController @Inject internal constructor(
             allowUserEmailEdits = allowUserEmailEdits,
             allowLogout = allowLogout,
             linkAppearance = appearance?.build(),
+            paymentMethodTypes = paymentMethodTypes,
         )
 
         internal companion object {

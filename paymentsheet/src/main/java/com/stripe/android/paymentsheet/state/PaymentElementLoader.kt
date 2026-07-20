@@ -200,7 +200,9 @@ internal interface PaymentElementLoader {
         }
 
         @Parcelize
-        object CryptoOnramp : InitializationMode() {
+        data class CryptoOnramp(
+            val paymentMethodTypes: List<String>? = null,
+        ) : InitializationMode() {
             override fun validate() {
                 // Nothing to validate.
             }
