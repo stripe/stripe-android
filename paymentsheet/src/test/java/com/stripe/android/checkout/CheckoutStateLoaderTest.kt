@@ -135,6 +135,24 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial leaves googlePayConfiguration null when checkout session country is missing`() = runScenario {
+        val configuration = CheckoutController.Configuration()
+            .googlePayConfiguration(
+                GooglePayConfiguration(
+                    GooglePayConfiguration.Environment.Production,
+                )
+            )
+            .build()
+
+        loader.loadInitial(
+            configuration = configuration,
+            checkoutSessionResponse = response(merchantCountry = null),
+        )
+
+        assertThat(stateHolder.state?.embeddedConfiguration?.googlePay).isNull()
+    }
+
+    @Test
     fun `loadInitial upgrades Automatic to Full when the session requires a billing address`() =
         runScenario {
             val configuration = CheckoutController.Configuration()
