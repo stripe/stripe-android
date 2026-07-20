@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.embedded.manage
 
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -10,6 +11,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -25,6 +27,7 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
     private val eventReporter: EventReporter,
     private val embeddedNavigatorProvider: Provider<EmbeddedNavigator>,
     private val launchMode: EmbeddedLaunchMode,
+    private val linkAccountHolder: LinkAccountHolder,
 ) : EmbeddedManageScreenInteractorFactory {
     override fun createManageScreenInteractor(): ManageScreenInteractor {
         return DefaultManageScreenInteractor(
@@ -52,6 +55,9 @@ internal class DefaultEmbeddedManageScreenInteractorFactory @Inject constructor(
                 embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
             },
             defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
+            linkBrand = linkAccountHolder.linkAccountInfo.mapAsStateFlow {
+                paymentMethodMetadata.effectiveLinkBrand(it.account)
+            },
         )
     }
 }

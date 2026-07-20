@@ -1,10 +1,12 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -154,6 +156,7 @@ internal class PaymentOptionDisplayDataFactoryTest {
             iconLoader = mock(),
             cardArtDrawableLoader = cardArtDrawableLoader,
             context = ApplicationProvider.getApplicationContext(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
 
         private val paymentSheetBillingDetails = PaymentSheet.BillingDetails(

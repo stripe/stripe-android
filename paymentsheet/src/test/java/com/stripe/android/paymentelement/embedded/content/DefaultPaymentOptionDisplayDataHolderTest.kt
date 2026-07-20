@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -44,6 +45,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
             iconLoader = mock(),
             cardArtDrawableLoader = { null },
             context = ApplicationProvider.getApplicationContext(),
+            linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         )
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())
         Scenario(

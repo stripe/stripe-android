@@ -39,7 +39,6 @@ import com.stripe.android.link.model.toLoginState
 import com.stripe.android.link.utils.determineFallbackPaymentSelectionAfterLinkLogout
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.WalletButtonsPreview

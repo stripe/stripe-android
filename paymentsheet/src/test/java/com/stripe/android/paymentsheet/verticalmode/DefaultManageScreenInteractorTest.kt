@@ -6,6 +6,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -369,6 +370,7 @@ class DefaultManageScreenInteractorTest {
             onUpdatePaymentMethod = { notImplemented() },
             navigateBack = handleBackPressed,
             defaultPaymentMethodId = defaultPaymentMethodId,
+            linkBrand = MutableStateFlow(LinkBrand.Link),
             dispatcher = dispatcher
         )
         closeInteractorRule.track(interactor)

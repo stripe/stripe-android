@@ -296,10 +296,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         verticalModeScreenSelection,
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
-        temporarySelection,
-        linkBrand,
+        combineAsStateFlow(temporarySelection, linkBrand) { temp, brand -> temp to brand },
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
-        temporarySelectionCode, linkBrand ->
+        (temporarySelectionCode, linkBrand) ->
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()

@@ -8,6 +8,7 @@ import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
@@ -56,6 +57,7 @@ internal class FakeBaseSheetViewModel private constructor(
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
     customViewModelScope = customViewModelScope,
     placesClient = null,
+    linkAccountHolder = LinkAccountHolder(savedStateHandle),
 ) {
     companion object {
         fun create(

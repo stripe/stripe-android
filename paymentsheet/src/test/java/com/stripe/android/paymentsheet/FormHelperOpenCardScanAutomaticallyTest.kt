@@ -243,6 +243,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             )
         }
         return viewModelStoreRule.track(viewModel)

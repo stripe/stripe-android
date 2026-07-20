@@ -308,6 +308,9 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     isVerticalLayout = true,
                 )
             },
+            linkBrand = linkAccountHolder.linkAccountInfo.mapAsStateFlow {
+                paymentMethodMetadata.effectiveLinkBrand(it.account)
+            },
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
     }
@@ -339,7 +342,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
             isNotPaymentFlow = false,
-            accountLinkBrandFlow = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account?.linkBrand },
+            linkAccountFlow = linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account },
         )
     }
 

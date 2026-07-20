@@ -24,6 +24,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -50,6 +51,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -1294,6 +1296,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
@@ -1380,6 +1383,7 @@ internal class PaymentSheetActivityTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             )
         }.also { viewModelStoreRule.track(it) }
     }

@@ -4,7 +4,6 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -25,6 +24,7 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Inject
@@ -127,6 +127,9 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                     walletsState = null,
                     isVerticalLayout = true,
                 )
+            },
+            linkBrand = linkAccountHolder.linkAccountInfo.mapAsStateFlow {
+                paymentMethodMetadata.effectiveLinkBrand(it.account)
             },
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )

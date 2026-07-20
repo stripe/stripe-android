@@ -65,7 +65,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             },
             isLinkEnabled = stateFlowOf(false), // Link is never enabled in the manage screen.
             isNotPaymentFlow = false,
-            accountLinkBrandFlow = stateFlowOf(null), // Link is never enabled in the manage screen.
+            linkAccountFlow = stateFlowOf(null), // Link is never enabled in the manage screen.
         )
     }
 

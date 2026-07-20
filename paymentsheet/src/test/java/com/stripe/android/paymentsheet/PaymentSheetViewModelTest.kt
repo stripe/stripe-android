@@ -26,6 +26,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.attestation.FakeLinkAttestationCheck
 import com.stripe.android.link.attestation.LinkAttestationCheck
 import com.stripe.android.link.model.AccountStatus
@@ -3505,6 +3506,7 @@ internal class PaymentSheetViewModelTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             )
         }
         return viewModelStoreRule.track(viewModel)
