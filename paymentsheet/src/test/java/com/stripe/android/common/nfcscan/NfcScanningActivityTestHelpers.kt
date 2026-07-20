@@ -112,7 +112,7 @@ internal object NfcScanningActivityTestHelpers {
         )
     }
 
-    private fun configureNfc(context: Context) {
+    fun configureNfc(context: Context) {
         shadowOf(context.packageManager).setSystemFeature(PackageManager.FEATURE_NFC, true)
         getNfcAdapter(context)?.setEnabled(true)
     }
