@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -23,7 +23,7 @@ internal class CurrencySelectorToggleScreenshotTest {
         boxModifier = Modifier.padding(all = 16.dp),
     )
 
-    private val defaultAppearance = Checkout.CurrencySelectorContentAppearance().build()
+    private val defaultAppearance = CurrencySelectorElement.Appearance().build()
 
     private val options = CurrencySelectorOptions(
         first = CurrencyOption(code = "USD", formattedAmount = "$50.99", flag = FlagContent.Emoji("🇺🇸")),

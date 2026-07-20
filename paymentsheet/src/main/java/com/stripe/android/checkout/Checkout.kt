@@ -617,7 +617,37 @@ class Checkout private constructor(
             isEnabled = !isLoading,
             showCurrencyCode = showCurrencyCode,
             errorMessage = errorMessage?.resolve(),
-            appearance = appearanceState,
+            appearance = appearanceState.toElementAppearanceState(),
         )
     }
 }
+
+/**
+ * Maps [Checkout]'s public [Checkout.CurrencySelectorContentAppearance.State] onto the
+ * [CurrencySelectorElement.Appearance.State] consumed by [CurrencySelectorToggle]. The two carry the
+ * same fields; [Checkout] keeps its own appearance type while the shared toggle speaks the element's.
+ */
+@OptIn(CheckoutSessionPreview::class)
+private fun Checkout.CurrencySelectorContentAppearance.State.toElementAppearanceState():
+    CurrencySelectorElement.Appearance.State = CurrencySelectorElement.Appearance.State(
+    contentVerticalPaddingDp = contentVerticalPaddingDp,
+    cornerRadiusDp = cornerRadiusDp,
+    borderWidthDp = borderWidthDp,
+    borderColor = borderColor,
+    background = background,
+    selectedBackground = selectedBackground,
+    textColor = textColor,
+    selectedTextColor = selectedTextColor,
+    textSecondaryColor = textSecondaryColor,
+    dangerColor = dangerColor,
+    fontResId = fontResId,
+    sizeScaleFactor = sizeScaleFactor,
+    labelContent = when (labelContent) {
+        Checkout.CurrencySelectorContentAppearance.LabelContent.AUTOMATIC ->
+            CurrencySelectorElement.Appearance.LabelContent.AUTOMATIC
+        Checkout.CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE ->
+            CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE
+        Checkout.CurrencySelectorContentAppearance.LabelContent.AMOUNT ->
+            CurrencySelectorElement.Appearance.LabelContent.AMOUNT
+    },
+)

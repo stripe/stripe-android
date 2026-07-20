@@ -21,21 +21,22 @@ import javax.inject.Inject
 class CurrencySelectorElement @Inject internal constructor(
     private val checkoutController: CheckoutController,
     private val viewModelFactory: CurrencySelectorViewModel.Factory,
+    private val stateHolder: CheckoutControllerStateHolder,
 ) {
     private val viewModelKey = "CurrencySelectorViewModel:${System.identityHashCode(checkoutController)}"
 
     @Composable
     fun Content() {
-        val appearanceState = Checkout.CurrencySelectorContentAppearance().build()
         val viewModel: CurrencySelectorViewModel = viewModel(
             key = viewModelKey,
             factory = viewModelFactory,
         )
+        val state by stateHolder.stateFlow.collectAsState()
+        val appearanceState = state?.configuration?.currencySelectorElementConfiguration?.appearance ?: return
         val isLoading by checkoutController.isLoading.collectAsState()
         val checkoutSession by checkoutController.checkoutSession.collectAsState()
         val currencySelectorOptions = checkoutSession?.currencySelectorOptions ?: return
-        val showCurrencyCode =
-            appearanceState.labelContent == Checkout.CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE
+        val showCurrencyCode = appearanceState.labelContent == Appearance.LabelContent.CURRENCY_CODE
         val errorMessage by viewModel.errorMessage.collectAsState()
         CurrencySelectorToggle(
             options = currencySelectorOptions,

@@ -4,7 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.stripe.android.checkout.Checkout
+import com.stripe.android.checkout.CurrencySelectorElement
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -31,7 +31,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testCustomColors() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .selectedBackground(Color(0xFF6200EE))
             .background(Color(0xFFE8DEF8))
             .selectedTextColor(Color.White)
@@ -54,7 +54,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testCustomDimensions() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .contentVerticalPaddingDp(12f)
             .cornerRadiusDp(8f)
             .borderWidthDp(1f)
@@ -73,7 +73,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testLargeSizeScaleFactor() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .sizeScaleFactor(1.4f)
             .contentVerticalPaddingDp(8f)
             .build()
@@ -91,7 +91,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testSmallSizeScaleFactor() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .sizeScaleFactor(0.8f)
             .contentVerticalPaddingDp(2f)
             .build()
@@ -109,7 +109,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testCustomDangerColor() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .dangerColor(Color(0xFFB3261E))
             .build()
 
@@ -127,7 +127,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testNoBorder() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .borderWidthDp(0f)
             .build()
 
@@ -144,7 +144,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testSquareCorners() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .cornerRadiusDp(0f)
             .borderWidthDp(1f)
             .build()
@@ -162,7 +162,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testCustomTextSecondaryColor() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .textSecondaryColor(Color(0xFF006B5E))
             .build()
 
@@ -179,7 +179,7 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testSecondOptionSelectedWithCustomColors() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
+        val appearance = CurrencySelectorElement.Appearance()
             .selectedBackground(Color(0xFF006B5E))
             .selectedTextColor(Color.White)
             .background(Color(0xFFD0F5EE))
@@ -199,8 +199,8 @@ internal class CurrencySelectorToggleAppearanceScreenshotTest {
 
     @Test
     fun testLabelContentCurrencyCode() {
-        val appearance = Checkout.CurrencySelectorContentAppearance()
-            .labelContent(Checkout.CurrencySelectorContentAppearance.LabelContent.CURRENCY_CODE)
+        val appearance = CurrencySelectorElement.Appearance()
+            .labelContent(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
             .build()
 
         paparazziRule.snapshot {
