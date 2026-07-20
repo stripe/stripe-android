@@ -11,15 +11,11 @@ import kotlinx.parcelize.Parcelize
  * @param environment The Google Pay environment to use. See
  * [Google's documentation](https://developers.google.com/android/reference/com/google/android/gms/wallet/Wallet.WalletOptions#environment)
  * for more information.
- * @param countryCode The two-letter ISO 3166 code of the country of your business, e.g. "US".
- * See your account's country value [here](https://dashboard.stripe.com/settings/account).
  */
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GooglePayConfiguration(
     private val environment: Environment,
-    // TODO: remove countryCode
-    private val countryCode: String,
 ) {
     private var label: String? = null
     private var buttonType: ButtonType = ButtonType.Pay
@@ -56,8 +52,6 @@ class GooglePayConfiguration(
     @Parcelize
     internal data class State(
         val environment: Environment,
-        // TODO: remove countryCode
-        val countryCode: String,
         val label: String?,
         val buttonType: ButtonType,
         val additionalEnabledNetworks: List<String>,
@@ -65,7 +59,6 @@ class GooglePayConfiguration(
 
     internal fun build(): State = State(
         environment = environment,
-        countryCode = countryCode,
         label = label,
         buttonType = buttonType,
         additionalEnabledNetworks = additionalEnabledNetworks.toList(),

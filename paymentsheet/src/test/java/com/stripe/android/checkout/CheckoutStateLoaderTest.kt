@@ -107,12 +107,11 @@ internal class CheckoutStateLoaderTest {
         }
 
     @Test
-    fun `loadInitial propagates googlePayConfiguration from the checkout configuration`() = runScenario {
+    fun `loadInitial uses the checkout session country for googlePayConfiguration`() = runScenario {
         val configuration = CheckoutController.Configuration()
             .googlePayConfiguration(
                 GooglePayConfiguration(
                     GooglePayConfiguration.Environment.Production,
-                    "CA",
                 )
                     .label("Total")
                     .buttonType(GooglePayConfiguration.ButtonType.Checkout)
@@ -120,12 +119,15 @@ internal class CheckoutStateLoaderTest {
             )
             .build()
 
-        loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
+        loader.loadInitial(
+            configuration = configuration,
+            checkoutSessionResponse = response(merchantCountry = "GB"),
+        )
 
         val actual = requireNotNull(stateHolder.state?.embeddedConfiguration?.googlePay)
         assertThat(actual.environment)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
-        assertThat(actual.countryCode).isEqualTo("CA")
+        assertThat(actual.countryCode).isEqualTo("GB")
         assertThat(actual.label).isEqualTo("Total")
         assertThat(actual.buttonType)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
@@ -290,7 +292,9 @@ internal class CheckoutStateLoaderTest {
 
     private fun defaultConfiguration() = CheckoutController.Configuration().build()
 
-    private fun response() = CheckoutSessionResponseFactory.create()
+    private fun response(
+        merchantCountry: String? = "US",
+    ) = CheckoutSessionResponseFactory.create(merchantCountry = merchantCountry)
 
     private fun bdcc(
         address: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,

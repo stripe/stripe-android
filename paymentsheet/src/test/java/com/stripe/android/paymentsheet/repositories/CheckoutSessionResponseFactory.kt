@@ -29,6 +29,7 @@ internal object CheckoutSessionResponseFactory {
         taxAddressSource: CheckoutSessionResponse.TaxAddressSource? = null,
         allowedShippingCountries: List<String>? = null,
         requiresBillingAddress: Boolean = false,
+        merchantCountry: String? = "US",
     ): CheckoutSessionResponse {
         return CheckoutSessionResponse(
             id = id,
@@ -52,6 +53,7 @@ internal object CheckoutSessionResponseFactory {
             taxAddressSource = taxAddressSource,
             allowedShippingCountries = allowedShippingCountries,
             requiresBillingAddress = requiresBillingAddress,
+            merchantCountry = merchantCountry,
         )
     }
 }

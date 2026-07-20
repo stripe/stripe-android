@@ -762,6 +762,25 @@ class CheckoutSessionResponseJsonParserTest {
     }
 
     @Test
+    fun `parse merchant country from account settings`() {
+        val json = JSONObject(
+            """
+            {
+                "session_id": "cs_test_123",
+                "ui_mode": "custom",
+                "currency": "usd",
+                "total_summary": { "due": 1000, "subtotal": 1000, "total": 1000 },
+                "account_settings": { "country": "GB" }
+            }
+            """.trimIndent()
+        )
+        val result = CheckoutSessionResponseJsonParser.parse(json)
+
+        assertThat(result).isNotNull()
+        assertThat(result?.merchantCountry).isEqualTo("GB")
+    }
+
+    @Test
     fun `customerEmail is null when customer_email is JSON null`() {
         val json = JSONObject(
             """

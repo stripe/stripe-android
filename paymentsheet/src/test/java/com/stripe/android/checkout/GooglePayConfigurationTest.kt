@@ -11,11 +11,9 @@ internal class GooglePayConfigurationTest {
     fun `configuration defaults optional values`() {
         val state = GooglePayConfiguration(
             GooglePayConfiguration.Environment.Test,
-            "US"
         ).build()
 
         assertThat(state.environment).isEqualTo(GooglePayConfiguration.Environment.Test)
-        assertThat(state.countryCode).isEqualTo("US")
         assertThat(state.label).isNull()
         assertThat(state.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Pay)
         assertThat(state.additionalEnabledNetworks).isEmpty()
@@ -25,7 +23,6 @@ internal class GooglePayConfigurationTest {
     fun `configuration builds requested values`() {
         val state = GooglePayConfiguration(
             GooglePayConfiguration.Environment.Production,
-            "CA",
         )
             .label("Total")
             .buttonType(GooglePayConfiguration.ButtonType.Checkout)
@@ -33,7 +30,6 @@ internal class GooglePayConfigurationTest {
             .build()
 
         assertThat(state.environment).isEqualTo(GooglePayConfiguration.Environment.Production)
-        assertThat(state.countryCode).isEqualTo("CA")
         assertThat(state.label).isEqualTo("Total")
         assertThat(state.buttonType).isEqualTo(GooglePayConfiguration.ButtonType.Checkout)
         assertThat(state.additionalEnabledNetworks).containsExactly("INTERAC")
