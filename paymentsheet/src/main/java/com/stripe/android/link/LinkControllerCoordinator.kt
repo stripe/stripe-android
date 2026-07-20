@@ -84,33 +84,23 @@ internal class LinkControllerCoordinator @Inject constructor(
         )
     }
 
-    fun createPaymentMethodAndConfirmSetupIntent() {
+    fun confirmSetupIntent(clientSecret: String) {
         lifecycleOwner.lifecycleScope.launch {
-            val setupIntentClientSecret = interactor.setupIntentClientSecret
-            if (setupIntentClientSecret == null) {
+            val paymentMethod = interactor.lastCreatedPaymentMethod
+            if (paymentMethod?.id == null) {
                 interactor.emitConfirmSetupIntentResult(
                     LinkController.ConfirmSetupIntentResult.Failed(
-                        IllegalStateException("No setupIntentClientSecret in Configuration")
+                        IllegalStateException("No payment method available. Call present() first.")
                     )
                 )
                 return@launch
             }
 
-            val pmResult = interactor.performCreatePaymentMethodForConfirmation()
-            pmResult.fold(
-                onSuccess = { paymentMethod ->
-                    paymentLauncher.confirm(
-                        ConfirmSetupIntentParams.create(
-                            paymentMethodId = paymentMethod.id,
-                            clientSecret = setupIntentClientSecret,
-                        )
-                    )
-                },
-                onFailure = { error ->
-                    interactor.emitConfirmSetupIntentResult(
-                        LinkController.ConfirmSetupIntentResult.Failed(error)
-                    )
-                }
+            paymentLauncher.confirm(
+                ConfirmSetupIntentParams.create(
+                    paymentMethodId = paymentMethod.id,
+                    clientSecret = clientSecret,
+                )
             )
         }
     }
