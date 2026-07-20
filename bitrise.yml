@@ -29,7 +29,7 @@ pipelines:
         parallel: 5
         depends_on:
           - build-paymentsheet-e2e
-#      run-paymentsheet-google-pay-e2e: { }
+      run-paymentsheet-google-pay-e2e: { }
       check-dependencies: { }
       verify-publish-pom: { }
   pipeline-connect-e2e-debug-tests:
