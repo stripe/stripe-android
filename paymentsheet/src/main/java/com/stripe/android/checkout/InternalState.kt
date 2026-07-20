@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Parcelable
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -30,7 +31,11 @@ internal data class InternalState(
         )
 
     fun asCheckoutSession(): CheckoutSession {
-        return checkoutSessionResponse.asCheckoutSession(flagImages, paymentOptionDisplayData = null)
+        return checkoutSessionResponse.asCheckoutSession(
+            flagImages,
+            paymentOptionDisplayData = null,
+            availableExpressButtonTypes = emptyList(),
+        )
     }
 }
 
@@ -38,6 +43,7 @@ internal data class InternalState(
 internal fun CheckoutSessionResponse.asCheckoutSession(
     flagImages: Map<String, Bitmap>?,
     paymentOptionDisplayData: PaymentOptionDisplayData?,
+    availableExpressButtonTypes: List<WalletType>,
 ): CheckoutSession {
     return CheckoutSession(
         id = id,
@@ -54,6 +60,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
             adaptivePricingInfo = adaptivePricingInfo,
             flagImages = flagImages,
         ),
+        availableExpressButtonTypes = availableExpressButtonTypes,
     )
 }
 

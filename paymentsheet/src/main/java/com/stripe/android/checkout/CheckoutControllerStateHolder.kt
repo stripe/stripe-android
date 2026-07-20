@@ -2,6 +2,7 @@ package com.stripe.android.checkout
 
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -27,6 +28,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
     private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
+    private val availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
 ) : EmbeddedSelectionHolder {
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
@@ -38,7 +40,12 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
     val checkoutSession: StateFlow<CheckoutSession?> =
-        stateFlow.mapAsStateFlow { it?.asCheckoutSession(paymentOptionFactory) }
+        stateFlow.mapAsStateFlow {
+            it?.asCheckoutSession(
+                paymentOptionFactory,
+                availableExpressButtonTypesFactory,
+            )
+        }
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }

@@ -113,38 +113,23 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `computeAvailableExpressButtonTypes keeps only wallets returned by metadata`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            availableWallets = listOf(WalletType.GooglePay),
+    fun `state reflects available wallets from checkoutSession`() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(
+                WalletType.Link,
+                WalletType.GooglePay,
+            )
+        )
+        val availableWallets = listOf(WalletType.GooglePay)
+        val interactor = createInteractor(
+            paymentMethodMetadata = paymentMethodMetadata,
+            availableWallets = availableWallets,
         )
 
-        assertThat(availableExpressButtonTypes).containsExactly(
-            WalletType.GooglePay
-        )
-    }
-
-    @Test
-    fun `computeAvailableExpressButtonTypes filters out wallets disabled by configuration`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
-            configuration = ExpressCheckoutElement.Configuration()
-                .linkVisibility(ExpressCheckoutElement.Configuration.LinkVisibility.Never),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(
-            WalletType.GooglePay
-        )
-    }
-
-    @Test
-    fun `computeAvailableExpressButtonTypes returns all available wallets`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
-            availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
-        )
-
-        assertThat(availableExpressButtonTypes).containsExactly(
-            WalletType.Link,
-            WalletType.GooglePay,
+        assertThat(interactor.state.value.expressButtons).containsExactly(
+            ExpressButton.GooglePay.create(
+                paymentMethodMetadata,
+            ),
         )
     }
 
@@ -152,12 +137,16 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        availableWallets: List<WalletType> = paymentMethodMetadata.availableWallets,
     ): DefaultExpressCheckoutElementInteractor {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _ -> null },
+            availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
+                availableWallets = availableWallets,
+            ),
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -169,23 +158,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         return DefaultExpressCheckoutElementInteractor(
             linkAccountHolder = linkAccountHolder,
             stateHolder = stateHolder,
-        )
-    }
-
-    private fun computeAvailableExpressButtonTypes(
-        availableWallets: List<WalletType> = emptyList(),
-        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
-    ): List<WalletType> {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            availableWallets = availableWallets,
-        )
-
-        return createInteractor(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
-        ).computeAvailableExpressButtonTypes(
-            paymentMethodMetadata = paymentMethodMetadata,
-            expressCheckoutElementConfiguration = configuration.build(),
         )
     }
 }
