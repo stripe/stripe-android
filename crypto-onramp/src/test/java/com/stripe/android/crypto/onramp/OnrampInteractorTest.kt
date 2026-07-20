@@ -52,6 +52,7 @@ import com.stripe.android.crypto.onramp.model.OnrampSessionClientSecretProvider
 import com.stripe.android.crypto.onramp.model.OnrampStartVerificationResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.model.OnrampSubmitWalletOwnershipSignatureResult
+import com.stripe.android.crypto.onramp.model.OnrampTokenAuthenticationResult
 import com.stripe.android.crypto.onramp.model.OnrampUpdatePhoneNumberResult
 import com.stripe.android.crypto.onramp.model.OnrampUserAttestationResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
@@ -214,6 +215,26 @@ class OnrampInteractorTest {
         verify(linkController).registerConsumer("email", "phone", "US", "Test User")
 
         testAnalyticsService.assertContainsEvent(OnrampAnalyticsEvent.LinkRegistrationCompleted)
+    }
+
+    @Test
+    fun testAuthenticateUserWithTokenIsSuccessful() = runTest {
+        whenever(linkController.authenticateWithToken("link_auth_token_client_secret"))
+            .thenReturn(LinkController.AuthenticateWithTokenResult.Success)
+        whenever(cryptoApiRepository.createCryptoCustomer("secret_123"))
+            .thenReturn(Result.success(CryptoCustomerResponse(id = "customer_123")))
+
+        interactor.onLinkControllerState(mockLinkStateWithAccount())
+
+        val result = interactor.authenticateUserWithToken("link_auth_token_client_secret")
+
+        assertThat(result).isInstanceOf(OnrampTokenAuthenticationResult.Completed::class.java)
+        assertThat(interactor.state.value.cryptoCustomerId).isEqualTo("customer_123")
+        verify(linkController).authenticateWithToken("link_auth_token_client_secret")
+        verify(cryptoApiRepository).createCryptoCustomer("secret_123")
+        testAnalyticsService.assertContainsEvent(
+            OnrampAnalyticsEvent.LinkUserAuthenticationWithTokenCompleted
+        )
     }
 
     @Test
