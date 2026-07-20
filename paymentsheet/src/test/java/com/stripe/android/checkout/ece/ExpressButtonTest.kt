@@ -168,21 +168,6 @@ internal class ExpressButtonTest {
         assertThat(button.cardFundingFilter).isSameInstanceAs(cardFundingFilter)
     }
 
-    @Test
-    fun `GooglePay create disallows credit cards when funding filter excludes credit`() {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            cardFundingFilter = PaymentSheetCardFundingFilter(
-                allowedCardFundingTypes = listOf(PaymentSheet.CardFundingType.Debit),
-            ),
-        )
-
-        val button = createGooglePayExpressButton(
-            paymentMethodMetadata = paymentMethodMetadata,
-        )
-
-        assertThat(button.allowCreditCards).isFalse()
-    }
-
     private fun createGooglePayExpressButton(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration()

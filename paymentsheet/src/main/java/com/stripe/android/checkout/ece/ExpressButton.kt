@@ -57,7 +57,7 @@ internal sealed interface ExpressButton {
                 googlePayConfiguration: GooglePayConfiguration.State,
             ): GooglePay {
                 return GooglePay(
-                    allowCreditCards = paymentMethodMetadata.cardFundingFilter.isAccepted(CardFunding.Credit),
+                    allowCreditCards = true,
                     googlePayButtonType = googlePayConfiguration.buttonType.asGooglePayButtonType(),
                     cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                     cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
