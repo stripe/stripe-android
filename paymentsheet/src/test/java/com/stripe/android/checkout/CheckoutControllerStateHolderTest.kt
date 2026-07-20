@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -151,6 +152,7 @@ internal class CheckoutControllerStateHolderTest {
             savedStateHandle = SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restored)),
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _ -> null },
+            availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
         )
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
@@ -184,7 +186,12 @@ internal class CheckoutControllerStateHolderTest {
     ) = runTest {
         val errorReporter = FakeErrorReporter()
         Scenario(
-            stateHolder = CheckoutControllerStateHolder(SavedStateHandle(), errorReporter, paymentOptionFactory),
+            stateHolder = CheckoutControllerStateHolder(
+                SavedStateHandle(),
+                errorReporter,
+                paymentOptionFactory,
+                availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(),
+            ),
             errorReporter = errorReporter,
         ).block()
         errorReporter.ensureAllEventsConsumed()
