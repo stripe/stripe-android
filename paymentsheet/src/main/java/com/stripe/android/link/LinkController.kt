@@ -288,7 +288,6 @@ class LinkController @Inject internal constructor(
             this.paymentMethodTypes = paymentMethodTypes
         }
 
-
         @Parcelize
         @Poko
         internal class State(
