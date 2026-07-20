@@ -36,6 +36,7 @@ class GenericAuthenticatorTest {
                 host = host,
                 actionable = mock(),
                 requestOptions = mock(),
+                returnUrl = null,
             )
             completable.complete(Unit)
         }
@@ -57,6 +58,7 @@ class GenericAuthenticatorTest {
             host = host,
             actionable = mock(),
             requestOptions = mock(),
+            returnUrl = null,
         )
 
         assertThat(authenticator.wasInvoked).isTrue()
@@ -71,7 +73,8 @@ private class TestNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         wasInvoked = true
     }

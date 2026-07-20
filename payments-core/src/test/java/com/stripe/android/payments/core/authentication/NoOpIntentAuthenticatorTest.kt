@@ -52,7 +52,8 @@ class NoOpIntentAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            null
         )
 
         assertThat(launcher.launchArgs)
@@ -76,7 +77,8 @@ class NoOpIntentAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_WITH_LAST_PAYMENT_ERROR,
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            null
         )
 
         verify(host).startActivityForResult(

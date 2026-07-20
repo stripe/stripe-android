@@ -54,7 +54,8 @@ class UnsupportedAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            null
         )
 
         assertThat(launcher.launchArgs)
@@ -78,7 +79,8 @@ class UnsupportedAuthenticatorTest {
         authenticator.performNextAction(
             host,
             PI_SUCCEEDED,
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            null
         )
 
         assertThat(launcher.launchArgs)

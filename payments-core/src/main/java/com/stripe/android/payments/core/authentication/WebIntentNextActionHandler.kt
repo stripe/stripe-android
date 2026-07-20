@@ -41,7 +41,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         val webAuthParams = when (val nextActionData = actionable.nextActionData) {
             // can only triggered when `use_stripe_sdk=false`
@@ -49,7 +50,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 nextActionData.webAuthParams(actionable)
             }
             is StripeIntent.NextActionData.AlipayRedirect -> {
-                nextActionData.webAuthParams()
+                nextActionData.webAuthParams(returnUrl)
             }
             is StripeIntent.NextActionData.DisplayVoucherDetails -> {
                 nextActionData.webAuthParams(actionable)
@@ -142,17 +143,22 @@ internal class WebIntentNextActionHandler @Inject constructor(
         }
     }
 
-    private fun StripeIntent.NextActionData.AlipayRedirect.webAuthParams(): WebAuthParams {
+    private fun StripeIntent.NextActionData.AlipayRedirect.webAuthParams(
+        suppliedReturnUrl: String?
+    ): WebAuthParams {
         analyticsRequestExecutor.executeAsync(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
         )
 
-        // Alipay's return_url now points at the pm-redirects.stripe.com trampoline rather
-        // than the merchant's own return URL, so matching against it (like the other
-        // redirect-based methods below) closes the WebView before the trampoline finishes.
+        // Alipay's return_url now points at the pm-redirects.stripe.com trampoline rather than the
+        // merchant's own return URL. The trampoline's final redirect target is the confirm-time
+        // return_url (merchant custom value if set, else the SDK default), so we watch for that
+        // instead of matching against the trampoline URL itself, which would close the WebView
+        // before the trampoline finishes. Falls back to defaultReturnUrl.value when no confirm-time
+        // value is available (e.g. manual next-action handling or Source authentication).
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
-            returnUrl = defaultReturnUrl.value,
+            returnUrl = suppliedReturnUrl ?: defaultReturnUrl.value,
             shouldCancelIntentOnUserNavigation = false,
         )
     }

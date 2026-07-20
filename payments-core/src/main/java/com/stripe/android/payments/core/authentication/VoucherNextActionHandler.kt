@@ -23,7 +23,8 @@ internal class VoucherNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         val detailsData = actionable.nextActionData as NextActionData.DisplayVoucherDetails
         if (detailsData.hostedVoucherUrl == null) {
@@ -34,13 +35,15 @@ internal class VoucherNextActionHandler @Inject constructor(
             noOpIntentAuthenticator.performNextAction(
                 host,
                 actionable,
-                requestOptions
+                requestOptions,
+                returnUrl
             )
         } else {
             webIntentAuthenticator.performNextAction(
                 host,
                 actionable,
-                requestOptions
+                requestOptions,
+                returnUrl
             )
         }
     }

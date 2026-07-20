@@ -19,7 +19,8 @@ internal class NoOpIntentNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         val args = PaymentRelayStarter.Args.create(
             stripeIntent = actionable,

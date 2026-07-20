@@ -168,10 +168,11 @@ constructor(
 
         result.fold(
             onSuccess = { intent ->
-                handleNextAction(
+                nextActionHandlerRegistry.getNextActionHandler(intent).performNextAction(
                     host,
                     intent,
-                    requestOptions
+                    requestOptions,
+                    returnUrl
                 )
             },
             onFailure = {
@@ -317,7 +318,8 @@ constructor(
         nextActionHandlerRegistry.getNextActionHandler(source).performNextAction(
             host,
             source,
-            requestOptions
+            requestOptions,
+            null
         )
     }
 
@@ -444,7 +446,8 @@ constructor(
         nextActionHandlerRegistry.getNextActionHandler(stripeIntent).performNextAction(
             host,
             stripeIntent,
-            requestOptions
+            requestOptions,
+            null
         )
     }
 

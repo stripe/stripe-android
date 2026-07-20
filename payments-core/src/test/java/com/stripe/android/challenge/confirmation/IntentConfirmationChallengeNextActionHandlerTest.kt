@@ -52,7 +52,8 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
             handler.performNextAction(
                 FakeAuthActivityStarterHost(),
                 paymentIntent,
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                null
             )
 
             val launchArgs = awaitLaunchCall() as IntentConfirmationChallengeActivityContract.Args
@@ -75,7 +76,8 @@ internal class IntentConfirmationChallengeNextActionHandlerTest {
         handler.performNextAction(
             host,
             paymentIntent,
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            null
         )
 
         val startActivityForResultCall = host.calls.awaitItem()

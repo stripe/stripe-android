@@ -52,7 +52,8 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.performNextAction(
                 host,
                 paymentIntent,
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                null
             )
 
             verify(activity).startActivityForResult(
@@ -76,7 +77,8 @@ class Stripe3DS2AuthenticatorTest {
             authenticator.performNextAction(
                 host,
                 paymentIntent,
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                null
             )
 
             verify(mockLauncher).launch(

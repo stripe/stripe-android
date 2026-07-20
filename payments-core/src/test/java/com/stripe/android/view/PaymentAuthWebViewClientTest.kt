@@ -160,6 +160,80 @@ class PaymentAuthWebViewClientTest {
     }
 
     @Test
+    fun shouldOverrideUrlLoading_withAlipayTrampolineIntermediateUrl_andDefaultReturnUrl_shouldNotFinish() {
+        val watchedReturnUrl = "stripesdk://payment_return_url/some_package_name"
+        val intermediateUrl = "https://pm-redirects.stripe.com/return/src_1HDEFWKlwPmebFhp6tcpln8T"
+        val webViewClient = createWebViewClient(
+            "src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            returnUrl = watchedReturnUrl
+        )
+
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(intermediateUrl)
+        )
+        assertThat(shouldOverrideUrlLoading)
+            .isFalse()
+        assertThat(activityFinished)
+            .isFalse()
+    }
+
+    @Test
+    fun shouldOverrideUrlLoading_withAlipayTrampolineFinalUrl_andDefaultReturnUrl_shouldFinish() {
+        val watchedReturnUrl = "stripesdk://payment_return_url/some_package_name"
+        val webViewClient = createWebViewClient(
+            "src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            returnUrl = watchedReturnUrl
+        )
+
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(watchedReturnUrl)
+        )
+        assertThat(shouldOverrideUrlLoading)
+            .isTrue()
+        assertThat(activityFinished)
+            .isTrue()
+    }
+
+    @Test
+    fun shouldOverrideUrlLoading_withAlipayTrampolineIntermediateUrl_andCustomReturnUrl_shouldNotFinish() {
+        val watchedReturnUrl = "myapp://custom_return"
+        val intermediateUrl = "https://pm-redirects.stripe.com/return/src_1HDEFWKlwPmebFhp6tcpln8T"
+        val webViewClient = createWebViewClient(
+            "src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            returnUrl = watchedReturnUrl
+        )
+
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(intermediateUrl)
+        )
+        assertThat(shouldOverrideUrlLoading)
+            .isFalse()
+        assertThat(activityFinished)
+            .isFalse()
+    }
+
+    @Test
+    fun shouldOverrideUrlLoading_withAlipayTrampolineFinalUrl_andCustomReturnUrl_shouldFinish() {
+        val watchedReturnUrl = "myapp://custom_return"
+        val webViewClient = createWebViewClient(
+            "src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            returnUrl = watchedReturnUrl
+        )
+
+        val shouldOverrideUrlLoading = webViewClient.shouldOverrideUrlLoading(
+            webView,
+            FakeWebResourceRequest(watchedReturnUrl)
+        )
+        assertThat(shouldOverrideUrlLoading)
+            .isTrue()
+        assertThat(activityFinished)
+            .isTrue()
+    }
+
+    @Test
     fun onPageFinished_wit3DSecureCompleteUrl_shouldHideProgressAndFinish() {
         val url = "https://hooks.stripe.com/3d_secure/complete/tdsrc_1ExLWoCRMbs6FrXfjPJRYtng"
         createWebViewClient("pi_123_secret_456")

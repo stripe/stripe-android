@@ -28,7 +28,8 @@ internal class PollingNextActionHandler : PaymentNextActionHandler<StripeIntent>
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         val args = getArgsForPaymentMethod(actionable, host, requestOptions)
 

@@ -22,7 +22,8 @@ internal class UnsupportedNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         val exception = actionable.nextActionData?.let {
             val nextActionType = it::class.java

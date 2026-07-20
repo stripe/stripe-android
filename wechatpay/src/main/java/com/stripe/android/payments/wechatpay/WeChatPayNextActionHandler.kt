@@ -55,7 +55,8 @@ class WeChatPayNextActionHandler : PaymentNextActionHandler<StripeIntent>() {
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         require(reflectionHelper.isWeChatPayAvailable()) {
             "WeChatPay dependency is not found, add " +

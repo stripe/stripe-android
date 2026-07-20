@@ -65,7 +65,8 @@ class WeChatPayAuthenticatorTest {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
-                    REQUEST_OPTIONS
+                    REQUEST_OPTIONS,
+                    null
                 )
             }
         }
@@ -80,7 +81,8 @@ class WeChatPayAuthenticatorTest {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_REQUIRES_BLIK_AUTHORIZE,
-                    REQUEST_OPTIONS
+                    REQUEST_OPTIONS,
+                    null
                 )
             }
         }
@@ -95,7 +97,8 @@ class WeChatPayAuthenticatorTest {
                 authenticator.performNextAction(
                     host,
                     PaymentIntentFixtures.PI_NO_NEXT_ACTION_DATA,
-                    REQUEST_OPTIONS
+                    REQUEST_OPTIONS,
+                    null
                 )
             }
         }
@@ -107,7 +110,8 @@ class WeChatPayAuthenticatorTest {
             authenticator.performNextAction(
                 host,
                 PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
-                REQUEST_OPTIONS
+                REQUEST_OPTIONS,
+                null
             )
             verify(mockWeChatPayAuthStarter).start(
                 argWhere {

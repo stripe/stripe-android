@@ -24,22 +24,28 @@ abstract class PaymentNextActionHandler<Actionable> : ActivityResultLauncherHost
      * @param host the host([Activity] or [Fragment]) where client is calling from, used to redirect back to client
      * @param actionable the [StripeIntent] or [Source] object to perform next action on (e.g authenticate)
      * @param requestOptions configurations for the API request which triggers the authentication
+     * @param returnUrl the confirm-time resolved return URL (merchant custom value if set, else the
+     * SDK default), or `null` if no confirm-time value is available (e.g. manual next-action handling
+     * or Source authentication). Used by web-based next actions (e.g. Alipay) to know which URL the
+     * redirect will ultimately land on.
      */
     suspend fun performNextAction(
         host: AuthActivityStarterHost,
         actionable: Actionable,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) {
         val lifecycleOwner = host.lifecycleOwner
 
         lifecycleOwner.awaitResumed()
-        performNextActionOnResumed(host, actionable, requestOptions)
+        performNextActionOnResumed(host, actionable, requestOptions, returnUrl)
     }
 
     protected abstract suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: Actionable,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     )
 }
 

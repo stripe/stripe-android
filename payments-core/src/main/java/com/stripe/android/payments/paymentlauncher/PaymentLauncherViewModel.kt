@@ -141,7 +141,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         nextActionHandlerRegistry.getNextActionHandler(intent).performNextAction(
                             host,
                             intent,
-                            apiRequestOptionsProvider.get()
+                            apiRequestOptionsProvider.get(),
+                            returnUrl
                         )
                     }
                 },
@@ -225,7 +226,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
                         .performNextAction(
                             host,
                             unredactedPaymentIntent,
-                            apiRequestOptionsProvider.get()
+                            apiRequestOptionsProvider.get(),
+                            null
                         )
                 },
                 onFailure = {
@@ -256,7 +258,8 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 .performNextAction(
                     host,
                     intent,
-                    apiRequestOptionsProvider.get()
+                    apiRequestOptionsProvider.get(),
+                    null
                 )
         }
     }

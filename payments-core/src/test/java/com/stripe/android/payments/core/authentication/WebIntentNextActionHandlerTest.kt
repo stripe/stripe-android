@@ -98,6 +98,34 @@ class WebIntentNextActionHandlerTest {
     }
 
     @Test
+    fun authenticate_whenRedirectingToAlipay_withCustomReturnUrl() {
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
+            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T" +
+                "?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            expectedReturnUrl = "myapp://custom_return",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = PaymentAnalyticsEvent.AuthRedirect,
+            expectedShouldCancelIntentOnUserNavigation = false,
+            returnUrl = "myapp://custom_return",
+        )
+    }
+
+    @Test
+    fun authenticate_whenRedirectingToAlipay_withNullReturnUrl_fallsBackToDefault() {
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
+            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T" +
+                "?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = PaymentAnalyticsEvent.AuthRedirect,
+            expectedShouldCancelIntentOnUserNavigation = false,
+            returnUrl = null,
+        )
+    }
+
+    @Test
     fun authenticate_whenRedirectingToCashApp() {
         verifyAuthenticate(
             stripeIntent = PaymentIntentFixtures.CASH_APP_PAY_REQUIRES_ACTION,
@@ -158,6 +186,7 @@ class WebIntentNextActionHandlerTest {
         expectedRequestCode: Int,
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
         expectedAnalyticsEvent: PaymentAnalyticsEvent?,
+        returnUrl: String? = null,
         beforePerformNextAction: TestParams.() -> Unit = {},
     ) = runTest {
         val redirectResolver = TurbineRedirectResolver()
@@ -182,7 +211,8 @@ class WebIntentNextActionHandlerTest {
         authenticator.performNextAction(
             host,
             stripeIntent,
-            REQUEST_OPTIONS
+            REQUEST_OPTIONS,
+            returnUrl
         )
         verify(paymentBrowserWebStarter).start(
             browserAuthContractArgumentCaptor.capture()

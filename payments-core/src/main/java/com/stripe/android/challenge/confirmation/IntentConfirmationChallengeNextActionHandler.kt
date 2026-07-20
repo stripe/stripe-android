@@ -70,7 +70,8 @@ internal class IntentConfirmationChallengeNextActionHandler @Inject constructor(
     override suspend fun performNextActionOnResumed(
         host: AuthActivityStarterHost,
         actionable: StripeIntent,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        returnUrl: String?
     ) = withContext(uiContext) {
         val intentConfirmationChallengeNextActionStarter = intentConfirmationChallengeNextActionStarterFactory(host)
         intentConfirmationChallengeNextActionStarter.start(

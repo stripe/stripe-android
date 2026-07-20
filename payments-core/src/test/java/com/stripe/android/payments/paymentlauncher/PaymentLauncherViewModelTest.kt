@@ -192,7 +192,8 @@ class PaymentLauncherViewModelTest {
             verify(piAuthenticator).performNextAction(
                 eq(authHost),
                 eq(paymentIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(defaultReturnUrl.value)
             )
         }
 
@@ -225,7 +226,8 @@ class PaymentLauncherViewModelTest {
             verify(piAuthenticator).performNextAction(
                 eq(authHost),
                 eq(paymentIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(RETURN_URL)
             )
         }
 
@@ -259,7 +261,8 @@ class PaymentLauncherViewModelTest {
             verify(piAuthenticator, never()).performNextAction(
                 eq(authHost),
                 eq(paymentIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                any()
             )
 
             assertThat(viewModel.internalPaymentResult.value)
@@ -290,7 +293,8 @@ class PaymentLauncherViewModelTest {
             verify(siAuthenticator).performNextAction(
                 eq(authHost),
                 eq(setupIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(defaultReturnUrl.value)
             )
         }
 
@@ -323,7 +327,8 @@ class PaymentLauncherViewModelTest {
             verify(siAuthenticator).performNextAction(
                 eq(authHost),
                 eq(setupIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(RETURN_URL)
             )
         }
 
@@ -378,7 +383,8 @@ class PaymentLauncherViewModelTest {
             verify(stripeIntentAuthenticator).performNextAction(
                 eq(authHost),
                 eq(stripeIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(null)
             )
         }
 
@@ -413,7 +419,8 @@ class PaymentLauncherViewModelTest {
             verify(piAuthenticator).performNextAction(
                 eq(authHost),
                 eq(testPaymentIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(null)
             )
             // Verify we don't fetch from repository when intent is already provided
             verify(stripeApiRepository, never()).retrieveStripeIntent(any(), any(), any())
@@ -432,7 +439,8 @@ class PaymentLauncherViewModelTest {
             verify(siAuthenticator).performNextAction(
                 eq(authHost),
                 eq(testSetupIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(null)
             )
             // Verify we don't fetch from repository when intent is already provided
             verify(stripeApiRepository, never()).retrieveStripeIntent(any(), any(), any())
@@ -532,7 +540,8 @@ class PaymentLauncherViewModelTest {
             verify(stripeIntentAuthenticator).performNextAction(
                 eq(authHost),
                 eq(unredactedIntent),
-                eq(apiRequestOptions)
+                eq(apiRequestOptions),
+                eq(null)
             )
         }
 
