@@ -9,6 +9,8 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheetContract
 import com.stripe.android.paymentsheet.PrefsRepository
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteApiService
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import dagger.Module
@@ -60,5 +62,15 @@ internal class PaymentSheetViewModelModule {
         googlePlacesApiKey = starterArgs.config.googlePlacesApiKey,
         errorReporter = errorReporter,
         isPlacesAvailable = DefaultIsPlacesAvailable()(),
+    )
+
+    @Provides
+    @Named(STRIPE_HOSTED_PLACES_CLIENT)
+    fun provideStripeHostedPlacesClient(
+        stripeAutocompleteApiService: StripeAutocompleteApiService,
+        starterArgs: PaymentSheetContract.Args,
+    ): PlacesClientProxy = StripeHostedPlacesClientProxy(
+        stripeAutocompleteApiService = stripeAutocompleteApiService,
+        googlePlacesApiKey = starterArgs.config.googlePlacesApiKey,
     )
 }

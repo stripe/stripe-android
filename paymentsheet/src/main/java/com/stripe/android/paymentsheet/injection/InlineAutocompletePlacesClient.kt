@@ -7,6 +7,8 @@ import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 
+internal const val STRIPE_HOSTED_PLACES_CLIENT = "StripeHostedPlacesClient"
+
 internal fun createInlineAutocompletePlacesClient(
     context: Context,
     googlePlacesApiKey: String?,

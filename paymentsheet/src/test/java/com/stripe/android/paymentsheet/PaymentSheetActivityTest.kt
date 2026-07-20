@@ -75,6 +75,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteApiService
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
@@ -1382,7 +1383,10 @@ internal class PaymentSheetActivityTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
-                stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+                stripeHostedPlacesClient = StripeHostedPlacesClientProxy(
+                    stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+                    googlePlacesApiKey = null,
+                ),
             )
         }.also { viewModelStoreRule.track(it) }
     }

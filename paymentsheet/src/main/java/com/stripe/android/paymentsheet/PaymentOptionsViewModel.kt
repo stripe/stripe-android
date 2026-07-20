@@ -36,9 +36,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteApiService
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
+import com.stripe.android.paymentsheet.injection.STRIPE_HOSTED_PLACES_CLIENT
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.Link
@@ -66,6 +66,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
@@ -88,7 +89,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     placesClient: PlacesClientProxy?,
-    stripeAutocompleteApiService: StripeAutocompleteApiService,
+    @Named(STRIPE_HOSTED_PLACES_CLIENT) stripeHostedPlacesClient: PlacesClientProxy,
 ) : BaseSheetViewModel(
     config = args.configuration,
     eventReporter = eventReporter,
@@ -102,7 +103,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
-    stripeAutocompleteApiService = stripeAutocompleteApiService,
+    stripeHostedPlacesClient = stripeHostedPlacesClient,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

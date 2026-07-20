@@ -47,6 +47,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteApiService
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripeAndroidPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -582,7 +583,10 @@ internal class PaymentOptionsActivityTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
-                stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+                stripeHostedPlacesClient = StripeHostedPlacesClientProxy(
+                    stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+                    googlePlacesApiKey = null,
+                ),
             )
         }.also { viewModelStoreRule.track(it) }
 

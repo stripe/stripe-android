@@ -82,6 +82,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AutocompleteContract
 import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteApiService
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
@@ -3506,7 +3507,10 @@ internal class PaymentSheetViewModelTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
-                stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+                stripeHostedPlacesClient = StripeHostedPlacesClientProxy(
+                    stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+                    googlePlacesApiKey = null,
+                ),
             )
         }
         return viewModelStoreRule.track(viewModel)
