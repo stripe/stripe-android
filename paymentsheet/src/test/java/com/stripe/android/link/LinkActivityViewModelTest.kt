@@ -725,7 +725,7 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `logout action should dismiss when shouldShowSecondaryCta is true`() = runTest {
+    fun `logout action should dismiss when canContinueWithoutLink is true`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         val viewModel = createViewModel(
             linkAccountManager = linkAccountManager,
@@ -749,7 +749,7 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
-    fun `logout action should navigate to signup when shouldShowSecondaryCta is false`() = runTest {
+    fun `logout action should navigate to signup when canContinueWithoutLink is false`() = runTest {
         val linkAccountManager = FakeLinkAccountManager()
         val navigationManager = TestNavigationManager()
         val savedStateHandle = SavedStateHandle()

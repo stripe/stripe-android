@@ -166,15 +166,18 @@ internal class LinkActivityViewModel @Inject constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun handleLogoutClicked() {
-        val shouldDismiss = when (val mode = linkLaunchMode) {
-            is LinkLaunchMode.PaymentMethodSelection -> mode.canContinueWithoutLink
-            else -> true
+        val shouldDismiss = when (linkLaunchMode) {
+            is LinkLaunchMode.Authentication,
+            is LinkLaunchMode.Authorization,
+            is LinkLaunchMode.Confirmation,
+            LinkLaunchMode.Full -> true
+            is LinkLaunchMode.PaymentMethodSelection -> linkLaunchMode.canContinueWithoutLink
         }
 
+        GlobalScope.launch {
+            linkAccountManager.logOut()
+        }
         if (shouldDismiss) {
-            GlobalScope.launch {
-                linkAccountManager.logOut()
-            }
             dismissWithResult(
                 LinkActivityResult.Canceled(
                     reason = LinkActivityResult.Canceled.Reason.LoggedOut,
@@ -185,9 +188,8 @@ internal class LinkActivityViewModel @Inject constructor(
             savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
             navigate(LinkScreen.SignUp, clearStack = true)
             viewModelScope.launch {
-                linkAccountManager.logOut()
-            }
-            viewModelScope.launch {
+                // Wait for the Wallet exit animation to finish. Clearing earlier triggers NoLinkAccountFoundException
+                // from the Wallet composable's null-check while it's still in composition.
                 delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
                 linkAccountHolder.set(LinkAccountUpdate.Value(null, LoggedOut))
             }
