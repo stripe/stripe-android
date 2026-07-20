@@ -725,6 +725,68 @@ internal class LinkActivityViewModelTest {
     }
 
     @Test
+    fun `logout action should dismiss when canContinueWithoutLink is true`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+                canContinueWithoutLink = true,
+            ),
+        )
+
+        viewModel.result.test {
+            viewModel.handleViewAction(LinkAction.LogoutClicked)
+
+            linkAccountManager.awaitLogoutCall()
+            assertThat(awaitItem()).isEqualTo(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `logout action should navigate to signup when canContinueWithoutLink is false`() = runTest {
+        val linkAccountManager = FakeLinkAccountManager()
+        val navigationManager = TestNavigationManager()
+        val savedStateHandle = SavedStateHandle()
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
+        val viewModel = createViewModel(
+            linkAccountManager = linkAccountManager,
+            navigationManager = navigationManager,
+            savedStateHandle = savedStateHandle,
+            linkAccountHolder = linkAccountHolder,
+            linkLaunchMode = LinkLaunchMode.PaymentMethodSelection(
+                selectedPayment = null,
+                canContinueWithoutLink = false,
+            ),
+        )
+
+        viewModel.result.test {
+            viewModel.handleViewAction(LinkAction.LogoutClicked)
+
+            linkAccountManager.awaitLogoutCall()
+            expectNoEvents()
+        }
+
+        assertThat(savedStateHandle.get<Boolean>(SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO)).isFalse()
+
+        navigationManager.assertNavigatedTo(
+            route = LinkScreen.SignUp.route,
+            popUpTo = PopUpToBehavior.Start,
+        )
+
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertThat(linkAccountHolder.linkAccountInfo.value).isEqualTo(
+            LinkAccountUpdate.Value(null, LoggedOut)
+        )
+    }
+
+    @Test
     fun `change email should navigate to email route and update savedStateHandle`() {
         val navigationManager = TestNavigationManager()
         val savedStateHandle = SavedStateHandle()

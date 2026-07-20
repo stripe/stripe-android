@@ -53,7 +53,6 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -167,16 +166,34 @@ internal class LinkActivityViewModel @Inject constructor(
 
     @OptIn(DelicateCoroutinesApi::class)
     private fun handleLogoutClicked() {
+        val shouldDismiss = when (linkLaunchMode) {
+            is LinkLaunchMode.Authentication,
+            is LinkLaunchMode.Authorization,
+            is LinkLaunchMode.Confirmation,
+            LinkLaunchMode.Full -> true
+            is LinkLaunchMode.PaymentMethodSelection -> linkLaunchMode.canContinueWithoutLink
+        }
+
         GlobalScope.launch {
             linkAccountManager.logOut()
         }
-
-        dismissWithResult(
-            LinkActivityResult.Canceled(
-                reason = LinkActivityResult.Canceled.Reason.LoggedOut,
-                linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+        if (shouldDismiss) {
+            dismissWithResult(
+                LinkActivityResult.Canceled(
+                    reason = LinkActivityResult.Canceled.Reason.LoggedOut,
+                    linkAccountUpdate = LinkAccountUpdate.Value(null, LoggedOut)
+                )
             )
-        )
+        } else {
+            savedStateHandle[SignUpViewModel.USE_LINK_CONFIGURATION_CUSTOMER_INFO] = false
+            navigate(LinkScreen.SignUp, clearStack = true)
+            viewModelScope.launch {
+                // Wait for the Wallet exit animation to finish. Clearing earlier triggers NoLinkAccountFoundException
+                // from the Wallet composable's null-check while it's still in composition.
+                delay(LINK_DEFAULT_ANIMATION_DELAY_MILLIS)
+                linkAccountHolder.set(LinkAccountUpdate.Value(null, LoggedOut))
+            }
+        }
     }
 
     fun onNavEntryChanged(entry: NavBackStackEntryUpdate) {

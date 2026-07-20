@@ -229,7 +229,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     paymentMethodFilters = paymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
+                    canContinueWithoutLink = false,
                 )
             }
         )
@@ -261,7 +261,7 @@ internal class LinkControllerInteractor @Inject constructor(
                     selectedPayment = state.selectedPaymentMethod?.details,
                     paymentMethodFilters = config.supportedPaymentMethodTypes?.toFilters(),
                     sharePaymentDetailsImmediatelyAfterCreation = false,
-                    shouldShowSecondaryCta = false,
+                    canContinueWithoutLink = false,
                 )
             }
         )
