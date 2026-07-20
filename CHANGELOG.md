@@ -3,6 +3,9 @@
 NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
 
+### Payments
+* [FIXED][13518](https://github.com/stripe/stripe-android/pull/13518) Alipay payments no longer incorrectly report failure to the merchant app when the payment actually succeeds, following Stripe's Alipay+ EVO redirect migration.
+
 ## 23.13.0 - 2026-07-20
 
 ### Payments
