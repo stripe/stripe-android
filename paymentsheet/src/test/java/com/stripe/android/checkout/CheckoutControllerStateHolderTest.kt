@@ -4,7 +4,11 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -48,6 +52,28 @@ internal class CheckoutControllerStateHolderTest {
             assertThat(stateHolder.checkoutSession.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
             assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
         }
+    }
+
+    @Test
+    fun `checkoutSession reports express checkout element available when a wallet is available`() = testScenario {
+        stateHolder.state = committedState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                availableWallets = listOf(WalletType.GooglePay),
+            ),
+        )
+
+        assertThat(stateHolder.checkoutSession.value?.isExpressCheckoutElementAvailable).isTrue()
+    }
+
+    @Test
+    fun `checkoutSession reports express checkout element unavailable when no wallet is available`() = testScenario {
+        stateHolder.state = committedState(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                availableWallets = emptyList(),
+            ),
+        )
+
+        assertThat(stateHolder.checkoutSession.value?.isExpressCheckoutElementAvailable).isFalse()
     }
 
     @Test
@@ -151,6 +177,7 @@ internal class CheckoutControllerStateHolderTest {
             savedStateHandle = SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restored)),
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _ -> null },
+            availableExpressButtonTypesFactory = DefaultAvailableExpressButtonTypesFactory(),
         )
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
@@ -163,6 +190,7 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) = CheckoutControllerState(
         key = DEFAULT_KEY,
         configuration = CheckoutController.Configuration().build(),
@@ -170,7 +198,7 @@ internal class CheckoutControllerStateHolderTest {
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         integrationLaunched = false,
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata = paymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
@@ -180,11 +208,18 @@ internal class CheckoutControllerStateHolderTest {
     private fun testScenario(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
             CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
+        availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory =
+            DefaultAvailableExpressButtonTypesFactory(),
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val errorReporter = FakeErrorReporter()
         Scenario(
-            stateHolder = CheckoutControllerStateHolder(SavedStateHandle(), errorReporter, paymentOptionFactory),
+            stateHolder = CheckoutControllerStateHolder(
+                savedStateHandle = SavedStateHandle(),
+                errorReporter = errorReporter,
+                paymentOptionFactory = paymentOptionFactory,
+                availableExpressButtonTypesFactory = availableExpressButtonTypesFactory,
+            ),
             errorReporter = errorReporter,
         ).block()
         errorReporter.ensureAllEventsConsumed()

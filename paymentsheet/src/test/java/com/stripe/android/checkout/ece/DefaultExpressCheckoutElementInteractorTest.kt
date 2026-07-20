@@ -113,8 +113,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `computeAvailableExpressButtonTypes keeps only wallets returned by metadata`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
+    fun `available button types keeps only wallets returned by metadata`() {
+        val availableExpressButtonTypes = createAvailableButtonTypes(
             availableWallets = listOf(WalletType.GooglePay),
         )
 
@@ -124,8 +124,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `computeAvailableExpressButtonTypes filters out wallets disabled by configuration`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
+    fun `available button types filters out wallets disabled by configuration`() {
+        val availableExpressButtonTypes = createAvailableButtonTypes(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
             configuration = ExpressCheckoutElement.Configuration()
                 .linkVisibility(ExpressCheckoutElement.Configuration.LinkVisibility.Never),
@@ -137,8 +137,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `computeAvailableExpressButtonTypes returns all available wallets`() {
-        val availableExpressButtonTypes = computeAvailableExpressButtonTypes(
+    fun `available button types returns all available wallets`() {
+        val availableExpressButtonTypes = createAvailableButtonTypes(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
         )
 
@@ -158,6 +158,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             savedStateHandle = savedStateHandle,
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _ -> null },
+            availableExpressButtonTypesFactory = DefaultAvailableExpressButtonTypesFactory(),
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,
@@ -172,7 +173,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
     }
 
-    private fun computeAvailableExpressButtonTypes(
+    private fun createAvailableButtonTypes(
         availableWallets: List<WalletType> = emptyList(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
     ): List<WalletType> {
@@ -180,10 +181,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             availableWallets = availableWallets,
         )
 
-        return createInteractor(
-            paymentMethodMetadata = paymentMethodMetadata,
-            configuration = configuration,
-        ).computeAvailableExpressButtonTypes(
+        return DefaultAvailableExpressButtonTypesFactory().create(
             paymentMethodMetadata = paymentMethodMetadata,
             expressCheckoutElementConfiguration = configuration.build(),
         )

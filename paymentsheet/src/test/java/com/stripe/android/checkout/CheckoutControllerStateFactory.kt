@@ -3,6 +3,8 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -51,11 +53,14 @@ internal object CheckoutControllerStateFactory {
         errorReporter: ErrorReporter = FakeErrorReporter(),
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
             CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
+        availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory =
+            DefaultAvailableExpressButtonTypesFactory(),
     ): CheckoutControllerStateHolder {
         return CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = errorReporter,
             paymentOptionFactory = paymentOptionFactory,
+            availableExpressButtonTypesFactory = availableExpressButtonTypesFactory,
         )
     }
 }
