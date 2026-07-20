@@ -37,6 +37,9 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         require(uiMode == UI_MODE_CUSTOM) {
             "Expected ui_mode to be \"$UI_MODE_CUSTOM\" but was \"$uiMode\""
         }
+        // TODO: make account_settings and country fields string consts like we otherwise use as params.
+        val accountSettings = json.optJSONObject("account_settings")
+        val merchantCountry = accountSettings?.optString("country")
         val mode = parseMode(json.optString(FIELD_MODE))
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
@@ -107,6 +110,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             taxAddressSource = taxAddressSource,
             allowedShippingCountries = allowedShippingCountries,
             requiresBillingAddress = requiresBillingAddress,
+            // TODO: add merchant country field which is equal to merchantCountry
         )
     }
 

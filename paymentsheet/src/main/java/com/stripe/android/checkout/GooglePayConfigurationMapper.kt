@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
+// TODO: add merchantCountry as a param and use that value for countryCode instead of the one from GooglePayConfiguration.State
 @OptIn(CheckoutSessionPreview::class)
 internal fun GooglePayConfiguration.State.asPaymentSheet(): PaymentSheet.GooglePayConfiguration =
     PaymentSheet.GooglePayConfiguration(

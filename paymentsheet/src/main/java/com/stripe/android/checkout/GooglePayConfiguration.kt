@@ -18,6 +18,7 @@ import kotlinx.parcelize.Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GooglePayConfiguration(
     private val environment: Environment,
+    // TODO: remove countryCode
     private val countryCode: String,
 ) {
     private var label: String? = null
@@ -55,6 +56,7 @@ class GooglePayConfiguration(
     @Parcelize
     internal data class State(
         val environment: Environment,
+        // TODO: remove countryCode
         val countryCode: String,
         val label: String?,
         val buttonType: ButtonType,
