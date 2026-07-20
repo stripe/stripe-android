@@ -32,4 +32,21 @@ internal class TestAlipay : BasePlaygroundTest() {
     fun testAlipay() {
         testDriver.confirmNewOrGuestComplete(testParameters)
     }
+
+    // Tests for mitigating #ir-cursor-reinforce that uses the new EVO path. Merchant.CN
+    // (acct_1ONGjdKULGu5EgSk) is enrolled in alipay_cn_to_alipay_plus_migration_gate, so its
+    // Alipay redirects go through the pm-redirects.stripe.com trampoline unlike Merchant.US.
+    @Test
+    fun testAlipayEVO() {
+        testDriver.confirmNewOrGuestComplete(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[MerchantSettingsDefinition] = Merchant.CN
+                settings[CurrencySettingsDefinition] = Currency.CNY
+                settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
+                    PaymentMethod.Type.Card.code,
+                    PaymentMethod.Type.Alipay.code,
+                ).joinToString(",")
+            },
+        )
+    }
 }

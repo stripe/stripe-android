@@ -115,16 +115,6 @@ object PaymentMethodFactory {
         )
     }
 
-    fun alipay(): PaymentMethod {
-        return PaymentMethod(
-            id = "pm_1234",
-            created = 123456789L,
-            liveMode = false,
-            type = PaymentMethod.Type.Alipay,
-            code = PaymentMethod.Type.Alipay.code,
-        )
-    }
-
     fun usBankAccount(): PaymentMethod {
         return PaymentMethod(
             id = "pm_1234",
