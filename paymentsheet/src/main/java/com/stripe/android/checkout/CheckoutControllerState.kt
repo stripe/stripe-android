@@ -3,6 +3,7 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.Parcelable
+import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -44,13 +45,20 @@ internal data class CheckoutControllerState(
     override val shippingAddress: Address.State? get() = collectedDetails.shippingAddress
     override val billingAddress: Address.State? get() = collectedDetails.billingAddress
 
-    fun asCheckoutSession(paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory): CheckoutSession {
+    fun asCheckoutSession(
+        paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
+        availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
+    ): CheckoutSession {
         return checkoutSessionResponse.asCheckoutSession(
             flagImages = flagImages,
             paymentOptionDisplayData = paymentOptionFactory.create(
                 selection = paymentSelection,
                 paymentMethodMetadata = paymentMethodMetadata,
             ),
+            availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
+                paymentMethodMetadata = paymentMethodMetadata,
+                expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
+            )
         )
     }
 }

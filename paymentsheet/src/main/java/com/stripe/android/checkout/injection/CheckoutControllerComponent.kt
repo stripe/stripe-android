@@ -12,6 +12,8 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -194,6 +196,11 @@ internal interface CheckoutControllerModule {
     fun bindsCheckoutPaymentOptionDisplayDataFactory(
         impl: DefaultCheckoutPaymentOptionDisplayDataFactory
     ): CheckoutPaymentOptionDisplayDataFactory
+
+    @Binds
+    fun bindsAvailableExpressButtonTypesFactory(
+        impl: DefaultAvailableExpressButtonTypesFactory
+    ): AvailableExpressButtonTypesFactory
 
     companion object {
         private const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"
