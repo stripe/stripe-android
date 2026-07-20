@@ -9,6 +9,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
@@ -49,7 +50,12 @@ internal class DefaultEmbeddedContentHelperTest {
             .isNull()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default)
-        stateHolder.dataLoaded(paymentMethodMetadata, appearance, embeddedViewDisplaysMandateText = true)
+        stateHolder.dataLoaded(
+            paymentMethodMetadata,
+            appearance,
+            embeddedViewDisplaysMandateText = true,
+            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        )
         val state = savedStateHandle.get<EmbeddedContentHelperStateHolder.State?>(STATE_KEY_EMBEDDED_CONTENT)
         assertThat(state?.paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
         assertThat(state?.appearance).isEqualTo(appearance)
@@ -64,6 +70,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             assertThat(awaitItem()).isNotNull()
         }
@@ -78,6 +85,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             assertThat(awaitItem()).isNotNull()
         }
@@ -92,6 +100,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             assertThat(awaitItem()).isNotNull()
             stateHolder.clearEmbeddedContent()
@@ -108,6 +117,7 @@ internal class DefaultEmbeddedContentHelperTest {
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             assertThat(awaitItem()).isNotNull()
             stateHolder.clearEmbeddedContent()
@@ -125,6 +135,7 @@ internal class DefaultEmbeddedContentHelperTest {
                     PaymentMethodMetadataFactory.create(),
                     Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = true,
+                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
             )
         }
@@ -151,6 +162,7 @@ internal class DefaultEmbeddedContentHelperTest {
                     PaymentMethodMetadataFactory.create(),
                     Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
+                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
             )
         }
@@ -166,6 +178,7 @@ internal class DefaultEmbeddedContentHelperTest {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = createCustomerState()
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
+        val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         testScenario(
             setup = {
                 set(
@@ -174,6 +187,7 @@ internal class DefaultEmbeddedContentHelperTest {
                         paymentMethodMetadata,
                         Embedded(Embedded.RowStyle.FlatWithRadio.default),
                         embeddedViewDisplaysMandateText = true,
+                        configuration = configuration,
                     )
                 )
                 set(CustomerStateHolder.SAVED_CUSTOMER, customerState)
@@ -189,7 +203,7 @@ internal class DefaultEmbeddedContentHelperTest {
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = customerState,
                     selection = selection,
-                    embeddedConfirmationState = null,
+                    configuration = configuration,
                 )
             )
             assertThat(errorReporter.getLoggedErrors()).isEmpty()
@@ -296,7 +310,6 @@ internal class DefaultEmbeddedContentHelperTest {
             internalRowSelectionCallback = { null },
             customerStateHolder = customerStateHolder,
             selectionHolder = selectionHolder,
-            confirmationStateHolder = confirmationStateHolder,
             errorReporter = errorReporter,
         )
         Scenario(
@@ -317,7 +330,7 @@ internal class DefaultEmbeddedContentHelperTest {
         override fun launchForm(
             code: String,
             paymentMethodMetadata: PaymentMethodMetadata,
-            embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+            configuration: EmbeddedPaymentElement.Configuration?,
             customerState: CustomerState?,
             promotion: PaymentMethodMessagePromotion?,
         ) = error("Not expected.")
@@ -326,21 +339,21 @@ internal class DefaultEmbeddedContentHelperTest {
             paymentMethodMetadata: PaymentMethodMetadata,
             customerState: CustomerState,
             selection: PaymentSelection?,
-            embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+            configuration: EmbeddedPaymentElement.Configuration?,
         ) = error("Not expected.")
 
         override fun launchPaymentOptions(
             paymentMethodMetadata: PaymentMethodMetadata,
             customerState: CustomerState?,
             selection: PaymentSelection?,
-            embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+            configuration: EmbeddedPaymentElement.Configuration?,
         ) {
             launchPaymentOptionsCalls.add(
                 LaunchPaymentOptionsCall(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = customerState,
                     selection = selection,
-                    embeddedConfirmationState = embeddedConfirmationState,
+                    configuration = configuration,
                 )
             )
         }
@@ -349,7 +362,7 @@ internal class DefaultEmbeddedContentHelperTest {
             val paymentMethodMetadata: PaymentMethodMetadata,
             val customerState: CustomerState?,
             val selection: PaymentSelection?,
-            val embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+            val configuration: EmbeddedPaymentElement.Configuration?,
         )
     }
 }

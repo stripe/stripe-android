@@ -46,7 +46,7 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
-                    embeddedConfirmationState = confirmationStateHolder.state,
+                    configuration = confirmationStateHolder.state?.configuration,
                 )
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),

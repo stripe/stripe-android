@@ -8,6 +8,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
@@ -69,6 +70,7 @@ internal class EmbeddedContentUiTest {
                     PaymentMethodMetadataFactory.create(),
                     Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
+                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
                 val content = awaitItem()
                 assertThat(content).isNotNull()
@@ -92,6 +94,7 @@ internal class EmbeddedContentUiTest {
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -115,6 +118,7 @@ internal class EmbeddedContentUiTest {
                 PaymentMethodMetadataFactory.create(),
                 Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
+                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
             val content = awaitItem()
             assertThat(content).isNotNull()
@@ -229,7 +233,6 @@ internal class EmbeddedContentUiTest {
                 internalRowSelectionCallback = { internalRowSelectionCallback },
                 customerStateHolder = customerStateHolder,
                 selectionHolder = selectionHolder,
-                confirmationStateHolder = confirmationStateHolder,
                 errorReporter = errorReporter,
             )
         Scenario(
