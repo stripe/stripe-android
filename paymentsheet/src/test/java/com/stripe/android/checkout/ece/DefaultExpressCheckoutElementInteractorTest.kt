@@ -157,6 +157,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = FakeErrorReporter(),
+            paymentOptionFactory = { _, _ -> null },
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
             paymentMethodMetadata = paymentMethodMetadata,

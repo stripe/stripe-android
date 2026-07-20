@@ -51,6 +51,10 @@ class CheckoutSession internal constructor(
      * Available shipping options for this checkout session.
      */
     val shippingOptions: List<ShippingRate>,
+    /**
+     * The customer's currently selected payment option, or `null` if none has been selected yet.
+     */
+    val paymentOptionDisplayData: PaymentOptionDisplayData?,
     internal val currencySelectorOptions: CurrencySelectorOptions?,
 ) {
 

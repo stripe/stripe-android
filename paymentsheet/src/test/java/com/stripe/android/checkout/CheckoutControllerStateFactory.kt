@@ -2,13 +2,16 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Bundle
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.testing.FakeErrorReporter
 
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutControllerStateFactory {
@@ -40,6 +43,19 @@ internal object CheckoutControllerStateFactory {
             paymentSelection = paymentSelection,
             temporarySelection = temporarySelection,
             previousNewSelections = previousNewSelections,
+        )
+    }
+
+    fun createStateHolder(
+        savedStateHandle: SavedStateHandle,
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+        paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
+            CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
+    ): CheckoutControllerStateHolder {
+        return CheckoutControllerStateHolder(
+            savedStateHandle = savedStateHandle,
+            errorReporter = errorReporter,
+            paymentOptionFactory = paymentOptionFactory,
         )
     }
 }

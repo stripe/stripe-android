@@ -3,11 +3,15 @@
 package com.stripe.android.checkout.injection
 
 import android.app.Application
+import android.content.Context
+import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
@@ -186,6 +190,11 @@ internal interface CheckoutControllerModule {
     @Binds
     fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
 
+    @Binds
+    fun bindsCheckoutPaymentOptionDisplayDataFactory(
+        impl: DefaultCheckoutPaymentOptionDisplayDataFactory
+    ): CheckoutPaymentOptionDisplayDataFactory
+
     companion object {
         private const val CALLBACK_IDENTIFIER_KEY = "CheckoutController_CallbackIdentifier"
 
@@ -213,6 +222,11 @@ internal interface CheckoutControllerModule {
         @Provides
         fun provideDurationProvider(): DurationProvider {
             return DefaultDurationProvider.instance
+        }
+
+        @Provides
+        fun provideResources(context: Context): Resources {
+            return context.resources
         }
 
         @Provides

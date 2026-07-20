@@ -44,7 +44,13 @@ internal data class CheckoutControllerState(
     override val shippingAddress: Address.State? get() = collectedDetails.shippingAddress
     override val billingAddress: Address.State? get() = collectedDetails.billingAddress
 
-    fun asCheckoutSession(): CheckoutSession {
-        return checkoutSessionResponse.asCheckoutSession(flagImages)
+    fun asCheckoutSession(paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory): CheckoutSession {
+        return checkoutSessionResponse.asCheckoutSession(
+            flagImages = flagImages,
+            paymentOptionDisplayData = paymentOptionFactory.create(
+                selection = paymentSelection,
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
+        )
     }
 }

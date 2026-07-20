@@ -29,6 +29,28 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `checkoutSession projects the paymentOption the factory builds from the committed state`() {
+        val expectedOption = PaymentOptionDisplayData(
+            imageLoader = { error("not needed for this test") },
+            label = "Google Pay",
+            paymentMethodType = "google_pay",
+            mandateText = null,
+        )
+        var capturedSelection: PaymentSelection? = null
+        val factory = CheckoutPaymentOptionDisplayDataFactory { selection, _ ->
+            capturedSelection = selection
+            expectedOption
+        }
+
+        testScenario(paymentOptionFactory = factory) {
+            stateHolder.state = committedState(paymentSelection = PaymentSelection.GooglePay)
+
+            assertThat(stateHolder.checkoutSession.value?.paymentOptionDisplayData).isSameInstanceAs(expectedOption)
+            assertThat(capturedSelection).isEqualTo(PaymentSelection.GooglePay)
+        }
+    }
+
+    @Test
     fun `setSelection updates paymentSelection on the state and emits`() = testScenario {
         stateHolder.state = committedState()
 
@@ -128,6 +150,7 @@ internal class CheckoutControllerStateHolderTest {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = SavedStateHandle(mapOf(CheckoutControllerStateHolder.STATE_KEY to restored)),
             errorReporter = FakeErrorReporter(),
+            paymentOptionFactory = { _, _ -> null },
         )
 
         assertThat(stateHolder.selection.value).isEqualTo(PaymentSelection.GooglePay)
@@ -155,11 +178,13 @@ internal class CheckoutControllerStateHolderTest {
     )
 
     private fun testScenario(
+        paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory =
+            CheckoutPaymentOptionDisplayDataFactory { _, _ -> null },
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val errorReporter = FakeErrorReporter()
         Scenario(
-            stateHolder = CheckoutControllerStateHolder(SavedStateHandle(), errorReporter),
+            stateHolder = CheckoutControllerStateHolder(SavedStateHandle(), errorReporter, paymentOptionFactory),
             errorReporter = errorReporter,
         ).block()
         errorReporter.ensureAllEventsConsumed()

@@ -30,13 +30,14 @@ internal data class InternalState(
         )
 
     fun asCheckoutSession(): CheckoutSession {
-        return checkoutSessionResponse.asCheckoutSession(flagImages)
+        return checkoutSessionResponse.asCheckoutSession(flagImages, paymentOptionDisplayData = null)
     }
 }
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.asCheckoutSession(
     flagImages: Map<String, Bitmap>?,
+    paymentOptionDisplayData: PaymentOptionDisplayData?,
 ): CheckoutSession {
     return CheckoutSession(
         id = id,
@@ -48,6 +49,7 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
         totalSummary = totalSummary?.asTotalSummary(),
         lineItems = lineItems.map { it.asLineItem() },
         shippingOptions = shippingOptions.map { it.asShippingRate() },
+        paymentOptionDisplayData = paymentOptionDisplayData,
         currencySelectorOptions = CurrencySelectorOptionsFactory.create(
             adaptivePricingInfo = adaptivePricingInfo,
             flagImages = flagImages,
