@@ -16,7 +16,7 @@ internal object NfcScanningExperimentDimensions {
             PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> "full"
         }
 
-        val hasDefaultBillingDetails = paymentMethodMetadata.defaultBillingDetails != null
+        val hasDefaultBillingDetails = paymentMethodMetadata.defaultBillingDetails?.isFilledOut() == true
 
         val requiresContactInfoCollection = billingDetailsConfig.collectsName ||
             billingDetailsConfig.collectsPhone ||
