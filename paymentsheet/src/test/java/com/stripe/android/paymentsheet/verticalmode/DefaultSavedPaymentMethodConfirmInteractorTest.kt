@@ -80,7 +80,7 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
         return DefaultSavedPaymentMethodConfirmInteractor(
             initialSelection = PaymentSelection.Saved(paymentMethod),
             displayName = "Card".resolvableString,
-            linkBrand = LinkBrand.Link,
+            linkBrand = MutableStateFlow(LinkBrand.Link),
             savedPaymentMethodLinkFormHelper = linkFormHelper,
             processing = processing,
             updateSelection = updateSelection,

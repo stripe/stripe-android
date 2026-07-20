@@ -1005,7 +1005,7 @@ class SavedPaymentMethodMutatorTest {
                 },
                 isLinkEnabled = stateFlowOf(false),
                 isNotPaymentFlow = true,
-                accountLinkBrandFlow = stateFlowOf(null),
+                linkAccountFlow = stateFlowOf(null),
             )
             Scenario(
                 savedPaymentMethodMutator = savedPaymentMethodMutator,

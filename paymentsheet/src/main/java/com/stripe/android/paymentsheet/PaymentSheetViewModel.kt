@@ -28,11 +28,10 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.LinkExpressMode
-import com.stripe.android.link.effectiveLinkBrand
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodOrientation
 import com.stripe.android.lpmfoundations.paymentmethod.WalletType
-import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.SetupIntent
@@ -109,6 +108,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     placesClient: PlacesClientProxy?,
+    linkAccountHolder: LinkAccountHolder,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -122,6 +122,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
+    linkAccountHolder = linkAccountHolder,
 ) {
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,

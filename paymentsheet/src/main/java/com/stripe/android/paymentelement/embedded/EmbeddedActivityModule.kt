@@ -225,6 +225,7 @@ internal interface EmbeddedActivityModule {
             paymentMethodMetadata: PaymentMethodMetadata,
             sheetActivityStateHolder: SheetActivityStateHolder,
             savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
+            linkAccountHolder: LinkAccountHolder,
         ): SavedPaymentMethodConfirmInteractor.Factory {
             return DefaultSavedPaymentMethodConfirmInteractor.Factory(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -232,6 +233,7 @@ internal interface EmbeddedActivityModule {
                 processing = sheetActivityStateHolder.state.mapAsStateFlow {
                     it.isProcessing
                 },
+                linkAccountHolder = linkAccountHolder,
                 coroutineScope = coroutineScope,
             )
         }

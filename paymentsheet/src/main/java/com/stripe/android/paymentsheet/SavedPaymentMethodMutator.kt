@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet
 
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -56,7 +56,7 @@ internal class SavedPaymentMethodMutator(
     ) -> Unit,
     isLinkEnabled: StateFlow<Boolean?>,
     isNotPaymentFlow: Boolean,
-    accountLinkBrandFlow: StateFlow<LinkBrand?>,
+    linkAccountFlow: StateFlow<LinkAccount?>,
 ) {
     val defaultPaymentMethodId: StateFlow<String?> = combineAsStateFlow(
         customerStateHolder.customer,
@@ -70,10 +70,9 @@ internal class SavedPaymentMethodMutator(
     }
 
     private val paymentOptionsItemsMapper: PaymentOptionsItemsMapper by lazy {
-        val configLinkBrand = paymentMethodMetadataFlow.mapAsStateFlow { it?.linkBrand }
         val effectiveLinkBrand =
-            combineAsStateFlow(accountLinkBrandFlow, configLinkBrand) { accountBrand, configBrand ->
-                accountBrand ?: configBrand
+            combineAsStateFlow(paymentMethodMetadataFlow, linkAccountFlow) { metadata, account ->
+                metadata?.effectiveLinkBrand(account)
             }
         PaymentOptionsItemsMapper(
             customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow { it?.customerMetadata },
@@ -451,8 +450,7 @@ internal class SavedPaymentMethodMutator(
                 },
                 isLinkEnabled = viewModel.linkHandler.isLinkEnabled,
                 isNotPaymentFlow = !viewModel.isCompleteFlow,
-                accountLinkBrandFlow = viewModel.linkHandler.linkConfigurationCoordinator.accountFlow
-                    .mapAsStateFlow { it?.linkBrand },
+                linkAccountFlow = viewModel.linkAccountHolder.linkAccountInfo.mapAsStateFlow { it.account },
             ).apply {
                 viewModel.viewModelScope.launch {
                     viewModel.navigationHandler.currentScreen.collect { currentScreen ->

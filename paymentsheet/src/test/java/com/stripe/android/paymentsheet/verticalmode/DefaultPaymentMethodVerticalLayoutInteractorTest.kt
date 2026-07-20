@@ -1920,6 +1920,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     Pair(visibleItems, hiddenItems)
                 )
             },
+            linkBrand = MutableStateFlow(LinkBrand.Link),
             paymentMethodMessagePromotionsHelper = promotionsHelper
         )
         closeInteractorRule.track(interactor)

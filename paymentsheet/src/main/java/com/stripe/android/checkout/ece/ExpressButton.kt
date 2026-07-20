@@ -31,7 +31,7 @@ internal sealed interface ExpressButton {
                         paymentDetails = linkAccount?.displayablePaymentDetails,
                     ),
                     theme = PaymentSheet.ButtonThemes.LinkButtonTheme.DEFAULT,
-                    linkBrand = paymentMethodMetadata.linkBrand,
+                    linkBrand = paymentMethodMetadata.effectiveLinkBrand(linkAccountInfo.account),
                 )
             }
         }
