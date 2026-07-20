@@ -276,6 +276,9 @@ constructor(
             requiresMandate = false,
             requiresMandateForPaymentIntent = false,
             hasDelayedSettlement = false,
+            // Alipay uses the redirect trampoline like P24, so it can still be in
+            // `requires_action` status immediately after a successful redirect.
+            afterRedirectAction = AfterRedirectAction.Poll(pollingDuration = REDUCED_POLLING_DURATION),
         ),
         GrabPay(
             "grabpay",

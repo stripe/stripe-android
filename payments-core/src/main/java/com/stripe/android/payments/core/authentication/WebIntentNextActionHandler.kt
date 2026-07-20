@@ -147,9 +147,13 @@ internal class WebIntentNextActionHandler @Inject constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
         )
 
+        // Alipay's return_url now points at the pm-redirects.stripe.com trampoline rather
+        // than the merchant's own return URL, so matching against it (like the other
+        // redirect-based methods below) closes the WebView before the trampoline finishes.
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
-            returnUrl = returnUrl,
+            returnUrl = defaultReturnUrl.value,
+            shouldCancelIntentOnUserNavigation = false,
         )
     }
 

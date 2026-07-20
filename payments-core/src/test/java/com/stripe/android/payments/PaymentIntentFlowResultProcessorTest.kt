@@ -562,6 +562,94 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
+    fun `Stops polling after max time when encountering an Alipay payment that still requires action`() =
+        runTest(testDispatcher) {
+            val paymentMethod = PaymentMethodFactory.alipay()
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = paymentMethod,
+                paymentMethodTypes = listOf("card", "alipay"),
+            )
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = requiresActionIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.UNKNOWN,
+                failureMessage = "We are unable to authenticate your payment method." +
+                    " Please choose a different payment method and try again.",
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+
+            verify(
+                mockStripeRepository,
+                atLeast(MINIMUM_RETRIEVE_CALLS)
+            ).retrievePaymentIntent(any(), any(), any())
+
+            verify(
+                mockStripeRepository,
+                atMost(
+                    getMaxNumberOfInvocations(paymentMethod.type!!)
+                )
+            ).retrievePaymentIntent(any(), any(), any())
+        }
+
+    @Test
+    fun `Keeps retrying when encountering an Alipay payment that still requires action`() =
+        runTest(testDispatcher) {
+            val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
+                status = StripeIntent.Status.RequiresAction,
+                paymentMethod = PaymentMethodFactory.alipay(),
+                paymentMethodTypes = listOf("card", "alipay"),
+            )
+
+            val succeededIntent = requiresActionIntent.copy(status = StripeIntent.Status.Succeeded)
+
+            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+                Result.success(requiresActionIntent),
+                Result.success(requiresActionIntent),
+                Result.success(succeededIntent),
+            )
+
+            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+                AssertionError("Not expected to call refresh in this test")
+            )
+
+            val clientSecret = requireNotNull(requiresActionIntent.clientSecret)
+
+            val result = createProcessor().processResult(
+                PaymentFlowResult.Unvalidated(
+                    clientSecret = clientSecret,
+                    flowOutcome = StripeIntentResult.Outcome.UNKNOWN,
+                )
+            ).getOrThrow()
+
+            val expectedResult = PaymentIntentResult(
+                intent = succeededIntent,
+                outcomeFromFlow = StripeIntentResult.Outcome.SUCCEEDED,
+                failureMessage = null,
+            )
+
+            assertThat(result).isEqualTo(expectedResult)
+        }
+
+    @Test
     fun `Calls refresh endpoint when encountering a CashAppPay payment that still requires action`() =
         runTest(testDispatcher) {
             val requiresActionIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
@@ -1220,7 +1308,8 @@ internal fun getMaxNumberOfInvocations(paymentMethodType: PaymentMethod.Type): I
         PaymentMethod.Type.RevolutPay,
         PaymentMethod.Type.AmazonPay,
         PaymentMethod.Type.Swish,
-        PaymentMethod.Type.Twint -> REDUCED_POLLING_DURATION / POLLING_DELAY + MINIMUM_RETRIEVE_CALLS
+        PaymentMethod.Type.Twint,
+        PaymentMethod.Type.Alipay -> REDUCED_POLLING_DURATION / POLLING_DELAY + MINIMUM_RETRIEVE_CALLS
         else -> 3
     }
     return retryPollMaxAttempts.toInt()
