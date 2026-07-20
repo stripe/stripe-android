@@ -80,6 +80,46 @@ internal class CurrencySelectorElementContentUITest {
     }
 
     @Test
+    fun currencySelectorConfiguredWithCurrencyCodeLabel_displaysCurrencyCodes() = runScenario(
+        configuration = CheckoutController.Configuration().currencySelectorElement(
+            CurrencySelectorElement.Configuration().appearance(
+                CurrencySelectorElement.Appearance()
+                    .labelContent(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
+            )
+        ),
+    ) {
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
+            .assertContentDescriptionContains("USD")
+
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
+            .assertContentDescriptionContains("EUR")
+    }
+
+    @Test
+    fun reconfiguringWithCurrencyCodeAfterComposition_updatesRenderedLabels() = runScenario {
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
+            .assertContentDescriptionContains("50.99")
+
+        enqueueCheckoutInit()
+        runBlocking {
+            controller.configure(
+                DEFAULT_CLIENT_SECRET,
+                CheckoutController.Configuration().currencySelectorElement(
+                    CurrencySelectorElement.Configuration().appearance(
+                        CurrencySelectorElement.Appearance()
+                            .labelContent(CurrencySelectorElement.Appearance.LabelContent.CURRENCY_CODE)
+                    )
+                ),
+            ).getOrThrow()
+        }
+
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}USD")
+            .assertContentDescriptionContains("USD")
+        composeRule.onNodeWithTag("${TEST_TAG_CURRENCY_OPTION_PREFIX}EUR")
+            .assertContentDescriptionContains("EUR")
+    }
+
+    @Test
     fun clickingSelectedOption_doesNotTriggerNetworkRequest() = runScenario {
         // EUR is the selected option. Clicking it is a no-op.
         // If it triggered a network request, NetworkRule teardown would fail
@@ -119,16 +159,10 @@ internal class CurrencySelectorElementContentUITest {
     private fun runScenario(
         fixture: String = FIXTURE_WITH_ADAPTIVE_PRICING,
         setContent: Boolean = true,
+        configuration: CheckoutController.Configuration = CheckoutController.Configuration(),
         block: Scenario.() -> Unit,
     ) {
-        networkRule.checkoutInit { response ->
-            // The loader requires a billing email (sourced from customer_email) and Link is disabled
-            // so the loader doesn't fire an unrelated consumer session lookup.
-            response.testBodyFromFile(fixture) { json ->
-                json.put("customer_email", "checkout@example.com")
-                json.getJSONObject("elements_session").remove("link_settings")
-            }
-        }
+        enqueueCheckoutInit(fixture)
 
         val controller = destroyControllerRule.track(
             CheckoutController.Builder(
@@ -137,7 +171,7 @@ internal class CurrencySelectorElementContentUITest {
             ).build()
         )
 
-        runBlocking { controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow() }
+        runBlocking { controller.configure(DEFAULT_CLIENT_SECRET, configuration).getOrThrow() }
 
         val element = controller.createPresenter(composeRule.activity).currencySelectorElement()
         if (setContent) {
@@ -147,6 +181,17 @@ internal class CurrencySelectorElementContentUITest {
         }
 
         Scenario(controller = controller).block()
+    }
+
+    private fun enqueueCheckoutInit(fixture: String = FIXTURE_WITH_ADAPTIVE_PRICING) {
+        networkRule.checkoutInit { response ->
+            // The loader requires a billing email (sourced from customer_email) and Link is disabled
+            // so the loader doesn't fire an unrelated consumer session lookup.
+            response.testBodyFromFile(fixture) { json ->
+                json.put("customer_email", "checkout@example.com")
+                json.getJSONObject("elements_session").remove("link_settings")
+            }
+        }
     }
 
     private class Scenario(
