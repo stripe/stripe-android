@@ -26,6 +26,7 @@ import javax.inject.Singleton
 internal class CheckoutControllerStateHolder @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
+    private val paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
 ) : EmbeddedSelectionHolder {
     var state: CheckoutControllerState?
         get() = savedStateHandle[STATE_KEY]
@@ -37,7 +38,7 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         savedStateHandle.getStateFlow(STATE_KEY, null)
 
     val checkoutSession: StateFlow<CheckoutSession?> =
-        stateFlow.mapAsStateFlow { it?.asCheckoutSession() }
+        stateFlow.mapAsStateFlow { it?.asCheckoutSession(paymentOptionFactory) }
 
     override val selection: StateFlow<PaymentSelection?> =
         stateFlow.mapAsStateFlow { it?.paymentSelection }
