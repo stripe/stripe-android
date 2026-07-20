@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.embedded.content
 
 import android.content.Context
 import androidx.compose.ui.text.AnnotatedString
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
@@ -22,6 +23,7 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
     private val iconLoader: PaymentSelection.IconLoader,
     private val cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader,
     private val context: Context,
+    private val linkAccountHolder: LinkAccountHolder,
 ) {
     fun create(
         selection: PaymentSelection?,
@@ -46,7 +48,12 @@ internal class PaymentOptionDisplayDataFactory @Inject constructor(
         }
 
         return EmbeddedPaymentElement.PaymentOptionDisplayData(
-            label = selection.label(paymentMethodMetadata.linkBrand).resolve(context),
+            label = selection.label(
+                paymentMethodMetadata.effectiveLinkBrand(
+                    linkAccountHolder.linkAccountInfo.value.account
+                )
+            )
+                .resolve(context),
             imageLoader = {
                 cardArtDrawableLoader.load(selection) ?: iconLoader.load(
                     drawableResourceId = selection.drawableResourceId,

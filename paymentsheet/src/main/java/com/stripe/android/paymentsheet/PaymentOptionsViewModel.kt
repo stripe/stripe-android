@@ -70,7 +70,7 @@ import kotlin.coroutines.CoroutineContext
 @JvmSuppressWildcards
 internal class PaymentOptionsViewModel @Inject constructor(
     private val args: PaymentOptionContract.Args,
-    private val linkAccountHolder: LinkAccountHolder,
+    linkAccountHolder: LinkAccountHolder,
     private val linkGateFactory: LinkGate.Factory,
     private val errorReporter: ErrorReporter,
     val linkPaymentLauncher: LinkPaymentLauncher,
@@ -100,6 +100,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
+    linkAccountHolder = linkAccountHolder,
 ) {
 
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(

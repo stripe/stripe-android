@@ -8,13 +8,17 @@ import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.common.spms.withLinkState
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
+import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.effectiveLinkBrand
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
@@ -47,7 +51,7 @@ internal interface SavedPaymentMethodConfirmInteractor {
 internal class DefaultSavedPaymentMethodConfirmInteractor(
     val initialSelection: PaymentSelection.Saved,
     val displayName: ResolvableString,
-    val linkBrand: LinkBrand,
+    val linkBrand: StateFlow<LinkBrand>,
     val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
     val processing: StateFlow<Boolean>,
     val updateSelection: (PaymentSelection.Saved) -> Unit,
@@ -58,7 +62,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
         paymentMethod = initialSelection.paymentMethod,
     )
 
-    override val state = processing.mapAsStateFlow { isProcessing ->
+    override val state = combineAsStateFlow(processing, linkBrand) { isProcessing, linkBrand ->
         SavedPaymentMethodConfirmInteractor.State(
             displayableSavedPaymentMethod = displayableSavedPaymentMethod,
             linkBrand = linkBrand,
@@ -92,7 +96,9 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
-                linkBrand = paymentMethodMetadata.linkBrand,
+                linkBrand = viewModel.linkAccountHolder.linkAccountInfo.mapAsStateFlow { linkAccountInfo ->
+                    paymentMethodMetadata.effectiveLinkBrand(linkAccountInfo.account)
+                },
                 savedPaymentMethodLinkFormHelper = DefaultSavedPaymentMethodLinkFormHelper(
                     linkInlineSignupAvailability = DefaultLinkInlineSignupAvailability(paymentMethodMetadata),
                     linkConfigurationCoordinator = viewModel.linkHandler.linkConfigurationCoordinator,
@@ -110,6 +116,7 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
         private val paymentMethodMetadata: PaymentMethodMetadata,
         private val savedPaymentMethodLinkFormHelper: SavedPaymentMethodLinkFormHelper,
         private val processing: StateFlow<Boolean>,
+        private val linkAccountHolder: LinkAccountHolder,
         private val coroutineScope: CoroutineScope,
     ) : SavedPaymentMethodConfirmInteractor.Factory {
         override fun create(
@@ -121,7 +128,9 @@ internal class DefaultSavedPaymentMethodConfirmInteractor(
                 displayName = paymentMethodMetadata.supportedPaymentMethodForCode(
                     PaymentMethod.Type.Card.code
                 )?.displayName.orEmpty(),
-                linkBrand = paymentMethodMetadata.linkBrand,
+                linkBrand = linkAccountHolder.linkAccountInfo.mapAsStateFlow { linkAccountInfo ->
+                    paymentMethodMetadata.effectiveLinkBrand(linkAccountInfo.account)
+                },
                 processing = processing,
                 savedPaymentMethodLinkFormHelper = savedPaymentMethodLinkFormHelper,
                 updateSelection = updateSelection,

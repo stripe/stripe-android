@@ -118,6 +118,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
+    private val linkBrand: StateFlow<LinkBrand>,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
@@ -203,7 +204,10 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         isVerticalLayout = true,
                     )
                 },
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                linkBrand = viewModel.linkAccountHolder.linkAccountInfo.mapAsStateFlow {
+                    paymentMethodMetadata.effectiveLinkBrand(it.account)
+                }
             ).also { interactor ->
                 viewModel.viewModelScope.launch {
                     interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->
@@ -293,8 +297,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
         displayedSavedPaymentMethod,
         availableSavedPaymentMethodAction,
         temporarySelection,
+        linkBrand,
     ) { displayablePaymentMethods, isProcessing, mostRecentSelection, displayedSavedPaymentMethod, action,
-        temporarySelectionCode ->
+        temporarySelectionCode, linkBrand ->
         val temporarySelection = if (temporarySelectionCode != null) {
             val changeDetails = if (temporarySelectionCode == mostRecentSelection?.code()) {
                 (mostRecentSelection as? PaymentSelection.New?)?.changeDetails()
@@ -316,7 +321,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
             displayedSavedPaymentMethod = displayedSavedPaymentMethod,
             availableSavedPaymentMethodAction = action,
             mandate = getMandate(temporarySelectionCode, mostRecentSelection),
-            linkBrand = paymentMethodMetadata.linkBrand,
+            linkBrand = linkBrand,
         )
     }
 

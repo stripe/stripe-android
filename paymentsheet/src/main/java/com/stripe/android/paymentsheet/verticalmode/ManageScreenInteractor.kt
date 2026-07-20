@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -106,6 +107,7 @@ internal class DefaultManageScreenInteractor(
     private val onUpdatePaymentMethod: (DisplayableSavedPaymentMethod) -> Unit,
     private val navigateBack: (withDelay: Boolean) -> Unit,
     private val defaultPaymentMethodId: StateFlow<String?>,
+    private val linkBrand: StateFlow<LinkBrand>,
     dispatcher: CoroutineContext = Dispatchers.Main,
 ) : ManageScreenInteractor {
 
@@ -130,7 +132,8 @@ internal class DefaultManageScreenInteractor(
         selection,
         editing,
         canEdit,
-    ) { displayablePaymentMethods, paymentSelection, editing, canEdit ->
+        linkBrand,
+    ) { displayablePaymentMethods, paymentSelection, editing, canEdit, linkBrand, ->
         val currentSelection = if (editing) {
             null
         } else {
@@ -142,7 +145,7 @@ internal class DefaultManageScreenInteractor(
             currentSelection = currentSelection,
             isEditing = editing,
             canEdit = canEdit,
-            linkBrand = paymentMethodMetadata.linkBrand,
+            linkBrand = linkBrand,
         )
     }
 
@@ -215,7 +218,10 @@ internal class DefaultManageScreenInteractor(
                         viewModel.navigationHandler.pop()
                     }
                 },
-                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId
+                defaultPaymentMethodId = savedPaymentMethodMutator.defaultPaymentMethodId,
+                linkBrand = viewModel.linkAccountHolder.linkAccountInfo.mapAsStateFlow {
+                    paymentMethodMetadata.effectiveLinkBrand(it.account)
+                }
             )
         }
 
