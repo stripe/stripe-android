@@ -12,14 +12,19 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.configureNfc
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.createComposeCleanupRule
+import com.stripe.android.uicore.utils.AnimationConstants
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowActivity
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -135,6 +140,31 @@ internal class NfcScanningActivityTest {
         )
 
         assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `finish applies fade out transition`() {
+        configureNfc(context)
+
+        val intent = NfcScanningContract.createIntent(
+            context = context,
+            input = NfcScanningContract.Args(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            ),
+        )
+        val controller = Robolectric.buildActivity(NfcScanningActivity::class.java, intent)
+            .create()
+            .start()
+            .resume()
+
+        val activity = controller.get()
+        activity.finish()
+
+        val shadowActivity = shadowOf(activity) as ShadowActivity
+        assertThat(shadowActivity.pendingTransitionEnterAnimationResourceId)
+            .isEqualTo(AnimationConstants.FADE_IN)
+        assertThat(shadowActivity.pendingTransitionExitAnimationResourceId)
+            .isEqualTo(AnimationConstants.FADE_OUT)
     }
 
     private fun test(
