@@ -11,6 +11,7 @@ import com.android.tools.lint.detector.api.Severity
 import com.android.tools.lint.detector.api.SourceCodeScanner
 import org.jetbrains.uast.UElement
 import org.jetbrains.uast.UFile
+import java.util.EnumSet
 
 internal class ComposeCleanupRuleUsageDetector : Detector(), SourceCodeScanner {
     override fun getApplicableUastTypes(): List<Class<out UElement>> =
@@ -22,7 +23,7 @@ internal class ComposeCleanupRuleUsageDetector : Detector(), SourceCodeScanner {
     companion object {
         private val IMPLEMENTATION = Implementation(
             ComposeCleanupRuleUsageDetector::class.java,
-            Scope.JAVA_FILE_SCOPE
+            EnumSet.of(Scope.JAVA_FILE, Scope.TEST_SOURCES)
         )
 
         @JvmField

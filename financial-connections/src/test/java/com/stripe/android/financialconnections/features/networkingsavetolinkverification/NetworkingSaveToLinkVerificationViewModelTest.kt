@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.repository.AttachedPaymentAccountRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -39,6 +40,9 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
@@ -69,7 +73,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         attachedPaymentAccountRepository = attachedPaymentAccountRepository,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         currentLinkBrand = FakeCurrentLinkBrand(),
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `init - starts verification with consumer session secret from cached session`() = runTest {

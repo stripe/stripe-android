@@ -21,9 +21,11 @@ import com.stripe.android.stripe3ds2.init.ui.StripeUiCustomization
 import com.stripe.android.stripe3ds2.service.StripeThreeDs2ServiceImpl
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.testing.fakeCreationExtras
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -35,6 +37,9 @@ import kotlin.test.assertNotNull
 
 @RunWith(RobolectricTestRunner::class)
 class Stripe3ds2TransactionViewModelTest {
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val context = ApplicationProvider.getApplicationContext<Application>()
     private val stripeRepository = mock<StripeRepository>()
 
@@ -109,7 +114,7 @@ class Stripe3ds2TransactionViewModelTest {
             workContext = Dispatchers.IO,
             savedStateHandle = mock(),
             isInstantApp = false
-        )
+        ).also { viewModelStoreRule.track(it) }
 
     private companion object {
         const val ENABLE_LOGGING = false
