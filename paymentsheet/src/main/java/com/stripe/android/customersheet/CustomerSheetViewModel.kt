@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -104,6 +105,7 @@ internal class CustomerSheetViewModel(
     private val productUsage: Set<String>,
     confirmationHandlerFactory: ConfirmationHandler.Factory,
     private val customerSheetLoader: CustomerSheetLoader,
+    private val isNfcScanningAvailable: IsNfcScanningAvailable,
     private val errorReporter: ErrorReporter,
     private val savedStateHandle: SavedStateHandle,
     internal val userFacingLogger: UserFacingLogger,
@@ -122,6 +124,7 @@ internal class CustomerSheetViewModel(
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         confirmationHandlerFactory: ConfirmationHandler.Factory,
         customerSheetLoader: CustomerSheetLoader,
+        isNfcScanningAvailable: IsNfcScanningAvailable,
         errorReporter: ErrorReporter,
         savedStateHandle: SavedStateHandle,
         userFacingLogger: UserFacingLogger,
@@ -139,6 +142,7 @@ internal class CustomerSheetViewModel(
         paymentConfiguration = paymentConfiguration,
         confirmationHandlerFactory = confirmationHandlerFactory,
         customerSheetLoader = customerSheetLoader,
+        isNfcScanningAvailable = isNfcScanningAvailable,
         errorReporter = errorReporter,
         savedStateHandle = savedStateHandle,
         userFacingLogger = userFacingLogger,
@@ -475,7 +479,8 @@ internal class CustomerSheetViewModel(
                         },
                         autocompleteAddressInteractorFactory = null,
                         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-                        paymentMethodMessagingPromotionsHelper = null
+                        paymentMethodMessagingPromotionsHelper = null,
+                        isNfcScanningAvailable = isNfcScanningAvailable,
                     ),
                 ) ?: listOf(),
                 primaryButtonLabel = if (
@@ -823,7 +828,8 @@ internal class CustomerSheetViewModel(
                 },
                 autocompleteAddressInteractorFactory = null,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
-                paymentMethodMessagingPromotionsHelper = null
+                paymentMethodMessagingPromotionsHelper = null,
+                isNfcScanningAvailable = isNfcScanningAvailable,
             )
         ) ?: emptyList()
 

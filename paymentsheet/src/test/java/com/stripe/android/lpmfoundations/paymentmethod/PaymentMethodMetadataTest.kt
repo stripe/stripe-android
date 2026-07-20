@@ -1146,7 +1146,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -1213,10 +1212,10 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            isNfcScanningEnabled = false,
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
-            isNfcScanningEnabled = false,
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
@@ -1284,7 +1283,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -1323,7 +1321,6 @@ internal class PaymentMethodMetadataTest {
             configuration = configuration,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
             isGooglePayReady = true,
-            isNfcScanningEnabled = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
         )
@@ -1376,10 +1373,10 @@ internal class PaymentMethodMetadataTest {
             ),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddSupported = false,
+            isNfcScanningEnabled = false,
             experimentsData = null,
             isStripeCardScanAllowed = false,
             enableMlKitCardScan = false,
-            isNfcScanningEnabled = false,
             elementsSessionId = "session_1234",
             disableSsdOcrCardScan = false,
             cardArts = emptyList(),
@@ -2045,7 +2042,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2116,7 +2112,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2142,7 +2137,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = true,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2172,7 +2166,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = IntegrationMetadata.IntentFirst("cs_123"),
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -2258,7 +2251,6 @@ internal class PaymentMethodMetadataTest {
             integrationMetadata = integrationMetadata,
             analyticsMetadata = AnalyticsMetadata(emptyMap()),
             isTapToAddAvailable = false,
-            isNfcScanningEnabled = false,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
     }
@@ -2285,7 +2277,6 @@ internal class PaymentMethodMetadataTest {
             configuration = configuration,
             sharedDataSpecs = emptyList(),
             isGooglePayReady = false,
-            isNfcScanningEnabled = false,
             customerMetadata = DEFAULT_CUSTOMER_METADATA,
             integrationMetadata = DEFAULT_CUSTOMER_INTEGRATION_METADATA,
         )

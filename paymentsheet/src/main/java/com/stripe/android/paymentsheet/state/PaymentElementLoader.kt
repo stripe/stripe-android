@@ -11,7 +11,6 @@ import com.stripe.android.common.analytics.experiment.PaymentMethodMessagePromot
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
-import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.utils.DurationProvider
@@ -278,7 +277,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val tapToAddAvailabilityFactory: TapToAddAvailabilityFactory,
     private val durationProvider: DurationProvider,
     private val paymentMethodMessagePromotionsExperimentHandler: PaymentMethodMessagePromotionsExperimentHandler,
-    private val isNfcScanningAvailable: IsNfcScanningAvailable,
 ) : PaymentElementLoader {
 
     fun interface AnalyticsMetadataFactory {
@@ -574,7 +572,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         val isTapToAddAvailable = tapToAddAvailabilityFactory.isAvailable(elementsSession, customerMetadata)
-        val isNfcScanningAvailable = isNfcScanningAvailable.get(elementsSession, customerMetadata)
 
         val analyticsMetadata = analyticsMetadataFactory.create(
             initializationMode = initializationMode,
@@ -605,7 +602,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             integrationMetadata = integrationMetadata,
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
-            isNfcScanningEnabled = isNfcScanningAvailable,
             paymentMethodLayout = paymentMethodLayout,
         )
 

@@ -72,6 +72,7 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -1464,6 +1465,7 @@ internal class PaymentOptionsViewModelTest {
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             tapToAddHelperFactory = tapToAddHelperFactory,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
             mode = EventReporter.Mode.Complete,
             errorReporter = errorReporter,
             customerStateHolderFactory = object : CustomerStateHolder.Factory {

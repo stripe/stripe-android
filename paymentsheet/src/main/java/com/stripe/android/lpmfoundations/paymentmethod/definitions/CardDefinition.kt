@@ -211,7 +211,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Custom {
                 tapToAddHelper = arguments.tapToAddHelper,
                 paymentMethodMetadata = metadata,
             )
-        } else if (metadata.isNfcScanningEnabled) {
+        } else if (arguments.isNfcScanningAvailable?.get(metadata) == true) {
             NfcScanningAction(paymentMethodMetadata = metadata)
         } else {
             CardScanAction(

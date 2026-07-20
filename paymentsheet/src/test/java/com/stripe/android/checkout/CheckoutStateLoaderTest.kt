@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFacto
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
@@ -194,6 +195,7 @@ internal class CheckoutStateLoaderTest {
                     embeddedSelectionHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
                     cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
                     savedStateHandle = savedStateHandle,
+                    isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 ),
                 eventReporter = FakeEventReporter(),
                 coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),

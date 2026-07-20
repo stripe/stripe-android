@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
@@ -487,6 +488,7 @@ internal class DefaultEmbeddedSelectionChooserTest {
             embeddedSelectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             savedStateHandle = savedStateHandle,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
         )
         Scenario(
             chooser = DefaultEmbeddedSelectionChooser(
