@@ -14,6 +14,7 @@ import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
+import com.stripe.android.paymentelement.embedded.EmbeddedVerticalLayoutInteractorFactory
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet.Appearance.Embedded
@@ -134,6 +135,7 @@ internal class EmbeddedContentUiTest {
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
+    @Suppress("LongMethod")
     private fun runScenario(
         internalRowSelectionCallback: InternalRowSelectionCallback? = null,
         block: suspend Scenario.() -> Unit,
@@ -154,6 +156,22 @@ internal class EmbeddedContentUiTest {
                 coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
                 internalRowSelectionCallback = { null }
             )
+        val customerStateHolder = DefaultCustomerStateHolder(
+            savedStateHandle = savedStateHandle,
+            selection = selectionHolder.selection,
+            customerMetadata = stateFlowOf(
+                PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+            ),
+            paymentMethodMetadataFlow = stateFlowOf(null),
+        )
+        val embeddedVerticalLayoutInteractorFactory = EmbeddedVerticalLayoutInteractorFactory(
+            coroutineScope = CoroutineScope(Dispatchers.Unconfined),
+            customerStateHolder = customerStateHolder,
+            selectionHolder = selectionHolder,
+            eventReporter = eventReporter,
+            embeddedFormHelperFactory = embeddedFormHelperFactory,
+            paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
+        )
 
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
@@ -168,15 +186,8 @@ internal class EmbeddedContentUiTest {
                     override val linkEmail: StateFlow<String?> = stateFlowOf(null)
                 },
                 embeddedWalletsHelper = { stateFlowOf(null) },
-                customerStateHolder = DefaultCustomerStateHolder(
-                    savedStateHandle = savedStateHandle,
-                    selection = selectionHolder.selection,
-                    customerMetadata = stateFlowOf(
-                        PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
-                    ),
-                    paymentMethodMetadataFlow = stateFlowOf(null),
-                ),
-                embeddedFormHelperFactory = embeddedFormHelperFactory,
+                customerStateHolder = customerStateHolder,
+                embeddedVerticalLayoutInteractorFactory = embeddedVerticalLayoutInteractorFactory,
                 confirmationHandler = confirmationHandler,
                 confirmationStateHolder = EmbeddedConfirmationStateHolder(
                     savedStateHandle = savedStateHandle,
