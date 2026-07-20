@@ -58,6 +58,7 @@ internal data class CheckoutControllerState(
             availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
                 paymentMethodMetadata = paymentMethodMetadata,
                 expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
+                googlePayConfiguration = configuration.googlePayConfiguration,
             )
         )
     }

@@ -10,6 +10,7 @@ import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import kotlin.collections.emptyList
+import kotlin.math.exp
 
 internal interface ExpressCheckoutElementInteractor {
     val state: StateFlow<State>
@@ -34,14 +35,15 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         }
 
         ExpressCheckoutElementInteractor.State(
-            expressButtons = checkoutSession.availableExpressButtonTypes.map { walletType ->
-                when (walletType) {
-                    WalletType.Link -> ExpressButton.Link.create(
+            expressButtons = checkoutSession.availableExpressButtonTypes.map { expressButtonType ->
+                when (expressButtonType) {
+                    ExpressButtonType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
                     )
-                    WalletType.GooglePay -> ExpressButton.GooglePay.create(
+                    is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
+                        googlePayConfiguration = expressButtonType.googlePayConfiguration,
                     )
                 }
             },
