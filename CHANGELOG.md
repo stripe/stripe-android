@@ -1,7 +1,9 @@
 # CHANGELOG
 
-NEXT_VERSION_BUMP: MINOR
+NEXT_VERSION_BUMP: PATCH
 ## XX.XX.XX - 20XX-XX-XX
+
+## 23.13.0 - 2026-07-20
 
 ### Payments
 * [FIXED][7581](https://github.com/stripe/stripe-android/issues/7581) Declined card error messages from 3DS2 payment flows are now localized instead of always displaying the raw English message from the server.
