@@ -37,6 +37,8 @@ interface PlacesClientProxy {
         placeId: String
     ): Result<FetchPlaceResponse>
 
+    fun resetSession() {}
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Volatile

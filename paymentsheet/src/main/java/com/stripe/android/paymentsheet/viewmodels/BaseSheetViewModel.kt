@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.addresselement.AutocompleteAppearanceCont
 import com.stripe.android.paymentsheet.addresselement.DefaultAutocompleteLauncher
 import com.stripe.android.paymentsheet.addresselement.PaymentElementAutocompleteAddressInteractor
 import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteApiService
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetAnalyticsListener
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -74,6 +75,12 @@ internal abstract class BaseSheetViewModel(
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
     )
+    private val stripeHostedPlacesClient: PlacesClientProxy by lazy {
+        StripeHostedPlacesClientProxy(
+            stripeAutocompleteApiService = stripeAutocompleteApiService,
+            googlePlacesApiKey = config.googlePlacesApiKey,
+        )
+    }
 
     private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
     internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
@@ -93,12 +100,14 @@ internal abstract class BaseSheetViewModel(
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
             ),
-            placesClient = placesClient,
-            coroutineScope = viewModelScope,
-            shouldUseAutocompleteProxyEndpointsProvider = {
-                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
+            placesClientProvider = {
+                if (paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints == true) {
+                    stripeHostedPlacesClient
+                } else {
+                    placesClient
+                }
             },
-            stripeAutocompleteApiService = stripeAutocompleteApiService,
+            coroutineScope = viewModelScope,
         )
 
     internal val validationRequested = MutableSharedFlow<Unit>()

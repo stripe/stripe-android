@@ -44,33 +44,30 @@ internal class PaymentElementAutocompleteAddressInteractor(
     class Factory(
         private val launcher: AutocompleteLauncher,
         private val autocompleteConfig: AutocompleteAddressInteractor.Config,
-        private val placesClient: PlacesClientProxy?,
+        private val placesClientProvider: () -> PlacesClientProxy?,
         private val coroutineScope: CoroutineScope?,
-        private val shouldUseAutocompleteProxyEndpointsProvider: () -> Boolean,
-        private val stripeAutocompleteApiService: StripeAutocompleteApiService?,
     ) : AutocompleteAddressInteractor.Factory {
         private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
 
         override fun create(): AutocompleteAddressInteractor {
-            val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()
-            val canCreateInline = (placesClient != null || useStripeHosted) &&
+            val effectivePlacesClient = placesClientProvider()
+            val canCreateInline = effectivePlacesClient != null &&
                 coroutineScope != null &&
                 autocompleteConfig.isInlineAutocompleteEnabled
             if (canCreateInline) {
                 activeInlineInteractor?.dispose()
                 return BillingInlineAutocompleteAddressInteractor(
-                    placesClient = placesClient,
+                    placesClient = effectivePlacesClient,
                     autocompleteConfig = AutocompleteAddressInteractor.Config(
                         googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
                         autocompleteCountries = autocompleteConfig.autocompleteCountries,
                         isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
                         isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
-                        shouldUseStripeHostedAutocomplete = useStripeHosted ||
+                        shouldUseStripeHostedAutocomplete =
+                            effectivePlacesClient is StripeHostedPlacesClientProxy ||
                             autocompleteConfig.shouldUseStripeHostedAutocomplete,
                     ),
                     coroutineScope = coroutineScope!!,
-                    shouldUseAutocompleteProxyEndpoints = useStripeHosted,
-                    stripeAutocompleteApiService = stripeAutocompleteApiService,
                 ).also { activeInlineInteractor = it }
             }
             return PaymentElementAutocompleteAddressInteractor(

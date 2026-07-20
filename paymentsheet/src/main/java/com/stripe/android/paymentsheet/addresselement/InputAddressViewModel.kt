@@ -73,7 +73,8 @@ internal class InputAddressViewModel @Inject constructor(
         googlePlacesApiKey = args.config?.googlePlacesApiKey,
         autocompleteCountries = args.config?.autocompleteCountries ?: emptySet(),
         isInlineAutocompleteEnabled = isInlineAutocompleteEnabled,
-        shouldUseStripeHostedAutocomplete = args.config?.useStripeHostedAutocomplete == true,
+        shouldUseStripeHostedAutocomplete = isInlineAutocompleteEnabled &&
+            args.config?.useStripeHostedAutocomplete == true,
     )
 
     private val inlineAutocompleteController = if (isInlineAutocompleteEnabled && placesClient != null) {
@@ -82,8 +83,6 @@ internal class InputAddressViewModel @Inject constructor(
             config = autocompleteConfig,
             coroutineScope = viewModelScope,
             eventListenerProvider = { eventListener },
-            shouldUseAutocompleteProxyEndpoints = false,
-            stripeAutocompleteApiService = null,
         )
     } else {
         null

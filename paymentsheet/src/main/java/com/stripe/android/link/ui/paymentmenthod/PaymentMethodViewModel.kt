@@ -211,10 +211,8 @@ internal class PaymentMethodViewModel @Inject constructor(
                                         isInlineAutocompleteEnabled =
                                             FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
                                     ),
-                                    placesClient = null,
+                                    placesClientProvider = { null },
                                     coroutineScope = null,
-                                    shouldUseAutocompleteProxyEndpointsProvider = { false },
-                                    stripeAutocompleteApiService = null,
                                 ),
                             isLinkUI = true,
                         ),

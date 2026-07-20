@@ -641,7 +641,7 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `stripe-hosted fetchPlace failure after prior query includes query and country`() = runScenario(
+    fun `stripe-hosted fetchPlace failure after prior query preserves tapped suggestion and country`() = runScenario(
         shouldUseStripeHostedAutocomplete = true,
     ) {
         fakePlacesClient.findPredictionsResult = Result.success(
@@ -671,7 +671,7 @@ class InlineAutocompleteControllerTest {
         assertThat(eventCalls.awaitItem()).isEqualTo(
             AutocompleteAddressInteractor.Event.OnExpandForm(
                 values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
+                    IdentifierSpec.Line1 to "123 Main St",
                     IdentifierSpec.Country to "US",
                 )
             )
@@ -739,27 +739,6 @@ class InlineAutocompleteControllerTest {
     }
 
     @Test
-    fun `proxy prediction failure expands form with user query`() = runProxyScenario {
-        fakeStripeApiService.predictionsResult = Result.failure(
-            RuntimeException("Proxy unavailable")
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main",
-                    IdentifierSpec.Country to "US",
-                )
-            )
-        )
-    }
-
-    @Test
     fun `proxy place selection fetches details and emits address`() = runProxyScenario {
         val address = StripeProxyAddress(
             line1 = "123 Main St",
@@ -770,6 +749,22 @@ class InlineAutocompleteControllerTest {
             country = "US",
         )
         fakeStripeApiService.detailsResult = Result.success(PlaceDetailsResult(address))
+        fakeStripeApiService.predictionsResult = Result.success(
+            AutocompletePredictionsResult(
+                predictions = listOf(
+                    AutocompleteSuggestion(
+                        placeId = "place_1",
+                        primaryText = "123 Main St",
+                        secondaryText = "San Francisco, CA",
+                        address = null,
+                    )
+                )
+            )
+        )
+        delegate.observeQueryChanges(queryFlow, countryFlow)
+
+        queryFlow.value = "123 Main"
+        advanceTimeBy(500)
 
         delegate.onPredictionSelected("place_1")
 
@@ -782,6 +777,54 @@ class InlineAutocompleteControllerTest {
         assertThat(values[IdentifierSpec.PostalCode]).isEqualTo("94105")
         assertThat(values[IdentifierSpec.Country]).isEqualTo("US")
     }
+
+    @Test
+    fun `proxy place selection preserves tapped country when country changes before details return`() =
+        runProxyScenario {
+            val detailsStarted = CompletableDeferred<Unit>()
+            val releaseDetails = CompletableDeferred<Unit>()
+            val address = StripeProxyAddress(
+                line1 = "123 Main St",
+                line2 = null,
+                city = "San Francisco",
+                state = "CA",
+                postalCode = "94105",
+                country = "US",
+            )
+            fakeStripeApiService.onBeforeFetchPlaceDetails = {
+                detailsStarted.complete(Unit)
+                releaseDetails.await()
+            }
+            fakeStripeApiService.detailsResult = Result.success(PlaceDetailsResult(address))
+            fakeStripeApiService.predictionsResult = Result.success(
+                AutocompletePredictionsResult(
+                    predictions = listOf(
+                        AutocompleteSuggestion(
+                            placeId = "place_1",
+                            primaryText = "123 Main St",
+                            secondaryText = "San Francisco, CA",
+                            address = null,
+                        )
+                    )
+                )
+            )
+            delegate.observeQueryChanges(queryFlow, countryFlow)
+
+            queryFlow.value = "123 Main"
+            advanceTimeBy(500)
+
+            delegate.onPredictionSelected("place_1")
+            detailsStarted.await()
+
+            countryFlow.value = "CA"
+            releaseDetails.complete(Unit)
+
+            val event = eventCalls.awaitItem()
+            assertThat(event).isInstanceOf<AutocompleteAddressInteractor.Event.OnValues>()
+            val values = (event as AutocompleteAddressInteractor.Event.OnValues).values
+            assertThat(values[IdentifierSpec.Country]).isEqualTo("US")
+            assertThat(values[IdentifierSpec.State]).isEqualTo("CA")
+        }
 
     @Test
     fun `proxy uses cached address without network call`() = runProxyScenario {
@@ -827,93 +870,6 @@ class InlineAutocompleteControllerTest {
         assertThat(values[IdentifierSpec.City]).isEqualTo("Portland")
     }
 
-    @Test
-    fun `proxy place details failure expands form`() = runProxyScenario {
-        fakeStripeApiService.detailsResult = Result.failure(
-            RuntimeException("Network error")
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        fakeStripeApiService.predictionsResult = Result.success(
-            AutocompletePredictionsResult(
-                predictions = listOf(
-                    AutocompleteSuggestion(
-                        placeId = "place_no_cache",
-                        primaryText = "123 Main St",
-                        secondaryText = "City, ST",
-                        address = null,
-                    )
-                )
-            )
-        )
-        queryFlow.value = "123 Main S"
-        advanceTimeBy(500)
-
-        delegate.onPredictionSelected("place_no_cache")
-
-        assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
-        assertThat(eventCalls.awaitItem()).isEqualTo(
-            AutocompleteAddressInteractor.Event.OnExpandForm(
-                values = mapOf(
-                    IdentifierSpec.Line1 to "123 Main S",
-                    IdentifierSpec.Country to "US",
-                )
-            )
-        )
-    }
-
-    @Test
-    fun `proxy does not call Google Places client`() = runProxyScenario {
-        fakeStripeApiService.predictionsResult = Result.success(
-            AutocompletePredictionsResult(predictions = emptyList())
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        fakePlacesClient.findPredictionsCalls.expectNoEvents()
-        fakePlacesClient.fetchPlaceCalls.expectNoEvents()
-    }
-
-    @Test
-    fun `no proxy calls Google Places for predictions`() = runScenario {
-        fakePlacesClient.findPredictionsResult = Result.success(
-            FindAutocompletePredictionsResponse(emptyList())
-        )
-        delegate.observeQueryChanges(queryFlow, countryFlow)
-
-        queryFlow.value = "123 Main"
-        advanceTimeBy(500)
-
-        val call = fakePlacesClient.findPredictionsCalls.awaitItem()
-        assertThat(call.query).isEqualTo("123 Main")
-    }
-
-    @Test
-    fun `no proxy calls Google Places for place selection`() = runScenario {
-        fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(
-                Place(
-                    listOf(
-                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                    )
-                )
-            )
-        )
-
-        delegate.onPredictionSelected("place-id-123")
-
-        val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
-        assertThat(call).isEqualTo("place-id-123")
-        eventCalls.awaitItem()
-    }
-
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),
@@ -934,8 +890,6 @@ class InlineAutocompleteControllerTest {
             config = config,
             coroutineScope = backgroundScope,
             eventListenerProvider = { { event -> eventCalls.add(event) } },
-            shouldUseAutocompleteProxyEndpoints = false,
-            stripeAutocompleteApiService = null,
         )
 
         Scenario(
@@ -957,8 +911,11 @@ class InlineAutocompleteControllerTest {
         autocompleteCountries: Set<String> = emptySet(),
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val fakePlaces = FakePlacesClientProxy()
         val fakeStripeApi = FakeStripeAutocompleteApiService()
+        val proxyClient = StripeHostedPlacesClientProxy(
+            stripeAutocompleteApiService = fakeStripeApi,
+            googlePlacesApiKey = "test_key",
+        )
         val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",
@@ -968,17 +925,15 @@ class InlineAutocompleteControllerTest {
             shouldUseStripeHostedAutocomplete = true,
         )
         val delegate = InlineAutocompleteController(
-            placesClient = fakePlaces,
+            placesClient = proxyClient,
             config = config,
             coroutineScope = backgroundScope,
             eventListenerProvider = { { event -> eventCalls.add(event) } },
-            shouldUseAutocompleteProxyEndpoints = true,
-            stripeAutocompleteApiService = fakeStripeApi,
         )
 
         Scenario(
             delegate = delegate,
-            fakePlacesClient = fakePlaces,
+            fakePlacesClient = FakePlacesClientProxy(),
             fakeStripeApiService = fakeStripeApi,
             eventCalls = eventCalls,
             queryFlow = MutableStateFlow(""),
@@ -986,7 +941,6 @@ class InlineAutocompleteControllerTest {
             testScope = this,
         ).apply { block() }
 
-        fakePlaces.ensureAllEventsConsumed()
         eventCalls.ensureAllEventsConsumed()
     }
 

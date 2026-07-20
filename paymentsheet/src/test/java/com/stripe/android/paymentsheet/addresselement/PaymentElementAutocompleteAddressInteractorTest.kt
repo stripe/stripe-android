@@ -186,10 +186,8 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            placesClient = null,
+            placesClientProvider = { null },
             coroutineScope = this,
-            shouldUseAutocompleteProxyEndpointsProvider = { false },
-            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
@@ -210,10 +208,8 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            placesClient = FakePlacesClientProxy(),
+            placesClientProvider = { FakePlacesClientProxy() },
             coroutineScope = this,
-            shouldUseAutocompleteProxyEndpointsProvider = { false },
-            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
@@ -237,10 +233,8 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            placesClient = fakePlaces,
+            placesClientProvider = { fakePlaces },
             coroutineScope = backgroundScope,
-            shouldUseAutocompleteProxyEndpointsProvider = { false },
-            stripeAutocompleteApiService = null,
         )
         val queryFlow = MutableStateFlow("")
         val countryFlow = MutableStateFlow<String?>("US")
@@ -270,10 +264,8 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            placesClient = null,
+            placesClientProvider = { null },
             coroutineScope = this,
-            shouldUseAutocompleteProxyEndpointsProvider = { false },
-            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
@@ -282,21 +274,23 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
-    fun `Factory creates inline interactor when proxy flag is on and placesClient is null`() = test { scenario ->
+    fun `Factory creates inline interactor with hosted config when provider returns hosted proxy`() = test { scenario ->
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = null,
             autocompleteCountries = setOf("US"),
             isPlacesAvailable = false,
             isInlineAutocompleteEnabled = true,
         )
+        val proxyClient = StripeHostedPlacesClientProxy(
+            stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+            googlePlacesApiKey = null,
+        )
 
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            placesClient = null,
+            placesClientProvider = { proxyClient },
             coroutineScope = this,
-            shouldUseAutocompleteProxyEndpointsProvider = { true },
-            stripeAutocompleteApiService = null,
         )
 
         val interactor = factory.create()
@@ -304,6 +298,32 @@ class PaymentElementAutocompleteAddressInteractorTest {
         assertThat(interactor).isInstanceOf(BillingInlineAutocompleteAddressInteractor::class.java)
         assertThat(interactor.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
         assertThat(interactor.autocompleteConfig.isPlacesAvailable).isFalse()
+    }
+
+    @Test
+    fun `Factory falls back to launcher when inline disabled even with hosted proxy`() = test { scenario ->
+        val config = AutocompleteAddressInteractor.Config(
+            googlePlacesApiKey = null,
+            autocompleteCountries = setOf("US"),
+            isPlacesAvailable = false,
+            isInlineAutocompleteEnabled = false,
+        )
+        val proxyClient = StripeHostedPlacesClientProxy(
+            stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+            googlePlacesApiKey = null,
+        )
+
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
+            launcher = scenario.launcher,
+            autocompleteConfig = config,
+            placesClientProvider = { proxyClient },
+            coroutineScope = this,
+        )
+
+        val interactor = factory.create()
+
+        assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
+        assertThat(interactor.autocompleteConfig).isEqualTo(config)
     }
 
     @Test

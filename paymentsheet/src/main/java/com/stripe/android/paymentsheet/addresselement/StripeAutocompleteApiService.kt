@@ -74,7 +74,6 @@ internal class DefaultStripeAutocompleteApiService(
                 put("google_api_key", googleApiKey)
             }
         }
-
         return executePost(AUTOCOMPLETE_URL, params) { json ->
             parseAutocompletePredictionsResponse(json)
         }
@@ -88,9 +87,8 @@ internal class DefaultStripeAutocompleteApiService(
             "place_id" to placeId,
             "session_token" to sessionToken,
             "client_type" to "mobile",
-            "source" to "autocomplete",
+            "source" to "google",
         )
-
         return executePost(DETAILS_URL, params) { json ->
             parsePlaceDetailsResponse(json)
         }
@@ -152,16 +150,24 @@ internal class DefaultStripeAutocompleteApiService(
     }
 }
 
-private fun parseAutocompletePredictionsResponse(
+internal fun parseAutocompletePredictionsResponse(
     json: JSONObject
 ): AutocompletePredictionsResult? {
     val suggestionsArray = json.optJSONArray("suggestions") ?: return null
-    val predictions = (0 until suggestionsArray.length()).map { i ->
+    val predictions = (0 until suggestionsArray.length()).mapNotNull { i ->
         val suggestion = suggestionsArray.getJSONObject(i)
+        val displayData = suggestion.optJSONObject("display_data")
+        val primaryText = suggestion.optString("primary_text").ifEmpty {
+            displayData?.optString("title").orEmpty()
+        }
+        val placeId = suggestion.optString("place_id")
+        if (primaryText.isBlank() || placeId.isBlank()) return@mapNotNull null
         AutocompleteSuggestion(
-            placeId = suggestion.getString("place_id"),
-            primaryText = suggestion.getString("primary_text"),
-            secondaryText = suggestion.optString("secondary_text", ""),
+            placeId = placeId,
+            primaryText = primaryText,
+            secondaryText = suggestion.optString("secondary_text").ifEmpty {
+                displayData?.optString("subtitle").orEmpty()
+            },
             address = suggestion.optJSONObject("address")?.let { parseAddress(it) },
         )
     }

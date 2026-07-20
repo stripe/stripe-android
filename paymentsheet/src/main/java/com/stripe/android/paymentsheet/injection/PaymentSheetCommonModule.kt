@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import androidx.lifecycle.SavedStateHandle
-import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.nfcscan.NfcScanningAvailabilityModule
@@ -9,17 +8,12 @@ import com.stripe.android.common.taptoadd.DefaultTapToAddHelper
 import com.stripe.android.common.taptoadd.TapToAddConnectionModule
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.StripeNetworkClientModule
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.core.utils.RealUserFacingLogger
 import com.stripe.android.core.utils.UserFacingLogger
-import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.account.DefaultLinkStore
@@ -47,8 +41,6 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
-import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteApiService
-import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteApiService
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.LoadingEventReporter
@@ -229,25 +221,6 @@ internal abstract class PaymentSheetCommonModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
-        }
-
-        @Provides
-        @Singleton
-        fun provideStripeAutocompleteApiService(
-            stripeNetworkClient: StripeNetworkClient,
-            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?
-        ): StripeAutocompleteApiService {
-            return DefaultStripeAutocompleteApiService(
-                stripeNetworkClient = stripeNetworkClient,
-                apiRequestFactory = ApiRequest.Factory(
-                    appInfo = Stripe.appInfo,
-                    apiVersion = Stripe.API_VERSION,
-                    sdkVersion = StripeSdkVersion.VERSION,
-                ),
-                publishableKeyProvider = publishableKeyProvider,
-                stripeAccountIdProvider = stripeAccountIdProvider,
-            )
         }
     }
 }
