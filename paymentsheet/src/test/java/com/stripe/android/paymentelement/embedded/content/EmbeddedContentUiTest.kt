@@ -202,7 +202,7 @@ internal class EmbeddedContentUiTest {
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
                 coroutineScope = viewModelScope,
-                stateHolder = stateHolder,
+                state = stateHolder.state,
                 verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
                 sheetLauncherHolder = sheetLauncherHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },

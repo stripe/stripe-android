@@ -247,7 +247,7 @@ internal class DefaultEmbeddedContentHelperTest {
 
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = backgroundScope,
-            stateHolder = stateHolder,
+            state = stateHolder.state,
             verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
             sheetLauncherHolder = sheetLauncherHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },

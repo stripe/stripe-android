@@ -23,7 +23,7 @@ internal interface EmbeddedContentHelper {
 @Singleton
 internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val stateHolder: EmbeddedContentHelperStateHolder,
+    private val state: StateFlow<EmbeddedContentHelperStateHolder.State?>,
     private val verticalLayoutInteractorFactory: EmbeddedPaymentMethodVerticalLayoutInteractorFactory,
     private val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
@@ -38,7 +38,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     init {
         coroutineScope.launch {
-            stateHolder.state.collect { state ->
+            state.collect { state ->
                 _embeddedContent.value = if (state == null) {
                     null
                 } else {
@@ -61,7 +61,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     }
 
     override fun presentPaymentOptions() {
-        val state = stateHolder.state.value
+        val state = state.value
         if (state == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NOT_CONFIGURED
