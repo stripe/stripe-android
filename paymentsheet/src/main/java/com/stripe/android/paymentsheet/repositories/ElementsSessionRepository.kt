@@ -329,7 +329,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
     return when (val deferredIntentMode = deferredIntentParams.mode) {
         is DeferredIntentParams.Mode.Payment -> PaymentIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,
-            paymentMethodTypes = deferredIntentParams.paymentMethodTypes.orEmpty(),
+            paymentMethodTypes = deferredIntentParams.paymentMethodTypes,
             amount = deferredIntentMode.amount,
             clientSecret = this.clientSecret,
             countryCode = null,
@@ -338,7 +338,7 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             isLiveMode = options.apiKeyIsLiveMode,
             unactivatedPaymentMethods = emptyList(),
             paymentMethodOptionsJsonString = deferredIntentMode.paymentMethodOptionsJsonString,
-            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isNullOrEmpty(),
+            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isEmpty(),
         )
         is DeferredIntentParams.Mode.Setup -> SetupIntent(
             id = deferredIntentParams.paymentMethodConfigurationId,
@@ -351,11 +351,11 @@ private fun ElementsSessionParams.DeferredIntentType.toStripeIntent(options: Api
             linkFundingSources = emptyList(),
             nextActionData = null,
             paymentMethodId = null,
-            paymentMethodTypes = deferredIntentParams.paymentMethodTypes.orEmpty(),
+            paymentMethodTypes = deferredIntentParams.paymentMethodTypes,
             status = null,
             unactivatedPaymentMethods = emptyList(),
             usage = null,
-            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isNullOrEmpty(),
+            automaticPaymentMethodsEnabled = deferredIntentParams.paymentMethodTypes.isEmpty(),
         )
     }
 }

@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.paymentmethodoptions.setupfutureusage.toJ
 internal fun PaymentSheet.IntentConfiguration.toDeferredIntentParams(): DeferredIntentParams {
     return DeferredIntentParams(
         mode = mode.toDeferredIntentMode(requireCvcRecollection),
-        paymentMethodTypes = paymentMethodTypes.takeIf { it.isNotEmpty() },
+        paymentMethodTypes = paymentMethodTypes,
         onBehalfOf = onBehalfOf,
         paymentMethodConfigurationId = paymentMethodConfigurationId,
     )

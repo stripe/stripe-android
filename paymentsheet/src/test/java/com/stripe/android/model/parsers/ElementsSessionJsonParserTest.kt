@@ -445,7 +445,7 @@ class ElementsSessionJsonParserTest {
                         setupFutureUsage = null,
                         paymentMethodOptionsJsonString = StripeJsonUtils.mapToJsonObject(pmoMap).toString()
                     ),
-                    paymentMethodTypes = null,
+                    paymentMethodTypes = emptyList(),
                     paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 ),
@@ -492,7 +492,7 @@ class ElementsSessionJsonParserTest {
                         currency = "usd",
                         setupFutureUsage = StripeIntent.Usage.OffSession,
                     ),
-                    paymentMethodTypes = null,
+                    paymentMethodTypes = emptyList(),
                     paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 ),
