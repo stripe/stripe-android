@@ -100,8 +100,16 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_log_out_with_brand">Afmelden bij %s</string>
   <!-- Text that is displayed when a network error occurs -->
   <string name="stripe_network_error_message">Er is iets misgegaan. Controleer je verbinding en probeer het opnieuw.</string>
+  <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
+  <string name="stripe_nfc_expired_error">De betaalkaart is verlopen. Probeer een andere betaalkaart.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">Kaart geweigerd. Probeer een andere betaalkaart.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
+  <string name="stripe_nfc_scan_error_expired_card">De betaalkaart is verlopen. Probeer een andere betaalkaart.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Houd de betaalkaart achter de telefoon</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
+  <string name="stripe_nfc_scan_unsupported_card">Deze betaalkaart wordt niet ondersteund. Probeer een andere betaalkaart.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">of voer handmatig in</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->
@@ -268,6 +276,7 @@ to be saved and used in future checkout sessions. -->
   <!-- Accessibility label for an action or a button that shows a menu. -->
   <string name="stripe_show_menu">Menu weergeven</string>
   <!-- Title of the sign-out action. -->
+  <string name="stripe_sign_out_link">Log uit bij Link</string>
   <!-- Title of the sign-out action. '%s' is a Stripe brand name such as 'Link'. -->
   <string name="stripe_sign_out_with_brand">Log uit bij %s</string>
   <!-- Title for a button that when tapped creates a Link account for the user. -->
