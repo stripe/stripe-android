@@ -4,14 +4,15 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 
 @OptIn(CheckoutSessionPreview::class)
-internal fun GooglePayConfiguration.State.asPaymentSheet(): PaymentSheet.GooglePayConfiguration =
-    PaymentSheet.GooglePayConfiguration(
-        environment = environment.asPaymentSheet(),
-        countryCode = countryCode,
-        label = label,
-        buttonType = buttonType.asPaymentSheet(),
-        additionalEnabledNetworks = additionalEnabledNetworks,
-    )
+internal fun GooglePayConfiguration.State.asPaymentSheet(
+    merchantCountry: String,
+): PaymentSheet.GooglePayConfiguration = PaymentSheet.GooglePayConfiguration(
+    environment = environment.asPaymentSheet(),
+    countryCode = merchantCountry,
+    label = label,
+    buttonType = buttonType.asPaymentSheet(),
+    additionalEnabledNetworks = additionalEnabledNetworks,
+)
 
 @OptIn(CheckoutSessionPreview::class)
 private fun GooglePayConfiguration.Environment.asPaymentSheet():

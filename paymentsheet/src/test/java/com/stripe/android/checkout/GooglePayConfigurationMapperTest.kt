@@ -12,8 +12,7 @@ internal class GooglePayConfigurationMapperTest {
     fun `default owned config maps to PaymentSheet defaults`() {
         val mapped = GooglePayConfiguration(
             GooglePayConfiguration.Environment.Test,
-            "US",
-        ).build().asPaymentSheet()
+        ).build().asPaymentSheet(merchantCountry = "US")
 
         assertThat(mapped.environment).isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Test)
         assertThat(mapped.countryCode).isEqualTo("US")
@@ -24,13 +23,12 @@ internal class GooglePayConfigurationMapperTest {
     fun `all fields map 1 to 1`() {
         val mapped = GooglePayConfiguration(
             GooglePayConfiguration.Environment.Production,
-            "CA",
         )
             .label("Total")
             .buttonType(GooglePayConfiguration.ButtonType.Checkout)
             .additionalEnabledNetworks(listOf("INTERAC"))
             .build()
-            .asPaymentSheet()
+            .asPaymentSheet(merchantCountry = "CA")
 
         assertThat(mapped.environment)
             .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
@@ -46,11 +44,10 @@ internal class GooglePayConfigurationMapperTest {
         GooglePayConfiguration.ButtonType.entries.forEach { buttonType ->
             val mapped = GooglePayConfiguration(
                 GooglePayConfiguration.Environment.Test,
-                "US",
             )
                 .buttonType(buttonType)
                 .build()
-                .asPaymentSheet()
+                .asPaymentSheet(merchantCountry = "US")
 
             assertThat(mapped.buttonType.name).isEqualTo(buttonType.name)
         }

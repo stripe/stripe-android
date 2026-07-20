@@ -37,6 +37,10 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
         require(uiMode == UI_MODE_CUSTOM) {
             "Expected ui_mode to be \"$UI_MODE_CUSTOM\" but was \"$uiMode\""
         }
+        val accountSettings = json.optJSONObject(FIELD_ACCOUNT_SETTINGS)
+        val merchantCountry = accountSettings?.let {
+            StripeJsonUtils.optCountryCode(it, FIELD_ACCOUNT_SETTINGS_COUNTRY)
+        }
         val mode = parseMode(json.optString(FIELD_MODE))
         val status = parseStatus(json.optString(FIELD_STATUS))
         val liveMode = json.optBoolean(FIELD_LIVE_MODE, false)
@@ -107,6 +111,7 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
             taxAddressSource = taxAddressSource,
             allowedShippingCountries = allowedShippingCountries,
             requiresBillingAddress = requiresBillingAddress,
+            merchantCountry = merchantCountry,
         )
     }
 
@@ -526,6 +531,8 @@ internal object CheckoutSessionResponseJsonParser : ModelJsonParser<CheckoutSess
     }
 
     private const val FIELD_SESSION_ID = "session_id"
+    private const val FIELD_ACCOUNT_SETTINGS = "account_settings"
+    private const val FIELD_ACCOUNT_SETTINGS_COUNTRY = "country"
     private const val FIELD_UI_MODE = "ui_mode"
     private const val UI_MODE_CUSTOM = "custom"
     private const val FIELD_MODE = "mode"
