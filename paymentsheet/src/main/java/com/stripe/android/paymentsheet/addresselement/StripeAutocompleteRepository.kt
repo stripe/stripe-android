@@ -5,8 +5,7 @@ internal interface StripeAutocompleteRepository {
         query: String,
         country: String,
         sessionToken: String,
-        locale: String?,
-        googleApiKey: String?
+        locale: String?
     ): Result<AutocompletePredictionsResult>
 
     suspend fun fetchPlaceDetails(

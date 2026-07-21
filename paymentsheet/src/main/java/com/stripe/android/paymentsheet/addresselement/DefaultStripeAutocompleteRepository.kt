@@ -24,8 +24,7 @@ internal class DefaultStripeAutocompleteRepository(
         query: String,
         country: String,
         sessionToken: String,
-        locale: String?,
-        googleApiKey: String?
+        locale: String?
     ): Result<AutocompletePredictionsResult> {
         val params = buildMap<String, Any> {
             put("search_text", query)
@@ -34,9 +33,6 @@ internal class DefaultStripeAutocompleteRepository(
             put("country_codes", listOf(country))
             if (locale != null) {
                 put("locale", locale)
-            }
-            if (googleApiKey != null) {
-                put("google_api_key", googleApiKey)
             }
         }
         return executeRequestWithResultParser(

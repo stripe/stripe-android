@@ -16,7 +16,6 @@ internal class FakeStripeAutocompleteRepository : StripeAutocompleteRepository {
         val country: String,
         val sessionToken: String,
         val locale: String?,
-        val googleApiKey: String?,
     )
 
     private val _findPredictionsCalls = Turbine<FindPredictionsCall>()
@@ -29,11 +28,10 @@ internal class FakeStripeAutocompleteRepository : StripeAutocompleteRepository {
         query: String,
         country: String,
         sessionToken: String,
-        locale: String?,
-        googleApiKey: String?
+        locale: String?
     ): Result<AutocompletePredictionsResult> {
         onBeforeFindAutocompletePredictions?.invoke()
-        _findPredictionsCalls.add(FindPredictionsCall(query, country, sessionToken, locale, googleApiKey))
+        _findPredictionsCalls.add(FindPredictionsCall(query, country, sessionToken, locale))
         return predictionsResult
     }
 
