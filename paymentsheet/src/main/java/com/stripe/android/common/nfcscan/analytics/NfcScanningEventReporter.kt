@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan.analytics
 
+import android.util.Log
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
@@ -90,6 +91,8 @@ internal class DefaultNfcScanningEventReporter @Inject constructor(
         eventName: String,
         additionalParams: Map<String, Any> = emptyMap()
     ) {
+        Log.d("NFC-Scan-Experiment", "$eventName($additionalParams)")
+
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = object : AnalyticsEvent {
