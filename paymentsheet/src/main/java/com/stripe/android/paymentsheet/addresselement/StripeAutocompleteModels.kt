@@ -36,9 +36,8 @@ internal data class PlaceDetailsResult(
 
 internal object AutocompletePredictionsResponseJsonParser :
     ModelJsonParser<AutocompletePredictionsResult> {
-    override fun parse(json: JSONObject): AutocompletePredictionsResult {
-        val suggestionsArray = json.optJSONArray("suggestions")
-            ?: return AutocompletePredictionsResult(predictions = emptyList())
+    override fun parse(json: JSONObject): AutocompletePredictionsResult? {
+        val suggestionsArray = json.optJSONArray("suggestions") ?: return null
         val predictions = (0 until suggestionsArray.length()).mapNotNull { i ->
             val suggestion = suggestionsArray.optJSONObject(i)
                 ?: return@mapNotNull null

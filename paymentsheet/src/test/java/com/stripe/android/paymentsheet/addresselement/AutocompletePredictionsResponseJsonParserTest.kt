@@ -28,7 +28,8 @@ class AutocompletePredictionsResponseJsonParserTest {
 
         val result = AutocompletePredictionsResponseJsonParser.parse(json)
 
-        assertThat(result.predictions).hasSize(1)
+        assertThat(result).isNotNull()
+        assertThat(result!!.predictions).hasSize(1)
         assertThat(result.predictions.single()).isEqualTo(
             AutocompleteSuggestion(
                 placeId = "places/ChIJcznybKSAhYARlTOE-mb13JA",
@@ -62,7 +63,8 @@ class AutocompletePredictionsResponseJsonParserTest {
 
         val result = AutocompletePredictionsResponseJsonParser.parse(json)
 
-        assertThat(result.predictions).hasSize(1)
+        assertThat(result).isNotNull()
+        assertThat(result!!.predictions).hasSize(1)
         assertThat(result.predictions.single()).isEqualTo(
             AutocompleteSuggestion(
                 placeId = "place_123",
@@ -74,12 +76,12 @@ class AutocompletePredictionsResponseJsonParserTest {
     }
 
     @Test
-    fun `returns empty list when suggestions key absent`() {
+    fun `returns null when suggestions key absent`() {
         val json = JSONObject("{}")
 
         val result = AutocompletePredictionsResponseJsonParser.parse(json)
 
-        assertThat(result.predictions).isEmpty()
+        assertThat(result).isNull()
     }
 
     @Test
@@ -104,7 +106,8 @@ class AutocompletePredictionsResponseJsonParserTest {
 
         val result = AutocompletePredictionsResponseJsonParser.parse(json)
 
-        assertThat(result.predictions).hasSize(1)
+        assertThat(result).isNotNull()
+        assertThat(result!!.predictions).hasSize(1)
         assertThat(result.predictions.single().placeId).isEqualTo("place_valid")
     }
 
@@ -133,7 +136,8 @@ class AutocompletePredictionsResponseJsonParserTest {
 
         val result = AutocompletePredictionsResponseJsonParser.parse(json)
 
-        assertThat(result.predictions.single().address).isEqualTo(
+        assertThat(result).isNotNull()
+        assertThat(result!!.predictions.single().address).isEqualTo(
             StripeProxyAddress(
                 line1 = "123 Main St",
                 line2 = null,

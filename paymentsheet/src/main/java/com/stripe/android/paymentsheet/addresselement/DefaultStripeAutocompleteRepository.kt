@@ -14,6 +14,12 @@ internal class DefaultStripeAutocompleteRepository(
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
+    private val requestOptions: ApiRequest.Options
+        get() = ApiRequest.Options(
+            apiKey = publishableKeyProvider(),
+            stripeAccount = stripeAccountIdProvider(),
+        )
+
     override suspend fun findAutocompletePredictions(
         query: String,
         country: String,
@@ -38,10 +44,7 @@ internal class DefaultStripeAutocompleteRepository(
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = apiRequestFactory.createPost(
                 url = AUTOCOMPLETE_URL,
-                options = ApiRequest.Options(
-                    apiKey = publishableKeyProvider(),
-                    stripeAccount = stripeAccountIdProvider(),
-                ),
+                options = requestOptions,
                 params = params,
             ),
             responseJsonParser = AutocompletePredictionsResponseJsonParser,
@@ -63,10 +66,7 @@ internal class DefaultStripeAutocompleteRepository(
             stripeErrorJsonParser = stripeErrorJsonParser,
             request = apiRequestFactory.createPost(
                 url = DETAILS_URL,
-                options = ApiRequest.Options(
-                    apiKey = publishableKeyProvider(),
-                    stripeAccount = stripeAccountIdProvider(),
-                ),
+                options = requestOptions,
                 params = params,
             ),
             responseJsonParser = PlaceDetailsResponseJsonParser,
