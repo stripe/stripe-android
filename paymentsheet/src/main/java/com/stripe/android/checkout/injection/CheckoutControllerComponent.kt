@@ -6,6 +6,7 @@ import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
@@ -29,9 +30,11 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -85,6 +88,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import java.util.UUID
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Singleton
@@ -278,6 +282,16 @@ internal interface CheckoutControllerModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+
+        @Provides
+        fun provideApiRequestOptionsProvider(
+            paymentConfig: Provider<PaymentConfiguration>,
+        ): ApiRequestOptionsProvider = ApiRequestOptionsProvider {
+            ApiRequest.Options(
+                apiKey = paymentConfig.get().publishableKey,
+                stripeAccount = paymentConfig.get().stripeAccountId,
+            )
         }
     }
 }

@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.state
 import android.os.Parcelable
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -31,6 +30,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -59,7 +59,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -267,7 +266,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val apiRequestOptionsProvider: ApiRequestOptionsProvider,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
@@ -305,7 +304,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
-            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            isLiveMode = apiRequestOptionsProvider.get().apiKeyIsLiveMode,
             callbackIdentifier = paymentElementCallbackIdentifier,
         )
 
@@ -487,7 +486,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
-                    silentlyFail = paymentConfiguration.get().isLiveMode(),
+                    silentlyFail = apiRequestOptionsProvider.get().apiKeyIsLiveMode,
                 )
             }
         }

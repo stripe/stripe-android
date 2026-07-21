@@ -44,9 +44,12 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkCommonModule
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.AnalyticEventCallback
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
@@ -81,6 +84,7 @@ import dagger.Subcomponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Singleton
 
 @Component(
@@ -255,6 +259,16 @@ internal interface TapToAddViewModelModule {
             @PaymentElementCallbackIdentifier paymentElementCallbackIdentifier: String,
         ): AnalyticEventCallback? {
             return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.analyticEventCallback
+        }
+
+        @Provides
+        fun provideApiRequestOptionsProvider(
+            paymentConfig: Provider<PaymentConfiguration>,
+        ): ApiRequestOptionsProvider = ApiRequestOptionsProvider {
+            ApiRequest.Options(
+                apiKey = paymentConfig.get().publishableKey,
+                stripeAccount = paymentConfig.get().stripeAccountId,
+            )
         }
     }
 }

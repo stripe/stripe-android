@@ -14,6 +14,8 @@ import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
+import com.stripe.android.paymentelement.MutableApiRequestOptionsProvider
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
@@ -186,6 +188,11 @@ internal interface EmbeddedPaymentElementViewModelModule {
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler
+
+    @Binds
+    fun bindsApiRequestOptionsProvider(
+        impl: MutableApiRequestOptionsProvider
+    ): ApiRequestOptionsProvider
 
     @Binds
     fun bindsPrefsRepositoryFactory(

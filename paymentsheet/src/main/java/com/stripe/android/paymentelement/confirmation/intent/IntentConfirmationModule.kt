@@ -1,8 +1,8 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import androidx.annotation.ColorInt
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -15,7 +15,6 @@ import dagger.Module
 import dagger.Provides
 import dagger.multibindings.IntoSet
 import javax.inject.Named
-import javax.inject.Provider
 
 @Module
 internal class IntentConfirmationModule {
@@ -49,14 +48,14 @@ internal class IntentConfirmationModule {
         interceptorFactory: IntentConfirmationInterceptor.Factory,
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         @Named(STATUS_BAR_COLOR) @ColorInt statusBarColor: Int?,
-        paymentConfigurationProvider: Provider<PaymentConfiguration>,
+        apiRequestOptionsProvider: ApiRequestOptionsProvider,
     ): ConfirmationDefinition<*, *, *, *> {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = interceptorFactory,
             paymentLauncherFactory = { hostActivityLauncher ->
                 stripePaymentLauncherAssistedFactory.create(
-                    publishableKey = { paymentConfigurationProvider.get().publishableKey },
-                    stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
+                    publishableKey = { apiRequestOptionsProvider.get().apiKey },
+                    stripeAccountId = { apiRequestOptionsProvider.get().stripeAccount },
                     hostActivityLauncher = hostActivityLauncher,
                     statusBarColor = statusBarColor,
                     includePaymentSheetNextHandlers = true,

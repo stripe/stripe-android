@@ -4,7 +4,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.analytics.experiment.DefaultPaymentMethodMessagePromotionsExperimentHandler
@@ -4924,7 +4923,11 @@ internal class DefaultPaymentElementLoaderTest {
             paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACKS_IDENTIFIER,
             analyticsMetadataFactory = analyticsMetadataFactory,
             tapToAddConnectionStarter = tapToAddConnectionStarter,
-            paymentConfiguration = { PaymentConfiguration(publishableKey = if (isLiveMode) "pk_live" else "pk_test") },
+            apiRequestOptionsProvider = {
+                com.stripe.android.core.networking.ApiRequest.Options(
+                    apiKey = if (isLiveMode) "pk_live" else "pk_test"
+                )
+            },
             createCustomerState = CreateCustomerState(
                 paymentMethodFilter = paymentMethodFilter,
                 errorReporter = errorReporter,

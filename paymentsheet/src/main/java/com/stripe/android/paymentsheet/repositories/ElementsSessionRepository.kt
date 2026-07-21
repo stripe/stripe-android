@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.repositories
 
 import android.app.Application
 import com.stripe.android.DefaultFraudDetectionDataRepository
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
 import com.stripe.android.core.exception.StripeException
@@ -22,13 +21,13 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.parsers.ElementsSessionJsonParser
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentelement.ApiRequestOptionsProvider
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface ElementsSessionRepository {
@@ -47,7 +46,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     application: Application,
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
+    private val apiRequestOptionsProvider: ApiRequestOptionsProvider,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
@@ -62,13 +61,8 @@ internal class RealElementsSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    // The PaymentConfiguration can change after initialization, so this needs to get a new
-    // request options each time requested.
     private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = lazyPaymentConfig.get().publishableKey,
-            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-        )
+        get() = apiRequestOptionsProvider.get()
 
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,

@@ -288,6 +288,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val apiConfiguration: ApiConfiguration? = null,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -325,6 +326,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var apiConfiguration: ApiConfiguration? = null
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -561,6 +563,10 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            internal fun apiConfiguration(apiConfiguration: ApiConfiguration?) = apply {
+                this.apiConfiguration = apiConfiguration
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -585,6 +591,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -614,6 +621,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .termsDisplay(termsDisplay)
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .userOverrideCountry(userOverrideCountry)
+            .apiConfiguration(apiConfiguration)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
             }

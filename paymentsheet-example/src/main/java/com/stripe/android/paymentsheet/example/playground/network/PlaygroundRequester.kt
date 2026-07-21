@@ -48,10 +48,10 @@ internal class PlaygroundRequester(
                 // Init PaymentConfiguration with the publishable key returned from the backend,
                 // which will be used on all Stripe API calls
                 withContext(Dispatchers.IO) {
-                    PaymentConfiguration.init(
-                        applicationContext,
-                        checkoutResponse.publishableKey,
-                    )
+//                    PaymentConfiguration.init(
+//                        applicationContext,
+//                        checkoutResponse.publishableKey,
+//                    )
                 }
 
                 val customerId = checkoutResponse.customerId
