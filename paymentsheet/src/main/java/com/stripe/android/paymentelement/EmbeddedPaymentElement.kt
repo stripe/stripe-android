@@ -8,7 +8,6 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.AnnotatedString
 import androidx.lifecycle.LifecycleOwner
@@ -108,22 +107,6 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 .forCheckoutSession(checkout.internalState),
             initializationMode = checkout.internalState.initializationMode,
         )
-    }
-
-    /**
-     * A composable function that displays a vertical list of wallet payment methods that can be used for express
-     * checkout.
-     */
-    @WalletButtonsPreview
-    @Composable
-    fun WalletButtons() {
-        val walletButtonsContent by contentHelper.walletButtonsContent.collectAsState()
-
-        val walletButtonsViewClickHandler = remember {
-            WalletButtonsViewClickHandler { false }
-        }
-
-        walletButtonsContent?.Content(walletButtonsViewClickHandler)
     }
 
     /**

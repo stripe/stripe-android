@@ -38,7 +38,6 @@ import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.TapToAddPreview
-import com.stripe.android.paymentelement.WalletButtonsPreview
 import com.stripe.android.paymentelement.rememberEmbeddedPaymentElement
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
@@ -56,15 +55,12 @@ import com.stripe.android.paymentsheet.example.playground.settings.EmbeddedViewD
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
-import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsPlaygroundType
-import com.stripe.android.paymentsheet.example.playground.settings.WalletButtonsSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
 import kotlinx.coroutines.launch
 
 @OptIn(
     ExperimentalAnalyticEventCallbackApi::class,
-    WalletButtonsPreview::class,
     TapToAddPreview::class,
     CheckoutSessionPreview::class,
 )
@@ -166,9 +162,6 @@ internal class EmbeddedPlaygroundActivity :
             BottomSheetContent(
                 loadingState = loadingState,
                 configure = ::configure,
-                showWalletButtons =
-                playgroundState.snapshot[WalletButtonsSettingsDefinition] !=
-                    WalletButtonsPlaygroundType.Disabled,
                 embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             )
         }
@@ -180,14 +173,12 @@ internal class EmbeddedPlaygroundActivity :
     private fun BottomSheetContent(
         loadingState: LoadingState,
         configure: () -> Unit,
-        showWalletButtons: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
     ) {
         PlaygroundTheme(
             content = {
                 loadingState.Content(
                     embeddedPaymentElement = embeddedPaymentElement,
-                    showWalletButtons = showWalletButtons,
                     retry = configure
                 )
             },
@@ -369,7 +360,6 @@ internal class EmbeddedPlaygroundActivity :
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -383,19 +373,11 @@ internal class EmbeddedPlaygroundActivity :
             }
         }
         data object Complete : LoadingState() {
-            @OptIn(WalletButtonsPreview::class)
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
-                if (showWalletButtons) {
-                    Box(modifier = Modifier.padding(bottom = 12.dp)) {
-                        embeddedPaymentElement.WalletButtons()
-                    }
-                }
-
                 Box(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp)) {
                     embeddedPaymentElement.Content()
                 }
@@ -405,7 +387,6 @@ internal class EmbeddedPlaygroundActivity :
             @Composable
             override fun Content(
                 embeddedPaymentElement: EmbeddedPaymentElement,
-                showWalletButtons: Boolean,
                 retry: () -> Unit,
             ) {
                 Text(message)
@@ -418,7 +399,6 @@ internal class EmbeddedPlaygroundActivity :
         @Composable
         abstract fun Content(
             embeddedPaymentElement: EmbeddedPaymentElement,
-            showWalletButtons: Boolean,
             retry: () -> Unit
         )
     }

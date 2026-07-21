@@ -183,11 +183,6 @@ internal interface EmbeddedPaymentElementViewModelModule {
     ): EmbeddedPaymentMethodVerticalLayoutInteractorFactory
 
     @Binds
-    fun bindsEmbeddedWalletButtonsInteractorFactory(
-        factory: DefaultEmbeddedWalletButtonsInteractorFactory
-    ): EmbeddedWalletButtonsInteractorFactory
-
-    @Binds
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler

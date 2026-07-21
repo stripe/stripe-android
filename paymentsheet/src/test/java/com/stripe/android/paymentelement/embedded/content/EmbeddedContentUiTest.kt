@@ -25,17 +25,14 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -208,26 +205,12 @@ internal class EmbeddedContentUiTest {
             sheetLauncherHolder = sheetLauncherHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
         )
-        val walletButtonsInteractorFactory = DefaultEmbeddedWalletButtonsInteractorFactory(
-            embeddedLinkHelper = object : EmbeddedLinkHelper {
-                override val linkEmail: StateFlow<String?> = stateFlowOf(null)
-            },
-            confirmationStateHolder = confirmationStateHolder,
-            confirmationHandler = confirmationHandler,
-            errorReporter = errorReporter,
-            eventReporter = eventReporter,
-            linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
-            linkAccountHolder = linkAccountHolder,
-            analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-            coroutineScope = viewModelScope,
-        )
 
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
                 coroutineScope = viewModelScope,
                 stateHolder = stateHolder,
                 verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-                walletButtonsInteractorFactory = walletButtonsInteractorFactory,
                 sheetLauncherHolder = sheetLauncherHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },
                 internalRowSelectionCallback = { internalRowSelectionCallback },

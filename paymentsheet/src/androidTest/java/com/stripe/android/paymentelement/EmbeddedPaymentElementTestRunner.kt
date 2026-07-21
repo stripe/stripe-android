@@ -69,7 +69,6 @@ internal fun runEmbeddedPaymentElementTest(
     resultCallback: EmbeddedPaymentElement.ResultCallback,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
-    showWalletButtons: Boolean = false,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -81,7 +80,6 @@ internal fun runEmbeddedPaymentElementTest(
         ),
         builder = builder,
         successTimeoutSeconds = successTimeoutSeconds,
-        showWalletButtons = showWalletButtons,
         rowSelectionCalls = rowSelectionCalls,
         block = block,
     )
@@ -93,7 +91,6 @@ internal fun runEmbeddedPaymentElementTest(
     builderInstance: EmbeddedPaymentElement.Builder,
     builder: EmbeddedPaymentElement.Builder.() -> Unit = {},
     successTimeoutSeconds: Long = 5L,
-    showWalletButtons: Boolean = false,
     rowSelectionCalls: ReceiveTurbine<RowSelectionCall> = Turbine(),
     block: suspend (EmbeddedPaymentElementTestRunnerContext) -> Unit,
 ) {
@@ -138,10 +135,6 @@ internal fun runEmbeddedPaymentElementTest(
             embeddedPaymentElement = rememberEmbeddedPaymentElement(embeddedPaymentElementBuilder)
             val scrollState = rememberScrollState()
             Column(modifier = Modifier.verticalScroll(scrollState)) {
-                if (showWalletButtons) {
-                    embeddedPaymentElement.WalletButtons()
-                }
-
                 embeddedPaymentElement.Content()
             }
         }

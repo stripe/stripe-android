@@ -25,9 +25,9 @@ internal object WalletButtonsSettingsDefinition :
         settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
         return when (configurationData.integrationType) {
-            PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.FlowController,
             PlaygroundConfigurationData.IntegrationType.FlowControllerWithSpt -> true
+            PlaygroundConfigurationData.IntegrationType.Embedded,
             PlaygroundConfigurationData.IntegrationType.PaymentSheet,
             PlaygroundConfigurationData.IntegrationType.CustomerSheet,
             PlaygroundConfigurationData.IntegrationType.LinkController -> false
