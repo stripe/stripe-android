@@ -737,7 +737,7 @@ internal class FaceDetectorTransitioner(
         const val VALUE_RIGHT = "right"
         const val DEFAULT_STAY_IN_FOUND_DURATION = 2000
         const val DEFAULT_SIDE_CAPTURE_PROMPT_DURATION = 1000
-        const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 10000000
+        const val DEFAULT_SIDE_CAPTURE_FALLBACK_DURATION = 8000
 
         private const val SIDE_CAPTURE_NUM_FRAMES = 2
         private const val SIDE_CAPTURE_BEST_FRAME_DURATION = 1000
