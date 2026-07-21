@@ -37,6 +37,14 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
         }
     }
 
+    override fun create(records: MutableMap<String, ByteArray>): NfcCardReader.Result.Error {
+        return if (TAG_MOBILE_WALLET in records) {
+            mobileWalletNotSupported()
+        } else {
+            unsupportedCard()
+        }
+    }
+
     private fun mapCommandError(error: ApduResponseError.Command): NfcCardReader.Result.Error {
         return when {
             isDeclined(error) -> declined()
@@ -80,7 +88,15 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
         )
     }
 
+    private fun mobileWalletNotSupported(): NfcCardReader.Result.Error {
+        return NfcCardReader.Result.Error(
+            errorCode = MOBILE_WALLET_NOT_SUPPORTED_ERROR_CODE,
+            userMessage = R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,
+        )
+    }
+
     private companion object {
+        const val TAG_MOBILE_WALLET = "9F71"
         const val TRANSCEIVER_SECURITY_ERROR_CODE = "nfcTransceiverSecurityError"
         const val TRANSCEIVER_IO_ERROR_CODE = "nfcTransceiverIoError"
         const val UNKNOWN_ERROR_CODE = "unknownNfcReaderError"
@@ -90,6 +106,7 @@ internal class ApduErrorCreator @Inject constructor() : NfcCardReader.ErrorCreat
 
         const val UNSUPPORTED_CARD_ERROR_CODE = "cardUnsupportedByNfc"
         const val CARD_DECLINED_ERROR_CODE = "cardDeclinedByNfc"
+        const val MOBILE_WALLET_NOT_SUPPORTED_ERROR_CODE = "mobileWalletNotSupportedByNfc"
         const val GENERAL_READ_ERROR_CODE = "nfcCardReadFailed"
 
         const val FILE_NOT_FOUND_SW1 = 0x6A.toByte()

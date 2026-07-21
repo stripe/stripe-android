@@ -10,13 +10,20 @@ internal class FakeNfcCardReaderErrorCreator(
     ),
 ) : NfcCardReader.ErrorCreator {
     val createCalls = Turbine<Throwable>()
+    val createFromRecordsCalls = Turbine<Map<String, ByteArray>>()
 
     override fun create(error: Throwable): NfcCardReader.Result.Error {
         createCalls.add(error)
         return result
     }
 
+    override fun create(records: MutableMap<String, ByteArray>): NfcCardReader.Result.Error {
+        createFromRecordsCalls.add(records)
+        return result
+    }
+
     fun ensureAllEventsConsumed() {
         createCalls.ensureAllEventsConsumed()
+        createFromRecordsCalls.ensureAllEventsConsumed()
     }
 }

@@ -162,4 +162,28 @@ internal class ApduErrorCreatorTest {
             ),
         )
     }
+
+    @Test
+    fun `create returns mobile wallet error when tag 9F71 is present`() {
+        val result = errorMapper.create(
+            mutableMapOf("9F71" to byteArrayOf(0x10, 0x49)),
+        )
+
+        assertThat(result.errorCode).isEqualTo("mobileWalletNotSupportedByNfc")
+        assertThat(result.userMessage).isEqualTo(
+            R.string.stripe_nfc_scan_error_mobile_wallet.resolvableString,
+        )
+    }
+
+    @Test
+    fun `create returns unsupported card error when parseable records are missing`() {
+        val result = errorMapper.create(
+            mutableMapOf("5A" to byteArrayOf(0x41, 0x11)),
+        )
+
+        assertThat(result.errorCode).isEqualTo("cardUnsupportedByNfc")
+        assertThat(result.userMessage).isEqualTo(
+            R.string.stripe_nfc_scan_unsupported_card.resolvableString,
+        )
+    }
 }

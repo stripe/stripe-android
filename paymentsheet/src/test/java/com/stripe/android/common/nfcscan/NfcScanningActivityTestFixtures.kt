@@ -107,4 +107,10 @@ internal object NfcScanningActivityTestFixtures {
         apduSuccessResponse(byteArrayOf()),
         apduSuccessResponse(tlv(tag = 0x57, value = EXPIRED_TRACK_2_DATA)),
     )
+
+    fun mobileWalletResponses(): List<ByteArray> = listOf(
+        apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+        apduSuccessResponse(byteArrayOf()),
+        apduSuccessResponse(tlv(tag = 0x9F.toByte(), tagContinuation = 0x71, value = byteArrayOf(0x10, 0x49))),
+    )
 }

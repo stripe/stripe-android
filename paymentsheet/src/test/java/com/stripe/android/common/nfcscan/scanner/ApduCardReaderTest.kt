@@ -28,7 +28,7 @@ internal class ApduCardReaderTest {
         val result = cardReader.readCard(transceiver)
 
         assertThat(result).isEqualTo(PARSE_FAILURE_ERROR)
-        assertThat(errorCreator.createCalls.awaitItem()).isInstanceOf<IllegalStateException>()
+        assertThat(errorCreator.createFromRecordsCalls.awaitItem()).isEmpty()
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
@@ -50,7 +50,7 @@ internal class ApduCardReaderTest {
         val result = cardReader.readCard(transceiver)
 
         assertThat(result).isEqualTo(PARSE_FAILURE_ERROR)
-        assertThat(errorCreator.createCalls.awaitItem()).isInstanceOf<IllegalStateException>()
+        assertThat(errorCreator.createFromRecordsCalls.awaitItem()).isEmpty()
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
@@ -187,8 +187,9 @@ internal class ApduCardReaderTest {
         val result = cardReader.readCard(transceiver)
 
         assertThat(result).isEqualTo(PARSE_FAILURE_ERROR)
-        assertThat(errorCreator.createCalls.awaitItem())
-            .isInstanceOf<IllegalStateException>()
+        val records = errorCreator.createFromRecordsCalls.awaitItem()
+        assertThat(records).containsKey("5A")
+        assertThat(records).containsKey("5F24")
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
@@ -241,7 +242,7 @@ internal class ApduCardReaderTest {
         )
         val reader = ApduCardReader(
             workContext = UnconfinedTestDispatcher(testScheduler),
-            errorMapper = fakeErrorCreator,
+            errorCreator = fakeErrorCreator,
             cardDataParser = fakeCardDataParser,
         )
 
@@ -277,8 +278,8 @@ internal class ApduCardReaderTest {
         const val MAX_RECORDS_PER_SFI = 8
 
         val PARSE_FAILURE_ERROR = NfcCardReader.Result.Error(
-            errorCode = "nfcCardReadFailed",
-            userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
+            errorCode = "cardUnsupportedByNfc",
+            userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
         )
 
         val UNSUPPORTED_CARD_ERROR = NfcCardReader.Result.Error(

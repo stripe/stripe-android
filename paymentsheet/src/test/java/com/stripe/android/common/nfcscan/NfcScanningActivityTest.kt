@@ -143,6 +143,17 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
+    fun `mobile wallet shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.mobileWalletResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_error_mobile_wallet),
+        )
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
     fun `finish applies fade out transition`() {
         configureNfc(context)
 

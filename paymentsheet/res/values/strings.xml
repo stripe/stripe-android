@@ -112,6 +112,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_nfc_scan_hold_card_behind_phone">Hold card behind phone</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is not supported by Stripe or by the merchant -->
   <string name="stripe_nfc_scan_unsupported_card">Card not supported. Try another card.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if a mobile wallet was scanned -->
+  <string name="stripe_nfc_scan_error_mobile_wallet">Mobile wallets not supported. Try using a card.</string>
   <!-- Text for separator within a separator that separates a button to tap to add a card and the card form -->
   <string name="stripe_or_enter_manually">or enter manually</string>
   <!-- Text for the 'Pay with Link' button. 'Link' is a Stripe brand, please do not translate the word 'Link'. -->

@@ -14,6 +14,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface NfcCardReader {
     interface ErrorCreator {
         fun create(error: Throwable): Result.Error
+        fun create(records: MutableMap<String, ByteArray>): Result.Error
     }
 
     suspend fun readCard(transceiver: NfcTagTransceiver): Result
@@ -29,23 +30,21 @@ internal interface NfcCardReader {
 
 internal class ApduCardReader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
-    private val errorMapper: NfcCardReader.ErrorCreator,
+    private val errorCreator: NfcCardReader.ErrorCreator,
     private val cardDataParser: NfcCardDataParser,
 ) : NfcCardReader {
     override suspend fun readCard(transceiver: NfcTagTransceiver): NfcCardReader.Result {
         return runCatching {
             readFromTransceiver(transceiver)
         }.fold(
-            onSuccess = { cardData ->
-                NfcCardReader.Result.Found(scannedCardData = cardData)
-            },
-            onFailure = errorMapper::create,
+            onSuccess = { it },
+            onFailure = errorCreator::create,
         )
     }
 
     private suspend fun readFromTransceiver(
         transceiver: NfcTagTransceiver
-    ): ScannedCardData = withContext(workContext) {
+    ): NfcCardReader.Result = withContext(workContext) {
         try {
             transceiver.open()
             val applicationIdentifier = SelectPpseCommand.transceiveWith(transceiver).getOrThrow()
@@ -72,8 +71,9 @@ internal class ApduCardReader @Inject constructor(
                 }
             }
 
-            cardDataParser.parse(records)
-                ?: throw IllegalStateException("Could not parse card data from NFC tag")
+            cardDataParser.parse(records)?.let { scannedCardData ->
+                NfcCardReader.Result.Found(scannedCardData)
+            } ?: errorCreator.create(records)
         } finally {
             transceiver.close()
         }
