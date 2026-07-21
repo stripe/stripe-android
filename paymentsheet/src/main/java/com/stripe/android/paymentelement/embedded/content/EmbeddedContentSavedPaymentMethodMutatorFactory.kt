@@ -5,6 +5,7 @@ import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
@@ -23,12 +24,14 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
     private val savedPaymentMethodRepository: SavedPaymentMethodRepository,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
-    private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
 ) {
-    fun create(paymentMethodMetadata: PaymentMethodMetadata): SavedPaymentMethodMutator {
+    fun create(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        configuration: EmbeddedPaymentElement.Configuration,
+    ): SavedPaymentMethodMutator {
         return SavedPaymentMethodMutator(
             paymentMethodMetadataFlow = stateFlowOf(paymentMethodMetadata),
             eventReporter = eventReporter,
@@ -46,7 +49,7 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
-                    configuration = confirmationStateHolder.state?.configuration,
+                    configuration = configuration,
                 )
             },
             isLinkEnabled = stateFlowOf(paymentMethodMetadata.linkState != null),
