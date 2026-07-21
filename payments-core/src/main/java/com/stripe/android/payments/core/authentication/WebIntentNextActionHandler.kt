@@ -159,6 +159,9 @@ internal class WebIntentNextActionHandler @Inject constructor(
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
             returnUrl = suppliedReturnUrl ?: defaultReturnUrl.value,
+            // If the user backs out mid-trampoline, report UNKNOWN rather than CANCELED: the intent
+            // may have already finalized server-side, so let the result processor reconcile the real
+            // state instead of asserting a hard cancel (matches CashApp/Swish).
             shouldCancelIntentOnUserNavigation = false,
         )
     }
