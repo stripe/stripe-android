@@ -13,6 +13,7 @@ import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import androidx.compose.ui.test.pressKey
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +25,9 @@ import org.robolectric.annotation.Config
 class OTPElementUITest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun `single digit advances focus`() {
