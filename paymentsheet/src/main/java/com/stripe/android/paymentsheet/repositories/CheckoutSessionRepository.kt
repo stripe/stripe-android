@@ -5,6 +5,8 @@ import com.stripe.android.checkout.Address
 import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.model.StripeModel
+import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -46,6 +48,18 @@ internal class CheckoutSessionRepository @Inject constructor(
         url: String,
         params: Map<String, *>,
     ): Result<CheckoutSessionResponse> {
+        return executePost(
+            url = url,
+            params = params,
+            responseJsonParser = CheckoutSessionResponseJsonParser,
+        )
+    }
+
+    private suspend fun <ResponseType : StripeModel> executePost(
+        url: String,
+        params: Map<String, *>,
+        responseJsonParser: ModelJsonParser<ResponseType>,
+    ): Result<ResponseType> {
         val options = createOptions()
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
@@ -55,7 +69,7 @@ internal class CheckoutSessionRepository @Inject constructor(
                 options = options,
                 params = params,
             ),
-            responseJsonParser = CheckoutSessionResponseJsonParser,
+            responseJsonParser = responseJsonParser,
         )
     }
 
@@ -73,6 +87,24 @@ internal class CheckoutSessionRepository @Inject constructor(
                 "elements_session_client" to clientParams.toCheckoutSessionMap(),
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
             ),
+        )
+    }
+
+    suspend fun initV2(
+        sessionId: String,
+        adaptivePricingAllowed: Boolean,
+    ): Result<CheckoutSessionResponse> {
+        val url = initV2Url(sessionId)
+        return executePost(
+            url = url,
+            params = mapOf(
+                "locale" to clientParams.locale,
+                "timezone" to TimeZone.getDefault().id,
+                "mobile_session_id" to clientParams.mobileSessionId,
+                "mobile_app_id" to clientParams.mobileAppId,
+                "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
+            ),
+            responseJsonParser = CheckoutClientResponseJsonParser,
         )
     }
 
@@ -211,6 +243,9 @@ internal class CheckoutSessionRepository @Inject constructor(
 
         private fun initUrl(sessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$sessionId/init"
+
+        private fun initV2Url(sessionId: String): String =
+            "${ApiRequest.API_HOST}/v1/checkout_client/$sessionId/init"
 
         private fun confirmUrl(checkoutSessionId: String): String =
             "${ApiRequest.API_HOST}/v1/payment_pages/$checkoutSessionId/confirm"
