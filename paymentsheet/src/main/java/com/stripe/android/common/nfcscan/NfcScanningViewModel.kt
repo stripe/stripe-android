@@ -9,6 +9,7 @@ import com.stripe.android.common.nfcscan.analytics.NfcScanningEventReporter
 import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.TapZoneResolver
+import com.stripe.android.common.nfcscan.ui.HapticFeedbackType
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.requireApplication
@@ -31,8 +32,8 @@ internal class NfcScanningViewModel @Inject constructor(
 ) : ViewModel() {
     private val tapZone = tapZoneResolver.get()
 
-    private val _result = MutableSharedFlow<NfcScanningContract.Result>()
-    val result = _result.asSharedFlow()
+    private val _event = MutableSharedFlow<NfcScanningEvent>()
+    val event = _event.asSharedFlow()
 
     private val _viewState = MutableStateFlow(
         NfcScanningViewState(
@@ -62,6 +63,8 @@ internal class NfcScanningViewModel @Inject constructor(
                         eventReporter.onNfcScanAttemptStarted()
                     }
                     is NfcCardScanner.State.Failed -> {
+                        _event.emit(NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Failed))
+
                         val error = state.error
 
                         _viewState.emit(
@@ -74,6 +77,8 @@ internal class NfcScanningViewModel @Inject constructor(
                         eventReporter.onNfcScanAttemptFailed(errorCode = error.code)
                     }
                     is NfcCardScanner.State.Complete -> {
+                        _event.emit(NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Success))
+
                         _viewState.emit(
                             NfcScanningViewState(
                                 tapZone = tapZone,
@@ -99,7 +104,7 @@ internal class NfcScanningViewModel @Inject constructor(
             is NfcScanningViewAction.Close -> {
                 viewModelScope.launch {
                     eventReporter.onNfcScanCancelled()
-                    _result.emit(NfcScanningContract.Result.Canceled)
+                    _event.emit(NfcScanningEvent.CloseWithResult(NfcScanningContract.Result.Canceled))
                 }
             }
             is NfcScanningViewAction.SuccessShown -> {
@@ -110,11 +115,13 @@ internal class NfcScanningViewModel @Inject constructor(
                 eventReporter.onNfcScanSucceeded()
                 viewModelScope.launch {
                     pendingValidCardData?.let { cardData ->
-                        _result.emit(
-                            NfcScanningContract.Result.Complete(
-                                cardNumber = cardData.cardNumber,
-                                expirationYear = cardData.expirationYear,
-                                expirationMonth = cardData.expirationMonth,
+                        _event.emit(
+                            NfcScanningEvent.CloseWithResult(
+                                NfcScanningContract.Result.Complete(
+                                    cardNumber = cardData.cardNumber,
+                                    expirationYear = cardData.expirationYear,
+                                    expirationMonth = cardData.expirationMonth,
+                                )
                             )
                         )
                     }
