@@ -33,6 +33,7 @@ import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -63,9 +64,9 @@ internal class EmbeddedContentUiTest {
         runScenario(internalRowSelectionCallback = {}) {
             embeddedContentHelper.embeddedContent.test {
                 assertThat(awaitItem()).isNull()
-                stateHolder.dataLoaded(
-                    PaymentMethodMetadataFactory.create(),
-                    Embedded(Embedded.RowStyle.FlatWithRadio.default),
+                state.value = EmbeddedContentHelperStateHolder.State(
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                    appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                     embeddedViewDisplaysMandateText = true,
                     configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
@@ -87,9 +88,9 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
+            state.value = EmbeddedContentHelperStateHolder.State(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                appearance = Embedded(Embedded.RowStyle.FlatWithRadio.default),
                 embeddedViewDisplaysMandateText = true,
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
@@ -111,9 +112,9 @@ internal class EmbeddedContentUiTest {
     ) {
         embeddedContentHelper.embeddedContent.test {
             assertThat(awaitItem()).isNull()
-            stateHolder.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
+            state.value = EmbeddedContentHelperStateHolder.State(
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                appearance = Embedded(Embedded.RowStyle.FlatWithDisclosure.default),
                 embeddedViewDisplaysMandateText = true,
                 configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
             )
@@ -133,7 +134,7 @@ internal class EmbeddedContentUiTest {
 
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
-        val stateHolder: EmbeddedContentHelperStateHolder,
+        val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
     )
 
     @OptIn(ExperimentalAnalyticEventCallbackApi::class)
@@ -171,10 +172,7 @@ internal class EmbeddedContentUiTest {
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
 
-        val stateHolder = DefaultEmbeddedContentHelperStateHolder(
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
-        )
+        val state = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(null)
         val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
             eventReporter = eventReporter,
             workContext = Dispatchers.Unconfined,
@@ -202,7 +200,7 @@ internal class EmbeddedContentUiTest {
         val embeddedContentHelper =
             DefaultEmbeddedContentHelper(
                 coroutineScope = viewModelScope,
-                stateHolder = stateHolder,
+                state = state,
                 verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
                 sheetLauncherHolder = sheetLauncherHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },
@@ -213,7 +211,7 @@ internal class EmbeddedContentUiTest {
             )
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
-            stateHolder = stateHolder,
+            state = state,
         ).block()
     }
 }

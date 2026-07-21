@@ -249,6 +249,13 @@ internal interface EmbeddedPaymentElementViewModelModule {
         }
 
         @Provides
+        fun provideEmbeddedContentState(
+            stateHolder: EmbeddedContentHelperStateHolder,
+        ): StateFlow<EmbeddedContentHelperStateHolder.State?> {
+            return stateHolder.state
+        }
+
+        @Provides
         fun providesConfirmationStateSupplier(
             confirmationStateHolder: EmbeddedConfirmationStateHolder,
         ): () -> EmbeddedConfirmationStateHolder.State? {
