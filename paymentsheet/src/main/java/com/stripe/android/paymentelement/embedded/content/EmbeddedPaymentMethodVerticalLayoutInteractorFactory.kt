@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVertical
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodIncentiveInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
-import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +25,7 @@ import javax.inject.Inject
 internal fun interface EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
     fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
+        configuration: EmbeddedPaymentElement.Configuration,
         walletsState: StateFlow<WalletsState?>,
         isImmediateAction: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
@@ -36,7 +36,6 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     private val eventReporter: EventReporter,
     private val embeddedFormHelperFactory: EmbeddedFormHelperFactory,
     private val confirmationHandler: ConfirmationHandler,
-    private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
@@ -49,6 +48,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     @Suppress("LongMethod")
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
+        configuration: EmbeddedPaymentElement.Configuration,
         walletsState: StateFlow<WalletsState?>,
         isImmediateAction: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
@@ -71,16 +71,14 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
         )
-        val savedPaymentMethodMutator = savedPaymentMethodMutatorFactory.create(paymentMethodMetadata)
+        val savedPaymentMethodMutator = savedPaymentMethodMutatorFactory.create(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = configuration,
+        )
 
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            processing = combineAsStateFlow(
-                confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
-                confirmationStateHolder.stateFlow.mapAsStateFlow { it != null },
-            ) { confirmationStateValid, configurationStateValid ->
-                confirmationStateValid && configurationStateValid
-            },
+            processing = confirmationHandler.state.mapAsStateFlow { it is ConfirmationHandler.State.Confirming },
             temporarySelection = selectionHolder.temporarySelection,
             selection = selectionHolder.selection,
             paymentMethodIncentiveInteractor = paymentMethodIncentiveInteractor,
@@ -93,14 +91,14 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
-                    configuration = confirmationStateHolder.state?.configuration,
+                    configuration = configuration,
                 )
             },
             transitionToFormScreen = { code ->
                 sheetLauncherHolder.sheetLauncher?.launchForm(
                     code = code,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = confirmationStateHolder.state?.configuration,
+                    configuration = configuration,
                     customerState = customerStateHolder.customer.value,
                     promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(
                         code = code,
@@ -122,7 +120,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             shouldUpdateVerticalModeSelection = { paymentMethodCode ->
-                val isConfirmFlow = confirmationStateHolder.state?.configuration?.formSheetAction ==
+                val isConfirmFlow = configuration.formSheetAction ==
                     EmbeddedPaymentElement.FormSheetAction.Confirm
                 if (isConfirmFlow) {
                     val requiresFormScreen = paymentMethodCode != null &&

@@ -168,11 +168,6 @@ internal class EmbeddedContentUiTest {
             ),
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
-        val confirmationStateHolder = EmbeddedConfirmationStateHolder(
-            savedStateHandle = savedStateHandle,
-            selectionHolder = selectionHolder,
-            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
-        )
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
         val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
 
@@ -187,7 +182,6 @@ internal class EmbeddedContentUiTest {
             savedPaymentMethodRepository = FakeSavedPaymentMethodRepository(),
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
-            confirmationStateHolder = confirmationStateHolder,
             linkAccountHolder = linkAccountHolder,
             coroutineScope = viewModelScope,
             sheetLauncherHolder = sheetLauncherHolder,
@@ -196,7 +190,6 @@ internal class EmbeddedContentUiTest {
             eventReporter = eventReporter,
             embeddedFormHelperFactory = embeddedFormHelperFactory,
             confirmationHandler = confirmationHandler,
-            confirmationStateHolder = confirmationStateHolder,
             selectionHolder = selectionHolder,
             customerStateHolder = customerStateHolder,
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
