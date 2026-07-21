@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import androidx.annotation.ColorInt
+import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -8,6 +9,7 @@ import com.stripe.android.paymentelement.PreparePaymentMethodHandler
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
+import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.CreateIntentCallback
@@ -42,6 +44,7 @@ internal class IntentConfirmationModule {
         return PaymentElementCallbackReferences[paymentElementCallbackIdentifier]?.preparePaymentMethodHandler
     }
 
+    @OptIn(ApiConfigurationPreview::class)
     @JvmSuppressWildcards
     @Provides
     @IntoSet
@@ -50,13 +53,20 @@ internal class IntentConfirmationModule {
         stripePaymentLauncherAssistedFactory: StripePaymentLauncherAssistedFactory,
         @Named(STATUS_BAR_COLOR) @ColorInt statusBarColor: Int?,
         paymentConfigurationProvider: Provider<PaymentConfiguration>,
+        confirmationStateHolder: EmbeddedConfirmationStateHolder,
     ): ConfirmationDefinition<*, *, *, *> {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = interceptorFactory,
             paymentLauncherFactory = { hostActivityLauncher ->
                 stripePaymentLauncherAssistedFactory.create(
-                    publishableKey = { paymentConfigurationProvider.get().publishableKey },
-                    stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
+                    publishableKey = {
+                        confirmationStateHolder.state?.configuration?.apiConfiguration?.state?.publishableKey
+                            ?: paymentConfigurationProvider.get().publishableKey
+                    },
+                    stripeAccountId = {
+                        confirmationStateHolder.state?.configuration?.apiConfiguration?.state?.stripeAccountId
+                            ?: paymentConfigurationProvider.get().stripeAccountId
+                    },
                     hostActivityLauncher = hostActivityLauncher,
                     statusBarColor = statusBarColor,
                     includePaymentSheetNextHandlers = true,
