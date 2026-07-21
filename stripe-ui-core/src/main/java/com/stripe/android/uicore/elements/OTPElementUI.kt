@@ -30,8 +30,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.focus.FocusDirection
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -41,7 +39,6 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.onAutofillText
@@ -58,7 +55,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
-import com.stripe.android.uicore.moveFocusSafely
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
 
@@ -112,7 +108,13 @@ fun OTPElementUI(
     selectedStrokeWidth: Dp = 2.dp,
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
-    val focusManager = LocalFocusManager.current
+    val focusRequesters = remember(focusRequester, element.controller.otpLength) {
+        if (element.controller.otpLength <= 0) {
+            emptyList()
+        } else {
+            listOf(focusRequester) + List(element.controller.otpLength - 1) { FocusRequester() }
+        }
+    }
     Row(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -149,6 +151,7 @@ fun OTPElementUI(
 
                 var textFieldModifier = Modifier
                     .height(56.dp)
+                    .focusRequester(focusRequesters[index])
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
                             focusedElementIndex = index
@@ -163,7 +166,7 @@ fun OTPElementUI(
                             value.isEmpty()
                         ) {
                             // If the current field is empty, move to the previous one and delete
-                            focusManager.moveFocusSafely(FocusDirection.Previous)
+                            focusRequesters.requestFocusSafely(index - 1)
                             element.controller.onValueChanged(index - 1, "")
                             return@onPreviewKeyEvent true
                         }
@@ -177,7 +180,6 @@ fun OTPElementUI(
 
                 if (index == 0) {
                     textFieldModifier = textFieldModifier
-                        .focusRequester(focusRequester)
                         .semantics {
                             onAutofillText {
                                 element.controller.onAutofillDigit(it.text)
@@ -191,7 +193,7 @@ fun OTPElementUI(
                     isSelected = isSelected,
                     element = element,
                     index = index,
-                    focusManager = focusManager,
+                    focusRequesters = focusRequesters,
                     modifier = textFieldModifier,
                     placeholder = otpInputPlaceholder,
                     textStyle = boxTextStyle,
@@ -210,7 +212,7 @@ private fun OTPInputBox(
     textStyle: TextStyle,
     element: OTPElement,
     index: Int,
-    focusManager: FocusManager,
+    focusRequesters: List<FocusRequester>,
     modifier: Modifier,
     enabled: Boolean,
     colors: OTPElementColors,
@@ -223,10 +225,11 @@ private fun OTPInputBox(
     BasicTextField(
         value = value,
         onValueChange = { newValue ->
-            val stringChangedSinceLastInvocation = lastTextValue != newValue
+            val prevLastTextValue = lastTextValue
+            val stringChangedSinceLastInvocation = prevLastTextValue != newValue
             lastTextValue = newValue
 
-            if (stringChangedSinceLastInvocation || newValue.length == 1) {
+            if (stringChangedSinceLastInvocation || (newValue.length == 1 && newValue != value)) {
                 // If the OTPInputBox already has a value, it would be the first character of it.text
                 // remove it before passing it to the controller.
                 val newValue =
@@ -235,8 +238,15 @@ private fun OTPInputBox(
                     } else {
                         newValue
                     }
-                val inputLength = element.controller.onValueChanged(index, newValue)
-                (0 until inputLength).forEach { _ -> focusManager.moveFocusSafely(FocusDirection.Next) }
+                val isSpuriousImeFlush = newValue.isEmpty() && prevLastTextValue.length > 1
+                if (!isSpuriousImeFlush) {
+                    val inputLength = element.controller.onValueChanged(index, newValue)
+                    if (inputLength > 0) {
+                        focusRequesters.requestFocusSafely(
+                            minOf(index + inputLength, focusRequesters.lastIndex)
+                        )
+                    }
+                }
             }
         },
         modifier = modifier,
@@ -247,12 +257,21 @@ private fun OTPInputBox(
             keyboardType = element.controller.keyboardType
         ),
         keyboardActions = KeyboardActions(
-            onNext = { focusManager.moveFocusSafely(FocusDirection.Next) },
-            onDone = { focusManager.clearFocus(true) }
+            onNext = { focusRequesters.requestFocusSafely(index + 1) }
         ),
         singleLine = true,
         decorationBox = OTPInputDecorationBox(value, isSelected, placeholder, enabled, colors)
     )
+}
+
+private fun List<FocusRequester>.requestFocusSafely(index: Int) {
+    val focusRequester = getOrNull(index) ?: return
+
+    try {
+        focusRequester.requestFocus()
+    } catch (_: IllegalStateException) {
+        // Ignore requests made before the next field has attached to the focus tree.
+    }
 }
 
 @Composable
