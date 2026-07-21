@@ -26,15 +26,12 @@ import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.utils.stateFlowOf
-import com.stripe.android.utils.AnalyticEventCallbackRule
 import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
-import com.stripe.android.utils.RecordingLinkPaymentLauncher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -78,40 +75,8 @@ internal class DefaultEmbeddedContentHelperTest {
     }
 
     @Test
-    fun `dataLoaded emits walletButtonsContent event`() = testScenario {
-        embeddedContentHelper.walletButtonsContent.test {
-            assertThat(awaitItem()).isNull()
-            stateHolder.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-            )
-            assertThat(awaitItem()).isNotNull()
-        }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
     fun `embeddedContent emits null when clearEmbeddedContent is called`() = testScenario {
         embeddedContentHelper.embeddedContent.test {
-            assertThat(awaitItem()).isNull()
-            stateHolder.dataLoaded(
-                PaymentMethodMetadataFactory.create(),
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
-                configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-            )
-            assertThat(awaitItem()).isNotNull()
-            stateHolder.clearEmbeddedContent()
-            assertThat(awaitItem()).isNull()
-        }
-        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
-    }
-
-    @Test
-    fun `walletButtonsContent emits null when clearEmbeddedContent is called`() = testScenario {
-        embeddedContentHelper.walletButtonsContent.test {
             assertThat(awaitItem()).isNull()
             stateHolder.dataLoaded(
                 PaymentMethodMetadataFactory.create(),
@@ -286,25 +251,11 @@ internal class DefaultEmbeddedContentHelperTest {
             sheetLauncherHolder = sheetLauncherHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
         )
-        val walletButtonsInteractorFactory = DefaultEmbeddedWalletButtonsInteractorFactory(
-            embeddedLinkHelper = object : EmbeddedLinkHelper {
-                override val linkEmail: StateFlow<String?> = stateFlowOf(null)
-            },
-            confirmationStateHolder = confirmationStateHolder,
-            confirmationHandler = confirmationHandler,
-            errorReporter = errorReporter,
-            eventReporter = eventReporter,
-            linkPaymentLauncher = RecordingLinkPaymentLauncher.noOp(),
-            linkAccountHolder = linkAccountHolder,
-            analyticsCallbackProvider = { AnalyticEventCallbackRule() },
-            coroutineScope = backgroundScope,
-        )
 
         val embeddedContentHelper = DefaultEmbeddedContentHelper(
             coroutineScope = backgroundScope,
             stateHolder = stateHolder,
             verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-            walletButtonsInteractorFactory = walletButtonsInteractorFactory,
             sheetLauncherHolder = sheetLauncherHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },
             internalRowSelectionCallback = { null },

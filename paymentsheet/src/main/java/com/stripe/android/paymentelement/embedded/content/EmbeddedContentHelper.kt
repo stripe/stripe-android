@@ -5,7 +5,6 @@ import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.ui.WalletButtonsContent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,7 +16,6 @@ import javax.inject.Singleton
 
 internal interface EmbeddedContentHelper {
     val embeddedContent: StateFlow<EmbeddedContent?>
-    val walletButtonsContent: StateFlow<WalletButtonsContent?>
 
     fun presentPaymentOptions()
 }
@@ -27,7 +25,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val stateHolder: EmbeddedContentHelperStateHolder,
     private val verticalLayoutInteractorFactory: EmbeddedPaymentMethodVerticalLayoutInteractorFactory,
-    private val walletButtonsInteractorFactory: EmbeddedWalletButtonsInteractorFactory,
     private val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
@@ -38,9 +35,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
 
     private val _embeddedContent = MutableStateFlow<EmbeddedContent?>(null)
     override val embeddedContent: StateFlow<EmbeddedContent?> = _embeddedContent.asStateFlow()
-
-    private val _walletButtonsContent = MutableStateFlow<WalletButtonsContent?>(null)
-    override val walletButtonsContent: StateFlow<WalletButtonsContent?> = _walletButtonsContent.asStateFlow()
 
     init {
         coroutineScope.launch {
@@ -59,18 +53,6 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                         embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
                         appearance = state.appearance,
                         isImmediateAction = isImmediateAction,
-                    )
-                }
-            }
-        }
-
-        coroutineScope.launch {
-            stateHolder.state.collect { state ->
-                _walletButtonsContent.value = if (state == null) {
-                    null
-                } else {
-                    WalletButtonsContent(
-                        interactor = walletButtonsInteractorFactory.create(),
                     )
                 }
             }
