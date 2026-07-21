@@ -23,7 +23,6 @@ class StripeAutocompleteRepositoryTest {
             country = "US",
             sessionToken = "session_abc",
             locale = null,
-            googleApiKey = null,
         )
 
         val request = scenario.networkClient.lastRequest as ApiRequest
@@ -40,7 +39,6 @@ class StripeAutocompleteRepositoryTest {
             country = "US",
             sessionToken = "session_abc",
             locale = "en",
-            googleApiKey = "key_123",
         )
 
         val request = scenario.networkClient.lastRequest as ApiRequest
@@ -49,7 +47,6 @@ class StripeAutocompleteRepositoryTest {
         assertThat(params["session_token"]).isEqualTo("session_abc")
         assertThat(params["client_type"]).isEqualTo("mobile")
         assertThat(params["locale"]).isEqualTo("en")
-        assertThat(params["google_api_key"]).isEqualTo("key_123")
     }
 
     @Test
