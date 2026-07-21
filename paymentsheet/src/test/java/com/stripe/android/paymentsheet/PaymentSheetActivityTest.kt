@@ -1259,6 +1259,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
@@ -1278,7 +1279,6 @@ internal class PaymentSheetActivityTest {
             accountStatus = AccountStatus.SignedOut,
             email = "email@email.com"
         )
-
         TestViewModelFactory.create(
             linkConfigurationCoordinator = coordinator,
         ) { linkHandler, savedStateHandle ->
@@ -1335,9 +1335,7 @@ internal class PaymentSheetActivityTest {
                         args: Args,
                         processing: StateFlow<Boolean>,
                         coroutineScope: CoroutineScope,
-                    ): CvcRecollectionInteractor {
-                        return FakeCvcRecollectionInteractor()
-                    }
+                    ): CvcRecollectionInteractor = FakeCvcRecollectionInteractor()
                 },
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
@@ -1345,6 +1343,7 @@ internal class PaymentSheetActivityTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
+                stripeAutocompleteRepository = null,
             )
         }.also { viewModelStoreRule.track(it) }
     }

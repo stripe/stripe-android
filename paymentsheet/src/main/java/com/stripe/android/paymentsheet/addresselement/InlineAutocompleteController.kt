@@ -10,6 +10,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,9 +66,17 @@ internal class InlineAutocompleteController(
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
         selectionJob = coroutineScope.launch {
-            placesClient.fetchPlace(predictionId).fold(
-                onSuccess = ::handleFetchPlaceSuccess,
-                onFailure = { handleFailure() }
+            val result = placesClient.fetchPlace(predictionId)
+            ensureActive()
+            result.fold(
+                onSuccess = { response ->
+                    placesClient.resetSession()
+                    handleFetchPlaceSuccess(response)
+                },
+                onFailure = {
+                    placesClient.resetSession()
+                    handleFailure()
+                }
             )
         }
     }
@@ -116,6 +126,7 @@ internal class InlineAutocompleteController(
             country = country,
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
         )
+        currentCoroutineContext().ensureActive()
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
             onFailure = { handleFailure() }

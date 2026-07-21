@@ -188,6 +188,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
+                stripeAutocompleteRepository = null,
             )
         }
         return viewModelStoreRule.track(viewModel)
@@ -243,6 +244,7 @@ internal class FormHelperOpenCardScanAutomaticallyTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
+                stripeAutocompleteRepository = null,
             )
         }
         return viewModelStoreRule.track(viewModel)

@@ -44,6 +44,7 @@ class InputAddressViewModelTest {
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
+                stripeAccountId = null,
                 config = config,
             ),
             navigator,
@@ -971,6 +972,7 @@ class InputAddressViewModelTest {
         return InputAddressViewModel(
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
+                stripeAccountId = null,
                 config = AddressLauncher.Configuration.Builder()
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)

@@ -737,6 +737,37 @@ class InlineAutocompleteControllerTest {
         eventCalls.awaitItem()
     }
 
+    @Test
+    fun `onPredictionSelected resets session after successful fetch`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.success(
+            FetchPlaceResponse(
+                Place(
+                    listOf(
+                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
+                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
+                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
+                    )
+                )
+            )
+        )
+
+        delegate.onPredictionSelected("place-id-123")
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        eventCalls.awaitItem()
+        assertThat(fakePlacesClient.resetSessionCallCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `onPredictionSelected resets session after failed fetch`() = runScenario {
+        fakePlacesClient.fetchPlaceResult = Result.failure(RuntimeException("error"))
+
+        delegate.onPredictionSelected("place-id-123")
+
+        fakePlacesClient.fetchPlaceCalls.awaitItem()
+        assertThat(fakePlacesClient.resetSessionCallCount).isEqualTo(1)
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     private fun runScenario(
         autocompleteCountries: Set<String> = emptySet(),

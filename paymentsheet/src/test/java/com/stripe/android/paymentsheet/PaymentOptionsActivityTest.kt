@@ -536,6 +536,7 @@ internal class PaymentOptionsActivityTest {
                 customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
+                stripeAutocompleteRepository = null,
             )
         }.also { viewModelStoreRule.track(it) }
 

@@ -37,4 +37,8 @@ private class LazyPlacesClientProxy(
     ): Result<FindAutocompletePredictionsResponse> = delegate.findAutocompletePredictions(query, country, limit)
 
     override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> = delegate.fetchPlace(placeId)
+
+    override fun resetSession() {
+        delegate.resetSession()
+    }
 }

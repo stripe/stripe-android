@@ -28,6 +28,7 @@ internal object AddressElementActivityContract :
     @Parcelize
     data class Args internal constructor(
         internal val publishableKey: String,
+        internal val stripeAccountId: String?,
         internal val config: AddressLauncher.Configuration?,
     ) : ActivityStarter.Args {
 

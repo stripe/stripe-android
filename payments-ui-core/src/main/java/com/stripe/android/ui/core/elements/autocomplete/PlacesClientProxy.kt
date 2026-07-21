@@ -37,6 +37,8 @@ interface PlacesClientProxy {
         placeId: String
     ): Result<FetchPlaceResponse>
 
+    fun resetSession() {}
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Volatile
@@ -90,7 +92,11 @@ internal class DefaultPlacesClientProxy(
     private val client: PlacesClient,
     private val errorReporter: ErrorReporter
 ) : PlacesClientProxy {
-    private val token = AutocompleteSessionToken.newInstance()
+    private var token = AutocompleteSessionToken.newInstance()
+
+    override fun resetSession() {
+        token = AutocompleteSessionToken.newInstance()
+    }
 
     override suspend fun findAutocompletePredictions(
         query: String?,

@@ -56,6 +56,7 @@ internal class FakeBaseSheetViewModel private constructor(
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
     customViewModelScope = customViewModelScope,
     placesClient = null,
+    stripeAutocompleteRepository = null,
 ) {
     companion object {
         fun create(

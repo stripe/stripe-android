@@ -44,6 +44,13 @@ internal class FakePlacesClientProxy(
         return fetchPlaceResult
     }
 
+    var resetSessionCallCount = 0
+        private set
+
+    override fun resetSession() {
+        resetSessionCallCount++
+    }
+
     fun ensureAllEventsConsumed() {
         _findPredictionsCalls.ensureAllEventsConsumed()
         _fetchPlaceCalls.ensureAllEventsConsumed()
