@@ -69,7 +69,7 @@ internal abstract class BaseSheetViewModel(
     val customerStateHolderFactory: CustomerStateHolder.Factory,
     val customViewModelScope: CoroutineScope,
     val placesClient: PlacesClientProxy?,
-    val stripeAutocompleteRepository: StripeAutocompleteRepository?,
+    val stripeAutocompleteRepository: StripeAutocompleteRepository,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)

@@ -25,7 +25,7 @@ internal fun createInlineAutocompletePlacesClient(
     }
 }
 
-private class LazyPlacesClientProxy(
+internal class LazyPlacesClientProxy(
     factory: () -> PlacesClientProxy,
 ) : PlacesClientProxy {
     private val delegate by lazy(factory)

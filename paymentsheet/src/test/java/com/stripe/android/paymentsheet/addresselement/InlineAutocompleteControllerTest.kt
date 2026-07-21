@@ -210,6 +210,7 @@ class InlineAutocompleteControllerTest {
 
         assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem())
             .isEqualTo("place_1")
+        fakePlacesClient.resetSessionCalls.awaitItem()
         val event = eventCalls.awaitItem()
         assertThat(event)
             .isInstanceOf<AutocompleteAddressInteractor.Event.OnValues>()
@@ -232,6 +233,7 @@ class InlineAutocompleteControllerTest {
         advanceTimeBy(100)
 
         fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
         eventCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
     }
@@ -246,6 +248,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             assertThat(delegate.inlinePredictionsState.value)
                 .isEqualTo(InlinePredictionsState.Idle)
         }
@@ -305,6 +308,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             eventCalls.awaitItem()
 
             queryFlow.value = "123 Main Street"
@@ -346,6 +350,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             eventCalls.awaitItem()
 
             // First matching query is suppressed
@@ -385,6 +390,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             eventCalls.awaitItem()
 
             delegate.onDismissed()
@@ -418,6 +424,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             eventCalls.awaitItem()
 
             // Query drops below the minimum — suppression guard should be cleared.
@@ -446,6 +453,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             eventCalls.awaitItem()
 
             // lastPredictionLine1 was not set, so the next query must still fetch predictions.
@@ -479,6 +487,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             eventCalls.awaitItem()
 
             // Second selection: place with no street components → line1 is null.
@@ -492,6 +501,7 @@ class InlineAutocompleteControllerTest {
             advanceTimeBy(100)
 
             fakePlacesClient.fetchPlaceCalls.awaitItem()
+            fakePlacesClient.resetSessionCalls.awaitItem()
             eventCalls.awaitItem()
 
             // Typing "123 Main St" must now fetch predictions — not be suppressed.
@@ -634,6 +644,7 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place-id-123")
 
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(call).isEqualTo("place-id-123")
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
         assertThat(eventCalls.awaitItem())
@@ -667,6 +678,7 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place-id-abc")
 
         fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
         assertThat(eventCalls.awaitItem()).isEqualTo(
             AutocompleteAddressInteractor.Event.OnExpandForm(
@@ -733,6 +745,7 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place-id-123")
 
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(call).isEqualTo("place-id-123")
         eventCalls.awaitItem()
     }
@@ -754,8 +767,8 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place-id-123")
 
         fakePlacesClient.fetchPlaceCalls.awaitItem()
+        fakePlacesClient.resetSessionCalls.awaitItem()
         eventCalls.awaitItem()
-        assertThat(fakePlacesClient.resetSessionCallCount).isEqualTo(1)
     }
 
     @Test
@@ -765,7 +778,7 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place-id-123")
 
         fakePlacesClient.fetchPlaceCalls.awaitItem()
-        assertThat(fakePlacesClient.resetSessionCallCount).isEqualTo(1)
+        fakePlacesClient.resetSessionCalls.awaitItem()
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)

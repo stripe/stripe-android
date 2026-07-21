@@ -3,8 +3,11 @@ package com.stripe.android.ui.core.elements.autocomplete.model
 import androidx.annotation.RestrictTo
 import java.util.Locale
 
-private const val STRIPE_HOSTED_JAPANESE_LINE1 = "stripe_hosted_japanese_line1"
-private const val STRIPE_HOSTED_JAPANESE_LINE2 = "stripe_hosted_japanese_line2"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val STRIPE_HOSTED_JAPANESE_LINE1 = "stripe_hosted_japanese_line1"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val STRIPE_HOSTED_JAPANESE_LINE2 = "stripe_hosted_japanese_line2"
 
 internal data class AddressLine1(
     var streetNumber: String? = null,

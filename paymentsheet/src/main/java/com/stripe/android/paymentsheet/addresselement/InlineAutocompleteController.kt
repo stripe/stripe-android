@@ -67,16 +67,11 @@ internal class InlineAutocompleteController(
         selectionJob?.cancel()
         selectionJob = coroutineScope.launch {
             val result = placesClient.fetchPlace(predictionId)
+            placesClient.resetSession()
             ensureActive()
             result.fold(
-                onSuccess = { response ->
-                    placesClient.resetSession()
-                    handleFetchPlaceSuccess(response)
-                },
-                onFailure = {
-                    placesClient.resetSession()
-                    handleFailure()
-                }
+                onSuccess = ::handleFetchPlaceSuccess,
+                onFailure = { handleFailure() }
             )
         }
     }

@@ -1,28 +1,19 @@
 package com.stripe.android.paymentsheet.injection
 
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.FakePlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
 class InlineAutocompletePlacesClientTest {
 
     @Test
-    fun `resetSession delegates to resolved client`() {
+    fun `resetSession delegates to resolved client`() = runTest {
         val fakePlacesClient = FakePlacesClientProxy()
-        val client = createLazyPlacesClientProxy {
-            fakePlacesClient
-        }
+        val client = LazyPlacesClientProxy { fakePlacesClient }
 
         client.resetSession()
 
-        assertThat(fakePlacesClient.resetSessionCallCount).isEqualTo(1)
-    }
-
-    private fun createLazyPlacesClientProxy(factory: () -> PlacesClientProxy): PlacesClientProxy {
-        val constructor = Class.forName("com.stripe.android.paymentsheet.injection.LazyPlacesClientProxy")
-            .getDeclaredConstructor(kotlin.jvm.functions.Function0::class.java)
-        constructor.isAccessible = true
-        return constructor.newInstance(factory) as PlacesClientProxy
+        fakePlacesClient.resetSessionCalls.awaitItem()
+        fakePlacesClient.ensureAllEventsConsumed()
     }
 }

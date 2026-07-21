@@ -37,7 +37,7 @@ interface PlacesClientProxy {
         placeId: String
     ): Result<FetchPlaceResponse>
 
-    fun resetSession() {}
+    fun resetSession()
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -172,6 +172,8 @@ internal class DefaultPlacesClientProxy(
 }
 
 internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
+    override fun resetSession() = Unit
+
     override suspend fun findAutocompletePredictions(
         query: String?,
         country: String,

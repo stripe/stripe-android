@@ -89,6 +89,8 @@ class AutocompleteScreenTest {
         private val predictions: List<AutocompletePrediction> = listOf(),
         private val addressComponents: List<AddressComponent> = listOf()
     ) : PlacesClientProxy {
+        override fun resetSession() = Unit
+
         override suspend fun findAutocompletePredictions(
             query: String?,
             country: String,

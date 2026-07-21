@@ -31,6 +31,10 @@ import javax.inject.Singleton
     ]
 )
 internal class AddressElementViewModelModule {
+    companion object {
+        internal const val INLINE_PLACES_CLIENT = "inline_places_client"
+    }
+
     @Provides
     @Singleton
     fun provideEventReporterMode(): EventReporter.Mode = EventReporter.Mode.Custom
@@ -66,7 +70,8 @@ internal class AddressElementViewModelModule {
 
     @Provides
     @Singleton
-    internal fun provideGooglePlacesClient(
+    @Named(INLINE_PLACES_CLIENT)
+    internal fun provideInlinePlacesClient(
         context: Context,
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
@@ -78,6 +83,22 @@ internal class AddressElementViewModelModule {
                 googleApiKey = config.googlePlacesApiKey,
             )
         }
+        return config.googlePlacesApiKey?.let {
+            PlacesClientProxy.create(
+                context,
+                it,
+                errorReporter = ErrorReporter.createFallbackInstance(context),
+            )
+        }
+    }
+
+    @Provides
+    @Singleton
+    internal fun provideGooglePlacesClient(
+        context: Context,
+        args: AddressElementActivityContract.Args,
+    ): PlacesClientProxy? {
+        val config = args.config ?: return null
         return config.googlePlacesApiKey?.let {
             PlacesClientProxy.create(
                 context,

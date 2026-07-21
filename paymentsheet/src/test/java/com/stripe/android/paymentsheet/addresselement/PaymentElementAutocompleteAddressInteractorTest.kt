@@ -330,6 +330,33 @@ class PaymentElementAutocompleteAddressInteractorTest {
     }
 
     @Test
+    fun `Factory uses launcher when proxy flag is on but inline disabled`() = test { scenario ->
+        val factory = PaymentElementAutocompleteAddressInteractor.Factory(
+            launcher = scenario.launcher,
+            autocompleteConfig = AutocompleteAddressInteractor.Config(
+                googlePlacesApiKey = "test-key",
+                autocompleteCountries = setOf("US"),
+                isInlineAutocompleteEnabled = false,
+            ),
+            placesClient = null,
+            stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
+            coroutineScope = this,
+            shouldUseAutocompleteProxyEndpointsProvider = { true },
+        )
+
+        val interactor = factory.create()
+
+        assertThat(interactor).isInstanceOf(PaymentElementAutocompleteAddressInteractor::class.java)
+
+        interactor.onAutocomplete("US")
+
+        scenario.launchCalls.expectMostRecentItem().let { call ->
+            assertThat(call.country).isEqualTo("US")
+            assertThat(call.googlePlacesApiKey).isEqualTo("test-key")
+        }
+    }
+
+    @Test
     fun `multiple onAutocomplete calls with different countries`() = test { scenario ->
         val interactor = createInteractor(launcher = scenario.launcher)
 

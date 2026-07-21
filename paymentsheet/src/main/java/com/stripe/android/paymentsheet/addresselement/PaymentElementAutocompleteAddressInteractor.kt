@@ -52,31 +52,36 @@ internal class PaymentElementAutocompleteAddressInteractor(
         private var activeInlineInteractor: BillingInlineAutocompleteAddressInteractor? = null
 
         override fun create(): AutocompleteAddressInteractor {
-            val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()
-            val resolvedClient = when {
-                useStripeHosted && stripeAutocompleteRepository != null ->
-                    StripeHostedPlacesClientProxy(
-                        repository = stripeAutocompleteRepository,
-                        googleApiKey = autocompleteConfig.googlePlacesApiKey,
-                    )
-                !useStripeHosted -> placesClient
-                else -> null
+            if (coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
+                val useStripeHosted = shouldUseAutocompleteProxyEndpointsProvider()
+                val resolvedClient = when {
+                    useStripeHosted && stripeAutocompleteRepository != null ->
+                        StripeHostedPlacesClientProxy(
+                            repository = stripeAutocompleteRepository,
+                            googleApiKey = autocompleteConfig.googlePlacesApiKey,
+                        )
+                    !useStripeHosted -> placesClient
+                    else -> null
+                }
+                if (resolvedClient != null) {
+                    activeInlineInteractor?.dispose()
+                    return BillingInlineAutocompleteAddressInteractor(
+                        placesClient = resolvedClient,
+                        autocompleteConfig = AutocompleteAddressInteractor.Config(
+                            googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
+                            autocompleteCountries = autocompleteConfig.autocompleteCountries,
+                            isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
+                            isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
+                            shouldUseStripeHostedAutocomplete = useStripeHosted ||
+                                autocompleteConfig.shouldUseStripeHostedAutocomplete,
+                        ),
+                        coroutineScope = coroutineScope,
+                    ).also { activeInlineInteractor = it }
+                }
             }
-            if (resolvedClient != null && coroutineScope != null && autocompleteConfig.isInlineAutocompleteEnabled) {
-                activeInlineInteractor?.dispose()
-                return BillingInlineAutocompleteAddressInteractor(
-                    placesClient = resolvedClient,
-                    autocompleteConfig = AutocompleteAddressInteractor.Config(
-                        googlePlacesApiKey = autocompleteConfig.googlePlacesApiKey,
-                        autocompleteCountries = autocompleteConfig.autocompleteCountries,
-                        isPlacesAvailable = autocompleteConfig.isPlacesAvailable,
-                        isInlineAutocompleteEnabled = autocompleteConfig.isInlineAutocompleteEnabled,
-                        shouldUseStripeHostedAutocomplete = useStripeHosted ||
-                            autocompleteConfig.shouldUseStripeHostedAutocomplete,
-                    ),
-                    coroutineScope = coroutineScope,
-                ).also { activeInlineInteractor = it }
-            }
+
+            activeInlineInteractor?.dispose()
+            activeInlineInteractor = null
             return PaymentElementAutocompleteAddressInteractor(
                 launcher = launcher,
                 autocompleteConfig = autocompleteConfig,

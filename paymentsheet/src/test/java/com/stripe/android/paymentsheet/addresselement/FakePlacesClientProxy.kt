@@ -44,15 +44,16 @@ internal class FakePlacesClientProxy(
         return fetchPlaceResult
     }
 
-    var resetSessionCallCount = 0
-        private set
+    private val _resetSessionCalls = Turbine<Unit>()
+    val resetSessionCalls: ReceiveTurbine<Unit> = _resetSessionCalls
 
     override fun resetSession() {
-        resetSessionCallCount++
+        _resetSessionCalls.add(Unit)
     }
 
     fun ensureAllEventsConsumed() {
         _findPredictionsCalls.ensureAllEventsConsumed()
         _fetchPlaceCalls.ensureAllEventsConsumed()
+        _resetSessionCalls.ensureAllEventsConsumed()
     }
 }

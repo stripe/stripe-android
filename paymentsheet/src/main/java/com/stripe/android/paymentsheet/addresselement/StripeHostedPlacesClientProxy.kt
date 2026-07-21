@@ -8,22 +8,24 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.ui.core.elements.autocomplete.model.STRIPE_HOSTED_JAPANESE_LINE1
+import com.stripe.android.ui.core.elements.autocomplete.model.STRIPE_HOSTED_JAPANESE_LINE2
 import java.util.Locale
 import java.util.UUID
-
-private const val STRIPE_HOSTED_JAPANESE_LINE1 = "stripe_hosted_japanese_line1"
-private const val STRIPE_HOSTED_JAPANESE_LINE2 = "stripe_hosted_japanese_line2"
 
 internal class StripeHostedPlacesClientProxy(
     private val repository: StripeAutocompleteRepository,
     private val googleApiKey: String?,
 ) : PlacesClientProxy {
+    private val lock = Any()
     private var sessionToken: String = newSessionToken()
     private val predictionCache = mutableMapOf<String, AutocompleteSuggestion>()
 
     override fun resetSession() {
-        sessionToken = newSessionToken()
-        predictionCache.clear()
+        synchronized(lock) {
+            sessionToken = newSessionToken()
+            predictionCache.clear()
+        }
     }
 
     override suspend fun findAutocompletePredictions(
@@ -33,16 +35,19 @@ internal class StripeHostedPlacesClientProxy(
     ): Result<FindAutocompletePredictionsResponse> {
         val q = query ?: return Result.success(FindAutocompletePredictionsResponse(emptyList()))
         val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+        val token = synchronized(lock) { sessionToken }
         return repository.findAutocompletePredictions(
             query = q,
             country = country,
-            sessionToken = sessionToken,
+            sessionToken = token,
             locale = locale.toLanguageTag(),
             googleApiKey = googleApiKey,
         ).map { result ->
             val limitedPredictions = result.predictions.take(limit)
-            predictionCache.clear()
-            limitedPredictions.forEach { predictionCache[it.placeId] = it }
+            synchronized(lock) {
+                predictionCache.clear()
+                limitedPredictions.forEach { predictionCache[it.placeId] = it }
+            }
             FindAutocompletePredictionsResponse(
                 autocompletePredictions = limitedPredictions.map { suggestion ->
                     AutocompletePrediction(
@@ -56,13 +61,15 @@ internal class StripeHostedPlacesClientProxy(
     }
 
     override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
-        val cached = predictionCache[placeId]
+        val (cached, token) = synchronized(lock) {
+            predictionCache[placeId] to sessionToken
+        }
         if (cached?.address != null) {
             return Result.success(cached.address.toFetchPlaceResponse())
         }
         return repository.fetchPlaceDetails(
             placeId = placeId,
-            sessionToken = sessionToken,
+            sessionToken = token,
         ).map { result ->
             result.address.toFetchPlaceResponse()
         }

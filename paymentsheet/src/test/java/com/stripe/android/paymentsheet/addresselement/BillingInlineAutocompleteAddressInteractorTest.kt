@@ -42,6 +42,7 @@ class BillingInlineAutocompleteAddressInteractorTest {
         advanceTimeBy(100)
 
         assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem()).isEqualTo("place_1")
+        fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(eventCalls.awaitItem())
             .isInstanceOf(AutocompleteAddressInteractor.Event.OnValues::class.java)
     }

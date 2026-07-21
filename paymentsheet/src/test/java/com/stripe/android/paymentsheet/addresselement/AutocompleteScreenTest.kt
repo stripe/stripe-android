@@ -123,6 +123,8 @@ class AutocompleteScreenTest {
         private val fetchPlaceResponse: Result<FetchPlaceResponse> =
             Result.failure(IllegalStateException("Failed!")),
     ) : PlacesClientProxy {
+        override fun resetSession() = Unit
+
         override suspend fun findAutocompletePredictions(
             query: String?,
             country: String,

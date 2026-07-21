@@ -108,7 +108,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     placesClient: PlacesClientProxy?,
-    stripeAutocompleteRepository: StripeAutocompleteRepository?,
+    stripeAutocompleteRepository: StripeAutocompleteRepository,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,

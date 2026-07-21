@@ -41,6 +41,8 @@ class PlacesClientProxyTestRule : TestWatcher() {
         private val findAutocompletePredictionsResponseChannel: Channel<Result<FindAutocompletePredictionsResponse>>,
         private val fetchPlaceResponseChannel: Channel<Result<FetchPlaceResponse>>,
     ) : PlacesClientProxy {
+        override fun resetSession() = Unit
+
         override suspend fun findAutocompletePredictions(
             query: String?,
             country: String,
