@@ -74,7 +74,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct parameters`() = testScenario {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         val customerState = createCustomerState()
         val promotion = PaymentMethodMessagePromotion(
             paymentMethodType = "KLARNA",
@@ -86,7 +85,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         )
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = null,
@@ -100,7 +99,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             customerState = customerState,
             promotion = promotion,
         )
@@ -114,12 +113,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct current selection if selection matches`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -131,13 +129,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with previous form details`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -149,12 +146,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct current selection if selection is saved card`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         selectionHolder.setSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -166,12 +162,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm launches activity with correct current selection if selection is for another LPM`() = testScenario {
         val code = "card"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -203,12 +198,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchForm is not launched again when the sheet is already open`() = testScenario {
         val code = "test_code"
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         sheetStateHolder.sheetIsOpen = true
         sheetLauncher.launchForm(
             code = code,
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             customerState = createCustomerState(),
             promotion = null,
         )
@@ -385,10 +379,9 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchManage launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = PaymentSelection.GooglePay,
@@ -401,7 +394,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = PaymentSelection.GooglePay,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
@@ -413,13 +406,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchManage is not launched again when the sheet is already open`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         sheetStateHolder.sheetIsOpen = true
         sheetLauncher.launchManage(
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = PaymentSelection.GooglePay,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
         )
     }
 
@@ -564,12 +556,11 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 instancesKey = "test_key",
             ),
         )
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         val error = runCatching {
             sheetLauncher.launchForm(
                 code = "card",
                 paymentMethodMetadata = paymentMethodMetadata,
-                configuration = state.configuration,
+                configuration = EmbeddedConfigurationFactory.create(),
                 customerState = createCustomerState(),
                 promotion = null,
             )
@@ -598,13 +589,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
             ),
         )
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val state = EmbeddedConfirmationStateFixtures.defaultState(paymentMethodMetadata)
         val error = runCatching {
             sheetLauncher.launchManage(
                 paymentMethodMetadata = paymentMethodMetadata,
                 customerState = customerState,
                 selection = PaymentSelection.GooglePay,
-                configuration = state.configuration,
+                configuration = EmbeddedConfigurationFactory.create(),
             )
         }.exceptionOrNull()
         assertThat(error).isInstanceOf(IllegalStateException::class.java)
@@ -618,11 +608,10 @@ internal class DefaultEmbeddedSheetLauncherTest {
     fun `launchPaymentOptions launches activity with correct parameters`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         val selection = PaymentSelection.GooglePay
         val expectedArgs = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
             paymentElementCallbackIdentifier = "EmbeddedFormTestIdentifier",
             statusBarColor = null,
             selection = selection,
@@ -635,7 +624,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = customerState,
             selection = selection,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall()
 
@@ -663,13 +652,12 @@ internal class DefaultEmbeddedSheetLauncherTest {
     @Test
     fun `launchPaymentOptions is not launched again when the sheet is already open`() = testScenario {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
-        val state = EmbeddedConfirmationStateFixtures.defaultState()
         sheetStateHolder.sheetIsOpen = true
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = paymentMethodMetadata,
             customerState = null,
             selection = null,
-            configuration = state.configuration,
+            configuration = EmbeddedConfigurationFactory.create(),
         )
     }
 
@@ -860,7 +848,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             sheetLauncher.launchForm(
                 code = code,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-                configuration = EmbeddedConfirmationStateFixtures.defaultState().configuration,
+                configuration = EmbeddedConfigurationFactory.create(),
                 customerState = null,
                 promotion = null,
             )
