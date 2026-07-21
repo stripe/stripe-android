@@ -264,9 +264,7 @@ class StripeHostedPlacesClientProxyTest {
 
     private fun createProxy(
         repository: FakeStripeAutocompleteRepository = defaultRepository(),
-        googleApiKey: String? = null,
     ) = StripeHostedPlacesClientProxy(
         repository = repository,
-        googleApiKey = googleApiKey,
     )
 }

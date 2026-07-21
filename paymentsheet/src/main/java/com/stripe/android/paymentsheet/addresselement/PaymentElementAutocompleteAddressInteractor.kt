@@ -58,7 +58,6 @@ internal class PaymentElementAutocompleteAddressInteractor(
                     useStripeHosted && stripeAutocompleteRepository != null ->
                         StripeHostedPlacesClientProxy(
                             repository = stripeAutocompleteRepository,
-                            googleApiKey = autocompleteConfig.googlePlacesApiKey,
                         )
                     !useStripeHosted -> placesClient
                     else -> null

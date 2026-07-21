@@ -15,7 +15,6 @@ import java.util.UUID
 
 internal class StripeHostedPlacesClientProxy(
     private val repository: StripeAutocompleteRepository,
-    private val googleApiKey: String?,
 ) : PlacesClientProxy {
     private val lock = Any()
     private var sessionToken: String = newSessionToken()
@@ -41,7 +40,6 @@ internal class StripeHostedPlacesClientProxy(
             country = country,
             sessionToken = token,
             locale = locale.toLanguageTag(),
-            googleApiKey = googleApiKey,
         ).map { result ->
             val limitedPredictions = result.predictions.take(limit)
             synchronized(lock) {

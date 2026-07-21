@@ -80,7 +80,6 @@ internal class AddressElementViewModelModule {
         if (config.useStripeHostedAutocomplete) {
             return StripeHostedPlacesClientProxy(
                 repository = stripeAutocompleteRepository,
-                googleApiKey = config.googlePlacesApiKey,
             )
         }
         return config.googlePlacesApiKey?.let {
