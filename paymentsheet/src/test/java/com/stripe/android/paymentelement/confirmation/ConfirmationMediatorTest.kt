@@ -630,6 +630,7 @@ class ConfirmationMediatorTest {
 
         private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
             confirmationOption = FakeConfirmationOption(),
+            statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         )
     }

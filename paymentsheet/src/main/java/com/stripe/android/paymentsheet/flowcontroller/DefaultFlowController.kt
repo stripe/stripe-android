@@ -596,6 +596,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         paymentMethodMetadata = state.paymentMethodMetadata,
+                        statusBarColor = viewModel.statusBarColor,
                     )
                 )
             } ?: run {

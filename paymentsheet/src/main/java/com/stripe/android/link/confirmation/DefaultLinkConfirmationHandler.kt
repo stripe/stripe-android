@@ -182,6 +182,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = null,
         )
     }
 
@@ -216,6 +217,7 @@ internal class DefaultLinkConfirmationHandler @Inject constructor(
                 newPMTransformedForConfirmation = newPMTransformedForConfirmation
             ),
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = null,
         )
     }
 

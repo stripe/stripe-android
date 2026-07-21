@@ -576,7 +576,6 @@ internal class LinkActivityViewModel @Inject constructor(
                         paymentElementCallbackIdentifier = args.paymentElementCallbackIdentifier,
                         context = app,
                         savedStateHandle = handle,
-                        statusBarColor = null,
                         application = app,
                         linkExpressMode = args.linkExpressMode,
                         linkLaunchMode = args.launchMode,

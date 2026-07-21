@@ -125,6 +125,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
             customerStateHolder = customerStateHolder,
             coroutineScope = backgroundScope,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            statusBarColor = null,
         )
 
         Scenario(

@@ -240,6 +240,7 @@ class CustomPaymentMethodConfirmationDefinitionTest {
     companion object {
         private val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
             confirmationOption = FakeConfirmationOption(),
+            statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(),
             ),

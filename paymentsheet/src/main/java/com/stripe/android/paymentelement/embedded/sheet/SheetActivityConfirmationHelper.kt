@@ -12,11 +12,13 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.OnClickOverrideDelegate
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 internal interface SheetActivityConfirmationHelper {
     fun confirm()
@@ -33,6 +35,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
     private val customerStateHolder: CustomerStateHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val launchMode: EmbeddedLaunchMode,
+    @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
 ) : SheetActivityConfirmationHelper {
 
     override fun confirm() {
@@ -80,6 +83,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = statusBarColor,
         )
     }
 }
