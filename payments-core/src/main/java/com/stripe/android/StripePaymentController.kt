@@ -57,7 +57,20 @@ constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory =
         PaymentAnalyticsRequestFactory(context.applicationContext, publishableKeyProvider),
     private val alipayRepository: AlipayRepository = DefaultAlipayRepository(stripeRepository),
-    private val uiContext: CoroutineContext = Dispatchers.Main
+    private val uiContext: CoroutineContext = Dispatchers.Main,
+    private val isInstantApp: Boolean = InstantApps.isInstantApp(context),
+    private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry =
+        DefaultPaymentNextActionHandlerRegistry.createInstance(
+            context = context,
+            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
+            enableLogging = enableLogging,
+            workContext = workContext,
+            uiContext = uiContext,
+            publishableKeyProvider = publishableKeyProvider,
+            productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
+            isInstantApp = isInstantApp,
+            includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
+        )
 ) : PaymentController {
 
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
@@ -84,8 +97,6 @@ constructor(
 
     private val defaultReturnUrl = DefaultReturnUrl.create(context)
 
-    private val isInstantApp = InstantApps.isInstantApp(context)
-
     /**
      * [paymentRelayLauncher] is mutable and might be updated during
      * through [registerLaunchersWithActivityResultCaller]
@@ -96,19 +107,6 @@ constructor(
             PaymentRelayStarter.Modern(it)
         } ?: PaymentRelayStarter.Legacy(host)
     }
-
-    private val nextActionHandlerRegistry: PaymentNextActionHandlerRegistry =
-        DefaultPaymentNextActionHandlerRegistry.createInstance(
-            context = context,
-            paymentAnalyticsRequestFactory = paymentAnalyticsRequestFactory,
-            enableLogging = enableLogging,
-            workContext = workContext,
-            uiContext = uiContext,
-            publishableKeyProvider = publishableKeyProvider,
-            productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
-            isInstantApp = isInstantApp,
-            includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.
-        )
 
     override fun registerLaunchersWithActivityResultCaller(
         activityResultCaller: ActivityResultCaller,

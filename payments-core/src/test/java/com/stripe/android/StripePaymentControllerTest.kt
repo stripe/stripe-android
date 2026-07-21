@@ -19,21 +19,28 @@ import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.Source
 import com.stripe.android.model.SourceFixtures
 import com.stripe.android.model.Stripe3ds2Fixtures
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.AlipayRepository
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandler
+import com.stripe.android.payments.core.authentication.PaymentNextActionHandlerRegistry
 import com.stripe.android.stripe3ds2.transaction.SdkTransactionId
 import com.stripe.android.stripe3ds2.transaction.Transaction
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.utils.ParcelUtils
+import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.UUID
@@ -214,6 +221,56 @@ internal class StripePaymentControllerTest {
             assertThat(actualResponse.outcome).isEqualTo(StripeIntentResult.Outcome.SUCCEEDED)
         }
 
+    @Test
+    fun `startConfirmAndAuth with custom returnUrl threads it to the next action handler`() =
+        runTest {
+            stripeRepository.confirmPaymentIntentResponse =
+                PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
+            val nextActionHandler = mock<PaymentNextActionHandler<StripeIntent>>()
+            val registry = mock<PaymentNextActionHandlerRegistry>()
+            whenever(registry.getNextActionHandler<StripeIntent>(any())).thenReturn(nextActionHandler)
+            val host = mock<AuthActivityStarterHost>()
+
+            createController(nextActionHandlerRegistry = registry).startConfirmAndAuth(
+                host,
+                ConfirmPaymentIntentParams.createWithPaymentMethodId("pm_123", "client_secret").also {
+                    it.returnUrl = RETURN_URL
+                },
+                REQUEST_OPTIONS,
+            )
+
+            verify(nextActionHandler).performNextAction(
+                eq(host),
+                eq(PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION),
+                eq(REQUEST_OPTIONS),
+                eq(RETURN_URL),
+            )
+        }
+
+    @Test
+    fun `startConfirmAndAuth without returnUrl threads default returnUrl to the next action handler`() =
+        runTest {
+            stripeRepository.confirmPaymentIntentResponse =
+                PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION
+            val nextActionHandler = mock<PaymentNextActionHandler<StripeIntent>>()
+            val registry = mock<PaymentNextActionHandlerRegistry>()
+            whenever(registry.getNextActionHandler<StripeIntent>(any())).thenReturn(nextActionHandler)
+            val host = mock<AuthActivityStarterHost>()
+
+            createController(nextActionHandlerRegistry = registry).startConfirmAndAuth(
+                host,
+                ConfirmPaymentIntentParams.createWithPaymentMethodId("pm_123", "client_secret"),
+                REQUEST_OPTIONS,
+            )
+
+            verify(nextActionHandler).performNextAction(
+                eq(host),
+                eq(PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION),
+                eq(REQUEST_OPTIONS),
+                eq(DefaultReturnUrl.create(context).value),
+            )
+        }
+
     private fun createController(): StripePaymentController {
         return StripePaymentController(
             context,
@@ -225,6 +282,23 @@ internal class StripePaymentControllerTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             alipayRepository = alipayRepository,
             uiContext = testDispatcher
+        )
+    }
+
+    private fun createController(
+        nextActionHandlerRegistry: PaymentNextActionHandlerRegistry,
+    ): StripePaymentController {
+        return StripePaymentController(
+            context,
+            { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            stripeRepository,
+            false,
+            workContext = testDispatcher,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            alipayRepository = alipayRepository,
+            uiContext = testDispatcher,
+            nextActionHandlerRegistry = nextActionHandlerRegistry,
         )
     }
 
@@ -297,6 +371,7 @@ internal class StripePaymentControllerTest {
 
     private companion object {
         private const val ACCOUNT_ID = "acct_123"
+        private const val RETURN_URL = "return://to.me"
         private val REQUEST_OPTIONS = ApiRequest.Options(
             apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
             stripeAccount = ACCOUNT_ID
