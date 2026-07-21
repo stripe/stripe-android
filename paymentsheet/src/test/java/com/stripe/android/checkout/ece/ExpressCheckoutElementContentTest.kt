@@ -1,15 +1,15 @@
 package com.stripe.android.checkout.ece
 
 import android.content.Context
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.ui.LinkButtonTestTag
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
@@ -134,8 +134,7 @@ internal class ExpressCheckoutElementContentTest {
         override val state: StateFlow<ExpressCheckoutElementInteractor.State>,
         private val viewActionRecorder: ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction> =
             ViewActionRecorder(),
-    ) : ExpressCheckoutElementInteractor
-    {
+    ) : ExpressCheckoutElementInteractor {
         override fun handleViewAction(viewAction: ExpressCheckoutElementInteractor.ViewAction) {
             viewActionRecorder.record(viewAction)
         }
