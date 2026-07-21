@@ -206,7 +206,8 @@ constructor(
                 mapOf(ConfirmStripeIntentParams.PARAM_MANDATE_DATA to it)
             }.orEmpty()
         ).plus(
-            returnUrl?.let { mapOf(PARAM_RETURN_URL to it) }.orEmpty()
+            // Hardcode a different return url to simulate a merchant setting the return URL themselves.
+            mapOf(PARAM_RETURN_URL to "stripe://return_url")
         ).plus(
             paymentMethodOptions?.let {
                 mapOf(PARAM_PAYMENT_METHOD_OPTIONS to it.toParamMap())

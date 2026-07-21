@@ -149,7 +149,8 @@ internal class WebIntentNextActionHandler @Inject constructor(
 
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
-            returnUrl = returnUrl,
+            // Try out a fix for alipay which doesn't thread the merchant provided return URL all the way through.
+            returnUrl = defaultReturnUrl.value,
         )
     }
 
