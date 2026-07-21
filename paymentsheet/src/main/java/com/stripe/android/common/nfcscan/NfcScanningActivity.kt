@@ -37,8 +37,13 @@ internal class NfcScanningActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.result.collectLatest { result ->
-                finishWithResult(result)
+            viewModel.event.collectLatest { event ->
+                when (event) {
+                    is NfcScanningEvent.CloseWithResult -> finishWithResult(event.result)
+                    is NfcScanningEvent.TriggerHapticFeedback -> {
+                        NfcScanningHapticFeedback.trigger(this@NfcScanningActivity, event.type)
+                    }
+                }
             }
         }
 

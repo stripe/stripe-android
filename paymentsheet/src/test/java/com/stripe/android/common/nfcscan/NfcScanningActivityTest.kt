@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.os.Looper
+import android.os.VibrationEffect
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -13,6 +14,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.configureNfc
+import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.getShadowVibrator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.createComposeCleanupRule
@@ -92,11 +94,13 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `successful card scan returns complete result`() = test {
+    fun `successful card scan perform haptic feedback & returns complete result`() = test {
         NfcScanningActivityTestHelpers.completeSuccessfulScan(
             scenario = this,
             responses = NfcScanningActivityTestFixtures.successResponses(),
         )
+
+        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_CLICK)
 
         waitForActivityFinish()
 
@@ -110,12 +114,14 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
-    fun `declined card shows error and keeps activity open`() = test {
+    fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test {
         NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
             scenario = this,
             responses = NfcScanningActivityTestFixtures.declinedCardResponses(),
             errorText = context.getString(R.string.stripe_nfc_scan_error_declined_card),
         )
+
+        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_HEAVY_CLICK)
 
         assertThat(isActivityDestroyed()).isFalse()
     }
