@@ -55,11 +55,9 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
         setup = {
             set(
                 EmbeddedContentHelperStateHolder.STATE_KEY_EMBEDDED_CONTENT,
-                EmbeddedContentHelperStateHolder.State(
-                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                EmbeddedContentHelperStateFactory.create(
                     appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
                     embeddedViewDisplaysMandateText = false,
-                    configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
                 )
             )
         }

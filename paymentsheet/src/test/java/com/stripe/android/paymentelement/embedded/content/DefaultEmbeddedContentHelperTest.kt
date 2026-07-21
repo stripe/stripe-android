@@ -73,11 +73,8 @@ internal class DefaultEmbeddedContentHelperTest {
 
     @Test
     fun `initializing embeddedContentHelper with paymentMethodMetadata emits correct initial event`() = testScenario(
-        initialState = EmbeddedContentHelperStateHolder.State(
-            PaymentMethodMetadataFactory.create(),
-            Embedded(Embedded.RowStyle.FloatingButton.default),
-            embeddedViewDisplaysMandateText = true,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
+        initialState = EmbeddedContentHelperStateFactory.create(
+            appearance = Embedded(Embedded.RowStyle.FloatingButton.default),
         )
     ) {
         embeddedContentHelper.embeddedContent.test {
@@ -95,12 +92,7 @@ internal class DefaultEmbeddedContentHelperTest {
 
     @Test
     fun `presentPaymentOptions reports error when launcher is null`() = testScenario(
-        initialState = EmbeddedContentHelperStateHolder.State(
-            PaymentMethodMetadataFactory.create(),
-            Embedded(Embedded.RowStyle.FlatWithRadio.default),
-            embeddedViewDisplaysMandateText = true,
-            configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
-        )
+        initialState = EmbeddedContentHelperStateFactory.create()
     ) {
         embeddedContentHelper.presentPaymentOptions()
         assertThat(errorReporter.getLoggedErrors()).containsExactly(
@@ -115,10 +107,8 @@ internal class DefaultEmbeddedContentHelperTest {
         val selection = PaymentMethodFixtures.CARD_PAYMENT_SELECTION
         val configuration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build()
         testScenario(
-            initialState = EmbeddedContentHelperStateHolder.State(
-                paymentMethodMetadata,
-                Embedded(Embedded.RowStyle.FlatWithRadio.default),
-                embeddedViewDisplaysMandateText = true,
+            initialState = EmbeddedContentHelperStateFactory.create(
+                paymentMethodMetadata = paymentMethodMetadata,
                 configuration = configuration,
             ),
             setup = {
