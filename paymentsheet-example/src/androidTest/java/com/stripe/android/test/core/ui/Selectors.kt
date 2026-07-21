@@ -140,6 +140,7 @@ internal class Selectors(
 
     val googlePayCheckoutButton = UiAutomatorText(
         "Pay",
+        labelMatchesExactly = true,
         className = "android.widget.Button",
         device = device
     )
