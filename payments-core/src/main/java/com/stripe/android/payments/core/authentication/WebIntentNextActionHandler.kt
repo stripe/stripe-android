@@ -150,18 +150,10 @@ internal class WebIntentNextActionHandler @Inject constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
         )
 
-        // Alipay's return_url now points at the pm-redirects.stripe.com trampoline rather than the
-        // merchant's own return URL. The trampoline's final redirect target is the confirm-time
-        // return_url (merchant custom value if set, else the SDK default), so we watch for that
-        // instead of matching against the trampoline URL itself, which would close the WebView
-        // before the trampoline finishes. Falls back to defaultReturnUrl.value when no confirm-time
-        // value is available (e.g. manual next-action handling or Source authentication).
+        // Post-EVO (gated) Alipay return_url is a trampoline URL; watch the confirm-time return_url instead.
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
             returnUrl = suppliedReturnUrl ?: defaultReturnUrl.value,
-            // If the user backs out mid-trampoline, report UNKNOWN rather than CANCELED: the intent
-            // may have already finalized server-side, so let the result processor reconcile the real
-            // state instead of asserting a hard cancel (matches CashApp/Swish).
             shouldCancelIntentOnUserNavigation = false,
         )
     }
