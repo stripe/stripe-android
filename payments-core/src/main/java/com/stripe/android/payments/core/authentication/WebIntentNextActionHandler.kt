@@ -147,9 +147,11 @@ internal class WebIntentNextActionHandler @Inject constructor(
             paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
         )
 
+        // Post-EVO (gated) Alipay return_url is a trampoline URL; watch the SDK default instead (like CashApp).
         return WebAuthParams(
             authUrl = webViewUrl.toString(),
-            returnUrl = returnUrl,
+            returnUrl = defaultReturnUrl.value,
+            shouldCancelIntentOnUserNavigation = false,
         )
     }
 
