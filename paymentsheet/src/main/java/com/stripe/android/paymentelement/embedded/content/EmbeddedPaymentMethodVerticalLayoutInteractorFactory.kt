@@ -26,6 +26,7 @@ import javax.inject.Inject
 internal fun interface EmbeddedPaymentMethodVerticalLayoutInteractorFactory {
     fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
+        configuration: EmbeddedPaymentElement.Configuration,
         walletsState: StateFlow<WalletsState?>,
         isImmediateAction: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
@@ -49,6 +50,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
     @Suppress("LongMethod")
     override fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
+        configuration: EmbeddedPaymentElement.Configuration,
         walletsState: StateFlow<WalletsState?>,
         isImmediateAction: Boolean,
         embeddedViewDisplaysMandateText: Boolean,
@@ -93,14 +95,14 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,
-                    configuration = confirmationStateHolder.state?.configuration,
+                    configuration = configuration,
                 )
             },
             transitionToFormScreen = { code ->
                 sheetLauncherHolder.sheetLauncher?.launchForm(
                     code = code,
                     paymentMethodMetadata = paymentMethodMetadata,
-                    configuration = confirmationStateHolder.state?.configuration,
+                    configuration = configuration,
                     customerState = customerStateHolder.customer.value,
                     promotion = paymentMethodMessagePromotionsHelper.getPromotionIfAvailableForCode(
                         code = code,
@@ -122,7 +124,7 @@ internal class DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory @Inje
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = savedPaymentMethodMutator::updatePaymentMethod,
             shouldUpdateVerticalModeSelection = { paymentMethodCode ->
-                val isConfirmFlow = confirmationStateHolder.state?.configuration?.formSheetAction ==
+                val isConfirmFlow = configuration.formSheetAction ==
                     EmbeddedPaymentElement.FormSheetAction.Confirm
                 if (isConfirmFlow) {
                     val requiresFormScreen = paymentMethodCode != null &&

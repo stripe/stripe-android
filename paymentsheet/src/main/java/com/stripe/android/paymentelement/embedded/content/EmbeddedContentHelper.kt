@@ -46,6 +46,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
                     EmbeddedContent(
                         interactor = verticalLayoutInteractorFactory.create(
                             paymentMethodMetadata = state.paymentMethodMetadata,
+                            configuration = state.configuration,
                             walletsState = embeddedWalletsHelper.walletsState(state.paymentMethodMetadata),
                             isImmediateAction = isImmediateAction,
                             embeddedViewDisplaysMandateText = state.embeddedViewDisplaysMandateText,
