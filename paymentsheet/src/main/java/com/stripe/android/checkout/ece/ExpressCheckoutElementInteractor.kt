@@ -14,14 +14,23 @@ import kotlin.collections.emptyList
 internal interface ExpressCheckoutElementInteractor {
     val state: StateFlow<State>
 
+    fun handleViewAction(viewAction: ViewAction)
+
     data class State(
         val expressButtons: List<ExpressButton>,
     )
+
+    sealed class ViewAction {
+        data object OnDisplayed : ViewAction()
+
+        data object OnWalletTapped : ViewAction()
+    }
 }
 
 internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
     stateHolder: CheckoutControllerStateHolder,
+    private val eventReporter: ExpressCheckoutElementEventReporter,
 ) : ExpressCheckoutElementInteractor {
 
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
@@ -46,5 +55,12 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             },
         )
+    }
+
+    override fun handleViewAction(viewAction: ExpressCheckoutElementInteractor.ViewAction) {
+        when (viewAction) {
+            ExpressCheckoutElementInteractor.ViewAction.OnDisplayed -> eventReporter.onEceDisplayed()
+            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped -> eventReporter.onEceWalletTapped()
+        }
     }
 }

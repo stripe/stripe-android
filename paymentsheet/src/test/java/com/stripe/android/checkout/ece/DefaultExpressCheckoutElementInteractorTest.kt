@@ -133,11 +133,38 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
     }
 
+    @Test
+    fun `handleViewAction OnDisplayed reports displayed event`() {
+        val eventReporter = FakeExpressCheckoutElementEventReporter()
+        val interactor = createInteractor(
+            eventReporter = eventReporter,
+        )
+
+        interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+
+        assertThat(eventReporter.calls)
+            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
+    }
+
+    @Test
+    fun `handleViewAction OnWalletTapped reports wallet tapped event`() {
+        val eventReporter = FakeExpressCheckoutElementEventReporter()
+        val interactor = createInteractor(
+            eventReporter = eventReporter,
+        )
+
+        interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
+
+        assertThat(eventReporter.calls)
+            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
+    }
+
     private fun createInteractor(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         availableWallets: List<WalletType> = paymentMethodMetadata.availableWallets,
+        eventReporter: ExpressCheckoutElementEventReporter = FakeExpressCheckoutElementEventReporter(),
     ): DefaultExpressCheckoutElementInteractor {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateHolder(
@@ -158,6 +185,24 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         return DefaultExpressCheckoutElementInteractor(
             linkAccountHolder = linkAccountHolder,
             stateHolder = stateHolder,
+            eventReporter = eventReporter,
         )
+    }
+
+    private class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementEventReporter {
+        val calls = mutableListOf<Call>()
+
+        override fun onEceDisplayed() {
+            calls.add(Call.OnEceDisplayed)
+        }
+
+        override fun onEceWalletTapped() {
+            calls.add(Call.OnEceWalletTapped)
+        }
+
+        enum class Call {
+            OnEceDisplayed,
+            OnEceWalletTapped,
+        }
     }
 }

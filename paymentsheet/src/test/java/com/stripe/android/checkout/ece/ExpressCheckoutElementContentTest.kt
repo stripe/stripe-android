@@ -1,9 +1,12 @@
 package com.stripe.android.checkout.ece
 
 import android.content.Context
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.ui.LinkButtonTestTag
@@ -39,10 +42,12 @@ internal class ExpressCheckoutElementContentTest {
 
     @Test
     fun `renders wallet buttons`() {
+        val viewActionRecorder = ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction>()
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
                 ExpressCheckoutElementInteractorStateFactory.create()
-            )
+            ),
+            viewActionRecorder = viewActionRecorder,
         )
 
         composeRule.setContent {
@@ -53,6 +58,8 @@ internal class ExpressCheckoutElementContentTest {
 
         composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).assertExists()
         composeRule.onNodeWithTag(LinkButtonTestTag).assertExists()
+        assertThat(viewActionRecorder.viewActions)
+            .containsExactly(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
     }
 
     @Test
@@ -60,7 +67,7 @@ internal class ExpressCheckoutElementContentTest {
         val interactor = FakeExpressCheckoutElementInteractor(
             state = stateFlowOf(
                 ExpressCheckoutElementInteractorStateFactory.create(expressButtons = emptyList())
-            )
+            ),
         )
 
         composeRule.setContent {
@@ -73,7 +80,64 @@ internal class ExpressCheckoutElementContentTest {
         composeRule.onNodeWithTag(LinkButtonTestTag).assertDoesNotExist()
     }
 
+    @Test
+    fun `reports wallet tapped when Google Pay button is pressed`() {
+        val viewActionRecorder = ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction>()
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create()
+            ),
+            viewActionRecorder = viewActionRecorder,
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.waitForIdle()
+        viewActionRecorder.consume(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+
+        composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).performClick()
+
+        composeRule.runOnIdle {
+            viewActionRecorder.consume(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
+    @Test
+    fun `reports wallet tapped when Link button is pressed`() {
+        val viewActionRecorder = ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction>()
+        val interactor = FakeExpressCheckoutElementInteractor(
+            state = stateFlowOf(
+                ExpressCheckoutElementInteractorStateFactory.create()
+            ),
+            viewActionRecorder = viewActionRecorder,
+        )
+
+        composeRule.setContent {
+            ExpressCheckoutElementContent(interactor = interactor)
+        }
+
+        composeRule.waitForIdle()
+        viewActionRecorder.consume(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+
+        composeRule.onNodeWithTag(LinkButtonTestTag).performClick()
+
+        composeRule.runOnIdle {
+            viewActionRecorder.consume(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
+            assertThat(viewActionRecorder.viewActions).isEmpty()
+        }
+    }
+
     private class FakeExpressCheckoutElementInteractor(
         override val state: StateFlow<ExpressCheckoutElementInteractor.State>,
+        private val viewActionRecorder: ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction> =
+            ViewActionRecorder(),
     ) : ExpressCheckoutElementInteractor
+    {
+        override fun handleViewAction(viewAction: ExpressCheckoutElementInteractor.ViewAction) {
+            viewActionRecorder.record(viewAction)
+        }
+    }
 }
