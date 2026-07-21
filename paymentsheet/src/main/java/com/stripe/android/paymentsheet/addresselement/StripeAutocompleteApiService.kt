@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import com.stripe.android.core.model.StripeJsonUtils
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
@@ -159,23 +160,28 @@ internal class DefaultStripeAutocompleteApiService(
 
 internal object AutocompletePredictionsResponseJsonParser :
     ModelJsonParser<AutocompletePredictionsResult> {
-    override fun parse(json: JSONObject): AutocompletePredictionsResult? {
-        val suggestionsArray = json.optJSONArray("suggestions") ?: return null
+    override fun parse(json: JSONObject): AutocompletePredictionsResult {
+        val suggestionsArray = json.optJSONArray("suggestions")
+            ?: return AutocompletePredictionsResult(predictions = emptyList())
         val predictions = (0 until suggestionsArray.length()).mapNotNull { i ->
-            val suggestion = suggestionsArray.getJSONObject(i)
+            val suggestion = suggestionsArray.optJSONObject(i)
+                ?: return@mapNotNull null
             val displayData = suggestion.optJSONObject("display_data")
-            val primaryText = suggestion.optString("primary_text").ifEmpty {
-                displayData?.optString("title").orEmpty()
-            }
-            val placeId = suggestion.optString("place_id")
-            if (primaryText.isBlank() || placeId.isBlank()) return@mapNotNull null
+            val primaryText =
+                StripeJsonUtils.optString(suggestion, "primary_text")
+                    ?: StripeJsonUtils.optString(displayData, "title")
+                    ?: return@mapNotNull null
+            val placeId = StripeJsonUtils.optString(suggestion, "place_id")
+                ?: return@mapNotNull null
             AutocompleteSuggestion(
                 placeId = placeId,
                 primaryText = primaryText,
-                secondaryText = suggestion.optString("secondary_text").ifEmpty {
-                    displayData?.optString("subtitle").orEmpty()
-                },
-                address = suggestion.optJSONObject("address")?.let { parseAddress(it) },
+                secondaryText =
+                    StripeJsonUtils.optString(suggestion, "secondary_text")
+                        ?: StripeJsonUtils.optString(displayData, "subtitle")
+                        ?: "",
+                address = suggestion.optJSONObject("address")
+                    ?.let { parseAddress(it) },
             )
         }
         return AutocompletePredictionsResult(predictions = predictions)
@@ -191,11 +197,11 @@ internal object PlaceDetailsResponseJsonParser : ModelJsonParser<PlaceDetailsRes
 
 private fun parseAddress(json: JSONObject): StripeProxyAddress {
     return StripeProxyAddress(
-        line1 = json.optString("line1").takeIf { it.isNotEmpty() },
-        line2 = json.optString("line2").takeIf { it.isNotEmpty() },
-        city = json.optString("city").takeIf { it.isNotEmpty() },
-        state = json.optString("state").takeIf { it.isNotEmpty() },
-        postalCode = json.optString("postal_code").takeIf { it.isNotEmpty() },
-        country = json.optString("country").takeIf { it.isNotEmpty() },
+        line1 = StripeJsonUtils.optString(json, "line1"),
+        line2 = StripeJsonUtils.optString(json, "line2"),
+        city = StripeJsonUtils.optString(json, "city"),
+        state = StripeJsonUtils.optString(json, "state"),
+        postalCode = StripeJsonUtils.optString(json, "postal_code"),
+        country = StripeJsonUtils.optString(json, "country"),
     )
 }
