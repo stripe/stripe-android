@@ -590,6 +590,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         paymentMethodMetadata = paymentMethodMetadata,
+                        statusBarColor = args.statusBarColor,
                     ),
                 )
             } ?: run {

@@ -4,17 +4,16 @@ import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetContract
 import com.stripe.android.customersheet.CustomerSheetIntegration
 import com.stripe.android.customersheet.CustomerSheetViewModel
 import com.stripe.android.googlepaylauncher.injection.GooglePayLauncherModule
 import com.stripe.android.networking.PaymentElementRequestSurfaceModule
 import com.stripe.android.paymentelement.confirmation.injection.CustomerSheetConfirmationModule
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import dagger.BindsInstance
 import dagger.Component
-import javax.inject.Named
 
 @CustomerSheetViewModelScope
 @Component(
@@ -39,8 +38,7 @@ internal interface CustomerSheetViewModelComponent {
             @BindsInstance
             configuration: CustomerSheet.Configuration,
             @BindsInstance
-            @Named(STATUS_BAR_COLOR)
-            statusBarColor: Int?,
+            args: CustomerSheetContract.Args,
             @BindsInstance
             integrationType: CustomerSheetIntegration.Type,
             @BindsInstance

@@ -15,7 +15,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -29,7 +28,6 @@ import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryMo
 import dagger.BindsInstance
 import dagger.Component
 import kotlinx.coroutines.CoroutineScope
-import javax.inject.Named
 import javax.inject.Provider
 import javax.inject.Singleton
 
@@ -67,9 +65,6 @@ internal interface FlowControllerStateComponent {
     @Component.Factory
     interface Factory {
         fun create(
-            @BindsInstance
-            @Named(STATUS_BAR_COLOR)
-            statusBarColor: Int?,
             @BindsInstance
             application: Application,
             @BindsInstance

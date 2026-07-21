@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import android.os.Parcelable
 import androidx.activity.result.ActivityResultCaller
+import androidx.annotation.ColorInt
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.core.Logger
 import com.stripe.android.core.strings.ResolvableString
@@ -73,6 +74,12 @@ internal interface ConfirmationHandler {
          * The immutable data created during configuration.
          */
         val paymentMethodMetadata: PaymentMethodMetadata,
+        /**
+         * The status bar color of the host activity, forwarded to auth surfaces that briefly take
+         * over the screen (the 3DS2 challenge activity and browser Custom Tab) so they match the
+         * merchant's chrome. Always `null` on API 35+, where the platform enforces edge-to-edge.
+         */
+        @ColorInt val statusBarColor: Int?,
     ) : Parcelable {
         /**
          * The [StripeIntent] that is being potentially confirmed by the handler

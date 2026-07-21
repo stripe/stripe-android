@@ -20,10 +20,11 @@ import kotlinx.parcelize.Parcelize
 
 internal class IntentConfirmationDefinition(
     private val intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
-    private val paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>) -> PaymentLauncher,
+    private val paymentLauncherFactory:
+        (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher,
 ) : ConfirmationDefinition<
     PaymentMethodConfirmationOption,
-    PaymentLauncher,
+    ActivityResultLauncher<PaymentLauncherContract.Args>,
     IntentConfirmationDefinition.Args,
     InternalPaymentResult
     > {
@@ -72,24 +73,27 @@ internal class IntentConfirmationDefinition(
     override fun createLauncher(
         activityResultCaller: ActivityResultCaller,
         onResult: (InternalPaymentResult) -> Unit
-    ): PaymentLauncher {
-        return paymentLauncherFactory(
-            activityResultCaller.registerForActivityResult(
-                PaymentLauncherContract(),
-                onResult
-            )
+    ): ActivityResultLauncher<PaymentLauncherContract.Args> {
+        return activityResultCaller.registerForActivityResult(
+            PaymentLauncherContract(),
+            onResult
         )
     }
 
+    override fun unregister(launcher: ActivityResultLauncher<PaymentLauncherContract.Args>) {
+        launcher.unregister()
+    }
+
     override fun launch(
-        launcher: PaymentLauncher,
+        launcher: ActivityResultLauncher<PaymentLauncherContract.Args>,
         arguments: Args,
         confirmationOption: PaymentMethodConfirmationOption,
         confirmationArgs: ConfirmationHandler.Args,
     ) {
+        val paymentLauncher = paymentLauncherFactory(launcher, confirmationArgs.statusBarColor)
         when (arguments) {
-            is Args.Confirm -> launchConfirm(launcher, arguments.confirmNextParams)
-            is Args.NextAction -> launcher.handleNextActionForStripeIntent(arguments.intent)
+            is Args.Confirm -> launchConfirm(paymentLauncher, arguments.confirmNextParams)
+            is Args.NextAction -> paymentLauncher.handleNextActionForStripeIntent(arguments.intent)
         }
     }
 
