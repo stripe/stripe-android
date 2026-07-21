@@ -28,6 +28,7 @@ internal object TapToAddContract : ActivityResultContract<TapToAddContract.Args,
         val paymentMethodMetadata: PaymentMethodMetadata,
         val paymentElementCallbackIdentifier: String,
         val productUsage: Set<String>,
+        val statusBarColor: Int?,
     ) : Parcelable {
         companion object {
             fun fromIntent(intent: Intent): Args? {

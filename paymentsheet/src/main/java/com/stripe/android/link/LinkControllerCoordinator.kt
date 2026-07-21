@@ -1,5 +1,6 @@
 package com.stripe.android.link
 
+import android.app.Activity
 import android.app.Application
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
@@ -8,6 +9,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.link.injection.LinkControllerPresenterScope
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
@@ -19,6 +21,7 @@ import javax.inject.Inject
 @LinkControllerPresenterScope
 internal class LinkControllerCoordinator @Inject constructor(
     private val application: Application,
+    activity: Activity,
     private val interactor: LinkControllerInteractor,
     private val lifecycleOwner: LifecycleOwner,
     activityResultRegistryOwner: ActivityResultRegistryOwner,
@@ -45,7 +48,7 @@ internal class LinkControllerCoordinator @Inject constructor(
         paymentLauncher = PaymentLauncherFactory(
             activityResultRegistryOwner = activityResultRegistryOwner,
             lifecycleOwner = lifecycleOwner,
-            statusBarColor = null,
+            statusBarColor = StatusBarCompat.color(activity),
             callback = PaymentLauncher.InternalPaymentResultCallback { result ->
                 interactor.onSetupIntentConfirmationResult(result)
             }

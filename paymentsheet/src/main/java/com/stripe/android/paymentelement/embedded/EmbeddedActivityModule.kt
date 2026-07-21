@@ -40,6 +40,7 @@ import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScr
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -59,6 +60,7 @@ import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
@@ -184,6 +186,7 @@ internal interface EmbeddedActivityModule {
             embeddedSelectionHolder: EmbeddedSelectionHolder,
             customerStateHolder: CustomerStateHolder,
             paymentMethodMetadata: PaymentMethodMetadata,
+            @Named(STATUS_BAR_COLOR) statusBarColor: Int?,
         ): TapToAddHelper {
             return tapToAddHelperFactory.create(
                 coroutineScope = coroutineScope,
@@ -194,6 +197,7 @@ internal interface EmbeddedActivityModule {
                 updateSelection = embeddedSelectionHolder::setSelection,
                 customerStateHolder = customerStateHolder,
                 linkSignupMode = stateFlowOf(paymentMethodMetadata.linkState?.signupMode),
+                statusBarColor = statusBarColor,
             )
         }
 

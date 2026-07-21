@@ -42,6 +42,7 @@ internal class LinkActivityContract @Inject internal constructor(
         internal val linkExpressMode: LinkExpressMode,
         internal val linkAccountInfo: LinkAccountUpdate.Value,
         internal val launchMode: LinkLaunchMode,
+        internal val statusBarColor: Int?,
     )
 
     data class Result(

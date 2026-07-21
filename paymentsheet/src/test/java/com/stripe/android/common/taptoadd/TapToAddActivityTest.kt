@@ -547,7 +547,8 @@ class TapToAddActivityTest {
                                 eventMode = EventReporter.Mode.Custom,
                                 paymentMethodMetadata = metadata,
                                 paymentElementCallbackIdentifier = PAYMENT_ELEMENT_CALLBACK_IDENTIFIER,
-                                productUsage = emptySet()
+                                productUsage = emptySet(),
+                                statusBarColor = null,
                             )
                         )
                     ).use { scenario ->

@@ -282,6 +282,7 @@ internal class DefaultWalletButtonsInteractor constructor(
                 linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                 launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment?.details),
                 linkExpressMode = LinkExpressMode.ENABLED,
+                statusBarColor = arguments.statusBarColor,
             )
         } else {
             handleButtonPressed(

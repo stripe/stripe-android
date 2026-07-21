@@ -88,6 +88,32 @@ internal class DefaultLinkConfirmationHandlerTest {
     }
 
     @Test
+    fun `confirm forwards statusBarColor to confirmation args`() = runTest(dispatcher) {
+        val configuration = TestFactory.LINK_CONFIGURATION
+        val confirmationHandler = FakeConfirmationHandler()
+        val handler = createHandler(
+            confirmationHandler = confirmationHandler,
+            configuration = configuration,
+            statusBarColor = 0x00FF00,
+        )
+
+        confirmationHandler.awaitResultTurbine.add(
+            item = ConfirmationHandler.Result.Succeeded(
+                intent = configuration.stripeIntent,
+            )
+        )
+
+        handler.confirm(
+            paymentDetails = TestFactory.CONSUMER_PAYMENT_DETAILS_CARD,
+            linkAccount = TestFactory.LINK_ACCOUNT,
+            cvc = CVC,
+            billingPhone = null
+        )
+
+        assertThat(confirmationHandler.startTurbine.awaitItem().statusBarColor).isEqualTo(0x00FF00)
+    }
+
+    @Test
     fun `successful confirmation yields success result with setup intent`() = runTest(dispatcher) {
         val configuration = TestFactory.LINK_CONFIGURATION.copy(
             stripeIntent = SetupIntentFixtures.SI_SUCCEEDED
@@ -737,7 +763,8 @@ internal class DefaultLinkConfirmationHandlerTest {
         configuration: LinkConfiguration = TestFactory.LINK_CONFIGURATION,
         logger: Logger = FakeLogger(),
         confirmationHandler: FakeConfirmationHandler = FakeConfirmationHandler(),
-        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS
+        passiveCaptchaParams: PassiveCaptchaParams? = PASSIVE_CAPTCHA_PARAMS,
+        statusBarColor: Int? = null,
     ): DefaultLinkConfirmationHandler {
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             passiveCaptchaParams = passiveCaptchaParams,
@@ -748,6 +775,7 @@ internal class DefaultLinkConfirmationHandlerTest {
             configuration = configuration,
             logger = logger,
             paymentMethodMetadata = paymentMethodMetadata,
+            statusBarColor = statusBarColor,
         )
         assertThat(confirmationHandler.bootstrapTurbine.awaitItem().paymentMethodMetadata)
             .isEqualTo(paymentMethodMetadata)
