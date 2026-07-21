@@ -1,6 +1,9 @@
 package com.stripe.android.common.model
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.ApiConfigurationPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.Test
 
@@ -63,5 +66,37 @@ internal class CommonConfigurationTest {
 
         assertThat(config.allowedCardFundingTypes(enabled = false))
             .isEqualTo(PaymentSheet.CardFundingType.entries)
+    }
+
+    @OptIn(ApiConfigurationPreview::class)
+    @Test
+    fun `EmbeddedPaymentElement Configuration asCommonConfiguration maps apiConfiguration`() {
+        val apiConfig = ApiConfiguration("pk_test_embedded")
+        val embeddedConfig = EmbeddedPaymentElement.Configuration.Builder("Merchant")
+            .apiConfiguration(apiConfig)
+            .build()
+
+        val common = embeddedConfig.asCommonConfiguration()
+
+        assertThat(common.apiConfiguration).isEqualTo(apiConfig)
+    }
+
+    @OptIn(ApiConfigurationPreview::class)
+    @Test
+    fun `EmbeddedPaymentElement Configuration asCommonConfiguration defaults apiConfiguration to null`() {
+        val embeddedConfig = EmbeddedPaymentElement.Configuration.Builder("Merchant").build()
+
+        val common = embeddedConfig.asCommonConfiguration()
+
+        assertThat(common.apiConfiguration).isNull()
+    }
+
+    @Test
+    fun `PaymentSheet Configuration asCommonConfiguration has null apiConfiguration`() {
+        val paymentSheetConfig = PaymentSheet.Configuration("Merchant")
+
+        val common = paymentSheetConfig.asCommonConfiguration()
+
+        assertThat(common.apiConfiguration).isNull()
     }
 }

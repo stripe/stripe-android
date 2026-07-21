@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.core.os.LocaleListCompat
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.PaymentConfiguration
@@ -1003,6 +1005,82 @@ internal class ElementsSessionRepositoryTest {
         assertThat(request.baseUrl).isEqualTo("https://api.stripe.com/v1/elements/sessions")
         assertThat(params["type"]).isEqualTo("deferred_intent")
         assertThat(params["mobile_app_id"]).isEqualTo(APP_ID)
+    }
+
+    @OptIn(ApiConfigurationPreview::class)
+    @Test
+    fun `apiConfiguration publishable key is used when provided`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
+        )
+
+        val apiConfig = ApiConfiguration("pk_test_apiconfiguration_key")
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            apiConfiguration = apiConfig,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        assertThat(request.options.apiKey).isEqualTo("pk_test_apiconfiguration_key")
+    }
+
+    @OptIn(ApiConfigurationPreview::class)
+    @Test
+    fun `falls back to PaymentConfiguration publishable key when apiConfiguration is null`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
+        )
+
+        createRepository(publishableKey = ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY).get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            apiConfiguration = null,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        assertThat(request.options.apiKey).isEqualTo(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)
+    }
+
+    @OptIn(ApiConfigurationPreview::class)
+    @Test
+    fun `apiConfiguration stripe account ID is used when provided`() = runTest {
+        whenever(stripeNetworkClient.executeRequest(any())).thenReturn(
+            StripeResponse(200, ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON.toString(), emptyMap())
+        )
+
+        val apiConfig = ApiConfiguration.Builder("pk_test_apiconfiguration_key")
+            .stripeAccountId("acct_connected")
+            .build()
+        createRepository().get(
+            initializationMode = PaymentElementLoader.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret",
+            ),
+            customer = null,
+            externalPaymentMethods = emptyList(),
+            customPaymentMethods = emptyList(),
+            savedPaymentMethodSelectionId = null,
+            countryOverride = null,
+            apiConfiguration = apiConfig,
+        )
+
+        verify(stripeNetworkClient).executeRequest(requestCaptor.capture())
+        val request = requestCaptor.firstValue as ApiRequest
+        assertThat(request.options.stripeAccount).isEqualTo("acct_connected")
     }
 
     private fun createRepository(

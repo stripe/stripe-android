@@ -39,6 +39,7 @@ internal class ElementsSessionLoader @Inject constructor(
             savedPaymentMethodSelectionId = savedPaymentMethodSelection?.id,
             countryOverride = configuration.userOverrideCountry,
             linkDisallowedFundingSourceCreation = configuration.link.disallowFundingSourceCreation,
+            apiConfiguration = configuration.apiConfiguration,
         ).getOrThrow()
     }
 }
