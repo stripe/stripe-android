@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.addresselement
 
-internal class FakeStripeAutocompleteApiService : StripeAutocompleteApiService {
+internal class FakeStripeAutocompleteRepository : StripeAutocompleteRepository {
     var predictionsResult: Result<AutocompletePredictionsResult> = Result.success(
         AutocompletePredictionsResult(predictions = emptyList())
     )
