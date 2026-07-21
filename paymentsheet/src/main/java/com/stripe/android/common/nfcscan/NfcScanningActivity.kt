@@ -66,8 +66,6 @@ internal class NfcScanningActivity : AppCompatActivity() {
             NfcScanningTheme {
                 val viewState by viewModel.viewState.collectAsState()
 
-                LaunchedEffect(Unit) { }
-
                 NfcScanningScreen(
                     state = viewState,
                     viewActionHandler = viewModel::handleViewAction,
