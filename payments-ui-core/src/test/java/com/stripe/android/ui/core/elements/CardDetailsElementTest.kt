@@ -59,7 +59,8 @@ class CardDetailsElementTest {
                     IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                     IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),
                 )
             )
         }
@@ -87,7 +88,8 @@ class CardDetailsElementTest {
                     IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                     IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("12", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),
                 )
             )
         }
@@ -124,7 +126,8 @@ class CardDetailsElementTest {
                     IdentifierSpec.CardCvc to FormFieldEntry("321", true),
                     IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),
                 )
             )
         }
@@ -166,7 +169,8 @@ class CardDetailsElementTest {
                     IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                     IdentifierSpec.PreferredCardBrand to FormFieldEntry(null, true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),
                 )
             )
         }
@@ -215,7 +219,8 @@ class CardDetailsElementTest {
                     IdentifierSpec.PreferredCardBrand to FormFieldEntry("cartes_bancaires", true),
                     IdentifierSpec.CardBrand to FormFieldEntry("cartes_bancaires", true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),
                 )
             )
         }
@@ -257,7 +262,8 @@ class CardDetailsElementTest {
                     IdentifierSpec.PreferredCardBrand to FormFieldEntry("cartes_bancaires", true),
                     IdentifierSpec.CardBrand to FormFieldEntry("cartes_bancaires", true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),
                 )
             )
         }
@@ -293,9 +299,109 @@ class CardDetailsElementTest {
                     IdentifierSpec.CardCvc to FormFieldEntry("", false),
                     IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
-                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),
                 )
             )
+        }
+    }
+
+    @Test
+    fun `test form field values include validated scan when initialized with card pill`() = runTest {
+        val cardDetailsElement = CardDetailsElement(
+            IdentifierSpec.Generic("card_details"),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = mapOf(
+                IdentifierSpec.CardNumber to "4242424242424242",
+                IdentifierSpec.CardValidatedScan to "true",
+                IdentifierSpec.CardExpMonth to "06",
+                IdentifierSpec.CardExpYear to "2030",
+            ),
+        )
+
+        cardDetailsElement.getFormFieldValueFlow().test {
+            assertThat(awaitItem()).containsExactlyElementsIn(
+                listOf(
+                    IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
+                    IdentifierSpec.CardCvc to FormFieldEntry("", false),
+                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                    IdentifierSpec.CardExpMonth to FormFieldEntry("06", true),
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("true", true),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `test form field values include validated scan when validated card is scanned`() = runTest {
+        val repositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = repositoryFactory,
+            initialValues = emptyMap(),
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+        )
+
+        val cardDetailsElement = CardDetailsElement(
+            IdentifierSpec.Generic("card_details"),
+            cardAccountRangeRepositoryFactory = repositoryFactory,
+            initialValues = emptyMap(),
+            controller = cardController,
+        )
+
+        cardController.onScannedCard(
+            ScannedCardDetails.Validated(
+                cardNumber = "4242424242424242",
+                expirationMonth = 6,
+                expirationYear = 2030,
+            )
+        )
+
+        cardDetailsElement.getFormFieldValueFlow().test {
+            assertThat(awaitItem()).containsExactlyElementsIn(
+                listOf(
+                    IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
+                    IdentifierSpec.CardCvc to FormFieldEntry("", false),
+                    IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                    IdentifierSpec.CardExpMonth to FormFieldEntry("06", true),
+                    IdentifierSpec.CardExpYear to FormFieldEntry("2030", true),
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry("true", true),
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `test form field values clear validated scan when card pill is dismissed`() = runTest {
+        val initialValues = mapOf(
+            IdentifierSpec.CardNumber to "4242424242424242",
+            IdentifierSpec.CardValidatedScan to "true",
+            IdentifierSpec.CardExpMonth to "06",
+            IdentifierSpec.CardExpYear to "2030",
+        )
+        val repositoryFactory = DefaultCardAccountRangeRepositoryFactory(context)
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = repositoryFactory,
+            initialValues = initialValues,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+        )
+        val cardDetailsElement = CardDetailsElement(
+            IdentifierSpec.Generic("card_details"),
+            cardAccountRangeRepositoryFactory = repositoryFactory,
+            initialValues = initialValues,
+            controller = cardController,
+        )
+
+        cardDetailsElement.getFormFieldValueFlow().test {
+            assertThat(awaitItem())
+                .contains(IdentifierSpec.CardValidatedScan to FormFieldEntry("true", true))
+
+            cardController.cardPillElement.value = null
+
+            assertThat(awaitItem())
+                .contains(IdentifierSpec.CardValidatedScan to FormFieldEntry("false", true),)
         }
     }
 

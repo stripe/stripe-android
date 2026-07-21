@@ -114,6 +114,12 @@ data class IdentifierSpec(
             destination = ParameterDestination.Local.Extras
         )
 
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val CardValidatedScan = IdentifierSpec(
+            "card[validated_scan]",
+            destination = ParameterDestination.Local.Extras
+        )
+
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {
             CardBrand.v1 -> CardBrand

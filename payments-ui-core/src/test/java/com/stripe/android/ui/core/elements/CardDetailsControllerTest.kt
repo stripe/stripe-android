@@ -220,6 +220,79 @@ class CardDetailsControllerTest {
     }
 
     @Test
+    fun `When initialized with validated scan and card number, card pill is shown`() = runTest {
+        val cardController = cardDetailsController(
+            initialValues = mapOf(
+                IdentifierSpec.CardNumber to "4242424242424242",
+                IdentifierSpec.CardValidatedScan to "true",
+                IdentifierSpec.CardExpMonth to "06",
+                IdentifierSpec.CardExpYear to "2030",
+            )
+        )
+
+        idleLooper()
+
+        cardController.fields.test {
+            val fields = awaitItem()
+
+            assertThat(fields).hasSize(2)
+
+            assertThat(fields[0]).isInstanceOf<CardPillElement>()
+            assertThat(fields[1]).isSameInstanceAs(cardController.cvcElement)
+
+            ensureAllEventsConsumed()
+        }
+
+        assertThat(cardController.cardPillElement.value).isNotNull()
+    }
+
+    @Test
+    fun `When initialized with validated scan but no card number, card pill is not shown`() = runTest {
+        val cardController = cardDetailsController(
+            initialValues = mapOf(
+                IdentifierSpec.CardValidatedScan to "true",
+            )
+        )
+        idleLooper()
+
+        cardController.fields.test {
+            val fields = awaitItem()
+
+            assertThat(fields).hasSize(2)
+
+            assertThat(fields[0]).isSameInstanceAs(cardController.numberElement)
+            assertThat(fields[1]).isInstanceOf(RowElement::class.java)
+
+            ensureAllEventsConsumed()
+        }
+
+        assertThat(cardController.cardPillElement.value).isNull()
+    }
+
+    @Test
+    fun `When initialized with validated scan false, card pill is not shown`() = runTest {
+        val cardController = cardDetailsController(
+            initialValues = mapOf(
+                IdentifierSpec.CardNumber to "4242424242424242",
+                IdentifierSpec.CardValidatedScan to "false",
+            )
+        )
+        idleLooper()
+
+        cardController.fields.test {
+            val fields = awaitItem()
+
+            assertThat(fields).hasSize(2)
+            assertThat(fields[0]).isSameInstanceAs(cardController.numberElement)
+            assertThat(fields[1]).isInstanceOf(RowElement::class.java)
+
+            ensureAllEventsConsumed()
+        }
+
+        assertThat(cardController.cardPillElement.value).isNull()
+    }
+
+    @Test
     fun `When validated scanned card, card data is applied and fields have card pill & cvc`() = runTest {
         val cardController = cardDetailsController()
         idleLooper()

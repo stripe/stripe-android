@@ -483,6 +483,52 @@ class FieldValuesToParamsMapConverterTest {
     }
 
     @Test
+    fun `transformToPaymentMethodExtraParams returns correct params for Card with validated scan`() {
+        val paymentMethodExtraParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodExtraParams(
+                mapOf(
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry(
+                        "true",
+                        true
+                    ),
+                ),
+                PaymentMethod.Type.Card.code,
+            )
+
+        assertThat(paymentMethodExtraParams).isNotNull()
+        assertThat(paymentMethodExtraParams?.toParamMap()).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "validated_scan" to "true"
+                )
+            )
+        )
+    }
+
+    @Test
+    fun `transformToPaymentMethodExtraParams returns correct params for Card with np validated scan`() {
+        val paymentMethodExtraParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodExtraParams(
+                mapOf(
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry(
+                        "false",
+                        true
+                    ),
+                ),
+                PaymentMethod.Type.Card.code,
+            )
+
+        assertThat(paymentMethodExtraParams).isNotNull()
+        assertThat(paymentMethodExtraParams?.toParamMap()).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "validated_scan" to "false"
+                )
+            )
+        )
+    }
+
+    @Test
     fun `allowRedisplay is set to UNSPECIFIED in param map`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
