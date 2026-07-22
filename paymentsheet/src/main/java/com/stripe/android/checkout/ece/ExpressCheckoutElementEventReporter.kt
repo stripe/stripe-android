@@ -36,8 +36,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(
                 event = object : AnalyticsEvent {
-                    override val eventName: String
-                        get() = EVENT_PREFIX + eventName
+                    override val eventName: String = eventName
                 },
                 additionalParams = additionalParams,
             )
@@ -45,8 +44,7 @@ internal class DefaultExpressCheckoutElementEventReporter @Inject constructor(
     }
 
     private companion object {
-        const val EVENT_PREFIX = "mc_"
-        const val ECE_DISPLAYED_EVENT_NAME = "ece_init"
-        const val ECE_WALLET_TAPPED_EVENT_NAME = "ece_wallet_tapped"
+        const val ECE_DISPLAYED_EVENT_NAME = "mc_ece_init"
+        const val ECE_WALLET_TAPPED_EVENT_NAME = "mc_ece_wallet_tapped"
     }
 }
