@@ -438,10 +438,12 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 set -euo pipefail
-                # Browser-redirect tests (e.g. Alipay) run on the Chrome-bearing google_apis device
-                # (pixel2api33chrome) because the lean aosp-atd image used for the main suite ships
-                # no browser. These classes are excluded from the main run in get_shard_test_classes.py.
-                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN "-Pandroid.testInstrumentationRunnerArguments.class=com.stripe.android.lpm.TestAlipay,com.stripe.android.TestBrowsers" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                # Browser-redirect tests (Alipay, Swish, CashApp, etc.) run on the Chrome-bearing
+                # google_apis device (pixel2api33chrome) because the lean aosp-atd image used for the
+                # main suite ships no browser. The class list is the single source of truth in
+                # get_shard_test_classes.py, which also excludes these from the main run.
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --browser-redirect)
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=2 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=2 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet browser E2E test results
           inputs:

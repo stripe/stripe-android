@@ -39,15 +39,39 @@ def class_names_from_test_files(test_directory, test_file_names):
     return class_names
 
 
-# Tests excluded from the main (aosp-atd) GMD run because they run in a dedicated environment:
-# - TestGooglePay runs on Firebase Test Lab (needs Google Play).
-# - Browser-redirect tests run on the Chrome-bearing pixel2api33chrome device via the
-#   run-paymentsheet-browser-e2e Bitrise workflow (aosp-atd ships no browser).
-EXCLUDED_TEST_CLASSES = {
+# TestGooglePay runs on Firebase Test Lab (needs Google Play) via run-paymentsheet-google-pay-e2e.
+FIREBASE_TEST_CLASSES = {
     'com.stripe.android.lpm.TestGooglePay',
-    'com.stripe.android.lpm.TestAlipay',
-    'com.stripe.android.TestBrowsers',
 }
+
+# Browser-redirect tests need a real browser (Chrome) for the authorization step, so they run on the
+# Chrome-bearing pixel2api33chrome device via the run-paymentsheet-browser-e2e Bitrise workflow. The
+# lean aosp-atd image used for the main run ships no browser, so these would silently skip there.
+BROWSER_REDIRECT_TEST_CLASSES = {
+    'com.stripe.android.TestBrowsers',
+    'com.stripe.android.lpm.TestAfterpay',
+    'com.stripe.android.lpm.TestAlipay',
+    'com.stripe.android.lpm.TestBancontact',
+    'com.stripe.android.lpm.TestBillie',
+    'com.stripe.android.lpm.TestCashApp',
+    'com.stripe.android.lpm.TestEps',
+    'com.stripe.android.lpm.TestFpx',
+    'com.stripe.android.lpm.TestGrabPay',
+    'com.stripe.android.lpm.TestIdeal',
+    'com.stripe.android.lpm.TestMobilePay',
+    'com.stripe.android.lpm.TestP24',
+    'com.stripe.android.lpm.TestPayPal',
+    'com.stripe.android.lpm.TestPayPay',
+    'com.stripe.android.lpm.TestSatispay',
+    'com.stripe.android.lpm.TestSunbit',
+    'com.stripe.android.lpm.TestSwish',
+    'com.stripe.android.lpm.TestTwint',
+    'com.stripe.android.lpm.TestWero',
+}
+
+# Never run on the main (aosp-atd) sharded GMD run.
+EXCLUDED_TEST_CLASSES = FIREBASE_TEST_CLASSES | BROWSER_REDIRECT_TEST_CLASSES
+
 
 def get_all_test_class_names():
     directory = 'paymentsheet-example/src/androidTest/java/'
@@ -64,9 +88,21 @@ def get_shard_classes(shard_index, num_shards):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Get test classes for a given shard.")
-    parser.add_argument("--shard-index", type=int, required=True)
-    parser.add_argument("--num-shards", type=int, required=True)
+    parser.add_argument("--shard-index", type=int)
+    parser.add_argument("--num-shards", type=int)
+    parser.add_argument(
+        "--browser-redirect",
+        action="store_true",
+        help="Print the browser-redirect test classes (run on the Chrome-bearing device).",
+    )
     args = parser.parse_args()
+
+    if args.browser_redirect:
+        print(",".join(sorted(BROWSER_REDIRECT_TEST_CLASSES)))
+        sys.exit(0)
+
+    if args.shard_index is None or args.num_shards is None:
+        parser.error("--shard-index and --num-shards are required unless --browser-redirect is set")
 
     classes = get_shard_classes(args.shard_index, args.num_shards)
     if not classes:
