@@ -1,6 +1,7 @@
 package com.stripe.android.checkout.ece
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.ui.GooglePayButton
@@ -13,6 +14,10 @@ internal fun ExpressCheckoutElementContent(
 ) {
     val state by interactor.state.collectAsState()
 
+    LaunchedEffect(Unit) {
+        interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+    }
+
     state.expressButtons.forEach { button ->
         when (button) {
             is ExpressButton.GooglePay -> GooglePayButton(
@@ -24,14 +29,18 @@ internal fun ExpressCheckoutElementContent(
                 cardBrandFilter = button.cardBrandFilter,
                 cardFundingFilter = button.cardFundingFilter,
                 additionalEnabledNetworks = button.additionalEnabledNetworks,
-                onPressed = {},
+                onPressed = {
+                    interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
+                },
             )
             is ExpressButton.Link -> LinkButton(
                 state = button.state,
                 enabled = true,
                 theme = button.theme,
                 linkBrand = button.linkBrand,
-                onClick = {},
+                onClick = {
+                    interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
+                },
             )
         }
     }

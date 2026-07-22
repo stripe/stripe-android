@@ -2,6 +2,7 @@
 
 package com.stripe.android.checkout.ece
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -13,15 +14,31 @@ import kotlin.collections.emptyList
 internal interface ExpressCheckoutElementInteractor {
     val state: StateFlow<State>
 
+    fun handleViewAction(viewAction: ViewAction)
+
     data class State(
         val expressButtons: List<ExpressButton>,
     )
+
+    sealed class ViewAction {
+        data object OnDisplayed : ViewAction()
+
+        data object OnWalletTapped : ViewAction()
+    }
 }
 
 internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     linkAccountHolder: LinkAccountHolder,
     stateHolder: CheckoutControllerStateHolder,
+    private val savedStateHandle: SavedStateHandle,
+    private val eventReporter: ExpressCheckoutElementEventReporter,
 ) : ExpressCheckoutElementInteractor {
+
+    private var hasReportedDisplayed: Boolean
+        get() = savedStateHandle[KEY_ECE_DISPLAYED] ?: false
+        set(value) {
+            savedStateHandle[KEY_ECE_DISPLAYED] = value
+        }
 
     override val state: StateFlow<ExpressCheckoutElementInteractor.State> = combineAsStateFlow(
         linkAccountHolder.linkAccountInfo,
@@ -46,5 +63,21 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             },
         )
+    }
+
+    override fun handleViewAction(viewAction: ExpressCheckoutElementInteractor.ViewAction) {
+        when (viewAction) {
+            ExpressCheckoutElementInteractor.ViewAction.OnDisplayed -> {
+                if (!hasReportedDisplayed) {
+                    hasReportedDisplayed = true
+                    eventReporter.onEceDisplayed()
+                }
+            }
+            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped -> eventReporter.onEceWalletTapped()
+        }
+    }
+
+    private companion object {
+        const val KEY_ECE_DISPLAYED = "express_checkout_element_displayed"
     }
 }
