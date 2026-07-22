@@ -1,9 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.common.model.CommonConfiguration
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 
 internal fun CheckoutSessionResponse.SavedPaymentMethodsOfferSave.toSaveConsentBehavior():
