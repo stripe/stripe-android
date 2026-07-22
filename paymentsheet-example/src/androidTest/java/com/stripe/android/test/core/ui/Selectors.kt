@@ -178,6 +178,8 @@ internal class Selectors(
         // Chrome may still be launching.
         device.wait(Until.hasObject(By.pkg(chrome)), 5_000L)
 
+        // Chrome onboarding button ids, tied to the API 33 google_apis Chrome build; revisit if
+        // that system image is bumped.
         val freButtonIds = listOf(
             "terms_accept",
             "next_button",
