@@ -13,6 +13,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutSession
+import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.checkout.GooglePayConfiguration.Environment
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -65,7 +67,15 @@ internal class CheckoutControllerExampleViewModel(
     private suspend fun fetchAndConfigure() {
         repository.fetchCheckoutSessionClientSecret().fold(
             onSuccess = { clientSecret ->
-                controller.configure(clientSecret).fold(
+                controller.configure(
+                    clientSecret,
+                    configuration = CheckoutController.Configuration()
+                        .googlePayConfiguration(
+                            GooglePayConfiguration(
+                                Environment.Test
+                            )
+                        )
+                ).fold(
                     onSuccess = {
                         _status.value = Status.Configured(
                             checkoutSession = controller.checkoutSession.value,
