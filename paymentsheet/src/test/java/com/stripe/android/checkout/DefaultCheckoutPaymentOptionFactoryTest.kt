@@ -3,8 +3,10 @@ package com.stripe.android.checkout
 import android.content.Context
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
@@ -111,6 +113,7 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
                 ),
                 cardArtDrawableLoader = { cardArt },
                 context = context,
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             ),
             metadata = metadata,
             cardArt = cardArt,
