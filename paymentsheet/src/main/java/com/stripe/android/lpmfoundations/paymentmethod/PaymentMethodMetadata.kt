@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
@@ -54,6 +55,7 @@ internal const val IS_PAYMENT_METHOD_SET_AS_DEFAULT_ENABLED_DEFAULT_VALUE = fals
  */
 @Parcelize
 internal data class PaymentMethodMetadata(
+    val apiConfiguration: ApiConfiguration.State,
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
@@ -365,6 +367,7 @@ internal data class PaymentMethodMetadata(
     internal companion object {
         @Suppress("LongMethod")
         internal fun createForPaymentElement(
+            apiConfiguration: ApiConfiguration.State,
             elementsSession: ElementsSession,
             configuration: CommonConfiguration,
             sharedDataSpecs: List<SharedDataSpec>,
@@ -382,6 +385,7 @@ internal data class PaymentMethodMetadata(
             val linkSettings = elementsSession.linkSettings
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
             return PaymentMethodMetadata(
+                apiConfiguration = apiConfiguration,
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
@@ -446,6 +450,7 @@ internal data class PaymentMethodMetadata(
 
         @Suppress("LongMethod")
         internal fun createForCustomerSheet(
+            apiConfiguration: ApiConfiguration.State,
             elementsSession: ElementsSession,
             configuration: CustomerSheet.Configuration,
             sharedDataSpecs: List<SharedDataSpec>,
@@ -454,6 +459,7 @@ internal data class PaymentMethodMetadata(
             integrationMetadata: IntegrationMetadata.CustomerSheet,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
+                apiConfiguration = apiConfiguration,
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
                 allowsDelayedPaymentMethods = true,

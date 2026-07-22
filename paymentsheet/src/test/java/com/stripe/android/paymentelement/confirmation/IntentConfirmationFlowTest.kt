@@ -291,7 +291,7 @@ internal class IntentConfirmationFlowTest {
                     )
                 }
             },
-            paymentLauncherFactory = { _, _ ->
+            paymentLauncherFactory = { _, _, _ ->
                 FakePaymentLauncher()
             }
         )

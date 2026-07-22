@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
@@ -407,7 +408,7 @@ class IntentConfirmationDefinitionTest {
         var capturedStatusBarColor: Int? = null
 
         val definition = createIntentConfirmationDefinition(
-            paymentLauncherFactory = { _, statusBarColor ->
+            paymentLauncherFactory = { _, statusBarColor, _ ->
                 capturedStatusBarColor = statusBarColor
                 FakePaymentLauncher()
             },
@@ -517,8 +518,9 @@ class IntentConfirmationDefinitionTest {
                 }
             },
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
-        paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher =
-            { _, _ -> paymentLauncher },
+        paymentLauncherFactory:
+            (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?, ApiConfiguration.State) -> PaymentLauncher =
+            { _, _, _ -> paymentLauncher },
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,

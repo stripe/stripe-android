@@ -722,6 +722,7 @@ class CustomerAdapterDataSourceTest {
             elementsSessionRepository = elementsSessionRepository,
             errorReporter = errorReporter,
             workContext = coroutineContext,
+            paymentConfigurationProvider = { com.stripe.android.PaymentConfiguration("pk_test_123") },
         )
     }
 
