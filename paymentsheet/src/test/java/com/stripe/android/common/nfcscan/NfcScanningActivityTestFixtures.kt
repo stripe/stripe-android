@@ -55,6 +55,16 @@ internal object NfcScanningActivityTestFixtures {
         0x01,
     )
 
+    // Form Factor Indicator (tag 0x9F6E) whose first byte low nibble reports a mobile device.
+    val MOBILE_WALLET_FORM_FACTOR_DATA = byteArrayOf(0x01, 0x00)
+
+    // Payment Account Reference (tag 0x9F24) marks the credential as tokenized.
+    val PAYMENT_ACCOUNT_REFERENCE_DATA = byteArrayOf(0x00, 0x11, 0x22, 0x33)
+
+    private const val TAG_9F = 0x9F.toByte()
+    private const val TAG_CONTINUATION_FORM_FACTOR_INDICATOR = 0x6E.toByte()
+    private const val TAG_CONTINUATION_PAYMENT_ACCOUNT_REFERENCE = 0x24.toByte()
+
     fun createIsoDepTag(): Tag = mock()
 
     fun createConfiguredIsoDep(
@@ -106,5 +116,31 @@ internal object NfcScanningActivityTestFixtures {
         apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
         apduSuccessResponse(byteArrayOf()),
         apduSuccessResponse(tlv(tag = 0x57, value = EXPIRED_TRACK_2_DATA)),
+    )
+
+    fun mobileWalletCardResponses(): List<ByteArray> = listOf(
+        apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+        apduSuccessResponse(byteArrayOf()),
+        apduSuccessResponse(tlv(tag = 0x57, value = VALID_TRACK_2_DATA)),
+        apduSuccessResponse(
+            tlv(
+                tag = TAG_9F,
+                tagContinuation = TAG_CONTINUATION_FORM_FACTOR_INDICATOR,
+                value = MOBILE_WALLET_FORM_FACTOR_DATA,
+            ),
+        ),
+    )
+
+    fun tokenizedCardResponses(): List<ByteArray> = listOf(
+        apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+        apduSuccessResponse(byteArrayOf()),
+        apduSuccessResponse(tlv(tag = 0x57, value = VALID_TRACK_2_DATA)),
+        apduSuccessResponse(
+            tlv(
+                tag = TAG_9F,
+                tagContinuation = TAG_CONTINUATION_PAYMENT_ACCOUNT_REFERENCE,
+                value = PAYMENT_ACCOUNT_REFERENCE_DATA,
+            ),
+        ),
     )
 }

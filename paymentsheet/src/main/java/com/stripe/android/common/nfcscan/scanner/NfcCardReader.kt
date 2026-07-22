@@ -36,8 +36,16 @@ internal class ApduCardReader @Inject constructor(
         return runCatching {
             readFromTransceiver(transceiver)
         }.fold(
-            onSuccess = { cardData ->
-                NfcCardReader.Result.Found(scannedCardData = cardData)
+            onSuccess = { parseResult ->
+                when (parseResult) {
+                    is NfcCardDataParser.Result.Success ->
+                        NfcCardReader.Result.Found(scannedCardData = parseResult.cardData)
+                    is NfcCardDataParser.Result.Error ->
+                        NfcCardReader.Result.Error(
+                            errorCode = parseResult.analyticsValue,
+                            userMessage = parseResult.userMessage,
+                        )
+                }
             },
             onFailure = errorMapper::create,
         )
@@ -45,7 +53,7 @@ internal class ApduCardReader @Inject constructor(
 
     private suspend fun readFromTransceiver(
         transceiver: NfcTagTransceiver
-    ): ScannedCardData = withContext(workContext) {
+    ): NfcCardDataParser.Result = withContext(workContext) {
         try {
             transceiver.open()
             val applicationIdentifier = SelectPpseCommand.transceiveWith(transceiver).getOrThrow()
@@ -53,17 +61,13 @@ internal class ApduCardReader @Inject constructor(
 
             val records = mutableMapOf<String, ByteArray>()
 
-            probeFiles@ for (sfi in PROBE_SFIS) {
+            for (sfi in PROBE_SFIS) {
                 for (record in 1..MAX_RECORDS_PER_SFI) {
                     val result = ReadRecordCommand(record, sfi)
                         .transceiveWith(transceiver)
 
                     result.onSuccess { result ->
                         records += result
-
-                        if (cardDataParser.canParse(records)) {
-                            break@probeFiles
-                        }
                     }.onFailure { error ->
                         if (!isRecordNotFoundError(error)) {
                             throw error
@@ -73,7 +77,6 @@ internal class ApduCardReader @Inject constructor(
             }
 
             cardDataParser.parse(records)
-                ?: throw IllegalStateException("Could not parse card data from NFC tag")
         } finally {
             transceiver.close()
         }
