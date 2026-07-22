@@ -607,6 +607,7 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
+            statusBarColor = anyOrNull(),
         )
 
         verify(paymentOptionActivityLauncher, never()).launch(any(), anyOrNull())
@@ -652,6 +653,7 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             launchMode = any(),
             linkExpressMode = any(),
+            statusBarColor = anyOrNull(),
         )
 
         // Simulate user dismissing 2FA with back press
@@ -675,6 +677,7 @@ internal class DefaultFlowControllerTest {
             linkAccountInfo = anyOrNull(),
             linkExpressMode = any(),
             launchMode = any(),
+            statusBarColor = anyOrNull(),
         )
 
         // Verify payment option launcher was called instead

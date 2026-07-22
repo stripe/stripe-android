@@ -330,6 +330,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     launchMode = LinkLaunchMode.PaymentMethodSelection(
                         selectedPayment = (paymentSelection as? Link)?.selectedPayment?.details
                     ),
+                    statusBarColor = viewModel.statusBarColor,
                 )
             } else {
                 showPaymentOptionList(state, paymentSelection)

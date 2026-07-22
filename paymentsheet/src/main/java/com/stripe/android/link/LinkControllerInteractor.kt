@@ -719,6 +719,10 @@ internal class LinkControllerInteractor @Inject constructor(
                         linkExpressMode = LinkExpressMode.ENABLED,
                         linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                         launchMode = launchMode,
+                        // LinkController launches Link for selection/authentication only (never
+                        // in-Link confirmation), and this singleton has no host Activity to read a
+                        // status bar color from.
+                        statusBarColor = null,
                     )
                 )
             }

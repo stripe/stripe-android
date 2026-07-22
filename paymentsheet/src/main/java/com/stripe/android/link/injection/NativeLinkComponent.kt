@@ -29,6 +29,7 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.link.LinkPassthroughConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.addresselement.AutocompleteLauncher
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.uicore.navigation.NavigationManager
@@ -104,6 +105,9 @@ internal interface NativeLinkComponent {
             linkAccountUpdate: LinkAccountUpdate.Value,
             @BindsInstance
             requestSurface: RequestSurface,
+            @BindsInstance
+            @Named(STATUS_BAR_COLOR)
+            statusBarColor: Int?,
         ): NativeLinkComponent
     }
 }

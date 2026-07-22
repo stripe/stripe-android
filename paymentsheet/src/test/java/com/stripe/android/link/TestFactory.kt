@@ -350,6 +350,7 @@ internal object TestFactory {
         linkAccountInfo = LinkAccountUpdate.Value(LINK_ACCOUNT),
         paymentElementCallbackIdentifier = "LinkNativeTestIdentifier",
         launchMode = LinkLaunchMode.Full,
+        statusBarColor = null,
     )
 
     val FINANCIAL_CONNECTIONS_CHECKING_ACCOUNT = FinancialConnectionsAccount(

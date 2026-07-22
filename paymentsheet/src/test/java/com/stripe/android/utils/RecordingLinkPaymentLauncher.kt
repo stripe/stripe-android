@@ -49,6 +49,7 @@ internal object RecordingLinkPaymentLauncher {
                     linkAccountInfo = anyOrNull(),
                     launchMode = any(),
                     linkExpressMode = any(),
+                    statusBarColor = anyOrNull(),
                 )
             } doAnswer { invocation ->
                 val arguments = invocation.arguments
@@ -60,6 +61,7 @@ internal object RecordingLinkPaymentLauncher {
                         linkAccount = arguments[2] as? LinkAccount,
                         launchMode = arguments[3] as LinkLaunchMode,
                         linkExpressMode = arguments[4] as LinkExpressMode,
+                        statusBarColor = arguments[5] as? Int,
                     )
                 )
             }
@@ -97,5 +99,6 @@ internal object RecordingLinkPaymentLauncher {
         val linkAccount: LinkAccount?,
         val launchMode: LinkLaunchMode,
         val linkExpressMode: LinkExpressMode,
+        val statusBarColor: Int?,
     )
 }
