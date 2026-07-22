@@ -22,7 +22,7 @@ internal class DefaultTapZoneResolver @Inject constructor(
 
         return deviceTapZoneMapping[manufacturer]?.get(model) ?: run {
             if (isAtLeastUpsideDownCake(sdk)) {
-                getTapZoneFromAvailableAntennae()
+                getTapZoneFromAvailableAntennae(manufacturer)
             } else {
                 DEFAULT
             }
@@ -30,7 +30,7 @@ internal class DefaultTapZoneResolver @Inject constructor(
     }
 
     @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
-    private fun getTapZoneFromAvailableAntennae(): TapZone =
+    private fun getTapZoneFromAvailableAntennae(manufacturer: String): TapZone =
         nfcHardwareDelegate.antenna()?.let { info ->
             if (info.availableNfcAntennas.isEmpty()) {
                 return DEFAULT
@@ -40,7 +40,11 @@ internal class DefaultTapZoneResolver @Inject constructor(
 
             val antenna = info.availableNfcAntennas.first()
             val xBias = antenna.locationX / info.deviceWidth.toFloat()
-            val yBias = 1 - antenna.locationY / info.deviceHeight.toFloat()
+            val yBias = if (isAntennaLocationOriginTopLeft(manufacturer)) {
+                antenna.locationY / info.deviceHeight.toFloat()
+            } else {
+                1 - antenna.locationY / info.deviceHeight.toFloat()
+            }
 
             TapZone(xBias, yBias)
         } ?: run {
@@ -82,19 +86,27 @@ internal class DefaultTapZoneResolver @Inject constructor(
         return name
     }
 
+    private fun isAntennaLocationOriginTopLeft(manufacturer: String): Boolean {
+        return manufacturer == SAMSUNG_MANUFACTURER ||
+            (manufacturer == GOOGLE_MANUFACTURER && sdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH_MR1)
+    }
+
     @ChecksSdkIntAtLeast(parameter = 0)
     private fun isAtLeastUpsideDownCake(sdk: Int): Boolean {
         return sdk >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE
     }
 
     private companion object {
+        const val SAMSUNG_MANUFACTURER = "samsung"
+        const val GOOGLE_MANUFACTURER = "google"
+
         const val SAMSUNG_REPLACEMENT_INDEX = 3
 
         val DEFAULT = TapZone(xBias = 0.5f, yBias = 0.5f)
         val deviceTapZoneMapping = mapOf(
             // Samsung NFC locations are guesstimates based on https://www.samsung.com/hk_en/nfc-support/ or
             // teardown videos
-            "samsung" to mapOf(
+            SAMSUNG_MANUFACTURER to mapOf(
                 // S22+
                 "SM-S906".lowercase() to TapZone(0.5f, 0.5f),
                 // S22
@@ -140,7 +152,7 @@ internal class DefaultTapZoneResolver @Inject constructor(
                 "SM-X306".lowercase() to TapZone(0.25f, 0f),
                 "SM-X308".lowercase() to TapZone(0.25f, 0f),
             ),
-            "google" to mapOf(
+            GOOGLE_MANUFACTURER to mapOf(
                 "Pixel 6".lowercase() to TapZone(0.5f, 0.4f),
                 "Pixel 6 Pro".lowercase() to TapZone(0.5f, 0.35f),
                 "Pixel 6a".lowercase() to TapZone(0.5f, 0.55f),
