@@ -209,23 +209,6 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
     }
 
-    private class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementEventReporter {
-        val calls = mutableListOf<Call>()
-
-        override fun onEceDisplayed() {
-            calls.add(Call.OnEceDisplayed)
-        }
-
-        override fun onEceWalletTapped() {
-            calls.add(Call.OnEceWalletTapped)
-        }
-
-        enum class Call {
-            OnEceDisplayed,
-            OnEceWalletTapped,
-        }
-    }
-    
     private fun createGooglePayConfiguration(
         buttonType: GooglePayConfiguration.ButtonType = GooglePayConfiguration.ButtonType.Pay,
         additionalEnabledNetworks: List<String> = emptyList(),
