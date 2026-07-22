@@ -5,6 +5,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -38,7 +39,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
-    internal val confirmationStateHolder: CheckoutConfirmationStateHolder,
+    private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
@@ -64,11 +65,9 @@ class CheckoutController @Inject internal constructor(
             sessionId = sessionId,
             adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
         ).mapCatching { response ->
-            checkoutStateLoader.load(
-                CheckoutControllerState.defaultState(
-                    configuration = configurationState,
-                    checkoutSessionResponse = response,
-                )
+            checkoutStateLoader.loadInitial(
+                configuration = configurationState,
+                checkoutSessionResponse = response,
             )
         }
     }
@@ -135,7 +134,13 @@ class CheckoutController @Inject internal constructor(
             ?.validateShippingCountry(address.build().country)
             ?.onFailure { return kotlin.Result.failure(it) }
         return updateAddress(CheckoutSessionResponse.TaxAddressSource.SHIPPING, address) {
-            copy(shippingName = name, shippingPhoneNumber = phoneNumber, shippingAddress = it)
+            copy(
+                collectedDetails = collectedDetails.copy(
+                    shippingName = name,
+                    shippingPhoneNumber = phoneNumber,
+                    shippingAddress = it,
+                ),
+            )
         }
     }
 
@@ -168,7 +173,13 @@ class CheckoutController @Inject internal constructor(
         phoneNumber: String?,
         address: Address,
     ): kotlin.Result<Unit> = updateAddress(CheckoutSessionResponse.TaxAddressSource.BILLING, address) {
-        copy(billingName = name, billingPhoneNumber = phoneNumber, billingAddress = it)
+        copy(
+            collectedDetails = collectedDetails.copy(
+                billingName = name,
+                billingPhoneNumber = phoneNumber,
+                billingAddress = it,
+            ),
+        )
     }
 
     /**
@@ -245,9 +256,9 @@ class CheckoutController @Inject internal constructor(
                 val newState = state
                     .copy(checkoutSessionResponse = response)
                     .additionalStateMutations()
-                // load resolves flag images (reusing newState's carried-over cache) and
-                // atomically commits the reloaded state to the holders.
-                checkoutStateLoader.load(newState)
+                // reload resolves flag images (reusing newState's carried-over cache) and commits
+                // the fully reloaded state to the holder.
+                checkoutStateLoader.reload(newState)
             }
         }
     }
@@ -275,12 +286,19 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
+    internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
+        return withCheckoutState { sessionId ->
+            checkoutSessionRepository.updateCurrency(sessionId, currency)
+        }
+    }
+
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        TODO("Not yet implemented")
+        return checkoutPresenterSubcomponentFactory.create().presenter
     }
 
     fun destroy() {
         viewModelScope.cancel()
+        stateHolder.state = null
     }
 
     fun clearPaymentOption() {
@@ -316,6 +334,7 @@ class CheckoutController @Inject internal constructor(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
         private var adaptivePricingAllowed: Boolean = false
+        private var googlePayConfiguration: GooglePayConfiguration? = null
         private var paymentElementConfiguration: PaymentElement.Configuration = PaymentElement.Configuration()
         private var currencySelectorElementConfiguration: CurrencySelectorElement.Configuration =
             CurrencySelectorElement.Configuration()
@@ -354,9 +373,16 @@ class CheckoutController @Inject internal constructor(
             this.expressCheckoutElementConfiguration = configuration
         }
 
+        fun googlePayConfiguration(
+            configuration: GooglePayConfiguration,
+        ): Configuration = apply {
+            this.googlePayConfiguration = configuration
+        }
+
         @Parcelize
         internal data class State(
             val adaptivePricingAllowed: Boolean,
+            val googlePayConfiguration: GooglePayConfiguration.State?,
             val paymentElementConfiguration: PaymentElement.Configuration.State,
             val currencySelectorElementConfiguration: CurrencySelectorElement.Configuration.State,
             val shippingAddressElementConfiguration: ShippingAddressElement.Configuration.State,
@@ -369,6 +395,7 @@ class CheckoutController @Inject internal constructor(
             currencySelectorElementConfiguration = currencySelectorElementConfiguration.build(),
             shippingAddressElementConfiguration = shippingAddressElementConfiguration.build(),
             expressCheckoutElementConfiguration = expressCheckoutElementConfiguration.build(),
+            googlePayConfiguration = googlePayConfiguration?.build(),
         )
     }
 

@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
 import com.stripe.android.paymentsheet.CustomerStateHolder
@@ -32,6 +33,7 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     @UIContext private val uiContext: CoroutineContext,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     private val updateScreenInteractorFactoryProvider: Provider<EmbeddedUpdateScreenInteractorFactory>,
+    private val launchMode: EmbeddedLaunchMode,
 ) {
     fun createSavedPaymentMethodMutator(): SavedPaymentMethodMutator {
         return SavedPaymentMethodMutator(
@@ -42,10 +44,15 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
             uiContext = uiContext,
             savedPaymentMethodRepository = savedPaymentMethodRepository,
             selection = selectionHolder.selection,
-            setSelection = selectionHolder::set,
+            setSelection = selectionHolder::setSelection,
             customerStateHolder = customerStateHolder,
             prePaymentMethodRemoveActions = {
-                if (customerStateHolder.paymentMethods.value.size > 1) {
+                val shouldNavigateBack = when (launchMode) {
+                    is EmbeddedLaunchMode.PaymentOptions -> true
+                    is EmbeddedLaunchMode.Manage,
+                    is EmbeddedLaunchMode.Form -> customerStateHolder.paymentMethods.value.size > 1
+                }
+                if (shouldNavigateBack) {
                     embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Back)
                     withContext(workContext) {
                         delay(PaymentMethodRemovalDelayMillis)
@@ -63,9 +70,14 @@ internal class ManageSavedPaymentMethodMutatorFactory @Inject constructor(
     }
 
     private fun onPaymentMethodRemoved() {
-        val shouldCloseSheet = customerStateHolder.paymentMethods.value.isEmpty()
-        if (shouldCloseSheet) {
-            embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Close())
+        if (customerStateHolder.paymentMethods.value.isEmpty()) {
+            when (launchMode) {
+                is EmbeddedLaunchMode.PaymentOptions -> Unit
+                is EmbeddedLaunchMode.Manage,
+                is EmbeddedLaunchMode.Form -> {
+                    embeddedNavigatorProvider.get().performAction(EmbeddedNavigator.Action.Close())
+                }
+            }
         }
     }
 

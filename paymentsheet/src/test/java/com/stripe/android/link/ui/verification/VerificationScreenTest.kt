@@ -27,6 +27,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.utils.collectAsState
@@ -46,6 +47,9 @@ internal class VerificationScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `title, email and otp should be displayed on screen load`() = runTest(dispatcher) {
@@ -311,7 +315,7 @@ internal class VerificationScreenTest {
             onChangeEmailRequested = {},
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun onTitleField() = composeTestRule.onNodeWithTag(VERIFICATION_TITLE_TAG)

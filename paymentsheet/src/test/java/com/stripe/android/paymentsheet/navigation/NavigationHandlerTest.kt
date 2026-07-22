@@ -2,8 +2,14 @@ package com.stripe.android.paymentsheet.navigation
 
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.testing.CleanupTestRule
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -12,6 +18,9 @@ import java.io.Closeable
 import kotlin.time.Duration.Companion.milliseconds
 
 internal class NavigationHandlerTest {
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @Test
     fun `currentScreen is initialized to Loading`() = runTest {
         val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
@@ -327,8 +336,9 @@ internal class NavigationHandlerTest {
     }
 
     @Test
-    fun `closeScreens calls close on all closable screens in the backstack`() = runTest {
-        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, PaymentSheetScreen.Loading) {}
+    fun `cancelling the coroutine scope closes all closable screens in the backstack`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job()))
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(scope, PaymentSheetScreen.Loading) {}
         navigationHandler.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
             val screenOne = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
@@ -337,10 +347,88 @@ internal class NavigationHandlerTest {
             val screenTwo = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
             navigationHandler.transitionTo(screenTwo)
             assertThat(awaitItem()).isEqualTo(screenTwo)
-            navigationHandler.closeScreens()
+            scope.cancel()
             verify(screenOne as Closeable).close()
             verify(screenTwo as Closeable).close()
         }
+    }
+
+    @Test
+    fun `transitionTo closes the initial screen when it is removed from the backstack`() = runTest {
+        val initialScreen = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(this, initialScreen) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            val newScreen = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(newScreen)
+            assertThat(awaitItem()).isEqualTo(newScreen)
+            verify(initialScreen as Closeable).close()
+        }
+    }
+
+    @Test
+    fun `transitionTo does not close the initial screen when it is kept on the backstack`() = runTest {
+        val initialScreen = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = this,
+            initialScreen = initialScreen,
+            shouldRemoveInitialScreenOnTransition = false,
+        ) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(initialScreen)
+            val newScreen = mock<PaymentSheetScreen>()
+            navigationHandler.transitionTo(newScreen)
+            assertThat(awaitItem()).isEqualTo(newScreen)
+            verify(initialScreen as Closeable, never()).close()
+        }
+    }
+
+    @Test
+    fun `cancelling the coroutine scope closes a pending delayed transition that has not been applied`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job() + UnconfinedTestDispatcher(testScheduler)))
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = scope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+            val pendingScreen = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+            navigationHandler.transitionToWithDelay(pendingScreen)
+            // The transition delay has not elapsed, so the target is not on the back stack yet.
+            scope.cancel()
+            verify(pendingScreen as Closeable).close()
+        }
+    }
+
+    @Test
+    fun `transitionToWithDelay closes a target dropped while a transition is already in flight`() = runTest {
+        val testScope = TestScope()
+        val navigationHandler = NavigationHandler<PaymentSheetScreen>(
+            coroutineScope = testScope,
+            initialScreen = PaymentSheetScreen.Loading,
+        ) {}
+        navigationHandler.currentScreen.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.Loading)
+            val firstTarget = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+            navigationHandler.transitionToWithDelay(firstTarget)
+            val droppedTarget = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+            navigationHandler.transitionToWithDelay(droppedTarget)
+            verify(droppedTarget as Closeable).close()
+            verify(firstTarget as Closeable, never()).close()
+            testScope.testScheduler.advanceTimeBy(251.milliseconds)
+            assertThat(awaitItem()).isEqualTo(firstTarget)
+        }
+    }
+
+    @Test
+    fun `cancelling the coroutine scope closes the screens on the backstack`() = runTest {
+        val scope = coroutineScopeCleanupRule.track(CoroutineScope(Job()))
+        val initialScreen = mock<PaymentSheetScreen>(extraInterfaces = arrayOf(Closeable::class))
+        NavigationHandler<PaymentSheetScreen>(scope, initialScreen) {}
+
+        scope.cancel()
+
+        verify(initialScreen as Closeable).close()
     }
 
     @Test

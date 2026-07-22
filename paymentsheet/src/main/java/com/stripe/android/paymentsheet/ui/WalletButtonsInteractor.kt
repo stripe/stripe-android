@@ -342,6 +342,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = arguments.paymentMethodMetadata,
+            statusBarColor = arguments.statusBarColor,
         )
     }
 
@@ -351,6 +352,7 @@ internal class DefaultWalletButtonsInteractor constructor(
         val configuration: CommonConfiguration,
         val appearance: PaymentSheet.Appearance,
         val paymentSelection: PaymentSelection?,
+        val statusBarColor: Int?,
     )
 
     companion object {
@@ -374,7 +376,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                             configuration = flowControllerState.paymentSheetState.config,
                             paymentMethodMetadata = flowControllerState.paymentSheetState.paymentMethodMetadata,
                             appearance = configureRequest.configuration.appearance,
-                            paymentSelection = flowControllerViewModel.paymentSelection
+                            paymentSelection = flowControllerViewModel.paymentSelection,
+                            statusBarColor = flowControllerViewModel.statusBarColor,
                         )
                     } else {
                         null
@@ -418,7 +421,8 @@ internal class DefaultWalletButtonsInteractor constructor(
                             configuration = state.configuration.asCommonConfiguration(),
                             paymentMethodMetadata = state.paymentMethodMetadata,
                             appearance = state.configuration.appearance,
-                            paymentSelection = state.selection
+                            paymentSelection = state.selection,
+                            statusBarColor = state.statusBarColor,
                         )
                     }
                 },

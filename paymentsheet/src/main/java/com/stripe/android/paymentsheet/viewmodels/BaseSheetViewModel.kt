@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.utils.FeatureFlags
@@ -125,6 +126,8 @@ internal abstract class BaseSheetViewModel(
     internal val cvcRecollectionCompleteFlow: StateFlow<Boolean> = _cvcRecollectionCompleteFlow
 
     abstract val tapToAddHelper: TapToAddHelper
+
+    abstract val isNfcScanningAvailable: IsNfcScanningAvailable
 
     val analyticsListener: PaymentSheetAnalyticsListener = PaymentSheetAnalyticsListener(
         savedStateHandle = savedStateHandle,

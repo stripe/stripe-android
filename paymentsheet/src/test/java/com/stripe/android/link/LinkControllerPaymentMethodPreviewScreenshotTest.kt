@@ -56,7 +56,8 @@ class LinkControllerPaymentMethodPreviewScreenshotTest {
                                 iconLoader = PaymentSelection.IconLoader(
                                     resources = LocalResources.current,
                                     imageLoader = DefaultStripeImageLoader(context),
-                                )
+                                ),
+                                reduceLinkBranding = true,
                             )
                         )
                     }

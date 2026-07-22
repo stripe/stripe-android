@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.lite.TextFixtures.configuration
 import com.stripe.android.financialconnections.lite.TextFixtures.financialConnectionsSessionNoAccounts
 import com.stripe.android.financialconnections.lite.TextFixtures.syncResponse
 import com.stripe.android.financialconnections.lite.repository.FinancialConnectionsLiteRepository
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -26,6 +27,9 @@ class FinancialConnectionsLiteViewModelTest {
 
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -43,7 +47,7 @@ class FinancialConnectionsLiteViewModelTest {
         repository = repository,
         workContext = testDispatcher,
         applicationId = "com.example"
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     @Test
     fun `test view model initializes with correct state`() = testScope.runTest {

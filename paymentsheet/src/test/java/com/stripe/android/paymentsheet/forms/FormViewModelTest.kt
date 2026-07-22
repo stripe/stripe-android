@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmHeaderElement
@@ -38,6 +39,7 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -48,6 +50,9 @@ import com.stripe.android.uicore.R as UiCoreR
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `Verify completeFormValues is not null when no elements exist`() = runTest {
@@ -859,5 +864,5 @@ internal class FormViewModelTest {
     ) = FormViewModel(
         formArguments = arguments,
         formElements = formElements,
-    )
+    ).also { viewModelStoreRule.track(it) }
 }

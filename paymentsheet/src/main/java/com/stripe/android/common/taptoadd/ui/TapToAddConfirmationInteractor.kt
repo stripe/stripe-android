@@ -175,6 +175,7 @@ internal class DefaultTapToAddConfirmationInteractor(
                 arguments = ConfirmationHandler.Args(
                     confirmationOption = confirmationOption,
                     paymentMethodMetadata = paymentMethodMetadata,
+                    statusBarColor = null,
                 )
             )
         }

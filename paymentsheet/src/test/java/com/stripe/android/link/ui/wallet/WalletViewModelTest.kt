@@ -40,6 +40,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -65,6 +66,9 @@ class WalletViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `viewmodel should load payment methods on init`() = runTest(dispatcher) {
@@ -977,11 +981,11 @@ class WalletViewModelTest {
     fun `secondaryButtonLabel is present based on shouldShowSecondaryCta`() = runTest(dispatcher) {
         val launchMode = LinkLaunchMode.PaymentMethodSelection(
             selectedPayment = null,
-            shouldShowSecondaryCta = true
+            canContinueWithoutLink = true
         )
         listOf(
             launchMode to resolvableString(R.string.stripe_wallet_continue_another_way),
-            launchMode.copy(shouldShowSecondaryCta = false) to null,
+            launchMode.copy(canContinueWithoutLink = false) to null,
         ).forEach { (mode, expected) ->
             assertThat(createViewModel(linkLaunchMode = mode).uiState.value.secondaryButtonLabel)
                 .isEqualTo(expected)
@@ -1172,7 +1176,7 @@ class WalletViewModelTest {
                 configuration = configuration,
                 linkLaunchMode = linkLaunchMode
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private suspend fun testAddBankAccount(

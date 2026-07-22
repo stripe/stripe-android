@@ -17,7 +17,7 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val confirmationStateHolder: EmbeddedConfirmationStateHolder,
-    private val embeddedContentHelper: EmbeddedContentHelper,
+    private val contentStateHolder: EmbeddedContentHelperStateHolder,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val confirmationHandler: ConfirmationHandler
 ) : EmbeddedStateHelper {
@@ -50,11 +50,12 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
         confirmationStateHolder.state = state.confirmationState
         customerStateHolder.setCustomerState(state.customer)
         selectionHolder.setPreviousNewSelections(state.previousNewSelections)
-        selectionHolder.set(state.confirmationState.selection)
-        embeddedContentHelper.dataLoaded(
+        selectionHolder.setSelection(state.confirmationState.selection)
+        contentStateHolder.dataLoaded(
             paymentMethodMetadata = state.confirmationState.paymentMethodMetadata,
             appearance = state.confirmationState.configuration.appearance.embeddedAppearance,
             embeddedViewDisplaysMandateText = state.confirmationState.configuration.embeddedViewDisplaysMandateText,
+            configuration = state.confirmationState.configuration,
         )
         confirmationHandler.bootstrap(state.confirmationState.paymentMethodMetadata)
     }
@@ -78,9 +79,9 @@ internal class DefaultEmbeddedStateHelper @Inject constructor(
     }
 
     private fun clearState() {
-        embeddedContentHelper.clearEmbeddedContent()
+        contentStateHolder.clearEmbeddedContent()
         confirmationStateHolder.state = null
-        selectionHolder.set(null)
+        selectionHolder.setSelection(null)
         selectionHolder.previousNewSelections.clear()
         customerStateHolder.setCustomerState(null)
     }

@@ -34,7 +34,7 @@ internal fun VerificationDialog(
     onDismissClicked: () -> Unit,
     dismissWithResult: (LinkActivityResult) -> Unit
 ) {
-    val viewModel = linkViewModel<VerificationViewModel> { parentComponent ->
+    val viewModel = linkViewModel<VerificationViewModel>(key = linkAccount.clientSecret) { parentComponent ->
         VerificationViewModel.factory(
             parentComponent = parentComponent,
             linkAccount = linkAccount,

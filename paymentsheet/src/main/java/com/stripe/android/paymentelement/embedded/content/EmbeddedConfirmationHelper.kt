@@ -68,6 +68,7 @@ internal class DefaultEmbeddedConfirmationHelper @Inject constructor(
         return ConfirmationHandler.Args(
             confirmationOption = confirmationOption,
             paymentMethodMetadata = confirmationState.paymentMethodMetadata,
+            statusBarColor = confirmationState.statusBarColor,
         )
     }
 }

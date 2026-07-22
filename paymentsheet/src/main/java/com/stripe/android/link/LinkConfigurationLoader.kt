@@ -21,13 +21,10 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
     private val tag = "LinkConfigurationLoader"
 
     override suspend fun load(configuration: LinkController.Configuration.State): Result<LinkMetadata> {
-        val initializationMode = if (configuration.setupIntentClientSecret != null) {
-            PaymentElementLoader.InitializationMode.SetupIntent(configuration.setupIntentClientSecret)
-        } else {
-            PaymentElementLoader.InitializationMode.CryptoOnramp
-        }
         return paymentElementLoader.load(
-            initializationMode = initializationMode,
+            initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp(
+                paymentMethodTypes = configuration.paymentMethodTypes,
+            ),
             integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(configuration),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = savedStateHandle.contains(

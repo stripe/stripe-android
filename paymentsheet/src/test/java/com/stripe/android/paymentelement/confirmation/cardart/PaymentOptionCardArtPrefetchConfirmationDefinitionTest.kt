@@ -109,6 +109,7 @@ internal class PaymentOptionCardArtPrefetchConfirmationDefinitionTest {
             fakeImageLoader = fakeImageLoader,
             confirmationArgs = ConfirmationHandler.Args(
                 confirmationOption = FakeConfirmationOption(),
+                statusBarColor = null,
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
         ).apply { block() }

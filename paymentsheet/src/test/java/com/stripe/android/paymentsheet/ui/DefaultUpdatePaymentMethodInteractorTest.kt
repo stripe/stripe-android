@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConf
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.setDefaultPaymentMethodErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updateCardBrandErrorMessage
 import com.stripe.android.paymentsheet.ui.DefaultUpdatePaymentMethodInteractor.Companion.updatesFailedErrorMessage
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -25,14 +26,18 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 
 @Suppress("LargeClass")
 class DefaultUpdatePaymentMethodInteractorTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
+    private val cleanupRule = CleanupTestRule(DefaultUpdatePaymentMethodInteractor::close)
+
     @get:Rule
-    val coroutineTestRule = CoroutineTestRule(testDispatcher)
+    val ruleChain: RuleChain = RuleChain.outerRule(CoroutineTestRule(testDispatcher))
+        .around(cleanupRule)
 
     @Test
     fun removeViewAction_removesPmAndNavigatesBack() {
@@ -777,6 +782,7 @@ class DefaultUpdatePaymentMethodInteractorTest {
             allowedBillingCountries = allowedBillingCountries,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         )
+        cleanupRule.track(interactor)
 
         TestParams(
             interactor = interactor,

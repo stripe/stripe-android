@@ -16,6 +16,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,6 +33,9 @@ import org.robolectric.annotation.Config
 class SelfieWarmupScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val mockNavController = mock<NavController>()
     private val mockScreenTracker = mock<ScreenTracker>()

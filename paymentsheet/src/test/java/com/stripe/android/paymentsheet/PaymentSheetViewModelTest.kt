@@ -112,9 +112,11 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.cardParamsUpdateAction
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.utils.prefillCreate
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
@@ -125,6 +127,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.BankFormScreenStateFactory
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -134,6 +137,7 @@ import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -172,8 +176,14 @@ internal class PaymentSheetViewModelTest {
 
     private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
+    private val viewModelStoreRule = ViewModelStoreTestRule()
+
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
+
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
+        .around(coroutineScopeCleanupRule)
+        .around(viewModelStoreRule)
         .around(InstantTaskExecutorRule())
         .around(SessionTestRule())
         .around(PaymentElementCallbackTestRule())
@@ -3453,7 +3463,7 @@ internal class PaymentSheetViewModelTest {
         tapToAddHelperFactory: TapToAddHelper.Factory = FakeTapToAddHelper.Factory.noOp(),
         customerStateHolder: CustomerStateHolder? = null,
     ): PaymentSheetViewModel {
-        return TestViewModelFactory.create(
+        val viewModel = TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = savedStateHandle,
         ) { linkHandler, thisSavedStateHandle ->
@@ -3485,17 +3495,19 @@ internal class PaymentSheetViewModelTest {
                     }
                 },
                 tapToAddHelperFactory = tapToAddHelperFactory,
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = object : CustomerStateHolder.Factory {
                     override fun create(viewModel: BaseSheetViewModel): CustomerStateHolder {
                         return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
                     }
                 },
-                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
                 placesClient = null,
             )
         }
+        return viewModelStoreRule.track(viewModel)
     }
 
     private fun FakeConfirmationHandler.Scenario.createLinkViewModel(): PaymentSheetViewModel {

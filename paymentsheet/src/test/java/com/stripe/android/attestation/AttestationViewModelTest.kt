@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.attestation.analytics.FakeAttestationAnalyticsEventsReporter
 import com.stripe.android.link.FakeIntegrityRequestManager
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -17,6 +18,9 @@ import java.io.IOException
 @RunWith(RobolectricTestRunner::class)
 internal class AttestationViewModelTest {
     private val testDispatcher = UnconfinedTestDispatcher()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
@@ -88,5 +92,5 @@ internal class AttestationViewModelTest {
         workContext = testDispatcher,
         attestationAnalyticsEventsReporter = attestationAnalyticsEventsReporter,
         errorReporter = FakeErrorReporter()
-    )
+    ).also { viewModelStoreRule.track(it) }
 }

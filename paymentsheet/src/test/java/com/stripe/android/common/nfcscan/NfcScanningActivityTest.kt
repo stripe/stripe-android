@@ -2,10 +2,9 @@ package com.stripe.android.common.nfcscan
 
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.nfc.NfcAdapter
 import android.os.Build
 import android.os.Looper
+import android.os.VibrationEffect
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -14,16 +13,20 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.configureNfc
+import com.stripe.android.common.nfcscan.NfcScanningActivityTestHelpers.getShadowVibrator
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.testing.createComposeCleanupRule
-import kotlinx.coroutines.test.runTest
+import com.stripe.android.uicore.utils.AnimationConstants
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.Robolectric
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
-import org.robolectric.shadows.ShadowNfcAdapter
+import org.robolectric.shadows.ShadowActivity
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
@@ -47,7 +50,7 @@ internal class NfcScanningActivityTest {
 
     @Test
     fun `activity returns canceled result when moved to background`() = test {
-        activity.finish()
+        moveToState(Lifecycle.State.CREATED)
 
         waitForActivityFinish()
 
@@ -90,12 +93,64 @@ internal class NfcScanningActivityTest {
         assertThat(nfcAdapter?.isInReaderMode).isTrue()
     }
 
-    private fun test(
-        block: suspend Scenario.() -> Unit,
-    ) {
-        shadowOf(context.packageManager)
-            .setSystemFeature(PackageManager.FEATURE_NFC, true)
-        getNfcAdapter()?.setEnabled(true)
+    @Test
+    fun `successful card scan perform haptic feedback & returns complete result`() = test {
+        NfcScanningActivityTestHelpers.completeSuccessfulScan(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.successResponses(),
+        )
+
+        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_CLICK)
+
+        waitForActivityFinish()
+
+        assertThat(getResult()).isEqualTo(
+            NfcScanningContract.Result.Complete(
+                cardNumber = "4242424242424242",
+                expirationMonth = 12,
+                expirationYear = 2030,
+            ),
+        )
+    }
+
+    @Test
+    fun `declined card shows error, performs haptic feedback, and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.declinedCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_error_declined_card),
+        )
+
+        assertThat(context.getShadowVibrator().effectId).isEqualTo(VibrationEffect.EFFECT_HEAVY_CLICK)
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `unsupported card shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.unsupportedCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_unsupported_card),
+        )
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `expired card shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.expiredCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_error_expired_card),
+        )
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `finish applies fade out transition`() {
+        configureNfc(context)
 
         val intent = NfcScanningContract.createIntent(
             context = context,
@@ -103,44 +158,28 @@ internal class NfcScanningActivityTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
         )
+        val controller = Robolectric.buildActivity(NfcScanningActivity::class.java, intent)
+            .create()
+            .start()
+            .resume()
 
-        ActivityScenario.launchActivityForResult<NfcScanningActivity>(intent).use { scenario ->
-            scenario.onActivity { activity ->
-                runTest {
-                    val waitForIdle = {
-                        shadowOf(Looper.getMainLooper()).idle()
-                        Espresso.onIdle()
-                        composeRule.waitForIdle()
-                    }
+        val activity = controller.get()
+        activity.finish()
 
-                    block(
-                        Scenario(
-                            activity = activity,
-                            nfcAdapter = getNfcAdapter(),
-                            moveToState = scenario::moveToState,
-                            waitForIdle = waitForIdle,
-                            waitForActivityFinish = waitForIdle,
-                            getResult = {
-                                NfcScanningContract.parseResult(
-                                    resultCode = scenario.result.resultCode,
-                                    intent = scenario.result.resultData,
-                                )
-                            },
-                        )
-                    )
-                }
-            }
-        }
+        val shadowActivity = shadowOf(activity) as ShadowActivity
+        assertThat(shadowActivity.pendingTransitionEnterAnimationResourceId)
+            .isEqualTo(AnimationConstants.FADE_IN)
+        assertThat(shadowActivity.pendingTransitionExitAnimationResourceId)
+            .isEqualTo(AnimationConstants.FADE_OUT)
     }
 
-    private fun getNfcAdapter() = NfcAdapter.getDefaultAdapter(context)?.let { shadowOf(it) }
-
-    private class Scenario(
-        val activity: NfcScanningActivity,
-        val nfcAdapter: ShadowNfcAdapter?,
-        val moveToState: (Lifecycle.State) -> Unit,
-        val waitForIdle: () -> Unit,
-        val waitForActivityFinish: () -> Unit,
-        val getResult: () -> NfcScanningContract.Result,
-    )
+    private fun test(
+        block: NfcScanningActivityTestHelpers.Scenario.() -> Unit,
+    ) {
+        NfcScanningActivityTestHelpers.launchScenario(
+            context = context,
+            composeRule = composeRule,
+            block = block,
+        )
+    }
 }

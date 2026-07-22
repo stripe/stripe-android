@@ -24,6 +24,7 @@ import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrack
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.TWO_ITEMS
 import com.stripe.android.paymentsheet.ui.AddPaymentMethodInitialVisibilityTrackerDataFixtures.TWO_ITEMS_EXPECTED_VISIBLE
 import com.stripe.android.paymentsheet.utils.errorTest
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.EmailElement
@@ -43,11 +44,19 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
+import org.junit.rules.RuleChain
 import org.mockito.Mockito.mock
 import kotlin.test.Test
 import com.stripe.android.uicore.R as UiCoreR
 
 class DefaultAddPaymentMethodInteractorTest {
+    private val cleanupRule = CleanupTestRule(DefaultAddPaymentMethodInteractor::close)
+
+    @get:Rule
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(cleanupRule)
+
     @Test
     fun handleViewAction_ReportFieldInteraction_reportsFieldInteraction() {
         runScenario {
@@ -422,6 +431,7 @@ class DefaultAddPaymentMethodInteractorTest {
                 initialVisibilityTrackerTurbine.add(Pair(visible, hidden))
             }
         )
+        cleanupRule.track(interactor)
 
         TestParams(
             interactor = interactor,
@@ -437,7 +447,6 @@ class DefaultAddPaymentMethodInteractorTest {
                 testBlock()
             }
             ensureAllEventsConsumed()
-            interactor.close()
         }
     }
 

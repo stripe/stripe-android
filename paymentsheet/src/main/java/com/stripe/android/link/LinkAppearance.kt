@@ -26,6 +26,7 @@ class LinkAppearance {
     private var darkColors: Colors? = null
     private var style: Style = Style.AUTOMATIC
     private var primaryButton: PrimaryButton? = null
+    private var reduceLinkBranding: Boolean = false
 
     fun lightColors(lightColors: Colors) = apply {
         this.lightColors = lightColors
@@ -43,6 +44,10 @@ class LinkAppearance {
         this.primaryButton = primaryButton
     }
 
+    fun reduceLinkBranding(reduceLinkBranding: Boolean) = apply {
+        this.reduceLinkBranding = reduceLinkBranding
+    }
+
     @Poko
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -51,6 +56,7 @@ class LinkAppearance {
         val darkColors: Colors.State,
         val style: Style,
         val primaryButton: PrimaryButton.State,
+        val reduceLinkBranding: Boolean,
     ) : Parcelable
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -60,6 +66,7 @@ class LinkAppearance {
             darkColors = (darkColors ?: Colors()).build(isDark = true),
             style = style,
             primaryButton = (primaryButton ?: PrimaryButton()).build(),
+            reduceLinkBranding = reduceLinkBranding,
         )
     }
 

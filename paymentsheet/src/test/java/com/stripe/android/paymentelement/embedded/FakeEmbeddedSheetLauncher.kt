@@ -2,7 +2,7 @@ package com.stripe.android.paymentelement.embedded
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
-import com.stripe.android.paymentelement.embedded.content.EmbeddedConfirmationStateHolder
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.CustomerState
@@ -11,7 +11,7 @@ internal class FakeEmbeddedSheetLauncher : EmbeddedSheetLauncher {
     override fun launchForm(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        configuration: EmbeddedPaymentElement.Configuration?,
         customerState: CustomerState?,
         promotion: PaymentMethodMessagePromotion?,
     ) {
@@ -22,7 +22,16 @@ internal class FakeEmbeddedSheetLauncher : EmbeddedSheetLauncher {
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
         selection: PaymentSelection?,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        configuration: EmbeddedPaymentElement.Configuration?,
+    ) {
+        error("Not expected.")
+    }
+
+    override fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration?,
     ) {
         error("Not expected.")
     }

@@ -11,6 +11,7 @@ import com.stripe.android.link.model.ConsentPresentation
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.model.LinkAuthIntentInfo
 import com.stripe.android.model.ConsentUi
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -25,6 +26,9 @@ internal class OAuthConsentViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `init with null consent pane dismisses immediately with success`() = runTest(dispatcher) {
@@ -215,7 +219,7 @@ internal class OAuthConsentViewModelTest {
             linkConfiguration = linkConfiguration,
             linkAccountManager = linkAccountManager,
             dismissWithResult = dismissWithResult
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun createLinkAccountWithConsent(

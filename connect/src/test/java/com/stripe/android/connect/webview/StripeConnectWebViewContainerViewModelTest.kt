@@ -28,6 +28,7 @@ import com.stripe.android.connect.webview.serialization.SetOnLoaderStart
 import com.stripe.android.connect.webview.serialization.SetterFunctionCalledMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.toCollection
@@ -40,6 +41,7 @@ import kotlinx.coroutines.test.setMain
 import kotlinx.serialization.json.JsonNull
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -61,6 +63,9 @@ import kotlin.test.assertTrue
 @Suppress("TooManyFunctions")
 @RunWith(RobolectricTestRunner::class)
 class StripeConnectWebViewContainerViewModelTest {
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -102,7 +107,7 @@ class StripeConnectWebViewContainerViewModelTest {
             stripeIntentLauncher = mockStripeIntentLauncher,
             logger = mockLogger,
             createWebView = { _, _, _ -> webView }
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @After
@@ -120,7 +125,7 @@ class StripeConnectWebViewContainerViewModelTest {
             analyticsService = analyticsService,
             logger = Logger.noop(),
             // Default `createWebView` value
-        )
+        ).also { viewModelStoreRule.track(it) }
         assertThat(viewModel.webView.delegate).isEqualTo(viewModel.delegate)
     }
 

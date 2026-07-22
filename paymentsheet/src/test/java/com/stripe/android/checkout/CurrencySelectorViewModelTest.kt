@@ -11,6 +11,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +30,9 @@ internal class CurrencySelectorViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `init fires currency selector init analytics event`() = runScenario {
@@ -143,7 +147,7 @@ internal class CurrencySelectorViewModelTest {
                 publishableKey = "pk_test_123",
             ),
             savedStateHandle = savedStateHandle,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         Scenario(
             fakeAnalyticsRequestExecutor = fakeAnalyticsRequestExecutor,

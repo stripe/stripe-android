@@ -10,12 +10,17 @@ import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
 import com.stripe.android.common.nfcscan.tapzone.FakeTapZoneResolver
 import com.stripe.android.common.nfcscan.tapzone.TapZone
+import com.stripe.android.common.nfcscan.ui.HapticFeedbackType
 import com.stripe.android.common.nfcscan.ui.NfcScanningStatus
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.isInstanceOf
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -29,6 +34,12 @@ internal class NfcScanningViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `viewState contains tap zone from resolver`() = runScenario(
@@ -44,10 +55,16 @@ internal class NfcScanningViewModelTest {
 
     @Test
     fun `handleViewAction Close emits Canceled result`() = runScenario {
-        viewModel.result.test {
+        viewModel.event.test {
             viewModel.handleViewAction(NfcScanningViewAction.Close)
 
-            assertThat(awaitItem()).isEqualTo(NfcScanningContract.Result.Canceled)
+            val event = awaitItem()
+
+            assertThat(event).isInstanceOf<NfcScanningEvent.CloseWithResult>()
+
+            val resultEvent = event as NfcScanningEvent.CloseWithResult
+
+            assertThat(resultEvent.result).isEqualTo(NfcScanningContract.Result.Canceled)
         }
 
         assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem()).isNotNull()
@@ -154,7 +171,7 @@ internal class NfcScanningViewModelTest {
 
     @Test
     fun `card scanner Complete state emits Complete result after success animation`() = runScenario {
-        viewModel.result.test {
+        viewModel.event.test {
             scannerState.emit(
                 NfcCardScanner.State.Complete(
                     ScannedCardData(
@@ -165,11 +182,19 @@ internal class NfcScanningViewModelTest {
                 ),
             )
 
-            expectNoEvents()
+            assertThat(awaitItem()).isEqualTo(
+                NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Success),
+            )
 
             viewModel.handleViewAction(NfcScanningViewAction.SuccessShown)
 
-            assertThat(awaitItem()).isEqualTo(
+            val event = awaitItem()
+
+            assertThat(event).isInstanceOf<NfcScanningEvent.CloseWithResult>()
+
+            val resultEvent = event as NfcScanningEvent.CloseWithResult
+
+            assertThat(resultEvent.result).isEqualTo(
                 NfcScanningContract.Result.Complete(
                     cardNumber = "4242424242424242",
                     expirationMonth = 12,
@@ -183,14 +208,55 @@ internal class NfcScanningViewModelTest {
     }
 
     @Test
+    fun `card scanner failed emits failed haptic feedback event`() = runScenario {
+        viewModel.event.test {
+            scannerState.emit(
+                NfcCardScanner.State.Failed(
+                    error = NfcCardScanner.Error(
+                        code = "expiredCard",
+                        userMessage = R.string.stripe_nfc_expired_error.resolvableString,
+                    ),
+                ),
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Failed),
+            )
+        }
+
+        assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("expiredCard")
+    }
+
+    @Test
+    fun `card scanner complete emits success haptic feedback event`() = runScenario {
+        viewModel.event.test {
+            scannerState.emit(
+                NfcCardScanner.State.Complete(
+                    ScannedCardData(
+                        cardNumber = "4242424242424242",
+                        expirationMonth = 12,
+                        expirationYear = 2030,
+                    ),
+                ),
+            )
+
+            assertThat(awaitItem()).isEqualTo(
+                NfcScanningEvent.TriggerHapticFeedback(HapticFeedbackType.Success),
+            )
+        }
+
+        assertThat(fakeEventReporter.onNfcScanAttemptSucceededCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `onCleared cancels view model scope`() = runTest(dispatcher) {
-        val viewModelScope = CoroutineScope(dispatcher + Job())
+        val viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher + Job()))
         val viewModel = NfcScanningViewModel(
             viewModelScope = viewModelScope,
             tapZoneResolver = FakeTapZoneResolver(),
             cardScanner = FakeNfcCardScanner(),
             eventReporter = FakeNfcScanningEventReporter(),
-        )
+        ).also { viewModelStoreRule.track(it) }
         val viewModelStore = ViewModelStore().apply {
             put("test", viewModel)
         }
@@ -208,11 +274,11 @@ internal class NfcScanningViewModelTest {
         val fakeCardScanner = FakeNfcCardScanner(stateFlow = scannerState)
         val fakeEventReporter = FakeNfcScanningEventReporter()
         val viewModel = NfcScanningViewModel(
-            viewModelScope = CoroutineScope(dispatcher),
+            viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)),
             tapZoneResolver = FakeTapZoneResolver(tapZone),
             cardScanner = fakeCardScanner,
             eventReporter = fakeEventReporter,
-        )
+        ).also { viewModelStoreRule.track(it) }
 
         assertThat(fakeEventReporter.onNfcScanStartedCalls.awaitItem()).isNotNull()
 

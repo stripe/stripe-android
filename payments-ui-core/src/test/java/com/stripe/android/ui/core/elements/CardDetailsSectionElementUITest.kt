@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -26,6 +27,9 @@ internal class CardDetailsSectionElementUITest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     @Test
     fun `CardDetailsSectionElement shows custom action and not card scan when cardDetailsAction is provided`() {

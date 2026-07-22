@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.addresselement.TestAutocompleteAddressInt
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -101,6 +102,9 @@ class USBankAccountFormViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `when email and name is valid then required fields are filled`() =
@@ -2130,7 +2134,7 @@ class USBankAccountFormViewModelTest {
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun mockManuallyEnteredBankAccount(usesMicrodeposits: Boolean): CollectBankAccountResultInternal.Completed {

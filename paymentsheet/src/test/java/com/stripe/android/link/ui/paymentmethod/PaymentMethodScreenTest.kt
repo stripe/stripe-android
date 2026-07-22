@@ -32,6 +32,7 @@ import com.stripe.android.link.ui.paymentmenthod.PAYMENT_METHOD_ERROR_TAG
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodScreen
 import com.stripe.android.link.ui.paymentmenthod.PaymentMethodViewModel
 import com.stripe.android.paymentsheet.FormHelper
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.testing.NoOpCardScanEventsReporter
@@ -54,6 +55,9 @@ internal class PaymentMethodScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `form fields are displayed correctly`() = runScenario {
@@ -192,7 +196,7 @@ internal class PaymentMethodScreenTest {
             dismissalCoordinator = dismissalCoordinator,
             linkLaunchMode = LinkLaunchMode.Full,
             dismissWithResult = {}
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun onPayButton() =

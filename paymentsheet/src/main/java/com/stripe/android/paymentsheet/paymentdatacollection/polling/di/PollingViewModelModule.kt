@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.polling.DefaultTime
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.TimeProvider
 import com.stripe.android.polling.DefaultIntentStatusPoller
 import com.stripe.android.polling.IntentStatusPoller
+import com.stripe.android.polling.PollingAnalyticsModule
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -17,7 +18,7 @@ import javax.inject.Named
 
 @Module(
     subcomponents = [PollingViewModelSubcomponent::class],
-    includes = [PaymentConfigurationModule::class],
+    includes = [PaymentConfigurationModule::class, PollingAnalyticsModule::class],
 )
 internal interface PollingViewModelModule {
 

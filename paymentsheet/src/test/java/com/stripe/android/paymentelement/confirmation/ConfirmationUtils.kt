@@ -18,6 +18,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
 import com.stripe.android.model.ClientAttributionMetadata
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
 import com.stripe.android.paymentelement.PreparePaymentMethodHandler
@@ -48,6 +49,7 @@ import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.utils.RecordingLinkStore
 import kotlinx.coroutines.Dispatchers
@@ -158,6 +160,11 @@ internal suspend fun createIntentConfirmationInterceptor(
                             mobileSessionIdProvider = { "test_session" },
                         ),
                         stripeNetworkClient = DefaultStripeNetworkClient(),
+                        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+                        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+                            context = ApplicationProvider.getApplicationContext(),
+                            publishableKey = "pk",
+                        ),
                         publishableKeyProvider = { "pk" },
                         stripeAccountIdProvider = { null },
                     ),
@@ -191,7 +198,7 @@ internal fun createTestConfirmationHandlerFactory(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentLauncherFactory = { launcher ->
+                    paymentLauncherFactory = { launcher, _ ->
                         stripePaymentLauncherAssistedFactory.create(
                             publishableKey = { paymentConfiguration.publishableKey },
                             stripeAccountId = { paymentConfiguration.stripeAccountId },

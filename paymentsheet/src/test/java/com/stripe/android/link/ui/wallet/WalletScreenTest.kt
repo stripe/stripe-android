@@ -49,6 +49,7 @@ import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.payments.financialconnections.FinancialConnectionsAvailability
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import com.stripe.android.ui.core.elements.CvcController
@@ -73,6 +74,9 @@ internal class WalletScreenTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `wallet list is collapsed on start`() = runTest(dispatcher) {
@@ -821,7 +825,7 @@ internal class WalletScreenTest {
                 configuration = TestFactory.LINK_CONFIGURATION,
                 linkLaunchMode = linkLaunchMode
             )
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private fun onWalletCollapsedHeader() =

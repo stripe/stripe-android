@@ -54,9 +54,12 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.FakeSavedPaymentMethodRepository
@@ -68,6 +71,7 @@ import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
@@ -88,14 +92,19 @@ internal class PaymentOptionsActivityTest {
 
     private val composeTestRule = createEmptyComposeRule()
     private val networkRule = NetworkRule()
+    private val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @get:Rule
     val rule = RuleChain.emptyRuleChain()
         .around(InstantTaskExecutorRule())
+        .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
         .around(networkRule)
         .around(CheckoutInstancesTestRule())
         .around(RetryRule(3))
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -565,14 +574,15 @@ internal class PaymentOptionsActivityTest {
                 linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
                 linkPaymentLauncher = mock(),
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 errorReporter = FakeErrorReporter(),
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
-                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
             )
-        }
+        }.also { viewModelStoreRule.track(it) }
 
         val scenario = injectableActivityScenario<PaymentOptionsActivity> {
             injectActivity {

@@ -63,18 +63,22 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -99,6 +103,12 @@ internal class PaymentOptionsViewModelTest {
 
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val standardTestDispatcher = StandardTestDispatcher()
@@ -1455,6 +1465,7 @@ internal class PaymentOptionsViewModelTest {
             linkPaymentLauncher = linkPaymentLauncher,
             linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
             tapToAddHelperFactory = tapToAddHelperFactory,
+            isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
             mode = EventReporter.Mode.Complete,
             errorReporter = errorReporter,
             customerStateHolderFactory = object : CustomerStateHolder.Factory {
@@ -1462,11 +1473,11 @@ internal class PaymentOptionsViewModelTest {
                     return customerStateHolder ?: DefaultCustomerStateHolder.Factory.create(viewModel)
                 }
             },
-            customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+            customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             placesClient = null,
         )
-    }
+    }.also { viewModelStoreRule.track(it) }
 
     private companion object {
         private val PAYMENT_INTENT = PaymentIntentFactory.create()

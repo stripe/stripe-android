@@ -20,6 +20,7 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -39,6 +40,9 @@ import org.robolectric.annotation.Config
 class UploadScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val mockNavController = mock<NavController>()
     private val onPhotoSelected = mock<(UploadMethod) -> Unit>()

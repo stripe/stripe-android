@@ -20,6 +20,7 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.FLOW_CONTROLLER_CALL
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.uicore.StripeTheme
@@ -58,6 +59,9 @@ class FlowControllerConfigurationHandlerTest {
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
 
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     @Before
     fun setup() {
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -67,7 +71,7 @@ class FlowControllerConfigurationHandlerTest {
             handle = SavedStateHandle(),
             paymentElementCallbackIdentifier = FLOW_CONTROLLER_DEFAULT_CALLBACK_IDENTIFIER,
             statusBarColor = null,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     @Test

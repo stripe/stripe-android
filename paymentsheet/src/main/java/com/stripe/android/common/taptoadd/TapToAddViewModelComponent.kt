@@ -60,7 +60,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -204,11 +203,6 @@ internal interface TapToAddViewModelModule {
         @Singleton
         @Named(ALLOWS_MANUAL_CONFIRMATION)
         fun provideAllowsManualConfirmation() = true
-
-        @Provides
-        @Singleton
-        @Named(STATUS_BAR_COLOR)
-        fun providesStatusBarColor(): Int? = null
 
         @Provides
         @Singleton

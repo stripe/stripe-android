@@ -9,6 +9,7 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.common.nfcscan.NoOpIsNfcScanningAvailable
 import com.stripe.android.core.Logger
 import com.stripe.android.customersheet.CustomerPermissions
 import com.stripe.android.customersheet.CustomerSheet
@@ -42,6 +43,7 @@ import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionL
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.FakeBacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.utils.FakeUserFacingLogger
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -54,10 +56,13 @@ import org.mockito.kotlin.mock
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
-internal object CustomerSheetTestHelper {
-    internal val application = ApplicationProvider.getApplicationContext<Application>()
+internal interface CustomerSheetTestHelper {
+    val application: Application
+        get() = ApplicationProvider.getApplicationContext()
 
-    internal fun createViewModel(
+    val viewModelStoreTestRule: ViewModelStoreTestRule
+
+    fun createViewModel(
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         integrationType: CustomerSheetIntegration.Type = CustomerSheetIntegration.Type.CustomerAdapter,
@@ -122,6 +127,7 @@ internal object CustomerSheetTestHelper {
             savedSelectionDataSourceProvider = CompletableSingle(savedSelectionDataSource),
             configuration = configuration,
             integrationType = integrationType,
+            statusBarColor = null,
             paymentConfiguration = PaymentConfiguration(if (isLiveMode) "pk_live" else "pk_test"),
             logger = Logger.noop(),
             productUsage = emptySet(),
@@ -165,11 +171,12 @@ internal object CustomerSheetTestHelper {
                 ),
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
+            isNfcScanningAvailable = NoOpIsNfcScanningAvailable(),
             errorReporter = errorReporter,
             savedStateHandle = savedStateHandle,
             userFacingLogger = FakeUserFacingLogger(),
         ).apply {
             registerFromActivity(DummyActivityResultCaller.noOp(), TestLifecycleOwner())
-        }
+        }.also { viewModelStoreTestRule.track(it) }
     }
 }

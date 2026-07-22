@@ -16,6 +16,8 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
@@ -53,11 +55,11 @@ internal class CheckoutControllerTest {
             .toString()
 
     // Destroys built controllers when the test finishes, releasing each one's viewModelScope.
-    private val controllerRule = CheckoutControllerTestRule()
+    private val destroyControllerRule = CleanupTestRule(CheckoutController::destroy)
 
     @get:Rule
-    val ruleChain: RuleChain = RuleChain
-        .outerRule(controllerRule)
+    val ruleChain: RuleChain = RuleChain.emptyRuleChain()
+        .around(destroyControllerRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
 
@@ -123,18 +125,18 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `configure populates confirmationState with payment method metadata`() = runConfigureScenario {
+    fun `configure populates state with payment method metadata`() = runConfigureScenario {
         result.getOrThrow()
-        val confirmationState = controller.confirmationStateHolder.state
-        assertThat(confirmationState).isNotNull()
-        assertThat(confirmationState!!.paymentMethodMetadata).isNotNull()
+        val state = committedState
+        assertThat(state).isNotNull()
+        assertThat(state!!.paymentMethodMetadata).isNotNull()
     }
 
     @Test
     fun `configure uses app name as merchant display name, not checkout session data`() =
         runConfigureScenario {
             result.getOrThrow()
-            assertThat(controller.confirmationStateHolder.state?.configuration?.merchantDisplayName)
+            assertThat(committedState?.embeddedConfiguration?.merchantDisplayName)
                 .isEqualTo(expectedMerchantDisplayName)
         }
 
@@ -146,8 +148,30 @@ internal class CheckoutControllerTest {
             ),
         ) {
             result.getOrThrow()
-            assertThat(controller.confirmationStateHolder.state?.configuration?.embeddedViewDisplaysMandateText)
+            assertThat(committedState?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
                 .isFalse()
+        }
+
+    @Test
+    fun `configure upgrades Automatic to Full when session requires billing address`() =
+        runConfigureScenario(
+            configuration = CheckoutController.Configuration().paymentElement(
+                PaymentElement.Configuration().billingDetailsCollectionConfiguration(
+                    BillingDetailsCollectionConfiguration()
+                        .address(BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic)
+                )
+            ),
+            networkSetup = {
+                networkRule.checkoutInit(
+                    responseFactory = successResponseFactory { json ->
+                        json.put("billing_address_collection", "required")
+                    },
+                )
+            },
+        ) {
+            result.getOrThrow()
+            assertThat(committedState?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
+                .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full)
         }
 
     @Test
@@ -173,7 +197,7 @@ internal class CheckoutControllerTest {
     ) {
         assertThat(result.isFailure).isTrue()
         assertThat(controller.checkoutSession.value).isNull()
-        assertThat(controller.confirmationStateHolder.state).isNull()
+        assertThat(committedState).isNull()
     }
 
     @Test
@@ -190,14 +214,15 @@ internal class CheckoutControllerTest {
         },
     ) {
         assertThat(result.isFailure).isTrue()
-        assertThat(controller.confirmationStateHolder.state).isNull()
+        assertThat(committedState).isNull()
     }
 
     @Test
     fun `checkoutSession is null before configure`() = runTest {
-        val controller = createController()
+        val savedStateHandle = SavedStateHandle()
+        val controller = createController(savedStateHandle)
         assertThat(controller.checkoutSession.value).isNull()
-        assertThat(controller.confirmationStateHolder.state).isNull()
+        assertThat(CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state).isNull()
     }
 
     @Test
@@ -214,18 +239,30 @@ internal class CheckoutControllerTest {
     }
 
     @Test
-    fun `confirmationState is restored from savedStateHandle after recreation`() = runTest {
+    fun `state is restored from savedStateHandle after recreation`() = runTest {
         networkRule.defaultInit()
         val savedStateHandle = SavedStateHandle()
         val controller = createController(savedStateHandle)
         controller.configure(DEFAULT_CLIENT_SECRET).getOrThrow()
 
-        val recreated = createController(savedStateHandle)
-
-        val confirmationState = recreated.confirmationStateHolder.state
-        assertThat(confirmationState).isNotNull()
-        assertThat(confirmationState!!.configuration.merchantDisplayName)
+        // A fresh state holder over the same SavedStateHandle simulates the controller being
+        // rebuilt after process death: the committed state is read back from persisted storage.
+        val state = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state
+        assertThat(state).isNotNull()
+        assertThat(state!!.embeddedConfiguration.merchantDisplayName)
             .isEqualTo(expectedMerchantDisplayName)
+    }
+
+    @Test
+    fun `destroy clears the committed state`() = runConfigureScenario {
+        result.getOrThrow()
+        // Pre-condition: configure committed a non-null state so the clear is observable.
+        assertThat(committedState).isNotNull()
+
+        controller.destroy()
+
+        assertThat(committedState).isNull()
+        assertThat(controller.checkoutSession.value).isNull()
     }
 
     @Test
@@ -257,7 +294,7 @@ internal class CheckoutControllerTest {
         val result = controller.applyPromotionCode("10OFF")
 
         result.getOrThrow()
-        assertThat(controller.confirmationStateHolder.state).isNotNull()
+        assertThat(committedState().paymentMethodMetadata).isNotNull()
     }
 
     @Test
@@ -324,6 +361,35 @@ internal class CheckoutControllerTest {
         val before = controller.checkoutSession.value
 
         val result = controller.updateLineItemQuantity("li_1", -1)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(controller.checkoutSession.value).isEqualTo(before)
+    }
+
+    @Test
+    fun `updateCurrency sends updated_currency and updates session on success`() = runMutationScenario {
+        networkRule.checkoutUpdate(
+            bodyPart("updated_currency", "usd"),
+            responseFactory = successResponseFactory { json ->
+                json.put("total_summary", totalSummaryJson(due = 5099))
+            },
+        )
+
+        val result = controller.updateCurrency("usd")
+
+        result.getOrThrow()
+        assertThat(controller.checkoutSession.value?.totalSummary?.totalDueToday).isEqualTo(5099)
+    }
+
+    @Test
+    fun `updateCurrency returns failure and preserves session on error`() = runMutationScenario {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid currency"}}""")
+        }
+        val before = controller.checkoutSession.value
+
+        val result = controller.updateCurrency("invalid")
 
         assertThat(result.isFailure).isTrue()
         assertThat(controller.checkoutSession.value).isEqualTo(before)
@@ -889,7 +955,7 @@ internal class CheckoutControllerTest {
     private fun createController(
         savedStateHandle: SavedStateHandle = SavedStateHandle(),
     ): CheckoutController {
-        return controllerRule.track(
+        return destroyControllerRule.track(
             CheckoutController.Builder(
                 application = applicationContext,
                 savedStateHandle = savedStateHandle,
@@ -904,15 +970,22 @@ internal class CheckoutControllerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         networkSetup()
-        val controller = createController()
+        val savedStateHandle = SavedStateHandle()
+        val controller = createController(savedStateHandle)
         val result = controller.configure(clientSecret, configuration)
-        block(Scenario(controller, result))
+        block(Scenario(controller, result, savedStateHandle))
     }
 
     private class Scenario(
         val controller: CheckoutController,
         val result: Result<Unit>,
-    )
+        private val savedStateHandle: SavedStateHandle,
+    ) {
+        // Reads the state the controller committed via its state holder, which shares this
+        // SavedStateHandle in the production graph.
+        val committedState: CheckoutControllerState?
+            get() = CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state
+    }
 
     // Configures a controller from a fresh init, then hands it to [block] alongside the shared
     // SavedStateHandle (used to read committed state and simulate a presented payment flow) and an
@@ -968,12 +1041,12 @@ internal class CheckoutControllerTest {
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
         fun committedState(): CheckoutControllerState =
-            requireNotNull(CheckoutControllerStateHolder(savedStateHandle).state)
+            requireNotNull(CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state)
 
         // Simulates a presented payment flow by flipping the committed state's integrationLaunched
         // flag, which the mutation guard reads back through the same SavedStateHandle.
         fun markIntegrationLaunched() {
-            val stateHolder = CheckoutControllerStateHolder(savedStateHandle)
+            val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
             stateHolder.state = committedState().copy(integrationLaunched = true)
         }
     }

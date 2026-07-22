@@ -1,55 +1,79 @@
 package com.stripe.android.checkout
 
+import android.graphics.Bitmap
+import android.os.Bundle
 import com.stripe.android.checkout.injection.MerchantDisplayName
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
-import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
-/**
- * Loads the payment element for a [CheckoutControllerState] and, on success, atomically commits it
- * to the [stateHolder], [confirmationStateHolder], and [selectionHolder]. Extracted from
- * [CheckoutController] so the load-and-commit flow can be unit tested in isolation from the
- * controller.
- */
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
     @MerchantDisplayName private val merchantDisplayName: String,
     private val flagImageResolver: FlagImageResolver,
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
-    private val selectionHolder: EmbeddedSelectionHolder,
-    private val confirmationStateHolder: CheckoutConfirmationStateHolder,
     private val stateHolder: CheckoutControllerStateHolder,
 ) {
-    /**
-     * Loads the payment element for [state] and, on success, atomically commits the resolved state.
-     * Throws if the load fails, leaving the previously committed state untouched (the commits are
-     * the final step, so a failure short-circuits before any holder is mutated).
-     */
-    suspend fun load(state: CheckoutControllerState) {
-        val response = state.checkoutSessionResponse
-
-        val resolvedState = state.copy(
-            // [state] carries the previously resolved flag images forward (a mutation copies them
-            // from the committed state), so they're reused when the currencies haven't changed.
-            flagImages = flagImageResolver.resolve(response, cached = state.flagImages),
+    suspend fun loadInitial(
+        configuration: CheckoutController.Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+    ) {
+        commit(
+            configuration = configuration,
+            sessionData = InitialSessionData(checkoutSessionResponse),
+            carryForward = CarryForward.initial(),
         )
+    }
+
+    suspend fun reload(state: CheckoutControllerState) {
+        commit(
+            configuration = state.configuration,
+            sessionData = state,
+            carryForward = CarryForward.from(state),
+        )
+    }
+
+    private suspend fun commit(
+        configuration: CheckoutController.Configuration.State,
+        sessionData: CheckoutSessionData,
+        carryForward: CarryForward,
+    ) {
+        val response = sessionData.checkoutSessionResponse
+
+        // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
+        // reused when the currencies haven't changed.
+        val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
         val baseConfig = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
             .embeddedViewDisplaysMandateText(
-                resolvedState.configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
+                configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
+            )
+            .billingDetailsCollectionConfiguration(
+                configuration.paymentElementConfiguration.billingDetailsCollectionConfiguration
+                    .reconcile(response.requiresBillingAddress)
+                    .asPaymentSheet()
+            )
+            .googlePay(
+                googlePay = response.merchantCountry?.let { merchantCountry ->
+                    configuration.googlePayConfiguration?.asPaymentSheet(merchantCountry)
+                }
             )
             .build()
 
         val embeddedConfig = CheckoutConfigurationMerger.EmbeddedConfiguration(baseConfig)
-            .forCheckoutSession(resolvedState)
+            .forCheckoutSession(sessionData)
 
         val loaderState = paymentElementLoader.load(
-            initializationMode = resolvedState.initializationMode,
+            initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(
+                instancesKey = response.id,
+                checkoutSessionResponse = response,
+            ),
             integrationConfiguration = PaymentElementLoader.Configuration.Embedded(
                 isRowSelectionImmediateAction = false,
                 configuration = embeddedConfig,
@@ -61,22 +85,84 @@ internal class CheckoutStateLoader @Inject constructor(
         ).getOrThrow()
 
         // Preserve the customer's existing selection across reloads when it's still valid, rather
-        // than blindly adopting the loader's recomputed selection (reuses the embedded logic).
+        // than blindly adopting the loader's recomputed selection (reuses the embedded logic). The
+        // previous selection comes from the incoming state, not a separate holder.
         val selection = selectionChooser.choose(
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             paymentMethods = loaderState.customer?.paymentMethods,
-            previousSelection = selectionHolder.selection.value,
+            previousSelection = carryForward.previousSelection,
             newSelection = loaderState.paymentSelection,
             newConfiguration = embeddedConfig.asCommonConfiguration(),
             formSheetAction = embeddedConfig.formSheetAction,
         )
 
-        stateHolder.state = resolvedState
-        confirmationStateHolder.state = CheckoutConfirmationStateHolder.State(
+        stateHolder.state = CheckoutControllerState(
+            key = response.id,
+            configuration = configuration,
+            checkoutSessionResponse = response,
+            flagImages = flagImages,
+            collectedDetails = sessionData.toCollectedDetails(),
+            integrationLaunched = carryForward.integrationLaunched,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
-            selection = selection,
-            configuration = embeddedConfig,
+            embeddedConfiguration = embeddedConfig,
+            paymentSelection = selection,
+            temporarySelection = carryForward.temporarySelection,
+            previousNewSelections = carryForward.previousNewSelections,
         )
-        selectionHolder.set(selection)
+    }
+
+    /**
+     * The fields carried from the prior state (or fresh defaults) into the next committed state, so a
+     * [reload] preserves everything the load itself doesn't recompute. Collapses [commit]'s parameter
+     * list into a single carrier.
+     */
+    private data class CarryForward(
+        val cachedFlagImages: Map<String, Bitmap>?,
+        val previousSelection: PaymentSelection?,
+        val temporarySelection: String?,
+        val previousNewSelections: Bundle,
+        val integrationLaunched: Boolean,
+    ) {
+        companion object {
+            fun initial() = CarryForward(
+                cachedFlagImages = null,
+                previousSelection = null,
+                temporarySelection = null,
+                previousNewSelections = Bundle(),
+                integrationLaunched = false,
+            )
+
+            fun from(state: CheckoutControllerState) = CarryForward(
+                cachedFlagImages = state.flagImages,
+                previousSelection = state.paymentSelection,
+                temporarySelection = state.temporarySelection,
+                previousNewSelections = state.previousNewSelections,
+                integrationLaunched = state.integrationLaunched,
+            )
+        }
+    }
+
+    /** The [CheckoutSessionData] for a first load: the session response with no collected details. */
+    private class InitialSessionData(
+        override val checkoutSessionResponse: CheckoutSessionResponse,
+        private val collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
+    ) : CheckoutSessionData {
+        override val shippingName: String? get() = collectedDetails.shippingName
+        override val billingName: String? get() = collectedDetails.billingName
+        override val shippingPhoneNumber: String? get() = collectedDetails.shippingPhoneNumber
+        override val billingPhoneNumber: String? get() = collectedDetails.billingPhoneNumber
+        override val shippingAddress: Address.State? get() = collectedDetails.shippingAddress
+        override val billingAddress: Address.State? get() = collectedDetails.billingAddress
     }
 }
+
+/** Projects the collected details carried on any [CheckoutSessionData] into a [CheckoutCollectedDetails]. */
+@OptIn(CheckoutSessionPreview::class)
+private fun CheckoutSessionData.toCollectedDetails() = CheckoutCollectedDetails(
+    shippingName = shippingName,
+    billingName = billingName,
+    shippingPhoneNumber = shippingPhoneNumber,
+    billingPhoneNumber = billingPhoneNumber,
+    shippingAddress = shippingAddress,
+    billingAddress = billingAddress,
+)

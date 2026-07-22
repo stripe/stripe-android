@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation
 
+import androidx.activity.result.ActivityResultLauncher
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -35,23 +36,21 @@ import org.mockito.kotlin.mock
 
 class IntentConfirmationDefinitionTest {
     @Test
-    fun `'createLauncher' should call factory when creating launcher`() {
-        val launcher = FakePaymentLauncher()
+    fun `'createLauncher' should register and return the activity result launcher`() {
+        val registeredLauncher = mock<ActivityResultLauncher<PaymentLauncherContract.Args>>()
 
-        val definition = createIntentConfirmationDefinition(
-            paymentLauncher = launcher,
-        )
+        val definition = createIntentConfirmationDefinition()
 
         val createdLauncher = definition.createLauncher(
             activityResultCaller = mock {
                 on {
                     registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(any(), any())
-                } doReturn mock()
+                } doReturn registeredLauncher
             },
             onResult = {}
         )
 
-        assertThat(createdLauncher).isEqualTo(launcher)
+        assertThat(createdLauncher).isEqualTo(registeredLauncher)
     }
 
     @Test
@@ -263,7 +262,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = mock(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -287,7 +286,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = mock(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -315,7 +314,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = mock(),
             arguments = IntentConfirmationDefinition.Args.Confirm(
                 confirmNextParams = confirmParams,
                 deferredIntentConfirmationType = null,
@@ -339,7 +338,7 @@ class IntentConfirmationDefinitionTest {
         )
 
         definition.launch(
-            launcher = launcher,
+            launcher = mock(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -364,7 +363,7 @@ class IntentConfirmationDefinitionTest {
         val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = launcher,
+            launcher = mock(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = paymentIntent,
                 deferredIntentConfirmationType = null,
@@ -389,7 +388,7 @@ class IntentConfirmationDefinitionTest {
         val setupIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         definition.launch(
-            launcher = launcher,
+            launcher = mock(),
             arguments = IntentConfirmationDefinition.Args.NextAction(
                 intent = setupIntent,
                 deferredIntentConfirmationType = null,
@@ -401,6 +400,30 @@ class IntentConfirmationDefinitionTest {
         assertThat(launcher.calls.awaitItem()).isEqualTo(
             FakePaymentLauncher.Call.HandleNextActionWithIntent.Intent(setupIntent)
         )
+    }
+
+    @Test
+    fun `On 'launch', should build payment launcher using 'statusBarColor' from confirmation args`() {
+        var capturedStatusBarColor: Int? = null
+
+        val definition = createIntentConfirmationDefinition(
+            paymentLauncherFactory = { _, statusBarColor ->
+                capturedStatusBarColor = statusBarColor
+                FakePaymentLauncher()
+            },
+        )
+
+        definition.launch(
+            launcher = mock(),
+            arguments = IntentConfirmationDefinition.Args.NextAction(
+                intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+                deferredIntentConfirmationType = null,
+            ),
+            confirmationArgs = CONFIRMATION_PARAMETERS.copy(statusBarColor = 0x00FF00),
+            confirmationOption = SAVED_PAYMENT_CONFIRMATION_OPTION,
+        )
+
+        assertThat(capturedStatusBarColor).isEqualTo(0x00FF00)
     }
 
     @Test
@@ -493,11 +516,13 @@ class IntentConfirmationDefinitionTest {
                     return FakeIntentConfirmationInterceptor()
                 }
             },
-        paymentLauncher: PaymentLauncher = FakePaymentLauncher()
+        paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
+        paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher =
+            { _, _ -> paymentLauncher },
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-            paymentLauncherFactory = { paymentLauncher }
+            paymentLauncherFactory = paymentLauncherFactory,
         )
     }
 

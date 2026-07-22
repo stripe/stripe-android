@@ -33,7 +33,10 @@ class AutocompleteAddressController(
     private val config = interactor.autocompleteConfig
 
     private val inlineAutocompleteActive =
-        config.isInlineAutocompleteEnabled && config.isPlacesAvailable
+        config.isInlineAutocompleteEnabled && (
+            config.shouldUseStripeHostedAutocomplete ||
+                (!config.googlePlacesApiKey.isNullOrBlank() && config.isPlacesAvailable)
+            )
 
     private val inlineAutocompleteHandler: InlineAutocompleteHandler? =
         if (inlineAutocompleteActive) {
@@ -129,7 +132,7 @@ class AutocompleteAddressController(
                 }
 
                 _addressElementFlow.value =
-                    createAddressElement(newValues, toAddressInputMode(expandForm, newValues))
+                    createAddressElement(newValues, newAddressInputMode)
             }
         }
     }
@@ -161,13 +164,7 @@ class AutocompleteAddressController(
     ): AddressInputMode {
         val googlePlacesApiKey = config.googlePlacesApiKey
 
-        return if (googlePlacesApiKey == null) {
-            AddressInputMode.NoAutocomplete(
-                phoneNumberConfig = phoneNumberConfig,
-                nameConfig = nameConfig,
-                emailConfig = emailConfig,
-            )
-        } else if (inlineAutocompleteActive && !expandForm && values[IdentifierSpec.Line1] == null) {
+        return if (inlineAutocompleteActive && !expandForm && values[IdentifierSpec.Line1] == null) {
             AddressInputMode.AutocompleteInline(
                 googleApiKey = googlePlacesApiKey,
                 autocompleteCountries = config.autocompleteCountries,
@@ -175,7 +172,7 @@ class AutocompleteAddressController(
                 nameConfig = nameConfig,
                 emailConfig = emailConfig,
             )
-        } else if (config.isInlineAutocompleteEnabled) {
+        } else if (config.isInlineAutocompleteEnabled || googlePlacesApiKey == null) {
             AddressInputMode.NoAutocomplete(
                 phoneNumberConfig = phoneNumberConfig,
                 nameConfig = nameConfig,

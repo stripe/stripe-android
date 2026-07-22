@@ -13,12 +13,17 @@ import com.stripe.android.core.browser.BrowserCapabilities
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.testing.ViewModelStoreTestRule
+import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class StripeBrowserLauncherViewModelTest {
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val analyticsRequests = mutableListOf<AnalyticsRequest>()
     private val analyticsRequestExecutor = AnalyticsRequestExecutor {
@@ -103,7 +108,7 @@ class StripeBrowserLauncherViewModelTest {
             customTabsPackage = null,
             resolveErrorMessage = "Unable to resolve things",
             savedStateHandle = savedStateHandle,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 
     private companion object {

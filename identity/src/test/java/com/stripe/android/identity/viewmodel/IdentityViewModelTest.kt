@@ -67,6 +67,7 @@ import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.BACK
 import com.stripe.android.identity.viewmodel.IdentityViewModel.Companion.FRONT
 import com.stripe.android.mlcore.base.InterpreterInitializer
+import com.stripe.android.testing.ViewModelStoreTestRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
@@ -94,6 +95,9 @@ import kotlin.test.assertFailsWith
 internal class IdentityViewModelTest {
     @get:Rule
     var rule: TestRule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     private val mockVerificationPage = mock<VerificationPage> {
         on { documentCapture }.thenReturn(DOCUMENT_CAPTURE)
@@ -164,7 +168,7 @@ internal class IdentityViewModelTest {
         mock(),
         UnconfinedTestDispatcher(),
         mock()
-    )
+    ).also { viewModelStoreRule.track(it) }
 
     private fun mockUploadSuccess() = runBlocking {
         whenever(mockIdentityRepository.uploadImage(any(), any(), any(), any(), any())).thenReturn(

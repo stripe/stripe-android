@@ -5,8 +5,6 @@ import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.strings.ResolvableString
-import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.paymentsheet.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -55,41 +53,34 @@ internal class DefaultNfcCardScanner @Inject constructor(
             viewModelScope.launch(workContext) {
                 _state.emit(NfcCardScanner.State.Scanning)
 
-                runCatching {
-                    transceiver.open()
-
-                    try {
-                        cardReader.readCard(transceiver)
-                            .getOrThrow()
-                    } finally {
-                        transceiver.close()
-                    }
-                }.fold(
-                    onSuccess = { cardData ->
-                        val state = when (val result = cardValidator.validate(cardData)) {
-                            is NfcCardValidator.Result.Validated -> NfcCardScanner.State.Complete(cardData)
-                            is NfcCardValidator.Result.Invalid -> NfcCardScanner.State.Failed(
+                val cardData = when (val readerResult = cardReader.readCard(transceiver)) {
+                    is NfcCardReader.Result.Found -> readerResult.scannedCardData
+                    is NfcCardReader.Result.Error -> {
+                        _state.emit(
+                            NfcCardScanner.State.Failed(
                                 error = NfcCardScanner.Error(
-                                    code = result.errorCode,
-                                    userMessage = result.userMessage,
+                                    code = readerResult.errorCode,
+                                    userMessage = readerResult.userMessage,
                                 )
                             )
-                        }
+                        )
 
-                        _state.emit(state)
-                    },
-                    onFailure = {
-                        _state.emit(NfcCardScanner.State.Failed(GENERIC_ERROR))
+                        return@launch
                     }
-                )
+                }
+
+                val finalResult = when (val result = cardValidator.validate(cardData)) {
+                    is NfcCardValidator.Result.Validated -> NfcCardScanner.State.Complete(cardData)
+                    is NfcCardValidator.Result.Invalid -> NfcCardScanner.State.Failed(
+                        error = NfcCardScanner.Error(
+                            code = result.errorCode,
+                            userMessage = result.userMessage,
+                        )
+                    )
+                }
+
+                _state.emit(finalResult)
             }
         }
-    }
-
-    private companion object {
-        val GENERIC_ERROR = NfcCardScanner.Error(
-            code = "unknown",
-            userMessage = R.string.stripe_tap_to_add_card_default_error_action.resolvableString,
-        )
     }
 }

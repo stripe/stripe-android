@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -41,6 +42,7 @@ internal sealed interface UiDefinitionFactory {
         val merchantName: String,
         val cbcEligibility: CardBrandChoiceEligibility,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        val requiresBillingAddressForAutomaticTax: Boolean,
         val requiresMandate: Boolean,
         val onLinkInlineSignupStateChanged: (InlineSignupViewState) -> Unit,
         val cardBrandFilter: CardBrandFilter,
@@ -53,6 +55,7 @@ internal sealed interface UiDefinitionFactory {
         val automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
         val tapToAddHelper: TapToAddHelper? = null,
         val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+        val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
     ) {
         interface Factory {
             fun create(
@@ -78,6 +81,7 @@ internal sealed interface UiDefinitionFactory {
                     null,
                 private val tapToAddHelper: TapToAddHelper? = null,
                 private val paymentMethodMessagingPromotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
+                private val isNfcScanningAvailable: IsNfcScanningAvailable? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
@@ -96,6 +100,7 @@ internal sealed interface UiDefinitionFactory {
                         shippingValues = metadata.shippingDetails?.toIdentifierMap(metadata.defaultBillingDetails),
                         saveForFutureUseInitialValue = getSaveForFutureUseInitialValue(),
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
+                        requiresBillingAddressForAutomaticTax = metadata.requiresBillingAddressForAutomaticTax,
                         requiresMandate = requiresMandate,
                         onLinkInlineSignupStateChanged = onLinkInlineSignupStateChanged,
                         cardBrandFilter = metadata.cardBrandFilter,
@@ -108,7 +113,8 @@ internal sealed interface UiDefinitionFactory {
                         previousLinkSignupCheckboxSelection = previousLinkSignupCheckboxSelection,
                         automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                         tapToAddHelper = tapToAddHelper,
-                        paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper
+                        paymentMethodMessagingPromotionsHelper = paymentMethodMessagingPromotionsHelper,
+                        isNfcScanningAvailable = isNfcScanningAvailable,
                     )
                 }
 

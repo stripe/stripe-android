@@ -30,7 +30,7 @@ internal interface EmbeddedSheetLauncher {
     fun launchForm(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        configuration: EmbeddedPaymentElement.Configuration?,
         customerState: CustomerState?,
         promotion: PaymentMethodMessagePromotion?,
     )
@@ -39,7 +39,14 @@ internal interface EmbeddedSheetLauncher {
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
         selection: PaymentSelection?,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        configuration: EmbeddedPaymentElement.Configuration?,
+    )
+
+    fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration?,
     )
 }
 
@@ -73,10 +80,11 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             sheetStateHolder.sheetIsOpen = false
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
-                    selectionHolder.setTemporary(null)
+                    selectionHolder.setTemporarySelection(null)
                     handleFormResult(result)
                 }
                 is EmbeddedLaunchMode.Manage -> handleManageResult(result)
+                is EmbeddedLaunchMode.PaymentOptions -> handlePaymentOptionsResult(result)
             }
         }
 
@@ -84,7 +92,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.set(result.selection)
+                selectionHolder.setSelection(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
                         EmbeddedPaymentElement.Result.Completed()
@@ -107,7 +115,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.set(result.selection)
+                selectionHolder.setSelection(result.selection)
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
                 }
@@ -117,10 +125,40 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
     }
 
+    private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
+        when (result) {
+            is EmbeddedActivityResult.Complete -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.setSelection(result.selection)
+                if (result.hasBeenConfirmed) {
+                    embeddedResultCallbackHelper.setResult(
+                        EmbeddedPaymentElement.Result.Completed()
+                    )
+                }
+            }
+            is EmbeddedActivityResult.Cancelled -> {
+                result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                clearStaleSelection()
+            }
+            is EmbeddedActivityResult.Error -> Unit
+        }
+    }
+
+    private fun clearStaleSelection() {
+        val currentSelection = selectionHolder.selection.value
+        if (currentSelection is PaymentSelection.Saved) {
+            val paymentMethodId = currentSelection.paymentMethod.id
+            val stillExists = customerStateHolder.paymentMethods.value.any { it.id == paymentMethodId }
+            if (!stillExists) {
+                selectionHolder.setSelection(null)
+            }
+        }
+    }
+
     override fun launchForm(
         code: String,
         paymentMethodMetadata: PaymentMethodMetadata,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        configuration: EmbeddedPaymentElement.Configuration?,
         customerState: CustomerState?,
         promotion: PaymentMethodMessagePromotion?,
     ) {
@@ -129,7 +167,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
             CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
         }
-        if (embeddedConfirmationState == null) {
+        if (configuration == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
             )
@@ -137,13 +175,13 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
-        selectionHolder.setTemporary(code)
+        selectionHolder.setTemporarySelection(code)
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
             ?: selectionHolder.getPreviousNewSelection(code)
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = embeddedConfirmationState.configuration,
+            configuration = configuration,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = currentSelection,
@@ -158,14 +196,14 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         paymentMethodMetadata: PaymentMethodMetadata,
         customerState: CustomerState,
         selection: PaymentSelection?,
-        embeddedConfirmationState: EmbeddedConfirmationStateHolder.State?,
+        configuration: EmbeddedPaymentElement.Configuration?,
     ) {
         val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
         if (checkoutSession != null) {
             CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
             CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
         }
-        if (embeddedConfirmationState == null) {
+        if (configuration == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
             )
@@ -175,13 +213,45 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         sheetStateHolder.sheetIsOpen = true
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
-            configuration = embeddedConfirmationState.configuration,
+            configuration = configuration,
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.Manage,
+        )
+        activityLauncher.launch(args)
+    }
+
+    override fun launchPaymentOptions(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        customerState: CustomerState?,
+        selection: PaymentSelection?,
+        configuration: EmbeddedPaymentElement.Configuration?,
+    ) {
+        val checkoutSession = paymentMethodMetadata.integrationMetadata as? IntegrationMetadata.CheckoutSession
+        if (checkoutSession != null) {
+            CheckoutInstances.ensureNoMutationInFlight(checkoutSession.instancesKey)
+            CheckoutInstances.markIntegrationLaunched(checkoutSession.instancesKey)
+        }
+        if (configuration == null) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EMBEDDED_SHEET_LAUNCHER_EMBEDDED_STATE_IS_NULL
+            )
+            return
+        }
+        if (sheetStateHolder.sheetIsOpen) return
+        sheetStateHolder.sheetIsOpen = true
+        val args = EmbeddedActivityArgs(
+            paymentMethodMetadata = paymentMethodMetadata,
+            configuration = configuration,
+            paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
+            statusBarColor = statusBarColor,
+            selection = selection,
+            customerState = customerState,
+            promotion = null,
+            launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
         activityLauncher.launch(args)
     }

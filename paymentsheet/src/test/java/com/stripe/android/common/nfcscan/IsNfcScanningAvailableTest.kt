@@ -1,90 +1,238 @@
 package com.stripe.android.common.nfcscan
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.common.analytics.experiment.LoggableExperiment
 import com.stripe.android.common.nfcscan.hardware.FakeNfcHardwareDelegate
 import com.stripe.android.common.nfcscan.security.FakeIsDeviceSecureForNfc
-import com.stripe.android.core.utils.FeatureFlags
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures
+import com.stripe.android.isInstanceOf
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
-import com.stripe.android.paymentsheet.state.FakeTapToAddAvailabilityFactory
-import org.junit.After
+import com.stripe.android.model.ElementsSession.ExperimentAssignment
+import com.stripe.android.paymentsheet.analytics.EventReporter
+import com.stripe.android.paymentsheet.analytics.FakeEventReporter
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 internal class IsNfcScanningAvailableTest {
-    private val elementsSession = mock<ElementsSession>()
-    private val customerMetadata = PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_METADATA
+    @Test
+    fun `returns false when NFC scanning is disabled on metadata`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
-    @After
-    fun tearDown() {
-        FeatureFlags.enableNfcScanning.reset()
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(isNfcScanningEnabled = false),
+            )
+        ).isFalse()
     }
 
     @Test
-    fun `IsNfcScanningAvailableForPaymentElement returns false when NFC feature flag is disabled`() {
-        FeatureFlags.enableNfcScanning.setEnabled(false)
+    fun `returns false when tap to add is supported`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
-        val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
-            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
-            tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
-            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
-        )
-
-        assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(
+                    isNfcScanningEnabled = true,
+                    isTapToAddSupported = true,
+                ),
+            )
+        ).isFalse()
     }
 
     @Test
-    fun `IsNfcScanningAvailableForPaymentElement returns false when tap to add is available`() {
-        FeatureFlags.enableNfcScanning.setEnabled(true)
-
-        val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
-            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
-            tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = true),
-            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
-        )
-
-        assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
-    }
-
-    @Test
-    fun `IsNfcScanningAvailableForPaymentElement returns false when device is not sure`() {
-        FeatureFlags.enableNfcScanning.setEnabled(true)
-
-        val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
+    fun `returns false when device is not secure`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
             isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
-            tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
-            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
         )
 
-        assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(isNfcScanningEnabled = true),
+            )
+        ).isFalse()
     }
 
     @Test
-    fun `IsNfcScanningAvailableForPaymentElement returns false when NFC hardware is unavailable`() {
-        FeatureFlags.enableNfcScanning.setEnabled(true)
-
-        val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
-            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
-            tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
+    fun `returns false when NFC hardware is unavailable`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
             nfcHardwareDelegate = FakeNfcHardwareDelegate(result = false),
         )
 
-        assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isFalse()
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(isNfcScanningEnabled = true),
+            )
+        ).isFalse()
     }
 
     @Test
-    fun `IsNfcScanningAvailableForPaymentElement returns true when flag on, TTA off, and NFC enabled & secure`() {
-        FeatureFlags.enableNfcScanning.setEnabled(true)
+    fun `returns false when assigned to control`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
 
-        val isNfcScanningAvailable = DefaultIsNfcScanningAvailable(
-            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
-            tapToAddAvailabilityFactory = FakeTapToAddAvailabilityFactory(isAvailableResult = false),
-            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(
+                    isNfcScanningEnabled = true,
+                    experimentVariant = "control",
+                ),
+            )
+        ).isFalse()
+    }
+
+    @Test
+    fun `returns true when assigned to treatment and NFC is enabled and secure`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
+
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(
+                    isNfcScanningEnabled = true,
+                    experimentVariant = "treatment",
+                ),
+            )
+        ).isTrue()
+    }
+
+    @Test
+    fun `returns true when experiment is unassigned and NFC is enabled and secure`() {
+        val isNfcScanningAvailable = createIsNfcScanningAvailable()
+
+        assertThat(
+            isNfcScanningAvailable.get(
+                metadata = createMetadata(isNfcScanningEnabled = true),
+            )
+        ).isTrue()
+    }
+
+    @Test
+    fun `logs experiment exposure when assigned to treatment`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(eventReporter = eventReporter)
+        val metadata = createMetadata(
+            isNfcScanningEnabled = true,
+            experimentVariant = "treatment",
         )
 
-        assertThat(isNfcScanningAvailable.get(elementsSession, customerMetadata)).isTrue()
+        isNfcScanningAvailable.get(metadata)
+
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+            as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
+        assertThat(exposure.group).isEqualTo("treatment")
+        assertThat(exposure.experiment).isEqualTo(ExperimentAssignment.OCS_MOBILE_NFC_SCANNING_FEATURE_HOLDBACK)
+        assertThat(exposure.canUseNfcScanner).isTrue()
+        assertThat(exposure.dimensions).containsEntry("can_use_nfc_scanning", "true")
+        eventReporter.experimentExposureCalls.expectNoEvents()
     }
+
+    @Test
+    fun `logs experiment exposure when assigned to control`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(eventReporter = eventReporter)
+        val metadata = createMetadata(
+            isNfcScanningEnabled = true,
+            experimentVariant = "control",
+        )
+
+        isNfcScanningAvailable.get(metadata)
+
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+            as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
+        assertThat(exposure.group).isEqualTo("control")
+        assertThat(exposure.canUseNfcScanner).isTrue()
+        assertThat(exposure.dimensions).containsEntry("can_use_nfc_scanning", "true")
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `logs canUseNfcScanner as false when device is not secure`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
+            eventReporter = eventReporter,
+            isDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = false),
+        )
+
+        isNfcScanningAvailable.get(
+            metadata = createMetadata(
+                isNfcScanningEnabled = true,
+                experimentVariant = "treatment",
+            )
+        )
+
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+        assertThat(exposure).isInstanceOf<LoggableExperiment.OcsMobileNfcScanningFeatureHoldback>()
+        val featureHoldback = exposure as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
+
+        assertThat(featureHoldback.canUseNfcScanner).isFalse()
+        assertThat(featureHoldback.dimensions).containsEntry("can_use_nfc_scanning", "false")
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `logs canUseNfcScanner as false when NFC hardware is unavailable`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(
+            eventReporter = eventReporter,
+            nfcHardwareDelegate = FakeNfcHardwareDelegate(result = false),
+        )
+
+        isNfcScanningAvailable.get(
+            metadata = createMetadata(
+                isNfcScanningEnabled = true,
+                experimentVariant = "control",
+            )
+        )
+
+        val exposure = eventReporter.experimentExposureCalls.awaitItem().experiment
+        assertThat(exposure).isInstanceOf<LoggableExperiment.OcsMobileNfcScanningFeatureHoldback>()
+        val featureHoldback = exposure as LoggableExperiment.OcsMobileNfcScanningFeatureHoldback
+
+        assertThat(featureHoldback.canUseNfcScanner).isFalse()
+        assertThat(featureHoldback.dimensions).containsEntry("can_use_nfc_scanning", "false")
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    @Test
+    fun `does not log experiment exposure when experiment is unassigned`() = runTest {
+        val eventReporter = FakeEventReporter()
+        val isNfcScanningAvailable = createIsNfcScanningAvailable(eventReporter = eventReporter)
+
+        isNfcScanningAvailable.get(createMetadata(isNfcScanningEnabled = true))
+
+        eventReporter.experimentExposureCalls.expectNoEvents()
+    }
+
+    private fun createIsNfcScanningAvailable(
+        isDeviceSecureForNfc: FakeIsDeviceSecureForNfc = FakeIsDeviceSecureForNfc(result = true),
+        nfcHardwareDelegate: FakeNfcHardwareDelegate = FakeNfcHardwareDelegate(result = true),
+        eventReporter: FakeEventReporter = FakeEventReporter(),
+        mode: EventReporter.Mode = EventReporter.Mode.Complete,
+    ): DefaultIsNfcScanningAvailable {
+        return DefaultIsNfcScanningAvailable(
+            isDeviceSecureForNfc = isDeviceSecureForNfc,
+            nfcHardwareDelegate = nfcHardwareDelegate,
+            eventReporter = eventReporter,
+            mode = mode,
+        )
+    }
+
+    private fun createMetadata(
+        isNfcScanningEnabled: Boolean,
+        isTapToAddSupported: Boolean = false,
+        experimentVariant: String? = null,
+    ) = PaymentMethodMetadataFactory.create(
+        isNfcScanningEnabled = isNfcScanningEnabled,
+        isTapToAddSupported = isTapToAddSupported,
+        experimentsData = experimentVariant?.let { variant ->
+            ElementsSession.ExperimentsData(
+                arbId = "test_arb_id",
+                experimentAssignments = mapOf(
+                    ExperimentAssignment.OCS_MOBILE_NFC_SCANNING_FEATURE_HOLDBACK to variant,
+                ),
+            )
+        },
+    )
 }

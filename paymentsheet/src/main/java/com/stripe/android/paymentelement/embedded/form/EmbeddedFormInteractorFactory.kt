@@ -45,7 +45,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
                     selectedPaymentMethodCode = paymentMethodCode,
                     paymentMethodMetadata = paymentMethodMetadata,
                 ),
-            selectionUpdater = { embeddedSelectionHolder.set(it) },
+            selectionUpdater = { embeddedSelectionHolder.setSelection(it) },
             tapToAddHelper = tapToAddHelper,
             // If no saved payment methods, then first saved payment method is automatically set as default
             setAsDefaultMatchesSaveForFutureUse = !hasSavedPaymentMethods,
@@ -60,7 +60,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
         val formType = formHelper.formTypeForCode(paymentMethodCode)
         val formArguments = formHelper.createFormArguments(paymentMethodCode)
         if (formType is FormHelper.FormType.MandateOnly) {
-            embeddedSelectionHolder.set(
+            embeddedSelectionHolder.setSelection(
                 formArguments.noUserInteractionFormFieldValues().transformToPaymentSelection(
                     paymentMethod = requireNotNull(
                         paymentMethodMetadata.supportedPaymentMethodForCode(code = paymentMethodCode)
@@ -100,7 +100,7 @@ internal class EmbeddedFormInteractorFactory @Inject constructor(
             paymentMethodMetadata = paymentMethodMetadata,
             selectedPaymentMethodCode = paymentMethodCode,
             hostedSurface = HOSTED_SURFACE_PAYMENT_ELEMENT,
-            setSelection = embeddedSelectionHolder::set,
+            setSelection = embeddedSelectionHolder::setSelection,
             hasSavedPaymentMethods = hasSavedPaymentMethods,
             onAnalyticsEvent = eventReporter::onUsBankAccountFormEvent,
             onMandateTextChanged = { mandateText, _ ->

@@ -11,6 +11,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentSelectPage
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -24,6 +25,10 @@ import org.robolectric.annotation.Config
 class DocWarmupScreenTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
+
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val onContinueClickMock: () -> Unit = mock()
 

@@ -1,14 +1,17 @@
 package com.stripe.android.paymentsheet.repositories
 
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -29,6 +32,11 @@ class CheckoutSessionRepositoryTest {
     private val repository = CheckoutSessionRepository(
         clientParams = clientParams,
         stripeNetworkClient = DefaultStripeNetworkClient(),
+        analyticsRequestExecutor = FakeAnalyticsRequestExecutor(),
+        paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
+            context = ApplicationProvider.getApplicationContext(),
+            publishableKey = "pk_test_123",
+        ),
         publishableKeyProvider = { "pk_test_123" },
         stripeAccountIdProvider = { null },
     )

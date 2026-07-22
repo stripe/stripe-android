@@ -23,6 +23,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.testing.CoroutineTestRule
+import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.events.AnalyticsEventReporter
 import com.stripe.android.ui.core.elements.events.CardBrandDisallowedReporter
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
@@ -61,6 +62,9 @@ import com.stripe.android.uicore.R as StripeUiCoreR
 internal class CardNumberControllerTest {
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 

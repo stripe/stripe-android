@@ -32,6 +32,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
@@ -43,6 +44,7 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.NullCardAccountRangeRepositoryFactory
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -59,6 +61,9 @@ internal class FormHelperTest {
         featureFlag = FeatureFlags.enableKlarnaFormRemoval,
         isEnabled = false
     )
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     @Test
     fun `formElementsForCode with unknown code returns empty list`() = runTest {
@@ -705,7 +710,7 @@ internal class FormHelperTest {
         selectionUpdater: (PaymentSelection?) -> Unit = { throw AssertionError("Not implemented") },
     ): FormHelper {
         return DefaultFormHelper(
-            coroutineScope = CoroutineScope(UnconfinedTestDispatcher()),
+            coroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
             cardAccountRangeRepositoryFactory = NullCardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = newPaymentSelectionProvider,
@@ -718,7 +723,8 @@ internal class FormHelperTest {
             autocompleteAddressInteractorFactory = null,
             automaticallyLaunchedCardScanFormDataHelper = null,
             tapToAddHelper = tapToAddHelper,
-            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+            paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+            isNfcScanningAvailable = null,
         )
     }
 

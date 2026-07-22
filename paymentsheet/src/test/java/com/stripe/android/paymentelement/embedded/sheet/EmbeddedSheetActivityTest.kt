@@ -2,7 +2,12 @@ package com.stripe.android.paymentelement.embedded.sheet
 
 import android.app.Application
 import android.os.Bundle
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -28,7 +33,9 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.RetryRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -44,6 +51,7 @@ import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -184,6 +192,53 @@ internal class EmbeddedSheetActivityTest {
         managePage.waitUntilVisible()
         managePage.clickDone()
         managePage.assertCardIsVisible(cbcCardId, "visa")
+    }
+
+    @Test
+    fun `top bar navigation button is disabled while updating card brand`() = launch {
+        managePage.waitUntilVisible()
+        managePage.clickEdit()
+        managePage.clickEdit(cbcCardId)
+
+        val countDownLatch = CountDownLatch(1)
+        networkRule.setupPaymentMethodUpdateResponse(
+            paymentMethodDetails = cbcCardDetails,
+            cardBrand = "visa",
+            countDownLatch = countDownLatch,
+        )
+        editPage.waitUntilVisible()
+        editPage.setCardBrandWithSelector("Visa")
+        editPage.update(waitUntilComplete = false)
+
+        // While the update is in flight the top bar navigation button must be disabled,
+        // matching the blocked system back button and swipe-to-dismiss.
+        composeTestRule.waitForIdle()
+        composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG).assertIsNotEnabled()
+
+        countDownLatch.countDown()
+        managePage.waitUntilVisible()
+
+        // Once the update completes the navigation button is re-enabled.
+        composeTestRule.onNodeWithTag(SHEET_NAVIGATION_BUTTON_TAG).assertIsEnabled()
+    }
+
+    @Test
+    fun `top bar shows close icon on manage list and back icon on edit screen`() = launch {
+        managePage.waitUntilVisible()
+
+        // The manage list is the root screen, so the navigation button closes the sheet.
+        composeTestRule.onNodeWithContentDescription(
+            applicationContext.getString(R.string.stripe_paymentsheet_close)
+        ).assertIsDisplayed()
+
+        managePage.clickEdit()
+        managePage.clickEdit(cbcCardId)
+        editPage.waitUntilVisible()
+
+        // The edit screen is pushed on top, so the navigation button goes back.
+        composeTestRule.onNodeWithContentDescription(
+            applicationContext.getString(StripeUiCoreR.string.stripe_back)
+        ).assertIsDisplayed()
     }
 
     @Test

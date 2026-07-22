@@ -107,6 +107,14 @@ internal class CardDetailsElement(
                     IdentifierSpec.CardExpYear to getExpiryYearFormFieldEntry(it)
                 }
             )
+
+            add(
+                controller.cardPillElement.mapAsStateFlow { element ->
+                    val hasCardPill = element != null
+
+                    IdentifierSpec.CardValidatedScan to FormFieldEntry(hasCardPill.toString(), true)
+                }
+            )
         }
         return combineAsStateFlow(flows) { it.toList() }
     }

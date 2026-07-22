@@ -110,6 +110,21 @@ class WebIntentNextActionHandlerTest {
     }
 
     @Test
+    fun authenticate_whenRedirectingToAlipay() {
+        // The fixture's next_action.return_url is "example://return_url"; asserting the SDK default
+        // instead proves the handler no longer trusts next_action.return_url (the EVO trampoline).
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.ALIPAY_REQUIRES_ACTION,
+            expectedUrl = "https://hooks.stripe.com/redirect/authenticate/src_1HDEFWKlwPmebFhp6tcpln8T" +
+                "?client_secret=src_client_secret_S6H9mVMKK6qxk9YxsUvbH55K",
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = null,
+            expectedShouldCancelIntentOnUserNavigation = false,
+        )
+    }
+
+    @Test
     fun authenticate_whenRedirectingToWeChatPay() {
         val mockResolvedUrl = "https://resolved_url.wow"
 

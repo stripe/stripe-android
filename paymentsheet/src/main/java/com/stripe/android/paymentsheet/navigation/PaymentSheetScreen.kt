@@ -454,7 +454,7 @@ internal sealed interface PaymentSheetScreen {
 
     class UpdatePaymentMethod(
         val interactor: UpdatePaymentMethodInteractor,
-    ) : PaymentSheetScreen {
+    ) : PaymentSheetScreen, Closeable {
         override val buyButtonState: StateFlow<BuyButtonState> = stateFlowOf(
             BuyButtonState(visible = false)
         )
@@ -475,6 +475,10 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(modifier: Modifier) {
             UpdatePaymentMethodUI(interactor, modifier)
+        }
+
+        override fun close() {
+            interactor.close()
         }
     }
 

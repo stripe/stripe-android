@@ -14,6 +14,7 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetLineContent
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
+import com.stripe.android.testing.createComposeCleanupRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,6 +28,9 @@ internal class BottomSheetTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private companion object {
         const val TITLE = "TITLE"

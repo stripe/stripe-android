@@ -447,6 +447,7 @@ private object TransformSpecToElementsFactory {
                 shippingValues = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                requiresBillingAddressForAutomaticTax = false,
                 requiresMandate = requiresMandate,
                 linkConfigurationCoordinator = null,
                 onLinkInlineSignupStateChanged = { throw AssertionError("Not implemented") },

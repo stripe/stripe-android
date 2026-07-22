@@ -1,16 +1,27 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
+import android.os.Bundle
 import android.os.Parcelable
+import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import kotlinx.parcelize.Parcelize
 
 /**
- * Internal state for [CheckoutController]. Unlike [InternalState] (used by [Checkout]), this holds
- * the controller's own [CheckoutController.Configuration.State] directly, so the configuration
- * doesn't have to be reconstructed and can be read back via [configuration].
+ * Internal state for [CheckoutController] and its single source of truth. Unlike [InternalState]
+ * (used by [Checkout]), this holds the controller's own [CheckoutController.Configuration.State]
+ * directly, so the configuration doesn't have to be reconstructed and can be read back via
+ * [configuration]. It is only ever built by [CheckoutStateLoader] after a payment element load, so
+ * the resolved [paymentMethodMetadata] and [embeddedConfiguration] are always present; everything
+ * the controller and its collaborators observe is derived from this one value.
+ *
+ * [CheckoutStateLoader] builds every committed state after a load, but the selection setters on
+ * [CheckoutControllerStateHolder] (which implements [EmbeddedSelectionHolder]) also [copy] it to
+ * update [paymentSelection]/[temporarySelection]/[previousNewSelections] without a reload.
  */
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
@@ -19,45 +30,35 @@ internal data class CheckoutControllerState(
     val configuration: CheckoutController.Configuration.State,
     override val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
-    override val shippingName: String?,
-    override val billingName: String?,
-    override val shippingPhoneNumber: String?,
-    override val billingPhoneNumber: String?,
-    override val shippingAddress: Address.State?,
-    override val billingAddress: Address.State?,
+    val collectedDetails: CheckoutCollectedDetails,
     val integrationLaunched: Boolean,
+    val paymentMethodMetadata: PaymentMethodMetadata,
+    val embeddedConfiguration: EmbeddedPaymentElement.Configuration,
+    val paymentSelection: PaymentSelection?,
+    val temporarySelection: String?,
+    val previousNewSelections: Bundle,
 ) : Parcelable, CheckoutSessionData {
-    val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
-        get() = PaymentElementLoader.InitializationMode.CheckoutSession(
-            instancesKey = key,
-            checkoutSessionResponse = checkoutSessionResponse,
-        )
+    override val shippingName: String? get() = collectedDetails.shippingName
+    override val billingName: String? get() = collectedDetails.billingName
+    override val shippingPhoneNumber: String? get() = collectedDetails.shippingPhoneNumber
+    override val billingPhoneNumber: String? get() = collectedDetails.billingPhoneNumber
+    override val shippingAddress: Address.State? get() = collectedDetails.shippingAddress
+    override val billingAddress: Address.State? get() = collectedDetails.billingAddress
 
-    fun asCheckoutSession(): CheckoutSession {
-        return checkoutSessionResponse.asCheckoutSession(flagImages)
-    }
-
-    companion object {
-        /**
-         * Builds the initial state for a freshly configured checkout session: a new [key], the
-         * given [configuration] and [checkoutSessionResponse], and no resolved flag images or
-         * collected shipping/billing details yet.
-         */
-        fun defaultState(
-            configuration: CheckoutController.Configuration.State,
-            checkoutSessionResponse: CheckoutSessionResponse,
-        ): CheckoutControllerState = CheckoutControllerState(
-            key = checkoutSessionResponse.id,
-            configuration = configuration,
-            checkoutSessionResponse = checkoutSessionResponse,
-            flagImages = null,
-            shippingName = null,
-            billingName = null,
-            shippingPhoneNumber = null,
-            billingPhoneNumber = null,
-            shippingAddress = null,
-            billingAddress = null,
-            integrationLaunched = false,
+    fun asCheckoutSession(
+        paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
+        availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
+    ): CheckoutSession {
+        return checkoutSessionResponse.asCheckoutSession(
+            flagImages = flagImages,
+            paymentOptionDisplayData = paymentOptionFactory.create(
+                selection = paymentSelection,
+                paymentMethodMetadata = paymentMethodMetadata,
+            ),
+            availableExpressButtonTypes = availableExpressButtonTypesFactory.create(
+                paymentMethodMetadata = paymentMethodMetadata,
+                expressCheckoutElementConfiguration = configuration.expressCheckoutElementConfiguration,
+            )
         )
     }
 }

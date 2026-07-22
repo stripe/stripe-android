@@ -98,6 +98,8 @@ import com.stripe.android.paymentsheet.ui.SHEET_NAVIGATION_BUTTON_TAG
 import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.TEST_TAG_MODIFY_BADGE
 import com.stripe.android.paymentsheet.ui.UPDATE_PM_REMOVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
+import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.createComposeCleanupRule
@@ -105,6 +107,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FakeIsNfcScanningAvailable
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
@@ -116,6 +119,7 @@ import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -148,6 +152,9 @@ internal class PaymentSheetActivityTest {
     val rule = InstantTaskExecutorRule()
 
     @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
+
+    @get:Rule
     val composeTestRule = createEmptyComposeRule()
 
     @get:Rule
@@ -155,6 +162,9 @@ internal class PaymentSheetActivityTest {
 
     @get:Rule
     val networkRule = NetworkRule()
+
+    @get:Rule
+    val coroutineScopeCleanupRule = CleanupTestRule<CoroutineScope> { cancel() }
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -1309,7 +1319,7 @@ internal class PaymentSheetActivityTest {
         ) { linkHandler, savedStateHandle ->
             PaymentSheetViewModel(
                 args = args,
-                customViewModelScope = CoroutineScope(Dispatchers.Unconfined),
+                customViewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(Dispatchers.Unconfined)),
                 eventReporter = eventReporter,
                 paymentElementLoader = FakePaymentElementLoader(
                     stripeIntent = paymentIntent,
@@ -1332,8 +1342,7 @@ internal class PaymentSheetActivityTest {
                 linkHandler = linkHandler,
                 confirmationHandlerFactory = confirmationHandlerFactory ?: createTestConfirmationHandlerFactory(
                     paymentElementCallbackIdentifier = PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER,
-                    intentConfirmationInterceptorFactory =
-                    object : IntentConfirmationInterceptor.Factory {
+                    intentConfirmationInterceptorFactory = object : IntentConfirmationInterceptor.Factory {
                         override suspend fun create(
                             integrationMetadata: IntegrationMetadata,
                             customerMetadata: CustomerMetadata?,
@@ -1366,12 +1375,13 @@ internal class PaymentSheetActivityTest {
                     }
                 },
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
+                isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
                 mode = EventReporter.Mode.Complete,
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
             )
-        }
+        }.also { viewModelStoreRule.track(it) }
     }
 
     private fun PaymentSheetViewModel.captureGooglePayListener():

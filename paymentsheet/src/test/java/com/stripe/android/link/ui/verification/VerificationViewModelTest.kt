@@ -22,6 +22,7 @@ import com.stripe.android.model.ConsentUi
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionRefresh
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FakeLogger
 import kotlinx.coroutines.delay
@@ -39,6 +40,9 @@ internal class VerificationViewModelTest {
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(dispatcher)
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `init starts verification with link account manager`() = runTest(dispatcher) {
@@ -474,6 +478,6 @@ internal class VerificationViewModelTest {
             onChangeEmailRequested = onChangeEmailRequested,
             onDismissClicked = onDismissClicked,
             dismissWithResult = dismissWithResult
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

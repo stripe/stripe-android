@@ -6,12 +6,12 @@ import androidx.compose.runtime.Composable
 import com.stripe.android.checkout.ece.ExpressCheckoutElementContent
 import com.stripe.android.checkout.ece.ExpressCheckoutElementInteractor
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ExpressCheckoutElement internal constructor(
+class ExpressCheckoutElement @Inject internal constructor(
     private val interactor: ExpressCheckoutElementInteractor,
 ) {
 
@@ -23,22 +23,43 @@ class ExpressCheckoutElement internal constructor(
     @CheckoutSessionPreview
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class Configuration {
-        private var visibility: PaymentSheet.WalletButtonsConfiguration.Visibility =
-            PaymentSheet.WalletButtonsConfiguration.Visibility()
 
-        fun visibility(
-            visibility: PaymentSheet.WalletButtonsConfiguration.Visibility
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class LinkVisibility {
+            Auto,
+            Never,
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class GooglePayVisibility {
+            Auto,
+            Never,
+        }
+
+        private var linkVisibility: LinkVisibility = LinkVisibility.Auto
+        private var googlePayVisibility: GooglePayVisibility = GooglePayVisibility.Auto
+
+        fun linkVisibility(
+            linkVisibility: LinkVisibility
         ): Configuration = apply {
-            this.visibility = visibility
+            this.linkVisibility = linkVisibility
+        }
+
+        fun googlePayVisibility(
+            googlePayVisibility: GooglePayVisibility
+        ): Configuration = apply {
+            this.googlePayVisibility = googlePayVisibility
         }
 
         @Parcelize
         internal data class State(
-            val visibility: PaymentSheet.WalletButtonsConfiguration.Visibility,
+            val linkVisibility: LinkVisibility,
+            val googlePayVisibility: GooglePayVisibility,
         ) : Parcelable
 
         internal fun build(): State = State(
-            visibility = visibility,
+            linkVisibility = linkVisibility,
+            googlePayVisibility = googlePayVisibility,
         )
     }
 }

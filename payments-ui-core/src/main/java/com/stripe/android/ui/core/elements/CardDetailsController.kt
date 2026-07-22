@@ -51,7 +51,20 @@ internal class CardDetailsController(
     dateConfig: TextFieldConfig = DateConfig(),
     private val validationMessageComparator: FieldValidationMessageComparator = DefaultFieldValidationMessageComparator
 ) : SectionFieldValidationController, SectionFieldComposable {
-    val cardPillElement = MutableStateFlow<CardPillElement?>(null)
+    private val initialCardNumber = initialValues[IdentifierSpec.CardNumber]
+
+    val cardPillElement = MutableStateFlow(
+        if (initialValues[IdentifierSpec.CardValidatedScan].toBoolean() && initialCardNumber != null) {
+            CardPillElement(
+                controller = CardPillController(
+                    cardNumber = initialCardNumber,
+                    onDismissPill = ::dismissCardPill,
+                )
+            )
+        } else {
+            null
+        }
+    )
 
     val nameElement = if (collectName) {
         SimpleTextElement(
@@ -77,7 +90,7 @@ internal class CardDetailsController(
             cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
             uiContext = uiContext,
             workContext = workContext,
-            initialValue = initialValues[IdentifierSpec.CardNumber],
+            initialValue = initialCardNumber,
             cardBrandChoiceConfig = when (cbcEligibility) {
                 is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(
                     preferredBrands = cbcEligibility.preferredNetworks,

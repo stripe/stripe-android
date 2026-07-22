@@ -12,6 +12,7 @@ import androidx.lifecycle.lifecycleScope
 import com.stripe.android.common.nfcscan.ui.NfcScanningScreen
 import com.stripe.android.common.nfcscan.ui.NfcScanningTheme
 import com.stripe.android.uicore.utils.collectAsState
+import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import android.graphics.Color as AndroidColor
@@ -36,8 +37,13 @@ internal class NfcScanningActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.result.collectLatest { result ->
-                finishWithResult(result)
+            viewModel.event.collectLatest { event ->
+                when (event) {
+                    is NfcScanningEvent.CloseWithResult -> finishWithResult(event.result)
+                    is NfcScanningEvent.TriggerHapticFeedback -> {
+                        NfcScanningHapticFeedback.trigger(this@NfcScanningActivity, event.type)
+                    }
+                }
             }
         }
 
@@ -82,5 +88,10 @@ internal class NfcScanningActivity : AppCompatActivity() {
             Intent().putExtras(result.toBundle()),
         )
         finish()
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
     }
 }

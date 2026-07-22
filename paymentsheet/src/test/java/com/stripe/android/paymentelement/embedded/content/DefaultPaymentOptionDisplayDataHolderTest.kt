@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.test.runTest
@@ -20,7 +21,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     fun `null confirmationState emits null paymentOption`() = testScenario {
         paymentOptionDisplayDataHolder.paymentOption.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.set(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay)
         }
     }
 
@@ -30,7 +31,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
     ) {
         paymentOptionDisplayDataHolder.paymentOption.test {
             assertThat(awaitItem()).isNull()
-            selectionHolder.set(PaymentSelection.GooglePay)
+            selectionHolder.setSelection(PaymentSelection.GooglePay)
             assertThat(awaitItem()?.paymentMethodType).isEqualTo("google_pay")
         }
     }
@@ -44,7 +45,7 @@ internal class DefaultPaymentOptionDisplayDataHolderTest {
             cardArtDrawableLoader = { null },
             context = ApplicationProvider.getApplicationContext(),
         )
-        val selectionHolder = EmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())
+        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle = SavedStateHandle())
         Scenario(
             paymentOptionDisplayDataHolder = DefaultPaymentOptionDisplayDataHolder(
                 coroutineScope = backgroundScope,

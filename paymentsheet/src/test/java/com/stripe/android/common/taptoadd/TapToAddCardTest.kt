@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.taptoadd.ui.TapToAddCard
 import com.stripe.android.common.taptoadd.ui.TapToAddTheme
 import com.stripe.android.model.CardBrand
+import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -21,6 +22,9 @@ internal class TapToAddCardTest {
 
     @get:Rule
     val composeTestRule = createComposeRule()
+
+    @get:Rule
+    val composeCleanupRule = createComposeCleanupRule()
 
     private val testBitmap = TapToAddImageRepository.CardArt(
         bitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888),

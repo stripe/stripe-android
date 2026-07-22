@@ -226,7 +226,7 @@ class LinkController @Inject internal constructor(
             ConfigurationDefaults.billingDetailsCollectionConfiguration
         private var allowUserEmailEdits: Boolean = true
         private var allowLogout: Boolean = true
-        private var setupIntentClientSecret: String? = null
+        private var paymentMethodTypes: List<String>? = null
 
         constructor(
             publishableKey: String,
@@ -284,8 +284,8 @@ class LinkController @Inject internal constructor(
         fun allowLogout(allowLogout: Boolean) = apply { this.allowLogout = allowLogout }
 
         @LinkControllerPreview
-        fun setupIntentClientSecret(setupIntentClientSecret: String?) = apply {
-            this.setupIntentClientSecret = setupIntentClientSecret
+        fun paymentMethodTypes(paymentMethodTypes: List<String>?) = apply {
+            this.paymentMethodTypes = paymentMethodTypes
         }
 
         @Parcelize
@@ -303,7 +303,7 @@ class LinkController @Inject internal constructor(
             internal val email: String?,
             internal val phoneNumber: String?,
             internal val supportedPaymentMethodTypes: List<PaymentMethodType>?,
-            internal val setupIntentClientSecret: String? = null,
+            internal val paymentMethodTypes: List<String>? = null,
         ) : Parcelable
 
         internal fun build(): State = State(
@@ -319,7 +319,7 @@ class LinkController @Inject internal constructor(
             allowUserEmailEdits = allowUserEmailEdits,
             allowLogout = allowLogout,
             linkAppearance = appearance?.build(),
-            setupIntentClientSecret = setupIntentClientSecret,
+            paymentMethodTypes = paymentMethodTypes,
         )
 
         internal companion object {
@@ -411,19 +411,19 @@ class LinkController @Inject internal constructor(
         }
 
         /**
-         * Creates a payment method from the currently selected Link payment method and confirms
-         * the SetupIntent configured via [Configuration.setupIntentClientSecret].
+         * Confirm a SetupIntent using the payment method from the most recent successful [present] call.
          *
-         * This combines payment method creation with SetupIntent confirmation in a single operation.
-         * Requires that [Configuration.setupIntentClientSecret] was provided during configuration
-         * and a payment method was selected via [presentPaymentMethods].
+         * This uses the payment method already created during the [present] flow to confirm the
+         * provided SetupIntent. Requires that [present] has completed successfully first; otherwise
+         * the result is [ConfirmSetupIntentResult.Failed].
          *
          * The result will be communicated through the [ConfirmSetupIntentCallback] provided
-         * during presenter creation. If [Configuration.setupIntentClientSecret] was not provided,
-         * the callback will receive [ConfirmSetupIntentResult.Failed].
+         * during presenter creation.
+         *
+         * @param clientSecret The client secret of the SetupIntent to confirm.
          */
-        fun createPaymentMethodAndConfirmSetupIntent() {
-            coordinator.createPaymentMethodAndConfirmSetupIntent()
+        fun confirmSetupIntent(clientSecret: String) {
+            coordinator.confirmSetupIntent(clientSecret)
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -793,7 +793,7 @@ class LinkController @Inject internal constructor(
     }
 
     /**
-     * Callback for receiving results from [Presenter.createPaymentMethodAndConfirmSetupIntent].
+     * Callback for receiving results from [Presenter.confirmSetupIntent].
      */
     @LinkControllerPreview
     fun interface ConfirmSetupIntentCallback {

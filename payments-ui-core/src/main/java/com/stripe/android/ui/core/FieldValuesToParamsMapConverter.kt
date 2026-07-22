@@ -148,6 +148,7 @@ class FieldValuesToParamsMapConverter {
                     setAsDefault =
                     fieldValuePairsForExtras[IdentifierSpec.SetAsDefaultPaymentMethod]?.value?.toBoolean(),
                     phoneNumberCountry = fieldValuePairsForExtras[IdentifierSpec.PhoneNumberCountry]?.value,
+                    fromValidatedScan = fieldValuePairsForExtras[IdentifierSpec.CardValidatedScan]?.value?.toBoolean(),
                 )
                 PaymentMethod.Type.Link.code -> PaymentMethodExtraParams.Link(
                     setAsDefault =

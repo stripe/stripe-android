@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.testing.ViewModelStoreTestRule
 import com.stripe.android.uicore.navigation.NavigationManager
 import com.stripe.android.uicore.navigation.PopUpToBehavior
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -35,6 +36,9 @@ class PartnerAuthViewModelTest {
 
     @get:Rule
     val testRule = CoroutineTestRule()
+
+    @get:Rule
+    val viewModelStoreRule = ViewModelStoreTestRule()
 
     @Test
     fun `Creates auth session when in partner auth flow`() = runTest {
@@ -189,6 +193,6 @@ class PartnerAuthViewModelTest {
             nativeAuthFlowCoordinator = NativeAuthFlowCoordinator(),
             pendingRepairRepository = pendingRepairRepository,
             repairAuthSession = repairAuthSession,
-        )
+        ).also { viewModelStoreRule.track(it) }
     }
 }

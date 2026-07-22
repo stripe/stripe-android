@@ -41,6 +41,7 @@ class EmbeddedConfirmationStarterTest {
     fun `on confirm, should call 'start' on confirmation handler`() = test {
         val arguments = ConfirmationHandler.Args(
             confirmationOption = FakeConfirmationOption(),
+            statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFactory.create(
                     paymentMethod = PaymentMethodFactory.card(random = true),

@@ -4,10 +4,11 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
 
 @CheckoutSessionPreview
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class ShippingAddressElement internal constructor() {
+class ShippingAddressElement @Inject internal constructor() {
 
     fun present() {
         TODO("Not yet implemented")

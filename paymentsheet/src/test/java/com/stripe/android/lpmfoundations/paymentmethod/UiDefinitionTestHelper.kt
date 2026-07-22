@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.common.nfcscan.IsNfcScanningAvailable
 import com.stripe.android.common.taptoadd.TapToAddHelper
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.UserInput
@@ -22,6 +23,7 @@ internal fun PaymentMethodDefinition.formElements(
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory? = null,
     automaticallyLaunchedCardScanFormDataHelper: AutomaticallyLaunchedCardScanFormDataHelper? = null,
     tapToAddHelper: TapToAddHelper? = null,
+    isNfcScanningAvailable: IsNfcScanningAvailable? = null,
     paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper? = null
 ): List<FormElement> {
     return requireNotNull(
@@ -37,7 +39,8 @@ internal fun PaymentMethodDefinition.formElements(
                 setAsDefaultMatchesSaveForFutureUse = setAsDefaultMatchesSaveForFutureUse,
                 automaticallyLaunchedCardScanFormDataHelper = automaticallyLaunchedCardScanFormDataHelper,
                 tapToAddHelper = tapToAddHelper,
-                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
+                paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
+                isNfcScanningAvailable = isNfcScanningAvailable,
             )
         )
     )

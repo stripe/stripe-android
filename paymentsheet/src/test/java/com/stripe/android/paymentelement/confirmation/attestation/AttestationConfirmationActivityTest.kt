@@ -174,6 +174,7 @@ internal class AttestationConfirmationActivityTest {
 
         private val CONFIRMATION_ARGUMENTS_NEW = ConfirmationHandler.Args(
             confirmationOption = NEW_CONFIRMATION_OPTION,
+            statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 shippingDetails = AddressDetails(),
                 stripeIntent = PAYMENT_INTENT,

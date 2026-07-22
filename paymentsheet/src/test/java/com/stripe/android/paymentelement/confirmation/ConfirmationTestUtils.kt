@@ -199,4 +199,5 @@ internal val CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
         stripeIntent = PAYMENT_INTENT,
         passiveCaptchaParams = PassiveCaptchaParamsFactory.passiveCaptchaParams(),
     ),
+    statusBarColor = null,
 )
