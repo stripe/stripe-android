@@ -55,9 +55,16 @@ android {
                 register("pixel2api33") {
                     device = "Pixel 2"
                     apiLevel = 33
-                    // Experiment (PR #13565): aosp-atd ships no browser, so browser-based auth tests
-                    // (Alipay etc.) silently skip. google_apis ships Chrome (lighter than the Play
-                    // Store variant). Paired with the androidTest <queries>/QUERY_ALL_PACKAGES fix.
+                    // Lean AOSP image for the main suite. Ships no browser, so browser-redirect
+                    // tests (Alipay etc.) are routed to pixel2api33chrome below instead.
+                    systemImageSource = "aosp-atd"
+                }
+                // Chrome-bearing image used ONLY for browser-redirect e2e tests (e.g. Alipay), which
+                // need a real browser for the authorization step. Kept separate so the heavier image
+                // doesn't destabilize the rest of the suite. See bitrise run-paymentsheet-browser-e2e.
+                register("pixel2api33chrome") {
+                    device = "Pixel 2"
+                    apiLevel = 33
                     systemImageSource = "google_apis"
                 }
             }

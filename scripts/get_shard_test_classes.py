@@ -39,8 +39,14 @@ def class_names_from_test_files(test_directory, test_file_names):
     return class_names
 
 
+# Tests excluded from the main (aosp-atd) GMD run because they run in a dedicated environment:
+# - TestGooglePay runs on Firebase Test Lab (needs Google Play).
+# - Browser-redirect tests run on the Chrome-bearing pixel2api33chrome device via the
+#   run-paymentsheet-browser-e2e Bitrise workflow (aosp-atd ships no browser).
 EXCLUDED_TEST_CLASSES = {
     'com.stripe.android.lpm.TestGooglePay',
+    'com.stripe.android.lpm.TestAlipay',
+    'com.stripe.android.TestBrowsers',
 }
 
 def get_all_test_class_names():

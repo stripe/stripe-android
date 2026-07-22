@@ -1416,14 +1416,20 @@ internal class PlaygroundTestDriver(
                     // select the first browser found
                     val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
+                    // A freshly-booted emulator shows Chrome's first-run onboarding, which blocks
+                    // the authorization page from loading. Click through it if present.
+                    dismissChromeFirstRunIfPresent()
+
                     // If there are multiple browser there is a browser selector window
                     selectBrowserPrompt.wait(4000)
                     if (selectBrowserPrompt.exists()) {
                         browserIconAtPrompt(selectedBrowser).click()
                     }
 
-                    assumeTrue(browserWindow(selectedBrowser)?.exists() == true)
-
+                    // Previously this was assumeTrue(browserWindow(...)?.exists()), which silently
+                    // SKIPPED the test when the browser window didn't appear, masking real failures.
+                    // blockUntilAuthorizationPageLoaded hard-asserts the auth page loaded, so a
+                    // missing or broken browser now fails loudly instead of being skipped.
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
 
