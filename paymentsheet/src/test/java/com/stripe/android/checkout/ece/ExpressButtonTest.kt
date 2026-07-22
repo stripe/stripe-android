@@ -1,16 +1,22 @@
+@file:OptIn(CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout.ece
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardBrandFilter
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentSheetCardFundingFilter
 import com.stripe.android.model.DisplayablePaymentDetails
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.state.LinkState
 import org.junit.Test
 
@@ -98,10 +104,34 @@ internal class ExpressButtonTest {
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         )
 
-        val button = ExpressButton.GooglePay.create(paymentMethodMetadata)
+        val button = createGooglePayExpressButton(
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
 
         assertThat(button.billingAddressParameters)
             .isEqualTo(billingDetailsCollectionConfiguration.toBillingAddressParameters())
+    }
+
+    @Test
+    fun `GooglePay create uses button type from google pay configuration`() {
+        val button = createGooglePayExpressButton(
+            googlePayConfiguration = createGooglePayConfiguration(
+                buttonType = GooglePayConfiguration.ButtonType.Checkout,
+            ),
+        )
+
+        assertThat(button.googlePayButtonType).isEqualTo(GooglePayButtonType.Checkout)
+    }
+
+    @Test
+    fun `GooglePay create uses additional enabled networks from google pay configuration`() {
+        val button = createGooglePayExpressButton(
+            googlePayConfiguration = createGooglePayConfiguration(
+                additionalEnabledNetworks = listOf("INTERAC"),
+            ),
+        )
+
+        assertThat(button.additionalEnabledNetworks).containsExactly("INTERAC")
     }
 
     @Test
@@ -115,7 +145,9 @@ internal class ExpressButtonTest {
             cardBrandFilter = cardBrandFilter,
         )
 
-        val button = ExpressButton.GooglePay.create(paymentMethodMetadata)
+        val button = createGooglePayExpressButton(
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
 
         assertThat(button.cardBrandFilter).isSameInstanceAs(cardBrandFilter)
     }
@@ -129,8 +161,32 @@ internal class ExpressButtonTest {
             cardFundingFilter = cardFundingFilter,
         )
 
-        val button = ExpressButton.GooglePay.create(paymentMethodMetadata)
+        val button = createGooglePayExpressButton(
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
 
         assertThat(button.cardFundingFilter).isSameInstanceAs(cardFundingFilter)
+    }
+
+    private fun createGooglePayExpressButton(
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration()
+    ): ExpressButton.GooglePay {
+         return ExpressButton.GooglePay.create(
+             paymentMethodMetadata = paymentMethodMetadata,
+             googlePayConfiguration = googlePayConfiguration
+         )
+    }
+
+    private fun createGooglePayConfiguration(
+        buttonType: GooglePayConfiguration.ButtonType = GooglePayConfiguration.ButtonType.Pay,
+        additionalEnabledNetworks: List<String> = emptyList(),
+    ): GooglePayConfiguration.State {
+        return GooglePayConfiguration(
+            GooglePayConfiguration.Environment.Test,
+        )
+            .buttonType(buttonType)
+            .additionalEnabledNetworks(additionalEnabledNetworks)
+            .build()
     }
 }

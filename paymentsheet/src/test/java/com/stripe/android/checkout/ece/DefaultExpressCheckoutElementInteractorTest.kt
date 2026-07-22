@@ -9,6 +9,7 @@ import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.ExpressCheckoutElement
+import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
@@ -36,6 +37,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
     @Test
     fun `state contains provided express buttons`() {
+        val googlePayConfiguration = createGooglePayConfiguration()
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(
                 WalletType.Link,
@@ -44,6 +46,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         )
         val interactor = createInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
+            googlePayConfiguration = googlePayConfiguration,
         )
 
         assertThat(interactor.state.value.expressButtons).containsExactly(
@@ -52,7 +55,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 linkAccountInfo = LinkAccountUpdate.Value(null),
             ),
             ExpressButton.GooglePay.create(
-                paymentMethodMetadata,
+                paymentMethodMetadata = paymentMethodMetadata,
+                googlePayConfiguration = googlePayConfiguration
             ),
         )
     }
@@ -113,22 +117,32 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `state reflects available wallets from checkoutSession`() {
+    fun `state reflects available express button types from checkoutSession`() {
+        val googlePayConfiguration = createGooglePayConfiguration(
+            buttonType = GooglePayConfiguration.ButtonType.Checkout,
+            additionalEnabledNetworks = listOf("INTERAC"),
+        )
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(
                 WalletType.Link,
                 WalletType.GooglePay,
             )
         )
-        val availableWallets = listOf(WalletType.GooglePay)
+        val availableExpressButtonTypes = listOf(
+            ExpressButtonType.GooglePay(
+                googlePayConfiguration = googlePayConfiguration,
+            )
+        )
         val interactor = createInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
-            availableWallets = availableWallets,
+            googlePayConfiguration = googlePayConfiguration,
+            availableExpressButtonTypes = availableExpressButtonTypes,
         )
 
         assertThat(interactor.state.value.expressButtons).containsExactly(
             ExpressButton.GooglePay.create(
-                paymentMethodMetadata,
+                paymentMethodMetadata = paymentMethodMetadata,
+                googlePayConfiguration = googlePayConfiguration,
             ),
         )
     }
@@ -136,8 +150,14 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     private fun createInteractor(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+        googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
         linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-        availableWallets: List<WalletType> = paymentMethodMetadata.availableWallets,
+        availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
+            when (it) {
+                WalletType.Link -> ExpressButtonType.Link
+                WalletType.GooglePay -> ExpressButtonType.GooglePay(googlePayConfiguration)
+            }
+        },
     ): DefaultExpressCheckoutElementInteractor {
         val savedStateHandle = SavedStateHandle()
         val stateHolder = CheckoutControllerStateHolder(
@@ -145,7 +165,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             errorReporter = FakeErrorReporter(),
             paymentOptionFactory = { _, _ -> null },
             availableExpressButtonTypesFactory = FakeAvailableExpressButtonTypesFactory(
-                availableWallets = availableWallets,
+                availableExpressButtonTypes = availableExpressButtonTypes,
             ),
         )
         stateHolder.state = CheckoutControllerStateFactory.create(
@@ -159,5 +179,17 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             linkAccountHolder = linkAccountHolder,
             stateHolder = stateHolder,
         )
+    }
+
+    private fun createGooglePayConfiguration(
+        buttonType: GooglePayConfiguration.ButtonType = GooglePayConfiguration.ButtonType.Pay,
+        additionalEnabledNetworks: List<String> = emptyList(),
+    ): GooglePayConfiguration.State {
+        return GooglePayConfiguration(
+            GooglePayConfiguration.Environment.Test,
+        )
+            .buttonType(buttonType)
+            .additionalEnabledNetworks(additionalEnabledNetworks)
+            .build()
     }
 }

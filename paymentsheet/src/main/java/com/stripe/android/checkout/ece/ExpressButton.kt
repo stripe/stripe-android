@@ -1,13 +1,17 @@
+@file:OptIn(CheckoutSessionPreview::class)
 package com.stripe.android.checkout.ece
 
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.GooglePayJsonFactory
+import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.checkout.asGooglePayButtonType
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.LinkBrand
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 
@@ -49,15 +53,16 @@ internal sealed interface ExpressButton {
         companion object {
             fun create(
                 paymentMethodMetadata: PaymentMethodMetadata,
+                googlePayConfiguration: GooglePayConfiguration.State,
             ): GooglePay {
                 return GooglePay(
                     allowCreditCards = true,
-                    googlePayButtonType = GooglePayButtonType.Pay,
+                    googlePayButtonType = googlePayConfiguration.buttonType.asGooglePayButtonType(),
                     cardBrandFilter = paymentMethodMetadata.cardBrandFilter,
                     cardFundingFilter = paymentMethodMetadata.cardFundingFilter,
                     billingAddressParameters = paymentMethodMetadata.billingDetailsCollectionConfiguration
                         .toBillingAddressParameters(),
-                    additionalEnabledNetworks = emptyList(),
+                    additionalEnabledNetworks = googlePayConfiguration.additionalEnabledNetworks,
                 )
             }
         }
