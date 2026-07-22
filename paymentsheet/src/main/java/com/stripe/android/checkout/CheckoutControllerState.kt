@@ -28,7 +28,7 @@ import kotlinx.parcelize.Parcelize
 internal data class CheckoutControllerState(
     val key: String,
     val configuration: CheckoutController.Configuration.State,
-    override val checkoutSessionResponse: CheckoutSessionResponse,
+    val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
     val collectedDetails: CheckoutCollectedDetails,
     val integrationLaunched: Boolean,
@@ -37,14 +37,7 @@ internal data class CheckoutControllerState(
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
-) : Parcelable, CheckoutSessionData {
-    override val shippingName: String? get() = collectedDetails.shippingName
-    override val billingName: String? get() = collectedDetails.billingName
-    override val shippingPhoneNumber: String? get() = collectedDetails.shippingPhoneNumber
-    override val billingPhoneNumber: String? get() = collectedDetails.billingPhoneNumber
-    override val shippingAddress: Address.State? get() = collectedDetails.shippingAddress
-    override val billingAddress: Address.State? get() = collectedDetails.billingAddress
-
+) : Parcelable {
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
         availableExpressButtonTypesFactory: AvailableExpressButtonTypesFactory,
