@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.embedded.content
 
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.effectiveLinkBrand
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
