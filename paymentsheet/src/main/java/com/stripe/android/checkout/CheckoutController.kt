@@ -7,8 +7,11 @@ import androidx.annotation.RestrictTo
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
+import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -40,6 +43,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
+    @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
@@ -293,7 +297,16 @@ class CheckoutController @Inject internal constructor(
     }
 
     fun createPresenter(activity: ComponentActivity): CheckoutPresenter {
-        return checkoutPresenterSubcomponentFactory.create().presenter
+        val subcomponent = checkoutPresenterSubcomponentFactory.create(
+            activityResultCaller = PaymentElementActivityResultCaller(
+                key = "CheckoutController(instance = $paymentElementCallbackIdentifier)",
+                registryOwner = activity,
+            ),
+            lifecycleOwner = activity,
+            statusBarColor = StatusBarCompat.color(activity),
+        )
+        subcomponent.initializer.initialize()
+        return subcomponent.presenter
     }
 
     fun destroy() {
