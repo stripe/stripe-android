@@ -18,10 +18,7 @@ internal object CustomerEmailSettingsDefinition :
         settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
         val customerType = settings[CustomerSettingsDefinition]
-        val isCheckoutSession =
-            settings[InitializationTypeSettingsDefinition] == InitializationType.CheckoutSession
-        return customerType == CustomerType.NEW ||
-            (customerType == CustomerType.GUEST && isCheckoutSession)
+        return customerType == CustomerType.NEW
     }
 
     override fun createOptions(

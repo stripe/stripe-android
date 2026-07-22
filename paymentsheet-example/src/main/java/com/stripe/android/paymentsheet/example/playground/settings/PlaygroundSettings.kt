@@ -1,4 +1,4 @@
-@file:OptIn(CheckoutSessionPreview::class, LinkControllerPreview::class)
+@file:OptIn(LinkControllerPreview::class)
 
 package com.stripe.android.paymentsheet.example.playground.settings
 
@@ -9,12 +9,10 @@ import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkController
 import com.stripe.android.link.LinkControllerPreview
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.Settings
@@ -294,16 +292,6 @@ internal class PlaygroundSettings private constructor(
             )
         }
 
-        fun checkoutConfiguration(): Checkout.Configuration {
-            val configuration = Checkout.Configuration()
-            settings.filter { (definition, _) ->
-                definition.applicable(configurationData, settings)
-            }.onEach { (settingDefinition, value) ->
-                settingDefinition.configure(configuration, value)
-            }
-            return configuration
-        }
-
         fun checkoutRequest(): CheckoutRequest {
             val builder = CheckoutRequest.Builder()
             settings.filter { (definition, _) ->
@@ -322,14 +310,6 @@ internal class PlaygroundSettings private constructor(
                 settingDefinition.configure(builder, value)
             }
             return builder.build()
-        }
-
-        private fun <T> PlaygroundSettingDefinition<T>.configure(
-            configuration: Checkout.Configuration,
-            value: Any?,
-        ) {
-            @Suppress("UNCHECKED_CAST")
-            configure(value as T, configuration)
         }
 
         private fun <T> PlaygroundSettingDefinition<T>.configure(
@@ -501,13 +481,6 @@ internal class PlaygroundSettings private constructor(
 
         val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
-            CheckoutSessionSaveSettingsDefinition,
-            CheckoutSessionRemoveSettingsDefinition,
-            CheckoutSessionAdjustableQuantitySettingsDefinition,
-            CheckoutSessionAutomaticTaxSettingsDefinition,
-            CheckoutSessionAdaptivePricingSettingsDefinition,
-            CheckoutSessionDisplayShippingRatesSettingsDefinition,
-            AllowPromotionCodesSettingsDefinition,
             CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,
             CustomerSessionSaveSettingsDefinition,

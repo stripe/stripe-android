@@ -33,8 +33,7 @@ internal object ExternalPaymentMethodSettingsDefinition :
         configurationData: PlaygroundConfigurationData,
         settings: Map<PlaygroundSettingDefinition<*>, Any?>,
     ): Boolean {
-        return configurationData.integrationType.isPaymentFlow() &&
-            settings[InitializationTypeSettingsDefinition] != InitializationType.CheckoutSession
+        return configurationData.integrationType.isPaymentFlow()
     }
 
     override fun configure(
