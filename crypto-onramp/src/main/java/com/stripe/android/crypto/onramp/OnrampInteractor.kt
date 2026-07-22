@@ -16,6 +16,9 @@ import com.stripe.android.crypto.onramp.exception.MissingCryptoCustomerException
 import com.stripe.android.crypto.onramp.exception.MissingPaymentMethodException
 import com.stripe.android.crypto.onramp.exception.OnrampErrorLogger
 import com.stripe.android.crypto.onramp.exception.PaymentFailedException
+import com.stripe.android.crypto.onramp.exception.SamsungPayException.Reason
+import com.stripe.android.crypto.onramp.exception.StripeCryptoOnrampError
+import com.stripe.android.crypto.onramp.exception.createDiagnosticContext
 import com.stripe.android.crypto.onramp.exception.toCryptoOnrampError
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.KycInfo
@@ -45,10 +48,13 @@ import com.stripe.android.crypto.onramp.model.OnrampVerifyIdentityResult
 import com.stripe.android.crypto.onramp.model.OnrampVerifyKycInfoResult
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodType
+import com.stripe.android.crypto.onramp.model.SamsungPayAvailabilityResult
 import com.stripe.android.crypto.onramp.model.UserAttestation
 import com.stripe.android.crypto.onramp.model.compliance.ComplianceIdentifier
 import com.stripe.android.crypto.onramp.model.googlePayKycInfo
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayResult
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayStatus
 import com.stripe.android.crypto.onramp.ui.KycRefreshScreenAction
 import com.stripe.android.crypto.onramp.ui.UserAttestationActivityResult
 import com.stripe.android.crypto.onramp.ui.UserAttestationScreenAction
@@ -69,6 +75,10 @@ import kotlinx.parcelize.Parcelize
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.stripe.android.crypto.onramp.R as OnrampR
+import com.stripe.android.crypto.onramp.exception.SamsungPayException as RichSamsungPayException
+import com.stripe.android.crypto.onramp.samsungpay.SamsungPayException as InternalSamsungPayException
+import com.stripe.android.paymentsheet.R as PaymentSheetR
 
 @Suppress("LargeClass", "TooManyFunctions")
 @Singleton
@@ -553,6 +563,7 @@ internal class OnrampInteractor @Inject constructor(
                         }
                     }
                     is SelectedPaymentSource.GooglePay -> selected.paymentMethodId
+                    is SelectedPaymentSource.SamsungPay -> selected.paymentMethodId
                 }
 
                 cryptoApiRepository.createPaymentToken(
@@ -708,6 +719,144 @@ internal class OnrampInteractor @Inject constructor(
             OnrampCollectPaymentMethodResult.Cancelled()
     }
 
+    suspend fun handleSamsungPayPaymentResult(
+        result: SamsungPayResult,
+        platformPublishableKey: String?,
+    ): OnrampCollectPaymentMethodResult = when (result) {
+        is SamsungPayResult.Completed -> {
+            if (platformPublishableKey == null) {
+                samsungPayFailureResult(
+                    error = IllegalStateException(
+                        "Samsung Pay completed without an onramp platform publishable key.",
+                    ),
+                    fallbackReason = Reason.PlatformKeyUnavailable,
+                )
+            } else {
+                cryptoApiRepository.createSamsungPayPaymentMethod(
+                    paymentCredential = result.paymentCredential,
+                    platformPublishableKey = platformPublishableKey,
+                ).fold(
+                    onSuccess = { paymentMethod ->
+                        handleSamsungPayPaymentMethod(paymentMethod) { displayData ->
+                            OnrampCollectPaymentMethodResult.Completed(displayData, kycInfo = null)
+                        }
+                    },
+                    onFailure = { failure ->
+                        samsungPayFailureResult(
+                            error = failure,
+                            fallbackReason = Reason.CredentialsFailed,
+                        )
+                    },
+                )
+            }
+        }
+        is SamsungPayResult.Failed -> {
+            samsungPayFailureResult(
+                error = result.error,
+                fallbackReason = Reason.OperationFailed,
+            )
+        }
+        SamsungPayResult.Canceled -> OnrampCollectPaymentMethodResult.Cancelled()
+    }
+
+    fun handleSamsungPayPlatformKeyFailure(error: Throwable): OnrampCollectPaymentMethodResult {
+        return samsungPayFailureResult(
+            error = error,
+            fallbackReason = Reason.PlatformKeyUnavailable,
+        )
+    }
+
+    fun handleSamsungPayAvailability(status: SamsungPayStatus): SamsungPayAvailabilityResult {
+        return when (status) {
+            SamsungPayStatus.Ready -> SamsungPayAvailabilityResult.Available()
+            SamsungPayStatus.NotSupported -> unavailableSamsungPay(Reason.NotSupported, null, null)
+            SamsungPayStatus.TemporarilyUnavailable -> {
+                unavailableSamsungPay(Reason.TemporarilyUnavailable, null, null)
+            }
+            is SamsungPayStatus.NotReady -> when (val reason = status.reason) {
+                SamsungPayStatus.NotReady.Reason.NeedsUserSetup -> {
+                    unavailableSamsungPay(Reason.SetupRequired, null, null)
+                }
+                SamsungPayStatus.NotReady.Reason.NeedsAppUpdate -> {
+                    unavailableSamsungPay(Reason.AppUpdateRequired, null, null)
+                }
+                is SamsungPayStatus.NotReady.Reason.Other -> {
+                    unavailableSamsungPay(Reason.NotReady, null, reason.code)
+                }
+            }
+            is SamsungPayStatus.Failed -> {
+                val internalError = status.error as? InternalSamsungPayException
+                unavailableSamsungPay(
+                    reason = internalError?.reason ?: Reason.OperationFailed,
+                    underlyingError = status.error,
+                    samsungPayErrorCode = internalError?.errorCode,
+                )
+            }
+        }
+    }
+
+    private fun unavailableSamsungPay(
+        reason: Reason,
+        underlyingError: Throwable?,
+        samsungPayErrorCode: Int?,
+    ): SamsungPayAvailabilityResult.Unavailable {
+        return SamsungPayAvailabilityResult.Unavailable(
+            createSamsungPayException(
+                reason = reason,
+                underlyingError = underlyingError,
+                samsungPayErrorCode = samsungPayErrorCode,
+            ),
+        )
+    }
+
+    private fun samsungPayFailureResult(
+        error: Throwable,
+        fallbackReason: Reason,
+    ): OnrampCollectPaymentMethodResult.Failed {
+        val mappedError = mapSamsungPayError(error, fallbackReason)
+        trackError(Operation.CollectPaymentMethod, mappedError)
+        return OnrampCollectPaymentMethodResult.Failed(mappedError)
+    }
+
+    private fun mapSamsungPayError(
+        error: Throwable,
+        fallbackReason: Reason,
+    ): Throwable {
+        val mappedError = mapError(Operation.CollectPaymentMethod, error)
+        if (mappedError is StripeCryptoOnrampError) {
+            return mappedError
+        }
+
+        val internalError = mappedError as? InternalSamsungPayException
+        return createSamsungPayException(
+            reason = internalError?.reason ?: fallbackReason,
+            underlyingError = mappedError,
+            samsungPayErrorCode = internalError?.errorCode,
+        )
+    }
+
+    private fun createSamsungPayException(
+        reason: Reason,
+        underlyingError: Throwable?,
+        samsungPayErrorCode: Int?,
+    ): RichSamsungPayException {
+        val configuration = state.value.configurationState
+        return RichSamsungPayException(
+            reason = reason,
+            samsungPayErrorCode = samsungPayErrorCode,
+            underlyingError = underlyingError,
+            userMessage = application.getString(OnrampR.string.stripe_onramp_samsung_pay_error_user_message),
+            diagnosticContext = createDiagnosticContext(
+                context = application,
+                operation = Operation.CollectPaymentMethod,
+                publishableKey = configuration?.publishableKey,
+                additionalSdkVersions = configuration?.additionalSdkVersions.orEmpty(),
+            ),
+            developerSummary = underlyingError?.message
+                ?: "Samsung Pay is unavailable (${reason.code}).",
+        )
+    }
+
     private fun handleGooglePayPaymentMethod(
         paymentMethod: PaymentMethod,
         buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
@@ -729,6 +878,27 @@ internal class OnrampInteractor @Inject constructor(
         return buildResult(googlePayDisplayData(paymentMethod))
     }
 
+    private fun handleSamsungPayPaymentMethod(
+        paymentMethod: PaymentMethod,
+        buildResult: (PaymentMethodDisplayData) -> OnrampCollectPaymentMethodResult,
+    ): OnrampCollectPaymentMethodResult {
+        analyticsService?.track(
+            OnrampAnalyticsEvent.CollectPaymentMethodCompleted(
+                paymentMethodType = PaymentMethodType.SamsungPay,
+            ),
+        )
+
+        _state.update { state ->
+            state.copy(
+                selectedPaymentSource = SelectedPaymentSource.SamsungPay(
+                    paymentMethodId = paymentMethod.id,
+                ),
+            )
+        }
+
+        return buildResult(samsungPayDisplayData(paymentMethod))
+    }
+
     private fun googlePayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
         return PaymentMethodDisplayData(
             imageLoader = {
@@ -740,6 +910,20 @@ internal class OnrampInteractor @Inject constructor(
             label = "Google Pay",
             sublabel = paymentMethod.card?.last4,
             type = PaymentMethodDisplayData.Type.GooglePay
+        )
+    }
+
+    private fun samsungPayDisplayData(paymentMethod: PaymentMethod): PaymentMethodDisplayData {
+        return PaymentMethodDisplayData(
+            imageLoader = {
+                ContextCompat.getDrawable(
+                    application,
+                    PaymentSheetR.drawable.stripe_ic_paymentsheet_card_unknown_day,
+                )!!
+            },
+            label = "Samsung Pay",
+            sublabel = paymentMethod.card?.last4,
+            type = PaymentMethodDisplayData.Type.SamsungPay,
         )
     }
 
@@ -833,6 +1017,10 @@ internal class OnrampInteractor @Inject constructor(
             analyticsService?.track(OnrampAnalyticsEvent.SessionCreated)
         }
         _state.value = _state.value.copy(linkControllerState = linkState)
+    }
+
+    fun trackAnalyticsEvent(event: OnrampAnalyticsEvent) {
+        analyticsService?.track(event)
     }
 
     fun onAuthorize() {
@@ -1169,6 +1357,12 @@ internal sealed interface SelectedPaymentSource {
         val paymentMethodId: String
     ) : SelectedPaymentSource {
         override val analyticsValue: String = "google_pay"
+    }
+
+    data class SamsungPay(
+        val paymentMethodId: String,
+    ) : SelectedPaymentSource {
+        override val analyticsValue: String = "samsung_pay"
     }
 }
 
