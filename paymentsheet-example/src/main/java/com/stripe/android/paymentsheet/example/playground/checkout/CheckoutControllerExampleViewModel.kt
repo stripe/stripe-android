@@ -68,11 +68,11 @@ internal class CheckoutControllerExampleViewModel(
         repository.fetchCheckoutSessionClientSecret().fold(
             onSuccess = { clientSecret ->
                 controller.configure(
-                    clientSecret,
+                    checkoutSessionClientSecret = clientSecret,
                     configuration = CheckoutController.Configuration()
                         .googlePayConfiguration(
                             GooglePayConfiguration(
-                                Environment.Test
+                                environment = Environment.Test
                             )
                         )
                 ).fold(
