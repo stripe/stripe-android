@@ -1422,8 +1422,6 @@ internal class PlaygroundTestDriver(
                         browserIconAtPrompt(selectedBrowser).click()
                     }
 
-                    assumeTrue(browserWindow(selectedBrowser)?.exists() == true)
-
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
 

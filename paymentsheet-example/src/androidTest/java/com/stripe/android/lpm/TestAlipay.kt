@@ -17,6 +17,7 @@ internal class TestAlipay : BasePlaygroundTest() {
 
     private val testParameters = TestParameters.create(
         paymentMethodCode = "alipay",
+        requiresBrowser = false,
     ) { settings ->
         settings[MerchantSettingsDefinition] = Merchant.US
         settings[CurrencySettingsDefinition] = Currency.USD
