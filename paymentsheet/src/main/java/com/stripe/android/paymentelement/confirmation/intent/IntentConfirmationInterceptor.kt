@@ -65,6 +65,10 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
                 // CryptoOnRamp doesn't call confirm.
                 throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp.")
             }
+            IntegrationMetadata.StandaloneLink -> {
+                // StandaloneLink doesn't call confirm.
+                throw IllegalStateException("No intent confirmation interceptor for StandaloneLink.")
+            }
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
                 confirmationTokenConfirmationInterceptorFactory.create(
                     intentConfiguration = integrationMetadata.intentConfiguration,

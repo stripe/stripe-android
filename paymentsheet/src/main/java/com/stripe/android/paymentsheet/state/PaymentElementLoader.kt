@@ -101,6 +101,12 @@ internal interface PaymentElementLoader {
         ) : Configuration {
             override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
         }
+
+        data class StandaloneLink(
+            val configuration: LinkController.Configuration.State
+        ) : Configuration {
+            override val commonConfiguration: CommonConfiguration = configuration.asCommonConfiguration()
+        }
     }
 
     sealed class InitializationMode : Parcelable {
@@ -209,6 +215,19 @@ internal interface PaymentElementLoader {
 
             override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
                 return IntegrationMetadata.CryptoOnramp
+            }
+        }
+
+        @Parcelize
+        data class StandaloneLink(
+            val paymentMethodTypes: List<String>? = null,
+        ) : InitializationMode() {
+            override fun validate() {
+                // Nothing to validate.
+            }
+
+            override fun integrationMetadata(paymentElementCallbacks: PaymentElementCallbacks?): IntegrationMetadata {
+                return IntegrationMetadata.StandaloneLink
             }
         }
 
@@ -616,6 +635,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     ): PaymentMethodLayout {
         return when (integrationConfiguration) {
             is PaymentElementLoader.Configuration.CryptoOnramp,
+            is PaymentElementLoader.Configuration.StandaloneLink,
             is PaymentElementLoader.Configuration.Embedded -> PaymentMethodLayout.Vertical
             is PaymentElementLoader.Configuration.PaymentSheet ->
                 if (

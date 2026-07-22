@@ -22,10 +22,10 @@ internal class DefaultLinkConfigurationLoader @Inject constructor(
 
     override suspend fun load(configuration: LinkController.Configuration.State): Result<LinkMetadata> {
         return paymentElementLoader.load(
-            initializationMode = PaymentElementLoader.InitializationMode.CryptoOnramp(
+            initializationMode = PaymentElementLoader.InitializationMode.StandaloneLink(
                 paymentMethodTypes = configuration.paymentMethodTypes,
             ),
-            integrationConfiguration = PaymentElementLoader.Configuration.CryptoOnramp(configuration),
+            integrationConfiguration = PaymentElementLoader.Configuration.StandaloneLink(configuration),
             metadata = PaymentElementLoader.Metadata(
                 isReloadingAfterProcessDeath = savedStateHandle.contains(
                     LinkControllerInteractor.LINK_CONFIGURED_KEY
