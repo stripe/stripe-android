@@ -2,7 +2,7 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Parcelable
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
+import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -43,7 +43,7 @@ internal data class InternalState(
 internal fun CheckoutSessionResponse.asCheckoutSession(
     flagImages: Map<String, Bitmap>?,
     paymentOptionDisplayData: PaymentOptionDisplayData?,
-    availableExpressButtonTypes: List<WalletType>,
+    availableExpressButtonTypes: List<ExpressButtonType>,
 ): CheckoutSession {
     return CheckoutSession(
         id = id,

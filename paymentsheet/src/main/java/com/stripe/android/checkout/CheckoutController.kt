@@ -301,8 +301,11 @@ class CheckoutController @Inject internal constructor(
         stateHolder.state = null
     }
 
+    /**
+     * Clears the customer's selected payment option, resetting it to `null`.
+     */
     fun clearPaymentOption() {
-        TODO("Not yet implemented")
+        stateHolder.clearSelection()
     }
 
     @CheckoutSessionPreview

@@ -45,7 +45,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -115,7 +114,6 @@ internal class ExtendedPaymentElementConfirmationTestActivity : AppCompatActivit
                     .create(
                         application = extras.requireApplication(),
                         savedStateHandle = extras.createSavedStateHandle(),
-                        statusBarColor = null,
                         allowsManualConfirmation = false,
                     )
 
@@ -146,9 +144,6 @@ internal interface ExtendedPaymentElementConfirmationTestComponent {
             application: Application,
             @BindsInstance
             savedStateHandle: SavedStateHandle,
-            @BindsInstance
-            @Named(STATUS_BAR_COLOR)
-            statusBarColor: Int?,
             @BindsInstance
             @Named(ALLOWS_MANUAL_CONFIRMATION)
             allowsManualConfirmation: Boolean,

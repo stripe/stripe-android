@@ -117,6 +117,9 @@ internal interface TapToAddViewModelComponent {
             productUsage: Set<String>,
             @BindsInstance application: Application,
             @BindsInstance savedStateHandle: SavedStateHandle,
+            @Named(STATUS_BAR_COLOR)
+            @BindsInstance
+            statusBarColor: Int?,
         ): TapToAddViewModelComponent
     }
 }
@@ -204,11 +207,6 @@ internal interface TapToAddViewModelModule {
         @Singleton
         @Named(ALLOWS_MANUAL_CONFIRMATION)
         fun provideAllowsManualConfirmation() = true
-
-        @Provides
-        @Singleton
-        @Named(STATUS_BAR_COLOR)
-        fun providesStatusBarColor(): Int? = null
 
         @Provides
         @Singleton

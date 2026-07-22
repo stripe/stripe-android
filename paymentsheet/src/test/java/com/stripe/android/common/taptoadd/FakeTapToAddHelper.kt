@@ -70,6 +70,7 @@ internal class FakeTapToAddHelper : TapToAddHelper {
             updateSelection: (PaymentSelection.Saved) -> Unit,
             customerStateHolder: CustomerStateHolder,
             linkSignupMode: StateFlow<LinkSignupMode?>,
+            statusBarColor: Int?,
         ): TapToAddHelper {
             val helper = FakeTapToAddHelper()
             createCalls.add(CreateCall(coroutineScope, tapToAddMode))

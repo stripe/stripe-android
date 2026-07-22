@@ -2,10 +2,8 @@ package com.stripe.android.checkout
 
 import android.graphics.Bitmap
 import android.os.Bundle
-import com.stripe.android.checkout.injection.MerchantDisplayName
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.paymentelement.CheckoutSessionPreview
-import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -14,7 +12,7 @@ import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutStateLoader @Inject constructor(
-    @MerchantDisplayName private val merchantDisplayName: String,
+    private val embeddedConfigurationFactory: CheckoutEmbeddedConfigurationFactory,
     private val flagImageResolver: FlagImageResolver,
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
@@ -50,24 +48,10 @@ internal class CheckoutStateLoader @Inject constructor(
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
-        val baseConfig = EmbeddedPaymentElement.Configuration.Builder(merchantDisplayName)
-            .embeddedViewDisplaysMandateText(
-                configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
-            )
-            .billingDetailsCollectionConfiguration(
-                configuration.paymentElementConfiguration.billingDetailsCollectionConfiguration
-                    .reconcile(response.requiresBillingAddress)
-                    .asPaymentSheet()
-            )
-            .googlePay(
-                googlePay = response.merchantCountry?.let { merchantCountry ->
-                    configuration.googlePayConfiguration?.asPaymentSheet(merchantCountry)
-                }
-            )
-            .build()
-
-        val embeddedConfig = CheckoutConfigurationMerger.EmbeddedConfiguration(baseConfig)
-            .forCheckoutSession(sessionData)
+        val embeddedConfig = embeddedConfigurationFactory.create(
+            configuration = configuration,
+            sessionData = sessionData,
+        )
 
         val loaderState = paymentElementLoader.load(
             initializationMode = PaymentElementLoader.InitializationMode.CheckoutSession(

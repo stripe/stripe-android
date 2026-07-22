@@ -4,7 +4,6 @@ package com.stripe.android.checkout.ece
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.link.account.LinkAccountHolder
-import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -43,14 +42,15 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         }
 
         ExpressCheckoutElementInteractor.State(
-            expressButtons = checkoutSession.availableExpressButtonTypes.map { walletType ->
-                when (walletType) {
-                    WalletType.Link -> ExpressButton.Link.create(
+            expressButtons = checkoutSession.availableExpressButtonTypes.map { expressButtonType ->
+                when (expressButtonType) {
+                    ExpressButtonType.Link -> ExpressButton.Link.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
                         linkAccountInfo = linkAccountInfo,
                     )
-                    WalletType.GooglePay -> ExpressButton.GooglePay.create(
+                    is ExpressButtonType.GooglePay -> ExpressButton.GooglePay.create(
                         paymentMethodMetadata = state.paymentMethodMetadata,
+                        googlePayConfiguration = expressButtonType.googlePayConfiguration,
                     )
                 }
             },

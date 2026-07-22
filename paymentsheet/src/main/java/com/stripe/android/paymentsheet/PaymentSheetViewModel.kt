@@ -146,6 +146,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         updateSelection = ::updateSelection,
         customerStateHolder = customerStateHolder,
         linkSignupMode = paymentMethodMetadata.mapAsStateFlow { it?.linkState?.signupMode },
+        statusBarColor = args.statusBarColor,
     )
 
     private val _paymentSheetResult = MutableSharedFlow<PaymentSheetResult>(replay = 1)
@@ -590,6 +591,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     arguments = ConfirmationHandler.Args(
                         confirmationOption = option,
                         paymentMethodMetadata = paymentMethodMetadata,
+                        statusBarColor = args.statusBarColor,
                     ),
                 )
             } ?: run {

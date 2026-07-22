@@ -291,7 +291,7 @@ internal class IntentConfirmationFlowTest {
                     )
                 }
             },
-            paymentLauncherFactory = {
+            paymentLauncherFactory = { _, _ ->
                 FakePaymentLauncher()
             }
         )
@@ -309,6 +309,7 @@ internal class IntentConfirmationFlowTest {
                     phoneNumber = "1234567890"
                 ),
             ),
+            statusBarColor = null,
         )
     }
 
@@ -345,6 +346,7 @@ internal class IntentConfirmationFlowTest {
 
         val DEFERRED_CONFIRMATION_PARAMETERS = ConfirmationHandler.Args(
             confirmationOption = FakeConfirmationOption(),
+            statusBarColor = null,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(id = null, clientSecret = null),
                 shippingDetails = AddressDetails(

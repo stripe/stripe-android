@@ -125,6 +125,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
         updateSelection = ::updateSelection,
         customerStateHolder = customerStateHolder,
         linkSignupMode = paymentMethodMetadata.mapAsStateFlow { it?.linkState?.signupMode },
+        // Continue mode returns the selection to the FlowController host, which confirms with its
+        // own status bar color; Tap to Add never confirms in this flow.
+        statusBarColor = null,
     )
 
     private val _paymentOptionsActivityResult = MutableSharedFlow<PaymentOptionsActivityResult>(replay = 1)
@@ -384,6 +387,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
                     launchMode = LinkLaunchMode.PaymentMethodSelection(selectedPayment = null),
                     linkAccountInfo = linkAccountHolder.linkAccountInfo.value,
                     linkExpressMode = LinkExpressMode.ENABLED,
+                    // Selection-only launch; Link returns a selection here and never confirms, so
+                    // there is no auth surface to color.
+                    statusBarColor = null,
                 )
             } else {
                 _paymentOptionsActivityResult.tryEmit(

@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
-import javax.inject.Singleton
 
 internal interface EmbeddedContentHelper {
     val embeddedContent: StateFlow<EmbeddedContent?>
@@ -20,7 +19,6 @@ internal interface EmbeddedContentHelper {
     fun presentPaymentOptions()
 }
 
-@Singleton
 internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val state: StateFlow<EmbeddedContentHelperStateHolder.State?>,

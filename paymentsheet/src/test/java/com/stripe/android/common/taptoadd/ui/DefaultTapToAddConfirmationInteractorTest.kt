@@ -161,6 +161,20 @@ internal class DefaultTapToAddConfirmationInteractorTest {
     }
 
     @Test
+    fun `PrimaryButtonPressed forwards statusBarColor to confirmation args`() = runScenario(
+        paymentMethod = PaymentMethodFactory.card(last4 = "4242"),
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
+        statusBarColor = 0x00FF00,
+    ) {
+        interactor.performAction(TapToAddConfirmationInteractor.Action.PrimaryButtonPressed)
+
+        assertThat(eventReporter.tapToAddConfirmCalls.awaitItem()).isFalse()
+        val args = confirmationHandlerScenario.startTurbine.awaitItem()
+
+        assertThat(args.statusBarColor).isEqualTo(0x00FF00)
+    }
+
+    @Test
     fun `PrimaryButtonPressed in Complete mode when not Idle does not call confirmationHandler start`() {
         val paymentMethod = PaymentMethodFactory.card(last4 = "4242")
 
@@ -540,6 +554,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
             PaymentMethodMetadataFactory.create(isTapToAddSupported = true),
         initialConfirmationState: ConfirmationHandler.State = ConfirmationHandler.State.Idle,
         initialCvcState: CvcFormHelper.State = CvcFormHelper.State.NotRequired,
+        statusBarColor: Int? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val eventReporter = FakeEventReporter()
@@ -558,6 +573,7 @@ internal class DefaultTapToAddConfirmationInteractorTest {
                 confirmationHandler = handler,
                 cvcFormHelper = cvcFormHelper,
                 eventReporter = eventReporter,
+                statusBarColor = statusBarColor,
                 onComplete = {
                     onCompleteCalls.add(Unit)
                 },

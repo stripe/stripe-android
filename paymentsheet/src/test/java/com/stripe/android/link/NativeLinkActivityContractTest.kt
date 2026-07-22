@@ -44,6 +44,7 @@ class NativeLinkActivityContractTest {
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
             launchMode = LinkLaunchMode.Full,
+            statusBarColor = 0x00FF00,
         )
 
         val intent = contract.createIntent(ApplicationProvider.getApplicationContext(), args)
@@ -64,6 +65,7 @@ class NativeLinkActivityContractTest {
                 linkAccountInfo = LinkAccountUpdate.Value(TestFactory.LINK_ACCOUNT),
                 paymentElementCallbackIdentifier = LINK_CALLBACK_TEST_IDENTIFIER,
                 launchMode = LinkLaunchMode.Full,
+                statusBarColor = 0x00FF00,
             )
         )
     }

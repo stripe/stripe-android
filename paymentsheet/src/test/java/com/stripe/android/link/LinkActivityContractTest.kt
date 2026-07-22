@@ -29,6 +29,7 @@ class LinkActivityContractTest {
             lastUpdateReason = null
         ),
         launchMode = LinkLaunchMode.Full,
+        statusBarColor = null,
     )
 
     @Test

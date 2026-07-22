@@ -6,9 +6,6 @@ import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.BillingDetailsCollectionConfiguration
-import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-import com.stripe.android.checkout.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -21,7 +18,6 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedFormHelperFactory
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -42,8 +38,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic as PSAutomatic
-import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full as PSFull
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -58,131 +52,6 @@ internal class CheckoutStateLoaderTest {
 
         assertThat(stateHolder.state?.paymentMethodMetadata).isNotNull()
     }
-
-    @Test
-    fun `loadInitial uses the provided merchant display name`() = runScenario(
-        merchantDisplayName = "Acme Corp",
-    ) {
-        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
-
-        assertThat(stateHolder.state?.embeddedConfiguration?.merchantDisplayName).isEqualTo("Acme Corp")
-    }
-
-    @Test
-    fun `loadInitial sources the billing email from the checkout session customer email`() = runScenario {
-        val response = CheckoutSessionResponseFactory.create(customerEmail = "checkout@example.com")
-
-        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response)
-
-        assertThat(stateHolder.state?.embeddedConfiguration?.defaultBillingDetails?.email)
-            .isEqualTo("checkout@example.com")
-    }
-
-    @Test
-    fun `loadInitial propagates embeddedViewDisplaysMandateText from the payment element configuration`() =
-        runScenario {
-            val configuration = CheckoutController.Configuration()
-                .paymentElement(PaymentElement.Configuration().embeddedViewDisplaysMandateText(false))
-                .build()
-
-            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
-
-            assertThat(stateHolder.state?.embeddedConfiguration?.embeddedViewDisplaysMandateText)
-                .isFalse()
-        }
-
-    @Test
-    fun `loadInitial propagates billingDetailsCollectionConfiguration from the payment element configuration`() =
-        runScenario {
-            val configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().billingDetailsCollectionConfiguration(bdcc(address = Full))
-                )
-                .build()
-
-            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response())
-
-            assertThat(stateHolder.state?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
-                .isEqualTo(PSFull)
-        }
-
-    @Test
-    fun `loadInitial uses the checkout session country for googlePayConfiguration`() = runScenario {
-        val configuration = CheckoutController.Configuration()
-            .googlePayConfiguration(
-                GooglePayConfiguration(
-                    GooglePayConfiguration.Environment.Production,
-                )
-                    .label("Total")
-                    .buttonType(GooglePayConfiguration.ButtonType.Checkout)
-                    .additionalEnabledNetworks(listOf("INTERAC"))
-            )
-            .build()
-
-        loader.loadInitial(
-            configuration = configuration,
-            checkoutSessionResponse = response(merchantCountry = "GB"),
-        )
-
-        val actual = requireNotNull(stateHolder.state?.embeddedConfiguration?.googlePay)
-        assertThat(actual.environment)
-            .isEqualTo(PaymentSheet.GooglePayConfiguration.Environment.Production)
-        assertThat(actual.countryCode).isEqualTo("GB")
-        assertThat(actual.label).isEqualTo("Total")
-        assertThat(actual.buttonType)
-            .isEqualTo(PaymentSheet.GooglePayConfiguration.ButtonType.Checkout)
-        assertThat(actual.additionalEnabledNetworks).containsExactly("INTERAC")
-    }
-
-    @Test
-    fun `loadInitial leaves googlePayConfiguration null when checkout session country is missing`() = runScenario {
-        val configuration = CheckoutController.Configuration()
-            .googlePayConfiguration(
-                GooglePayConfiguration(
-                    GooglePayConfiguration.Environment.Production,
-                )
-            )
-            .build()
-
-        loader.loadInitial(
-            configuration = configuration,
-            checkoutSessionResponse = response(merchantCountry = null),
-        )
-
-        assertThat(stateHolder.state?.embeddedConfiguration?.googlePay).isNull()
-    }
-
-    @Test
-    fun `loadInitial upgrades Automatic to Full when the session requires a billing address`() =
-        runScenario {
-            val configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().billingDetailsCollectionConfiguration(bdcc(address = Automatic))
-                )
-                .build()
-            val response = CheckoutSessionResponseFactory.create(requiresBillingAddress = true)
-
-            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response)
-
-            assertThat(stateHolder.state?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
-                .isEqualTo(PSFull)
-        }
-
-    @Test
-    fun `loadInitial leaves Automatic unchanged when the session does not require a billing address`() =
-        runScenario {
-            val configuration = CheckoutController.Configuration()
-                .paymentElement(
-                    PaymentElement.Configuration().billingDetailsCollectionConfiguration(bdcc(address = Automatic))
-                )
-                .build()
-            val response = CheckoutSessionResponseFactory.create(requiresBillingAddress = false)
-
-            loader.loadInitial(configuration = configuration, checkoutSessionResponse = response)
-
-            assertThat(stateHolder.state?.embeddedConfiguration?.billingDetailsCollectionConfiguration?.address)
-                .isEqualTo(PSAutomatic)
-        }
 
     @Test
     fun `reload routes the selection through the chooser`() = runScenario(
@@ -314,10 +183,6 @@ internal class CheckoutStateLoaderTest {
         merchantCountry: String? = "US",
     ) = CheckoutSessionResponseFactory.create(merchantCountry = merchantCountry)
 
-    private fun bdcc(
-        address: BillingDetailsCollectionConfiguration.AddressCollectionMode = Automatic,
-    ) = BillingDetailsCollectionConfiguration().address(address)
-
     // A committed state as [CheckoutStateLoader] would produce it, for exercising reloads. The
     // resolved metadata/configuration are placeholders; reload recomputes and overwrites them.
     private fun committedState(
@@ -382,7 +247,7 @@ internal class CheckoutStateLoaderTest {
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
         val loader = CheckoutStateLoader(
-            merchantDisplayName = merchantDisplayName,
+            embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = FakePaymentElementLoader(
                 paymentSelection = loaderSelection,
