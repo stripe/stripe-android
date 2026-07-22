@@ -18,8 +18,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.stripe.android.crypto.onramp.example.AUTHENTICATED_OPERATIONS_TAG
+import com.stripe.android.crypto.onramp.example.BACK_TO_SIGN_IN_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.LOG_OUT_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.model.OnrampUiState
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
@@ -79,6 +83,7 @@ internal fun AuthenticatedOperationsScreen(
 
     Column(
         modifier = Modifier
+            .testTag(AUTHENTICATED_OPERATIONS_TAG)
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
             .padding(16.dp)
@@ -165,6 +170,7 @@ internal fun AuthenticatedOperationsScreen(
         Button(
             onClick = onLogOut,
             modifier = Modifier
+                .testTag(LOG_OUT_BUTTON_TAG)
                 .fillMaxWidth()
                 .padding(bottom = 8.dp)
         ) {
@@ -173,7 +179,9 @@ internal fun AuthenticatedOperationsScreen(
 
         TextButton(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .testTag(BACK_TO_SIGN_IN_BUTTON_TAG)
+                .fillMaxWidth()
         ) {
             Text("Back to Sign in")
         }
