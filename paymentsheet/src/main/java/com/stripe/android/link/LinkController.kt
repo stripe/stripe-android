@@ -227,6 +227,7 @@ class LinkController @Inject internal constructor(
         private var allowUserEmailEdits: Boolean = true
         private var allowLogout: Boolean = true
         private var paymentMethodTypes: List<String>? = null
+        private var collectMissingBillingDetailsForExistingPaymentMethods: Boolean = false
 
         constructor(
             publishableKey: String,
@@ -277,6 +278,14 @@ class LinkController @Inject internal constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun collectMissingBillingDetailsForExistingPaymentMethods(
+            collectMissingBillingDetailsForExistingPaymentMethods: Boolean
+        ) = apply {
+            this.collectMissingBillingDetailsForExistingPaymentMethods =
+                collectMissingBillingDetailsForExistingPaymentMethods
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun allowUserEmailEdits(allowUserEmailEdits: Boolean) = apply {
             this.allowUserEmailEdits = allowUserEmailEdits
         }
@@ -299,6 +308,7 @@ class LinkController @Inject internal constructor(
             internal val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
             internal val allowUserEmailEdits: Boolean,
             internal val allowLogout: Boolean,
+            internal val collectMissingBillingDetailsForExistingPaymentMethods: Boolean,
             internal val linkAppearance: LinkAppearance.State?,
             internal val email: String?,
             internal val phoneNumber: String?,
@@ -318,6 +328,8 @@ class LinkController @Inject internal constructor(
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowUserEmailEdits = allowUserEmailEdits,
             allowLogout = allowLogout,
+            collectMissingBillingDetailsForExistingPaymentMethods =
+                collectMissingBillingDetailsForExistingPaymentMethods,
             linkAppearance = appearance?.build(),
             paymentMethodTypes = paymentMethodTypes,
         )

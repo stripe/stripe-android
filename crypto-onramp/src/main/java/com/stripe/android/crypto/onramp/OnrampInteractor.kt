@@ -132,6 +132,7 @@ internal class OnrampInteractor @Inject constructor(
             )
                 .allowLogout(false)
                 .allowUserEmailEdits(false)
+                .collectMissingBillingDetailsForExistingPaymentMethods(true)
                 .appearance(configurationState.appearance)
         )
 

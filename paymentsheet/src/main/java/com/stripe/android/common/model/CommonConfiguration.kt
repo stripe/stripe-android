@@ -292,7 +292,8 @@ internal fun LinkController.Configuration.State.asCommonConfiguration(): CommonC
     customPaymentMethods = ConfigurationDefaults.customPaymentMethods,
     link = PaymentSheet.LinkConfiguration(
         display = PaymentSheet.LinkConfiguration.Display.Automatic,
-        collectMissingBillingDetailsForExistingPaymentMethods = true,
+        collectMissingBillingDetailsForExistingPaymentMethods =
+            collectMissingBillingDetailsForExistingPaymentMethods,
         allowUserEmailEdits = allowUserEmailEdits,
         allowLogOut = allowLogout,
         disallowFundingSourceCreation = emptySet(),
