@@ -84,6 +84,15 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         return previousNewSelections.previousNewSelection(code)
     }
 
+    fun clearSelection() {
+        val current = requireState(operation = "clearSelection") ?: return
+        state = current.copy(
+            paymentSelection = null,
+            temporarySelection = null,
+            previousNewSelections = Bundle(),
+        )
+    }
+
     /**
      * The selection lives on [CheckoutControllerState], so the mutators can only act once
      * [CheckoutStateLoader] has committed a state. A call before then is a programming error (a

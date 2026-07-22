@@ -119,6 +119,30 @@ internal class CheckoutControllerStateHolderTest {
         }
 
     @Test
+    fun `clearSelection resets selection, temporarySelection and previousNewSelections`() = testScenario {
+        stateHolder.state = committedState(
+            paymentSelection = PaymentSelection.GooglePay,
+            temporarySelection = "card",
+            previousNewSelections = Bundle().apply {
+                putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+            },
+        )
+
+        stateHolder.selection.test {
+            assertThat(awaitItem()).isEqualTo(PaymentSelection.GooglePay)
+            stateHolder.clearSelection()
+            assertThat(awaitItem()).isNull()
+        }
+
+        val clearedState = requireNotNull(stateHolder.state)
+        assertThat(clearedState.paymentSelection).isNull()
+        assertThat(clearedState.temporarySelection).isNull()
+        assertThat(clearedState.previousNewSelections.isEmpty).isTrue()
+        assertThat(stateHolder.temporarySelection.value).isNull()
+        assertThat(stateHolder.getPreviousNewSelection("cashapp")).isNull()
+    }
+
+    @Test
     fun `selection setters no-op before the state is committed`() = testScenario {
         stateHolder.setSelection(PaymentSelection.GooglePay)
         assertSetBeforeLoadError(operation = "setSelection")
@@ -130,6 +154,9 @@ internal class CheckoutControllerStateHolderTest {
             Bundle().apply { putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION) },
         )
         assertSetBeforeLoadError(operation = "setPreviousNewSelections")
+
+        stateHolder.clearSelection()
+        assertSetBeforeLoadError(operation = "clearSelection")
 
         assertThat(stateHolder.state).isNull()
         assertThat(stateHolder.selection.value).isNull()
