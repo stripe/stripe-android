@@ -7,7 +7,10 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.ui.core.elements.formatExpirationDateForAccessibility
 import com.stripe.android.uicore.R
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
+@RunWith(RobolectricTestRunner::class)
 class ExpiryDateContentDescriptionFormatterTest {
 
     @Test

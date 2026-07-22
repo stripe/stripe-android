@@ -15,6 +15,7 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.TextFieldIcon
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
@@ -95,6 +96,11 @@ class AutocompleteViewModelTest {
             )
         )
         whenever(mockClient.fetchPlace(any())).thenReturn(fetchPlaceResponse)
+        whenever(mockClient.transformToAddress(any(), any())).thenAnswer { invocation ->
+            val response = invocation.getArgument<FetchPlaceResponse>(0)
+            val locale = invocation.getArgument<java.util.Locale>(1)
+            response.place.transformGoogleToStripeAddress(locale)
+        }
 
         viewModel.event.test {
             viewModel.selectPrediction(
