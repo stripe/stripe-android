@@ -114,7 +114,7 @@ internal class DefaultTapZoneResolverTest {
 
     @Test
     @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
-    fun `get computes tap zone from antenna location for unknown device`() = runScenario(
+    fun `get returns tap zone from antenna location using bottom-left origin for unknown device`() = runScenario(
         manufacturer = "unknown",
         model = "unknown",
         sdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
@@ -126,6 +126,38 @@ internal class DefaultTapZoneResolverTest {
         ),
     ) {
         assertThat(resolver.get()).isEqualTo(TapZone(xBias = 0.3f, yBias = 0.8f))
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
+    fun `get returns tap zone from antenna location using top-left origin for unknown samsung device`() = runScenario(
+        manufacturer = "samsung",
+        model = "SM-UNKNOWN",
+        sdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+        antennaInfo = NfcAntennaInfo(
+            1000,
+            2000,
+            false,
+            listOf(AvailableNfcAntenna(300, 400)),
+        ),
+    ) {
+        assertThat(resolver.get()).isEqualTo(TapZone(xBias = 0.3f, yBias = 0.2f))
+    }
+
+    @Test
+    @Config(sdk = [Build.VERSION_CODES.UPSIDE_DOWN_CAKE])
+    fun `get returns tap zone from antenna location using top-left origin for unknown google device`() = runScenario(
+        manufacturer = "google",
+        model = "Unknown Pixel",
+        sdk = Build.VERSION_CODES.UPSIDE_DOWN_CAKE,
+        antennaInfo = NfcAntennaInfo(
+            1000,
+            2000,
+            false,
+            listOf(AvailableNfcAntenna(300, 400)),
+        ),
+    ) {
+        assertThat(resolver.get()).isEqualTo(TapZone(xBias = 0.3f, yBias = 0.2f))
     }
 
     private fun runScenario(
