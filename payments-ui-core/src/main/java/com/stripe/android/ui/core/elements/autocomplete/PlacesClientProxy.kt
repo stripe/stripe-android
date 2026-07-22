@@ -14,15 +14,18 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.stripe.android.BuildConfig
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.model.Address
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.DefaultIsPlacesAvailable
 import com.stripe.android.uicore.elements.IsPlacesAvailable
 import kotlinx.coroutines.tasks.await
+import java.util.Locale
 import com.google.android.libraries.places.R as PlacesR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -38,6 +41,8 @@ interface PlacesClientProxy {
     ): Result<FetchPlaceResponse>
 
     fun resetSession()
+
+    fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -92,6 +97,7 @@ internal class DefaultPlacesClientProxy(
     private val client: PlacesClient,
     private val errorReporter: ErrorReporter
 ) : PlacesClientProxy {
+    @Volatile
     private var token = AutocompleteSessionToken.newInstance()
 
     override fun resetSession() {
@@ -169,10 +175,18 @@ internal class DefaultPlacesClientProxy(
             )
         }
     }
+
+    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+        return response.place.transformGoogleToStripeAddress(locale)
+    }
 }
 
 internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
     override fun resetSession() = Unit
+
+    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+        return response.place.transformGoogleToStripeAddress(locale)
+    }
 
     override suspend fun findAutocompletePredictions(
         query: String?,

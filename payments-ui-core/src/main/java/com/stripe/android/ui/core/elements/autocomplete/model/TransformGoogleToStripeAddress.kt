@@ -3,12 +3,6 @@ package com.stripe.android.ui.core.elements.autocomplete.model
 import androidx.annotation.RestrictTo
 import java.util.Locale
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val STRIPE_HOSTED_JAPANESE_LINE1 = "stripe_hosted_japanese_line1"
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val STRIPE_HOSTED_JAPANESE_LINE2 = "stripe_hosted_japanese_line2"
-
 internal data class AddressLine1(
     var streetNumber: String? = null,
     var route: String? = null,
@@ -179,19 +173,11 @@ fun Place.transformGoogleToStripeAddress(
 ): com.stripe.android.model.Address {
     var address = Address()
     val addressLine1 = AddressLine1()
-    var hostedJapaneseLine1: String? = null
-    var hostedJapaneseLine2: String? = null
 
     addressComponents?.forEach { field ->
         val types = field.types
 
         when {
-            types.contains(STRIPE_HOSTED_JAPANESE_LINE1) -> {
-                hostedJapaneseLine1 = field.longName
-            }
-            types.contains(STRIPE_HOSTED_JAPANESE_LINE2) -> {
-                hostedJapaneseLine2 = field.longName
-            }
             types.contains(Place.Type.STREET_NUMBER.value) -> {
                 addressLine1.streetNumber = field.longName
             }
@@ -253,12 +239,8 @@ fun Place.transformGoogleToStripeAddress(
         }
     }
 
-    val isHostedJapaneseAddress = address.country == Locale.JAPAN.country && hostedJapaneseLine1 != null
-    address.addressLine1 = hostedJapaneseLine1 ?: composeAddressLine1(locale, addressLine1, address)
+    address.addressLine1 = composeAddressLine1(locale, addressLine1, address)
     address = address.modifyStripeAddressByCountry(this)
-    if (isHostedJapaneseAddress) {
-        address.addressLine2 = hostedJapaneseLine2
-    }
 
     return com.stripe.android.model.Address.Builder()
         .setLine1(address.addressLine1)

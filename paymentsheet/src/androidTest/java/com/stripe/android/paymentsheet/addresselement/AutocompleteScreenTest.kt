@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
@@ -18,6 +19,8 @@ import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePredic
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
+import java.util.Locale
 import com.stripe.android.uicore.DefaultStripeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -90,6 +93,10 @@ class AutocompleteScreenTest {
         private val addressComponents: List<AddressComponent> = listOf()
     ) : PlacesClientProxy {
         override fun resetSession() = Unit
+
+        override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+            return response.place.transformGoogleToStripeAddress(locale)
+        }
 
         override suspend fun findAutocompletePredictions(
             query: String?,

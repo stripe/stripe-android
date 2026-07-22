@@ -4,7 +4,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CoroutineScope
@@ -67,18 +66,18 @@ internal class InlineAutocompleteController(
         selectionJob?.cancel()
         selectionJob = coroutineScope.launch {
             val result = placesClient.fetchPlace(predictionId)
-            placesClient.resetSession()
             ensureActive()
             result.fold(
-                onSuccess = ::handleFetchPlaceSuccess,
+                onSuccess = { handleFetchPlaceSuccess(it) },
                 onFailure = { handleFailure() }
             )
+            placesClient.resetSession()
         }
     }
 
     private fun handleFetchPlaceSuccess(response: FetchPlaceResponse) {
         val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-        val address = response.place.transformGoogleToStripeAddress(locale)
+        val address = placesClient.transformToAddress(response, locale)
         lastPredictionLine1 = address.line1
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         eventListenerProvider()?.invoke(

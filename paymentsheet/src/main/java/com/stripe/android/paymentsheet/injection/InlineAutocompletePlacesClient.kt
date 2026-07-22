@@ -2,10 +2,12 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.model.Address
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
+import java.util.Locale
 
 internal fun createInlineAutocompletePlacesClient(
     context: Context,
@@ -41,4 +43,7 @@ internal class LazyPlacesClientProxy(
     override fun resetSession() {
         delegate.resetSession()
     }
+
+    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address =
+        delegate.transformToAddress(response, locale)
 }

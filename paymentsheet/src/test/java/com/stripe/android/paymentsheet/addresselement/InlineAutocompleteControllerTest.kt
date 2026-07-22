@@ -644,8 +644,8 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place-id-123")
 
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
-        fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(call).isEqualTo("place-id-123")
+        fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
         assertThat(eventCalls.awaitItem())
             .isEqualTo(AutocompleteAddressInteractor.Event.OnExpandForm(values = null))

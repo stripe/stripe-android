@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcompone
 import com.stripe.android.paymentsheet.injection.DaggerAutocompleteViewModelFactoryComponent
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
@@ -118,7 +117,7 @@ internal class AutocompleteViewModel @Inject constructor(
                 onSuccess = {
                     _loading.value = false
                     val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-                    val address = it.place.transformGoogleToStripeAddress(locale)
+                    val address = placesClient.transformToAddress(it, locale)
 
                     _event.emit(
                         Event.GoBack(

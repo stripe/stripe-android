@@ -2,14 +2,12 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.text.SpannableString
 import androidx.appcompat.app.AppCompatDelegate
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
-import com.stripe.android.ui.core.elements.autocomplete.model.STRIPE_HOSTED_JAPANESE_LINE1
-import com.stripe.android.ui.core.elements.autocomplete.model.STRIPE_HOSTED_JAPANESE_LINE2
 import java.util.Locale
 import java.util.UUID
 
@@ -19,11 +17,13 @@ internal class StripeHostedPlacesClientProxy(
     private val lock = Any()
     private var sessionToken: String = newSessionToken()
     private val predictionCache = mutableMapOf<String, AutocompleteSuggestion>()
+    private var lastResolvedAddress: StripeProxyAddress? = null
 
     override fun resetSession() {
         synchronized(lock) {
             sessionToken = newSessionToken()
             predictionCache.clear()
+            lastResolvedAddress = null
         }
     }
 
@@ -43,7 +43,6 @@ internal class StripeHostedPlacesClientProxy(
         ).map { result ->
             val limitedPredictions = result.predictions.take(limit)
             synchronized(lock) {
-                predictionCache.clear()
                 limitedPredictions.forEach { predictionCache[it.placeId] = it }
             }
             FindAutocompletePredictionsResponse(
@@ -63,45 +62,28 @@ internal class StripeHostedPlacesClientProxy(
             predictionCache[placeId] to sessionToken
         }
         if (cached?.address != null) {
-            return Result.success(cached.address.toFetchPlaceResponse())
+            synchronized(lock) { lastResolvedAddress = cached.address }
+            return Result.success(FetchPlaceResponse(Place(addressComponents = null)))
         }
         return repository.fetchPlaceDetails(
             placeId = placeId,
             sessionToken = token,
         ).map { result ->
-            result.address.toFetchPlaceResponse()
+            synchronized(lock) { lastResolvedAddress = result.address }
+            FetchPlaceResponse(Place(addressComponents = null))
         }
     }
 
-    private fun StripeProxyAddress.toFetchPlaceResponse(): FetchPlaceResponse {
-        val isJapaneseAddress = country == Locale.JAPAN.country
-        val components = buildList {
-            line1?.let { line1 ->
-                add(
-                    AddressComponent(
-                        shortName = line1,
-                        longName = line1,
-                        types = listOf(if (isJapaneseAddress) STRIPE_HOSTED_JAPANESE_LINE1 else "route"),
-                    )
-                )
-            }
-            line2?.let { line2 ->
-                add(
-                    AddressComponent(
-                        shortName = line2,
-                        longName = line2,
-                        types = listOf(if (isJapaneseAddress) STRIPE_HOSTED_JAPANESE_LINE2 else "premise"),
-                    )
-                )
-            }
-            city?.let { add(AddressComponent(shortName = it, longName = it, types = listOf("locality"))) }
-            state?.let {
-                add(AddressComponent(shortName = it, longName = it, types = listOf("administrative_area_level_1")))
-            }
-            postalCode?.let { add(AddressComponent(shortName = it, longName = it, types = listOf("postal_code"))) }
-            country?.let { add(AddressComponent(shortName = it, longName = it, types = listOf("country"))) }
-        }
-        return FetchPlaceResponse(Place(addressComponents = components))
+    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+        val address = synchronized(lock) { lastResolvedAddress }
+        return Address(
+            line1 = address?.line1,
+            line2 = address?.line2,
+            city = address?.city,
+            state = address?.state,
+            postalCode = address?.postalCode,
+            country = address?.country,
+        )
     }
 
     private companion object {

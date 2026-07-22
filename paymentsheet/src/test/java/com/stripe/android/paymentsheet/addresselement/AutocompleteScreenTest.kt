@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performTextInput
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
@@ -17,11 +18,13 @@ import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
+import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import java.util.Locale
 
 @ExperimentalAnimationApi
 @RunWith(AndroidJUnit4::class)
@@ -124,6 +127,10 @@ class AutocompleteScreenTest {
             Result.failure(IllegalStateException("Failed!")),
     ) : PlacesClientProxy {
         override fun resetSession() = Unit
+
+        override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+            return response.place.transformGoogleToStripeAddress(locale)
+        }
 
         override suspend fun findAutocompletePredictions(
             query: String?,

@@ -2,10 +2,13 @@ package com.stripe.android.paymentsheet.addresselement
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
+import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
+import java.util.Locale
 
 internal class FakePlacesClientProxy(
     var findPredictionsResult: Result<FindAutocompletePredictionsResponse> =
@@ -49,6 +52,10 @@ internal class FakePlacesClientProxy(
 
     override fun resetSession() {
         _resetSessionCalls.add(Unit)
+    }
+
+    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+        return response.place.transformGoogleToStripeAddress(locale)
     }
 
     fun ensureAllEventsConsumed() {

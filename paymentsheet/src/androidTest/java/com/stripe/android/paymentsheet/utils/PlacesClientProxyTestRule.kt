@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.utils
 
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
+import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
+import java.util.Locale
 import kotlinx.coroutines.channels.Channel
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
@@ -42,6 +45,10 @@ class PlacesClientProxyTestRule : TestWatcher() {
         private val fetchPlaceResponseChannel: Channel<Result<FetchPlaceResponse>>,
     ) : PlacesClientProxy {
         override fun resetSession() = Unit
+
+        override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+            return response.place.transformGoogleToStripeAddress(locale)
+        }
 
         override suspend fun findAutocompletePredictions(
             query: String?,
