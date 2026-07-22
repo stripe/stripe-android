@@ -48,7 +48,6 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.CustomerStateHolder
-import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
 import com.stripe.android.paymentsheet.PaymentOptionCardArtModule
 import com.stripe.android.paymentsheet.PrefsRepository
@@ -78,7 +77,6 @@ import com.stripe.android.paymentsheet.state.PaymentMethodFilter
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
 import com.stripe.android.paymentsheet.state.TapToAddAvailabilityFactory
 import com.stripe.android.paymentsheet.state.TapToAddConnectionStarterModule
-import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -86,7 +84,6 @@ import dagger.Module
 import dagger.Provides
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.StateFlow
 import java.util.UUID
 import javax.inject.Named
 import javax.inject.Singleton
@@ -198,6 +195,9 @@ internal interface CheckoutControllerModule {
     fun bindsEmbeddedSelectionHolder(impl: CheckoutControllerStateHolder): EmbeddedSelectionHolder
 
     @Binds
+    fun bindsCustomerStateHolder(impl: CheckoutControllerStateHolder): CustomerStateHolder
+
+    @Binds
     fun bindsCheckoutPaymentOptionDisplayDataFactory(
         impl: DefaultCheckoutPaymentOptionDisplayDataFactory
     ): CheckoutPaymentOptionDisplayDataFactory
@@ -286,31 +286,6 @@ internal interface CheckoutControllerModule {
             @ViewModelScope coroutineScope: CoroutineScope,
         ): ConfirmationHandler {
             return confirmationHandlerFactory.create(coroutineScope)
-        }
-
-        @Provides
-        @Singleton
-        fun provideCustomerStateHolder(
-            savedStateHandle: SavedStateHandle,
-            selectionHolder: EmbeddedSelectionHolder,
-            paymentMethodMetadataFlow: StateFlow<PaymentMethodMetadata?>,
-        ): CustomerStateHolder {
-            val customerMetadata = paymentMethodMetadataFlow.mapAsStateFlow {
-                it?.customerMetadata
-            }
-            return DefaultCustomerStateHolder(
-                savedStateHandle = savedStateHandle,
-                selection = selectionHolder.selection,
-                customerMetadata = customerMetadata,
-                paymentMethodMetadataFlow = paymentMethodMetadataFlow,
-            )
-        }
-
-        @Provides
-        fun providePaymentMethodMetadataFlow(
-            stateHolder: CheckoutControllerStateHolder,
-        ): StateFlow<PaymentMethodMetadata?> {
-            return stateHolder.stateFlow.mapAsStateFlow { it?.paymentMethodMetadata }
         }
     }
 }

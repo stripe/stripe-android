@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.FakeStripeImageLoader
@@ -161,6 +162,34 @@ internal class CheckoutStateLoaderTest {
     }
 
     @Test
+    fun `loadInitial populates customerState from the loaded customer`() = runScenario(
+        loaderCustomer = CustomerState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            defaultPaymentMethodId = null,
+        ),
+    ) {
+        loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
+
+        assertThat(stateHolder.state?.customerState?.paymentMethods)
+            .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `reload keeps the carried-forward customer over the freshly loaded one`() = runScenario(
+        // The loader would reload an empty customer, but an in-session addition must survive the reload.
+        loaderCustomer = CustomerState(paymentMethods = emptyList(), defaultPaymentMethodId = null),
+    ) {
+        val carried = CustomerState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            defaultPaymentMethodId = null,
+        )
+
+        loader.reload(committedState(customerState = carried))
+
+        assertThat(stateHolder.state?.customerState).isEqualTo(carried)
+    }
+
+    @Test
     fun `loadInitial resets the temporary selection and previous new selections`() = runScenario {
         // A prior state carries a temporary selection and a stashed new payment method; a fresh
         // configuration load must start from a clean slate rather than carrying them forward.
@@ -190,6 +219,7 @@ internal class CheckoutStateLoaderTest {
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
+        customerState: CustomerState? = null,
     ) = CheckoutControllerState(
         key = checkoutSessionResponse.id,
         configuration = CheckoutController.Configuration().build(),
@@ -202,6 +232,8 @@ internal class CheckoutStateLoaderTest {
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        customerState = customerState,
+        mostRecentlySelectedSavedPaymentMethod = null,
     )
 
     // Adaptive pricing (usd → eur) drives flag image resolution during load.
@@ -222,6 +254,7 @@ internal class CheckoutStateLoaderTest {
     private fun runScenario(
         merchantDisplayName: String = "Example, Inc.",
         loaderSelection: PaymentSelection? = null,
+        loaderCustomer: CustomerState? = null,
         chosenSelection: PaymentSelection? = null,
         shouldFail: Boolean = false,
         isGooglePayAvailable: Boolean = false,
@@ -250,6 +283,7 @@ internal class CheckoutStateLoaderTest {
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = FakePaymentElementLoader(
+                customer = loaderCustomer,
                 paymentSelection = loaderSelection,
                 shouldFail = shouldFail,
                 isGooglePayAvailable = isGooglePayAvailable,

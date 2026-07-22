@@ -3,10 +3,12 @@ package com.stripe.android.checkout
 import android.graphics.Bitmap
 import android.os.Bundle
 import com.stripe.android.common.model.asCommonConfiguration
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.content.EmbeddedSelectionChooser
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
@@ -94,6 +96,9 @@ internal class CheckoutStateLoader @Inject constructor(
             paymentSelection = selection,
             temporarySelection = carryForward.temporarySelection,
             previousNewSelections = carryForward.previousNewSelections,
+            customerState = carryForward.customerState ?: loaderState.customer,
+            mostRecentlySelectedSavedPaymentMethod = carryForward.mostRecentlySelectedSavedPaymentMethod
+                ?: (selection as? PaymentSelection.Saved)?.paymentMethod,
         )
     }
 
@@ -108,6 +113,8 @@ internal class CheckoutStateLoader @Inject constructor(
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
         val integrationLaunched: Boolean,
+        val customerState: CustomerState?,
+        val mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
     ) {
         companion object {
             fun initial() = CarryForward(
@@ -116,6 +123,8 @@ internal class CheckoutStateLoader @Inject constructor(
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
                 integrationLaunched = false,
+                customerState = null,
+                mostRecentlySelectedSavedPaymentMethod = null,
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
@@ -124,6 +133,8 @@ internal class CheckoutStateLoader @Inject constructor(
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
                 integrationLaunched = state.integrationLaunched,
+                customerState = state.customerState,
+                mostRecentlySelectedSavedPaymentMethod = state.mostRecentlySelectedSavedPaymentMethod,
             )
         }
     }

@@ -5,7 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.ece.FakeAvailableExpressButtonTypesFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
@@ -13,6 +15,7 @@ import com.stripe.android.paymentelement.embedded.previousNewSelection
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -143,6 +146,129 @@ internal class CheckoutControllerStateHolderTest {
     }
 
     @Test
+    fun `customer and paymentMethods project the customer from the committed state`() = testScenario {
+        val customerState = CustomerState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            defaultPaymentMethodId = null,
+        )
+        stateHolder.state = committedState(customerState = customerState)
+
+        assertThat(stateHolder.customer.value).isEqualTo(customerState)
+        assertThat(stateHolder.paymentMethods.value).containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `mostRecentlySelectedSavedPaymentMethod projects from the committed state`() = testScenario {
+        stateHolder.state = committedState(
+            mostRecentlySelectedSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+        )
+
+        assertThat(stateHolder.mostRecentlySelectedSavedPaymentMethod.value)
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `setCustomerState commits the customer onto the state and emits`() = testScenario {
+        stateHolder.state = committedState()
+        val customerState = CustomerState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            defaultPaymentMethodId = null,
+        )
+
+        stateHolder.customer.test {
+            assertThat(awaitItem()).isNull()
+            stateHolder.setCustomerState(customerState)
+            assertThat(awaitItem()).isEqualTo(customerState)
+        }
+
+        assertThat(stateHolder.state?.customerState).isEqualTo(customerState)
+    }
+
+    @Test
+    fun `setCustomerState clears mostRecentlySelectedSavedPaymentMethod when it is no longer present`() =
+        testScenario {
+            stateHolder.state = committedState(
+                customerState = CustomerState(
+                    paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                    defaultPaymentMethodId = null,
+                ),
+                mostRecentlySelectedSavedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            )
+
+            stateHolder.setCustomerState(
+                CustomerState(paymentMethods = emptyList(), defaultPaymentMethodId = null),
+            )
+
+            assertThat(stateHolder.state?.mostRecentlySelectedSavedPaymentMethod).isNull()
+        }
+
+    @Test
+    fun `updateMostRecentlySelectedSavedPaymentMethod commits onto the state and emits`() = testScenario {
+        stateHolder.state = committedState()
+
+        stateHolder.mostRecentlySelectedSavedPaymentMethod.test {
+            assertThat(awaitItem()).isNull()
+            stateHolder.updateMostRecentlySelectedSavedPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            assertThat(awaitItem()).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        }
+
+        assertThat(stateHolder.state?.mostRecentlySelectedSavedPaymentMethod)
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
+    fun `setDefaultPaymentMethod updates the customer default on the state`() = testScenario {
+        stateHolder.state = committedState(
+            customerState = CustomerState(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                defaultPaymentMethodId = null,
+            ),
+        )
+
+        stateHolder.setDefaultPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+
+        assertThat(stateHolder.state?.customerState?.defaultPaymentMethodId)
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_METHOD.id)
+    }
+
+    @Test
+    fun `addPaymentMethod appends the payment method to the customer on the state`() = testScenario {
+        stateHolder.state = committedState(
+            customerState = CustomerState(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+                defaultPaymentMethodId = null,
+            ),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(hasCustomerConfiguration = true),
+        )
+
+        stateHolder.addPaymentMethod(PaymentMethodFixtures.LINK_PAYMENT_METHOD)
+
+        assertThat(stateHolder.state?.customerState?.paymentMethods).containsExactly(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            PaymentMethodFixtures.LINK_PAYMENT_METHOD,
+        )
+    }
+
+    @Test
+    fun `customer setters no-op before the state is committed`() = testScenario {
+        stateHolder.setCustomerState(CustomerState(paymentMethods = emptyList(), defaultPaymentMethodId = null))
+        assertSetBeforeLoadError(operation = "setCustomerState")
+
+        stateHolder.setDefaultPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        assertSetBeforeLoadError(operation = "setDefaultPaymentMethod")
+
+        stateHolder.updateMostRecentlySelectedSavedPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        assertSetBeforeLoadError(operation = "updateMostRecentlySelectedSavedPaymentMethod")
+
+        stateHolder.addPaymentMethod(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        assertSetBeforeLoadError(operation = "addPaymentMethod")
+
+        assertThat(stateHolder.state).isNull()
+        assertThat(stateHolder.customer.value).isNull()
+        assertThat(stateHolder.mostRecentlySelectedSavedPaymentMethod.value).isNull()
+    }
+
+    @Test
     fun `selection setters no-op before the state is committed`() = testScenario {
         stateHolder.setSelection(PaymentSelection.GooglePay)
         assertSetBeforeLoadError(operation = "setSelection")
@@ -192,6 +318,9 @@ internal class CheckoutControllerStateHolderTest {
         paymentSelection: PaymentSelection? = null,
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
+        customerState: CustomerState? = null,
+        mostRecentlySelectedSavedPaymentMethod: PaymentMethod? = null,
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
     ) = CheckoutControllerState(
         key = DEFAULT_KEY,
         configuration = CheckoutController.Configuration().build(),
@@ -199,11 +328,13 @@ internal class CheckoutControllerStateHolderTest {
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
         integrationLaunched = false,
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+        paymentMethodMetadata = paymentMethodMetadata,
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
         temporarySelection = temporarySelection,
         previousNewSelections = previousNewSelections,
+        customerState = customerState,
+        mostRecentlySelectedSavedPaymentMethod = mostRecentlySelectedSavedPaymentMethod,
     )
 
     private fun testScenario(

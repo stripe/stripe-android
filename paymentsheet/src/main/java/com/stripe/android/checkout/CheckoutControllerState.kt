@@ -5,10 +5,12 @@ import android.os.Bundle
 import android.os.Parcelable
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
+import com.stripe.android.paymentsheet.state.CustomerState
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -21,7 +23,9 @@ import kotlinx.parcelize.Parcelize
  *
  * [CheckoutStateLoader] builds every committed state after a load, but the selection setters on
  * [CheckoutControllerStateHolder] (which implements [EmbeddedSelectionHolder]) also [copy] it to
- * update [paymentSelection]/[temporarySelection]/[previousNewSelections] without a reload.
+ * update [paymentSelection]/[temporarySelection]/[previousNewSelections] without a reload. The
+ * customer setters (it also implements [com.stripe.android.paymentsheet.CustomerStateHolder])
+ * likewise [copy] it to update [customerState]/[mostRecentlySelectedSavedPaymentMethod].
  */
 @OptIn(CheckoutSessionPreview::class)
 @Parcelize
@@ -37,6 +41,8 @@ internal data class CheckoutControllerState(
     val paymentSelection: PaymentSelection?,
     val temporarySelection: String?,
     val previousNewSelections: Bundle,
+    val customerState: CustomerState?,
+    val mostRecentlySelectedSavedPaymentMethod: PaymentMethod?,
 ) : Parcelable {
     fun asCheckoutSession(
         paymentOptionFactory: CheckoutPaymentOptionDisplayDataFactory,
