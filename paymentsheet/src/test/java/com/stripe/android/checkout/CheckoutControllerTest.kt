@@ -498,9 +498,9 @@ internal class CheckoutControllerTest {
 
             result.getOrThrow()
             val state = committedState()
-            assertThat(state.shippingName).isEqualTo("John")
-            assertThat(state.shippingPhoneNumber).isEqualTo("5551234567")
-            assertThat(state.shippingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+            assertThat(state.collectedDetails.shippingPhoneNumber).isEqualTo("5551234567")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
         }
 
     @Test
@@ -531,8 +531,8 @@ internal class CheckoutControllerTest {
 
             result.getOrThrow()
             val state = committedState()
-            assertThat(state.shippingName).isEqualTo("John")
-            assertThat(state.shippingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
         }
 
     @Test
@@ -547,8 +547,8 @@ internal class CheckoutControllerTest {
 
             assertThat(result.isFailure).isTrue()
             val state = committedState()
-            assertThat(state.shippingName).isNull()
-            assertThat(state.shippingAddress).isNull()
+            assertThat(state.collectedDetails.shippingName).isNull()
+            assertThat(state.collectedDetails.shippingAddress).isNull()
         }
 
     @Test
@@ -570,9 +570,9 @@ internal class CheckoutControllerTest {
 
             result.getOrThrow()
             val state = committedState()
-            assertThat(state.billingName).isEqualTo("Jane")
-            assertThat(state.billingPhoneNumber).isEqualTo("5559876543")
-            assertThat(state.billingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
+            assertThat(state.collectedDetails.billingPhoneNumber).isEqualTo("5559876543")
+            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
         }
 
     @Test
@@ -583,8 +583,8 @@ internal class CheckoutControllerTest {
 
             result.getOrThrow()
             val state = committedState()
-            assertThat(state.billingName).isEqualTo("Jane")
-            assertThat(state.billingAddress).isEqualTo(fullAddress.build())
+            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
+            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
         }
 
     @Test

@@ -24,7 +24,8 @@ internal class CheckoutStateLoader @Inject constructor(
     ) {
         commit(
             configuration = configuration,
-            sessionData = InitialSessionData(checkoutSessionResponse),
+            response = checkoutSessionResponse,
+            collectedDetails = CheckoutCollectedDetails(),
             carryForward = CarryForward.initial(),
         )
     }
@@ -32,25 +33,26 @@ internal class CheckoutStateLoader @Inject constructor(
     suspend fun reload(state: CheckoutControllerState) {
         commit(
             configuration = state.configuration,
-            sessionData = state,
+            response = state.checkoutSessionResponse,
+            collectedDetails = state.collectedDetails,
             carryForward = CarryForward.from(state),
         )
     }
 
     private suspend fun commit(
         configuration: CheckoutController.Configuration.State,
-        sessionData: CheckoutSessionData,
+        response: CheckoutSessionResponse,
+        collectedDetails: CheckoutCollectedDetails,
         carryForward: CarryForward,
     ) {
-        val response = sessionData.checkoutSessionResponse
-
         // [CarryForward.cachedFlagImages] carries the previously resolved images forward, so they're
         // reused when the currencies haven't changed.
         val flagImages = flagImageResolver.resolve(response, cached = carryForward.cachedFlagImages)
 
         val embeddedConfig = embeddedConfigurationFactory.create(
             configuration = configuration,
-            sessionData = sessionData,
+            checkoutSessionResponse = response,
+            collectedDetails = collectedDetails,
         )
 
         val loaderState = paymentElementLoader.load(
@@ -85,7 +87,7 @@ internal class CheckoutStateLoader @Inject constructor(
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,
-            collectedDetails = sessionData.toCollectedDetails(),
+            collectedDetails = collectedDetails,
             integrationLaunched = carryForward.integrationLaunched,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
@@ -125,28 +127,4 @@ internal class CheckoutStateLoader @Inject constructor(
             )
         }
     }
-
-    /** The [CheckoutSessionData] for a first load: the session response with no collected details. */
-    private class InitialSessionData(
-        override val checkoutSessionResponse: CheckoutSessionResponse,
-        private val collectedDetails: CheckoutCollectedDetails = CheckoutCollectedDetails(),
-    ) : CheckoutSessionData {
-        override val shippingName: String? get() = collectedDetails.shippingName
-        override val billingName: String? get() = collectedDetails.billingName
-        override val shippingPhoneNumber: String? get() = collectedDetails.shippingPhoneNumber
-        override val billingPhoneNumber: String? get() = collectedDetails.billingPhoneNumber
-        override val shippingAddress: Address.State? get() = collectedDetails.shippingAddress
-        override val billingAddress: Address.State? get() = collectedDetails.billingAddress
-    }
 }
-
-/** Projects the collected details carried on any [CheckoutSessionData] into a [CheckoutCollectedDetails]. */
-@OptIn(CheckoutSessionPreview::class)
-private fun CheckoutSessionData.toCollectedDetails() = CheckoutCollectedDetails(
-    shippingName = shippingName,
-    billingName = billingName,
-    shippingPhoneNumber = shippingPhoneNumber,
-    billingPhoneNumber = billingPhoneNumber,
-    shippingAddress = shippingAddress,
-    billingAddress = billingAddress,
-)

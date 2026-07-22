@@ -14,16 +14,16 @@ import kotlinx.parcelize.Parcelize
 internal data class InternalState(
     val key: String,
     val configuration: Checkout.Configuration.State,
-    override val checkoutSessionResponse: CheckoutSessionResponse,
+    val checkoutSessionResponse: CheckoutSessionResponse,
     val flagImages: Map<String, Bitmap>?,
-    override val shippingName: String? = null,
-    override val billingName: String? = null,
-    override val shippingPhoneNumber: String? = null,
-    override val billingPhoneNumber: String? = null,
-    override val shippingAddress: Address.State? = null,
-    override val billingAddress: Address.State? = null,
+    val shippingName: String? = null,
+    val billingName: String? = null,
+    val shippingPhoneNumber: String? = null,
+    val billingPhoneNumber: String? = null,
+    val shippingAddress: Address.State? = null,
+    val billingAddress: Address.State? = null,
     val integrationLaunched: Boolean = false,
-) : Parcelable, CheckoutSessionData {
+) : Parcelable {
     val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
         get() = PaymentElementLoader.InitializationMode.CheckoutSession(
             instancesKey = key,
