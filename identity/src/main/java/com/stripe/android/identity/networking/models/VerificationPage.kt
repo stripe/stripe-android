@@ -1,6 +1,7 @@
 package com.stripe.android.identity.networking.models
 
 import android.os.Parcelable
+import com.stripe.android.identity.IdentityVerificationSheet
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage.Companion.enable3DFaceCapture
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage.Companion.shouldSubmit3DFaceCaptureData
 import kotlinx.parcelize.Parcelize
@@ -98,9 +99,13 @@ internal data class VerificationPage(
             }
 
         fun VerificationPage.enable3DFaceCapture(): Boolean =
-            selfieCapture?.enable3DFaceCapture() == true || has3DFaceCaptureExperiment()
+            IdentityVerificationSheet.local3DFaceCaptureOverride ?: (
+                selfieCapture?.enable3DFaceCapture() == true || has3DFaceCaptureExperiment()
+            )
 
         fun VerificationPage.shouldSubmit3DFaceCaptureData(): Boolean =
-            selfieCapture?.shouldSubmit3DFaceCaptureData() == true || has3DFaceCaptureExperiment()
+            IdentityVerificationSheet.local3DFaceCaptureOverride ?: (
+                selfieCapture?.shouldSubmit3DFaceCaptureData() == true || has3DFaceCaptureExperiment()
+            )
     }
 }
