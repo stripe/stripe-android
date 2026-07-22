@@ -4,8 +4,8 @@ package com.stripe.android.checkout.injection
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.lifecycle.LifecycleOwner
-import com.stripe.android.checkout.CheckoutPaymentElementInitializer
 import com.stripe.android.checkout.CheckoutPresenter
+import com.stripe.android.checkout.CheckoutPresenterInitializer
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import dagger.BindsInstance
@@ -21,7 +21,7 @@ import javax.inject.Named
 )
 internal interface CheckoutPresenterSubcomponent {
     val presenter: CheckoutPresenter
-    val initializer: CheckoutPaymentElementInitializer
+    val initializer: CheckoutPresenterInitializer
 
     @Subcomponent.Factory
     interface Factory {
