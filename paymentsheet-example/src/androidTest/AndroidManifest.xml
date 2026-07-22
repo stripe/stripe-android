@@ -2,10 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- The test app targets SDK 36, so getInstalledApplications() is subject to Android 11+
-         package-visibility filtering and cannot see browsers like Chrome. This <queries> block
-         (the standard browsable-https + explicit browser packages pattern) makes them visible so
-         Selectors.getInstalledBrowsers() can detect them. -->
+    <!-- Make installed browsers visible to getInstalledApplications() under Android 11+
+         package-visibility filtering, so browser detection works. -->
     <queries>
         <intent>
             <action android:name="android.intent.action.VIEW" />

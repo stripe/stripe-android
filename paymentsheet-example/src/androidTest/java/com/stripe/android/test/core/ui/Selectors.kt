@@ -170,15 +170,12 @@ internal class Selectors(
     }
 
     /**
-     * On a freshly-booted emulator Chrome launches into its first-run onboarding
-     * (FirstRunActivity: terms, then a sign-in/sync prompt), which blocks the authorization page
-     * from loading. Click through it so the Custom Tab / browser can show the auth page. Buttons are
-     * matched by Chrome resource id (stable across versions). Chrome persists first-run completion,
-     * so this is a fast no-op on subsequent tests. No-op if first-run isn't showing.
+     * Clicks through Chrome's first-run onboarding, which otherwise blocks the authorization page.
+     * No-op if it isn't showing.
      */
     fun dismissChromeFirstRunIfPresent() {
         val chrome = BrowserUI.Chrome.packageName
-        // Chrome may still be launching; give it a moment to reach the foreground.
+        // Chrome may still be launching.
         device.wait(Until.hasObject(By.pkg(chrome)), 5_000L)
 
         val freButtonIds = listOf(

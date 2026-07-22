@@ -52,16 +52,14 @@ android {
 
         managedDevices {
             localDevices {
+                // Lean image without a browser; used for the main suite.
                 register("pixel2api33") {
                     device = "Pixel 2"
                     apiLevel = 33
-                    // Lean AOSP image for the main suite. Ships no browser, so browser-redirect
-                    // tests (Alipay etc.) are routed to pixel2api33chrome below instead.
                     systemImageSource = "aosp-atd"
                 }
-                // Chrome-bearing image used ONLY for browser-redirect e2e tests (e.g. Alipay), which
-                // need a real browser for the authorization step. Kept separate so the heavier image
-                // doesn't destabilize the rest of the suite. See bitrise run-paymentsheet-browser-e2e.
+                // Chrome-bearing image for browser-redirect tests, kept separate so its heavier
+                // footprint doesn't affect the rest of the suite.
                 register("pixel2api33chrome") {
                     device = "Pixel 2"
                     apiLevel = 33

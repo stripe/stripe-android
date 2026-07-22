@@ -39,14 +39,13 @@ def class_names_from_test_files(test_directory, test_file_names):
     return class_names
 
 
-# TestGooglePay runs on Firebase Test Lab (needs Google Play) via run-paymentsheet-google-pay-e2e.
+# Runs on Firebase Test Lab (needs Google Play), not the GMD run.
 FIREBASE_TEST_CLASSES = {
     'com.stripe.android.lpm.TestGooglePay',
 }
 
-# Browser-redirect tests need a real browser (Chrome) for the authorization step, so they run on the
-# Chrome-bearing pixel2api33chrome device via the run-paymentsheet-browser-e2e Bitrise workflow. The
-# lean aosp-atd image used for the main run ships no browser, so these would silently skip there.
+# Need a real browser for the authorization step, so they run on the Chrome-bearing device
+# (pixel2api33chrome); the main run's aosp-atd image has no browser.
 BROWSER_REDIRECT_TEST_CLASSES = {
     'com.stripe.android.TestBrowsers',
     'com.stripe.android.lpm.TestAfterpay',
@@ -69,7 +68,7 @@ BROWSER_REDIRECT_TEST_CLASSES = {
     'com.stripe.android.lpm.TestWero',
 }
 
-# Never run on the main (aosp-atd) sharded GMD run.
+# Excluded from the main sharded GMD run.
 EXCLUDED_TEST_CLASSES = FIREBASE_TEST_CLASSES | BROWSER_REDIRECT_TEST_CLASSES
 
 
