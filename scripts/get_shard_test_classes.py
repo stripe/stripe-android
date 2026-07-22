@@ -47,25 +47,10 @@ FIREBASE_TEST_CLASSES = {
 # Need a real browser for the authorization step, so they run on the Chrome-bearing device
 # (pixel2api33chrome); the main run's aosp-atd image has no browser.
 BROWSER_REDIRECT_TEST_CLASSES = {
-    'com.stripe.android.TestBrowsers',
-    'com.stripe.android.lpm.TestAfterpay',
     'com.stripe.android.lpm.TestAlipay',
     'com.stripe.android.lpm.TestBancontact',
     'com.stripe.android.lpm.TestBillie',
     'com.stripe.android.lpm.TestCashApp',
-    'com.stripe.android.lpm.TestEps',
-    'com.stripe.android.lpm.TestFpx',
-    'com.stripe.android.lpm.TestGrabPay',
-    'com.stripe.android.lpm.TestIdeal',
-    'com.stripe.android.lpm.TestMobilePay',
-    'com.stripe.android.lpm.TestP24',
-    'com.stripe.android.lpm.TestPayPal',
-    'com.stripe.android.lpm.TestPayPay',
-    'com.stripe.android.lpm.TestSatispay',
-    'com.stripe.android.lpm.TestSunbit',
-    'com.stripe.android.lpm.TestSwish',
-    'com.stripe.android.lpm.TestTwint',
-    'com.stripe.android.lpm.TestWero',
 }
 
 # Excluded from the main sharded GMD run.
