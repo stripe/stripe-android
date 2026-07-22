@@ -19,11 +19,11 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     @Test
     fun `initialize init and clear sheetLauncher`() = testScenario {
-        assertThat(sheetLauncherHolder.sheetLauncher).isNull()
+        assertThat(sheetStateHolder.sheetLauncher).isNull()
         initializer.initialize(true)
-        assertThat(sheetLauncherHolder.sheetLauncher).isNotNull()
+        assertThat(sheetStateHolder.sheetLauncher).isNotNull()
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
-        assertThat(sheetLauncherHolder.sheetLauncher).isNull()
+        assertThat(sheetStateHolder.sheetLauncher).isNull()
     }
 
     @Test
@@ -79,11 +79,11 @@ internal class EmbeddedPaymentElementInitializerTest {
         paymentElementCallbackIdentifier: String = PAYMENT_ELEMENT_CALLBACK_TEST_IDENTIFIER,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
-        val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
+        val sheetStateHolder = SheetStateHolder(SavedStateHandle())
         val eventReporter = FakeEventReporter()
         val initializer = EmbeddedPaymentElementInitializer(
             sheetLauncher = FakeEmbeddedSheetLauncher(),
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
             lifecycleOwner = lifecycleOwner,
             savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
@@ -91,7 +91,7 @@ internal class EmbeddedPaymentElementInitializerTest {
         )
         Scenario(
             initializer = initializer,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
             lifecycleOwner = lifecycleOwner,
             eventReporter = eventReporter,
         ).block()
@@ -100,7 +100,7 @@ internal class EmbeddedPaymentElementInitializerTest {
 
     private class Scenario(
         val initializer: EmbeddedPaymentElementInitializer,
-        val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
+        val sheetStateHolder: SheetStateHolder,
         val lifecycleOwner: TestLifecycleOwner,
         val eventReporter: FakeEventReporter,
     )

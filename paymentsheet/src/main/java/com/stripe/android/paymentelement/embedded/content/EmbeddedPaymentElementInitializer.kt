@@ -12,7 +12,7 @@ import javax.inject.Inject
 @EmbeddedPaymentElementScope
 internal class EmbeddedPaymentElementInitializer @Inject constructor(
     private val sheetLauncher: EmbeddedSheetLauncher,
-    private val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
+    private val sheetStateHolder: SheetStateHolder,
     private val lifecycleOwner: LifecycleOwner,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: EventReporter,
@@ -30,13 +30,13 @@ internal class EmbeddedPaymentElementInitializer @Inject constructor(
             previouslySentDeepLinkEvent = true
         }
 
-        sheetLauncherHolder.sheetLauncher = sheetLauncher
+        sheetStateHolder.sheetLauncher = sheetLauncher
 
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     PaymentElementCallbackReferences.remove(paymentElementCallbackIdentifier)
-                    sheetLauncherHolder.sheetLauncher = null
+                    sheetStateHolder.sheetLauncher = null
                 }
             }
         )
