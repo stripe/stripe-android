@@ -55,7 +55,10 @@ android {
                 register("pixel2api33") {
                     device = "Pixel 2"
                     apiLevel = 33
-                    systemImageSource = "aosp-atd"
+                    // Experiment (PR #13565): aosp-atd ships no browser, so browser-based auth tests
+                    // (Alipay etc.) silently skip. google_apis ships Chrome (lighter than the Play
+                    // Store variant). Paired with the androidTest <queries>/QUERY_ALL_PACKAGES fix.
+                    systemImageSource = "google_apis"
                 }
             }
         }
