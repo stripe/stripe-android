@@ -47,6 +47,7 @@ FIREBASE_TEST_CLASSES = {
 # Need a real browser for the authorization step, so they run on the Chrome-bearing device
 # (pixel2api33chrome); the main run's aosp-atd image has no browser.
 BROWSER_REDIRECT_TEST_CLASSES = {
+    'com.stripe.android.BrowserAvailabilityTest',
     'com.stripe.android.TestBrowsers',
     'com.stripe.android.lpm.TestAfterpay',
     'com.stripe.android.lpm.TestAlipay',

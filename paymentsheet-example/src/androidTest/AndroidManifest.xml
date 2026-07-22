@@ -2,17 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <!-- Make installed browsers visible to getInstalledApplications() under Android 11+
-         package-visibility filtering, so browser detection works. -->
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <category android:name="android.intent.category.BROWSABLE" />
-            <data android:scheme="https" />
-        </intent>
-        <package android:name="com.android.chrome" />
-        <package android:name="org.mozilla.firefox" />
-    </queries>
 
     <application android:requestLegacyExternalStorage="true" />
 </manifest>
