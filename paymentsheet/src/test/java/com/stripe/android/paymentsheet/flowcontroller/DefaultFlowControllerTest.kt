@@ -2366,27 +2366,6 @@ internal class DefaultFlowControllerTest {
         }
 
     @Test
-    fun `configureWithCheckout throws when checkout mutation is in flight`() = runTest {
-        val checkout = CheckoutStateFactory.createCheckout(context)
-        networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-        val deferred = async { checkout.applyPromotionCode("10OFF") }
-        testScheduler.advanceUntilIdle()
-
-        val flowController = createFlowController()
-        val error = runCatching {
-            flowController.configureWithCheckout(checkout, PaymentSheet.Configuration("Test")) { _, _ -> }
-        }.exceptionOrNull()
-        assertThat(error).isInstanceOf(IllegalStateException::class.java)
-        assertThat(error).hasMessageThat()
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-
-        deferred.cancel()
-    }
-
-    @Test
     fun `presentPaymentOptions throws when checkout mutation is in flight`() = runTest {
         val checkout = CheckoutStateFactory.createCheckout(context)
         val flowController = createFlowController(

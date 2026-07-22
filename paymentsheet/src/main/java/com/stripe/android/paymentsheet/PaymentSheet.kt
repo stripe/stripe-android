@@ -19,7 +19,6 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.LinkDisallowFundingSourceCreationPreview
 import com.stripe.android.SharedPaymentTokenSessionPreview
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.core.reactnative.ReactNativeSdkInternal
 import com.stripe.android.core.reactnative.UnregisterSignal
@@ -35,7 +34,6 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentelement.AddressAutocompletePreview
 import com.stripe.android.paymentelement.AnalyticEventCallback
 import com.stripe.android.paymentelement.AppearanceAPIAdditionsPreview
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.CreateCardPresentSetupIntentCallback
 import com.stripe.android.paymentelement.CreateIntentWithConfirmationTokenCallback
@@ -3945,21 +3943,6 @@ class PaymentSheet internal constructor(
             intentConfiguration: IntentConfiguration,
             configuration: Configuration? = null,
             callback: ConfigCallback
-        )
-
-        /**
-         * Configure the FlowController with a [Checkout].
-         *
-         * @param checkout The configured checkout.
-         * @param configuration An optional [PaymentSheet] configuration.
-         * @param callback called with the result of configuring the FlowController.
-         */
-        @CheckoutSessionPreview
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun configureWithCheckout(
-            checkout: Checkout,
-            configuration: Configuration,
-            callback: ConfigCallback,
         )
 
         /**
