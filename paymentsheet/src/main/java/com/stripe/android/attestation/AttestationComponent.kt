@@ -1,12 +1,13 @@
 package com.stripe.android.attestation
 
 import android.app.Application
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.link.injection.PaymentsIntegrityModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
+import com.stripe.android.paymentsheet.injection.NamedKeysFromApiConfigModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Named
@@ -20,7 +21,7 @@ import javax.inject.Singleton
         CoreCommonModule::class,
         CoroutineContextModule::class,
         PaymentsIntegrityModule::class,
-        StripeRepositoryModule::class,
+        NamedKeysFromApiConfigModule::class,
     ]
 )
 internal interface AttestationComponent {
@@ -31,8 +32,7 @@ internal interface AttestationComponent {
         fun build(
             @BindsInstance application: Application,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,

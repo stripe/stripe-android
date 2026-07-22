@@ -328,8 +328,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,

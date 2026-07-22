@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentsheet.injection.ApiConfigurationFromMetadataModule
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
@@ -31,6 +32,7 @@ import javax.inject.Singleton
         GooglePayLauncherModule::class,
         EmbeddedLinkExtrasModule::class,
         PaymentMethodMessagePromotionsExperimentHandlerModule::class,
+        ApiConfigurationFromMetadataModule::class,
     ],
 )
 @Singleton

@@ -63,6 +63,7 @@ import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.injection.ApiConfigurationFromPaymentConfigModule
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.DefaultEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -85,6 +86,7 @@ import javax.inject.Singleton
 
 @Component(
     modules = [
+        ApiConfigurationFromPaymentConfigModule::class,
         ElementsSessionClientParamsModule::class,
         CoreCommonModule::class,
         CoroutineContextModule::class,

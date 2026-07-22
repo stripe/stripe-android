@@ -1,12 +1,11 @@
 package com.stripe.android.link.repositories
 
 import android.app.Application
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultFraudDetectionDataRepository
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentMethod
@@ -40,7 +39,6 @@ import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -50,8 +48,7 @@ import kotlin.coroutines.CoroutineContext
 internal class LinkApiRepository @Inject constructor(
     application: Application,
     private val requestSurface: RequestSurface,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    private val apiConfiguration: ApiConfiguration.State,
     private val stripeRepository: StripeRepository,
     private val consumersApiService: ConsumersApiService,
     @IOContext private val workContext: CoroutineContext,
@@ -541,8 +538,8 @@ internal class LinkApiRepository @Inject constructor(
             )
         } else {
             ApiRequest.Options(
-                apiKey = publishableKeyProvider(),
-                stripeAccount = stripeAccountIdProvider(),
+                apiKey = apiConfiguration.publishableKey,
+                stripeAccount = apiConfiguration.stripeAccountId,
             )
         }
     }

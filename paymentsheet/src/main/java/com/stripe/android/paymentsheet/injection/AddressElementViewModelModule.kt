@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
@@ -37,11 +37,13 @@ internal class AddressElementViewModelModule {
     fun providesProductUsage() = setOf("PaymentSheet.AddressController")
 
     @Provides
-    @Named(PUBLISHABLE_KEY)
     @Singleton
-    fun providesPublishableKey(
+    fun providesApiConfiguration(
         args: AddressElementActivityContract.Args
-    ): String = args.publishableKey
+    ): ApiConfiguration.State = ApiConfiguration.State(
+        publishableKey = args.publishableKey,
+        stripeAccountId = null,
+    )
 
     @Provides
     @Singleton

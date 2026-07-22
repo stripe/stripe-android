@@ -6,8 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.paymentsheet.injection.ApiConfigurationFromMetadataModule
+import com.stripe.android.paymentsheet.injection.NamedKeysFromApiConfigModule
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkActivityViewModel
 import com.stripe.android.link.LinkConfiguration
@@ -50,6 +50,8 @@ internal annotation class NativeLinkScope
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LinkPassthroughConfirmationModule::class,
+        ApiConfigurationFromMetadataModule::class,
+        NamedKeysFromApiConfigModule::class,
     ]
 )
 internal interface NativeLinkComponent {
@@ -81,12 +83,6 @@ internal interface NativeLinkComponent {
             configuration: LinkConfiguration,
             @BindsInstance
             paymentMethodMetadata: PaymentMethodMetadata,
-            @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
-            @BindsInstance
-            @Named(STRIPE_ACCOUNT_ID)
-            stripeAccountIdProvider: () -> String?,
             @BindsInstance
             @PaymentElementCallbackIdentifier
             paymentElementCallbackIdentifier: String,

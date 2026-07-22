@@ -126,6 +126,7 @@ internal class PaymentElementConfirmationTestActivity : AppCompatActivity() {
         PaymentElementConfirmationModule::class,
         PaymentElementConfirmationTestModule::class,
         GooglePayLauncherModule::class,
+        com.stripe.android.paymentsheet.injection.ApiConfigurationFromPaymentConfigModule::class,
     ]
 )
 @Singleton

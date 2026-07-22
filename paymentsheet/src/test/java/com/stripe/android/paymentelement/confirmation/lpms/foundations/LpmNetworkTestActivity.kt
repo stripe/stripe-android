@@ -137,6 +137,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
         DefaultConfirmationModule::class,
         DefaultIntentConfirmationModule::class,
         LpmNetworkTestModule::class,
+        com.stripe.android.paymentsheet.injection.ApiConfigurationFromPaymentConfigModule::class,
     ]
 )
 @Singleton
