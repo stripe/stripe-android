@@ -170,7 +170,7 @@ internal class EmbeddedContentUiTest {
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
+        val sheetStateHolder = SheetStateHolder(savedStateHandle)
 
         val state = MutableStateFlow<EmbeddedContentHelperStateHolder.State?>(null)
         val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
@@ -182,7 +182,7 @@ internal class EmbeddedContentUiTest {
             customerStateHolder = customerStateHolder,
             linkAccountHolder = linkAccountHolder,
             coroutineScope = viewModelScope,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
         )
         val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
             eventReporter = eventReporter,
@@ -193,7 +193,7 @@ internal class EmbeddedContentUiTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             coroutineScope = viewModelScope,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
         )
 
@@ -202,7 +202,7 @@ internal class EmbeddedContentUiTest {
                 coroutineScope = viewModelScope,
                 state = state,
                 verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-                sheetLauncherHolder = sheetLauncherHolder,
+                sheetStateHolder = sheetStateHolder,
                 embeddedWalletsHelper = { stateFlowOf(null) },
                 internalRowSelectionCallback = { internalRowSelectionCallback },
                 customerStateHolder = customerStateHolder,

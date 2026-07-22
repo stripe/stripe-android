@@ -117,7 +117,7 @@ internal class DefaultEmbeddedContentHelperTest {
             }
         ) {
             val fakeLauncher = RecordingEmbeddedSheetLauncher()
-            sheetLauncherHolder.sheetLauncher = fakeLauncher
+            sheetStateHolder.sheetLauncher = fakeLauncher
             embeddedContentHelper.presentPaymentOptions()
 
             assertThat(fakeLauncher.launchPaymentOptionsCalls.single()).isEqualTo(
@@ -135,7 +135,7 @@ internal class DefaultEmbeddedContentHelperTest {
     private class Scenario(
         val embeddedContentHelper: DefaultEmbeddedContentHelper,
         val state: MutableStateFlow<EmbeddedContentHelperStateHolder.State?>,
-        val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
+        val sheetStateHolder: SheetStateHolder,
         val errorReporter: FakeErrorReporter,
     )
 
@@ -171,7 +171,7 @@ internal class DefaultEmbeddedContentHelperTest {
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
         val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        val sheetLauncherHolder = EmbeddedSheetLauncherHolder()
+        val sheetStateHolder = SheetStateHolder(savedStateHandle)
 
         val state = MutableStateFlow(initialState)
         val savedPaymentMethodMutatorFactory = EmbeddedContentSavedPaymentMethodMutatorFactory(
@@ -183,7 +183,7 @@ internal class DefaultEmbeddedContentHelperTest {
             customerStateHolder = customerStateHolder,
             linkAccountHolder = linkAccountHolder,
             coroutineScope = backgroundScope,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
         )
         val verticalLayoutInteractorFactory = DefaultEmbeddedPaymentMethodVerticalLayoutInteractorFactory(
             eventReporter = eventReporter,
@@ -194,7 +194,7 @@ internal class DefaultEmbeddedContentHelperTest {
             paymentMethodMessagePromotionsHelper = FakePaymentMethodMessagePromotionsHelper(),
             rowSelectionImmediateActionHandler = immediateActionHandler,
             coroutineScope = backgroundScope,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
             savedPaymentMethodMutatorFactory = savedPaymentMethodMutatorFactory,
         )
 
@@ -202,7 +202,7 @@ internal class DefaultEmbeddedContentHelperTest {
             coroutineScope = backgroundScope,
             state = state,
             verticalLayoutInteractorFactory = verticalLayoutInteractorFactory,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
             embeddedWalletsHelper = { stateFlowOf(null) },
             internalRowSelectionCallback = { null },
             customerStateHolder = customerStateHolder,
@@ -212,7 +212,7 @@ internal class DefaultEmbeddedContentHelperTest {
         Scenario(
             embeddedContentHelper = embeddedContentHelper,
             state = state,
-            sheetLauncherHolder = sheetLauncherHolder,
+            sheetStateHolder = sheetStateHolder,
             errorReporter = errorReporter,
         ).block()
         confirmationHandler.validate()

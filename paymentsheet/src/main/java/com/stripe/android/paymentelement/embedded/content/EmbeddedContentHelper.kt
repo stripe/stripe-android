@@ -23,7 +23,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
     @ViewModelScope private val coroutineScope: CoroutineScope,
     private val state: StateFlow<EmbeddedContentHelperStateHolder.State?>,
     private val verticalLayoutInteractorFactory: EmbeddedPaymentMethodVerticalLayoutInteractorFactory,
-    private val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
+    private val sheetStateHolder: SheetStateHolder,
     private val embeddedWalletsHelper: EmbeddedWalletsHelper,
     private val internalRowSelectionCallback: Provider<InternalRowSelectionCallback?>,
     private val customerStateHolder: CustomerStateHolder,
@@ -66,7 +66,7 @@ internal class DefaultEmbeddedContentHelper @Inject constructor(
             )
             return
         }
-        val launcher = sheetLauncherHolder.sheetLauncher
+        val launcher = sheetStateHolder.sheetLauncher
         if (launcher == null) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.EMBEDDED_PRESENT_PAYMENT_OPTIONS_NO_LAUNCHER
