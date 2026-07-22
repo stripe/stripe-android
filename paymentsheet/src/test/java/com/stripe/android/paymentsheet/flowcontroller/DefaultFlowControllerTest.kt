@@ -15,10 +15,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.CheckoutStateFactory
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -57,7 +53,6 @@ import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferences
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbacks
@@ -104,7 +99,6 @@ import com.stripe.android.utils.FakePaymentElementLoader
 import com.stripe.android.utils.FakePaymentMethodMessagePromotionsHelper
 import com.stripe.android.utils.PaymentElementCallbackTestRule
 import com.stripe.android.utils.RelayingPaymentElementLoader
-import kotlinx.coroutines.async
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -126,7 +120,6 @@ import org.mockito.kotlin.reset
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.TimeUnit
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
@@ -143,7 +136,6 @@ internal class DefaultFlowControllerTest {
     @get:Rule
     val checkoutRuleChain: RuleChain = RuleChain
         .outerRule(networkRule)
-        .around(CheckoutInstancesTestRule())
 
     private val paymentOptionResultCallback = mock<PaymentOptionResultCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
@@ -2364,59 +2356,6 @@ internal class DefaultFlowControllerTest {
                 assertThat(bootstrapTurbine.awaitItem().paymentMethodMetadata).isEqualTo(paymentMethodMetadata)
             }
         }
-
-    @Test
-    fun `configureWithCheckout throws when checkout mutation is in flight`() = runTest {
-        val checkout = CheckoutStateFactory.createCheckout(context)
-        networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-        val deferred = async { checkout.applyPromotionCode("10OFF") }
-        testScheduler.advanceUntilIdle()
-
-        val flowController = createFlowController()
-        val error = runCatching {
-            flowController.configureWithCheckout(checkout, PaymentSheet.Configuration("Test")) { _, _ -> }
-        }.exceptionOrNull()
-        assertThat(error).isInstanceOf(IllegalStateException::class.java)
-        assertThat(error).hasMessageThat()
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-
-        deferred.cancel()
-    }
-
-    @Test
-    fun `presentPaymentOptions throws when checkout mutation is in flight`() = runTest {
-        val checkout = CheckoutStateFactory.createCheckout(context)
-        val flowController = createFlowController(
-            FakePaymentElementLoader(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-                integrationMetadata = IntegrationMetadata.CheckoutSession(
-                    id = DEFAULT_CHECKOUT_SESSION_ID,
-                    instancesKey = "test_key",
-                ),
-                linkState = null,
-            ),
-        )
-        flowController.configureExpectingSuccess()
-
-        networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-        val deferred = async { checkout.applyPromotionCode("10OFF") }
-        testScheduler.advanceUntilIdle()
-
-        val error = runCatching {
-            flowController.presentPaymentOptions()
-        }.exceptionOrNull()
-        assertThat(error).isInstanceOf(IllegalStateException::class.java)
-        assertThat(error).hasMessageThat()
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-
-        deferred.cancel()
-    }
 
     private suspend fun FakeFlowControllerConfirmationHandler.Scenario.createAndConfigureFlowControllerForDeferred(
         paymentIntent: PaymentIntent = PaymentIntentFixtures.PI_SUCCEEDED,

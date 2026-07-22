@@ -26,23 +26,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.CheckoutStateFactory
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.gate.FakeLinkGate
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
@@ -72,7 +66,6 @@ import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Rule
 import org.junit.Test
@@ -100,7 +93,6 @@ internal class PaymentOptionsActivityTest {
         .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
         .around(networkRule)
-        .around(CheckoutInstancesTestRule())
         .around(RetryRule(3))
 
     @get:Rule
@@ -477,41 +469,6 @@ internal class PaymentOptionsActivityTest {
                 mandateNode.assertDoesNotExist()
             }
         }
-    }
-
-    @Test
-    fun `onDestroy clears checkout integration launched flag`() {
-        val checkout = CheckoutStateFactory.createCheckout(context)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
-
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    integrationMetadata = IntegrationMetadata.CheckoutSession(
-                        id = "cs_test",
-                        instancesKey = CheckoutStateFactory.DEFAULT_KEY,
-                    ),
-                ),
-            ),
-        )
-
-        runActivityScenario(args) {
-            it.onActivity {
-                pressBack()
-            }
-            composeTestRule.waitForIdle()
-            idleLooper()
-        }
-
-        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-
-        // After the activity finishes, the integration launched flag should be cleared.
-        // If it wasn't cleared, this would return a failure with "payment flow is presented" message.
-        val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.isSuccess).isTrue()
     }
 
     @Test

@@ -7,18 +7,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.CheckoutStateFactory
-import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.isInstanceOf
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.asCallbackFor
@@ -41,7 +35,6 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -51,7 +44,6 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 @Suppress("LargeClass")
@@ -68,7 +60,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         .outerRule(networkRule)
         .around(coroutineScopeCleanupRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `launchForm launches activity with correct parameters`() = testScenario {
@@ -538,70 +529,6 @@ internal class DefaultEmbeddedSheetLauncherTest {
         assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
         assertThat(callbackHelper.callbackTurbine.awaitItem()).isInstanceOf<EmbeddedPaymentElement.Result.Canceled>()
-    }
-
-    @Test
-    fun `launchForm throws when checkout mutation is in flight`() = testScenario {
-        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
-        networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-        val deferred = testScope.async { checkout.applyPromotionCode("10OFF") }
-        testScope.testScheduler.advanceUntilIdle()
-
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = DEFAULT_CHECKOUT_SESSION_ID,
-                instancesKey = "test_key",
-            ),
-        )
-        val error = runCatching {
-            sheetLauncher.launchForm(
-                code = "card",
-                paymentMethodMetadata = paymentMethodMetadata,
-                configuration = EmbeddedConfigurationFactory.create(),
-                customerState = createCustomerState(),
-                promotion = null,
-            )
-        }.exceptionOrNull()
-        assertThat(error).isInstanceOf(IllegalStateException::class.java)
-        assertThat(error).hasMessageThat()
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-
-        deferred.cancel()
-    }
-
-    @Test
-    fun `launchManage throws when checkout mutation is in flight`() = testScenario {
-        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
-        networkRule.checkoutUpdate { response ->
-            response.setBodyDelay(5, TimeUnit.SECONDS)
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-        val deferred = testScope.async { checkout.applyPromotionCode("10OFF") }
-        testScope.testScheduler.advanceUntilIdle()
-
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = DEFAULT_CHECKOUT_SESSION_ID,
-                instancesKey = "test_key",
-            ),
-        )
-        val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
-        val error = runCatching {
-            sheetLauncher.launchManage(
-                paymentMethodMetadata = paymentMethodMetadata,
-                customerState = customerState,
-                selection = PaymentSelection.GooglePay,
-                configuration = EmbeddedConfigurationFactory.create(),
-            )
-        }.exceptionOrNull()
-        assertThat(error).isInstanceOf(IllegalStateException::class.java)
-        assertThat(error).hasMessageThat()
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-
-        deferred.cancel()
     }
 
     @Test

@@ -1,5 +1,3 @@
-@file:OptIn(CheckoutSessionPreview::class)
-
 package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
@@ -12,7 +10,6 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
@@ -54,7 +51,6 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.ConfirmCustomPaymentMethodCallback
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
@@ -73,7 +69,6 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.activity.CustomPaymentMethodActivity
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
-import com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundOneStepContract
 import com.stripe.android.paymentsheet.example.playground.embedded.EmbeddedPlaygroundTwoStepContract
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
@@ -142,14 +137,6 @@ internal class PaymentSheetPlaygroundActivity :
             is EmbeddedPlaygroundTwoStepContract.Result.Updated -> {
                 embeddedPaymentElement.state = result.embeddedPaymentElementState
             }
-        }
-    }
-
-    private val checkoutPlaygroundLauncher = registerForActivityResult(
-        CheckoutPlaygroundContract()
-    ) { checkoutState ->
-        if (checkoutState != null) {
-            viewModel.checkout?.state = checkoutState
         }
     }
 
@@ -300,19 +287,13 @@ internal class PaymentSheetPlaygroundActivity :
                         label = PLAYGROUND_BOTTOM_BAR_LABEL,
                         targetState = playgroundState
                     ) { playgroundState ->
-                        Column {
-                            CheckoutSessionUi(
-                                playgroundState = playgroundState,
-                            )
-
-                            PlaygroundStateUi(
-                                playgroundState = playgroundState,
-                                paymentSheet = paymentSheet,
-                                flowController = flowController,
-                                customerSheet = customerSheet,
-                                addressLauncher = addressLauncher,
-                            )
-                        }
+                        PlaygroundStateUi(
+                            playgroundState = playgroundState,
+                            paymentSheet = paymentSheet,
+                            flowController = flowController,
+                            customerSheet = customerSheet,
+                            addressLauncher = addressLauncher,
+                        )
                     }
 
                     Spacer(
@@ -635,7 +616,6 @@ internal class PaymentSheetPlaygroundActivity :
                     embeddedPlaygroundOneStepLauncher.launch(
                         EmbeddedPlaygroundOneStepContract.Args(
                             playgroundState = playgroundState,
-                            checkoutState = viewModel.checkout?.state,
                         )
                     )
                 }
@@ -718,37 +698,13 @@ internal class PaymentSheetPlaygroundActivity :
         }
     }
 
-    @Composable
-    private fun CheckoutSessionUi(
-        playgroundState: PlaygroundState?,
-    ) {
-        val paymentState = playgroundState?.asPaymentState()
-        if (paymentState?.initializationType == InitializationType.CheckoutSession) {
-            Button(
-                onClick = {
-                    checkoutPlaygroundLauncher.launch(requireNotNull(viewModel.checkout?.state))
-                },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text("Launch Checkout Playground")
-            }
-        }
-    }
-
     private suspend fun configure(
         playgroundState: PlaygroundState.Payment,
     ): EmbeddedPaymentElement.ConfigureResult {
-        return if (playgroundState.initializationType == InitializationType.CheckoutSession) {
-            embeddedPaymentElement.configure(
-                checkout = requireNotNull(viewModel.checkout),
-                configuration = playgroundState.embeddedConfiguration(),
-            )
-        } else {
-            embeddedPaymentElement.configure(
-                intentConfiguration = playgroundState.intentConfiguration(),
-                configuration = playgroundState.embeddedConfiguration(),
-            )
-        }
+        return embeddedPaymentElement.configure(
+            intentConfiguration = playgroundState.intentConfiguration(),
+            configuration = playgroundState.embeddedConfiguration(),
+        )
     }
 
     private fun presentPaymentSheet(
@@ -793,12 +749,6 @@ internal class PaymentSheetPlaygroundActivity :
                     callback = viewModel::onFlowControllerConfigured,
                 )
             }
-        } else if (playgroundState.initializationType == InitializationType.CheckoutSession) {
-            flowController.configureWithCheckout(
-                checkout = requireNotNull(viewModel.checkout),
-                configuration = playgroundState.paymentSheetConfiguration(viewModel.settings),
-                callback = viewModel::onFlowControllerConfigured,
-            )
         } else {
             flowController.configureWithIntentConfiguration(
                 intentConfiguration = playgroundState.intentConfiguration(),

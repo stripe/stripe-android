@@ -289,21 +289,20 @@ class AsCheckoutSessionTest {
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
     ): CheckoutSession {
-        return InternalState(
-            key = "CheckoutConfigurationMergerTest",
-            configuration = Checkout.Configuration().build(),
-            checkoutSessionResponse = CheckoutSessionResponseFactory.create(
-                id = id,
-                status = status,
-                liveMode = liveMode,
-                currency = currency,
-                customerEmail = customerEmail,
-                taxStatus = taxStatus,
-                totalSummary = totalSummary,
-                lineItems = lineItems,
-                shippingOptions = shippingOptions,
-            ),
+        return CheckoutSessionResponseFactory.create(
+            id = id,
+            status = status,
+            liveMode = liveMode,
+            currency = currency,
+            customerEmail = customerEmail,
+            taxStatus = taxStatus,
+            totalSummary = totalSummary,
+            lineItems = lineItems,
+            shippingOptions = shippingOptions,
+        ).asCheckoutSession(
             flagImages = null,
-        ).asCheckoutSession()
+            paymentOptionDisplayData = null,
+            availableExpressButtonTypes = emptyList(),
+        )
     }
 }

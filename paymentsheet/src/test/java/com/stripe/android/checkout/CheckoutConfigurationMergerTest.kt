@@ -5,6 +5,7 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import org.junit.Test
 
@@ -634,10 +635,8 @@ class CheckoutConfigurationMergerTest {
         billingPhoneNumber: String? = null,
         shippingAddress: Address.State? = null,
         billingAddress: Address.State? = null,
-    ): InternalState {
-        return InternalState(
-            key = "CheckoutConfigurationMergerTest",
-            configuration = Checkout.Configuration().build(),
+    ): CheckoutSessionData {
+        return TestCheckoutSessionData(
             checkoutSessionResponse = CheckoutSessionResponseFactory.create(
                 customerEmail = customerEmail,
             ),
@@ -647,7 +646,16 @@ class CheckoutConfigurationMergerTest {
             billingPhoneNumber = billingPhoneNumber,
             shippingAddress = shippingAddress,
             billingAddress = billingAddress,
-            flagImages = null,
         )
     }
+
+    private data class TestCheckoutSessionData(
+        override val checkoutSessionResponse: CheckoutSessionResponse,
+        override val shippingName: String?,
+        override val billingName: String?,
+        override val shippingPhoneNumber: String?,
+        override val billingPhoneNumber: String?,
+        override val shippingAddress: Address.State?,
+        override val billingAddress: Address.State?,
+    ) : CheckoutSessionData
 }

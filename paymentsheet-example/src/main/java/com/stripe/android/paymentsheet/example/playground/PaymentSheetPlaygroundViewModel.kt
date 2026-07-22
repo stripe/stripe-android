@@ -17,7 +17,6 @@ import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.Checkout
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
@@ -25,7 +24,6 @@ import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.model.ConfirmationToken
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentelement.AnalyticEvent
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.ExperimentalAnalyticEventCallbackApi
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
@@ -68,7 +66,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
-@OptIn(CheckoutSessionPreview::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     private val savedStateHandle: SavedStateHandle,
@@ -84,9 +81,6 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = savedStateHandle.getStateFlow<PlaygroundState?>(PLAYGROUND_STATE_KEY, null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
-
-    @Volatile
-    var checkout: Checkout? = null
 
     private val baseUrl: String
         get() {
@@ -139,13 +133,8 @@ internal class PaymentSheetPlaygroundViewModel(
 
             PlaygroundRequester(playgroundSettingsSnapshot, getApplication()).fetch().fold(
                 onSuccess = { state ->
-                    viewModelScope.launch {
-                        val shouldContinue = setCheckout(state)
-                        if (shouldContinue) {
-                            playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
-                            setPlaygroundState(state)
-                        }
-                    }
+                    playgroundSettingsFlow.value = state.snapshot.playgroundSettings()
+                    setPlaygroundState(state)
                 },
                 onFailure = { exception ->
                     status.value = StatusMessage(
@@ -154,29 +143,6 @@ internal class PaymentSheetPlaygroundViewModel(
                 },
             )
         }
-    }
-
-    private suspend fun setCheckout(state: PlaygroundState): Boolean {
-        val paymentState = state.asPaymentState()
-        if (paymentState?.initializationType == InitializationType.CheckoutSession) {
-            val configuration = state.snapshot.checkoutConfiguration()
-            Checkout.configure(
-                context = getApplication(),
-                checkoutSessionClientSecret = paymentState.clientSecret,
-                configuration = configuration,
-            ).fold(
-                onSuccess = { value ->
-                    checkout = value
-                },
-                onFailure = { exception ->
-                    status.value = StatusMessage(
-                        "Preparing checkout failed:\n${exception.message}"
-                    )
-                    return false
-                }
-            )
-        }
-        return true
     }
 
     private fun prepareSharedPaymentToken(

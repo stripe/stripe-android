@@ -1,43 +1,10 @@
 package com.stripe.android.checkout
 
 import android.graphics.Bitmap
-import android.os.Parcelable
 import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
-import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.verticalmode.CurrencySelectorOptionsFactory
-import kotlinx.parcelize.Parcelize
-
-@OptIn(CheckoutSessionPreview::class)
-@Parcelize
-internal data class InternalState(
-    val key: String,
-    val configuration: Checkout.Configuration.State,
-    override val checkoutSessionResponse: CheckoutSessionResponse,
-    val flagImages: Map<String, Bitmap>?,
-    override val shippingName: String? = null,
-    override val billingName: String? = null,
-    override val shippingPhoneNumber: String? = null,
-    override val billingPhoneNumber: String? = null,
-    override val shippingAddress: Address.State? = null,
-    override val billingAddress: Address.State? = null,
-    val integrationLaunched: Boolean = false,
-) : Parcelable, CheckoutSessionData {
-    val initializationMode: PaymentElementLoader.InitializationMode.CheckoutSession
-        get() = PaymentElementLoader.InitializationMode.CheckoutSession(
-            instancesKey = key,
-            checkoutSessionResponse = checkoutSessionResponse,
-        )
-
-    fun asCheckoutSession(): CheckoutSession {
-        return checkoutSessionResponse.asCheckoutSession(
-            flagImages,
-            paymentOptionDisplayData = null,
-            availableExpressButtonTypes = emptyList(),
-        )
-    }
-}
 
 @OptIn(CheckoutSessionPreview::class)
 internal fun CheckoutSessionResponse.asCheckoutSession(
