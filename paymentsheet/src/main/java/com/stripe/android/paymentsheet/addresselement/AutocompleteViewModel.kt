@@ -117,7 +117,7 @@ internal class AutocompleteViewModel @Inject constructor(
                 onSuccess = {
                     _loading.value = false
                     val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-                    val address = placesClient.transformToAddress(it, locale)
+                    val address = placesClient.transformToAddress(locale)
 
                     _event.emit(
                         Event.GoBack(
@@ -137,6 +137,7 @@ internal class AutocompleteViewModel @Inject constructor(
                     _event.emit(Event.GoBack(address = null))
                 }
             )
+            placesClient?.resetSession()
         }
     }
 

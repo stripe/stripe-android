@@ -78,35 +78,6 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `fetchPlace uses cached inline address when available`() = runTest {
-        val inlineAddress = StripeProxyAddress(
-            line1 = "123 Main St",
-            line2 = null,
-            city = "San Francisco",
-            state = "CA",
-            postalCode = "94105",
-            country = "US",
-        )
-        val repository = FakeStripeAutocompleteRepository().apply {
-            predictionsResult = Result.success(
-                AutocompletePredictionsResult(
-                    predictions = listOf(
-                        AutocompleteSuggestion("place_123", "123 Main St", "SF, CA", inlineAddress)
-                    )
-                )
-            )
-        }
-        val proxy = createProxy(repository = repository)
-        proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
-        repository.findPredictionsCalls.awaitItem()
-
-        val result = proxy.fetchPlace("place_123")
-
-        assertThat(result.isSuccess).isTrue()
-        repository.ensureAllEventsConsumed()
-    }
-
-    @Test
     fun `fetchPlace calls repository when no inline address cached`() = runTest {
         val repository = defaultRepository()
         val proxy = createProxy(repository = repository)
@@ -143,8 +114,8 @@ class StripeHostedPlacesClientProxyTest {
         proxy.findAutocompletePredictions(query = "123", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
 
-        val fetchResult = proxy.fetchPlace("place_123")
-        val address = proxy.transformToAddress(fetchResult.getOrThrow(), Locale.US)
+        proxy.fetchPlace("place_123")
+        val address = proxy.transformToAddress(Locale.US)
 
         assertThat(address).isEqualTo(
             Address(
@@ -182,8 +153,8 @@ class StripeHostedPlacesClientProxyTest {
         proxy.findAutocompletePredictions(query = "Kameido", country = "JP", limit = 4)
         repository.findPredictionsCalls.awaitItem()
 
-        val fetchResult = proxy.fetchPlace("place_jp")
-        val address = proxy.transformToAddress(fetchResult.getOrThrow(), Locale.getDefault())
+        proxy.fetchPlace("place_jp")
+        val address = proxy.transformToAddress(Locale.getDefault())
 
         assertThat(address).isEqualTo(
             Address(

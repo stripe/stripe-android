@@ -74,7 +74,7 @@ internal class StripeHostedPlacesClientProxy(
         }
     }
 
-    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
+    override fun transformToAddress(locale: Locale): Address {
         val address = synchronized(lock) { lastResolvedAddress }
         return Address(
             line1 = address?.line1,

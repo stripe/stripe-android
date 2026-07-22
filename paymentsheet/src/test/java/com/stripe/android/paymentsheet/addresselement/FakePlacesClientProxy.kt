@@ -41,9 +41,12 @@ internal class FakePlacesClientProxy(
         return findPredictionsResult
     }
 
+    private var lastFetchedResponse: FetchPlaceResponse? = null
+
     override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
         _fetchPlaceCalls.add(placeId)
         onBeforeFetchPlace?.invoke()
+        fetchPlaceResult.onSuccess { lastFetchedResponse = it }
         return fetchPlaceResult
     }
 
@@ -51,11 +54,12 @@ internal class FakePlacesClientProxy(
     val resetSessionCalls: ReceiveTurbine<Unit> = _resetSessionCalls
 
     override fun resetSession() {
+        lastFetchedResponse = null
         _resetSessionCalls.add(Unit)
     }
 
-    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
-        return response.place.transformGoogleToStripeAddress(locale)
+    override fun transformToAddress(locale: Locale): Address {
+        return lastFetchedResponse?.place?.transformGoogleToStripeAddress(locale) ?: Address()
     }
 
     fun ensureAllEventsConsumed() {

@@ -44,6 +44,5 @@ internal class LazyPlacesClientProxy(
         delegate.resetSession()
     }
 
-    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address =
-        delegate.transformToAddress(response, locale)
+    override fun transformToAddress(locale: Locale): Address = delegate.transformToAddress(locale)
 }

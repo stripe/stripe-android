@@ -96,10 +96,9 @@ class AutocompleteViewModelTest {
             )
         )
         whenever(mockClient.fetchPlace(any())).thenReturn(fetchPlaceResponse)
-        whenever(mockClient.transformToAddress(any(), any())).thenAnswer { invocation ->
-            val response = invocation.getArgument<FetchPlaceResponse>(0)
-            val locale = invocation.getArgument<java.util.Locale>(1)
-            response.place.transformGoogleToStripeAddress(locale)
+        whenever(mockClient.transformToAddress(any())).thenAnswer { invocation ->
+            val locale = invocation.getArgument<java.util.Locale>(0)
+            fetchPlaceResponse.getOrNull()!!.place.transformGoogleToStripeAddress(locale)
         }
 
         viewModel.event.test {

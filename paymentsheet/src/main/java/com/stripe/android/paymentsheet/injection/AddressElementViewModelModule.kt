@@ -72,9 +72,9 @@ internal class AddressElementViewModelModule {
     @Singleton
     @Named(INLINE_PLACES_CLIENT)
     internal fun provideInlinePlacesClient(
-        context: Context,
         args: AddressElementActivityContract.Args,
         stripeAutocompleteRepository: StripeAutocompleteRepository,
+        googlePlacesClient: PlacesClientProxy?,
     ): PlacesClientProxy? {
         val config = args.config ?: return null
         if (config.useStripeHostedAutocomplete) {
@@ -82,13 +82,7 @@ internal class AddressElementViewModelModule {
                 repository = stripeAutocompleteRepository,
             )
         }
-        return config.googlePlacesApiKey?.let {
-            PlacesClientProxy.create(
-                context,
-                it,
-                errorReporter = ErrorReporter.createFallbackInstance(context),
-            )
-        }
+        return googlePlacesClient
     }
 
     @Provides

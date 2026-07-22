@@ -44,10 +44,12 @@ class PlacesClientProxyTestRule : TestWatcher() {
         private val findAutocompletePredictionsResponseChannel: Channel<Result<FindAutocompletePredictionsResponse>>,
         private val fetchPlaceResponseChannel: Channel<Result<FetchPlaceResponse>>,
     ) : PlacesClientProxy {
+        private var lastFetchedResponse: FetchPlaceResponse? = null
+
         override fun resetSession() = Unit
 
-        override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
-            return response.place.transformGoogleToStripeAddress(locale)
+        override fun transformToAddress(locale: Locale): Address {
+            return lastFetchedResponse?.place?.transformGoogleToStripeAddress(locale) ?: Address()
         }
 
         override suspend fun findAutocompletePredictions(
@@ -59,7 +61,9 @@ class PlacesClientProxyTestRule : TestWatcher() {
         }
 
         override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
-            return fetchPlaceResponseChannel.receive()
+            return fetchPlaceResponseChannel.receive().also { result ->
+                result.onSuccess { lastFetchedResponse = it }
+            }
         }
     }
 }

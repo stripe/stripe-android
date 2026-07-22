@@ -42,7 +42,7 @@ interface PlacesClientProxy {
 
     fun resetSession()
 
-    fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address
+    fun transformToAddress(locale: Locale): Address
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -100,8 +100,12 @@ internal class DefaultPlacesClientProxy(
     @Volatile
     private var token = AutocompleteSessionToken.newInstance()
 
+    @Volatile
+    private var lastFetchedResponse: FetchPlaceResponse? = null
+
     override fun resetSession() {
         token = AutocompleteSessionToken.newInstance()
+        lastFetchedResponse = null
     }
 
     override suspend fun findAutocompletePredictions(
@@ -155,19 +159,19 @@ internal class DefaultPlacesClientProxy(
                 )
             ).await()
             errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FETCH_PLACE_SUCCESS)
-            Result.success(
-                FetchPlaceResponse(
-                    Place(
-                        response.place.addressComponents?.asList()?.map {
-                            AddressComponent(
-                                shortName = it.shortName,
-                                longName = it.name,
-                                types = it.types
-                            )
-                        }
-                    )
+            val fetchPlaceResponse = FetchPlaceResponse(
+                Place(
+                    response.place.addressComponents?.asList()?.map {
+                        AddressComponent(
+                            shortName = it.shortName,
+                            longName = it.name,
+                            types = it.types
+                        )
+                    }
                 )
             )
+            lastFetchedResponse = fetchPlaceResponse
+            Result.success(fetchPlaceResponse)
         } catch (e: Exception) {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
             Result.failure(
@@ -176,17 +180,15 @@ internal class DefaultPlacesClientProxy(
         }
     }
 
-    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
-        return response.place.transformGoogleToStripeAddress(locale)
+    override fun transformToAddress(locale: Locale): Address {
+        return lastFetchedResponse?.place?.transformGoogleToStripeAddress(locale) ?: Address()
     }
 }
 
 internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
     override fun resetSession() = Unit
 
-    override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
-        return response.place.transformGoogleToStripeAddress(locale)
-    }
+    override fun transformToAddress(locale: Locale): Address = Address()
 
     override suspend fun findAutocompletePredictions(
         query: String?,

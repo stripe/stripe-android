@@ -18,7 +18,6 @@ import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -128,9 +127,7 @@ class AutocompleteScreenTest {
     ) : PlacesClientProxy {
         override fun resetSession() = Unit
 
-        override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
-            return response.place.transformGoogleToStripeAddress(locale)
-        }
+        override fun transformToAddress(locale: Locale): Address = Address()
 
         override suspend fun findAutocompletePredictions(
             query: String?,

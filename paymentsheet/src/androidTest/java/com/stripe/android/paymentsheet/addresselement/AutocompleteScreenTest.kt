@@ -92,10 +92,12 @@ class AutocompleteScreenTest {
         private val predictions: List<AutocompletePrediction> = listOf(),
         private val addressComponents: List<AddressComponent> = listOf()
     ) : PlacesClientProxy {
+        private var lastFetchedResponse: FetchPlaceResponse? = null
+
         override fun resetSession() = Unit
 
-        override fun transformToAddress(response: FetchPlaceResponse, locale: Locale): Address {
-            return response.place.transformGoogleToStripeAddress(locale)
+        override fun transformToAddress(locale: Locale): Address {
+            return lastFetchedResponse?.place?.transformGoogleToStripeAddress(locale) ?: Address()
         }
 
         override suspend fun findAutocompletePredictions(
@@ -109,11 +111,9 @@ class AutocompleteScreenTest {
         }
 
         override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
-            return Result.success(
-                FetchPlaceResponse(
-                    Place(addressComponents)
-                )
-            )
+            val response = FetchPlaceResponse(Place(addressComponents))
+            lastFetchedResponse = response
+            return Result.success(response)
         }
     }
 
