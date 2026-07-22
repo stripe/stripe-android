@@ -2,6 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- TEMPORARY (PR #13565 experiment): the test app targets SDK 36, so getInstalledApplications()
+         is subject to Android 11+ package-visibility filtering and cannot see browsers like Chrome.
+         QUERY_ALL_PACKAGES + a browsable-https <queries> make browsers visible to the package query
+         so getInstalledBrowsers() can detect them. Remove/refine before merge. -->
+    <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" />
+        </intent>
+        <package android:name="com.android.chrome" />
+        <package android:name="org.mozilla.firefox" />
+    </queries>
 
     <application android:requestLegacyExternalStorage="true" />
 </manifest>

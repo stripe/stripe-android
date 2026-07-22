@@ -1,7 +1,6 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
-import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.hasContentDescription
@@ -170,26 +169,16 @@ internal class Selectors(
         device.waitForIdle()
     }
 
-    fun getInstalledBrowsers(): List<BrowserUI> {
-        // Diagnostic: surface the emulator's actual browser inventory in the CI log so we can
-        // confirm which browser (if any) the managed-device image ships. Remove before merge.
-        val installedPackages = getInstalledPackages().map { it.packageName }
-        Log.i(
-            "TestAlipayDiag",
-            "browser-relevant packages: " +
-                installedPackages.filter {
-                    it.contains("chrome") || it.contains("firefox") ||
-                        it.contains("browser") || it.contains("webview")
-                } + " | total=" + installedPackages.size
-        )
-        return getInstalledPackages().mapNotNull {
+    fun getInstalledBrowsers() = getInstalledPackages()
+        .mapNotNull {
             when (it.packageName) {
                 BrowserUI.Firefox.packageName -> BrowserUI.Firefox
                 BrowserUI.Chrome.packageName -> BrowserUI.Chrome
-                else -> null
+                else -> {
+                    null
+                }
             }
         }
-    }
 
     private fun getInstalledPackages() = InstrumentationRegistry.getInstrumentation()
         .targetContext
