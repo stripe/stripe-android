@@ -35,6 +35,29 @@ internal class DefaultEmbeddedContentHelperStateHolderTest {
     }
 
     @Test
+    fun `dataLoaded with identical args does not re-emit`() = testScenario {
+        val args = EmbeddedContentHelperStateFactory.create()
+        stateHolder.state.test {
+            assertThat(awaitItem()).isNull()
+            repeat(2) {
+                stateHolder.dataLoaded(
+                    paymentMethodMetadata = args.paymentMethodMetadata,
+                    appearance = args.appearance,
+                    embeddedViewDisplaysMandateText = args.embeddedViewDisplaysMandateText,
+                    configuration = args.configuration,
+                )
+            }
+            assertThat(awaitItem()).isEqualTo(args)
+            // A broken State.equals would cause the SavedStateHandle-backed StateFlow to re-emit
+            // identical data, rebuilding the embedded content and recomposing the UI unnecessarily.
+            expectNoEvents()
+        }
+        // onShowNewPaymentOptions is reported unconditionally per dataLoaded call, so twice here.
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+        assertThat(eventReporter.showNewPaymentOptionsCalls.awaitItem()).isEqualTo(Unit)
+    }
+
+    @Test
     fun `clearEmbeddedContent resets state to null`() = testScenario {
         stateHolder.dataLoaded(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),

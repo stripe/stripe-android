@@ -24,7 +24,7 @@ internal interface EmbeddedContentHelperStateHolder {
     fun clearEmbeddedContent()
 
     @Parcelize
-    class State(
+    data class State(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val appearance: Embedded,
         val embeddedViewDisplaysMandateText: Boolean,
