@@ -93,10 +93,19 @@ internal class CheckoutControllerStateHolder @Inject constructor(
         )
     }
 
+    fun markIntegrationLaunched() {
+        val current = requireState(operation = "markIntegrationLaunched") ?: return
+        state = current.copy(integrationLaunched = true)
+    }
+
+    fun markIntegrationDismissed() {
+        val current = requireState(operation = "markIntegrationDismissed") ?: return
+        state = current.copy(integrationLaunched = false)
+    }
+
     /**
-     * The selection lives on [CheckoutControllerState], so the mutators can only act once
-     * [CheckoutStateLoader] has committed a state. A call before then is a programming error (a
-     * mis-ordered selection write); report it and no-op rather than silently dropping the value.
+     * State-backed mutators can only act once [CheckoutStateLoader] has committed a state. A call
+     * before then is a programming error; report it and no-op rather than silently dropping the value.
      */
     private fun requireState(operation: String): CheckoutControllerState? {
         return state ?: run {

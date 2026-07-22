@@ -28,6 +28,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
+    private val checkoutControllerStateHolder: CheckoutControllerStateHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
     private val errorReporter: ErrorReporter,
@@ -49,6 +50,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
     private val activityLauncher: ActivityResultLauncher<EmbeddedActivityArgs> =
         activityResultCaller.registerForActivityResult(EmbeddedSheetContract) { result ->
             sheetStateHolder.sheetIsOpen = false
+            checkoutControllerStateHolder.markIntegrationDismissed()
             when (result.launchMode) {
                 is EmbeddedLaunchMode.Form -> {
                     selectionHolder.setTemporarySelection(null)
@@ -123,6 +125,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
+        checkoutControllerStateHolder.markIntegrationLaunched()
         selectionHolder.setTemporarySelection(code)
         val currentSelection = (selectionHolder.selection.value as? PaymentSelection.New?)
             .takeIf { it?.paymentMethodType == code }
@@ -154,6 +157,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
+        checkoutControllerStateHolder.markIntegrationLaunched()
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,
@@ -181,6 +185,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
         }
         if (sheetStateHolder.sheetIsOpen) return
         sheetStateHolder.sheetIsOpen = true
+        checkoutControllerStateHolder.markIntegrationLaunched()
         val args = EmbeddedActivityArgs(
             paymentMethodMetadata = paymentMethodMetadata,
             configuration = configuration,

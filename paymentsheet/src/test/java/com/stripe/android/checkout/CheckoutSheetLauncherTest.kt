@@ -12,7 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
-import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -38,6 +38,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutSheetLauncherTest {
 
@@ -176,6 +177,23 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `launchForm marks integration launched until activity result is received`() = testScenario {
+        launchForm("card")
+
+        assertThat(checkoutControllerStateHolder.state?.integrationLaunched).isTrue()
+
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(
+            EmbeddedActivityResult.Cancelled(
+                customerState = null,
+                launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+            )
+        )
+
+        assertThat(checkoutControllerStateHolder.state?.integrationLaunched).isFalse()
+    }
+
+    @Test
     fun `formActivityLauncher sets selection and customer state on complete result`() = testScenario {
         selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         launchForm("cashapp")
@@ -304,6 +322,24 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `launchManage marks integration launched until activity result is received`() = testScenario {
+        sheetLauncher.launchManage(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+        dummyActivityResultCallerScenario.awaitLaunchCall()
+
+        assertThat(checkoutControllerStateHolder.state?.integrationLaunched).isTrue()
+
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(EmbeddedActivityResult.Error(launchMode = EmbeddedLaunchMode.Manage))
+
+        assertThat(checkoutControllerStateHolder.state?.integrationLaunched).isFalse()
+    }
+
+    @Test
     fun `manageSheetLauncher callback updates state on complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
@@ -410,6 +446,24 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
+    fun `launchPaymentOptions marks integration launched until activity result is received`() = testScenario {
+        sheetLauncher.launchPaymentOptions(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+            customerState = null,
+            selection = null,
+            configuration = EmbeddedConfigurationFactory.create(),
+        )
+        dummyActivityResultCallerScenario.awaitLaunchCall()
+
+        assertThat(checkoutControllerStateHolder.state?.integrationLaunched).isTrue()
+
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(EmbeddedActivityResult.Error(launchMode = EmbeddedLaunchMode.PaymentOptions))
+
+        assertThat(checkoutControllerStateHolder.state?.integrationLaunched).isFalse()
+    }
+
+    @Test
     fun `paymentOptionsResult callback updates state on complete result`() = testScenario {
         sheetStateHolder.sheetIsOpen = true
         val customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE
@@ -512,8 +566,12 @@ internal class CheckoutSheetLauncherTest {
     ) = runTest {
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
-        val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create()
+        val checkoutControllerStateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        checkoutControllerStateHolder.state = CheckoutControllerStateFactory.create(
+            paymentMethodMetadata = paymentMethodMetadata,
+        )
+        val selectionHolder = checkoutControllerStateHolder
         val customerStateHolder = DefaultCustomerStateHolder(
             savedStateHandle = savedStateHandle,
             selection = selectionHolder.selection,
@@ -528,6 +586,7 @@ internal class CheckoutSheetLauncherTest {
                 activityResultCaller = activityResultCaller,
                 lifecycleOwner = lifecycleOwner,
                 selectionHolder = selectionHolder,
+                checkoutControllerStateHolder = checkoutControllerStateHolder,
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
                 errorReporter = errorReporter,
@@ -549,6 +608,7 @@ internal class CheckoutSheetLauncherTest {
                 launcher = launcher,
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
+                checkoutControllerStateHolder = checkoutControllerStateHolder,
                 errorReporter = errorReporter,
             ).block()
         }
@@ -563,6 +623,7 @@ internal class CheckoutSheetLauncherTest {
         val launcher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
+        val checkoutControllerStateHolder: CheckoutControllerStateHolder,
         val errorReporter: FakeErrorReporter,
     ) {
         suspend fun launchForm(code: String) {
