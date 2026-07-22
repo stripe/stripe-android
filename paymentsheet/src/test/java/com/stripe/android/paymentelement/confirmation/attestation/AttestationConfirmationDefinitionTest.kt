@@ -637,7 +637,6 @@ internal class AttestationConfirmationDefinitionTest {
             integrityRequestManager = integrityRequestManager,
             coroutineScope = coroutineScope,
             workContext = workContext,
-            publishableKeyProvider = { publishableKey },
             productUsage = productUsage,
             attestationAnalyticsEventsReporter = eventsReporter,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,

@@ -95,7 +95,6 @@ internal class PassiveChallengeConfirmationFlowTest {
     ) = PassiveChallengeConfirmationDefinition(
         errorReporter = errorReporter,
         passiveChallengeWarmer = passiveChallengeWarmer,
-        publishableKeyProvider = { "pk_123" },
         productUsage = setOf("PaymentSheet"),
         isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
     )

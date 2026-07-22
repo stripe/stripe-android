@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PassiveCaptchaParams
 import com.stripe.android.model.StripeIntent
@@ -44,6 +45,7 @@ internal class FakeElementsSessionRepository(
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         linkDisallowedFundingSourceCreation: Set<String>,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ElementsSession> {
         lastParams = Params(
             initializationMode = initializationMode,

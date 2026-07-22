@@ -179,6 +179,7 @@ internal suspend fun createIntentConfirmationInterceptor(
     )
 }
 
+@Suppress("UnusedParameter")
 internal fun createTestConfirmationHandlerFactory(
     paymentElementCallbackIdentifier: String,
     intentConfirmationInterceptorFactory: IntentConfirmationInterceptor.Factory,
@@ -198,10 +199,10 @@ internal fun createTestConfirmationHandlerFactory(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentLauncherFactory = { launcher, _ ->
+                    paymentLauncherFactory = { launcher, _, apiConfig ->
                         stripePaymentLauncherAssistedFactory.create(
-                            publishableKey = { paymentConfiguration.publishableKey },
-                            stripeAccountId = { paymentConfiguration.stripeAccountId },
+                            publishableKey = { apiConfig.publishableKey },
+                            stripeAccountId = { apiConfig.stripeAccountId },
                             hostActivityLauncher = launcher,
                             statusBarColor = statusBarColor,
                             includePaymentSheetNextHandlers = true,

@@ -513,6 +513,7 @@ class DefaultCustomerSessionElementsSessionManagerTest {
             ),
             timeProvider = timeProvider,
             workContext = coroutineContext,
+            paymentConfigurationProvider = { com.stripe.android.PaymentConfiguration("pk_test_123") },
         )
     }
 
