@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import android.app.Application
+import android.os.Bundle
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.ReceiveTurbine
@@ -10,6 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
@@ -17,6 +19,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import kotlinx.coroutines.CoroutineScope
@@ -263,6 +266,30 @@ internal class CheckoutControllerTest {
 
         assertThat(committedState).isNull()
         assertThat(controller.checkoutSession.value).isNull()
+    }
+
+    @Test
+    fun `clearPaymentOption clears paymentOptionDisplayData`() = runTest {
+        val savedStateHandle = SavedStateHandle(
+            mapOf(
+                CheckoutControllerStateHolder.STATE_KEY to CheckoutControllerStateFactory.create(
+                    paymentSelection = PaymentSelection.GooglePay,
+                    temporarySelection = "card",
+                    previousNewSelections = Bundle().apply {
+                        putParcelable("cashapp", PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
+                    },
+                ),
+            ),
+        )
+
+        val controller = createController(savedStateHandle)
+        controller.checkoutSession.test {
+            assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
+
+            controller.clearPaymentOption()
+
+            assertThat(requireNotNull(awaitItem()).paymentOptionDisplayData).isNull()
+        }
     }
 
     @Test
