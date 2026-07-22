@@ -54,10 +54,3 @@ internal fun ElementsSession.toDisplayableCustomPaymentMethods(
         }
     }
 }
-
-/**
- * Returns the consumer's LinkBrand if logged in, otherwise falls back to the metadata's brand.
- */
-internal fun PaymentMethodMetadata.effectiveLinkBrand(account: LinkAccount?): LinkBrand {
-    return account?.linkBrand ?: linkBrand
-}

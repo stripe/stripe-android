@@ -9,6 +9,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.orEmpty
 import com.stripe.android.core.utils.FeatureFlags.enableNfcScanning
 import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.FormHeaderInformation
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CustomPaymentMethodUiDefinitionFactory
@@ -119,6 +120,13 @@ internal data class PaymentMethodMetadata(
             is LinkState -> result
             is LinkDisabledState, null -> null
         }
+
+    /**
+     * Returns the consumer's LinkBrand if logged in, otherwise falls back to the metadata's brand.
+     */
+    internal fun effectiveLinkBrand(account: LinkAccount?): LinkBrand {
+        return account?.linkBrand ?: linkBrand
+    }
 
     fun hasIntentToSetup(code: PaymentMethodCode): Boolean {
         return when (stripeIntent) {
