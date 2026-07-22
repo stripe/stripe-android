@@ -149,6 +149,17 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
+    fun `inactivity timeout returns canceled result`() = test {
+        NfcScanningActivityTestHelpers.waitForInitialScanningUi(this)
+
+        NfcScanningActivityTestHelpers.advanceInactivityTimeout(this)
+
+        waitForActivityFinish()
+
+        assertThat(getResult()).isEqualTo(NfcScanningContract.Result.Canceled)
+    }
+
+    @Test
     fun `finish applies fade out transition`() {
         configureNfc(context)
 

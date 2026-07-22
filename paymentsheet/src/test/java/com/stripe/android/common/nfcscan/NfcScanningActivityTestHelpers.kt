@@ -19,7 +19,10 @@ import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.mockStatic
 import org.robolectric.Shadows.shadowOf
 import org.robolectric.shadows.ShadowNfcAdapter
+import org.robolectric.shadows.ShadowSystemClock
 import org.robolectric.shadows.ShadowVibrator
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 internal object NfcScanningActivityTestHelpers {
     private const val UI_TIMEOUT_MS = 5_000L
@@ -82,6 +85,14 @@ internal object NfcScanningActivityTestHelpers {
         }
     }
 
+    fun advanceInactivityTimeout(scenario: Scenario) {
+        ShadowSystemClock.advanceBy(
+            20.seconds.inWholeSeconds,
+            TimeUnit.SECONDS,
+        )
+        scenario.waitForIdle()
+    }
+
     private fun createScenario(
         context: Context,
         composeRule: ComposeTestRule,
@@ -128,7 +139,7 @@ internal object NfcScanningActivityTestHelpers {
     private fun getNfcAdapter(context: Context) =
         NfcAdapter.getDefaultAdapter(context)?.let { shadowOf(it) }
 
-    private fun waitForInitialScanningUi(scenario: Scenario) {
+    internal fun waitForInitialScanningUi(scenario: Scenario) {
         scenario.composeRule.waitUntil(timeoutMillis = UI_TIMEOUT_MS) {
             scenario.waitForIdle()
             scenario.composeRule.onAllNodesWithContentDescription("Cancel")

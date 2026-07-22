@@ -9,6 +9,7 @@ import com.stripe.android.common.nfcscan.tapzone.TapZoneModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
 import dagger.Module
@@ -40,13 +41,18 @@ internal interface NfcScanningViewModelComponent {
         TapZoneModule::class,
     ]
 )
-internal object NfcScanningViewModelModule {
-    @Provides
-    @ViewModelScope
-    fun provideViewModelScope(): CoroutineScope {
-        return CoroutineScope(Dispatchers.Main)
-    }
+internal interface NfcScanningViewModelModule {
+    @Binds
+    fun bindsTimeoutManager(manager: DefaultNfcScanningTimeoutManager): NfcScanningTimeoutManager
 
-    @Provides
-    fun providesContext(application: Application): Context = application.applicationContext
+    companion object {
+        @Provides
+        @ViewModelScope
+        fun provideViewModelScope(): CoroutineScope {
+            return CoroutineScope(Dispatchers.Main)
+        }
+
+        @Provides
+        fun providesContext(application: Application): Context = application.applicationContext
+    }
 }

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModelStore
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.analytics.FakeNfcScanningEventReporter
+import com.stripe.android.common.nfcscan.analytics.NfcScanCancellationReason
 import com.stripe.android.common.nfcscan.scanner.FakeNfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.NfcCardScanner
 import com.stripe.android.common.nfcscan.scanner.ScannedCardData
@@ -67,7 +68,10 @@ internal class NfcScanningViewModelTest {
             assertThat(resultEvent.result).isEqualTo(NfcScanningContract.Result.Canceled)
         }
 
-        assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem()).isNotNull()
+        assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem())
+            .isEqualTo(NfcScanCancellationReason.UserInitiated)
+
+        assertThat(fakeTimeoutManager.cancelCalls.awaitItem()).isNotNull()
     }
 
     @Test
@@ -101,6 +105,7 @@ internal class NfcScanningViewModelTest {
         }
 
         assertThat(fakeEventReporter.onNfcScanAttemptStartedCalls.awaitItem()).isNotNull()
+        assertThat(fakeTimeoutManager.resetCalls.awaitItem()).isNotNull()
     }
 
     @Test
@@ -122,6 +127,7 @@ internal class NfcScanningViewModelTest {
         }
 
         assertThat(fakeEventReporter.onNfcScanAttemptSucceededCalls.awaitItem()).isNotNull()
+        assertThat(fakeTimeoutManager.cancelCalls.awaitItem()).isNotNull()
     }
 
     @Test
@@ -142,6 +148,7 @@ internal class NfcScanningViewModelTest {
 
             assertThat(awaitItem().status).isEqualTo(NfcScanningStatus.Idle(error = errorMessage))
             assertThat(fakeEventReporter.onNfcScanAttemptFailedCalls.awaitItem()).isEqualTo("unknown")
+            assertThat(fakeTimeoutManager.resetCalls.awaitItem()).isNotNull()
         }
     }
 
@@ -249,21 +256,67 @@ internal class NfcScanningViewModelTest {
     }
 
     @Test
-    fun `onCleared cancels view model scope`() = runTest(dispatcher) {
+    fun `timeout emits Canceled result with timeout reason`() = runScenario {
+        viewModel.event.test {
+            fakeTimeoutManager.emitTimeout()
+
+            val event = awaitItem()
+
+            assertThat(event).isInstanceOf<NfcScanningEvent.CloseWithResult>()
+
+            val resultEvent = event as NfcScanningEvent.CloseWithResult
+
+            assertThat(resultEvent.result).isEqualTo(NfcScanningContract.Result.Canceled)
+        }
+
+        assertThat(fakeEventReporter.onNfcScanCancelledCalls.awaitItem())
+            .isEqualTo(NfcScanCancellationReason.Timeout)
+        assertThat(fakeTimeoutManager.cancelCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `timeout does not cause flow cancellation after successful scan`() = runScenario {
+        scannerState.emit(
+            NfcCardScanner.State.Complete(
+                ScannedCardData(
+                    cardNumber = "4242424242424242",
+                    expirationMonth = 12,
+                    expirationYear = 2030,
+                ),
+            ),
+        )
+
+        assertThat(fakeEventReporter.onNfcScanAttemptSucceededCalls.awaitItem()).isNotNull()
+        assertThat(fakeTimeoutManager.cancelCalls.awaitItem()).isNotNull()
+
+        viewModel.event.test {
+            fakeTimeoutManager.emitTimeout()
+            expectNoEvents()
+        }
+    }
+
+    @Test
+    fun `onCleared cancels view model scope & timeout manager`() = runTest(dispatcher) {
         val viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher + Job()))
+        val fakeTimeoutManager = FakeNfcScanningTimeoutManager()
         val viewModel = NfcScanningViewModel(
             viewModelScope = viewModelScope,
             tapZoneResolver = FakeTapZoneResolver(),
             cardScanner = FakeNfcCardScanner(),
+            timeoutManager = fakeTimeoutManager,
             eventReporter = FakeNfcScanningEventReporter(),
         ).also { viewModelStoreRule.track(it) }
         val viewModelStore = ViewModelStore().apply {
             put("test", viewModel)
         }
 
+        assertThat(fakeTimeoutManager.startCalls.awaitItem()).isNotNull()
+
         viewModelStore.clear()
 
+        assertThat(fakeTimeoutManager.cancelCalls.awaitItem()).isNotNull()
         assertThat(viewModelScope.coroutineContext[Job]?.isCancelled).isTrue()
+        fakeTimeoutManager.ensureAllEventsConsumed()
     }
 
     private fun runScenario(
@@ -273,19 +326,23 @@ internal class NfcScanningViewModelTest {
         val scannerState = MutableSharedFlow<NfcCardScanner.State>()
         val fakeCardScanner = FakeNfcCardScanner(stateFlow = scannerState)
         val fakeEventReporter = FakeNfcScanningEventReporter()
+        val fakeTimeoutManager = FakeNfcScanningTimeoutManager()
         val viewModel = NfcScanningViewModel(
             viewModelScope = coroutineScopeCleanupRule.track(CoroutineScope(dispatcher)),
             tapZoneResolver = FakeTapZoneResolver(tapZone),
             cardScanner = fakeCardScanner,
+            timeoutManager = fakeTimeoutManager,
             eventReporter = fakeEventReporter,
         ).also { viewModelStoreRule.track(it) }
 
         assertThat(fakeEventReporter.onNfcScanStartedCalls.awaitItem()).isNotNull()
+        assertThat(fakeTimeoutManager.startCalls.awaitItem()).isNotNull()
 
         Scenario(
             viewModel = viewModel,
             fakeCardScanner = fakeCardScanner,
             fakeEventReporter = fakeEventReporter,
+            fakeTimeoutManager = fakeTimeoutManager,
             scannerState = scannerState,
         ).block()
 
@@ -297,6 +354,7 @@ internal class NfcScanningViewModelTest {
         val viewModel: NfcScanningViewModel,
         val fakeCardScanner: FakeNfcCardScanner,
         val fakeEventReporter: FakeNfcScanningEventReporter,
+        val fakeTimeoutManager: FakeNfcScanningTimeoutManager,
         val scannerState: MutableSharedFlow<NfcCardScanner.State>,
     )
 }
