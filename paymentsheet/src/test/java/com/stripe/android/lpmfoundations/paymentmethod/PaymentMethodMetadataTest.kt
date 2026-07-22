@@ -8,6 +8,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFixtures.DEFAULT_CUSTOMER_INTEGRATION_METADATA
@@ -2378,6 +2379,35 @@ internal class PaymentMethodMetadataTest {
         )
 
         assertThat(metadata.paymentMethodOrientation()).isEqualTo(PaymentMethodOrientation.Horizontal)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns account linkBrand when account linkBrand is present`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Link)
+
+        assertThat(metadata.effectiveLinkBrand(createLinkAccount(linkBrand = LinkBrand.Onelink)))
+            .isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns metadata linkBrand when account is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Onelink)
+
+        assertThat(metadata.effectiveLinkBrand(account = null)).isEqualTo(LinkBrand.Onelink)
+    }
+
+    @Test
+    fun `effectiveLinkBrand returns metadata linkBrand when account linkBrand is null`() {
+        val metadata = PaymentMethodMetadataFactory.create(linkBrand = LinkBrand.Onelink)
+
+        assertThat(metadata.effectiveLinkBrand(createLinkAccount(linkBrand = null)))
+            .isEqualTo(LinkBrand.Onelink)
+    }
+
+    private fun createLinkAccount(linkBrand: LinkBrand?): LinkAccount {
+        return LinkAccount(
+            TestFactory.CONSUMER_SESSION.copy(linkBrand = linkBrand),
+        )
     }
 
     private fun createCustomerSheetConfiguration(
