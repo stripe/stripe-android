@@ -58,9 +58,6 @@
         <activity android:name="com.stripe.android.paymentsheet.example.playground.spt.SharedPaymentTokenPlaygroundActivity" />
         <activity android:name="com.stripe.android.paymentsheet.example.playground.LinkControllerPlaygroundActivity" />
         <activity
-            android:name="com.stripe.android.paymentsheet.example.playground.checkout.CheckoutPlaygroundActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
             android:name="com.stripe.android.paymentsheet.example.playground.checkout.CheckoutControllerExampleActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity

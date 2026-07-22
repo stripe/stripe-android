@@ -22,13 +22,6 @@ internal object InitializationTypeSettingsDefinition :
         add(option("Deferred SSC", InitializationType.DeferredServerSideConfirmation))
         add(option("Deferred SSC + MC", InitializationType.DeferredManualConfirmation))
         add(option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor))
-        if (configurationData.integrationType in setOf(
-                PlaygroundConfigurationData.IntegrationType.FlowController,
-                PlaygroundConfigurationData.IntegrationType.Embedded,
-            )
-        ) {
-            add(option("Checkout Session", InitializationType.CheckoutSession))
-        }
     }
 
     override fun applicable(
@@ -38,21 +31,11 @@ internal object InitializationTypeSettingsDefinition :
         return configurationData.integrationType.isPaymentFlow()
     }
 
-    override fun valueUpdated(value: InitializationType, playgroundSettings: PlaygroundSettings) {
-        if (value == InitializationType.CheckoutSession) {
-            playgroundSettings[CustomerSessionSettingsDefinition] = false
-        }
-    }
-
     override fun configure(
         value: InitializationType,
         checkoutRequestBuilder: CheckoutRequest.Builder
     ) {
-        if (value == InitializationType.CheckoutSession) {
-            checkoutRequestBuilder.useCheckoutSession(true)
-        } else {
-            checkoutRequestBuilder.initialization(value.value)
-        }
+        checkoutRequestBuilder.initialization(value.value)
     }
 }
 
@@ -62,5 +45,4 @@ enum class InitializationType(override val value: String) : ValueEnum {
     DeferredServerSideConfirmation("Deferred SSC"),
     DeferredManualConfirmation("Deferred SSC + MC"),
     DeferredMultiprocessor("Deferred SSC + MP"),
-    CheckoutSession("Checkout Session"),
 }
