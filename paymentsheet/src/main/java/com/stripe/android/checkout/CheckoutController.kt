@@ -63,18 +63,25 @@ class CheckoutController @Inject internal constructor(
     suspend fun configure(
         checkoutSessionClientSecret: String,
         configuration: Configuration = Configuration(),
-    ): kotlin.Result<Unit> = runSerialized {
-        val configurationState = configuration.build()
-        val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
+    ): kotlin.Result<Unit> {
+        // A re-configure while a payment flow is presented would reload the session out from under
+        // the open sheet. The first configure runs with null state, so this only blocks re-configures.
+        if (sheetStateHolder.sheetIsOpen) {
+            return integrationLaunchedFailure()
+        }
+        return runSerialized {
+            val configurationState = configuration.build()
+            val sessionId = checkoutSessionClientSecret.substringBefore("_secret_")
 
-        checkoutSessionRepository.init(
-            sessionId = sessionId,
-            adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
-        ).mapCatching { response ->
-            checkoutStateLoader.loadInitial(
-                configuration = configurationState,
-                checkoutSessionResponse = response,
-            )
+            checkoutSessionRepository.init(
+                sessionId = sessionId,
+                adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+            ).mapCatching { response ->
+                checkoutStateLoader.loadInitial(
+                    configuration = configurationState,
+                    checkoutSessionResponse = response,
+                )
+            }
         }
     }
 
@@ -270,6 +277,28 @@ class CheckoutController @Inject internal constructor(
     }
 
     /**
+     * The gate shared by every mutation entry point: fails if the session hasn't been configured
+     * yet, or if a payment flow is currently presented (per [SheetStateHolder.sheetIsOpen]). On
+     * success it carries the current committed state; callers that only need the gate can ignore
+     * the value.
+     */
+    private fun requireMutableState(): kotlin.Result<CheckoutControllerState> {
+        val currentState = stateHolder.state
+            ?: return kotlin.Result.failure(
+                IllegalStateException("Cannot mutate checkout session before it is configured.")
+            )
+        return if (sheetStateHolder.sheetIsOpen) {
+            integrationLaunchedFailure()
+        } else {
+            kotlin.Result.success(currentState)
+        }
+    }
+
+    private fun integrationLaunchedFailure(): kotlin.Result<Nothing> = kotlin.Result.failure(
+        IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
+    )
+
+    /**
      * Serializes [block] behind [mutex] so configuration and mutations run in sequence, and toggles
      * [isLoading] while any serialized work is in flight (tracked via [pendingMutations] so
      * concurrent callers share a single loading window).
@@ -318,9 +347,12 @@ class CheckoutController @Inject internal constructor(
 
     /**
      * Clears the customer's selected payment option, resetting it to `null`.
+     *
+     * Returns [kotlin.Result.failure] if the session hasn't been configured yet or a payment flow is
+     * currently presented.
      */
-    fun clearPaymentOption() {
-        stateHolder.clearSelection()
+    fun clearPaymentOption(): kotlin.Result<Unit> {
+        return requireMutableState().map { stateHolder.clearSelection() }
     }
 
     @CheckoutSessionPreview
