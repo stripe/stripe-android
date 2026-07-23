@@ -1,7 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -116,15 +115,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private suspend fun confirmCheckoutSession(
         params: ConfirmCheckoutSessionParams,
     ): ConfirmationDefinition.Action<Args> {
-        try {
-            CheckoutInstances.ensureNoMutationInFlight(integrationMetadata.instancesKey)
-        } catch (e: IllegalStateException) {
-            return ConfirmationDefinition.Action.Fail(
-                cause = e,
-                message = e.stripeErrorMessage(),
-                errorType = ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration,
-            )
-        }
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = params,
@@ -143,8 +133,6 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
     private fun handleConfirmResponse(
         response: CheckoutSessionResponse,
     ): ConfirmationDefinition.Action<Args> {
-        CheckoutInstances[integrationMetadata.instancesKey]?.updateWithResponse(response)
-
         val intent: StripeIntent = response.paymentIntent ?: response.setupIntent
             ?: run {
                 val exception = IllegalStateException(

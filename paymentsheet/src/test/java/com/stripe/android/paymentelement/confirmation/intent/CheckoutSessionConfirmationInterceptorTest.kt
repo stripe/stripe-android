@@ -2,15 +2,10 @@ package com.stripe.android.paymentelement.confirmation.intent
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.test
-import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.Checkout
-import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.checkout.CheckoutStateFactory
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.isInstanceOf
@@ -47,17 +42,12 @@ import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import com.stripe.android.testing.PaymentConfigurationTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.SetupIntentFactory
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -70,7 +60,6 @@ class CheckoutSessionConfirmationInterceptorTest {
     val ruleChain: RuleChain = RuleChain
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `intercept with succeeded payment intent returns Complete action`() = runScenario {
@@ -352,157 +341,9 @@ class CheckoutSessionConfirmationInterceptorTest {
         interceptSavedPm()
     }
 
-    @Test
-    fun `successful confirm updates multiple Checkout instances`() = runScenario(
-        checkoutInstanceCount = 2
-    ) {
-        val checkout1 = checkoutInstances[0]
-        val checkout2 = checkoutInstances[1]
-        turbineScope {
-            val checkoutSessionTurbine1 = checkout1.checkoutSession.testIn(backgroundScope)
-            val checkoutSessionTurbine2 = checkout2.checkoutSession.testIn(backgroundScope)
-
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptNewPm()
-
-            assertThat(checkoutSessionTurbine1.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-            assertThat(checkoutSessionTurbine2.awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        }
-    }
-
-    @Test
-    fun `successful confirm with new PM updates registered Checkout instances`() = runScenario(
-        checkoutInstanceCount = 1
-    ) {
-        val checkout = checkoutInstances.single()
-        checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptNewPm()
-
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        }
-    }
-
-    @Test
-    fun `successful confirm with saved PM updates registered Checkout instances`() = runScenario(
-        checkoutInstanceCount = 1
-    ) {
-        val checkout = checkoutInstances.single()
-        checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-
-            networkRule.checkoutConfirm { response ->
-                response.testBodyFromFile("checkout-session-confirm.json")
-            }
-
-            interceptSavedPm()
-
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        }
-    }
-
-    @Test
-    fun `intercept with new PM fails when mutation is in flight`() = runScenario(
-        checkoutInstanceCount = 1,
-    ) {
-        val checkout = checkoutInstances.single()
-        val requestArrived = CountDownLatch(1)
-        val holdResponse = CountDownLatch(1)
-
-        networkRule.checkoutUpdate { response ->
-            requestArrived.countDown()
-            holdResponse.await()
-            response.setBody("{}")
-        }
-
-        val job = backgroundScope.launch(Dispatchers.IO) {
-            checkout.removePromotionCode()
-        }
-
-        assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
-
-        val result = interceptNewPm()
-
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
-        val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.cause.message)
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-        assertThat(failAction.errorType)
-            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
-
-        holdResponse.countDown()
-        job.join()
-    }
-
-    @Test
-    fun `intercept with saved PM fails when mutation is in flight`() = runScenario(
-        checkoutInstanceCount = 1,
-    ) {
-        val checkout = checkoutInstances.single()
-        val requestArrived = CountDownLatch(1)
-        val holdResponse = CountDownLatch(1)
-
-        networkRule.checkoutUpdate { response ->
-            requestArrived.countDown()
-            holdResponse.await()
-            response.setBody("{}")
-        }
-
-        val job = backgroundScope.launch(Dispatchers.IO) {
-            checkout.removePromotionCode()
-        }
-
-        assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
-
-        val result = interceptSavedPm()
-
-        assertThat(result).isInstanceOf<ConfirmationDefinition.Action.Fail<IntentConfirmationDefinition.Args>>()
-        val failAction = result as ConfirmationDefinition.Action.Fail
-        assertThat(failAction.cause).isInstanceOf<IllegalStateException>()
-        assertThat(failAction.cause.message)
-            .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-        assertThat(failAction.errorType)
-            .isEqualTo(ConfirmationHandler.Result.Failed.ErrorType.MerchantIntegration)
-
-        holdResponse.countDown()
-        job.join()
-    }
-
-    @Test
-    fun `failed confirm does not update registered Checkout instances`() = runScenario(
-        checkoutInstanceCount = 1,
-    ) {
-        networkRule.checkoutConfirm { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error":{"message":"Checkout session confirmation failed"}}""")
-        }
-
-        val checkout = checkoutInstances.single()
-        checkout.checkoutSession.test {
-            assertThat(awaitItem().id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-
-            interceptNewPm()
-
-            ensureAllEventsConsumed()
-        }
-    }
-
     private fun runScenario(
         createPaymentMethodResult: Result<PaymentMethod> = Result.success(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
         customerMetadata: CustomerMetadata? = null,
-        checkoutInstanceCount: Int = 0,
         block: suspend Scenario.() -> Unit,
     ) {
         val stripeRepository = FakeCreatePaymentMethodRepository(
@@ -542,19 +383,9 @@ class CheckoutSessionConfirmationInterceptorTest {
             requestOptions = ApiRequest.Options(apiKey = "pk_test_123"),
         )
 
-        @Suppress("EmptyRange")
-        val checkoutInstances = (0 until checkoutInstanceCount).map {
-            Checkout.createWithState(
-                context = applicationContext,
-                state = CheckoutStateFactory.create(),
-            )
-        }
-
         runTest {
             val scenario = Scenario(
                 interceptor = interceptor,
-                checkoutInstances = checkoutInstances,
-                backgroundScope = backgroundScope,
             )
 
             scenario.block()
@@ -563,8 +394,6 @@ class CheckoutSessionConfirmationInterceptorTest {
 
     private data class Scenario(
         val interceptor: CheckoutSessionConfirmationInterceptor,
-        val checkoutInstances: List<Checkout>,
-        val backgroundScope: CoroutineScope,
     ) {
         suspend fun interceptNewPm(
             shouldSave: Boolean = false,

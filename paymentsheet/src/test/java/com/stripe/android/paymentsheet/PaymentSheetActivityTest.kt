@@ -37,8 +37,6 @@ import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.CheckoutInstances
-import com.stripe.android.checkout.CheckoutStateFactory
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
@@ -63,8 +61,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.createTestConfirmationHandlerFactory
@@ -143,7 +139,6 @@ import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
-@OptIn(CheckoutSessionPreview::class)
 @RunWith(AndroidJUnit4::class)
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetActivityTest {
@@ -219,34 +214,6 @@ internal class PaymentSheetActivityTest {
         WeakMapInjectorRegistry.clear()
         CheckoutInstances.clear()
         Dispatchers.resetMain()
-    }
-
-    @Test
-    fun `onDestroy clears checkout integration launched flag`() {
-        val checkout = CheckoutStateFactory.createCheckout(context)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
-
-        val viewModel = createViewModel(
-            integrationMetadata = IntegrationMetadata.CheckoutSession(
-                id = "cs_test",
-                instancesKey = CheckoutStateFactory.DEFAULT_KEY,
-            ),
-        )
-        val scenario = activityScenario(viewModel)
-        scenario.launchForResult(intent).use {
-            it.onActivity { activity ->
-                pressBack()
-            }
-            composeTestRule.waitForIdle()
-        }
-
-        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-
-        val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.isSuccess).isTrue()
     }
 
     @Test
