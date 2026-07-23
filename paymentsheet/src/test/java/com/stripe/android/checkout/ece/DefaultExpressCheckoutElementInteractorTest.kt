@@ -36,19 +36,14 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     val paymentConfigurationRule = PaymentConfigurationTestRule(applicationContext)
 
     @Test
-    fun `state contains provided express buttons`() {
-        val googlePayConfiguration = createGooglePayConfiguration()
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+    fun `state contains provided express buttons`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(
                 WalletType.Link,
                 WalletType.GooglePay,
             )
-        )
-        val interactor = createInteractor(
-            paymentMethodMetadata = paymentMethodMetadata,
-            googlePayConfiguration = googlePayConfiguration,
-        )
-
+        ),
+    ) {
         assertThat(interactor.state.value.expressButtons).containsExactly(
             ExpressButton.Link.create(
                 paymentMethodMetadata = paymentMethodMetadata,
@@ -62,8 +57,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `state updates when link account info changes`() = runTest {
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+    fun `state updates when link account info changes`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.Link),
             linkState = LinkState(
                 configuration = TestFactory.LINK_CONFIGURATION.copy(
@@ -73,11 +68,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 signupMode = null,
             ),
         )
-        val linkAccountHolder = LinkAccountHolder(SavedStateHandle())
-        val interactor = createInteractor(
-            paymentMethodMetadata = paymentMethodMetadata,
-            linkAccountHolder = linkAccountHolder,
-        )
+    ) {
         val linkAccount = TestFactory.LINK_ACCOUNT.copy(
             displayablePaymentDetails = DisplayablePaymentDetails(
                 defaultCardBrand = "VISA",
@@ -122,38 +113,31 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             buttonType = GooglePayConfiguration.ButtonType.Checkout,
             additionalEnabledNetworks = listOf("INTERAC"),
         )
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            availableWallets = listOf(
-                WalletType.Link,
-                WalletType.GooglePay,
-            )
-        )
-        val availableExpressButtonTypes = listOf(
-            ExpressButtonType.GooglePay(
-                googlePayConfiguration = googlePayConfiguration,
-            )
-        )
-        val interactor = createInteractor(
-            paymentMethodMetadata = paymentMethodMetadata,
+        runScenario(
             googlePayConfiguration = googlePayConfiguration,
-            availableExpressButtonTypes = availableExpressButtonTypes,
-        )
-
-        assertThat(interactor.state.value.expressButtons).containsExactly(
-            ExpressButton.GooglePay.create(
-                paymentMethodMetadata = paymentMethodMetadata,
-                googlePayConfiguration = googlePayConfiguration,
+            availableExpressButtonTypes = listOf(
+                ExpressButtonType.GooglePay(
+                    googlePayConfiguration = googlePayConfiguration,
+                )
             ),
-        )
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                availableWallets = listOf(
+                    WalletType.Link,
+                    WalletType.GooglePay,
+                )
+            ),
+        ) {
+            assertThat(interactor.state.value.expressButtons).containsExactly(
+                ExpressButton.GooglePay.create(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                    googlePayConfiguration = googlePayConfiguration,
+                ),
+            )
+        }
     }
 
     @Test
-    fun `handleViewAction OnDisplayed reports displayed event`() {
-        val eventReporter = FakeExpressCheckoutElementEventReporter()
-        val interactor = createInteractor(
-            eventReporter = eventReporter,
-        )
-
+    fun `handleViewAction OnDisplayed reports displayed event`() = runScenario {
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
 
         assertThat(eventReporter.calls)
@@ -161,19 +145,10 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `handleViewAction OnDisplayed only reports displayed event once across restored interactors`() {
-        val savedStateHandle = SavedStateHandle()
-        val eventReporter = FakeExpressCheckoutElementEventReporter()
-        val firstInteractor = createInteractor(
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
-        )
-        val restoredInteractor = createInteractor(
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
-        )
+    fun `handleViewAction OnDisplayed only reports displayed event once across restored interactors`() = runScenario {
+        val restoredInteractor = createInteractor()
 
-        firstInteractor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
+        interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
         restoredInteractor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
 
         assertThat(eventReporter.calls)
@@ -181,32 +156,93 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `handleViewAction OnWalletTapped reports wallet tapped event`() {
-        val eventReporter = FakeExpressCheckoutElementEventReporter()
-        val interactor = createInteractor(
-            eventReporter = eventReporter,
+    fun `handleViewAction OnWalletTapped reports wallet tapped event`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.GooglePay),
+        ),
+    ) {
+        interactor.handleViewAction(
+            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                expressButton = interactor.state.value.expressButtons.single(),
+            )
         )
-
-        interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
 
         assertThat(eventReporter.calls)
             .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
     }
 
-    private fun createInteractor(
+    @Test
+    fun `handleViewAction OnWalletTapped starts confirmation`() = runScenario(
+        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            availableWallets = listOf(WalletType.GooglePay),
+        ),
+    ) {
+        val expressButton = interactor.state.value.expressButtons.single()
+
+        interactor.handleViewAction(
+            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                expressButton = expressButton,
+            )
+        )
+
+        assertThat(confirmationPerformer.calls)
+            .containsExactly(expressButton)
+
+        assertThat(eventReporter.calls)
+            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
+    }
+
+    private fun runScenario(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
         googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration(),
-        savedStateHandle: SavedStateHandle = SavedStateHandle(),
-        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
-        eventReporter: ExpressCheckoutElementEventReporter = FakeExpressCheckoutElementEventReporter(),
         availableExpressButtonTypes: List<ExpressButtonType> = paymentMethodMetadata.availableWallets.map {
             when (it) {
                 WalletType.Link -> ExpressButtonType.Link
                 WalletType.GooglePay -> ExpressButtonType.GooglePay(googlePayConfiguration)
             }
         },
-    ): DefaultExpressCheckoutElementInteractor {
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+        block: suspend Scenario.() -> Unit,
+    ) = runTest {
+        val eventReporter = FakeExpressCheckoutElementEventReporter()
+        val confirmationPerformer = FakeExpressCheckoutElementConfirmationPerformer()
+
+        val interactorFactory = {
+            val stateHolder = createStateHolder(
+                paymentMethodMetadata = paymentMethodMetadata,
+                availableExpressButtonTypes = availableExpressButtonTypes,
+                savedStateHandle = savedStateHandle,
+                configuration = configuration,
+            )
+
+            DefaultExpressCheckoutElementInteractor(
+                linkAccountHolder = linkAccountHolder,
+                stateHolder = stateHolder,
+                savedStateHandle = savedStateHandle,
+                eventReporter = eventReporter,
+                expressCheckoutElementConfirmationPerformer = confirmationPerformer,
+            )
+        }
+
+        Scenario(
+            interactor = interactorFactory(),
+            eventReporter = eventReporter,
+            confirmationPerformer = confirmationPerformer,
+            linkAccountHolder = linkAccountHolder,
+            paymentMethodMetadata = paymentMethodMetadata,
+            googlePayConfiguration = googlePayConfiguration,
+            interactorFactory = interactorFactory,
+        ).block()
+    }
+
+    private fun createStateHolder(
+        paymentMethodMetadata: PaymentMethodMetadata,
+        availableExpressButtonTypes: List<ExpressButtonType>,
+        savedStateHandle: SavedStateHandle,
+        configuration: ExpressCheckoutElement.Configuration = ExpressCheckoutElement.Configuration(),
+    ): CheckoutControllerStateHolder {
         val stateHolder = CheckoutControllerStateHolder(
             savedStateHandle = savedStateHandle,
             errorReporter = FakeErrorReporter(),
@@ -222,12 +258,21 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                 .build(),
         )
 
-        return DefaultExpressCheckoutElementInteractor(
-            linkAccountHolder = linkAccountHolder,
-            stateHolder = stateHolder,
-            savedStateHandle = savedStateHandle,
-            eventReporter = eventReporter,
-        )
+        return stateHolder
+    }
+
+    private class Scenario(
+        val interactor: DefaultExpressCheckoutElementInteractor,
+        val eventReporter: FakeExpressCheckoutElementEventReporter,
+        val confirmationPerformer: FakeExpressCheckoutElementConfirmationPerformer,
+        val linkAccountHolder: LinkAccountHolder,
+        val paymentMethodMetadata: PaymentMethodMetadata,
+        val googlePayConfiguration: GooglePayConfiguration.State,
+        private val interactorFactory: () -> DefaultExpressCheckoutElementInteractor,
+    ) {
+        fun createInteractor(): DefaultExpressCheckoutElementInteractor {
+            return interactorFactory()
+        }
     }
 
     private fun createGooglePayConfiguration(
