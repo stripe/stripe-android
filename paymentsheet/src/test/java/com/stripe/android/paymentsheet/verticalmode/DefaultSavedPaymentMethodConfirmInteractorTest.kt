@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
@@ -41,6 +42,26 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
             processing.value = false
             advanceUntilIdle()
             assertThat(awaitItem().form.enabled).isTrue()
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
+    fun `state uses link brand from account when logged in`() = runTest {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkBrand = LinkBrand.Onelink,
+        )
+        val linkAccount = LinkAccount(
+            consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Link),
+        )
+        val interactor = getDefaultSavedPaymentMethodConfirmInteractor(
+            linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = linkAccount)),
+            paymentMethodMetadata = paymentMethodMetadata,
+            coroutineScope = backgroundScope,
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
             ensureAllEventsConsumed()
         }
     }
