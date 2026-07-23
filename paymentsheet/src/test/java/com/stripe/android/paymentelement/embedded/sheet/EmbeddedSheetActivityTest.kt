@@ -13,7 +13,6 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -69,7 +68,6 @@ internal class EmbeddedSheetActivityTest {
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(RetryRule(3))
-        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `when launched without args should finish with error result`() {

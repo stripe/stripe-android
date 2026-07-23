@@ -27,6 +27,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.TestScope
@@ -553,6 +554,18 @@ internal class CheckoutControllerTest {
         }
 
     @Test
+    fun `updateShippingAddress does not send tax_region when automatic tax targets billing`() =
+        runMutationScenario(initModifier = automaticTaxFor("billing")) {
+            // Automatic tax targets billing, so a shipping address update stays local: no request.
+            val result = controller.updateShippingAddress(name = "John", phoneNumber = null, address = fullAddress)
+
+            result.getOrThrow()
+            val state = committedState()
+            assertThat(state.collectedDetails.shippingName).isEqualTo("John")
+            assertThat(state.collectedDetails.shippingAddress).isEqualTo(fullAddress.build())
+        }
+
+    @Test
     fun `updateBillingAddress sends tax_region and stores address when automatic tax targets billing`() =
         runMutationScenario(initModifier = automaticTaxFor("billing")) {
             networkRule.checkoutUpdate(
@@ -586,6 +599,35 @@ internal class CheckoutControllerTest {
             val state = committedState()
             assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
             assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
+        }
+
+    @Test
+    fun `updateBillingAddress stores address without a network call when automatic tax is disabled`() =
+        runMutationScenario {
+            // No checkoutUpdate is enqueued: with automatic tax off, the address is stored locally
+            // and the payment element is reloaded from the existing response, firing no request.
+            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+
+            result.getOrThrow()
+            val state = committedState()
+            assertThat(state.collectedDetails.billingName).isEqualTo("Jane")
+            assertThat(state.collectedDetails.billingAddress).isEqualTo(fullAddress.build())
+        }
+
+    @Test
+    fun `updateBillingAddress does not store address on failure`() =
+        runMutationScenario(initModifier = automaticTaxFor("billing")) {
+            networkRule.checkoutUpdate { response ->
+                response.setResponseCode(400)
+                response.setBody("""{"error": {"message": "Invalid address"}}""")
+            }
+
+            val result = controller.updateBillingAddress(name = "Jane", phoneNumber = null, address = fullAddress)
+
+            assertThat(result.isFailure).isTrue()
+            val state = committedState()
+            assertThat(state.collectedDetails.billingName).isNull()
+            assertThat(state.collectedDetails.billingAddress).isNull()
         }
 
     @Test
@@ -729,6 +771,61 @@ internal class CheckoutControllerTest {
         job2.await()
 
         // isLoading should go directly from true to false with no intermediate flicker.
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+    }
+
+    @Test
+    fun `isLoading transitions to true then false on a failed mutation`() = runMutationScenario(
+        assertLoadingConsumed = true,
+    ) {
+        networkRule.checkoutUpdate { response ->
+            response.setResponseCode(400)
+            response.setBody("""{"error": {"message": "Invalid promotion code"}}""")
+        }
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        controller.applyPromotionCode("INVALID")
+
+        // The failure path must still release the loading window via the finally block.
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+    }
+
+    @Test
+    fun `isLoading returns to false when a queued mutation is cancelled`() = runMutationScenario(
+        assertLoadingConsumed = true,
+    ) {
+        val holdFirstResponse = CountDownLatch(1)
+        networkRule.checkoutUpdate(
+            bodyPart("promotion_code", "10OFF"),
+        ) { response ->
+            holdFirstResponse.await(10, TimeUnit.SECONDS)
+            successResponseFactory().invoke(response)
+        }
+        // No mock for "20OFF": NetworkRule fails unmatched requests, so if the cancelled mutation's
+        // network call fires, the test fails.
+
+        assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+        val job1 = async { controller.applyPromotionCode("10OFF") }
+        val job2 = async { controller.applyPromotionCode("20OFF") }
+        testScheduler.advanceUntilIdle()
+
+        assertThat(isLoadingTurbine.awaitItem()).isTrue()
+
+        // Prove job2 has started and is suspended waiting for the mutex, not merely unstarted.
+        assertThat(job2.isActive).isTrue()
+
+        job2.cancelAndJoin()
+
+        // isLoading stays true because job1 is still in-flight (shared loading window).
+        assertThat(controller.isLoading.value).isTrue()
+        isLoadingTurbine.expectNoEvents()
+
+        holdFirstResponse.countDown()
+        job1.await()
+
         assertThat(isLoadingTurbine.awaitItem()).isFalse()
     }
 
@@ -920,6 +1017,21 @@ internal class CheckoutControllerTest {
             )
 
             assertThat(result.isSuccess).isTrue()
+        }
+
+    @Test
+    fun `updateShippingAddress with missing country throws IllegalArgumentException before allowlist check`() =
+        runMutationScenario(initModifier = allowedShippingCountries(listOf("US"))) {
+            // Address.build() requires a country and throws synchronously, before the allowlist is
+            // ever consulted, so the call is wrapped to capture the thrown exception.
+            val result = runCatching {
+                controller.updateShippingAddress(name = null, phoneNumber = null, address = Address())
+            }
+
+            assertThat(result.isFailure).isTrue()
+            val exception = result.exceptionOrNull()
+            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception).hasMessageThat().isEqualTo("Country is required.")
         }
 
     // endregion

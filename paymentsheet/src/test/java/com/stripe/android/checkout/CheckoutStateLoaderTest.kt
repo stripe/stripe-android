@@ -111,7 +111,6 @@ internal class CheckoutStateLoaderTest {
         loader.loadInitial(configuration = defaultConfiguration(), checkoutSessionResponse = response())
 
         assertThat(stateHolder.checkoutSession.value?.id).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
-        assertThat(stateHolder.state?.key).isEqualTo(DEFAULT_CHECKOUT_SESSION_ID)
         // No adaptive pricing in the response, so no flag images are resolved.
         assertThat(stateHolder.state?.flagImages).isNull()
     }
@@ -191,7 +190,6 @@ internal class CheckoutStateLoaderTest {
         previousNewSelections: Bundle = Bundle(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
     ) = CheckoutControllerState(
-        key = checkoutSessionResponse.id,
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = checkoutSessionResponse,
         flagImages = null,
