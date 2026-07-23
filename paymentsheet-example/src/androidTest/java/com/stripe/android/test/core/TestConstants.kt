@@ -1,6 +1,5 @@
 package com.stripe.android.test.core
 
-import com.stripe.android.paymentsheet.example.BuildConfig
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
