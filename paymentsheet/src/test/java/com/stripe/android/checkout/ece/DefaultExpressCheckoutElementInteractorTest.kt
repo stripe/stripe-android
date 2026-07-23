@@ -140,8 +140,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     fun `handleViewAction OnDisplayed reports displayed event`() = runScenario {
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
 
-        assertThat(eventReporter.calls)
-            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
     }
 
     @Test
@@ -151,8 +151,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
         restoredInteractor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
 
-        assertThat(eventReporter.calls)
-            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceDisplayed)
     }
 
     @Test
@@ -167,8 +167,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             )
         )
 
-        assertThat(eventReporter.calls)
-            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
     }
 
     @Test
@@ -188,8 +188,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
         assertThat(confirmationPerformer.calls)
             .containsExactly(expressButton)
 
-        assertThat(eventReporter.calls)
-            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
     }
 
     private fun runScenario(
@@ -235,6 +235,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             googlePayConfiguration = googlePayConfiguration,
             interactorFactory = interactorFactory,
         ).block()
+
+        eventReporter.ensureAllEventsConsumed()
     }
 
     private fun createStateHolder(
