@@ -106,7 +106,6 @@ internal fun ExampleScreen(
     val (loadingState, onLoadingStateChanged) = remember {
         mutableStateOf<LoadingState>(LoadingState.Idle)
     }
-    var threeDFaceCaptureEnabled by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -162,9 +161,7 @@ internal fun ExampleScreen(
                         submissionState = submissionState,
                         onSubmissionStateChanged = onSubmissionStateChanged,
                         shouldShowPhoneNumber = true,
-                        scrollState = scrollState,
-                        threeDFaceCaptureEnabled = threeDFaceCaptureEnabled,
-                        onThreeDFaceCaptureEnabledChanged = { threeDFaceCaptureEnabled = it }
+                        scrollState = scrollState
                     )
 
                     VerificationType.ID_NUMBER -> IdNumberUI(
@@ -177,9 +174,7 @@ internal fun ExampleScreen(
                     VerificationType.PHONE -> PhoneUI(
                         scrollState,
                         submissionState,
-                        onSubmissionStateChanged,
-                        threeDFaceCaptureEnabled,
-                        onThreeDFaceCaptureEnabledChanged = { threeDFaceCaptureEnabled = it }
+                        onSubmissionStateChanged
                     )
                 }
             }
@@ -190,8 +185,7 @@ internal fun ExampleScreen(
                 configuration,
                 viewModel,
                 loadingState,
-                onLoadingStateChanged,
-                threeDFaceCaptureEnabled
+                onLoadingStateChanged
             )
         }
     }
@@ -433,8 +427,7 @@ private fun SubmitView(
     configuration: IdentityVerificationSheet.Configuration,
     viewModel: IdentityExampleViewModel,
     loadingState: LoadingState,
-    onLoadingStateChanged: (LoadingState) -> Unit,
-    threeDFaceCaptureEnabled: Boolean
+    onLoadingStateChanged: (LoadingState) -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -483,7 +476,6 @@ private fun SubmitView(
         vsId = verificationSessionId
         when (submissionState.integrationType) {
             NATIVE -> {
-                IdentityVerificationSheet.local3DFaceCaptureOverride = threeDFaceCaptureEnabled
                 identityVerificationSheet.present(verificationSessionId, ephemeralKeySecret)
             }
 

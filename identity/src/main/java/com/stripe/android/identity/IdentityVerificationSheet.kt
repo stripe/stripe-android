@@ -76,18 +76,6 @@ interface IdentityVerificationSheet {
 
     companion object {
         /**
-         * Overrides whether the SDK uses 3D face capture for local integrations.
-         *
-         * `null` uses the normal SDK behavior, `true` forces the 3D selfie flow, and `false`
-         * forces the legacy selfie flow.
-         */
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @set:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        @JvmStatic
-        @Volatile
-        var local3DFaceCaptureOverride: Boolean? = null
-
-        /**
          * Creates a [IdentityVerificationSheet] instance with [ComponentActivity].
          *
          * This API registers an [ActivityResultLauncher] into the

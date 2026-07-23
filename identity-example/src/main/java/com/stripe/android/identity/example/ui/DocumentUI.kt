@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Checkbox
-import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -21,17 +20,10 @@ internal fun DocumentUI(
     submissionState: IdentitySubmissionState,
     onSubmissionStateChanged: (IdentitySubmissionState) -> Unit,
     shouldShowPhoneNumber: Boolean,
-    scrollState: ScrollState,
-    threeDFaceCaptureEnabled: Boolean,
-    onThreeDFaceCaptureEnabledChanged: (Boolean) -> Unit
+    scrollState: ScrollState
 ) {
     AllowedDocumentTypes(submissionState, onSubmissionStateChanged)
-    RequireDocTypes(
-        identitySubmissionState = submissionState,
-        onSubmissionStateChangedListener = onSubmissionStateChanged,
-        threeDFaceCaptureEnabled = threeDFaceCaptureEnabled,
-        onThreeDFaceCaptureEnabledChanged = onThreeDFaceCaptureEnabledChanged
-    )
+    RequireDocTypes(submissionState, onSubmissionStateChanged)
     // TODO(ccen) re-enable when backend supports PII
     //    if (shouldShowPhoneNumber) {
     //        Divider()
@@ -129,9 +121,7 @@ private fun AllowedDocumentTypes(
 @Composable
 private fun RequireDocTypes(
     identitySubmissionState: IdentitySubmissionState,
-    onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit,
-    threeDFaceCaptureEnabled: Boolean,
-    onThreeDFaceCaptureEnabledChanged: (Boolean) -> Unit
+    onSubmissionStateChangedListener: (IdentitySubmissionState) -> Unit
 ) {
     Row(
         modifier = Modifier.padding(start = 10.dp),
@@ -208,20 +198,6 @@ private fun RequireDocTypes(
                     )
                 )
             }
-        )
-    }
-
-    Row(
-        modifier = Modifier.padding(start = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Switch(
-            checked = threeDFaceCaptureEnabled,
-            onCheckedChange = onThreeDFaceCaptureEnabledChanged
-        )
-        StyledClickableText(
-            text = AnnotatedString(stringResource(id = R.string.three_d_face_capture_enabled)),
-            onClick = { onThreeDFaceCaptureEnabledChanged(!threeDFaceCaptureEnabled) }
         )
     }
 

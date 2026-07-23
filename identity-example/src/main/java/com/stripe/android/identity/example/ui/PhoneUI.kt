@@ -34,9 +34,7 @@ import com.stripe.android.identity.example.R
 internal fun PhoneUI(
     scrollState: ScrollState,
     submissionState: IdentitySubmissionState,
-    onSubmissionStateChanged: (IdentitySubmissionState) -> Unit,
-    threeDFaceCaptureEnabled: Boolean,
-    onThreeDFaceCaptureEnabledChanged: (Boolean) -> Unit
+    onSubmissionStateChanged: (IdentitySubmissionState) -> Unit
 ) {
     val useDocumentFallback = submissionState.useDocumentFallback ?: false
 
@@ -87,9 +85,7 @@ internal fun PhoneUI(
             submissionState = submissionState,
             onSubmissionStateChanged = onSubmissionStateChanged,
             shouldShowPhoneNumber = false,
-            scrollState = scrollState,
-            threeDFaceCaptureEnabled = threeDFaceCaptureEnabled,
-            onThreeDFaceCaptureEnabledChanged = onThreeDFaceCaptureEnabledChanged
+            scrollState = scrollState
         )
     }
 }
