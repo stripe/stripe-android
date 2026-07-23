@@ -8,6 +8,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -17,7 +18,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
