@@ -14,6 +14,7 @@ internal data class VerificationSessionCreationResponse(
 @Serializable
 internal data class VerificationSessionCreationRequest(
     @SerialName("type") val type: String = "document",
+    @SerialName("3d_face_capture_enabled") val threeDFaceCaptureEnabled: Boolean,
     @SerialName("options") val options: Options? = null,
     @SerialName("provided_details") val providedDetails: ProvidedDetails? = null
 ) {
