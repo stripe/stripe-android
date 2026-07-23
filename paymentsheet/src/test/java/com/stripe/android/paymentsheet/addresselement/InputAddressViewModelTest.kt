@@ -45,6 +45,7 @@ class InputAddressViewModelTest {
             AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
                 config = config,
+                stripeAccountId = null,
             ),
             navigator,
             eventReporter,
@@ -130,7 +131,8 @@ class InputAddressViewModelTest {
     }
 
     @Test
-    fun `internal config can enable stripe-hosted autocomplete`() = runTest(UnconfinedTestDispatcher()) {
+    fun `internal config does not enable stripe-hosted autocomplete when inline is disabled`() =
+        runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel(
             config = AddressLauncher.Configuration(
                 billingAddress = null,
@@ -138,7 +140,22 @@ class InputAddressViewModelTest {
             )
         )
 
-        assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
+        assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isFalse()
+    }
+
+    @Test
+    fun `internal config can enable stripe-hosted autocomplete when inline is enabled`() =
+        runTest(UnconfinedTestDispatcher()) {
+            FeatureFlags.inlineAddressAutocompleteEnabled.setEnabled(true)
+
+            val viewModel = createViewModel(
+                config = AddressLauncher.Configuration(
+                    billingAddress = null,
+                    useStripeHostedAutocomplete = true,
+                )
+            )
+
+            assertThat(viewModel.autocompleteConfig.shouldUseStripeHostedAutocomplete).isTrue()
     }
 
     @Test
@@ -975,6 +992,7 @@ class InputAddressViewModelTest {
                     .googlePlacesApiKey(googlePlacesApiKey)
                     .autocompleteCountries(autocompleteCountries)
                     .build(),
+                stripeAccountId = null,
             ),
             navigator,
             eventReporter,

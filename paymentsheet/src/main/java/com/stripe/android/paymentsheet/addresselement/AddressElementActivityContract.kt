@@ -29,6 +29,7 @@ internal object AddressElementActivityContract :
     data class Args internal constructor(
         internal val publishableKey: String,
         internal val config: AddressLauncher.Configuration?,
+        internal val stripeAccountId: String?,
     ) : ActivityStarter.Args {
 
         internal companion object {

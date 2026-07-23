@@ -13,6 +13,8 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.NewPaymentOptionSelection
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteApiService
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -56,6 +58,10 @@ internal class FakeBaseSheetViewModel private constructor(
     customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
     customViewModelScope = customViewModelScope,
     placesClient = null,
+    stripeHostedPlacesClient = StripeHostedPlacesClientProxy(
+        stripeAutocompleteApiService = FakeStripeAutocompleteApiService(),
+        googlePlacesApiKey = null,
+    ),
 ) {
     companion object {
         fun create(

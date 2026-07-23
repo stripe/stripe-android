@@ -20,7 +20,7 @@ import kotlinx.coroutines.launch
 import java.util.Locale
 
 internal class InlineAutocompleteController(
-    private val placesClient: PlacesClientProxy,
+    private val placesClient: PlacesClientProxy?,
     private val config: AutocompleteAddressInteractor.Config,
     private val coroutineScope: CoroutineScope,
     private val eventListenerProvider: () -> ((AutocompleteAddressInteractor.Event) -> Unit)?,
@@ -63,31 +63,20 @@ internal class InlineAutocompleteController(
 
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
+        val predictionLine1 = findSelectedPredictionLine1(predictionId)
+        val selectedCountry = latestCountry
         selectionJob = coroutineScope.launch {
-            placesClient.fetchPlace(predictionId).fold(
-                onSuccess = ::handleFetchPlaceSuccess,
-                onFailure = { handleFailure() }
+            val client = placesClient ?: return@launch
+            client.fetchPlace(predictionId).fold(
+                onSuccess = { handleFetchPlaceSuccess(it, selectedCountry) },
+                onFailure = {
+                    handleFailure(
+                        fallbackLine1 = predictionLine1,
+                        fallbackCountry = selectedCountry,
+                    )
+                }
             )
         }
-    }
-
-    private fun handleFetchPlaceSuccess(response: FetchPlaceResponse) {
-        val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-        val address = response.place.transformGoogleToStripeAddress(locale)
-        lastPredictionLine1 = address.line1
-        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
-        eventListenerProvider()?.invoke(
-            AutocompleteAddressInteractor.Event.OnValues(
-                mapOf(
-                    IdentifierSpec.Line1 to address.line1,
-                    IdentifierSpec.Line2 to address.line2,
-                    IdentifierSpec.City to address.city,
-                    IdentifierSpec.State to address.state,
-                    IdentifierSpec.PostalCode to address.postalCode,
-                    IdentifierSpec.Country to address.country,
-                )
-            )
-        )
     }
 
     fun onDismissed() {
@@ -96,6 +85,7 @@ internal class InlineAutocompleteController(
         latestQuery = null
         latestCountry = null
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+        placesClient?.resetSession()
     }
 
     fun dispose() {
@@ -110,15 +100,21 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
+        val client = placesClient ?: return
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
-        val result = placesClient.findAutocompletePredictions(
+        val result = client.findAutocompletePredictions(
             query = query,
             country = country,
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
         )
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
-            onFailure = { handleFailure() }
+            onFailure = {
+                handleFailure(
+                    fallbackLine1 = null,
+                    fallbackCountry = country,
+                )
+            }
         )
     }
 
@@ -138,21 +134,63 @@ internal class InlineAutocompleteController(
         )
     }
 
-    private fun handleFailure() {
+    private fun handleFetchPlaceSuccess(
+        response: FetchPlaceResponse,
+        selectedCountry: String?,
+    ) {
+        val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+        val address = response.place.transformGoogleToStripeAddress(locale)
+        lastPredictionLine1 = address.line1
+        _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
+        eventListenerProvider()?.invoke(
+            AutocompleteAddressInteractor.Event.OnValues(
+                mapOf(
+                    IdentifierSpec.Line1 to address.line1,
+                    IdentifierSpec.Line2 to address.line2,
+                    IdentifierSpec.City to address.city,
+                    IdentifierSpec.State to address.state,
+                    IdentifierSpec.PostalCode to address.postalCode,
+                    IdentifierSpec.Country to (address.country ?: selectedCountry),
+                )
+            )
+        )
+    }
+
+    private fun handleFailure(
+        fallbackLine1: String?,
+        fallbackCountry: String?,
+    ) {
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         if (config.shouldUseStripeHostedAutocomplete) {
-            expandFormForHostedFailure()
+            expandFormForHostedFailure(
+                fallbackLine1 = fallbackLine1,
+                fallbackCountry = fallbackCountry,
+            )
         }
     }
 
-    private fun expandFormForHostedFailure() {
+    private fun expandFormForHostedFailure(
+        fallbackLine1: String?,
+        fallbackCountry: String?,
+    ) {
         val values = buildMap<IdentifierSpec, String?> {
-            latestQuery?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Line1, it) }
-            latestCountry?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Country, it) }
+            (fallbackLine1 ?: latestQuery)?.takeIf { it.isNotBlank() }?.let {
+                put(IdentifierSpec.Line1, it)
+            }
+            fallbackCountry?.takeIf { it.isNotBlank() }?.let { put(IdentifierSpec.Country, it) }
         }.takeIf { it.isNotEmpty() }
 
         eventListenerProvider()?.invoke(
             AutocompleteAddressInteractor.Event.OnExpandForm(values)
         )
+    }
+
+    private fun findSelectedPredictionLine1(predictionId: String): String? {
+        val state = _inlinePredictionsState.value
+        if (state !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
+            return null
+        }
+
+        return state.predictions.firstOrNull { it.id == predictionId }?.primaryText
     }
 }

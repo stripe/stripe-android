@@ -68,6 +68,7 @@ internal abstract class BaseSheetViewModel(
     val customerStateHolderFactory: CustomerStateHolder.Factory,
     val customViewModelScope: CoroutineScope,
     val placesClient: PlacesClientProxy?,
+    val stripeHostedPlacesClient: PlacesClientProxy,
 ) : ViewModel() {
     private val autocompleteLauncher = DefaultAutocompleteLauncher(
         AutocompleteAppearanceContext.PaymentElement(config.appearance)
@@ -91,11 +92,14 @@ internal abstract class BaseSheetViewModel(
                 autocompleteCountries = AUTOCOMPLETE_DEFAULT_COUNTRIES,
                 isInlineAutocompleteEnabled = FeatureFlags.inlineAddressAutocompleteEnabled.isEnabled,
             ),
-            placesClient = placesClient,
-            coroutineScope = viewModelScope,
-            shouldUseAutocompleteProxyEndpointsProvider = {
-                _paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints ?: false
+            placesClientProvider = {
+                if (paymentMethodMetadata.value?.shouldUseAutocompleteProxyEndpoints == true) {
+                    stripeHostedPlacesClient
+                } else {
+                    placesClient
+                }
             },
+            coroutineScope = viewModelScope,
         )
 
     internal val validationRequested = MutableSharedFlow<Unit>()

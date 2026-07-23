@@ -6,7 +6,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.StateFlow
 
 internal class BillingInlineAutocompleteAddressInteractor(
-    placesClient: PlacesClientProxy,
+    placesClient: PlacesClientProxy?,
     override val autocompleteConfig: AutocompleteAddressInteractor.Config,
     coroutineScope: CoroutineScope,
 ) : AutocompleteAddressInteractor {

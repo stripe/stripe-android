@@ -8,6 +8,8 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentif
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentOptionContract
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteApiService
+import com.stripe.android.paymentsheet.addresselement.StripeHostedPlacesClientProxy
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.repositories.PrefetchedPaymentMethodMessagePromotionsHelper
@@ -67,5 +69,15 @@ internal class PaymentOptionsViewModelModule {
         googlePlacesApiKey = args.configuration.googlePlacesApiKey,
         errorReporter = errorReporter,
         isPlacesAvailable = DefaultIsPlacesAvailable()(),
+    )
+
+    @Provides
+    @Named(STRIPE_HOSTED_PLACES_CLIENT)
+    fun provideStripeHostedPlacesClient(
+        stripeAutocompleteApiService: StripeAutocompleteApiService,
+        args: PaymentOptionContract.Args,
+    ): PlacesClientProxy = StripeHostedPlacesClientProxy(
+        stripeAutocompleteApiService = stripeAutocompleteApiService,
+        googlePlacesApiKey = args.configuration.googlePlacesApiKey,
     )
 }
