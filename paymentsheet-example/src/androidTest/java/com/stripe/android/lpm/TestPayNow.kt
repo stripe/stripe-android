@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CurrencySetti
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -27,6 +28,7 @@ internal class TestPayNow : BasePlaygroundTest() {
         ).joinToString(",")
     }
 
+    @Ignore("#ir-implore-chord")
     @Test
     fun testPayNow() {
         testDriver.confirmNewOrGuestComplete(

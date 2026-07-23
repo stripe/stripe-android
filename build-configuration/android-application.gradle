@@ -52,14 +52,14 @@ android {
 
         managedDevices {
             localDevices {
-                // Lean image without a browser; used for the main suite.
+                // Lean image without a browser; used for connectedAndroidTest runs.
                 register("pixel2api33") {
                     device = "Pixel 2"
                     apiLevel = 33
                     systemImageSource = "aosp-atd"
                 }
-                // Chrome-bearing image for browser-redirect tests, kept separate so its heavier
-                // footprint doesn't affect the rest of the suite.
+                // Chrome-bearing image; used for the paymentsheet-example E2E suite, which needs
+                // a real browser for the authorization step.
                 register("pixel2api33chrome") {
                     device = "Pixel 2"
                     apiLevel = 33

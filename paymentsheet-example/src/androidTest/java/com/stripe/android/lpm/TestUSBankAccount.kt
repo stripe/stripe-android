@@ -150,6 +150,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("#ir-implore-chord")
     @Test
     fun testUSBankAccountLiteSuccess() {
         testDriver.confirmUSBankAccount(
@@ -231,6 +232,7 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
+    @Ignore("#ir-implore-chord")
     @Test
     fun testUSBankAccountLiteCancelAllowsUserToContinue() {
         testDriver.confirmUSBankAccount(

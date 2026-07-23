@@ -26,11 +26,7 @@ pipelines:
       run-crypto-onramp-example-e2e-tests: { }
       build-paymentsheet-e2e: { }
       run-paymentsheet-e2e:
-        parallel: 3
-        depends_on:
-          - build-paymentsheet-e2e
-      run-paymentsheet-browser-e2e:
-        parallel: 4
+        parallel: 15
         depends_on:
           - build-paymentsheet-e2e
       run-paymentsheet-google-pay-e2e: { }
@@ -414,41 +410,18 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 set -euo pipefail
+                # Runs on the Chrome-bearing google_apis device (pixel2api33chrome); the whole suite
+                # needs a real browser for the authorization step. One serial emulator per shard
+                # (parallelism comes from the pipeline shards); concurrent devices caused WebView/
+                # focus-cascade flakiness on this image.
                 envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 3)
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 15)
 
-                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=1 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=1 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
             - test_title: "PaymentSheet E2E tests (shard $PAYMENTSHEET_E2E_SHARD_DISPLAY)"
-    meta:
-      bitrise.io:
-        stack: ubuntu-resolute-26.04-bitrise-2026-android
-        machine_type_id: g2.linux.x-large
-  run-paymentsheet-browser-e2e:
-    before_run:
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - script@1:
-          title: Execute PaymentSheet browser-redirect E2E tests
-          timeout: 2400
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                set -euo pipefail
-                # Browser-redirect tests run on the Chrome-bearing device; the main aosp-atd image
-                # has no browser. One serial emulator per machine (parallelism comes from the pipeline
-                # shards); concurrent devices break real-browser tests via window-focus contention.
-                envman add --key PAYMENTSHEET_BROWSER_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --browser-redirect --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 4)
-                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=1 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=1 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
-      - bundle::export_instrumentation_test_results:
-          title: Export PaymentSheet browser E2E test results
-          inputs:
-            - test_title: "PaymentSheet browser E2E tests (shard $PAYMENTSHEET_BROWSER_E2E_SHARD_DISPLAY)"
     meta:
       bitrise.io:
         stack: ubuntu-resolute-26.04-bitrise-2026-android

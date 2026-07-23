@@ -44,33 +44,8 @@ FIREBASE_TEST_CLASSES = {
     'com.stripe.android.lpm.TestGooglePay',
 }
 
-# Need a real browser for the authorization step, so they run on the Chrome-bearing device
-# (pixel2api33chrome); the main run's aosp-atd image has no browser.
-BROWSER_REDIRECT_TEST_CLASSES = {
-    'com.stripe.android.BrowserAvailabilityTest',
-    'com.stripe.android.TestBrowsers',
-    'com.stripe.android.lpm.TestAfterpay',
-    'com.stripe.android.lpm.TestAlipay',
-    'com.stripe.android.lpm.TestBancontact',
-    'com.stripe.android.lpm.TestBillie',
-    'com.stripe.android.lpm.TestCashApp',
-    'com.stripe.android.lpm.TestEps',
-    'com.stripe.android.lpm.TestFpx',
-    'com.stripe.android.lpm.TestGrabPay',
-    'com.stripe.android.lpm.TestIdeal',
-    'com.stripe.android.lpm.TestMobilePay',
-    'com.stripe.android.lpm.TestP24',
-    'com.stripe.android.lpm.TestPayPal',
-    'com.stripe.android.lpm.TestPayPay',
-    'com.stripe.android.lpm.TestSatispay',
-    'com.stripe.android.lpm.TestSunbit',
-    'com.stripe.android.lpm.TestSwish',
-    'com.stripe.android.lpm.TestTwint',
-    'com.stripe.android.lpm.TestWero',
-}
-
 # Excluded from the main sharded GMD run.
-EXCLUDED_TEST_CLASSES = FIREBASE_TEST_CLASSES | BROWSER_REDIRECT_TEST_CLASSES
+EXCLUDED_TEST_CLASSES = FIREBASE_TEST_CLASSES
 
 
 def get_all_test_class_names():
@@ -91,24 +66,11 @@ def get_shard_classes(shard_index, num_shards):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Get test classes for a given shard.")
-    parser.add_argument("--shard-index", type=int)
-    parser.add_argument("--num-shards", type=int)
-    parser.add_argument(
-        "--browser-redirect",
-        action="store_true",
-        help="Select from the browser-redirect classes (run on the Chrome-bearing device). "
-             "With --shard-index/--num-shards, returns that shard's subset; otherwise all of them.",
-    )
+    parser.add_argument("--shard-index", type=int, required=True)
+    parser.add_argument("--num-shards", type=int, required=True)
     args = parser.parse_args()
 
-    if args.browser_redirect:
-        classes = sorted(BROWSER_REDIRECT_TEST_CLASSES)
-        if args.shard_index is not None and args.num_shards is not None:
-            classes = shard(classes, args.shard_index, args.num_shards)
-    else:
-        if args.shard_index is None or args.num_shards is None:
-            parser.error("--shard-index and --num-shards are required unless --browser-redirect is set")
-        classes = get_shard_classes(args.shard_index, args.num_shards)
+    classes = get_shard_classes(args.shard_index, args.num_shards)
 
     if not classes:
         print("No test classes found for shard", args.shard_index, file=sys.stderr)
