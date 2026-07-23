@@ -351,6 +351,9 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         ),
         CHECKOUT_SELECTION_SET_BEFORE_LOAD(
             partialEventName = "checkout.selection_set_before_load"
+        ),
+        CHECKOUT_RELOAD_AFTER_CONFIRM_FAILED(
+            partialEventName = "checkout.reload_after_confirm_failed"
         );
 
         override val eventName: String

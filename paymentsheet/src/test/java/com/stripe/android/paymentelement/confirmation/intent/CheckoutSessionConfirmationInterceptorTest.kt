@@ -32,7 +32,6 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
-import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionClientParams
@@ -73,11 +72,10 @@ class CheckoutSessionConfirmationInterceptorTest {
         val completeAction = result as ConfirmationDefinition.Action.Complete
         assertThat(completeAction.intent).isInstanceOf<PaymentIntent>()
         assertThat((completeAction.intent as PaymentIntent).status).isEqualTo(StripeIntent.Status.Succeeded)
-        assertThat(completeAction.metadata).isEqualTo(
-            MutableConfirmationMetadata().apply {
-                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-            }
-        )
+        assertThat(completeAction.metadata[DeferredIntentConfirmationTypeKey])
+            .isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.paymentIntent)
+            .isEqualTo(completeAction.intent)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 
@@ -211,11 +209,10 @@ class CheckoutSessionConfirmationInterceptorTest {
         val completeAction = result as ConfirmationDefinition.Action.Complete
         assertThat(completeAction.intent).isInstanceOf<PaymentIntent>()
         assertThat((completeAction.intent as PaymentIntent).status).isEqualTo(StripeIntent.Status.Succeeded)
-        assertThat(completeAction.metadata).isEqualTo(
-            MutableConfirmationMetadata().apply {
-                set(DeferredIntentConfirmationTypeKey, DeferredIntentConfirmationType.Server)
-            }
-        )
+        assertThat(completeAction.metadata[DeferredIntentConfirmationTypeKey])
+            .isEqualTo(DeferredIntentConfirmationType.Server)
+        assertThat(completeAction.metadata[CheckoutSessionResponseKey]?.paymentIntent)
+            .isEqualTo(completeAction.intent)
         assertThat(completeAction.completedFullPaymentFlow).isTrue()
     }
 

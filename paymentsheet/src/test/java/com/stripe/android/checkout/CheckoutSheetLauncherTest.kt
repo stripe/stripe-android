@@ -12,6 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFact
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodMessageLearnMore
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -26,6 +27,7 @@ import com.stripe.android.paymentsheet.DefaultCustomerStateHolder
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.createCustomerState
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.DummyActivityResultCaller
 import com.stripe.android.testing.DummyActivityResultCaller.RegisterCall
 import com.stripe.android.testing.FakeErrorReporter
@@ -38,6 +40,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class CheckoutSheetLauncherTest {
 
@@ -186,6 +189,7 @@ internal class CheckoutSheetLauncherTest {
             hasBeenConfirmed = false,
             customerState = customerState,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -239,6 +243,7 @@ internal class CheckoutSheetLauncherTest {
             hasBeenConfirmed = true,
             customerState = null,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -248,6 +253,71 @@ internal class CheckoutSheetLauncherTest {
         assertThat(selectionHolder.temporarySelection.value).isNull()
         assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(sheetStateHolder.sheetIsOpen).isFalse()
+    }
+
+    @Test
+    fun `complete result with checkout session response reloads state`() = testScenario {
+        val initialResponse = CheckoutSessionResponseFactory.create()
+        stateHolder.state = CheckoutControllerStateFactory.create(checkoutSessionResponse = initialResponse)
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+
+        val confirmedResponse = initialResponse.copy(id = "cs_confirmed")
+        val result = EmbeddedActivityResult.Complete(
+            selection = null,
+            hasBeenConfirmed = true,
+            customerState = null,
+            shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = confirmedResponse,
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        assertThat(checkoutStateLoader.reloadCalls.awaitItem().checkoutSessionResponse)
+            .isEqualTo(confirmedResponse)
+        // The reload re-derives the selection, so the manual selection update is skipped.
+        assertThat(selectionHolder.selection.value).isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
+        checkoutStateLoader.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `complete result with checkout session response is ignored when no state is loaded`() = testScenario {
+        val result = EmbeddedActivityResult.Complete(
+            selection = null,
+            hasBeenConfirmed = true,
+            customerState = null,
+            shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        checkoutStateLoader.reloadCalls.expectNoEvents()
+        checkoutStateLoader.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `complete result reports error when reload fails`() = testScenario(
+        reloadResult = Result.failure(RuntimeException("boom")),
+    ) {
+        stateHolder.state = CheckoutControllerStateFactory.create()
+        val result = EmbeddedActivityResult.Complete(
+            selection = null,
+            hasBeenConfirmed = true,
+            customerState = null,
+            shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
+            launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
+        )
+        val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
+        callback.onActivityResult(result)
+
+        // Draining the reload call runs the coroutine through its failure handling.
+        checkoutStateLoader.reloadCalls.awaitItem()
+        assertThat(errorReporter.getLoggedErrors())
+            .contains("unexpected_error.checkout.reload_after_confirm_failed")
+        checkoutStateLoader.ensureAllEventsConsumed()
     }
 
     @Test
@@ -313,6 +383,7 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Manage,
         )
 
@@ -419,6 +490,7 @@ internal class CheckoutSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 
@@ -508,8 +580,10 @@ internal class CheckoutSheetLauncherTest {
     }
 
     private fun testScenario(
+        reloadResult: Result<Unit> = Result.success(Unit),
         block: suspend Scenario.() -> Unit
     ) = runTest {
+        val backgroundScope = this.backgroundScope
         val lifecycleOwner = TestLifecycleOwner()
         val savedStateHandle = SavedStateHandle()
         val selectionHolder = DefaultEmbeddedSelectionHolder(savedStateHandle)
@@ -521,6 +595,8 @@ internal class CheckoutSheetLauncherTest {
             paymentMethodMetadataFlow = stateFlowOf(null),
         )
         val sheetStateHolder = SheetStateHolder(savedStateHandle)
+        val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
+        val checkoutStateLoader = FakeCheckoutStateLoader(reloadResult = reloadResult)
         val errorReporter = FakeErrorReporter()
 
         DummyActivityResultCaller.test {
@@ -530,7 +606,10 @@ internal class CheckoutSheetLauncherTest {
                 selectionHolder = selectionHolder,
                 customerStateHolder = customerStateHolder,
                 sheetStateHolder = sheetStateHolder,
+                stateHolder = stateHolder,
+                checkoutStateLoader = checkoutStateLoader,
                 errorReporter = errorReporter,
+                coroutineScope = backgroundScope,
                 statusBarColor = null,
                 paymentElementCallbackIdentifier = CALLBACK_IDENTIFIER,
             )
@@ -549,6 +628,8 @@ internal class CheckoutSheetLauncherTest {
                 launcher = launcher,
                 sheetLauncher = sheetLauncher,
                 sheetStateHolder = sheetStateHolder,
+                stateHolder = stateHolder,
+                checkoutStateLoader = checkoutStateLoader,
                 errorReporter = errorReporter,
             ).block()
         }
@@ -563,6 +644,8 @@ internal class CheckoutSheetLauncherTest {
         val launcher: ActivityResultLauncher<*>,
         val sheetLauncher: EmbeddedSheetLauncher,
         val sheetStateHolder: SheetStateHolder,
+        val stateHolder: CheckoutControllerStateHolder,
+        val checkoutStateLoader: FakeCheckoutStateLoader,
         val errorReporter: FakeErrorReporter,
     ) {
         suspend fun launchForm(code: String) {

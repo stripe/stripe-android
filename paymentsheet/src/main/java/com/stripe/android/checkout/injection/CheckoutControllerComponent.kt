@@ -11,7 +11,9 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.checkout.CheckoutController
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.CheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.CheckoutStateLoader
 import com.stripe.android.checkout.DefaultCheckoutPaymentOptionDisplayDataFactory
+import com.stripe.android.checkout.DefaultCheckoutStateLoader
 import com.stripe.android.checkout.ece.AvailableExpressButtonTypesFactory
 import com.stripe.android.checkout.ece.DefaultAvailableExpressButtonTypesFactory
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
@@ -132,6 +134,9 @@ internal interface CheckoutControllerComponent {
 internal interface CheckoutControllerModule {
     @Binds
     fun bindPaymentElementLoader(loader: DefaultPaymentElementLoader): PaymentElementLoader
+
+    @Binds
+    fun bindsCheckoutStateLoader(loader: DefaultCheckoutStateLoader): CheckoutStateLoader
 
     @Binds
     fun bindsElementsSessionRepository(impl: RealElementsSessionRepository): ElementsSessionRepository

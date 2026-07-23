@@ -243,7 +243,7 @@ internal class CheckoutStateLoaderTest {
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
         val recordingChooser = RecordingSelectionChooser(chosenSelection)
         val chooser = selectionChooser?.invoke(savedStateHandle) ?: recordingChooser
-        val loader = CheckoutStateLoader(
+        val loader = DefaultCheckoutStateLoader(
             embeddedConfigurationFactory = CheckoutEmbeddedConfigurationFactory(merchantDisplayName),
             flagImageResolver = flagImageResolver,
             paymentElementLoader = FakePaymentElementLoader(

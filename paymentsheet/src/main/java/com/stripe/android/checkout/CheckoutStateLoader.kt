@@ -11,14 +11,24 @@ import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import javax.inject.Inject
 
 @OptIn(CheckoutSessionPreview::class)
-internal class CheckoutStateLoader @Inject constructor(
+internal interface CheckoutStateLoader {
+    suspend fun loadInitial(
+        configuration: CheckoutController.Configuration.State,
+        checkoutSessionResponse: CheckoutSessionResponse,
+    )
+
+    suspend fun reload(state: CheckoutControllerState)
+}
+
+@OptIn(CheckoutSessionPreview::class)
+internal class DefaultCheckoutStateLoader @Inject constructor(
     private val embeddedConfigurationFactory: CheckoutEmbeddedConfigurationFactory,
     private val flagImageResolver: FlagImageResolver,
     private val paymentElementLoader: PaymentElementLoader,
     private val selectionChooser: EmbeddedSelectionChooser,
     private val stateHolder: CheckoutControllerStateHolder,
-) {
-    suspend fun loadInitial(
+) : CheckoutStateLoader {
+    override suspend fun loadInitial(
         configuration: CheckoutController.Configuration.State,
         checkoutSessionResponse: CheckoutSessionResponse,
     ) {
@@ -30,7 +40,7 @@ internal class CheckoutStateLoader @Inject constructor(
         )
     }
 
-    suspend fun reload(state: CheckoutControllerState) {
+    override suspend fun reload(state: CheckoutControllerState) {
         commit(
             configuration = state.configuration,
             response = state.checkoutSessionResponse,

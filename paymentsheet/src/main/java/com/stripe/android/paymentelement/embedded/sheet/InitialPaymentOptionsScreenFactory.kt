@@ -58,6 +58,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
+                        checkoutSessionResponse = null,
                         launchMode = EmbeddedLaunchMode.PaymentOptions,
                     )
                 )
