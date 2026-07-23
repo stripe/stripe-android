@@ -716,7 +716,7 @@ internal class IdentityViewModel(
                 add(selfie to false)
             }
             sideSelfies.forEach { selfie ->
-                add(selfie to true)
+                add(selfie to false)
             }
         }
     }
