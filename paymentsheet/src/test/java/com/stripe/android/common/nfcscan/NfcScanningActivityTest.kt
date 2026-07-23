@@ -138,6 +138,28 @@ internal class NfcScanningActivityTest {
     }
 
     @Test
+    fun `mobile wallet card shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.mobileWalletCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_error_mobile_wallet),
+        )
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
+    fun `tokenized card shows error and keeps activity open`() = test {
+        NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
+            scenario = this,
+            responses = NfcScanningActivityTestFixtures.tokenizedCardResponses(),
+            errorText = context.getString(R.string.stripe_nfc_scan_unsupported_card),
+        )
+
+        assertThat(isActivityDestroyed()).isFalse()
+    }
+
+    @Test
     fun `expired card shows error and keeps activity open`() = test {
         NfcScanningActivityTestHelpers.assertErrorIsDisplayed(
             scenario = this,
