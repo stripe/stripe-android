@@ -52,7 +52,9 @@ android {
 
         managedDevices {
             localDevices {
-                // Lean image without a browser; used for connectedAndroidTest runs.
+                // Lean, fast image for the module instrumentation suites that don't need a browser
+                // (run-instrumentation-tests / run-paymentsheet-instrumentation-tests). The
+                // paymentsheet-example E2E suite uses the heavier google_apis device below instead.
                 register("pixel2api33") {
                     device = "Pixel 2"
                     apiLevel = 33
