@@ -25,12 +25,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.crypto.onramp.example.CHECKOUT_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.COLLECT_CARD_BUTTON_TAG
+import com.stripe.android.crypto.onramp.example.COLLECT_SAMSUNG_PAY_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_CRYPTO_TOKEN_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.CREATE_SESSION_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.REGISTER_WALLET_BUTTON_TAG
 import com.stripe.android.crypto.onramp.example.network.OnrampSessionResponse
 import com.stripe.android.crypto.onramp.example.network.SettlementSpeed
 import com.stripe.android.crypto.onramp.example.ui.components.GooglePayButton
+import com.stripe.android.crypto.onramp.example.ui.components.SamsungPayButton
 import com.stripe.android.crypto.onramp.model.CryptoNetwork
 import com.stripe.android.crypto.onramp.model.PaymentMethodDisplayData
 import com.stripe.android.crypto.onramp.model.PaymentMethodSelection
@@ -263,6 +265,7 @@ internal fun VerificationSection(
 @Composable
 internal fun PaymentSection(
     googlePayIsReady: Boolean,
+    samsungPayIsReady: Boolean,
     onCollectPayment: (PaymentMethodSelection) -> Unit
 ) {
     Text(
@@ -315,7 +318,23 @@ internal fun PaymentSection(
             .padding(bottom = 8.dp)
     )
 
+    SamsungPayButton(
+        enabled = samsungPayIsReady,
+        onClick = { onCollectPayment(samsungPaySelection()) },
+        modifier = Modifier
+            .testTag(COLLECT_SAMSUNG_PAY_BUTTON_TAG)
+            .padding(bottom = 8.dp)
+    )
+
     Spacer(modifier = Modifier.height(32.dp))
+}
+
+private fun samsungPaySelection(): PaymentMethodSelection.SamsungPay {
+    return PaymentMethodSelection.SamsungPay(
+        currencyCode = "USD",
+        amount = 1_099L,
+        orderNumber = "onramp-example-order",
+    )
 }
 
 @Composable
