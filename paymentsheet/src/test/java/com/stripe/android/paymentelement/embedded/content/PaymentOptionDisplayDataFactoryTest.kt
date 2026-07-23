@@ -1,10 +1,13 @@
 package com.stripe.android.paymentelement.embedded.content
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
+import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkPaymentMethod
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -14,6 +17,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.paymentelement.ShippingDetailsInPaymentOptionPreview
 import com.stripe.android.paymentsheet.PaymentOptionCardArtDrawableLoader
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -29,6 +33,24 @@ import org.robolectric.RobolectricTestRunner
 internal class PaymentOptionDisplayDataFactoryTest {
 
     private val displayDataFactory = createFactory()
+
+    @Test
+    fun `create uses link account brand for saved Link passthrough card label`() {
+        val linkAccountHolder = LinkAccountHolder(SavedStateHandle()).apply {
+            set(LinkAccountUpdate.Value(createLinkAccount(linkBrand = LinkBrand.Onelink)))
+        }
+
+        val option = createFactory(linkAccountHolder = linkAccountHolder).create(
+            selection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true),
+            ),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkBrand = LinkBrand.Link,
+            ),
+        )
+
+        assertThat(option?.label).isEqualTo("Onelink")
+    }
 
     @Test
     fun `create attaches PaymentMethod BillingDetails as PaymentSheet BillingDetails `() {
@@ -150,11 +172,19 @@ internal class PaymentOptionDisplayDataFactoryTest {
     companion object {
         private fun createFactory(
             cardArtDrawableLoader: PaymentOptionCardArtDrawableLoader = PaymentOptionCardArtDrawableLoader { null },
+            linkAccountHolder: LinkAccountHolder = LinkAccountHolder(SavedStateHandle()),
         ) = PaymentOptionDisplayDataFactory(
             iconLoader = mock(),
             cardArtDrawableLoader = cardArtDrawableLoader,
             context = ApplicationProvider.getApplicationContext(),
+            linkAccountHolder = linkAccountHolder,
         )
+
+        private fun createLinkAccount(linkBrand: LinkBrand?): LinkAccount {
+            return LinkAccount(
+                TestFactory.CONSUMER_SESSION.copy(linkBrand = linkBrand),
+            )
+        }
 
         private val paymentSheetBillingDetails = PaymentSheet.BillingDetails(
             name = "Jenny Rosen",
