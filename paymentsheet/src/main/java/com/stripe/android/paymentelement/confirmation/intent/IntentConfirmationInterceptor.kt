@@ -64,8 +64,7 @@ internal class DefaultIntentConfirmationInterceptorFactory @Inject constructor(
             IntegrationMetadata.CryptoOnramp,
             IntegrationMetadata.StandaloneLink -> {
                 // Neither CryptoOnramp nor StandaloneLink calls confirm.
-                val name = integrationMetadata::class.simpleName
-                throw IllegalStateException("No intent confirmation interceptor for $name.")
+                throw IllegalStateException("No intent confirmation interceptor for CryptoOnramp or StandaloneLink.")
             }
             is IntegrationMetadata.DeferredIntent.WithConfirmationToken -> {
                 confirmationTokenConfirmationInterceptorFactory.create(
