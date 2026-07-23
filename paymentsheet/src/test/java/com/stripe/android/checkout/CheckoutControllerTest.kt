@@ -18,6 +18,7 @@ import com.stripe.android.networktesting.RequestMatchers.hasBodyPart
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentelement.CheckoutSessionPreview
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.CleanupTestRule
@@ -1037,6 +1038,7 @@ internal class CheckoutControllerTest {
                 MutationScenario(
                     controller = controller,
                     savedStateHandle = savedStateHandle,
+                    sheetStateHolder = SheetStateHolder(savedStateHandle),
                     testScope = this@runTest,
                     isLoadingTurbine = isLoadingTurbine,
                 )
@@ -1052,6 +1054,7 @@ internal class CheckoutControllerTest {
     private class MutationScenario(
         val controller: CheckoutController,
         private val savedStateHandle: SavedStateHandle,
+        private val sheetStateHolder: SheetStateHolder,
         private val testScope: TestScope,
         val isLoadingTurbine: ReceiveTurbine<Boolean>,
     ) : CoroutineScope by testScope {
@@ -1070,11 +1073,10 @@ internal class CheckoutControllerTest {
         fun committedState(): CheckoutControllerState =
             requireNotNull(CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state)
 
-        // Simulates a presented payment flow by flipping the committed state's integrationLaunched
-        // flag, which the mutation guard reads back through the same SavedStateHandle.
+        // Simulates a presented payment flow by opening the sheet through the SheetStateHolder backed
+        // by the shared SavedStateHandle, which the mutation guard reads back through the same holder.
         fun markIntegrationLaunched() {
-            val stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle)
-            stateHolder.state = committedState().copy(integrationLaunched = true)
+            sheetStateHolder.sheetIsOpen = true
         }
     }
 
