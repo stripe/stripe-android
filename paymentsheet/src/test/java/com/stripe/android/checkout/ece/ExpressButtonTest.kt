@@ -4,7 +4,9 @@ package com.stripe.android.checkout.ece
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.LinkButtonState
@@ -17,6 +19,7 @@ import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import org.junit.Test
 
@@ -92,6 +95,21 @@ internal class ExpressButtonTest {
 
         val buttonState = button.state as LinkButtonState.DefaultPayment
         assertThat(buttonState.paymentUI.last4).isEqualTo("4242")
+    }
+
+    @Test
+    fun `Link toSelection returns Link selection with disabled express mode`() {
+        val selection = ExpressButton.Link.create(
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkBrand = LinkBrand.Onelink,
+            ),
+            linkAccountInfo = LinkAccountUpdate.Value(null),
+        ).toSelection()
+
+        assertThat(selection).isInstanceOf<PaymentSelection.Link>()
+        val linkSelection = selection as PaymentSelection.Link
+        assertThat(linkSelection.brand).isEqualTo(LinkBrand.Onelink)
+        assertThat(linkSelection.linkExpressMode).isEqualTo(LinkExpressMode.DISABLED)
     }
 
     @Test
@@ -198,14 +216,21 @@ internal class ExpressButtonTest {
         assertThat(button.allowCreditCards).isFalse()
     }
 
+    @Test
+    fun `GooglePay toSelection returns Google Pay selection`() {
+        val button = createGooglePayExpressButton()
+
+        assertThat(button.toSelection()).isEqualTo(PaymentSelection.GooglePay)
+    }
+
     private fun createGooglePayExpressButton(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         googlePayConfiguration: GooglePayConfiguration.State = createGooglePayConfiguration()
     ): ExpressButton.GooglePay {
-         return ExpressButton.GooglePay.create(
-             paymentMethodMetadata = paymentMethodMetadata,
-             googlePayConfiguration = googlePayConfiguration
-         )
+        return ExpressButton.GooglePay.create(
+            paymentMethodMetadata = paymentMethodMetadata,
+            googlePayConfiguration = googlePayConfiguration
+        )
     }
 
     private fun createGooglePayConfiguration(

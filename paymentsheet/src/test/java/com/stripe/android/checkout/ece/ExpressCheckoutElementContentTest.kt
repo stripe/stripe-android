@@ -82,11 +82,10 @@ internal class ExpressCheckoutElementContentTest {
 
     @Test
     fun `reports wallet tapped when Google Pay button is pressed`() {
+        val state = ExpressCheckoutElementInteractorStateFactory.create()
         val viewActionRecorder = ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction>()
         val interactor = FakeExpressCheckoutElementInteractor(
-            state = stateFlowOf(
-                ExpressCheckoutElementInteractorStateFactory.create()
-            ),
+            state = stateFlowOf(state),
             viewActionRecorder = viewActionRecorder,
         )
 
@@ -100,18 +99,21 @@ internal class ExpressCheckoutElementContentTest {
         composeRule.onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG).performClick()
 
         composeRule.runOnIdle {
-            viewActionRecorder.consume(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
+            viewActionRecorder.consume(
+                ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                    expressButton = state.expressButtons.filterIsInstance<ExpressButton.GooglePay>().single(),
+                )
+            )
             assertThat(viewActionRecorder.viewActions).isEmpty()
         }
     }
 
     @Test
     fun `reports wallet tapped when Link button is pressed`() {
+        val state = ExpressCheckoutElementInteractorStateFactory.create()
         val viewActionRecorder = ViewActionRecorder<ExpressCheckoutElementInteractor.ViewAction>()
         val interactor = FakeExpressCheckoutElementInteractor(
-            state = stateFlowOf(
-                ExpressCheckoutElementInteractorStateFactory.create()
-            ),
+            state = stateFlowOf(state),
             viewActionRecorder = viewActionRecorder,
         )
 
@@ -125,7 +127,11 @@ internal class ExpressCheckoutElementContentTest {
         composeRule.onNodeWithTag(LinkButtonTestTag).performClick()
 
         composeRule.runOnIdle {
-            viewActionRecorder.consume(ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped)
+            viewActionRecorder.consume(
+                ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
+                    expressButton = state.expressButtons.filterIsInstance<ExpressButton.Link>().single(),
+                )
+            )
             assertThat(viewActionRecorder.viewActions).isEmpty()
         }
     }
