@@ -156,23 +156,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
     }
 
     @Test
-    fun `handleViewAction OnWalletTapped reports wallet tapped event`() = runScenario(
-        paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            availableWallets = listOf(WalletType.GooglePay),
-        ),
-    ) {
-        interactor.handleViewAction(
-            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                expressButton = interactor.state.value.expressButtons.single(),
-            )
-        )
-
-        assertThat(eventReporter.calls)
-            .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
-    }
-
-    @Test
-    fun `handleViewAction OnWalletTapped starts confirmation`() = runScenario(
+    fun `handleViewAction OnWalletTapped reports wallet tapped event and starts confirmation`() = runScenario(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             availableWallets = listOf(WalletType.GooglePay),
         ),
@@ -181,12 +165,12 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
         interactor.handleViewAction(
             ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                expressButton = expressButton,
+                expressButton = interactor.state.value.expressButtons.single(),
             )
         )
 
-        assertThat(confirmationPerformer.calls)
-            .containsExactly(expressButton)
+        val confirmedButton = confirmationPerformer.calls.awaitItem()
+        assertThat(confirmedButton).isEqualTo(expressButton)
 
         assertThat(eventReporter.calls)
             .containsExactly(FakeExpressCheckoutElementEventReporter.Call.OnEceWalletTapped)
@@ -235,6 +219,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
             googlePayConfiguration = googlePayConfiguration,
             interactorFactory = interactorFactory,
         ).block()
+
+        confirmationPerformer.ensureAllEventsConsumed()
     }
 
     private fun createStateHolder(
