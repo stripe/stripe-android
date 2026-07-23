@@ -112,31 +112,33 @@ internal class AutocompleteViewModel @Inject constructor(
         viewModelScope.launch {
             _loading.value = true
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-            placesClient?.fetchPlace(
-                placeId = prediction.placeId,
-                locale = locale,
-            )?.fold(
-                onSuccess = { address ->
-                    _loading.value = false
-                    _event.emit(
-                        Event.GoBack(
-                            address = PaymentSheet.Address(
-                                city = address.city,
-                                country = address.country,
-                                line1 = address.line1,
-                                line2 = address.line2,
-                                postalCode = address.postalCode,
-                                state = address.state
+            try {
+                placesClient?.fetchPlace(
+                    placeId = prediction.placeId,
+                    locale = locale,
+                )?.fold(
+                    onSuccess = { address ->
+                        _event.emit(
+                            Event.GoBack(
+                                address = PaymentSheet.Address(
+                                    city = address.city,
+                                    country = address.country,
+                                    line1 = address.line1,
+                                    line2 = address.line2,
+                                    postalCode = address.postalCode,
+                                    state = address.state
+                                )
                             )
                         )
-                    )
-                },
-                onFailure = {
-                    _loading.value = false
-                    _event.emit(Event.GoBack(address = null))
-                }
-            )
-            placesClient?.resetSession()
+                    },
+                    onFailure = {
+                        _event.emit(Event.GoBack(address = null))
+                    }
+                )
+            } finally {
+                _loading.value = false
+                placesClient?.resetSession()
+            }
         }
     }
 

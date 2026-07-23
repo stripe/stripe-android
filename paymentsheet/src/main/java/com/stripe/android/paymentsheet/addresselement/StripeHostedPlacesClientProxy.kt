@@ -73,7 +73,15 @@ internal class StripeHostedPlacesClientProxy(
             placeId = placeId,
             sessionToken = token,
             locale = locale.toLanguageTag(),
-        ).map { result ->
+        ).also { result ->
+            result.onSuccess { details ->
+                synchronized(lock) {
+                    predictionCache[placeId]?.let { existing ->
+                        predictionCache[placeId] = existing.copy(address = details.address)
+                    }
+                }
+            }
+        }.map { result ->
             Address(
                 line1 = result.address?.line1,
                 line2 = result.address?.line2,

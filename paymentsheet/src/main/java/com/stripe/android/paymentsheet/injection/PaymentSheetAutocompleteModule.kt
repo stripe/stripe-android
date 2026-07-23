@@ -14,17 +14,12 @@ import javax.inject.Singleton
 internal class PaymentSheetAutocompleteModule {
     @Provides
     @Singleton
-    fun provideApiRequestFactory(): ApiRequest.Factory = ApiRequest.Factory()
-
-    @Provides
-    @Singleton
     fun provideStripeAutocompleteRepository(
         stripeNetworkClient: StripeNetworkClient,
-        apiRequestFactory: ApiRequest.Factory,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
-        apiRequestFactory = apiRequestFactory,
+        apiRequestFactory = ApiRequest.Factory(),
         publishableKeyProvider = publishableKeyProvider,
     )
 }

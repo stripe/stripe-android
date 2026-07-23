@@ -78,6 +78,24 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
+    fun `fetchPlace uses cached address after first fetchPlaceDetails in same session`() = runTest {
+        val repository = defaultRepository()
+        val proxy = createProxy(repository = repository)
+        proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+
+        // First fetch hits the network and writes the result back to the cache.
+        proxy.fetchPlace("place_123", Locale.US)
+        repository.fetchPlaceDetailsCalls.awaitItem()
+
+        // Second fetch for the same placeId must not call the repository again.
+        val result = proxy.fetchPlace("place_123", Locale.US)
+
+        assertThat(result.isSuccess).isTrue()
+        repository.ensureAllEventsConsumed()
+    }
+
+    @Test
     fun `fetchPlace calls repository when no inline address cached`() = runTest {
         val repository = defaultRepository()
         val proxy = createProxy(repository = repository)
@@ -187,6 +205,42 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.fetchPlace("place_123", Locale.US)
         repository.fetchPlaceDetailsCalls.awaitItem()
+        repository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `findAutocompletePredictions and fetchPlaceDetails share the same session token within a session`() = runTest {
+        val repository = defaultRepository()
+        val proxy = createProxy(repository = repository)
+
+        proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+        val findCall = repository.findPredictionsCalls.awaitItem()
+
+        proxy.fetchPlace("place_123", Locale.US)
+        val detailsCall = repository.fetchPlaceDetailsCalls.awaitItem()
+
+        assertThat(findCall.sessionToken).isEqualTo(detailsCall.sessionToken)
+        repository.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `fetchPlaceDetails token rotates after resetSession`() = runTest {
+        val repository = defaultRepository()
+        val proxy = createProxy(repository = repository)
+
+        proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+        proxy.fetchPlace("place_123", Locale.US)
+        val firstDetailsCall = repository.fetchPlaceDetailsCalls.awaitItem()
+
+        proxy.resetSession()
+
+        proxy.findAutocompletePredictions(query = "456 Oak", country = "US", limit = 4)
+        repository.findPredictionsCalls.awaitItem()
+        proxy.fetchPlace("place_123", Locale.US)
+        val secondDetailsCall = repository.fetchPlaceDetailsCalls.awaitItem()
+
+        assertThat(firstDetailsCall.sessionToken).isNotEqualTo(secondDetailsCall.sessionToken)
         repository.ensureAllEventsConsumed()
     }
 

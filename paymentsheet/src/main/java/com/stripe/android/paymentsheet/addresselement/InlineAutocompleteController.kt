@@ -67,12 +67,15 @@ internal class InlineAutocompleteController(
         selectionJob = coroutineScope.launch {
             val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             val result = placesClient.fetchPlace(predictionId, locale)
-            ensureActive()
-            result.fold(
-                onSuccess = { handleFetchPlaceSuccess(it) },
-                onFailure = { handleFailure() }
-            )
-            placesClient.resetSession()
+            try {
+                ensureActive()
+                result.fold(
+                    onSuccess = { handleFetchPlaceSuccess(it) },
+                    onFailure = { handleFailure() }
+                )
+            } finally {
+                placesClient.resetSession()
+            }
         }
     }
 
