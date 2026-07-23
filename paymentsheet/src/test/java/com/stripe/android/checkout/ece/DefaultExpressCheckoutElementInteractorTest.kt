@@ -165,7 +165,7 @@ internal class DefaultExpressCheckoutElementInteractorTest {
 
         interactor.handleViewAction(
             ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
-                expressButton = interactor.state.value.expressButtons.single(),
+                expressButton = expressButton
             )
         )
 
