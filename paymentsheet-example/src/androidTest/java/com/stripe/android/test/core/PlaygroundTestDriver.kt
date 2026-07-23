@@ -1318,8 +1318,6 @@ internal class PlaygroundTestDriver(
         }
     }
 
-    // The whole suite now runs on the Chrome-bearing google_apis image, so a browser is always
-    // installed; there's nothing left to Assume-skip on.
     private fun getBrowser(requestedBrowser: BrowserUI?): BrowserUI {
         val installedBrowsers = selectors.getInstalledBrowsers()
 
