@@ -602,14 +602,12 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     private fun createPassiveChallengeConfirmationDefinition(
         errorReporter: ErrorReporter = FakeErrorReporter(),
         passiveChallengeWarmer: PassiveChallengeWarmer = FakePassiveChallengeWarmer(),
-        publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage,
         isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
             FakeIsEligibleForConfirmationChallenge()
     ): PassiveChallengeConfirmationDefinition {
         return PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            publishableKeyProvider = { publishableKey },
             productUsage = productUsage,
             passiveChallengeWarmer = passiveChallengeWarmer,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge
