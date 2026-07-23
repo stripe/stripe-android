@@ -148,6 +148,8 @@ internal interface CustomerSheetEventReporter {
 
     fun onCardScanEvent(event: CardScanEvent)
 
+    fun onNfcScanButtonShown()
+
     enum class Screen(val value: String) {
         AddPaymentMethod("add_payment_method"),
         SelectPaymentMethod("select_payment_method"),

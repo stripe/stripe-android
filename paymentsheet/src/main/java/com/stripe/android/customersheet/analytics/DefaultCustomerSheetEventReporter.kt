@@ -251,6 +251,10 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         }
     }
 
+    override fun onNfcScanButtonShown() {
+        fireEvent(CustomerSheetEvent.NfcScanButtonShown())
+    }
+
     private fun fireEvent(event: CustomerSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

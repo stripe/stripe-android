@@ -561,6 +561,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "mc_cardscan_button_shown"
     }
 
+    class NfcScanButtonShown : PaymentSheetEvent() {
+        override val eventName: String = "mc_nfc_scan_button_shown"
+    }
+
     class CardScanApiCheckFailed(
         implementation: String,
         error: Throwable?,

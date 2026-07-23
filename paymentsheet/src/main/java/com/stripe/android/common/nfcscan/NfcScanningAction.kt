@@ -2,6 +2,11 @@ package com.stripe.android.common.nfcscan
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.ActivityOptionsCompat
 import com.stripe.android.common.taptoadd.TapToButtonUI
@@ -19,6 +24,15 @@ internal class NfcScanningAction(
         onScannedCard: (ScannedCardDetails) -> Unit
     ) {
         val context = LocalContext.current
+        val reportNfcScanButtonShown = LocalNfcScanEventShownReporter.current
+        var buttonReportedShown by rememberSaveable { mutableStateOf(false) }
+
+        LaunchedEffect(Unit) {
+            if (!buttonReportedShown) {
+                reportNfcScanButtonShown()
+                buttonReportedShown = true
+            }
+        }
 
         val launcher = rememberLauncherForActivityResult(NfcScanningContract) { result ->
             if (result is NfcScanningContract.Result.Complete) {

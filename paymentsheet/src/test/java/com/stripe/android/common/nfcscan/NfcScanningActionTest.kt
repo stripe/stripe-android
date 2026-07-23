@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -38,19 +39,23 @@ internal class NfcScanningActionTest {
     val composeCleanupRule = createComposeCleanupRule()
 
     @Test
-    fun `when disabled clicking does not launch contract or invoke callback`() = activityResultTest(
+    fun `when disabled clicking does not launch contract or invoke callback`() = test(
         enabled = false,
     ) {
+        clickButton()
+
         onLaunchCalls.expectNoEvents()
         onScannedCalls.expectNoEvents()
     }
 
     @Test
-    fun `when enabled click completes forwards scanned card details`() = activityResultTest(
+    fun `when enabled click completes forwards scanned card details`() = test(
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFactory.create(),
         ),
     ) {
+        clickButton()
+
         val launch = onLaunchCalls.awaitItem()
 
         assertThat(launch.contract).isEqualTo(NfcScanningContract)
@@ -79,14 +84,16 @@ internal class NfcScanningActionTest {
     }
 
     @Test
-    fun `when enabled click returns canceled does not invoke callback`() = activityResultTest {
+    fun `when enabled click returns canceled does not invoke callback`() = test {
+        clickButton()
         val launch = onLaunchCalls.awaitItem()
         resultDispatcher(launch.requestCode, Activity.RESULT_CANCELED, null)
         onScannedCalls.expectNoEvents()
     }
 
     @Test
-    fun `when enabled click returns canceled result in intent does not invoke callback`() = activityResultTest {
+    fun `when enabled click returns canceled result in intent does not invoke callback`() = test {
+        clickButton()
         val launch = onLaunchCalls.awaitItem()
         val intent = Intent().apply {
             putExtras(NfcScanningContract.Result.Canceled.toBundle())
@@ -95,12 +102,19 @@ internal class NfcScanningActionTest {
         onScannedCalls.expectNoEvents()
     }
 
-    private fun activityResultTest(
+    @Test
+    fun `does not report nfc scan button shown again when state changes`() = test {
+        setEnabled(false)
+        onNfcScanButtonShownCalls.expectNoEvents()
+    }
+
+    private fun test(
         paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         enabled: Boolean = true,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val onScannedCardCalls = Turbine<OnScannedCall>()
+        val onNfcScanButtonShownCalls = Turbine<Unit>()
 
         val registry = FakeActivityResultRegistry()
         val owner = object : ActivityResultRegistryOwner {
@@ -108,11 +122,17 @@ internal class NfcScanningActionTest {
         }
 
         val onLaunchCalls = registry.onLaunchCalls
+        val enabledState = mutableStateOf(enabled)
 
         composeTestRule.setContent {
-            CompositionLocalProvider(LocalActivityResultRegistryOwner provides owner) {
+            CompositionLocalProvider(
+                LocalActivityResultRegistryOwner provides owner,
+                LocalNfcScanEventShownReporter provides {
+                    onNfcScanButtonShownCalls.add(Unit)
+                },
+            ) {
                 NfcScanningAction(paymentMethodMetadata).Content(
-                    enabled = enabled,
+                    enabled = enabledState.value,
                     onScannedCard = { details ->
                         onScannedCardCalls.add(OnScannedCall(details))
                     },
@@ -121,26 +141,37 @@ internal class NfcScanningActionTest {
         }
 
         composeTestRule.waitForIdle()
-        composeTestRule.onNodeWithTag(TAP_TO_BUTTON_UI_TEST_TAG).performClick()
-        composeTestRule.waitForIdle()
+        assertThat(onNfcScanButtonShownCalls.awaitItem()).isNotNull()
 
         block(
             Scenario(
                 paymentMethodMetadata = paymentMethodMetadata,
                 onLaunchCalls = onLaunchCalls,
                 onScannedCalls = onScannedCardCalls,
+                onNfcScanButtonShownCalls = onNfcScanButtonShownCalls,
+                clickButton = {
+                    composeTestRule.onNodeWithTag(TAP_TO_BUTTON_UI_TEST_TAG).performClick()
+                    composeTestRule.waitForIdle()
+                },
+                setEnabled = {
+                    enabledState.value = it
+                },
                 resultDispatcher = registry::dispatchResult,
             ),
         )
 
         onScannedCardCalls.ensureAllEventsConsumed()
         onLaunchCalls.ensureAllEventsConsumed()
+        onNfcScanButtonShownCalls.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val paymentMethodMetadata: PaymentMethodMetadata,
         val onLaunchCalls: ReceiveTurbine<FakeActivityResultRegistry.OnLaunchCall<*, *>>,
         val onScannedCalls: ReceiveTurbine<OnScannedCall>,
+        val onNfcScanButtonShownCalls: ReceiveTurbine<Unit>,
+        val clickButton: () -> Unit,
+        val setEnabled: (Boolean) -> Unit,
         val resultDispatcher: (requestCode: Int, resultCode: Int, data: Intent?) -> Unit,
     )
 
