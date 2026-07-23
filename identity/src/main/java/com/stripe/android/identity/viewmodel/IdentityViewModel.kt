@@ -22,7 +22,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.navigation.NavController
 import com.stripe.android.camera.CameraPermissionEnsureable
 import com.stripe.android.camera.framework.image.longerEdge
-import com.stripe.android.camera.framework.util.NANOS_PER_MILLI
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
@@ -39,6 +38,8 @@ import com.stripe.android.identity.ml.Category
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorOutput
+import com.stripe.android.identity.ml.MediaPipeFaceDetectorAnalyzer
+import com.stripe.android.identity.ml.MediaPipeFaceDetectorUnavailableException
 import com.stripe.android.identity.navigation.CameraPermissionDeniedDestination
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.DocumentScanDestination
@@ -70,12 +71,15 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.mergeWith
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.DocumentUploadParam.UploadMethod
+import com.stripe.android.identity.networking.models.FaceFrameDataParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.Requirement.Companion.INDIVIDUAL_REQUIREMENT_SET
 import com.stripe.android.identity.networking.models.Requirement.Companion.nextDestination
 import com.stripe.android.identity.networking.models.Requirement.Companion.supportsForceConfirm
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.enable3DFaceCapture
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.shouldSubmit3DFaceCaptureData
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.hasError
 import com.stripe.android.identity.networking.models.VerificationPageData.Companion.needsFallback
@@ -98,6 +102,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
@@ -167,6 +172,9 @@ internal class IdentityViewModel(
         savedStateHandle[SELFIE_UPLOAD_STATE] ?: SelfieUploadState()
     )
     val selfieUploadState: StateFlow<SelfieUploadState> = _selfieUploadedState
+
+    internal val selfieTrainingConsent: Boolean
+        get() = savedStateHandle[SELFIE_TRAINING_CONSENT] ?: false
 
     /**
      * StateFlow to track analytics status.
@@ -648,8 +656,8 @@ internal class IdentityViewModel(
         result: IdentityAggregator.FinalResult,
         verificationPage: VerificationPage
     ) {
-        val filteredFrames =
-            (result.identityState.transitioner as FaceDetectorTransitioner).filteredFrames
+        val transitioner = result.identityState.transitioner as FaceDetectorTransitioner
+        val filteredFrames = transitioner.filteredFrames
         require(filteredFrames.size == FaceDetectorTransitioner.NUM_FILTERED_FRAMES) {
             "FaceDetectorTransitioner incorrectly collected ${filteredFrames.size} frames " +
                 "instead of ${FaceDetectorTransitioner.NUM_FILTERED_FRAMES} frames"
@@ -659,35 +667,56 @@ internal class IdentityViewModel(
         val bestInput = filteredFrames[FaceDetectorTransitioner.INDEX_BEST].first
         val bestIso = bestInput.cameraPreviewImage.exposureIso
         val bestFocal = bestInput.cameraPreviewImage.focalLength
-        val bestExpMs = bestInput.cameraPreviewImage.exposureDurationNs?.let { it / NANOS_PER_MILLI }
+        val bestExpMicros = bestInput.cameraPreviewImage.exposureDurationNs?.let {
+            it / NANOS_PER_MICRO
+        }
         val bestIsVirtual = bestInput.cameraPreviewImage.isVirtualCamera
         selfieBestExposureIso = bestIso
         selfieBestFocalLength = bestFocal
-        selfieBestExposureDuration = bestExpMs
+        selfieBestExposureDuration = bestExpMicros
         selfieBestIsVirtualCamera = bestIsVirtual
 
-        listOf(
-            (FaceDetectorTransitioner.Selfie.FIRST),
-            (FaceDetectorTransitioner.Selfie.BEST),
-            (FaceDetectorTransitioner.Selfie.LAST)
-        ).forEach { selfie ->
-            listOf(true, false).forEach { isHighRes ->
-                runCatching {
-                    processSelfieScanResultAndUpload(
-                        originalBitmap = filteredFrames[selfie.index].first.cameraPreviewImage.image,
-                        boundingBox = filteredFrames[selfie.index].second.boundingBox,
-                        selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
-                        isHighRes = isHighRes,
-                        selfie = selfie
-                    )
-                }.onFailure {
-                    postSelfieUploadPrepError(
-                        isHighRes = isHighRes,
-                        selfie = selfie,
-                        message = "Failed to prepare selfie image for upload",
-                        throwable = it
-                    )
-                }
+        val sideSelfies = if (verificationPage.shouldSubmit3DFaceCaptureData()) {
+            transitioner.sideSelfies
+        } else {
+            emptyList()
+        }
+
+        selfieUploadSpecs(sideSelfies).forEach { (selfie, isHighRes) ->
+            val selfieFrame = transitioner.frameForSelfie(selfie)
+            runCatching {
+                processSelfieScanResultAndUpload(
+                    originalBitmap = selfieFrame.first.cameraPreviewImage.image,
+                    boundingBox = selfieFrame.second.boundingBox,
+                    selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
+                    isHighRes = isHighRes,
+                    selfie = selfie
+                )
+            }.onFailure {
+                postSelfieUploadPrepError(
+                    isHighRes = isHighRes,
+                    selfie = selfie,
+                    message = "Failed to prepare selfie image for upload",
+                    throwable = it
+                )
+            }
+        }
+    }
+
+    private fun selfieUploadSpecs(
+        sideSelfies: Collection<FaceDetectorTransitioner.Selfie>
+    ): List<Pair<FaceDetectorTransitioner.Selfie, Boolean>> {
+        return buildList {
+            listOf(
+                FaceDetectorTransitioner.Selfie.FIRST,
+                FaceDetectorTransitioner.Selfie.BEST,
+                FaceDetectorTransitioner.Selfie.LAST
+            ).forEach { selfie ->
+                add(selfie to true)
+                add(selfie to false)
+            }
+            sideSelfies.forEach { selfie ->
+                add(selfie to false)
             }
         }
     }
@@ -1120,11 +1149,15 @@ internal class IdentityViewModel(
                             IdentityAnalyticsRequestFactory.ModelType.DOCUMENT
                         )
                         verificationPage.selfieCapture?.let { selfieCapture ->
-                            downloadModelAndPost(
-                                selfieCapture.models.faceDetectorUrl,
-                                _faceDetectorModelFile,
-                                IdentityAnalyticsRequestFactory.ModelType.SELFIE
-                            )
+                            if (verificationPage.enable3DFaceCapture()) {
+                                loadMediaPipeFaceDetectorAndPost(_faceDetectorModelFile)
+                            } else {
+                                downloadModelAndPost(
+                                    selfieCapture.models.faceDetectorUrl,
+                                    _faceDetectorModelFile,
+                                    IdentityAnalyticsRequestFactory.ModelType.SELFIE
+                                )
+                            }
                         } ?: run {
                             // Selfie not required, post null
                             _faceDetectorModelFile.postValue(Resource.success(null))
@@ -1316,6 +1349,51 @@ internal class IdentityViewModel(
 
                     // Exit with failure
                     finishWithResult(IdentityVerificationSheet.VerificationFlowResult.Failed(it))
+                }
+            )
+        }
+    }
+
+    private fun loadMediaPipeFaceDetectorAndPost(
+        target: MutableLiveData<Resource<File>>
+    ) {
+        viewModelScope.launch {
+            runCatching {
+                target.postValue(Resource.loading())
+                withContext(workContext) {
+                    MediaPipeFaceDetectorAnalyzer.assertAvailable(getApplication())
+                }
+            }.fold(
+                onSuccess = {
+                    target.postValue(Resource.success(null))
+                },
+                onFailure = { throwable ->
+                    val mediaPipeThrowable = throwable as? MediaPipeFaceDetectorUnavailableException
+                        ?: MediaPipeFaceDetectorUnavailableException(throwable)
+                    identityAnalyticsRequestFactory.genericError(
+                        throwable = mediaPipeThrowable,
+                        overrideMessage = "MediaPipe face detector unavailable",
+                        additionalMetadata = modelLoadingErrorMetadata(
+                            modelType = IdentityAnalyticsRequestFactory.ModelType.FACE,
+                            stage = IdentityAnalyticsRequestFactory.MODEL_LOADING_STAGE_MEDIA_PIPE_DETECTOR
+                        )
+                    )
+                    identityAnalyticsRequestFactory.verificationFailed(
+                        isFromFallbackUrl = false,
+                        requireSelfie = verificationPage.value?.data?.requireSelfie(),
+                        throwable = mediaPipeThrowable,
+                        lastScreenName = modelScreenName(IdentityAnalyticsRequestFactory.ModelType.FACE)
+                    )
+                    target.postValue(
+                        Resource.error(
+                            "MediaPipe face detector unavailable",
+                            mediaPipeThrowable
+                        )
+                    )
+
+                    finishWithResult(
+                        IdentityVerificationSheet.VerificationFlowResult.Failed(mediaPipeThrowable)
+                    )
                 }
             )
         }
@@ -1617,6 +1695,10 @@ internal class IdentityViewModel(
         _selfieUploadedState.updateStateAndSave {
             SelfieUploadState()
         }
+    }
+
+    fun setSelfieTrainingConsent(trainingConsent: Boolean) {
+        savedStateHandle[SELFIE_TRAINING_CONSENT] = trainingConsent
     }
 
     // Reset document upload, selfie upload(if applicable)
@@ -1998,19 +2080,29 @@ internal class IdentityViewModel(
     suspend fun collectDataForSelfieScreen(
         navController: NavController,
         faceDetectorTransitioner: FaceDetectorTransitioner,
-        allowImageCollection: Boolean
+        verificationPage: VerificationPage,
+        trainingConsent: Boolean = selfieTrainingConsent
     ) {
+        val sideSelfies = if (verificationPage.shouldSubmit3DFaceCaptureData()) {
+            faceDetectorTransitioner.sideSelfies
+        } else {
+            emptyList()
+        }
         selfieUploadState.collectLatest {
             when {
-                it.isIdle() -> {} // no-op
+                it.isIdle(sideSelfies) -> {} // no-op
                 it.isAnyLoading() -> {} // no-op
-                it.hasError() -> {
-                    errorCause.postValue(it.getError())
+                it.hasError(sideSelfies) -> {
+                    errorCause.postValue(it.getError(sideSelfies))
                     navController.navigateToErrorScreenWithDefaultValues(getApplication())
                 }
 
-                it.isAllUploaded() -> {
+                it.isAllUploaded(sideSelfies) -> {
                     runCatching {
+                        val frameData = faceDetectorTransitioner.createFaceFrameData(
+                            sideSelfies = sideSelfies,
+                            cameraLensModel = selfieCameraLensModel
+                        )
                         postVerificationPageDataAndMaybeNavigate(
                             navController = navController,
                             collectedDataParam = CollectedDataParam.createForSelfie(
@@ -2020,7 +2112,7 @@ internal class IdentityViewModel(
                                 lastLowResResult = requireNotNull(it.lastLowResResult.data),
                                 bestHighResResult = requireNotNull(it.bestHighResResult.data),
                                 bestLowResResult = requireNotNull(it.bestLowResResult.data),
-                                trainingConsent = allowImageCollection,
+                                trainingConsent = trainingConsent,
                                 faceScoreVariance = faceDetectorTransitioner.scoreVariance,
                                 bestFaceScore = faceDetectorTransitioner.bestFaceScore,
                                 numFrames = faceDetectorTransitioner.numFrames,
@@ -2028,7 +2120,38 @@ internal class IdentityViewModel(
                                 bestExposureIso = selfieBestExposureIso,
                                 bestFocalLength = selfieBestFocalLength,
                                 bestExposureDuration = selfieBestExposureDuration,
-                                bestIsVirtualCamera = selfieBestIsVirtualCamera
+                                bestIsVirtualCamera = selfieBestIsVirtualCamera,
+                                leftHighResResult = if (
+                                    FaceDetectorTransitioner.Selfie.LEFT in sideSelfies
+                                ) {
+                                    it.leftLowResResult.data
+                                } else {
+                                    null
+                                },
+                                rightHighResResult = if (
+                                    FaceDetectorTransitioner.Selfie.RIGHT in sideSelfies
+                                ) {
+                                    it.rightLowResResult.data
+                                } else {
+                                    null
+                                },
+                                bestFrameData = frameData[FaceDetectorTransitioner.Selfie.BEST],
+                                firstFrameData = frameData[FaceDetectorTransitioner.Selfie.FIRST],
+                                lastFrameData = frameData[FaceDetectorTransitioner.Selfie.LAST],
+                                leftFrameData = if (
+                                    FaceDetectorTransitioner.Selfie.LEFT in sideSelfies
+                                ) {
+                                    frameData[FaceDetectorTransitioner.Selfie.LEFT]
+                                } else {
+                                    null
+                                },
+                                rightFrameData = if (
+                                    FaceDetectorTransitioner.Selfie.RIGHT in sideSelfies
+                                ) {
+                                    frameData[FaceDetectorTransitioner.Selfie.RIGHT]
+                                } else {
+                                    null
+                                },
                             ),
                             fromRoute = SelfieDestination.ROUTE.route
                         ) {
@@ -2054,6 +2177,51 @@ internal class IdentityViewModel(
                 }
             }
         }
+    }
+
+    private fun FaceDetectorTransitioner.createFaceFrameData(
+        sideSelfies: Collection<FaceDetectorTransitioner.Selfie>,
+        cameraLensModel: String?
+    ): Map<FaceDetectorTransitioner.Selfie, FaceFrameDataParam> {
+        val selectedSelfies = listOf(
+            FaceDetectorTransitioner.Selfie.FIRST,
+            FaceDetectorTransitioner.Selfie.BEST,
+            FaceDetectorTransitioner.Selfie.LAST
+        ) + sideSelfies
+        val selectedFrames = selectedSelfies.associateWith { selfieFrameForSelfie(it) }
+        val shouldIncludeFrameMetadata = selectedFrames.values.any {
+            it.capture != FaceDetectorTransitioner.Capture.FRONT || it.output.pose != null
+        }
+        if (!shouldIncludeFrameMetadata) {
+            return emptyMap()
+        }
+
+        val captureOrders = captureOrders(selectedFrames)
+        return selectedFrames.mapValues { (selfie, frame) ->
+            FaceFrameDataParam.create(
+                selfieFrame = frame,
+                faceScoreVariance = scoreVariance,
+                captureOrder = captureOrders[selfie],
+                cameraLensModel = cameraLensModel
+            )
+        }
+    }
+
+    private fun captureOrders(
+        selectedFrames: Map<FaceDetectorTransitioner.Selfie, FaceDetectorTransitioner.SelfieFrame>
+    ): Map<FaceDetectorTransitioner.Selfie, Int> {
+        return selectedFrames.entries
+            .withIndex()
+            .sortedWith(
+                compareBy(
+                    { it.value.value.capturedAt },
+                    { it.index }
+                )
+            )
+            .mapIndexed { index, frame ->
+                frame.value.key to index + 1
+            }
+            .toMap()
     }
 
     /**
@@ -2148,7 +2316,8 @@ internal class IdentityViewModel(
     ): String = when (modelType) {
         IdentityAnalyticsRequestFactory.ModelType.DOCUMENT ->
             IdentityAnalyticsRequestFactory.SCREEN_NAME_LIVE_CAPTURE
-        IdentityAnalyticsRequestFactory.ModelType.SELFIE ->
+        IdentityAnalyticsRequestFactory.ModelType.SELFIE,
+        IdentityAnalyticsRequestFactory.ModelType.FACE ->
             IdentityAnalyticsRequestFactory.SCREEN_NAME_SELFIE
     }
 
@@ -2263,9 +2432,11 @@ internal class IdentityViewModel(
         const val FRONT = "front"
         const val BACK = "back"
         const val BYTES_IN_KB = 1024
+        private const val NANOS_PER_MICRO = 1000L
         private const val DOCUMENT_FRONT_UPLOAD_STATE = "document_front_upload_state"
         private const val DOCUMENT_BACK_UPLOAD_STATE = "document_back_upload_state"
         private const val SELFIE_UPLOAD_STATE = "selfie_upload_state"
+        private const val SELFIE_TRAINING_CONSENT = "selfie_training_consent"
         private const val ANALYTICS_STATE = "analytics_upload_state"
         private const val COLLECTED_DATA = "collected_data"
         private const val MISSING_REQUIREMENTS = "missing_requirements"

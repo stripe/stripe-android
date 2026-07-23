@@ -36,6 +36,7 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
     implementation libs.material
+    implementation libs.mediapipeTasksVision
 
     debugImplementation libs.compose.uiTestManifest
 
@@ -58,6 +59,10 @@ dependencies {
 }
 
 android {
+    defaultConfig {
+        minSdkVersion 24
+    }
+
     sourceSets {
         main {
             assets {

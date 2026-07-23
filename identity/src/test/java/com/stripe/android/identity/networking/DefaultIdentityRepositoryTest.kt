@@ -1,6 +1,7 @@
 package com.stripe.android.identity.networking
 
 import android.content.Context
+import android.util.Base64
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
@@ -19,14 +20,19 @@ import com.stripe.android.identity.networking.models.ClearDataParam.Companion.cr
 import com.stripe.android.identity.networking.models.CollectedDataParam
 import com.stripe.android.identity.networking.models.CollectedDataParam.Companion.createCollectedDataParamEntry
 import com.stripe.android.identity.networking.models.DocumentUploadParam
+import com.stripe.android.identity.networking.models.FaceFrameDataParam
 import com.stripe.android.identity.networking.models.FaceUploadParam
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.enable3DFaceCapture
+import com.stripe.android.identity.networking.models.VerificationPage.Companion.has3DFaceCaptureExperiment
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.runBlocking
+import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +84,33 @@ class DefaultIdentityRepositoryTest {
                 Requirement.IDDOCUMENTBACK,
                 Requirement.FACE
             )
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage decodes 3D face capture experiment`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING.replace(
+                "\"experiment1\"",
+                "\"$IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT\""
+            )
+        ) {
+            assertThat(it.experiments).hasSize(1)
+            assertThat(it.has3DFaceCaptureExperiment()).isTrue()
+            assertThat(it.enable3DFaceCapture()).isTrue()
+        }
+    }
+
+    @Test
+    fun `retrieveVerificationPage enables 3D from experiment name only`() {
+        testFetchVerificationPage(
+            VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING.replace(
+                "\"experiment1\"",
+                "\"$IDPROD_3D_FACE_CAPTURE_MOBILE_EXPERIMENT\""
+            )
+        ) {
+            assertThat(it.has3DFaceCaptureExperiment()).isTrue()
+            assertThat(it.enable3DFaceCapture()).isTrue()
         }
     }
 
@@ -232,7 +265,24 @@ class DefaultIdentityRepositoryTest {
                 bestFocalLength = 3.456f,
                 bestIsVirtualCamera = true,
                 bestExposureIso = 100.123f,
-                trainingConsent = false
+                trainingConsent = false,
+                leftHighResImage = "left_high_res_image",
+                rightHighResImage = "right_high_res_image",
+                bestFrameData = FaceFrameDataParam(
+                    faceScore = 0.891f,
+                    faceScoreVariance = 0.154f,
+                    blurScore = null,
+                    blurScoreVariance = 1f,
+                    yaw = 12.345f,
+                    pitch = 1.234f,
+                    roll = 2.345f,
+                    bbox = listOf(1, 2, 3, 4),
+                    inputSize = listOf(640, 480),
+                    faceLandmarkResult = "landmark_result",
+                    capturedAt = 123456789L,
+                    captureOrder = 2,
+                    cameraInfo = "camera_info"
+                )
             )
         )
 
@@ -272,7 +322,69 @@ class DefaultIdentityRepositoryTest {
             assertThat(face["best_is_virtual_camera"]).isEqualTo("true")
             assertThat(face["best_exposure_iso"]).isEqualTo("100.12")
             assertThat(face["training_consent"]).isEqualTo("false")
+            assertThat(face["left_high_res_image"]).isEqualTo("left_high_res_image")
+            assertThat(face["right_high_res_image"]).isEqualTo("right_high_res_image")
+            assertThat(face).doesNotContainKey("left_full_frame")
+            assertThat(face).doesNotContainKey("right_full_frame")
+            val bestFrameData = face["best_frame_data"] as Map<*, *>
+            assertThat(bestFrameData["face_score"]).isEqualTo("0.89")
+            assertThat(bestFrameData["face_score_variance"]).isEqualTo("0.15")
+            assertThat(bestFrameData["blur_score_variance"]).isEqualTo("1.0")
+            assertThat(bestFrameData["yaw"]).isEqualTo("12.35")
+            assertThat(bestFrameData["bbox"]).isEqualTo(listOf("1", "2", "3", "4"))
+            assertThat(bestFrameData["input_size"]).isEqualTo(listOf("640", "480"))
+            assertThat(bestFrameData["face_landmark_result"]).isEqualTo("landmark_result")
+            assertThat(bestFrameData["captured_at"]).isEqualTo("123456789")
+            assertThat(bestFrameData["capture_order"]).isEqualTo("2")
+            assertThat(bestFrameData["camera_info"]).isEqualTo("camera_info")
         }
+    }
+
+    @Test
+    fun `face landmark result is compacted to fit server limit`() {
+        val encodedLandmarkResult = encodeJson(
+            JSONObject()
+                .put(
+                    "categories",
+                    JSONArray().put(
+                        JSONObject()
+                            .put("index", 1)
+                            .put("score", 0.123456)
+                            .put("category_name", "smile")
+                            .put("display_name", "Smile")
+                    )
+                )
+                .toString()
+        )
+
+        val compacted = FaceFrameDataParam.compactedFaceLandmarkResult(encodedLandmarkResult)
+        val decoded = JSONObject(decodeBase64(requireNotNull(compacted)))
+        val category = decoded.getJSONArray("categories").getJSONObject(0)
+
+        assertThat(category.getDouble("score")).isEqualTo(0.1235)
+        assertThat(category.getString("category_name")).isEqualTo("smile")
+        assertThat(category.has("index")).isFalse()
+        assertThat(category.has("display_name")).isFalse()
+    }
+
+    @Test
+    fun `face landmark result is omitted when compacted payload is too large`() {
+        val encodedLandmarkResult = encodeJson(
+            JSONObject()
+                .put(
+                    "categories",
+                    JSONArray().put(
+                        JSONObject()
+                            .put("score", 0.123456)
+                            .put("category_name", "x".repeat(6000))
+                    )
+                )
+                .toString()
+        )
+
+        assertThat(
+            FaceFrameDataParam.compactedFaceLandmarkResult(encodedLandmarkResult)
+        ).isNull()
     }
 
     @Test
@@ -604,6 +716,14 @@ class DefaultIdentityRepositoryTest {
 
             verificationPageBlock(verificationPage)
         }
+    }
+
+    private fun encodeJson(json: String): String {
+        return Base64.encodeToString(json.toByteArray(Charsets.UTF_8), Base64.NO_WRAP)
+    }
+
+    private fun decodeBase64(encoded: String): String {
+        return String(Base64.decode(encoded, Base64.DEFAULT), Charsets.UTF_8)
     }
 
     private fun testVerifyEndpoint(

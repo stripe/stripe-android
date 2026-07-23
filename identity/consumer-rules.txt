@@ -1,2 +1,9 @@
 # Consumer Proguard/R8 rules for Stripe ML core (default / LiteRT)
 -keep class org.tensorflow.lite.** { *; }
+
+# MediaPipe uses generated protobuf fields and Flogger's caller lookup at runtime. R8 optimization
+# can otherwise make FaceLandmarker initialization fail in minified apps.
+-keep class com.google.mediapipe.** { *; }
+-dontwarn com.google.mediapipe.**
+-keepclassmembers class * extends com.google.protobuf.GeneratedMessageLite { *; }
+-keep class com.google.common.flogger.** { *; }

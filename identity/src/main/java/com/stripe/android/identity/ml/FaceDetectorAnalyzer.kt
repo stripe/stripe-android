@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ml
 
+import android.util.Log
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCenter
@@ -74,7 +75,7 @@ internal class FaceDetectorAnalyzer(
 
         // FaceDetector outputs (left, top, right, bottom) with absolute value
         // convert them to (left, top, width, height) with fractional value
-        return FaceDetectorOutput(
+        val output = FaceDetectorOutput(
             boundingBox = BoundingBox(
                 left = boundingBoxes[0][0] / INPUT_WIDTH,
                 top = boundingBoxes[0][1] / INPUT_HEIGHT,
@@ -83,6 +84,15 @@ internal class FaceDetectorAnalyzer(
             ),
             resultScore = score[0].roundToMaxDecimals(2)
         )
+        Log.d(
+            TAG,
+            "FaceDetectorAnalyzer output " +
+                "score=${output.resultScore}, " +
+                "bbox=${output.boundingBox}, " +
+                "pose=${output.pose}, " +
+                "state=${state::class.simpleName}"
+        )
+        return output
     }
 
     internal class Factory(
