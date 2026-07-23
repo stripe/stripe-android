@@ -58,6 +58,7 @@ BROWSER_REDIRECT_TEST_CLASSES = {
     'com.stripe.android.lpm.TestFpx',
     'com.stripe.android.lpm.TestGrabPay',
     'com.stripe.android.lpm.TestIdeal',
+    'com.stripe.android.lpm.TestInstantDebits',
     'com.stripe.android.lpm.TestMobilePay',
     'com.stripe.android.lpm.TestP24',
     'com.stripe.android.lpm.TestPayPal',
@@ -66,6 +67,7 @@ BROWSER_REDIRECT_TEST_CLASSES = {
     'com.stripe.android.lpm.TestSunbit',
     'com.stripe.android.lpm.TestSwish',
     'com.stripe.android.lpm.TestTwint',
+    'com.stripe.android.lpm.TestUSBankAccount',
     'com.stripe.android.lpm.TestWero',
 }
 
