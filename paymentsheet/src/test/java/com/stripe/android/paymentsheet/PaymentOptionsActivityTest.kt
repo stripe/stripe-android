@@ -26,7 +26,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.common.taptoadd.FakeTapToAddHelper
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.LinkAccountUpdate
@@ -92,7 +91,6 @@ internal class PaymentOptionsActivityTest {
         .around(coroutineScopeCleanupRule)
         .around(composeTestRule)
         .around(networkRule)
-        .around(CheckoutInstancesTestRule())
         .around(RetryRule(3))
 
     @get:Rule

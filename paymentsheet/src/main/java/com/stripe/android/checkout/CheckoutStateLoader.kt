@@ -83,7 +83,6 @@ internal class CheckoutStateLoader @Inject constructor(
         )
 
         stateHolder.state = CheckoutControllerState(
-            key = response.id,
             configuration = configuration,
             checkoutSessionResponse = response,
             flagImages = flagImages,

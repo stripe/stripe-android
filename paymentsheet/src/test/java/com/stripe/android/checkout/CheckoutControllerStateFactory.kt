@@ -17,10 +17,7 @@ import com.stripe.android.testing.FakeErrorReporter
 
 @OptIn(CheckoutSessionPreview::class)
 internal object CheckoutControllerStateFactory {
-    const val DEFAULT_KEY = "test_key"
-
     fun create(
-        key: String = DEFAULT_KEY,
         configuration: CheckoutController.Configuration.State = CheckoutController.Configuration().build(),
         checkoutSessionResponse: CheckoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages: Map<String, Bitmap>? = null,
@@ -33,7 +30,6 @@ internal object CheckoutControllerStateFactory {
         previousNewSelections: Bundle = Bundle(),
     ): CheckoutControllerState {
         return CheckoutControllerState(
-            key = key,
             configuration = configuration,
             checkoutSessionResponse = checkoutSessionResponse,
             flagImages = flagImages,

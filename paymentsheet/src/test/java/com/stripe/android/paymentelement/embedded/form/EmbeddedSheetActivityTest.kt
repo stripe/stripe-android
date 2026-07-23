@@ -16,7 +16,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.pressBack
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -56,7 +55,6 @@ internal class EmbeddedSheetActivityTest {
         .outerRule(composeTestRule)
         .around(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
-        .around(CheckoutInstancesTestRule())
 
     @Test
     fun `when launched without args should finish with cancelled result`() {

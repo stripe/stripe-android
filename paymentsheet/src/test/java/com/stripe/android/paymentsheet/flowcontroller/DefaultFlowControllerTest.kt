@@ -15,7 +15,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.checkout.CheckoutInstancesTestRule
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.strings.resolvableString
@@ -137,7 +136,6 @@ internal class DefaultFlowControllerTest {
     @get:Rule
     val checkoutRuleChain: RuleChain = RuleChain
         .outerRule(networkRule)
-        .around(CheckoutInstancesTestRule())
 
     private val paymentOptionResultCallback = mock<PaymentOptionResultCallback>()
     private val paymentResultCallback = mock<PaymentSheetResultCallback>()
