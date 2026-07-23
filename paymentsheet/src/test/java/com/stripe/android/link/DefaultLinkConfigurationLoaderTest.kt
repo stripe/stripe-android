@@ -5,6 +5,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.link.exceptions.LinkUnavailableException
 import com.stripe.android.link.gate.FakeLinkGate
+import com.stripe.android.networking.RequestSurface
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
@@ -45,6 +46,7 @@ internal class DefaultLinkConfigurationLoaderTest {
             paymentElementLoader = paymentElementLoader,
             linkGateFactory = linkGateFactory,
             savedStateHandle = savedStateHandle,
+            requestSurface = RequestSurface.StandaloneLink,
         )
     }
 

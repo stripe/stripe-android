@@ -45,6 +45,9 @@ internal sealed class IntegrationMetadata : Parcelable {
     object CryptoOnramp : IntegrationMetadata()
 
     @Parcelize
+    object StandaloneLink : IntegrationMetadata()
+
+    @Parcelize
     data class CheckoutSession(
         val id: String,
         val instancesKey: String,
