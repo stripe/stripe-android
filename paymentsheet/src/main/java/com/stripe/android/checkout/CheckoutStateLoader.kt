@@ -88,7 +88,6 @@ internal class CheckoutStateLoader @Inject constructor(
             checkoutSessionResponse = response,
             flagImages = flagImages,
             collectedDetails = collectedDetails,
-            integrationLaunched = carryForward.integrationLaunched,
             paymentMethodMetadata = loaderState.paymentMethodMetadata,
             embeddedConfiguration = embeddedConfig,
             paymentSelection = selection,
@@ -107,7 +106,6 @@ internal class CheckoutStateLoader @Inject constructor(
         val previousSelection: PaymentSelection?,
         val temporarySelection: String?,
         val previousNewSelections: Bundle,
-        val integrationLaunched: Boolean,
     ) {
         companion object {
             fun initial() = CarryForward(
@@ -115,7 +113,6 @@ internal class CheckoutStateLoader @Inject constructor(
                 previousSelection = null,
                 temporarySelection = null,
                 previousNewSelections = Bundle(),
-                integrationLaunched = false,
             )
 
             fun from(state: CheckoutControllerState) = CarryForward(
@@ -123,7 +120,6 @@ internal class CheckoutStateLoader @Inject constructor(
                 previousSelection = state.paymentSelection,
                 temporarySelection = state.temporarySelection,
                 previousNewSelections = state.previousNewSelections,
-                integrationLaunched = state.integrationLaunched,
             )
         }
     }

@@ -198,7 +198,6 @@ internal class CheckoutControllerStateHolderTest {
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
-        integrationLaunched = false,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
