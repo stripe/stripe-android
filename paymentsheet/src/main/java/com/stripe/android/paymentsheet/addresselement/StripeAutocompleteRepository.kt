@@ -10,6 +10,7 @@ internal interface StripeAutocompleteRepository {
 
     suspend fun fetchPlaceDetails(
         placeId: String,
-        sessionToken: String
+        sessionToken: String,
+        locale: String?
     ): Result<PlaceDetailsResult>
 }

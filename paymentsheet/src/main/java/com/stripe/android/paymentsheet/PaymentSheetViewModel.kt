@@ -43,6 +43,7 @@ import com.stripe.android.paymentelement.confirmation.intent.DeferredIntentConfi
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.paymentsheet.addresselement.StripeAutocompleteRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.cvcrecollection.CvcRecollectionHandler
@@ -85,6 +86,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+@Suppress("LargeClass")
 @Singleton
 internal class PaymentSheetViewModel @Inject internal constructor(
     internal val args: PaymentSheetContract.Args,
@@ -107,6 +109,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     @ViewModelScope customViewModelScope: CoroutineScope,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper,
     placesClient: PlacesClientProxy?,
+    stripeAutocompleteRepository: StripeAutocompleteRepository,
 ) : BaseSheetViewModel(
     config = args.config,
     eventReporter = eventReporter,
@@ -120,6 +123,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     customerStateHolderFactory = customerStateHolderFactory,
     customViewModelScope = customViewModelScope,
     placesClient = placesClient,
+    stripeAutocompleteRepository = stripeAutocompleteRepository,
 ) {
     private val primaryButtonUiStateMapper = PrimaryButtonUiStateMapper(
         config = config,

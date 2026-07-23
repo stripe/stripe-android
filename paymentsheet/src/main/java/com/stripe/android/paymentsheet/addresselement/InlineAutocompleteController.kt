@@ -1,15 +1,16 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.appcompat.app.AppCompatDelegate
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -64,16 +65,21 @@ internal class InlineAutocompleteController(
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
         selectionJob = coroutineScope.launch {
-            placesClient.fetchPlace(predictionId).fold(
-                onSuccess = ::handleFetchPlaceSuccess,
-                onFailure = { handleFailure() }
-            )
+            val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+            val result = placesClient.fetchPlace(predictionId, locale)
+            try {
+                ensureActive()
+                result.fold(
+                    onSuccess = { handleFetchPlaceSuccess(it) },
+                    onFailure = { handleFailure() }
+                )
+            } finally {
+                placesClient.resetSession()
+            }
         }
     }
 
-    private fun handleFetchPlaceSuccess(response: FetchPlaceResponse) {
-        val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-        val address = response.place.transformGoogleToStripeAddress(locale)
+    private fun handleFetchPlaceSuccess(address: Address) {
         lastPredictionLine1 = address.line1
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         eventListenerProvider()?.invoke(
@@ -116,6 +122,7 @@ internal class InlineAutocompleteController(
             country = country,
             limit = AutocompleteViewModel.MAX_DISPLAYED_RESULTS,
         )
+        currentCoroutineContext().ensureActive()
         result.fold(
             onSuccess = { handleFindPredictionsSuccess(query, it) },
             onFailure = { handleFailure() }

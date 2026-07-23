@@ -32,6 +32,7 @@ import javax.inject.Singleton
         ElementsSessionClientParamsModule::class,
         LinkHoldbackExposureModule::class,
         PaymentSheetViewModelModule::class,
+        PaymentSheetAutocompleteModule::class,
         TapToAddConnectionStarterModule::class,
         PaymentElementConfirmationModule::class,
         PaymentMethodMessagePromotionsHelperModule::class,

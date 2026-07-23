@@ -86,8 +86,8 @@ class AddressLauncher internal constructor(
         configuration: Configuration = Configuration()
     ) {
         val args = AddressElementActivityContract.Args(
-            publishableKey,
-            configuration,
+            publishableKey = publishableKey,
+            config = configuration,
         )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(

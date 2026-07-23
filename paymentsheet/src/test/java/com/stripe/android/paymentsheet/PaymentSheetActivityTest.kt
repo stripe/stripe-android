@@ -69,6 +69,7 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_SHEET_CALLBACK_TEST_IDENTIFIER
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
+import com.stripe.android.paymentsheet.addresselement.FakeStripeAutocompleteRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.cvcrecollection.FakeCvcRecollectionHandler
 import com.stripe.android.paymentsheet.cvcrecollection.RecordingCvcRecollectionLauncherFactory
@@ -1259,6 +1260,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
@@ -1278,7 +1280,6 @@ internal class PaymentSheetActivityTest {
             accountStatus = AccountStatus.SignedOut,
             email = "email@email.com"
         )
-
         TestViewModelFactory.create(
             linkConfigurationCoordinator = coordinator,
         ) { linkHandler, savedStateHandle ->
@@ -1335,9 +1336,7 @@ internal class PaymentSheetActivityTest {
                         args: Args,
                         processing: StateFlow<Boolean>,
                         coroutineScope: CoroutineScope,
-                    ): CvcRecollectionInteractor {
-                        return FakeCvcRecollectionInteractor()
-                    }
+                    ): CvcRecollectionInteractor = FakeCvcRecollectionInteractor()
                 },
                 tapToAddHelperFactory = FakeTapToAddHelper.Factory.noOp(),
                 isNfcScanningAvailable = FakeIsNfcScanningAvailable(result = false),
@@ -1345,6 +1344,7 @@ internal class PaymentSheetActivityTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
+                stripeAutocompleteRepository = FakeStripeAutocompleteRepository(),
             )
         }.also { viewModelStoreRule.track(it) }
     }
