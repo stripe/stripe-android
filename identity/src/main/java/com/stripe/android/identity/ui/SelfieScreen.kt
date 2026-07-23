@@ -301,23 +301,28 @@ private fun SelfieCaptureScreen(
                 fontSize = dimensionResourceSp(id = R.dimen.stripe_scan_title_text_size),
                 fontWeight = FontWeight.Bold
             )
-            if (showPreCameraInstruction) {
-                Text(
-                    text = feedback?.let { stringResource(id = it) } ?: "",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .padding(
-                            top = 20.dp,
-                            bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
-                            start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
-                            end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
-                        )
-                        .semantics {
-                            testTag = SELFIE_SCAN_MESSAGE_TAG
-                        },
-                    maxLines = 3
-                )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(100.dp)
+            ) {
+                if (showPreCameraInstruction) {
+                    Text(
+                        text = feedback?.let { stringResource(id = it) } ?: "",
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(
+                                top = 20.dp,
+                                bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
+                                start = dimensionResource(id = R.dimen.stripe_page_horizontal_margin),
+                                end = dimensionResource(id = R.dimen.stripe_page_horizontal_margin)
+                            )
+                            .semantics {
+                                testTag = SELFIE_SCAN_MESSAGE_TAG
+                            },
+                        maxLines = 3
+                    )
+                }
             }
 
             val isCheckingImages = faceDetectorTransitioner != null

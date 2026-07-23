@@ -28,7 +28,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.dimensionResource
@@ -257,6 +259,10 @@ private fun DocumentCaptureScreen(
             }
         }
     )
+    var instructionAreaHeightPx by remember { mutableStateOf(0) }
+    val instructionAreaMinHeight = with(LocalDensity.current) {
+        instructionAreaHeightPx.toDp().coerceAtLeast(100.dp)
+    }
 
     Column(
         modifier = Modifier
@@ -310,19 +316,29 @@ private fun DocumentCaptureScreen(
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold
             )
-            Text(
-                text = feedbackText,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 100.dp)
-                    .padding(
-                        top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
-                        bottom = 48.dp
-                    )
-                    .semantics {
-                        testTag = SCAN_MESSAGE_TAG
+                    .heightIn(min = instructionAreaMinHeight)
+                    .onSizeChanged { size ->
+                        if (size.height > instructionAreaHeightPx) {
+                            instructionAreaHeightPx = size.height
+                        }
                     }
-            )
+            ) {
+                Text(
+                    text = feedbackText,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(
+                            top = dimensionResource(id = R.dimen.stripe_item_vertical_margin),
+                            bottom = 48.dp
+                        )
+                        .semantics {
+                            testTag = SCAN_MESSAGE_TAG
+                        }
+                )
+            }
 
             CameraViewFinder(
                 shouldShowFinished =
