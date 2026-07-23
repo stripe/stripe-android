@@ -631,4 +631,15 @@ class CustomerSheetEventReporterTest {
             }
         )
     }
+
+    @Test
+    fun `onNfcScanButtonShown() should fire analytics request with expected event value`() {
+        eventReporter.onNfcScanButtonShown()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "cs_nfc_scan_button_shown"
+            }
+        )
+    }
 }

@@ -17,6 +17,7 @@ internal sealed class CustomerSheetViewAction {
     object OnCardNumberInputCompleted : CustomerSheetViewAction()
     class OnAnalyticsEvent(val event: AnalyticsEvent) : CustomerSheetViewAction()
     class OnCardScanEvent(val event: CardScanEvent) : CustomerSheetViewAction()
+    object OnNfcScanButtonShown : CustomerSheetViewAction()
     object OnAddCardPressed : CustomerSheetViewAction()
     object OnPrimaryButtonPressed : CustomerSheetViewAction()
     object OnCancelClose : CustomerSheetViewAction()
