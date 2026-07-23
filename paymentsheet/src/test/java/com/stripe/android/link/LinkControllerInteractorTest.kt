@@ -569,13 +569,15 @@ class LinkControllerInteractorTest {
             collectName = true,
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
 
     @Test
-    fun `onPresentPaymentMethods() without collectName uses configured billingDetailsCollectionConfiguration`() = runTest {
+    fun `onPresentPaymentMethods() without collectName uses configured billingDetailsCollectionConfiguration`() =
+        runTest {
         val interactor = createInteractor()
         configure(interactor)
 
@@ -586,7 +588,8 @@ class LinkControllerInteractorTest {
             paymentMethodTypes = listOf(LinkController.PaymentMethodType.Generic)
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
     }
@@ -608,7 +611,8 @@ class LinkControllerInteractorTest {
             paymentMethodTypes = listOf(LinkController.PaymentMethodType.Card),
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
@@ -625,7 +629,8 @@ class LinkControllerInteractorTest {
             paymentMethodTypes = null,
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
     }
