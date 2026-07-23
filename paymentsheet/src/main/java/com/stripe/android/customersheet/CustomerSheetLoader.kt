@@ -1,6 +1,9 @@
 package com.stripe.android.customersheet
 
+import android.app.Application
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
@@ -39,6 +42,7 @@ internal interface CustomerSheetLoader {
 }
 
 internal class DefaultCustomerSheetLoader(
+    private val application: Application,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
     private val lpmRepository: LpmRepository,
@@ -51,6 +55,7 @@ internal class DefaultCustomerSheetLoader(
 
     @Inject
     constructor(
+        application: Application,
         googlePayRepositoryFactory: GooglePayRepositoryFactory,
         isFinancialConnectionsAvailable: IsFinancialConnectionsSdkAvailable,
         lpmRepository: LpmRepository,
@@ -58,6 +63,7 @@ internal class DefaultCustomerSheetLoader(
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
     ) : this(
+        application = application,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
@@ -165,6 +171,7 @@ internal class DefaultCustomerSheetLoader(
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
 
+        val paymentConfig = PaymentConfiguration.getInstance(application)
         return PaymentMethodMetadata.createForCustomerSheet(
             elementsSession = elementsSession,
             configuration = configuration,
@@ -177,6 +184,10 @@ internal class DefaultCustomerSheetLoader(
                 } else {
                     IntegrationMetadata.CustomerSheet.AttachmentStyle.CreateAttach
                 }
+            ),
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = paymentConfig.publishableKey,
+                stripeAccountId = paymentConfig.stripeAccountId,
             ),
         )
     }

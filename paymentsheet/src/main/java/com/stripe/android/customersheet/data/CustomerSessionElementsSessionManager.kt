@@ -1,8 +1,11 @@
 package com.stripe.android.customersheet.data
 
+import android.app.Application
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -30,6 +33,7 @@ internal data class CustomerSessionElementsSession(
 
 @Singleton
 internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
+    private val application: Application,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val customerSessionProvider: CustomerSheet.CustomerSessionProvider,
@@ -74,6 +78,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     isLinkAvailable = false,
                 ) as? SavedSelection.PaymentMethod
 
+                val paymentConfig = PaymentConfiguration.getInstance(application)
                 elementsSessionRepository.get(
                     initializationMode = PaymentElementLoader.InitializationMode.DeferredIntent(
                         intentConfiguration = PaymentSheet.IntentConfiguration(
@@ -90,6 +95,10 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
                     countryOverride = null,
+                    requestOptions = ApiRequest.Options(
+                        apiKey = paymentConfig.publishableKey,
+                        stripeAccount = paymentConfig.stripeAccountId,
+                    ),
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

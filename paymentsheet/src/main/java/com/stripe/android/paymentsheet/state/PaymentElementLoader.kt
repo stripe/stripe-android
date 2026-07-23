@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.state
 import android.os.Parcelable
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
@@ -59,7 +58,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
@@ -272,6 +270,7 @@ internal interface PaymentElementLoader {
 @Singleton
 @SuppressWarnings("LargeClass")
 internal class DefaultPaymentElementLoader @Inject constructor(
+    private val application: android.app.Application,
     private val prefsRepositoryFactory: PrefsRepository.Factory,
     private val googlePayRepositoryFactory: GooglePayRepositoryFactory,
     private val lpmRepository: LpmRepository,
@@ -286,7 +285,6 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     private val userFacingLogger: UserFacingLogger,
     private val integrityRequestManager: IntegrityRequestManager,
     private val tapToAddConnectionStarter: TapToAddConnectionStarter,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
     private val analyticsMetadataFactory: AnalyticsMetadataFactory,
     private val customerRepository: CustomerRepository,
@@ -320,16 +318,26 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
+        val resolvedApiConfig = ApiConfigurationResolver.resolve(
+            apiConfiguration = configuration.apiConfiguration,
+            context = application,
+        )
+
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
-            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            isLiveMode = resolvedApiConfig.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
         tapToAddConnectionStarter.start(configuration)
+
+        val requestOptions = com.stripe.android.core.networking.ApiRequest.Options(
+            apiKey = resolvedApiConfig.publishableKey,
+            stripeAccount = resolvedApiConfig.stripeAccountId,
+        )
 
         val isGooglePaySupportedOnDevice = async {
             durationProvider.measureDuration(
@@ -346,13 +354,14 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
         }
 
-        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
+        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration, resolvedApiConfig)
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
             initializationMode = initializationMode,
             configuration = configuration,
             savedPaymentMethodSelection = savedPaymentMethodSelection,
+            requestOptions = requestOptions,
         )
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
@@ -419,6 +428,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = resolvedApiConfig,
                 )
             }
         }
@@ -491,6 +501,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
         configuration: CommonConfiguration,
+        apiConfiguration: com.stripe.android.ApiConfiguration.State,
     ): PrefetchedPaymentMethods? {
         val customer = configuration.customer ?: return null
         val accessType = customer.accessType
@@ -506,7 +517,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
-                    silentlyFail = paymentConfiguration.get().isLiveMode(),
+                    silentlyFail = apiConfiguration.isLiveMode(),
                 )
             }
         }
@@ -516,6 +527,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+        requestOptions: com.stripe.android.core.networking.ApiRequest.Options,
     ): ElementsSession {
         return durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadSessionLoad
@@ -527,6 +539,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     configuration = configuration,
                     savedPaymentMethodSelection = savedPaymentMethodSelection,
+                    requestOptions = requestOptions,
                 )
             }
         }
@@ -567,6 +580,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         customerMetadata: CustomerMetadata?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        apiConfiguration: com.stripe.android.ApiConfiguration.State,
     ): PaymentMethodMetadata {
         val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
             stripeIntent = elementsSession.stripeIntent,
@@ -624,6 +638,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             analyticsMetadata = analyticsMetadata,
             isTapToAddAvailable = isTapToAddAvailable,
             paymentMethodLayout = paymentMethodLayout,
+            apiConfiguration = apiConfiguration,
         )
 
         return paymentMethodMetadata

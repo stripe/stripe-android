@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.state
 
+import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
@@ -60,12 +61,15 @@ import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
+@RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
 internal class DefaultCustomerSheetLoaderTest {
     private val dispatcher = StandardTestDispatcher()
@@ -444,6 +448,7 @@ internal class DefaultCustomerSheetLoaderTest {
 
         initDataSource.complete(
             CustomerAdapterDataSource(
+                application = ApplicationProvider.getApplicationContext(),
                 elementsSessionRepository = FakeElementsSessionRepository(
                     stripeIntent = STRIPE_INTENT,
                     error = null,
@@ -845,6 +850,7 @@ internal class DefaultCustomerSheetLoaderTest {
         workContext: CoroutineContext = UnconfinedTestDispatcher()
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
+            application = ApplicationProvider.getApplicationContext(),
             googlePayRepositoryFactory = object : GooglePayRepositoryFactory {
                 override fun invoke(
                     environment: GooglePayEnvironment,
