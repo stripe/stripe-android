@@ -9,7 +9,7 @@ import com.stripe.android.paymentsheet.repositories.TotalSummaryResponseFactory
 import org.junit.Test
 
 @OptIn(CheckoutSessionPreview::class)
-class AsCheckoutSessionTest {
+class CheckoutSessionMappersTest {
 
     @Test
     fun `maps id`() {
