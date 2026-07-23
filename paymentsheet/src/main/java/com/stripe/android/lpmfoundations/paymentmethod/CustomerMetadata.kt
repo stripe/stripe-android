@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.customersheet.CustomerSheet
@@ -49,6 +50,7 @@ internal sealed class CustomerMetadata : Parcelable {
 
     @Parcelize
     data class CheckoutSession(
+        val apiConfiguration: ApiConfiguration.State,
         val sessionId: String,
         val customerId: String,
         override val removePaymentMethod: PaymentMethodRemovePermission,

@@ -267,6 +267,7 @@ internal object TestFactory {
     )
 
     val LINK_CONFIGURATION = LinkConfiguration(
+        apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         stripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
         merchantName = MERCHANT_NAME,
         sellerBusinessName = null,

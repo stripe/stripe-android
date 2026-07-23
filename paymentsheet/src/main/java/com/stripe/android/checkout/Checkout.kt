@@ -71,6 +71,7 @@ class Checkout private constructor(
             return component.checkoutSessionRepository.init(
                 sessionId = checkoutSessionClientSecret.substringBefore("_secret_"),
                 adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+                apiConfiguration = component.apiConfiguration,
             ).map { response ->
                 val flagImages = component.flagImageResolver.resolve(response, cached = null)
                 val key = UUID.randomUUID().toString()
@@ -388,7 +389,7 @@ class Checkout private constructor(
     suspend fun applyPromotionCode(
         promotionCode: String,
     ): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
+        component.checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim(), component.apiConfiguration)
     }
 
     /**
@@ -401,14 +402,14 @@ class Checkout private constructor(
         lineItemId: String,
         quantity: Int,
     ): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
+        component.checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity, component.apiConfiguration)
     }
 
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
     suspend fun removePromotionCode(): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.applyPromotionCode(sessionId, "")
+        component.checkoutSessionRepository.applyPromotionCode(sessionId, "", component.apiConfiguration)
     }
 
     /**
@@ -429,6 +430,7 @@ class Checkout private constructor(
                 component.checkoutSessionRepository.init(
                     sessionId = sessionId,
                     adaptivePricingAllowed = configuration.adaptivePricingAllowed,
+                    apiConfiguration = component.apiConfiguration,
                 )
             },
             onFailure = { Result.failure(it) },
@@ -443,7 +445,7 @@ class Checkout private constructor(
     suspend fun selectShippingOption(
         id: String,
     ): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.selectShippingRate(sessionId, id)
+        component.checkoutSessionRepository.selectShippingRate(sessionId, id, component.apiConfiguration)
     }
 
     /**
@@ -480,7 +482,7 @@ class Checkout private constructor(
         type: String,
         value: String,
     ): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
+        component.checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim(), component.apiConfiguration)
     }
 
     /**
@@ -515,7 +517,7 @@ class Checkout private constructor(
             additionalStateMutations = { mutation(built) },
         ) { sessionId ->
             if (shouldSendTaxRegion) {
-                component.checkoutSessionRepository.updateTaxRegion(sessionId, built)
+                component.checkoutSessionRepository.updateTaxRegion(sessionId, built, component.apiConfiguration)
             } else {
                 Result.success(checkoutSessionResponse)
             }
@@ -523,7 +525,7 @@ class Checkout private constructor(
     }
 
     internal suspend fun updateCurrency(currency: String): Result<Unit> = withInternalState { sessionId ->
-        component.checkoutSessionRepository.updateCurrency(sessionId, currency)
+        component.checkoutSessionRepository.updateCurrency(sessionId, currency, component.apiConfiguration)
     }
 
     internal fun markIntegrationLaunched() {

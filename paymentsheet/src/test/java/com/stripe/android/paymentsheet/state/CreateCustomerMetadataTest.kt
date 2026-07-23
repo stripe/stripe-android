@@ -210,6 +210,10 @@ internal class CreateCustomerMetadataTest {
                 initializationMode = initializationMode,
                 configuration = configuration,
                 elementsSession = elementsSession,
+                apiConfiguration = com.stripe.android.ApiConfiguration.State(
+                    publishableKey = "pk_test_123",
+                    stripeAccountId = null,
+                ),
             )
         }
 

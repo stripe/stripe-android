@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.PaymentConfiguration
@@ -301,11 +302,13 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         metadata: PaymentElementLoader.Metadata,
     ): Result<PaymentElementLoader.State> = workContext.runCatching(::reportFailedLoad) {
         val configuration = integrationConfiguration.commonConfiguration
+        val resolvedApiConfiguration = resolveApiConfiguration(integrationConfiguration)
+
         // Validate configuration before loading
         initializationMode.validate()
         configuration.validate(
             initializationMode = initializationMode,
-            isLiveMode = paymentConfiguration.get().isLiveMode(),
+            isLiveMode = resolvedApiConfiguration.isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
         )
 
@@ -327,13 +330,17 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             }
         }
 
-        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(configuration)
+        val prefetchedPaymentMethods = prefetchPaymentMethodsForLegacyEphemeralKey(
+            configuration = configuration,
+            apiConfiguration = resolvedApiConfiguration,
+        )
 
         val savedPaymentMethodSelection = retrieveSavedPaymentMethodSelection(configuration)
         val elementsSession = loadSession(
             initializationMode = initializationMode,
             configuration = configuration,
             savedPaymentMethodSelection = savedPaymentMethodSelection,
+            apiConfiguration = resolvedApiConfiguration,
         )
 
         // Preemptively prepare Integrity asynchronously if needed, as warm up can take
@@ -369,6 +376,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             configuration = configuration,
             elementsSession = elementsSession,
+            apiConfiguration = resolvedApiConfiguration,
         )
 
         val linkState = async {
@@ -379,6 +387,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     customerMetadata = customerMetadata,
                     clientAttributionMetadata = clientAttributionMetadata,
+                    apiConfiguration = resolvedApiConfiguration,
                 )
             }
         }
@@ -391,6 +400,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
             durationProvider.measureDuration(DurationProvider.Key.PaymentSheetLoadComputePaymentMethodTypes) {
                 createPaymentMethodMetadata(
+                    apiConfiguration = resolvedApiConfiguration,
                     integrationConfiguration = integrationConfiguration,
                     elementsSession = elementsSession,
                     configuration = configuration,
@@ -472,6 +482,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
 
     private fun CoroutineScope.prefetchPaymentMethodsForLegacyEphemeralKey(
         configuration: CommonConfiguration,
+        apiConfiguration: ApiConfiguration.State,
     ): PrefetchedPaymentMethods? {
         val customer = configuration.customer ?: return null
         val accessType = customer.accessType
@@ -487,7 +498,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                         PaymentMethod.Type.SepaDebit,
                         PaymentMethod.Type.USBankAccount,
                     ), // These are the only payment method types we support as saved payment methods.
-                    silentlyFail = paymentConfiguration.get().isLiveMode(),
+                    silentlyFail = apiConfiguration.isLiveMode(),
                 )
             }
         }
@@ -497,6 +508,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         savedPaymentMethodSelection: SavedSelection.PaymentMethod?,
+        apiConfiguration: ApiConfiguration.State,
     ): ElementsSession {
         return durationProvider.measureDuration(
             DurationProvider.Key.PaymentSheetLoadSessionLoad
@@ -508,9 +520,25 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                     initializationMode = initializationMode,
                     configuration = configuration,
                     savedPaymentMethodSelection = savedPaymentMethodSelection,
+                    apiConfiguration = apiConfiguration,
                 )
             }
         }
+    }
+
+    private fun resolveApiConfiguration(
+        integrationConfiguration: PaymentElementLoader.Configuration,
+    ): ApiConfiguration.State {
+        val explicit = when (integrationConfiguration) {
+            is PaymentElementLoader.Configuration.Embedded ->
+                integrationConfiguration.configuration.apiConfiguration
+            is PaymentElementLoader.Configuration.PaymentSheet -> null
+            is PaymentElementLoader.Configuration.CryptoOnramp -> null
+        }
+        return explicit ?: ApiConfiguration.State(
+            publishableKey = paymentConfiguration.get().publishableKey,
+            stripeAccountId = paymentConfiguration.get().stripeAccountId,
+        )
     }
 
     private fun ElementsSession.shouldWarmUpIntegrity(): Boolean = when {
@@ -539,6 +567,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
     }
 
     private fun createPaymentMethodMetadata(
+        apiConfiguration: ApiConfiguration.State,
         integrationConfiguration: PaymentElementLoader.Configuration,
         elementsSession: ElementsSession,
         configuration: CommonConfiguration,
@@ -592,6 +621,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         )
 
         val paymentMethodMetadata = PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = apiConfiguration,
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,

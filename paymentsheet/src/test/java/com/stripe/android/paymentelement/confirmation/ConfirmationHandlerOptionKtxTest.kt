@@ -786,6 +786,7 @@ class ConfirmationHandlerOptionKtxTest {
 
     private companion object {
         val LINK_CONFIGURATION = LinkConfiguration(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
             sellerBusinessName = null,

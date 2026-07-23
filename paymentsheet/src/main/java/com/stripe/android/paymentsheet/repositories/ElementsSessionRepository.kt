@@ -1,8 +1,8 @@
 package com.stripe.android.paymentsheet.repositories
 
 import android.app.Application
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultFraudDetectionDataRepository
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.Stripe
 import com.stripe.android.core.exception.StripeException
@@ -28,7 +28,6 @@ import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface ElementsSessionRepository {
@@ -40,6 +39,7 @@ internal interface ElementsSessionRepository {
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         linkDisallowedFundingSourceCreation: Set<String> = emptySet(),
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ElementsSession>
 }
 
@@ -47,7 +47,6 @@ internal class RealElementsSessionRepository @Inject constructor(
     application: Application,
     private val stripeNetworkClient: StripeNetworkClient,
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @IOContext private val workContext: CoroutineContext,
     private val clientParams: ElementsSessionClientParams,
 ) : ElementsSessionRepository {
@@ -62,14 +61,6 @@ internal class RealElementsSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    // The PaymentConfiguration can change after initialization, so this needs to get a new
-    // request options each time requested.
-    private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = lazyPaymentConfig.get().publishableKey,
-            stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-        )
-
     override suspend fun get(
         initializationMode: PaymentElementLoader.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
@@ -78,6 +69,7 @@ internal class RealElementsSessionRepository @Inject constructor(
         savedPaymentMethodSelectionId: String?,
         countryOverride: String?,
         linkDisallowedFundingSourceCreation: Set<String>,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ElementsSession> {
         fraudDetectionDataRepository.refresh()
 
@@ -91,12 +83,15 @@ internal class RealElementsSessionRepository @Inject constructor(
             linkDisallowedFundingSourceCreation = linkDisallowedFundingSourceCreation,
         )
 
-        val options = requestOptions
+        val options = ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
+        )
         val elementsSession = retrieveElementsSession(params, options)
 
         return elementsSession.getResultOrElse { elementsSessionFailure ->
             if (shouldFallback(elementsSession)) {
-                fallback(params, elementsSessionFailure)
+                fallback(params, elementsSessionFailure, apiConfiguration)
             } else {
                 elementsSession
             }
@@ -148,24 +143,29 @@ internal class RealElementsSessionRepository @Inject constructor(
     private suspend fun fallback(
         params: ElementsSessionParams,
         elementsSessionFailure: Throwable,
+        apiConfiguration: ApiConfiguration.State,
     ): Result<ElementsSession> = withContext(workContext) {
+        val options = ApiRequest.Options(
+            apiKey = apiConfiguration.publishableKey,
+            stripeAccount = apiConfiguration.stripeAccountId,
+        )
         val stripeIntent = when (params) {
             is ElementsSessionParams.PaymentIntentType -> {
                 stripeRepository.retrievePaymentIntent(
                     clientSecret = params.clientSecret,
-                    options = requestOptions,
+                    options = options,
                     expandFields = listOf("payment_method")
                 )
             }
             is ElementsSessionParams.SetupIntentType -> {
                 stripeRepository.retrieveSetupIntent(
                     clientSecret = params.clientSecret,
-                    options = requestOptions,
+                    options = options,
                     expandFields = listOf("payment_method")
                 )
             }
             is ElementsSessionParams.DeferredIntentType -> {
-                Result.success(params.toStripeIntent(requestOptions))
+                Result.success(params.toStripeIntent(options))
             }
         }
         stripeIntent.map { intent ->

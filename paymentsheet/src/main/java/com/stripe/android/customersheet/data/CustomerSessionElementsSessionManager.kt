@@ -1,5 +1,7 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.validation.CustomerSessionClientSecretValidator
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
@@ -36,6 +38,7 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
     private val errorReporter: ErrorReporter,
     private val timeProvider: () -> Long,
     @IOContext private val workContext: CoroutineContext,
+    private val paymentConfigurationProvider: javax.inject.Provider<PaymentConfiguration>,
 ) : CustomerSessionElementsSessionManager {
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
@@ -90,6 +93,10 @@ internal class DefaultCustomerSessionElementsSessionManager @Inject constructor(
                     customPaymentMethods = listOf(),
                     externalPaymentMethods = listOf(),
                     countryOverride = null,
+                    apiConfiguration = ApiConfiguration.State(
+                        publishableKey = paymentConfigurationProvider.get().publishableKey,
+                        stripeAccountId = paymentConfigurationProvider.get().stripeAccountId,
+                    ),
                 ).onSuccess {
                     reportSuccessfulElementsSessionLoad()
                 }.onFailure {

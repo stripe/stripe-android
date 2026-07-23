@@ -80,6 +80,10 @@ internal object LinkTestUtils {
         linkBrand: LinkBrand = LinkBrand.Link,
     ): LinkConfiguration {
         return LinkConfiguration(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             stripeIntent = mock {
                 on { linkFundingSources } doReturn listOf(
                     PaymentMethod.Type.Card.code

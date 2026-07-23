@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.common.analytics.experiment.DefaultLogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment
@@ -8,8 +9,6 @@ import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -21,7 +20,6 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
-import javax.inject.Named
 import javax.inject.Qualifier
 import kotlin.coroutines.CoroutineContext
 
@@ -39,6 +37,10 @@ import kotlin.coroutines.CoroutineContext
  */
 @Qualifier
 internal annotation class LinkDisabledApiRepository
+
+internal fun interface LinkDisabledApiRepositoryFactory {
+    fun create(apiConfiguration: ApiConfiguration.State): LinkRepository
+}
 
 @Module
 internal class LinkHoldbackExposureModule {
@@ -58,37 +60,35 @@ internal class LinkHoldbackExposureModule {
     }
 
     @Provides
-    @LinkDisabledApiRepository
-    fun providesLinkRepository(
+    fun providesLinkDisabledApiRepositoryFactory(
         application: Application,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
         requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
         logger: Logger,
         locale: Locale?,
         errorReporter: ErrorReporter,
-    ): LinkRepository {
-        val consumersApiService = ConsumersApiServiceImpl(
-            appInfo = Stripe.appInfo,
-            sdkVersion = StripeSdkVersion.VERSION,
-            apiVersion = Stripe.API_VERSION,
-            stripeNetworkClient = DefaultStripeNetworkClient(
-                logger = logger,
-                workContext = workContext
+    ): LinkDisabledApiRepositoryFactory {
+        return LinkDisabledApiRepositoryFactory { apiConfiguration ->
+            val consumersApiService = ConsumersApiServiceImpl(
+                appInfo = Stripe.appInfo,
+                sdkVersion = StripeSdkVersion.VERSION,
+                apiVersion = Stripe.API_VERSION,
+                stripeNetworkClient = DefaultStripeNetworkClient(
+                    logger = logger,
+                    workContext = workContext
+                )
             )
-        )
-        return LinkApiRepository(
-            application = application,
-            requestSurface = requestSurface,
-            publishableKeyProvider = publishableKeyProvider,
-            stripeAccountIdProvider = stripeAccountIdProvider,
-            stripeRepository = stripeRepository,
-            consumersApiService = consumersApiService,
-            workContext = workContext,
-            locale = locale,
-            errorReporter = errorReporter,
-        )
+            LinkApiRepository(
+                application = application,
+                requestSurface = requestSurface,
+                apiConfiguration = apiConfiguration,
+                stripeRepository = stripeRepository,
+                consumersApiService = consumersApiService,
+                workContext = workContext,
+                locale = locale,
+                errorReporter = errorReporter,
+            )
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.model.CommonConfiguration
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.exception.StripeException
@@ -28,10 +29,12 @@ internal class CreateCustomerMetadata @Inject constructor(
         initializationMode: PaymentElementLoader.InitializationMode,
         configuration: CommonConfiguration,
         elementsSession: ElementsSession,
+        apiConfiguration: ApiConfiguration.State,
     ): CustomerMetadata? {
         if (initializationMode is PaymentElementLoader.InitializationMode.CheckoutSession) {
             val customer = initializationMode.checkoutSessionResponse.customer ?: return null
             return CustomerMetadata.CheckoutSession(
+                apiConfiguration = apiConfiguration,
                 sessionId = initializationMode.checkoutSessionResponse.id,
                 customerId = customer.id,
                 removePaymentMethod = if (customer.canDetachPaymentMethod) {

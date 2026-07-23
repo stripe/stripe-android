@@ -775,6 +775,7 @@ internal class LinkInlineSignupConfirmationDefinitionTest {
             extraParams = null,
             saveOption = saveOption,
             linkConfiguration = LinkConfiguration(
+                apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
                 stripeIntent = PaymentIntentFactory.create(),
                 merchantName = "Merchant Inc.",
                 sellerBusinessName = null,

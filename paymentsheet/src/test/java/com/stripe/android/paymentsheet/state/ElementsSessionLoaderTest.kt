@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.common.model.asCommonConfiguration
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -20,6 +21,7 @@ internal class ElementsSessionLoaderTest {
             ),
             configuration = DEFAULT_CONFIG,
             savedPaymentMethodSelection = null,
+            apiConfiguration = TEST_API_CONFIGURATION,
         )
 
         assertThat(result.stripeIntent)
@@ -36,6 +38,7 @@ internal class ElementsSessionLoaderTest {
             ),
             configuration = DEFAULT_CONFIG,
             savedPaymentMethodSelection = savedSelection,
+            apiConfiguration = TEST_API_CONFIGURATION,
         )
 
         assertThat(elementsSessionRepository.lastParams?.savedPaymentMethodSelectionId)
@@ -68,5 +71,9 @@ internal class ElementsSessionLoaderTest {
         private val DEFAULT_CONFIG = PaymentSheet.Configuration(
             merchantDisplayName = "Merchant",
         ).asCommonConfiguration()
+        private val TEST_API_CONFIGURATION = ApiConfiguration.State(
+            publishableKey = "pk_test_123",
+            stripeAccountId = null,
+        )
     }
 }

@@ -130,6 +130,7 @@ internal class DefaultCustomerStateHolderTest {
                 card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(brand = CardBrand.MasterCard),
             ),
             customerMetadata = CustomerMetadata.CheckoutSession(
+                apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
                 sessionId = "cs_123",
                 customerId = "cus_123",
                 removePaymentMethod = PaymentMethodRemovePermission.Full,

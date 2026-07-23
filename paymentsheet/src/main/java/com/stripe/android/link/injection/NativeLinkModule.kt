@@ -3,8 +3,10 @@ package com.stripe.android.link.injection
 import android.content.Context
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.BuildConfig
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
@@ -221,6 +223,12 @@ internal interface NativeLinkModule {
         fun provideLinkConfirmationHandlerFactory(
             factory: DefaultLinkConfirmationHandler.Factory
         ): LinkConfirmationHandler.Factory = factory
+
+        @Provides
+        @NativeLinkScope
+        fun provideApiConfiguration(
+            configuration: LinkConfiguration
+        ): ApiConfiguration.State = configuration.apiConfiguration
 
         @Provides
         @NativeLinkScope

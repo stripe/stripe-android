@@ -206,6 +206,7 @@ class SavedPaymentMethodMutatorTest {
     @Test
     fun `removePaymentMethod with CheckoutSession metadata passes CheckoutSession to repository`() {
         val checkoutSessionMetadata = CustomerMetadata.CheckoutSession(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             sessionId = "cs_test_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

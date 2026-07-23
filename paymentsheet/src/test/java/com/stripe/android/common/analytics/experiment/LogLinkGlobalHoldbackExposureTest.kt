@@ -68,7 +68,7 @@ class LogLinkGlobalHoldbackExposureTest {
         linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
         logLinkHoldbackExperiment = DefaultLogLinkHoldbackExperiment(
-            linkDisabledApiRepository = linkRepository,
+            linkDisabledApiRepositoryFactory = { linkRepository },
             eventReporter = eventReporter,
             mobileSessionId = "test_mobile_session_id",
             logger = logger,

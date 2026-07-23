@@ -20,6 +20,7 @@ internal class CustomerMetadataTest {
     @Test
     fun `CheckoutSession should support card expiry and billing details but not card brand updates`() {
         val metadata = CustomerMetadata.CheckoutSession(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             sessionId = "cs_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

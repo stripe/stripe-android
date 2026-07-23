@@ -2,6 +2,7 @@ package com.stripe.android.checkout.injection
 
 import android.app.Application
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.checkout.FlagImageResolver
 import com.stripe.android.common.di.DisplayDensity
@@ -31,6 +32,7 @@ import javax.inject.Provider
 @Component(
     modules = [
         CheckoutModule::class,
+        CheckoutApiConfigurationModule::class,
         ElementsSessionClientParamsModule::class,
         StripeRepositoryModule::class,
         CoreCommonModule::class,
@@ -43,6 +45,7 @@ internal interface CheckoutComponent {
     val analyticsRequestExecutor: AnalyticsRequestExecutor
     val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
     val flagImageResolver: FlagImageResolver
+    val apiConfiguration: ApiConfiguration.State
 
     @Component.Factory
     interface Factory {
@@ -79,4 +82,15 @@ internal object CheckoutModule {
     @Provides
     @DisplayDensity
     fun provideDisplayDensity(context: Context): Float = context.resources.displayMetrics.density
+}
+
+@Module
+internal object CheckoutApiConfigurationModule {
+    @Provides
+    fun provideApiConfiguration(
+        paymentConfiguration: Provider<PaymentConfiguration>
+    ): ApiConfiguration.State = ApiConfiguration.State(
+        publishableKey = paymentConfiguration.get().publishableKey,
+        stripeAccountId = paymentConfiguration.get().stripeAccountId,
+    )
 }

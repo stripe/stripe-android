@@ -117,7 +117,7 @@ private suspend fun checkout(context: Context): CreateIntentResult {
         is Result.Success -> {
             PaymentConfiguration.init(
                 context = context,
-                publishableKey = apiResult.value.publishableKey,
+                publishableKey = "pk_123",
             )
             CreateIntentResult.Success(apiResult.value.paymentIntent)
         }

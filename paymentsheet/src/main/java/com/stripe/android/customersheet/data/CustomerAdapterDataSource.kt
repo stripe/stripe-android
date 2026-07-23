@@ -1,5 +1,7 @@
 package com.stripe.android.customersheet.data
 
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.exception.StripeException
@@ -30,6 +32,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
     private val customerAdapter: CustomerAdapter,
     private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
+    private val paymentConfigurationProvider: javax.inject.Provider<PaymentConfiguration>,
 ) : CustomerSheetInitializationDataSource,
     CustomerSheetSavedSelectionDataSource,
     CustomerSheetPaymentMethodDataSource,
@@ -132,6 +135,10 @@ internal class CustomerAdapterDataSource @Inject constructor(
             customPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = paymentConfigurationProvider.get().publishableKey,
+                stripeAccountId = paymentConfigurationProvider.get().stripeAccountId,
+            ),
         ).onSuccess {
             errorReporter.report(
                 errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,

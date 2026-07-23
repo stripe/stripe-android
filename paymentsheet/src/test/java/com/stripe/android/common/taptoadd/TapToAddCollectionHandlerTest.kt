@@ -220,6 +220,7 @@ class TapToAddCollectionHandlerTest {
             hasCustomerConfiguration = true,
         ).copy(
             customerMetadata = CustomerMetadata.CheckoutSession(
+                apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
                 sessionId = "cs_123",
                 customerId = "cus_123",
                 removePaymentMethod = PaymentMethodRemovePermission.Full,

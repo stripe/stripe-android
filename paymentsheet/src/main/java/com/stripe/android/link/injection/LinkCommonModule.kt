@@ -7,8 +7,6 @@ import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
-import com.stripe.android.link.repositories.LinkApiRepository
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Binds
@@ -19,10 +17,6 @@ import kotlin.coroutines.CoroutineContext
 
 @Module
 internal interface LinkCommonModule {
-    @Binds
-    @Singleton
-    fun bindLinkRepository(linkApiRepository: LinkApiRepository): LinkRepository
-
     @Binds
     @Singleton
     fun bindLinkEventsReporter(linkEventsReporter: DefaultLinkEventsReporter): LinkEventsReporter

@@ -171,6 +171,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         )
 
         val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             sessionId = "cs_test_123",
             customerId = "cus_test_123",
             removePaymentMethod = PaymentMethodRemovePermission.None,

@@ -37,8 +37,6 @@ class CheckoutSessionRepositoryTest {
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
         ),
-        publishableKeyProvider = { "pk_test_123" },
-        stripeAccountIdProvider = { null },
     )
 
     @Test
@@ -55,6 +53,7 @@ class CheckoutSessionRepositoryTest {
         val result = repository.init(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             adaptivePricingAllowed = true,
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -72,6 +71,7 @@ class CheckoutSessionRepositoryTest {
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             currencyCode = "eur",
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -87,6 +87,7 @@ class CheckoutSessionRepositoryTest {
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             currencyCode = "invalid",
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
         )
 
         assertThat(result.isFailure).isTrue()

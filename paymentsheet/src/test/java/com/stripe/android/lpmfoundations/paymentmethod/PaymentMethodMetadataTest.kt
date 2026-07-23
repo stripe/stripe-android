@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.common.model.asCommonConfiguration
@@ -1130,6 +1131,10 @@ internal class PaymentMethodMetadataTest {
         val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
             sharedDataSpecs = sharedDataSpecs,
@@ -1150,6 +1155,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         val expectedMetadata = PaymentMethodMetadata(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = true,
@@ -1267,6 +1276,10 @@ internal class PaymentMethodMetadataTest {
         val externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
             sharedDataSpecs = sharedDataSpecs,
@@ -1317,6 +1330,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         val metadata = PaymentMethodMetadata.createForCustomerSheet(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = listOf(SharedDataSpec("card")),
@@ -1326,6 +1343,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         val expectedMetadata = PaymentMethodMetadata(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             allowsDelayedPaymentMethods = true,
@@ -2022,6 +2043,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = configuration.asCommonConfiguration(),
             sharedDataSpecs = emptyList(),
@@ -2100,6 +2125,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             sharedDataSpecs = emptyList(),
@@ -2125,6 +2154,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             sharedDataSpecs = emptyList(),
@@ -2154,6 +2187,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         val metadata = PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             sharedDataSpecs = emptyList(),
@@ -2239,6 +2276,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         return PaymentMethodMetadata.createForPaymentElement(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER.asCommonConfiguration(),
             sharedDataSpecs = emptyList(),
@@ -2273,6 +2314,10 @@ internal class PaymentMethodMetadataTest {
         )
 
         return PaymentMethodMetadata.createForCustomerSheet(
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = "pk_test_123",
+                stripeAccountId = null,
+            ),
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = emptyList(),
@@ -2284,6 +2329,7 @@ internal class PaymentMethodMetadataTest {
 
     private fun createLinkConfiguration(): LinkConfiguration {
         return LinkConfiguration(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customerInfo = LinkConfiguration.CustomerInfo(
                 email = "john@email.com",

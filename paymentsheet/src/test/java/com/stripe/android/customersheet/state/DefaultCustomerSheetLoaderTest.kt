@@ -452,6 +452,7 @@ internal class DefaultCustomerSheetLoaderTest {
                 workContext = coroutineContext,
                 customerAdapter = FakeCustomerAdapter(),
                 errorReporter = FakeErrorReporter(),
+                paymentConfigurationProvider = { com.stripe.android.PaymentConfiguration("pk_test_123") },
             )
         )
 
@@ -864,7 +865,8 @@ internal class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext
+            workContext = workContext,
+            paymentConfiguration = { com.stripe.android.PaymentConfiguration("pk_test_123") },
         )
     }
 

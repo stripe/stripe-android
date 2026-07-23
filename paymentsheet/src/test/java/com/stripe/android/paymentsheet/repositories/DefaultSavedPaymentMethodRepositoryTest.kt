@@ -328,8 +328,6 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
@@ -351,6 +349,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
     companion object {
         private val CHECKOUT_SESSION_METADATA = CustomerMetadata.CheckoutSession(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             sessionId = "cs_123",
             customerId = "cus_123",
             removePaymentMethod = PaymentMethodRemovePermission.Full,

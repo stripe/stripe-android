@@ -1,6 +1,8 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.DefaultCardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.coroutines.awaitWithTimeout
 import com.stripe.android.common.validation.isSupportedWithBillingConfig
@@ -47,6 +49,7 @@ internal class DefaultCustomerSheetLoader(
     private val eventReporter: CustomerSheetEventReporter,
     private val errorReporter: ErrorReporter,
     private val workContext: CoroutineContext,
+    private val paymentConfiguration: javax.inject.Provider<PaymentConfiguration>,
 ) : CustomerSheetLoader {
 
     @Inject
@@ -57,6 +60,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter: CustomerSheetEventReporter,
         errorReporter: ErrorReporter,
         @IOContext workContext: CoroutineContext,
+        paymentConfiguration: javax.inject.Provider<PaymentConfiguration>,
     ) : this(
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
@@ -66,6 +70,7 @@ internal class DefaultCustomerSheetLoader(
         eventReporter = eventReporter,
         errorReporter = errorReporter,
         workContext = workContext,
+        paymentConfiguration = paymentConfiguration,
     )
 
     override suspend fun load(
@@ -165,7 +170,13 @@ internal class DefaultCustomerSheetLoader(
             isPaymentMethodSetAsDefaultEnabled = isPaymentMethodSyncDefaultEnabled,
         )
 
+        val apiConfig = ApiConfiguration.State(
+            publishableKey = paymentConfiguration.get().publishableKey,
+            stripeAccountId = paymentConfiguration.get().stripeAccountId,
+        )
+
         return PaymentMethodMetadata.createForCustomerSheet(
+            apiConfiguration = apiConfig,
             elementsSession = elementsSession,
             configuration = configuration,
             sharedDataSpecs = sharedDataSpecs,

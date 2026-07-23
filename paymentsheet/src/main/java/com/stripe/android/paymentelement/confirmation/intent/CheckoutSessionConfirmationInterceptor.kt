@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.intent
 
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.networking.ApiRequest
@@ -128,6 +129,10 @@ internal class CheckoutSessionConfirmationInterceptor @AssistedInject constructo
         return checkoutSessionRepository.confirm(
             id = integrationMetadata.id,
             params = params,
+            apiConfiguration = ApiConfiguration.State(
+                publishableKey = requestOptions.apiKey,
+                stripeAccountId = requestOptions.stripeAccount,
+            ),
         ).fold(
             onSuccess = ::handleConfirmResponse,
             onFailure = { error ->

@@ -904,6 +904,7 @@ class DefaultAnalyticsMetadataFactoryTest {
     ): LinkState {
         return LinkState(
             configuration = LinkConfiguration(
+                apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 merchantName = "Test Merchant",
                 sellerBusinessName = null,

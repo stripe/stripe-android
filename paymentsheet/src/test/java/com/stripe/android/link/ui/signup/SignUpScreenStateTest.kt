@@ -84,6 +84,7 @@ class SignUpScreenStateTest {
         customerInfo: LinkConfiguration.CustomerInfo,
     ): LinkConfiguration {
         return LinkConfiguration(
+            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
             stripeIntent = PaymentIntentFactory.create(),
             merchantName = "Merchant, Inc.",
             sellerBusinessName = null,

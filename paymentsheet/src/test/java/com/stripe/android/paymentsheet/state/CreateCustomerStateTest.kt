@@ -39,6 +39,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
+                apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_123",
                 removePaymentMethod = PaymentMethodRemovePermission.None,
@@ -67,6 +68,7 @@ internal class CreateCustomerStateTest {
         val result = createCustomerState(
             initializationMode = initializationMode,
             customerMetadata = CustomerMetadata.CheckoutSession(
+                apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
                 sessionId = checkoutSessionResponse.id,
                 customerId = "cus_checkout_empty",
                 removePaymentMethod = PaymentMethodRemovePermission.None,

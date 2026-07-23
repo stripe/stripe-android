@@ -47,6 +47,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             checkoutSessionRepository.detachPaymentMethod(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
+                apiConfiguration = customerMetadata.apiConfiguration,
             ).map {
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }
@@ -78,6 +79,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
                 params = params,
+                apiConfiguration = customerMetadata.apiConfiguration,
             ).mapCatching { response ->
                 response.customer?.paymentMethods?.firstOrNull { it.id == paymentMethodId }
                     ?: error("Checkout session update response did not include updated payment method.")
