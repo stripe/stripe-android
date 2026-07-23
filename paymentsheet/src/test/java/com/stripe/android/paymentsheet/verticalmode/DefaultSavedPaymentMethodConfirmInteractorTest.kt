@@ -5,7 +5,12 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.link.TestFactory
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.PaymentMethodFactory
@@ -42,6 +47,26 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
     }
 
     @Test
+    fun `state uses link brand from account when logged in`() = runTest {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            linkBrand = LinkBrand.Onelink,
+        )
+        val linkAccount = LinkAccount(
+            consumerSession = TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Link),
+        )
+        val interactor = getDefaultSavedPaymentMethodConfirmInteractor(
+            linkAccount = MutableStateFlow(LinkAccountUpdate.Value(account = linkAccount)),
+            paymentMethodMetadata = paymentMethodMetadata,
+            coroutineScope = backgroundScope,
+        )
+
+        interactor.state.test {
+            assertThat(awaitItem().linkBrand).isEqualTo(LinkBrand.Link)
+            ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun `when link form helper state is updated, selection is updated`() = runTest {
         val linkFormHelper = FakeSavedPaymentMethodLinkFormHelper(
             initialState = SavedPaymentMethodLinkFormHelper.State.Unused
@@ -73,6 +98,8 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
     private fun getDefaultSavedPaymentMethodConfirmInteractor(
         linkFormHelper: SavedPaymentMethodLinkFormHelper = FakeSavedPaymentMethodLinkFormHelper(),
         processing: StateFlow<Boolean> = MutableStateFlow(false),
+        linkAccount: StateFlow<LinkAccountUpdate.Value> = MutableStateFlow(LinkAccountUpdate.Value(account = null)),
+        paymentMethodMetadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         updateSelection: (PaymentSelection.Saved) -> Unit = {},
         coroutineScope: CoroutineScope,
     ): DefaultSavedPaymentMethodConfirmInteractor {
@@ -80,10 +107,11 @@ class DefaultSavedPaymentMethodConfirmInteractorTest {
         return DefaultSavedPaymentMethodConfirmInteractor(
             initialSelection = PaymentSelection.Saved(paymentMethod),
             displayName = "Card".resolvableString,
-            linkBrand = LinkBrand.Link,
+            linkAccount = linkAccount,
             savedPaymentMethodLinkFormHelper = linkFormHelper,
             processing = processing,
             updateSelection = updateSelection,
+            paymentMethodMetadata = paymentMethodMetadata,
             coroutineScope = coroutineScope,
         )
     }

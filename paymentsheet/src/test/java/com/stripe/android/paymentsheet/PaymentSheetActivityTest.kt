@@ -47,6 +47,7 @@ import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentLauncher
 import com.stripe.android.link.TestFactory
+import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
@@ -1345,6 +1346,7 @@ internal class PaymentSheetActivityTest {
                 customerStateHolderFactory = DefaultCustomerStateHolder.Factory,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
                 placesClient = null,
+                linkAccountHolder = LinkAccountHolder(savedStateHandle),
             )
         }.also { viewModelStoreRule.track(it) }
     }
