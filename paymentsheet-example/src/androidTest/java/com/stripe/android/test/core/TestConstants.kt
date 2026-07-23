@@ -7,4 +7,4 @@ import kotlin.time.Duration.Companion.seconds
 const val INDIVIDUAL_TEST_TIMEOUT_SECONDS = 90L
 const val HOOKS_PAGE_LOAD_TIMEOUT = 60L
 
-val DEFAULT_UI_TIMEOUT: Duration = if (BuildConfig.IS_RUNNING_IN_CI) 25.seconds else 15.seconds
+val DEFAULT_UI_TIMEOUT: Duration = 15.seconds
