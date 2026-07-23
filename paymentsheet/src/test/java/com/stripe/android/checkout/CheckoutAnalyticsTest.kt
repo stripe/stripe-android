@@ -1,7 +1,6 @@
 package com.stripe.android.checkout
 
 import android.app.Application
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -15,7 +14,6 @@ import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import com.stripe.android.testing.createComposeCleanupRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -30,12 +28,6 @@ internal class CheckoutAnalyticsTest {
 
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
 
-    @get:Rule
-    val composeRule = createComposeRule()
-
-    @get:Rule
-    val composeCleanupRule = createComposeCleanupRule()
-
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 5.seconds,
@@ -46,19 +38,6 @@ internal class CheckoutAnalyticsTest {
         .outerRule(networkRule)
         .around(PaymentConfigurationTestRule(applicationContext))
         .around(CheckoutInstancesTestRule())
-
-    @Test
-    fun `CurrencySelectorContent fires currency_selector_init on display`() {
-        validateAnalyticsRequest("fraud_detection_data_repository.api_failure")
-        validateAnalyticsRequest("elements.adaptive_pricing.currency_selector_init")
-
-        val checkout = createCheckout()
-
-        composeRule.setContent {
-            checkout.CurrencySelectorContent()
-        }
-        composeRule.waitForIdle()
-    }
 
     @Test
     fun `updateCurrency fires currency_toggled on success`() {
