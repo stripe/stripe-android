@@ -8,13 +8,9 @@ import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.testing.PaymentConfigurationTestRule
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.After
-import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -51,69 +47,6 @@ class CheckoutInstancesTest {
         val checkout2 = createCheckout(key = "key2")
 
         assertThat(checkout1).isNotSameInstanceAs(checkout2)
-    }
-
-    @Test
-    fun `ensureNoMutationInFlight does not throw for unknown key`() {
-        CheckoutInstances.ensureNoMutationInFlight("unknown-key")
-    }
-
-    @Test
-    fun `ensureNoMutationInFlight throws when mutation is in flight`() {
-        val checkout = createCheckout(key = "key1")
-        val requestArrived = CountDownLatch(1)
-        val holdResponse = CountDownLatch(1)
-
-        networkRule.checkoutUpdate { response ->
-            requestArrived.countDown()
-            holdResponse.await(10, TimeUnit.SECONDS)
-            response.setBody("{}")
-        }
-
-        runBlocking {
-            val job = launch(Dispatchers.IO) {
-                checkout.removePromotionCode()
-            }
-
-            assertThat(requestArrived.await(5, TimeUnit.SECONDS)).isTrue()
-
-            val error = assertThrows(IllegalStateException::class.java) {
-                CheckoutInstances.ensureNoMutationInFlight("key1")
-            }
-            assertThat(error).hasMessageThat()
-                .isEqualTo("Cannot launch while a checkout session mutation is in flight.")
-
-            holdResponse.countDown()
-            job.join()
-        }
-    }
-
-    @Test
-    fun `markIntegrationLaunched blocks mutations`() = runTest {
-        val checkout = createCheckout(key = "key1")
-
-        CheckoutInstances.markIntegrationLaunched("key1")
-
-        val result = checkout.applyPromotionCode("code")
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
-    }
-
-    @Test
-    fun `markIntegrationDismissed unblocks mutations`() = runTest {
-        val checkout = createCheckout(key = "key1")
-
-        CheckoutInstances.markIntegrationLaunched("key1")
-        CheckoutInstances.markIntegrationDismissed("key1")
-
-        networkRule.checkoutUpdate { response ->
-            response.setResponseCode(400)
-            response.setBody("""{"error": {"message": "error"}}""")
-        }
-
-        val result = checkout.applyPromotionCode("code")
-        assertThat(result.isFailure).isTrue()
-        assertThat(result.exceptionOrNull()).isNotInstanceOf(IllegalStateException::class.java)
     }
 
     @Test

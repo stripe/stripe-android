@@ -13,12 +13,8 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.checkout.CheckoutInstancesTestRule
-import com.stripe.android.checkout.CheckoutStateFactory
-import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.common.model.PaymentMethodRemovePermission
-import com.stripe.android.lpmfoundations.paymentmethod.IntegrationMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -26,8 +22,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.testBodyFromFile
-import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
@@ -44,7 +38,6 @@ import com.stripe.paymentelementnetwork.setupPaymentMethodDetachResponse
 import com.stripe.paymentelementnetwork.setupPaymentMethodUpdateResponse
 import com.stripe.paymentelementtestpages.EditPage
 import com.stripe.paymentelementtestpages.ManagePage
-import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -53,7 +46,6 @@ import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.CountDownLatch
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
-@OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
 internal class EmbeddedSheetActivityTest {
     private val applicationContext = ApplicationProvider.getApplicationContext<Application>()
@@ -254,39 +246,6 @@ internal class EmbeddedSheetActivityTest {
             val updatedCbcCard = completedResultPaymentMethods().single()
             assertThat(updatedCbcCard.card?.displayBrand).isEqualTo("visa")
         }
-    }
-
-    @Test
-    fun `onDestroy clears checkout integration launched flag`() {
-        val checkout = CheckoutStateFactory.createCheckout(applicationContext)
-        CheckoutInstances.markIntegrationLaunched(CheckoutStateFactory.DEFAULT_KEY)
-
-        launch(
-            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = listOf()),
-                hasCustomerConfiguration = true,
-                removePaymentMethod = PaymentMethodRemovePermission.Full,
-                saveConsent = PaymentMethodSaveConsentBehavior.Legacy,
-                canRemoveLastPaymentMethod = true,
-                canUpdateCardExpiryAndBillingDetails = false,
-                integrationMetadata = IntegrationMetadata.CheckoutSession(
-                    id = "cs_test",
-                    instancesKey = CheckoutStateFactory.DEFAULT_KEY,
-                ),
-            ),
-        ) {
-            Espresso.pressBack()
-        }
-
-        // Enqueue a response so the mutation attempt doesn't fail due to missing network stub.
-        networkRule.checkoutUpdate { response ->
-            response.testBodyFromFile("checkout-session-apply-discount.json")
-        }
-
-        // If markIntegrationDismissed was not called, this would fail with
-        // "Cannot mutate checkout session while a payment flow is presented."
-        val result = runBlocking { checkout.applyPromotionCode("code") }
-        assertThat(result.isSuccess).isTrue()
     }
 
     private fun launch(
