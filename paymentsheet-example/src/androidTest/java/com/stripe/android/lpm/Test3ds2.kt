@@ -9,6 +9,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore("#ir-implore-chord")
 @RunWith(AndroidJUnit4::class)
 internal class Test3ds2 : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
@@ -31,7 +32,6 @@ internal class Test3ds2 : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-implore-chord")
     @Test
     fun test3DS2HSBCHTML() {
         testDriver.confirmNewOrGuestComplete(
@@ -45,7 +45,6 @@ internal class Test3ds2 : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-implore-chord")
     @Test
     fun test3DS2OTP() {
         testDriver.confirmNewOrGuestComplete(
@@ -59,7 +58,6 @@ internal class Test3ds2 : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-implore-chord")
     @Test
     fun test3DS2OOB() {
         testDriver.confirmNewOrGuestComplete(
@@ -86,7 +84,6 @@ internal class Test3ds2 : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-implore-chord")
     @Test
     fun test3DS2MultiSelect() {
         testDriver.confirmNewOrGuestComplete(

@@ -14,6 +14,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore("#ir-implore-chord")
 @RunWith(AndroidJUnit4::class)
 internal class TestPromptPay : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
@@ -28,7 +29,6 @@ internal class TestPromptPay : BasePlaygroundTest() {
         ).joinToString(",")
     }
 
-    @Ignore("#ir-implore-chord")
     @Test
     fun testPromptPay() {
         testDriver.confirmNewOrGuestComplete(

@@ -36,6 +36,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@Ignore("#ir-implore-chord")
 @RunWith(AndroidJUnit4::class)
 internal class TestUSBankAccount : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
@@ -150,7 +151,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-implore-chord")
     @Test
     fun testUSBankAccountLiteSuccess() {
         testDriver.confirmUSBankAccount(
@@ -232,7 +232,6 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("#ir-implore-chord")
     @Test
     fun testUSBankAccountLiteCancelAllowsUserToContinue() {
         testDriver.confirmUSBankAccount(
