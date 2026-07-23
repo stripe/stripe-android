@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.injection
 
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.paymentsheet.addresselement.DefaultStripeAutocompleteRepository
@@ -23,11 +22,9 @@ internal class PaymentSheetAutocompleteModule {
         stripeNetworkClient: StripeNetworkClient,
         apiRequestFactory: ApiRequest.Factory,
         @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
     ): StripeAutocompleteRepository = DefaultStripeAutocompleteRepository(
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = apiRequestFactory,
         publishableKeyProvider = publishableKeyProvider,
-        stripeAccountIdProvider = stripeAccountIdProvider,
     )
 }

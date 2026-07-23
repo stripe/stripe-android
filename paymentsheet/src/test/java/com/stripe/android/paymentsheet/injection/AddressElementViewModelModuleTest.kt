@@ -16,7 +16,6 @@ class AddressElementViewModelModuleTest {
         val placesClient = module.provideInlinePlacesClient(
             args = AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
-                stripeAccountId = null,
                 config = AddressLauncher.Configuration(
                     billingAddress = null,
                     useStripeHostedAutocomplete = true,
@@ -30,16 +29,12 @@ class AddressElementViewModelModuleTest {
     }
 
     @Test
-    fun `provideGooglePlacesClient returns null without google api key even when hosted autocomplete is enabled`() {
+    fun `provideGooglePlacesClient returns null without google api key`() {
         val placesClient = module.provideGooglePlacesClient(
             context = mock<Context>(),
             args = AddressElementActivityContract.Args(
                 publishableKey = "pk_123",
-                stripeAccountId = null,
-                config = AddressLauncher.Configuration(
-                    billingAddress = null,
-                    useStripeHostedAutocomplete = true,
-                ),
+                config = AddressLauncher.Configuration(billingAddress = null),
             ),
         )
 

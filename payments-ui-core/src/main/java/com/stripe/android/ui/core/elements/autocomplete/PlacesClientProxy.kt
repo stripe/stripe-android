@@ -18,7 +18,6 @@ import com.stripe.android.model.Address
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
@@ -37,12 +36,11 @@ interface PlacesClientProxy {
     ): Result<FindAutocompletePredictionsResponse>
 
     suspend fun fetchPlace(
-        placeId: String
-    ): Result<FetchPlaceResponse>
+        placeId: String,
+        locale: Locale,
+    ): Result<Address>
 
     fun resetSession()
-
-    fun transformToAddress(locale: Locale): Address
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -100,12 +98,8 @@ internal class DefaultPlacesClientProxy(
     @Volatile
     private var token = AutocompleteSessionToken.newInstance()
 
-    @Volatile
-    private var lastFetchedResponse: FetchPlaceResponse? = null
-
     override fun resetSession() {
         token = AutocompleteSessionToken.newInstance()
-        lastFetchedResponse = null
     }
 
     override suspend fun findAutocompletePredictions(
@@ -147,8 +141,9 @@ internal class DefaultPlacesClientProxy(
     }
 
     override suspend fun fetchPlace(
-        placeId: String
-    ): Result<FetchPlaceResponse> {
+        placeId: String,
+        locale: Locale,
+    ): Result<Address> {
         return try {
             val response = client.fetchPlace(
                 FetchPlaceRequest.newInstance(
@@ -159,19 +154,16 @@ internal class DefaultPlacesClientProxy(
                 )
             ).await()
             errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FETCH_PLACE_SUCCESS)
-            val fetchPlaceResponse = FetchPlaceResponse(
-                Place(
-                    response.place.addressComponents?.asList()?.map {
-                        AddressComponent(
-                            shortName = it.shortName,
-                            longName = it.name,
-                            types = it.types
-                        )
-                    }
-                )
+            val place = Place(
+                response.place.addressComponents?.asList()?.map {
+                    AddressComponent(
+                        shortName = it.shortName,
+                        longName = it.name,
+                        types = it.types
+                    )
+                }
             )
-            lastFetchedResponse = fetchPlaceResponse
-            Result.success(fetchPlaceResponse)
+            Result.success(place.transformGoogleToStripeAddress(locale))
         } catch (e: Exception) {
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
             Result.failure(
@@ -179,16 +171,10 @@ internal class DefaultPlacesClientProxy(
             )
         }
     }
-
-    override fun transformToAddress(locale: Locale): Address {
-        return lastFetchedResponse?.place?.transformGoogleToStripeAddress(locale) ?: Address()
-    }
 }
 
 internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
     override fun resetSession() = Unit
-
-    override fun transformToAddress(locale: Locale): Address = Address()
 
     override suspend fun findAutocompletePredictions(
         query: String?,
@@ -205,7 +191,7 @@ internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : 
         return Result.failure(exception)
     }
 
-    override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
+    override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> {
         val exception = IllegalStateException(
             "Missing Google Places dependency, please add it to your apps build.gradle"
         )

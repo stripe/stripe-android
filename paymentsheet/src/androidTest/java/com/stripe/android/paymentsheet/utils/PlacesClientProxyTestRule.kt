@@ -2,9 +2,7 @@ package com.stripe.android.paymentsheet.utils
 
 import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import java.util.Locale
 import kotlinx.coroutines.channels.Channel
 import org.junit.rules.TestWatcher
@@ -13,7 +11,7 @@ import org.junit.runner.Description
 class PlacesClientProxyTestRule : TestWatcher() {
     private val findAutocompletePredictionsResponseChannel =
         Channel<Result<FindAutocompletePredictionsResponse>>(capacity = 1)
-    private val fetchPlaceResponseChannel = Channel<Result<FetchPlaceResponse>>(capacity = 1)
+    private val fetchPlaceResponseChannel = Channel<Result<Address>>(capacity = 1)
 
     override fun starting(description: Description?) {
         super.starting(description)
@@ -35,22 +33,16 @@ class PlacesClientProxyTestRule : TestWatcher() {
     }
 
     fun enqueueFetchPlaceResponse(
-        response: Result<FetchPlaceResponse>
+        response: Result<Address>
     ) {
         fetchPlaceResponseChannel.trySend(response)
     }
 
     private class FakePlacesClientProxy(
         private val findAutocompletePredictionsResponseChannel: Channel<Result<FindAutocompletePredictionsResponse>>,
-        private val fetchPlaceResponseChannel: Channel<Result<FetchPlaceResponse>>,
+        private val fetchPlaceResponseChannel: Channel<Result<Address>>,
     ) : PlacesClientProxy {
-        private var lastFetchedResponse: FetchPlaceResponse? = null
-
         override fun resetSession() = Unit
-
-        override fun transformToAddress(locale: Locale): Address {
-            return lastFetchedResponse?.place?.transformGoogleToStripeAddress(locale) ?: Address()
-        }
 
         override suspend fun findAutocompletePredictions(
             query: String?,
@@ -60,10 +52,8 @@ class PlacesClientProxyTestRule : TestWatcher() {
             return findAutocompletePredictionsResponseChannel.receive()
         }
 
-        override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
-            return fetchPlaceResponseChannel.receive().also { result ->
-                result.onSuccess { lastFetchedResponse = it }
-            }
+        override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> {
+            return fetchPlaceResponseChannel.receive()
         }
     }
 }

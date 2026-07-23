@@ -85,34 +85,8 @@ class AddressLauncher internal constructor(
         publishableKey: String,
         configuration: Configuration = Configuration()
     ) {
-        launchAddressElement(
-            publishableKey = publishableKey,
-            stripeAccountId = null,
-            configuration = configuration,
-        )
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    fun present(
-        publishableKey: String,
-        stripeAccountId: String?,
-        configuration: Configuration,
-    ) {
-        launchAddressElement(
-            publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
-            configuration = configuration,
-        )
-    }
-
-    private fun launchAddressElement(
-        publishableKey: String,
-        stripeAccountId: String?,
-        configuration: Configuration,
-    ) {
         val args = AddressElementActivityContract.Args(
             publishableKey = publishableKey,
-            stripeAccountId = stripeAccountId,
             config = configuration,
         )
 

@@ -4,11 +4,9 @@ import android.text.SpannableString
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.isInstanceOf
-import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor.InlinePredictionsState
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -187,28 +185,19 @@ class InlineAutocompleteControllerTest {
     @Test
     fun `onPredictionSelected fetches place and emits OnValues event`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(
-                Place(
-                    listOf(
-                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                        AddressComponent("SF", "San Francisco", listOf(Place.Type.LOCALITY.value)),
-                        AddressComponent(
-                            "CA",
-                            "California",
-                            listOf(Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value)
-                        ),
-                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                        AddressComponent("94105", "94105", listOf(Place.Type.POSTAL_CODE.value)),
-                    )
-                )
+            Address(
+                line1 = "123 Main Street",
+                city = "San Francisco",
+                state = "CA",
+                country = "US",
+                postalCode = "94105",
             )
         )
 
         delegate.onPredictionSelected("place_1")
         advanceTimeBy(100)
 
-        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem())
+        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId)
             .isEqualTo("place_1")
         fakePlacesClient.resetSessionCalls.awaitItem()
         val event = eventCalls.awaitItem()
@@ -225,9 +214,7 @@ class InlineAutocompleteControllerTest {
 
     @Test
     fun `onPredictionSelected resets state to Idle`() = runScenario {
-        fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(Place(emptyList()))
-        )
+        fakePlacesClient.fetchPlaceResult = Result.success(Address())
 
         delegate.onPredictionSelected("place_1")
         advanceTimeBy(100)
@@ -256,9 +243,7 @@ class InlineAutocompleteControllerTest {
     @Test
     fun `onDismissed cancels an in-flight prediction selection`() = runScenario {
         val fetchGate = CompletableDeferred<Unit>()
-        fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(Place(emptyList()))
-        )
+        fakePlacesClient.fetchPlaceResult = Result.success(Address())
         fakePlacesClient.onBeforeFetchPlace = { fetchGate.await() }
 
         delegate.onPredictionSelected("place_1")
@@ -271,7 +256,7 @@ class InlineAutocompleteControllerTest {
         fetchGate.complete(Unit)
         advanceTimeBy(100)
 
-        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem()).isEqualTo("place_1")
+        assertThat(fakePlacesClient.fetchPlaceCalls.awaitItem().placeId).isEqualTo("place_1")
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
         eventCalls.expectNoEvents()
     }
@@ -280,24 +265,7 @@ class InlineAutocompleteControllerTest {
     fun `onPredictionSelected suppresses next query matching predicted line1`() =
         runScenario {
             fakePlacesClient.fetchPlaceResult = Result.success(
-                FetchPlaceResponse(
-                    Place(
-                        listOf(
-                            AddressComponent(
-                                "123", "123",
-                                listOf(Place.Type.STREET_NUMBER.value)
-                            ),
-                            AddressComponent(
-                                "Main St", "Main Street",
-                                listOf(Place.Type.ROUTE.value)
-                            ),
-                            AddressComponent(
-                                "US", "United States",
-                                listOf(Place.Type.COUNTRY.value)
-                            ),
-                        )
-                    )
-                )
+                Address(line1 = "123 Main Street", country = "US")
             )
             fakePlacesClient.findPredictionsResult = Result.success(
                 FindAutocompletePredictionsResponse(emptyList())
@@ -322,24 +290,7 @@ class InlineAutocompleteControllerTest {
     fun `suppression only applies once - second matching query fetches normally`() =
         runScenario {
             fakePlacesClient.fetchPlaceResult = Result.success(
-                FetchPlaceResponse(
-                    Place(
-                        listOf(
-                            AddressComponent(
-                                "123", "123",
-                                listOf(Place.Type.STREET_NUMBER.value)
-                            ),
-                            AddressComponent(
-                                "Main St", "Main Street",
-                                listOf(Place.Type.ROUTE.value)
-                            ),
-                            AddressComponent(
-                                "US", "United States",
-                                listOf(Place.Type.COUNTRY.value)
-                            ),
-                        )
-                    )
-                )
+                Address(line1 = "123 Main Street", country = "US")
             )
             fakePlacesClient.findPredictionsResult = Result.success(
                 FindAutocompletePredictionsResponse(emptyList())
@@ -371,15 +322,7 @@ class InlineAutocompleteControllerTest {
     fun `onDismissed clears suppression - typing previously-selected address fetches normally`() =
         runScenario {
             fakePlacesClient.fetchPlaceResult = Result.success(
-                FetchPlaceResponse(
-                    Place(
-                        listOf(
-                            AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                            AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                            AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                        )
-                    )
-                )
+                Address(line1 = "123 Main Street", country = "US")
             )
             fakePlacesClient.findPredictionsResult = Result.success(
                 FindAutocompletePredictionsResponse(emptyList())
@@ -405,15 +348,7 @@ class InlineAutocompleteControllerTest {
     fun `query dropping below minimum chars clears suppression - re-typing fetches normally`() =
         runScenario {
             fakePlacesClient.fetchPlaceResult = Result.success(
-                FetchPlaceResponse(
-                    Place(
-                        listOf(
-                            AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                            AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                            AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                        )
-                    )
-                )
+                Address(line1 = "123 Main Street", country = "US")
             )
             fakePlacesClient.findPredictionsResult = Result.success(
                 FindAutocompletePredictionsResponse(emptyList())
@@ -441,9 +376,7 @@ class InlineAutocompleteControllerTest {
     fun `prediction selected with null line1 does not block subsequent fetches`() =
         runScenario {
             // Place with no street components produces null line1 — no suppression is set.
-            fakePlacesClient.fetchPlaceResult = Result.success(
-                FetchPlaceResponse(Place(emptyList()))
-            )
+            fakePlacesClient.fetchPlaceResult = Result.success(Address())
             fakePlacesClient.findPredictionsResult = Result.success(
                 FindAutocompletePredictionsResponse(emptyList())
             )
@@ -468,15 +401,7 @@ class InlineAutocompleteControllerTest {
         runScenario {
             // First selection: place with line1="123 Main St" — sets lastPredictionLine1.
             fakePlacesClient.fetchPlaceResult = Result.success(
-                FetchPlaceResponse(
-                    Place(
-                        listOf(
-                            AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                            AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                            AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                        )
-                    )
-                )
+                Address(line1 = "123 Main Street", country = "US")
             )
             fakePlacesClient.findPredictionsResult = Result.success(
                 FindAutocompletePredictionsResponse(emptyList())
@@ -493,9 +418,7 @@ class InlineAutocompleteControllerTest {
             // Second selection: place with no street components → line1 is null.
             // This must clear lastPredictionLine1 so the previous value doesn't
             // suppress a future fetch for "123 Main St".
-            fakePlacesClient.fetchPlaceResult = Result.success(
-                FetchPlaceResponse(Place(emptyList()))
-            )
+            fakePlacesClient.fetchPlaceResult = Result.success(Address())
 
             delegate.onPredictionSelected("place_2")
             advanceTimeBy(100)
@@ -644,7 +567,7 @@ class InlineAutocompleteControllerTest {
         delegate.onPredictionSelected("place-id-123")
 
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
-        assertThat(call).isEqualTo("place-id-123")
+        assertThat(call.placeId).isEqualTo("place-id-123")
         fakePlacesClient.resetSessionCalls.awaitItem()
         assertThat(delegate.inlinePredictionsState.value).isEqualTo(InlinePredictionsState.Idle)
         assertThat(eventCalls.awaitItem())
@@ -731,22 +654,14 @@ class InlineAutocompleteControllerTest {
     @Test
     fun `no proxy calls Google Places for place selection`() = runScenario {
         fakePlacesClient.fetchPlaceResult = Result.success(
-            FetchPlaceResponse(
-                Place(
-                    listOf(
-                        AddressComponent("123", "123", listOf(Place.Type.STREET_NUMBER.value)),
-                        AddressComponent("Main St", "Main Street", listOf(Place.Type.ROUTE.value)),
-                        AddressComponent("US", "United States", listOf(Place.Type.COUNTRY.value)),
-                    )
-                )
-            )
+            Address(line1 = "123 Main Street", country = "US")
         )
 
         delegate.onPredictionSelected("place-id-123")
 
         val call = fakePlacesClient.fetchPlaceCalls.awaitItem()
         fakePlacesClient.resetSessionCalls.awaitItem()
-        assertThat(call).isEqualTo("place-id-123")
+        assertThat(call.placeId).isEqualTo("place-id-123")
         eventCalls.awaitItem()
     }
 
@@ -756,7 +671,10 @@ class InlineAutocompleteControllerTest {
         shouldUseStripeHostedAutocomplete: Boolean = false,
         block: suspend Scenario.() -> Unit,
     ) = runTest(UnconfinedTestDispatcher()) {
-        val fakePlaces = FakePlacesClientProxy()
+        val fakePlaces = FakePlacesClientProxy(
+            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+            fetchPlaceResult = Result.success(Address()),
+        )
         val eventCalls = Turbine<AutocompleteAddressInteractor.Event>()
         val config = AutocompleteAddressInteractor.Config(
             googlePlacesApiKey = "test_key",

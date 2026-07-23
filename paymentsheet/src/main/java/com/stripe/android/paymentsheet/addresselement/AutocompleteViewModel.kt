@@ -111,14 +111,13 @@ internal class AutocompleteViewModel @Inject constructor(
     fun selectPrediction(prediction: AutocompletePrediction) {
         viewModelScope.launch {
             _loading.value = true
+            val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
             placesClient?.fetchPlace(
-                placeId = prediction.placeId
+                placeId = prediction.placeId,
+                locale = locale,
             )?.fold(
-                onSuccess = {
+                onSuccess = { address ->
                     _loading.value = false
-                    val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-                    val address = placesClient.transformToAddress(locale)
-
                     _event.emit(
                         Event.GoBack(
                             address = PaymentSheet.Address(

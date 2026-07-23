@@ -5,9 +5,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import java.util.Locale
 import java.util.UUID
 
@@ -17,13 +15,11 @@ internal class StripeHostedPlacesClientProxy(
     private val lock = Any()
     private var sessionToken: String = newSessionToken()
     private val predictionCache = mutableMapOf<String, AutocompleteSuggestion>()
-    private var lastResolvedAddress: StripeProxyAddress? = null
 
     override fun resetSession() {
         synchronized(lock) {
             sessionToken = newSessionToken()
             predictionCache.clear()
-            lastResolvedAddress = null
         }
     }
 
@@ -57,33 +53,36 @@ internal class StripeHostedPlacesClientProxy(
         }
     }
 
-    override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
+    override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> {
         val (cached, token) = synchronized(lock) {
             predictionCache[placeId] to sessionToken
         }
         if (cached?.address != null) {
-            synchronized(lock) { lastResolvedAddress = cached.address }
-            return Result.success(FetchPlaceResponse(Place(addressComponents = null)))
+            return Result.success(
+                Address(
+                    line1 = cached.address.line1,
+                    line2 = cached.address.line2,
+                    city = cached.address.city,
+                    state = cached.address.state,
+                    postalCode = cached.address.postalCode,
+                    country = cached.address.country,
+                )
+            )
         }
         return repository.fetchPlaceDetails(
             placeId = placeId,
             sessionToken = token,
+            locale = locale.toLanguageTag(),
         ).map { result ->
-            synchronized(lock) { lastResolvedAddress = result.address }
-            FetchPlaceResponse(Place(addressComponents = null))
+            Address(
+                line1 = result.address?.line1,
+                line2 = result.address?.line2,
+                city = result.address?.city,
+                state = result.address?.state,
+                postalCode = result.address?.postalCode,
+                country = result.address?.country,
+            )
         }
-    }
-
-    override fun transformToAddress(locale: Locale): Address {
-        val address = synchronized(lock) { lastResolvedAddress }
-        return Address(
-            line1 = address?.line1,
-            line2 = address?.line2,
-            city = address?.city,
-            state = address?.state,
-            postalCode = address?.postalCode,
-            country = address?.country,
-        )
     }
 
     private companion object {

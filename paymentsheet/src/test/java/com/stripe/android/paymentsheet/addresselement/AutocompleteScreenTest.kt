@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.utils.ViewModelStoreTestRule
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.createComposeCleanupRule
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -122,12 +121,10 @@ class AutocompleteScreenTest {
     private class TestPlacesClientProxy(
         private val findAutocompletePredictionsResponse: Result<FindAutocompletePredictionsResponse> =
             Result.failure(IllegalStateException("Failed!")),
-        private val fetchPlaceResponse: Result<FetchPlaceResponse> =
+        private val fetchPlaceResponse: Result<Address> =
             Result.failure(IllegalStateException("Failed!")),
     ) : PlacesClientProxy {
         override fun resetSession() = Unit
-
-        override fun transformToAddress(locale: Locale): Address = Address()
 
         override suspend fun findAutocompletePredictions(
             query: String?,
@@ -136,8 +133,9 @@ class AutocompleteScreenTest {
         ): Result<FindAutocompletePredictionsResponse> = findAutocompletePredictionsResponse
 
         override suspend fun fetchPlace(
-            placeId: String
-        ): Result<FetchPlaceResponse> = fetchPlaceResponse
+            placeId: String,
+            locale: Locale,
+        ): Result<Address> = fetchPlaceResponse
     }
 
     private object TestAddressLauncherEventReporter : AddressLauncherEventReporter {

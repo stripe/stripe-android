@@ -9,16 +9,12 @@ internal class DefaultStripeAutocompleteRepository(
     private val stripeNetworkClient: StripeNetworkClient,
     private val apiRequestFactory: ApiRequest.Factory,
     private val publishableKeyProvider: () -> String,
-    private val stripeAccountIdProvider: () -> String?
 ) : StripeAutocompleteRepository {
 
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
     private val requestOptions: ApiRequest.Options
-        get() = ApiRequest.Options(
-            apiKey = publishableKeyProvider(),
-            stripeAccount = stripeAccountIdProvider(),
-        )
+        get() = ApiRequest.Options(apiKey = publishableKeyProvider())
 
     override suspend fun findAutocompletePredictions(
         query: String,
@@ -49,14 +45,18 @@ internal class DefaultStripeAutocompleteRepository(
 
     override suspend fun fetchPlaceDetails(
         placeId: String,
-        sessionToken: String
+        sessionToken: String,
+        locale: String?
     ): Result<PlaceDetailsResult> {
-        val params = mapOf(
-            "place_id" to placeId,
-            "session_token" to sessionToken,
-            "client_type" to "mobile",
-            "source" to "google",
-        )
+        val params = buildMap<String, Any> {
+            put("place_id", placeId)
+            put("session_token", sessionToken)
+            put("client_type", "mobile")
+            put("source", "google")
+            if (locale != null) {
+                put("locale", locale)
+            }
+        }
         return executeRequestWithResultParser(
             stripeNetworkClient = stripeNetworkClient,
             stripeErrorJsonParser = stripeErrorJsonParser,

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import androidx.appcompat.app.AppCompatDelegate
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
@@ -64,19 +65,18 @@ internal class InlineAutocompleteController(
     fun onPredictionSelected(predictionId: String) {
         selectionJob?.cancel()
         selectionJob = coroutineScope.launch {
-            val result = placesClient.fetchPlace(predictionId)
+            val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
+            val result = placesClient.fetchPlace(predictionId, locale)
             ensureActive()
             result.fold(
-                onSuccess = { handleFetchPlaceSuccess() },
+                onSuccess = { handleFetchPlaceSuccess(it) },
                 onFailure = { handleFailure() }
             )
             placesClient.resetSession()
         }
     }
 
-    private fun handleFetchPlaceSuccess() {
-        val locale = AppCompatDelegate.getApplicationLocales()[0] ?: Locale.getDefault()
-        val address = placesClient.transformToAddress(locale)
+    private fun handleFetchPlaceSuccess(address: Address) {
         lastPredictionLine1 = address.line1
         _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Idle
         eventListenerProvider()?.invoke(

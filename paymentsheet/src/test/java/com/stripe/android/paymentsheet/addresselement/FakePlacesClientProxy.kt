@@ -4,17 +4,12 @@ import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.Turbine
 import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.Place
-import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToStripeAddress
 import java.util.Locale
 
 internal class FakePlacesClientProxy(
-    var findPredictionsResult: Result<FindAutocompletePredictionsResponse> =
-        Result.success(FindAutocompletePredictionsResponse(emptyList())),
-    var fetchPlaceResult: Result<FetchPlaceResponse> =
-        Result.success(FetchPlaceResponse(Place(emptyList()))),
+    var findPredictionsResult: Result<FindAutocompletePredictionsResponse>,
+    var fetchPlaceResult: Result<Address>,
 ) : PlacesClientProxy {
     var onBeforeFindPredictions: (() -> Unit)? = null
     var onBeforeFetchPlace: (suspend () -> Unit)? = null
@@ -28,8 +23,10 @@ internal class FakePlacesClientProxy(
     private val _findPredictionsCalls = Turbine<FindPredictionsCall>()
     val findPredictionsCalls: ReceiveTurbine<FindPredictionsCall> = _findPredictionsCalls
 
-    private val _fetchPlaceCalls = Turbine<String>()
-    val fetchPlaceCalls: ReceiveTurbine<String> = _fetchPlaceCalls
+    data class FetchPlaceCall(val placeId: String, val locale: Locale)
+
+    private val _fetchPlaceCalls = Turbine<FetchPlaceCall>()
+    val fetchPlaceCalls: ReceiveTurbine<FetchPlaceCall> = _fetchPlaceCalls
 
     override suspend fun findAutocompletePredictions(
         query: String?,
@@ -41,12 +38,9 @@ internal class FakePlacesClientProxy(
         return findPredictionsResult
     }
 
-    private var lastFetchedResponse: FetchPlaceResponse? = null
-
-    override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> {
-        _fetchPlaceCalls.add(placeId)
+    override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> {
+        _fetchPlaceCalls.add(FetchPlaceCall(placeId, locale))
         onBeforeFetchPlace?.invoke()
-        fetchPlaceResult.onSuccess { lastFetchedResponse = it }
         return fetchPlaceResult
     }
 
@@ -54,12 +48,7 @@ internal class FakePlacesClientProxy(
     val resetSessionCalls: ReceiveTurbine<Unit> = _resetSessionCalls
 
     override fun resetSession() {
-        lastFetchedResponse = null
         _resetSessionCalls.add(Unit)
-    }
-
-    override fun transformToAddress(locale: Locale): Address {
-        return lastFetchedResponse?.place?.transformGoogleToStripeAddress(locale) ?: Address()
     }
 
     fun ensureAllEventsConsumed() {

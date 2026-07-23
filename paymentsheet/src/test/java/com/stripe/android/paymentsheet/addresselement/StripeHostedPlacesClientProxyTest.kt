@@ -84,7 +84,7 @@ class StripeHostedPlacesClientProxyTest {
         proxy.findAutocompletePredictions(query = "123 Main", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
 
-        val result = proxy.fetchPlace("place_123")
+        val result = proxy.fetchPlace("place_123", Locale.US)
 
         assertThat(result.isSuccess).isTrue()
         repository.fetchPlaceDetailsCalls.awaitItem()
@@ -92,7 +92,7 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `transformToAddress returns correct fields from cached inline address`() = runTest {
+    fun `fetchPlace returns correct Address from cached inline address`() = runTest {
         val inlineAddress = StripeProxyAddress(
             line1 = "123 Main St",
             line2 = "Apt 4",
@@ -114,10 +114,9 @@ class StripeHostedPlacesClientProxyTest {
         proxy.findAutocompletePredictions(query = "123", country = "US", limit = 4)
         repository.findPredictionsCalls.awaitItem()
 
-        proxy.fetchPlace("place_123")
-        val address = proxy.transformToAddress(Locale.US)
+        val result = proxy.fetchPlace("place_123", Locale.US)
 
-        assertThat(address).isEqualTo(
+        assertThat(result.getOrThrow()).isEqualTo(
             Address(
                 city = "San Francisco",
                 country = "US",
@@ -131,7 +130,7 @@ class StripeHostedPlacesClientProxyTest {
     }
 
     @Test
-    fun `transformToAddress preserves Japanese address lines directly`() = runTest {
+    fun `fetchPlace preserves Japanese address lines directly`() = runTest {
         val inlineAddress = StripeProxyAddress(
             line1 = "3-chome-6-1 Kameido Koto City",
             line2 = "Unit 201",
@@ -153,10 +152,9 @@ class StripeHostedPlacesClientProxyTest {
         proxy.findAutocompletePredictions(query = "Kameido", country = "JP", limit = 4)
         repository.findPredictionsCalls.awaitItem()
 
-        proxy.fetchPlace("place_jp")
-        val address = proxy.transformToAddress(Locale.getDefault())
+        val result = proxy.fetchPlace("place_jp", Locale.getDefault())
 
-        assertThat(address).isEqualTo(
+        assertThat(result.getOrThrow()).isEqualTo(
             Address(
                 city = "Koto City",
                 country = "JP",
@@ -187,7 +185,7 @@ class StripeHostedPlacesClientProxyTest {
 
         proxy.resetSession()
 
-        proxy.fetchPlace("place_123")
+        proxy.fetchPlace("place_123", Locale.US)
         repository.fetchPlaceDetailsCalls.awaitItem()
         repository.ensureAllEventsConsumed()
     }

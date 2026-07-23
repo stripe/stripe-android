@@ -65,7 +65,6 @@ internal class AddressElementViewModelModule {
         stripeNetworkClient = stripeNetworkClient,
         apiRequestFactory = apiRequestFactory,
         publishableKeyProvider = { args.publishableKey },
-        stripeAccountIdProvider = { args.stripeAccountId },
     )
 
     @Provides
@@ -77,12 +76,11 @@ internal class AddressElementViewModelModule {
         googlePlacesClient: PlacesClientProxy?,
     ): PlacesClientProxy? {
         val config = args.config ?: return null
-        if (config.useStripeHostedAutocomplete) {
-            return StripeHostedPlacesClientProxy(
-                repository = stripeAutocompleteRepository,
-            )
+        return if (config.useStripeHostedAutocomplete) {
+            StripeHostedPlacesClientProxy(repository = stripeAutocompleteRepository)
+        } else {
+            googlePlacesClient
         }
-        return googlePlacesClient
     }
 
     @Provides

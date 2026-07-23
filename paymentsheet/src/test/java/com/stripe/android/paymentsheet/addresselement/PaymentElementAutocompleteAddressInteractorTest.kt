@@ -1,7 +1,9 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import com.stripe.android.uicore.elements.AutocompleteAddressInteractor
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.CompletableDeferred
@@ -210,7 +212,10 @@ class PaymentElementAutocompleteAddressInteractorTest {
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,
-            placesClient = FakePlacesClientProxy(),
+            placesClient = FakePlacesClientProxy(
+                findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+                fetchPlaceResult = Result.success(Address()),
+            ),
             stripeAutocompleteRepository = null,
             coroutineScope = this,
             shouldUseAutocompleteProxyEndpointsProvider = { false },
@@ -233,7 +238,10 @@ class PaymentElementAutocompleteAddressInteractorTest {
             isPlacesAvailable = true,
             isInlineAutocompleteEnabled = true,
         )
-        val fakePlaces = FakePlacesClientProxy()
+        val fakePlaces = FakePlacesClientProxy(
+            findPredictionsResult = Result.success(FindAutocompletePredictionsResponse(emptyList())),
+            fetchPlaceResult = Result.success(Address()),
+        )
         val factory = PaymentElementAutocompleteAddressInteractor.Factory(
             launcher = scenario.launcher,
             autocompleteConfig = config,

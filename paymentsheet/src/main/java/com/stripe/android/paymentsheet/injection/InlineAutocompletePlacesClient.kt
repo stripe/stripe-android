@@ -5,7 +5,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.Address
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
 import java.util.Locale
 
@@ -38,11 +37,10 @@ internal class LazyPlacesClientProxy(
         limit: Int,
     ): Result<FindAutocompletePredictionsResponse> = delegate.findAutocompletePredictions(query, country, limit)
 
-    override suspend fun fetchPlace(placeId: String): Result<FetchPlaceResponse> = delegate.fetchPlace(placeId)
+    override suspend fun fetchPlace(placeId: String, locale: Locale): Result<Address> =
+        delegate.fetchPlace(placeId, locale)
 
     override fun resetSession() {
         delegate.resetSession()
     }
-
-    override fun transformToAddress(locale: Locale): Address = delegate.transformToAddress(locale)
 }
