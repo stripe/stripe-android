@@ -18,7 +18,6 @@ import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.PaymentConfigurationModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.BuildConfig
-import com.stripe.android.paymentsheet.injection.ApiConfigurationFromPaymentConfigModule
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.uicore.image.DefaultStripeImageLoader
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -37,7 +36,6 @@ import javax.inject.Provider
         CoreCommonModule::class,
         CoroutineContextModule::class,
         PaymentElementRequestSurfaceModule::class,
-        ApiConfigurationFromPaymentConfigModule::class,
     ],
 )
 internal interface CheckoutComponent {

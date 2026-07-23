@@ -19,7 +19,6 @@ import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackReferen
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
-import com.stripe.android.paymentsheet.injection.ApiConfigurationFromPaymentConfigModule
 import com.stripe.android.paymentelement.embedded.EmbeddedCommonModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
@@ -63,7 +62,6 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        ApiConfigurationFromPaymentConfigModule::class,
         EmbeddedPaymentElementViewModelModule::class,
         GooglePayLauncherModule::class,
         ExtendedPaymentElementConfirmationModule::class,

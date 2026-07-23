@@ -165,7 +165,8 @@ internal suspend fun createIntentConfirmationInterceptor(
                             context = ApplicationProvider.getApplicationContext(),
                             publishableKey = "pk",
                         ),
-                        apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk", stripeAccountId = null),
+                        publishableKeyProvider = { "pk" },
+                        stripeAccountIdProvider = { null },
                     ),
                     requestOptions = requestOptions,
                 )

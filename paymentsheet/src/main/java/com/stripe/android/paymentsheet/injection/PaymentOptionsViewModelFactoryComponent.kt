@@ -17,7 +17,6 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        ApiConfigurationFromPaymentConfigModule::class,
         StripeRepositoryModule::class,
         PaymentSheetCommonModule::class,
         PaymentElementRequestSurfaceModule::class,
@@ -26,7 +25,7 @@ import javax.inject.Singleton
         CoroutineContextModule::class,
         CoreCommonModule::class,
         ResourceRepositoryModule::class,
-        PaymentMethodMessagePromotionsExperimentHandlerModule::class
+        PaymentMethodMessagePromotionsExperimentHandlerModule::class,
     ]
 )
 internal interface PaymentOptionsViewModelFactoryComponent {

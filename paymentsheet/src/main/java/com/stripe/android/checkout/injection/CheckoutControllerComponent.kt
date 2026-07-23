@@ -40,7 +40,6 @@ import com.stripe.android.paymentelement.confirmation.ALLOWS_MANUAL_CONFIRMATION
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.injection.ExtendedPaymentElementConfirmationModule
 import com.stripe.android.paymentelement.embedded.EmbeddedLinkExtrasModule
-import com.stripe.android.paymentsheet.injection.ApiConfigurationFromPaymentConfigModule
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.InternalRowSelectionCallback
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedSelectionChooser
@@ -95,7 +94,6 @@ import javax.inject.Singleton
 @Singleton
 @Component(
     modules = [
-        ApiConfigurationFromPaymentConfigModule::class,
         CheckoutControllerModule::class,
         CheckoutModule::class,
         ExtendedPaymentElementConfirmationModule::class,

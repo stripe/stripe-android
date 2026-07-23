@@ -1,18 +1,15 @@
 package com.stripe.android.paymentsheet.injection
 
 import com.stripe.android.ApiConfiguration
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
-import javax.inject.Provider
 
 /**
- * Provides [ApiConfiguration.State] from [PaymentMethodMetadata] when available in the Dagger
- * graph, otherwise falls back to [PaymentConfiguration].
+ * Provides [ApiConfiguration.State] from [PaymentMethodMetadata].
  */
 @Module
 internal object ApiConfigurationFromMetadataModule {
@@ -20,21 +17,6 @@ internal object ApiConfigurationFromMetadataModule {
     fun providesApiConfiguration(
         paymentMethodMetadata: PaymentMethodMetadata
     ): ApiConfiguration.State = paymentMethodMetadata.apiConfiguration
-}
-
-/**
- * Provides [ApiConfiguration.State] from [PaymentConfiguration] for components that don't have
- * [PaymentMethodMetadata] available at construction time.
- */
-@Module
-internal object ApiConfigurationFromPaymentConfigModule {
-    @Provides
-    fun providesApiConfiguration(
-        paymentConfigurationProvider: Provider<PaymentConfiguration>
-    ): ApiConfiguration.State = ApiConfiguration.State(
-        publishableKey = paymentConfigurationProvider.get().publishableKey,
-        stripeAccountId = paymentConfigurationProvider.get().stripeAccountId,
-    )
 }
 
 /**

@@ -8,7 +8,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement
 import com.stripe.android.model.ElementsSession.Customer.Components.MobilePaymentElement.Enabled
@@ -16,7 +15,7 @@ import com.stripe.android.model.ElementsSession.ExperimentAssignment
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_DISABLE_LINK_GLOBAL_HOLDBACK_LOOKUP
 import com.stripe.android.model.ElementsSession.Flag.ELEMENTS_ENABLE_LINK_SPM
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepository
+import com.stripe.android.paymentsheet.injection.LinkDisabledApiRepositoryFactory
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentElementLoader
 import com.stripe.android.paymentsheet.state.RetrieveCustomerEmail
@@ -42,7 +41,7 @@ internal interface LogLinkHoldbackExperiment {
 
 internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private val eventReporter: EventReporter,
-    @LinkDisabledApiRepository private val linkDisabledApiRepository: LinkRepository,
+    private val linkDisabledApiRepositoryFactory: LinkDisabledApiRepositoryFactory,
     @Named(MOBILE_SESSION_ID) private val mobileSessionId: String,
     @IOContext private val workContext: CoroutineContext,
     private val retrieveCustomerEmail: RetrieveCustomerEmail,
@@ -93,7 +92,11 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
             }
             else -> {
                 // Link is disabled — perform the lookup for experiment logging.
-                isReturningUser(email = customerEmail, sessionId = elementsSession.elementsSessionId)
+                isReturningUser(
+                    email = customerEmail,
+                    sessionId = elementsSession.elementsSessionId,
+                    state = state,
+                )
             }
         }
 
@@ -149,8 +152,12 @@ internal class DefaultLogLinkHoldbackExperiment @Inject constructor(
     private suspend fun isReturningUser(
         email: String,
         sessionId: String,
+        state: PaymentElementLoader.State,
     ): Boolean {
-        return linkDisabledApiRepository
+        val repository = linkDisabledApiRepositoryFactory.create(
+            state.paymentMethodMetadata.apiConfiguration
+        )
+        return repository
             .lookupConsumerWithoutBackendLoggingForExposure(
                 email = email,
                 sessionId = sessionId,

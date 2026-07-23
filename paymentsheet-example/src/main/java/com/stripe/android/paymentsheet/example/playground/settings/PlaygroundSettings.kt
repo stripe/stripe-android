@@ -8,6 +8,8 @@ import android.os.Parcelable
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.ApiConfigurationPreview
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheet
@@ -168,6 +170,7 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
+        @OptIn(ApiConfigurationPreview::class)
         fun embeddedConfiguration(
             playgroundState: PlaygroundState.Payment
         ): EmbeddedPaymentElement.Configuration {
@@ -178,6 +181,7 @@ internal class PlaygroundSettings private constructor(
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, embeddedConfigurationData)
             }
+            builder.apiConfiguration(ApiConfiguration("pk_test_51HvTI7Lu5o3P18Zp6t5AgBSkMvWoTtA0nyA7pVYDqpfLkRtWun7qZTYCOHCReprfLM464yaBeF72UFfB7cY9WG4a00ZnDtiC2C"))
             return builder.build()
         }
 

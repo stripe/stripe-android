@@ -1032,10 +1032,8 @@ class LinkApiRepositoryTest {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),
             requestSurface = RequestSurface.PaymentElement,
-            apiConfiguration = com.stripe.android.ApiConfiguration.State(
-                publishableKey = PUBLISHABLE_KEY,
-                stripeAccountId = STRIPE_ACCOUNT_ID,
-            ),
+            publishableKeyProvider = { PUBLISHABLE_KEY },
+            stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,
             workContext = Dispatchers.IO,

@@ -520,7 +520,8 @@ class CheckoutSessionConfirmationInterceptorTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            apiConfiguration = com.stripe.android.ApiConfiguration.State(publishableKey = "pk_test_123", stripeAccountId = null),
+            publishableKeyProvider = { "pk_test_123" },
+            stripeAccountIdProvider = { null },
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(

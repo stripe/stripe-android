@@ -38,6 +38,10 @@ import kotlin.coroutines.CoroutineContext
 @Qualifier
 internal annotation class LinkDisabledApiRepository
 
+internal fun interface LinkDisabledApiRepositoryFactory {
+    fun create(apiConfiguration: ApiConfiguration.State): LinkRepository
+}
+
 @Module
 internal class LinkHoldbackExposureModule {
 
@@ -56,35 +60,36 @@ internal class LinkHoldbackExposureModule {
     }
 
     @Provides
-    @LinkDisabledApiRepository
-    fun providesLinkRepository(
+    fun providesLinkDisabledApiRepositoryFactory(
         application: Application,
-        apiConfiguration: ApiConfiguration.State,
         requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
         logger: Logger,
         locale: Locale?,
         errorReporter: ErrorReporter,
-    ): LinkRepository {
-        val consumersApiService = ConsumersApiServiceImpl(
-            appInfo = Stripe.appInfo,
-            sdkVersion = StripeSdkVersion.VERSION,
-            apiVersion = Stripe.API_VERSION,
-            stripeNetworkClient = DefaultStripeNetworkClient(
-                logger = logger,
-                workContext = workContext
+    ): LinkDisabledApiRepositoryFactory {
+        return LinkDisabledApiRepositoryFactory { apiConfiguration ->
+            val consumersApiService = ConsumersApiServiceImpl(
+                appInfo = Stripe.appInfo,
+                sdkVersion = StripeSdkVersion.VERSION,
+                apiVersion = Stripe.API_VERSION,
+                stripeNetworkClient = DefaultStripeNetworkClient(
+                    logger = logger,
+                    workContext = workContext
+                )
             )
-        )
-        return LinkApiRepository(
-            application = application,
-            requestSurface = requestSurface,
-            apiConfiguration = apiConfiguration,
-            stripeRepository = stripeRepository,
-            consumersApiService = consumersApiService,
-            workContext = workContext,
-            locale = locale,
-            errorReporter = errorReporter,
-        )
+            LinkApiRepository(
+                application = application,
+                requestSurface = requestSurface,
+                publishableKeyProvider = { apiConfiguration.publishableKey },
+                stripeAccountIdProvider = { apiConfiguration.stripeAccountId },
+                stripeRepository = stripeRepository,
+                consumersApiService = consumersApiService,
+                workContext = workContext,
+                locale = locale,
+                errorReporter = errorReporter,
+            )
+        }
     }
 }
