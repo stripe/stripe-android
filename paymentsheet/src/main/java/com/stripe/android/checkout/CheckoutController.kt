@@ -276,21 +276,15 @@ class CheckoutController @Inject internal constructor(
         }
     }
 
-    /**
-     * The gate shared by every mutation entry point: fails if the session hasn't been configured
-     * yet, or if a payment flow is currently presented (per [SheetStateHolder.sheetIsOpen]). On
-     * success it carries the current committed state; callers that only need the gate can ignore
-     * the value.
-     */
-    private fun requireMutableState(): kotlin.Result<CheckoutControllerState> {
-        val currentState = stateHolder.state
+    private fun requireMutableState(): kotlin.Result<Unit> {
+        stateHolder.state
             ?: return kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session before it is configured.")
             )
         return if (sheetStateHolder.sheetIsOpen) {
             integrationLaunchedFailure()
         } else {
-            kotlin.Result.success(currentState)
+            kotlin.Result.success(Unit)
         }
     }
 
