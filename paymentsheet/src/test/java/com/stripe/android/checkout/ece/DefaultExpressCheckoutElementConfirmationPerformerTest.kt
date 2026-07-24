@@ -119,6 +119,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
         performer.confirm(expressButton)
 
+        confirmationHandler.startTurbine.awaitItem()
         assertThat(eventReporter.calls.awaitItem())
             .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentSuccess)
     }
@@ -138,6 +139,7 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
         performer.confirm(expressButton)
 
+        confirmationHandler.startTurbine.awaitItem()
         assertThat(eventReporter.calls.awaitItem())
             .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentFailure)
     }
