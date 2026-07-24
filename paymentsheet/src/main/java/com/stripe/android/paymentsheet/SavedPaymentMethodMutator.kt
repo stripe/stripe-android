@@ -166,6 +166,7 @@ internal class SavedPaymentMethodMutator(
 
         return savedPaymentMethodRepository.detachPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = paymentMethodMetadataFlow.value?.apiConfiguration?.stripeAccountId,
             paymentMethodId = paymentMethodId,
         )
     }
@@ -217,6 +218,7 @@ internal class SavedPaymentMethodMutator(
 
         return savedPaymentMethodRepository.setDefaultPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = paymentMethodMetadataFlow.value?.apiConfiguration?.stripeAccountId,
             paymentMethodId = paymentMethod.id,
         ).onFailure { error ->
             eventReporter.onSetAsDefaultPaymentMethodFailed(
@@ -264,6 +266,7 @@ internal class SavedPaymentMethodMutator(
 
         return savedPaymentMethodRepository.updatePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = paymentMethodMetadataFlow.value?.apiConfiguration?.stripeAccountId,
             paymentMethodId = paymentMethod.id,
             params = PaymentMethodUpdateParams.createCard(
                 networks = cardUpdateParams.cardBrand?.let {

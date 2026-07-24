@@ -40,6 +40,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                 customerRepository.updatePaymentMethod(
                     customerId = ephemeralKey.customerId,
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                    stripeAccountId = null,
                     paymentMethodId = paymentMethodId,
                     params = params,
                 ).getOrThrow()
@@ -64,6 +65,7 @@ internal class CustomerSessionPaymentMethodDataSource @Inject constructor(
                 customerRepository.detachPaymentMethodAndDuplicates(
                     customerId = ephemeralKey.customerId,
                     ephemeralKeySecret = ephemeralKey.ephemeralKey,
+                    stripeAccountId = null,
                     customerSessionClientSecret = ephemeralKey.customerSessionClientSecret,
                     paymentMethodId = paymentMethodId,
                 ).getOrThrow()

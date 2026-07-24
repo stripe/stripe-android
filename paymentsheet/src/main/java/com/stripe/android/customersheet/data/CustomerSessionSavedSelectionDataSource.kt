@@ -100,6 +100,7 @@ internal class CustomerSessionSavedSelectionDataSource @Inject constructor(
         customerRepository.setDefaultPaymentMethod(
             customerId = ephemeralKey.customerId,
             ephemeralKeySecret = ephemeralKey.ephemeralKey,
+            stripeAccountId = null,
             paymentMethodId = paymentMethodId,
         ).getOrThrow()
     }
