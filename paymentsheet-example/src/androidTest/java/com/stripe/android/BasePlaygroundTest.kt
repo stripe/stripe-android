@@ -31,6 +31,9 @@ internal open class BasePlaygroundTest(
 
     @After
     fun after() {
+        // Runs even if the test body threw before its own teardown() call, so a destroyed
+        // activity is never left referenced by the driver.
+        testDriver.teardown()
         Intents.release()
     }
 }
