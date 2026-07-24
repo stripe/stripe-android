@@ -72,6 +72,7 @@ import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
+import com.stripe.android.utils.awaitWindowFocus
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume.assumeFalse
@@ -1286,6 +1287,17 @@ internal class PlaygroundTestDriver(
         }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
+        waitForWindowFocus()
+    }
+
+    /**
+     * Returning from a browser/external activity can leave no window focused. Fail fast with a
+     * clear message here instead of surfacing as an opaque Espresso RootViewPicker timeout later.
+     */
+    private fun waitForWindowFocus() {
+        if (!awaitWindowFocus()) {
+            error("Playground did not regain window focus after returning from an external activity")
+        }
     }
 
     /**
