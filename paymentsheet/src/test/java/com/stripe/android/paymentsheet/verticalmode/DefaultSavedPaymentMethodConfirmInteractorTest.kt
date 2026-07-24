@@ -5,8 +5,8 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.spms.SavedPaymentMethodLinkFormHelper
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.link.TestFactory
 import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata

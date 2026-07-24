@@ -1295,6 +1295,7 @@ internal class PaymentSheetActivityTest {
         }
     }
 
+    @Suppress("LongMethod")
     private fun createViewModel(
         paymentIntent: PaymentIntent = PAYMENT_INTENT,
         paymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
