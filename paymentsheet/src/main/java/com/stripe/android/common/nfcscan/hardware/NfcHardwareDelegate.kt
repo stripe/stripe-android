@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.common.nfcscan.NfcScanLogger
 
 internal interface NfcHardwareDelegate {
     fun isAvailable(): Boolean
@@ -53,9 +54,14 @@ internal class DefaultNfcHardwareDelegate(
         onTagDiscovered: (Tag) -> Unit,
     ) {
         if (nfcAdapter == null || activity.lifecycle.currentState != Lifecycle.State.STARTED) {
+            NfcScanLogger.debug(
+                "Reader mode not started adapterPresent=${nfcAdapter != null} " +
+                    "lifecycle=${activity.lifecycle.currentState}"
+            )
             return
         }
 
+        NfcScanLogger.debug("Enabling reader mode flags=$SUPPORTED_NFC_TYPES")
         nfcAdapter.enableReaderMode(
             activity,
             onTagDiscovered,
@@ -68,6 +74,7 @@ internal class DefaultNfcHardwareDelegate(
         activity.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onPause(owner: LifecycleOwner) {
+                    NfcScanLogger.debug("Disabling reader mode on pause")
                     nfcAdapter.disableReaderMode(activity)
                     super.onPause(owner)
                 }

@@ -2,6 +2,7 @@ package com.stripe.android.common.nfcscan.scanner
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.scanner.apdu.ApduResponseError
+import com.stripe.android.common.nfcscan.scanner.apdu.GetProcessingOptionsCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.apduSuccessResponse
@@ -20,6 +21,7 @@ internal class ApduCardReaderTest {
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
+            GPO_WITHOUT_AFL_RESPONSE,
         ),
         transceiveResult = RECORD_NOT_FOUND_RESPONSE,
         errorResult = PARSE_FAILURE_ERROR,
@@ -31,6 +33,7 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
 
         assertReadRecordProbes()
 
@@ -42,6 +45,7 @@ internal class ApduCardReaderTest {
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
+            GPO_WITHOUT_AFL_RESPONSE,
             FILE_NOT_FOUND_RESPONSE,
         ),
         transceiveResult = RECORD_NOT_FOUND_RESPONSE,
@@ -54,6 +58,7 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
         assertReadRecordProbes(startingAtIndex = MAX_RECORDS_PER_SFI)
@@ -67,6 +72,7 @@ internal class ApduCardReaderTest {
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
+            GPO_WITHOUT_AFL_RESPONSE,
             FILE_NOT_FOUND_RESPONSE,
             apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
         ),
@@ -78,6 +84,7 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS[MAX_RECORDS_PER_SFI])
 
@@ -92,6 +99,7 @@ internal class ApduCardReaderTest {
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
+            GPO_WITHOUT_AFL_RESPONSE,
         ),
         transceiveResult = CARD_DECLINED_RESPONSE,
         errorResult = PARSE_FAILURE_ERROR,
@@ -103,6 +111,7 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
 
         assertReadRecordProbes()
 
@@ -154,11 +163,12 @@ internal class ApduCardReaderTest {
     }
 
     @Test
-    fun `readCard returns parsed card data when parser succeeds`() = runScenario(
+    fun `readCard gets processing options and reads AFL records`() = runScenario(
         parseResult = SCANNED_CARD_DATA,
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
-            apduSuccessResponse(byteArrayOf()),
+            apduSuccessResponse(tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = PDOL_WITH_TTQ)),
+            GPO_WITH_AFL_RESPONSE,
             apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
         ),
         transceiveResult = RECORD_NOT_FOUND_RESPONSE,
@@ -169,6 +179,89 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITH_TTQ_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_SFI_2_RECORD_3_REQUEST)
+
+        assertThat(cardDataParser.canParseCalls.awaitItem()).containsKey("57")
+        assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
+
+        cardDataParser.canParseCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `readCard parses card data returned by get processing options`() = runScenario(
+        parseResult = SCANNED_CARD_DATA,
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = PDOL_WITH_TTQ)),
+            GPO_WITH_AFL_AND_TRACK_2_RESPONSE,
+            apduSuccessResponse(tlv(tag = 0x9F.toByte(), tagContinuation = 0x69, value = CARD_AUTH_DATA)),
+        ),
+        transceiveResult = RECORD_NOT_FOUND_RESPONSE,
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result).isEqualTo(NfcCardReader.Result.Found(SCANNED_CARD_DATA))
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITH_TTQ_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_SFI_2_RECORD_3_REQUEST)
+
+        val recordsWithGpoData = cardDataParser.canParseCalls.awaitItem()
+        assertThat(recordsWithGpoData).containsKey("57")
+        assertThat(recordsWithGpoData).containsKey("9F69")
+
+        val parsedRecords = cardDataParser.parseCalls.awaitItem()
+        assertThat(parsedRecords).containsKey("57")
+        assertThat(parsedRecords.getValue("57").contentEquals(TRACK_2_DATA)).isTrue()
+    }
+
+    @Test
+    fun `readCard propagates get processing options failure`() = runScenario(
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(byteArrayOf()),
+        ),
+        transceiveResult = CARD_DECLINED_RESPONSE,
+        errorResult = PARSE_FAILURE_ERROR,
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result).isEqualTo(PARSE_FAILURE_ERROR)
+
+        val error = errorCreator.createCalls.awaitItem()
+
+        assertThat(error).isInstanceOf<ApduResponseError.Command>()
+        val commandError = error as ApduResponseError.Command
+
+        assertThat(commandError.apduCommand).isInstanceOf<GetProcessingOptionsCommand>()
+        assertThat(commandError.sw1).isEqualTo(0x69.toByte())
+        assertThat(commandError.sw2).isEqualTo(0x85.toByte())
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
+    }
+
+    @Test
+    fun `readCard returns parsed card data when parser succeeds`() = runScenario(
+        parseResult = SCANNED_CARD_DATA,
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(byteArrayOf()),
+            GPO_WITHOUT_AFL_RESPONSE,
+            apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
+        ),
+        transceiveResult = RECORD_NOT_FOUND_RESPONSE,
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result).isEqualTo(NfcCardReader.Result.Found(SCANNED_CARD_DATA))
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
 
         assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
@@ -180,6 +273,7 @@ internal class ApduCardReaderTest {
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
+            GPO_WITHOUT_AFL_RESPONSE,
             apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
         ),
         transceiveResult = RECORD_NOT_FOUND_RESPONSE,
@@ -190,6 +284,7 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
 
         assertThat(cardDataParser.canParseCalls.awaitItem()).containsKey("57")
@@ -203,6 +298,7 @@ internal class ApduCardReaderTest {
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
+            GPO_WITHOUT_AFL_RESPONSE,
             apduSuccessResponse(tlv(tag = 0x5A, value = PAN_DATA)),
             apduSuccessResponse(tlv(tag = 0x5F, tagContinuation = 0x24, value = EXPIRY_DATA)),
         ),
@@ -217,6 +313,7 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS[1])
 
@@ -353,9 +450,18 @@ internal class ApduCardReaderTest {
             0x12,
             0x01,
         )
+        val CARD_AUTH_DATA = byteArrayOf(
+            0x12,
+            0x34,
+            0x56,
+            0x78,
+            0x90.toByte(),
+            0x12,
+            0x34,
+        )
 
         val READ_RECORD_REQUESTS = buildList {
-            for (sfi in 1..3) {
+            for (sfi in 1..8) {
                 val shortFileIdentifierByte = ((sfi shl 3) or 4).toByte()
                 for (record in 1..MAX_RECORDS_PER_SFI) {
                     add(
@@ -383,6 +489,21 @@ internal class ApduCardReaderTest {
         val RECORD_NOT_FOUND_RESPONSE = byteArrayOf(0x6A.toByte(), 0x83.toByte())
         val FILE_NOT_FOUND_RESPONSE = byteArrayOf(0x6A.toByte(), 0x82.toByte())
         val CARD_DECLINED_RESPONSE = byteArrayOf(0x69.toByte(), 0x85.toByte())
+        val GPO_WITHOUT_AFL_RESPONSE = apduSuccessResponse(
+            tlv(tag = 0x80.toByte(), value = byteArrayOf(0x00, 0x00)),
+        )
+        val PDOL_WITH_TTQ = byteArrayOf(0x9F.toByte(), 0x66, 0x04)
+        val AFL_SFI_2_RECORD_3 = byteArrayOf(0x10, 0x03, 0x03, 0x00)
+        val GPO_WITH_AFL_RESPONSE = apduSuccessResponse(
+            tlv(tag = 0x77, value = tlv(tag = 0x94.toByte(), value = AFL_SFI_2_RECORD_3)),
+        )
+        val GPO_WITH_AFL_AND_TRACK_2_RESPONSE = apduSuccessResponse(
+            tlv(
+                tag = 0x77,
+                value = tlv(tag = 0x94.toByte(), value = AFL_SFI_2_RECORD_3) +
+                    tlv(tag = 0x57, value = TRACK_2_DATA),
+            ),
+        )
         val SELECT_PPSE_REQUEST = byteArrayOf(
             0x00,
             0xA4.toByte(),
@@ -418,6 +539,37 @@ internal class ApduCardReaderTest {
             0x03,
             0x10,
             0x10,
+            0x00,
+        )
+        val GET_PROCESSING_OPTIONS_WITHOUT_PDOL_REQUEST = byteArrayOf(
+            0x80.toByte(),
+            0xA8.toByte(),
+            0x00,
+            0x00,
+            0x02,
+            0x83.toByte(),
+            0x00,
+            0x00,
+        )
+        val GET_PROCESSING_OPTIONS_WITH_TTQ_REQUEST = byteArrayOf(
+            0x80.toByte(),
+            0xA8.toByte(),
+            0x00,
+            0x00,
+            0x06,
+            0x83.toByte(),
+            0x04,
+            0x36,
+            0x00,
+            0x00,
+            0x00,
+            0x00,
+        )
+        val READ_SFI_2_RECORD_3_REQUEST = byteArrayOf(
+            0x00,
+            0xB2.toByte(),
+            0x03,
+            0x14,
             0x00,
         )
     }

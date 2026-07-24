@@ -1,6 +1,8 @@
 package com.stripe.android.common.nfcscan.scanner
 
+import android.nfc.Tag
 import androidx.appcompat.app.AppCompatActivity
+import com.stripe.android.common.nfcscan.NfcScanLogger
 import com.stripe.android.common.nfcscan.hardware.NfcHardwareDelegate
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
@@ -44,43 +46,92 @@ internal class DefaultNfcCardScanner @Inject constructor(
     override fun start(
         activity: AppCompatActivity,
     ) {
+        NfcScanLogger.debug("Starting NFC card scanner")
         hardwareDelegate.start(
             activity = activity,
         ) { tag ->
-            val transceiver = transceiverFactory.create(tag)
-                ?: return@start
+            val transceiver = transceiverFor(tag) ?: return@start
 
             viewModelScope.launch(workContext) {
-                _state.emit(NfcCardScanner.State.Scanning)
+                scanCard(transceiver)
+            }
+        }
+    }
 
-                val cardData = when (val readerResult = cardReader.readCard(transceiver)) {
-                    is NfcCardReader.Result.Found -> readerResult.scannedCardData
-                    is NfcCardReader.Result.Error -> {
-                        _state.emit(
-                            NfcCardScanner.State.Failed(
-                                error = NfcCardScanner.Error(
-                                    code = readerResult.errorCode,
-                                    userMessage = readerResult.userMessage,
-                                )
-                            )
-                        )
+    private fun transceiverFor(tag: Tag): NfcTagTransceiver? {
+        val techList = runCatching {
+            tag.techList.toList()
+        }.getOrElse {
+            emptyList()
+        }
+        NfcScanLogger.debug("Tag discovered techs=$techList")
 
-                        return@launch
-                    }
-                }
+        return transceiverFactory.create(tag)
+            ?: run {
+                NfcScanLogger.debug("No IsoDep transceiver available for tag")
+                null
+            }
+    }
 
-                val finalResult = when (val result = cardValidator.validate(cardData)) {
-                    is NfcCardValidator.Result.Validated -> NfcCardScanner.State.Complete(cardData)
-                    is NfcCardValidator.Result.Invalid -> NfcCardScanner.State.Failed(
+    private suspend fun scanCard(transceiver: NfcTagTransceiver) {
+        _state.emit(NfcCardScanner.State.Scanning)
+        NfcScanLogger.debug("Scanner state emitted: Scanning")
+
+        val cardData = readCardData(transceiver) ?: return
+        val finalResult = validate(cardData)
+
+        NfcScanLogger.debug(finalResult.toLogMessage())
+        _state.emit(finalResult)
+    }
+
+    private suspend fun readCardData(transceiver: NfcTagTransceiver): ScannedCardData? {
+        return when (val readerResult = cardReader.readCard(transceiver)) {
+            is NfcCardReader.Result.Found -> {
+                NfcScanLogger.debug(
+                    "Reader found card brand digits=${readerResult.scannedCardData.cardNumber.length} " +
+                        "expiry=${readerResult.scannedCardData.expirationMonth}/" +
+                        readerResult.scannedCardData.expirationYear
+                )
+                readerResult.scannedCardData
+            }
+            is NfcCardReader.Result.Error -> {
+                NfcScanLogger.debug("Reader failed code=${readerResult.errorCode}")
+                _state.emit(
+                    NfcCardScanner.State.Failed(
                         error = NfcCardScanner.Error(
-                            code = result.errorCode,
-                            userMessage = result.userMessage,
+                            code = readerResult.errorCode,
+                            userMessage = readerResult.userMessage,
                         )
                     )
-                }
-
-                _state.emit(finalResult)
+                )
+                null
             }
+        }
+    }
+
+    private fun validate(cardData: ScannedCardData): NfcCardScanner.State {
+        return when (val result = cardValidator.validate(cardData)) {
+            is NfcCardValidator.Result.Validated -> {
+                NfcScanLogger.debug("Card validation succeeded")
+                NfcCardScanner.State.Complete(cardData)
+            }
+            is NfcCardValidator.Result.Invalid -> {
+                NfcScanLogger.debug("Card validation failed code=${result.errorCode}")
+                NfcCardScanner.State.Failed(
+                    error = NfcCardScanner.Error(
+                        code = result.errorCode,
+                        userMessage = result.userMessage,
+                    )
+                )
+            }
+        }
+    }
+
+    private fun NfcCardScanner.State.toLogMessage(): String {
+        return when (this) {
+            is NfcCardScanner.State.Complete -> "Scanner final state=Complete"
+            is NfcCardScanner.State.Failed -> "Scanner final state=Failed code=${error.code}"
+            NfcCardScanner.State.Scanning -> "Scanner final state=Scanning"
         }
     }
 }

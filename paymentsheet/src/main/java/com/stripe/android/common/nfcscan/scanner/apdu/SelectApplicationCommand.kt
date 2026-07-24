@@ -5,7 +5,7 @@ package com.stripe.android.common.nfcscan.scanner.apdu
  */
 internal data class SelectApplicationCommand(
     val aid: ApplicationIdentifier,
-) : ApduCommand<Unit>() {
+) : ApduCommand<SelectApplicationCommand.Response>() {
     override val commandName: String = "selectApplication(aid=$aid)"
 
     /*
@@ -33,7 +33,17 @@ internal data class SelectApplicationCommand(
      */
     override val dataArray = aid.value.hexToByteArray()
 
-    override fun responseData(tlv: Map<String, ByteArray>) {
-        // No-op
+    override fun responseData(tlv: Map<String, ByteArray>): Response {
+        return Response(
+            processingOptionsDataObjectList = tlv[TAG_PDOL]
+        )
+    }
+
+    internal data class Response(
+        val processingOptionsDataObjectList: ByteArray?,
+    )
+
+    private companion object {
+        const val TAG_PDOL = "9F38"
     }
 }

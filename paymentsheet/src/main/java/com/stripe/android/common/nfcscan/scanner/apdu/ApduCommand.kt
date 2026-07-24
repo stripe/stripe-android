@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan.scanner.apdu
 
+import com.stripe.android.common.nfcscan.NfcScanLogger
 import com.stripe.android.common.nfcscan.scanner.NfcTagTransceiver
 
 /**
@@ -53,7 +54,10 @@ internal abstract class ApduCommand<TResponseData> {
      * Sends a command to the NFC tag then parses out the response returned from the NFC tag.
      */
     fun transceiveWith(transceiver: NfcTagTransceiver): Result<TResponseData> {
-        val rawData = transceiver.transceive(request())
+        val request = request()
+        NfcScanLogger.debug(">> $commandName request=${request.toHexString()}")
+
+        val rawData = transceiver.transceive(request)
         return response(rawData)
     }
 
@@ -77,6 +81,10 @@ internal abstract class ApduCommand<TResponseData> {
         val sw1 = rawResponse[rawResponse.size - 2]
         val sw2 = rawResponse[rawResponse.size - 1]
 
+        NfcScanLogger.debug(
+            "<< $commandName sw1=${sw1.toStatusHex()} sw2=${sw2.toStatusHex()} bytes=${rawResponse.size}"
+        )
+
         if (sw1 != 0x90.toByte() || sw2 != 0x00.toByte()) {
             return Result.failure(ApduResponseError.Command(this, sw1, sw2))
         }
@@ -85,6 +93,9 @@ internal abstract class ApduCommand<TResponseData> {
 
         return TlvParser.parse(rawData).fold(
             onSuccess = { tlv ->
+                NfcScanLogger.debug(
+                    "<< $commandName tags=${tlv.mapValues { it.value.size }.toSortedMap()}"
+                )
                 responseData(tlv)?.let { responseData ->
                     Result.success(responseData)
                 } ?: Result.failure(ApduResponseError.Invalid(rawData))
@@ -101,5 +112,13 @@ internal abstract class ApduCommand<TResponseData> {
         } else {
             byteArrayOf()
         }
+    }
+
+    private fun Byte.toStatusHex(): String {
+        return "0x%02X".format(toInt() and BYTE_MASK)
+    }
+
+    private companion object {
+        const val BYTE_MASK = 0xFF
     }
 }

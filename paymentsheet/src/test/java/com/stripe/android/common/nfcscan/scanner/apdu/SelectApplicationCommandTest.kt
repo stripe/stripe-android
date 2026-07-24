@@ -28,6 +28,20 @@ internal class SelectApplicationCommandTest {
     }
 
     @Test
+    fun `transceiveWith returns processing options data object list`() = test(
+        transceiveResult = apduSuccessResponse(
+            tlv(tag = 0x9F.toByte(), tagContinuation = 0x38, value = PDOL_WITH_TTQ),
+        ),
+    ) {
+        val result = SelectApplicationCommand(ApplicationIdentifier(VISA_AID.toHexString()))
+            .transceiveWith(transceiver)
+
+        assertThat(result.isSuccess).isTrue()
+        assertThat(result.getOrNull()?.processingOptionsDataObjectList?.contentEquals(PDOL_WITH_TTQ)).isTrue()
+        assertThat(transceiver.transceiveCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
     fun `transceiveWith returns Command error when status word is not 9000`() = test(
         transceiveResult = byteArrayOf(0x6A.toByte(), 0x82.toByte()),
     ) {
@@ -65,6 +79,7 @@ internal class SelectApplicationCommandTest {
             0x10,
             0x10,
         )
+        val PDOL_WITH_TTQ = byteArrayOf(0x9F.toByte(), 0x66, 0x04)
         val SELECT_VISA_APPLICATION_REQUEST = byteArrayOf(
             0x00,
             0xA4.toByte(),

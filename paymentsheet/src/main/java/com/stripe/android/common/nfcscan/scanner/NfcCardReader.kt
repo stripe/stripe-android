@@ -1,7 +1,8 @@
 package com.stripe.android.common.nfcscan.scanner
 
-import android.util.Log
+import com.stripe.android.common.nfcscan.NfcScanLogger
 import com.stripe.android.common.nfcscan.scanner.apdu.ApduResponseError
+import com.stripe.android.common.nfcscan.scanner.apdu.GetProcessingOptionsCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.ReadRecordCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
@@ -41,7 +42,7 @@ internal class ApduCardReader @Inject constructor(
                 NfcCardReader.Result.Found(scannedCardData = cardData)
             },
             onFailure = {
-                Log.d("NFC-Scan-Log", it.message ?: "Unknown error")
+                NfcScanLogger.debug(it.toDebugMessage())
 
                 errorMapper.create(it)
             },
@@ -52,25 +53,48 @@ internal class ApduCardReader @Inject constructor(
         transceiver: NfcTagTransceiver
     ): ScannedCardData = withContext(workContext) {
         try {
+            NfcScanLogger.debug("Opening transceiver")
             transceiver.open()
+            NfcScanLogger.debug("Selecting PPSE")
             val applicationIdentifier = SelectPpseCommand.transceiveWith(transceiver).getOrThrow()
-            SelectApplicationCommand(applicationIdentifier).transceiveWith(transceiver).getOrThrow()
+            NfcScanLogger.debug("Selected AID ${applicationIdentifier.value}")
+            val selectedApplication = SelectApplicationCommand(applicationIdentifier)
+                .transceiveWith(transceiver)
+                .getOrThrow()
+            NfcScanLogger.debug("Application selected; getting processing options")
+            val processingOptions = GetProcessingOptionsCommand(selectedApplication.processingOptionsDataObjectList)
+                .transceiveWith(transceiver)
+                .getOrThrow()
+            val recordLocators = processingOptions.recordLocators.ifEmpty {
+                DEFAULT_RECORD_LOCATORS
+            }
+            NfcScanLogger.debug("Processing options recordLocators=$recordLocators; probing records")
 
-            val records = mutableMapOf<String, ByteArray>()
+            val records = processingOptions.records.toMutableMap()
+            NfcScanLogger.debug("Processing options tags=${records.mapValues { it.value.size }.toSortedMap()}")
 
-            probeFiles@ for (sfi in PROBE_SFIS) {
-                for (record in 1..MAX_RECORDS_PER_SFI) {
-                    val result = ReadRecordCommand(record, sfi)
+            probeFiles@ for (recordLocator in recordLocators) {
+                for (record in recordLocator.firstRecord..recordLocator.lastRecord) {
+                    val result = ReadRecordCommand(
+                        recordNumber = record,
+                        shortFileIdentifier = recordLocator.shortFileIdentifier,
+                    )
                         .transceiveWith(transceiver)
 
                     result.onSuccess { result ->
                         records += result
+                        NfcScanLogger.debug(
+                            "Read record success sfi=${recordLocator.shortFileIdentifier} record=$record " +
+                                "tags=${result.mapValues { it.value.size }.toSortedMap()} " +
+                                "allTags=${records.keys.sorted()}"
+                        )
 
                         if (cardDataParser.canParse(records)) {
+                            NfcScanLogger.debug("Card data parser has enough tags; stopping record probe")
                             break@probeFiles
                         }
                     }.onFailure { error ->
-                        Log.d("NFC-Scan-Log", error.message ?: "Unknown record reading error")
+                        NfcScanLogger.debug(error.toDebugMessage())
 
                         if (isFileNotFoundError(error)) {
                             // Breaks the record loop but moves on to the next file
@@ -80,9 +104,11 @@ internal class ApduCardReader @Inject constructor(
                 }
             }
 
+            NfcScanLogger.debug("Record probing finished with tags=${records.keys.sorted()}")
             cardDataParser.parse(records)
                 ?: throw IllegalStateException("Could not parse card data from NFC tag")
         } finally {
+            NfcScanLogger.debug("Closing transceiver")
             transceiver.close()
         }
     }
@@ -92,9 +118,24 @@ internal class ApduCardReader @Inject constructor(
             error.sw1 == PARAMETER_ERROR_SW1 && error.sw2 == FILE_NOT_FOUND_SW2
     }
 
+    private fun Throwable.toDebugMessage(): String {
+        return when (this) {
+            is ApduResponseError.Invalid -> "Invalid APDU response data bytes=${data.size}"
+            is ApduResponseError.Parsing -> {
+                "Failed to parse APDU response data bytes=${data.size} cause=${cause?.javaClass?.simpleName}"
+            }
+            else -> message ?: "Unknown NFC reader error"
+        }
+    }
+
     private companion object {
-        // SFIs 1-3 cover virtually all Visa/Mastercard/Amex/Discover payment records.
-        val PROBE_SFIS = 1..8
+        val DEFAULT_RECORD_LOCATORS = (1..8).map { shortFileIdentifier ->
+            GetProcessingOptionsCommand.RecordLocator(
+                shortFileIdentifier = shortFileIdentifier,
+                firstRecord = 1,
+                lastRecord = MAX_RECORDS_PER_SFI,
+            )
+        }
         const val MAX_RECORDS_PER_SFI = 8
 
         const val PARAMETER_ERROR_SW1 = 0x6A.toByte()
