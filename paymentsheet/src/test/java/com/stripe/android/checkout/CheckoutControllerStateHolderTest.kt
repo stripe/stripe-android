@@ -193,12 +193,10 @@ internal class CheckoutControllerStateHolderTest {
         temporarySelection: String? = null,
         previousNewSelections: Bundle = Bundle(),
     ) = CheckoutControllerState(
-        key = DEFAULT_KEY,
         configuration = CheckoutController.Configuration().build(),
         checkoutSessionResponse = CheckoutSessionResponseFactory.create(),
         flagImages = null,
         collectedDetails = CheckoutCollectedDetails(),
-        integrationLaunched = false,
         paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.").build(),
         paymentSelection = paymentSelection,
@@ -235,8 +233,4 @@ internal class CheckoutControllerStateHolderTest {
         val stateHolder: CheckoutControllerStateHolder,
         val errorReporter: FakeErrorReporter,
     )
-
-    private companion object {
-        const val DEFAULT_KEY = "test_key"
-    }
 }

@@ -26,7 +26,7 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
     private val customerStateHolder: CustomerStateHolder,
     private val linkAccountHolder: LinkAccountHolder,
     @ViewModelScope private val coroutineScope: CoroutineScope,
-    private val sheetLauncherHolder: EmbeddedSheetLauncherHolder,
+    private val sheetStateHolder: SheetStateHolder,
 ) {
     fun create(
         paymentMethodMetadata: PaymentMethodMetadata,
@@ -45,7 +45,7 @@ internal class EmbeddedContentSavedPaymentMethodMutatorFactory @Inject construct
             prePaymentMethodRemoveActions = {},
             postPaymentMethodRemoveActions = {},
             onUpdatePaymentMethod = { _, _, _, _, _ ->
-                sheetLauncherHolder.sheetLauncher?.launchManage(
+                sheetStateHolder.sheetLauncher?.launchManage(
                     paymentMethodMetadata = paymentMethodMetadata,
                     customerState = requireNotNull(customerStateHolder.customer.value),
                     selection = selectionHolder.selection.value,

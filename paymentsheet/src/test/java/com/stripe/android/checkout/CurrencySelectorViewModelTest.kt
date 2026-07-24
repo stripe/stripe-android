@@ -82,12 +82,12 @@ internal class CurrencySelectorViewModelTest {
         viewModel.errorMessage.test {
             assertThat(awaitItem()).isEqualTo(R.string.stripe_something_went_wrong.resolvableString)
 
-            checkoutSessionFlow.value = InternalState(
-                key = "CheckoutConfigurationMergerTest",
-                configuration = Checkout.Configuration().build(),
-                CheckoutSessionResponseFactory.create(currency = "eur"),
-                flagImages = null,
-            ).asCheckoutSession()
+            checkoutSessionFlow.value = CheckoutSessionResponseFactory.create(currency = "eur")
+                .asCheckoutSession(
+                    flagImages = null,
+                    paymentOptionDisplayData = null,
+                    availableExpressButtonTypes = emptyList(),
+                )
 
             assertThat(awaitItem()).isNull()
         }
@@ -125,12 +125,11 @@ internal class CurrencySelectorViewModelTest {
         val application = ApplicationProvider.getApplicationContext<Application>()
         val fakeAnalyticsRequestExecutor = FakeAnalyticsRequestExecutor()
         val checkoutSessionFlow = MutableStateFlow(
-            InternalState(
-                key = "CheckoutConfigurationMergerTest",
-                configuration = Checkout.Configuration().build(),
-                CheckoutSessionResponseFactory.create(),
+            CheckoutSessionResponseFactory.create().asCheckoutSession(
                 flagImages = null,
-            ).asCheckoutSession()
+                paymentOptionDisplayData = null,
+                availableExpressButtonTypes = emptyList(),
+            )
         )
         val updateCurrencyCalls = Turbine<String>()
         val updateCurrencyResult = Turbine<Result<Unit>>()

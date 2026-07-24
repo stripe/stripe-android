@@ -23,7 +23,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.checkout.CheckoutInstances
 import com.stripe.android.common.ui.BottomSheetScaffold
 import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -202,7 +201,6 @@ internal class EmbeddedSheetActivity : AppCompatActivity() {
         super.onDestroy()
 
         if (isFinishing) {
-            CheckoutInstances.markIntegrationDismissed(args?.paymentMethodMetadata)
             if (::eventReporter.isInitialized) {
                 eventReporter.onDismiss()
             }

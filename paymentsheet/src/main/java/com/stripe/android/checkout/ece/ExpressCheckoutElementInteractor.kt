@@ -23,7 +23,9 @@ internal interface ExpressCheckoutElementInteractor {
     sealed class ViewAction {
         data object OnDisplayed : ViewAction()
 
-        data object OnWalletTapped : ViewAction()
+        data class OnWalletTapped(
+            val expressButton: ExpressButton,
+        ) : ViewAction()
     }
 }
 
@@ -32,6 +34,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
     stateHolder: CheckoutControllerStateHolder,
     private val savedStateHandle: SavedStateHandle,
     private val eventReporter: ExpressCheckoutElementEventReporter,
+    private val expressCheckoutElementConfirmationPerformer: ExpressCheckoutElementConfirmationPerformer,
 ) : ExpressCheckoutElementInteractor {
 
     private var hasReportedDisplayed: Boolean
@@ -73,7 +76,11 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     eventReporter.onEceDisplayed()
                 }
             }
-            ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped -> eventReporter.onEceWalletTapped()
+            is ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped -> {
+                eventReporter.onEceWalletTapped()
+
+                expressCheckoutElementConfirmationPerformer.confirm(viewAction.expressButton)
+            }
         }
     }
 

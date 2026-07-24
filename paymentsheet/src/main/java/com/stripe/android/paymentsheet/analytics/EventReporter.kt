@@ -236,6 +236,8 @@ internal interface EventReporter : CardScanEventsReporter {
 
     fun onTapToAddButtonShown()
 
+    fun onNfcScanButtonShown()
+
     fun onTapToAddStarted()
 
     fun onCardAddedWithTapToAdd(

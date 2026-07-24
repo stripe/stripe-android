@@ -1222,6 +1222,7 @@ internal class PaymentMethodMetadataTest {
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             requiresBillingAddressForAutomaticTax = false,
+            checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
 
@@ -1383,6 +1384,7 @@ internal class PaymentMethodMetadataTest {
             cardArts = emptyList(),
             shouldUseAutocompleteProxyEndpoints = false,
             requiresBillingAddressForAutomaticTax = false,
+            checkoutSessionResponse = null,
             paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
         )
         assertThat(metadata).isEqualTo(expectedMetadata)

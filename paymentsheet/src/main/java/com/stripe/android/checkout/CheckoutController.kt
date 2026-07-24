@@ -12,6 +12,7 @@ import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
+import com.stripe.android.paymentelement.embedded.content.SheetStateHolder
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionRepository
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.repositories.validateShippingCountry
@@ -42,6 +43,7 @@ class CheckoutController @Inject internal constructor(
     private val checkoutSessionRepository: CheckoutSessionRepository,
     private val checkoutStateLoader: CheckoutStateLoader,
     private val stateHolder: CheckoutControllerStateHolder,
+    private val sheetStateHolder: SheetStateHolder,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) {
@@ -242,11 +244,11 @@ class CheckoutController @Inject internal constructor(
         additionalStateMutations: CheckoutControllerState.() -> CheckoutControllerState = { this },
         block: suspend CheckoutControllerState.(sessionId: String) -> kotlin.Result<CheckoutSessionResponse>,
     ): kotlin.Result<Unit> {
-        val currentState = stateHolder.state
+        stateHolder.state
             ?: return kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session before it is configured.")
             )
-        if (currentState.integrationLaunched) {
+        if (sheetStateHolder.sheetIsOpen) {
             return kotlin.Result.failure(
                 IllegalStateException("Cannot mutate checkout session while a payment flow is presented.")
             )

@@ -169,12 +169,13 @@ class PlacesClientProxyTest {
             )
 
             val place = proxy.fetchPlace(
-                "placeId"
+                placeId = "placeId",
+                locale = java.util.Locale.getDefault(),
             )
 
             runCurrent()
 
-            assertThat(place.getOrNull()?.place)
+            assertThat(place.getOrNull())
                 .isNotNull()
         }
 

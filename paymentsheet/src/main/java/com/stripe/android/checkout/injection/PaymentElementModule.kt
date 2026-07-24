@@ -1,6 +1,7 @@
 package com.stripe.android.checkout.injection
 
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.CheckoutSheetLauncher
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.EmbeddedRowSelectionImmediateActionHandler
 import com.stripe.android.paymentelement.embedded.content.DefaultEmbeddedContentHelper
@@ -11,6 +12,7 @@ import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedContentHelperStateHolder
 import com.stripe.android.paymentelement.embedded.content.EmbeddedLinkHelper
 import com.stripe.android.paymentelement.embedded.content.EmbeddedPaymentMethodVerticalLayoutInteractorFactory
+import com.stripe.android.paymentelement.embedded.content.EmbeddedSheetLauncher
 import com.stripe.android.paymentelement.embedded.content.EmbeddedWalletsHelper
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Binds
@@ -38,6 +40,9 @@ internal interface PaymentElementModule {
     fun bindsEmbeddedRowSelectionImmediateActionHandler(
         handler: DefaultEmbeddedRowSelectionImmediateActionHandler
     ): EmbeddedRowSelectionImmediateActionHandler
+
+    @Binds
+    fun bindsSheetLauncher(launcher: CheckoutSheetLauncher): EmbeddedSheetLauncher
 
     companion object {
         @Provides
