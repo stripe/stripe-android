@@ -6,6 +6,7 @@ import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.networking.ApiRequest
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -41,4 +42,12 @@ class PaymentConfigurationModule {
             stripeAccountId = config.stripeAccountId,
         )
     }
+
+    @Provides
+    fun provideApiRequestOptions(
+        paymentConfiguration: Provider<PaymentConfiguration>
+    ): ApiRequest.Options = ApiRequest.Options(
+        apiKey = paymentConfiguration.get().publishableKey,
+        stripeAccount = paymentConfiguration.get().stripeAccountId,
+    )
 }

@@ -9,6 +9,7 @@ import com.stripe.android.checkout.injection.CheckoutPresenterSubcomponent
 import com.stripe.android.checkout.injection.DaggerCheckoutControllerComponent
 import com.stripe.android.common.ui.PaymentElementActivityResultCaller
 import com.stripe.android.core.injection.ViewModelScope
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.StatusBarCompat
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
@@ -46,6 +47,7 @@ class CheckoutController @Inject internal constructor(
     private val sheetStateHolder: SheetStateHolder,
     private val checkoutPresenterSubcomponentFactory: CheckoutPresenterSubcomponent.Factory,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
+    private val requestOptions: ApiRequest.Options,
 ) {
     val checkoutSession: StateFlow<CheckoutSession?>
         get() = stateHolder.checkoutSession
@@ -70,6 +72,7 @@ class CheckoutController @Inject internal constructor(
         checkoutSessionRepository.init(
             sessionId = sessionId,
             adaptivePricingAllowed = configurationState.adaptivePricingAllowed,
+            requestOptions = requestOptions,
         ).mapCatching { response ->
             checkoutStateLoader.loadInitial(
                 configuration = configurationState,
@@ -86,14 +89,14 @@ class CheckoutController @Inject internal constructor(
     suspend fun applyPromotionCode(
         promotionCode: String,
     ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim())
+        checkoutSessionRepository.applyPromotionCode(sessionId, promotionCode.trim(), requestOptions)
     }
 
     /**
      * Removes the currently applied promotion code from the checkout session.
      */
     suspend fun removePromotionCode(): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.applyPromotionCode(sessionId, "")
+        checkoutSessionRepository.applyPromotionCode(sessionId, "", requestOptions)
     }
 
     /**
@@ -106,7 +109,7 @@ class CheckoutController @Inject internal constructor(
         lineItemId: String,
         quantity: Int,
     ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity)
+        checkoutSessionRepository.updateLineItemQuantity(sessionId, lineItemId, quantity, requestOptions)
     }
 
     /**
@@ -117,7 +120,7 @@ class CheckoutController @Inject internal constructor(
     suspend fun selectShippingOption(
         id: String,
     ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.selectShippingRate(sessionId, id)
+        checkoutSessionRepository.selectShippingRate(sessionId, id, requestOptions)
     }
 
     /**
@@ -160,7 +163,7 @@ class CheckoutController @Inject internal constructor(
         type: String,
         value: String,
     ): kotlin.Result<Unit> = withCheckoutState { sessionId ->
-        checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim())
+        checkoutSessionRepository.updateTaxId(sessionId, type.trim(), value.trim(), requestOptions)
     }
 
     /**
@@ -206,6 +209,7 @@ class CheckoutController @Inject internal constructor(
                 checkoutSessionRepository.init(
                     sessionId = sessionId,
                     adaptivePricingAllowed = configuration.adaptivePricingAllowed,
+                    requestOptions = requestOptions,
                 )
             },
             onFailure = { kotlin.Result.failure(it) },
@@ -224,7 +228,7 @@ class CheckoutController @Inject internal constructor(
             val shouldSendTaxRegion = checkoutSessionResponse.automaticTaxEnabled &&
                 checkoutSessionResponse.taxAddressSource == addressType
             if (shouldSendTaxRegion) {
-                checkoutSessionRepository.updateTaxRegion(sessionId, built)
+                checkoutSessionRepository.updateTaxRegion(sessionId, built, requestOptions)
             } else {
                 kotlin.Result.success(checkoutSessionResponse)
             }
@@ -294,7 +298,7 @@ class CheckoutController @Inject internal constructor(
 
     internal suspend fun updateCurrency(currency: String): kotlin.Result<Unit> {
         return withCheckoutState { sessionId ->
-            checkoutSessionRepository.updateCurrency(sessionId, currency)
+            checkoutSessionRepository.updateCurrency(sessionId, currency, requestOptions)
         }
     }
 

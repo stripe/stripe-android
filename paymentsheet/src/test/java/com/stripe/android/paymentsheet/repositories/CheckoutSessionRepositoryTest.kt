@@ -6,6 +6,7 @@ import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutInit
 import com.stripe.android.checkouttesting.checkoutUpdate
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networktesting.NetworkRule
@@ -31,6 +32,10 @@ class CheckoutSessionRepositoryTest {
 
     private val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
 
+    private val requestOptions = ApiRequest.Options(
+        apiKey = "pk_test_123",
+    )
+
     private val repository = CheckoutSessionRepository(
         clientParams = clientParams,
         stripeNetworkClient = DefaultStripeNetworkClient(),
@@ -39,8 +44,6 @@ class CheckoutSessionRepositoryTest {
             context = ApplicationProvider.getApplicationContext(),
             publishableKey = "pk_test_123",
         ),
-        publishableKeyProvider = { "pk_test_123" },
-        stripeAccountIdProvider = { null },
     )
 
     @Test
@@ -57,6 +60,7 @@ class CheckoutSessionRepositoryTest {
         val result = repository.init(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             adaptivePricingAllowed = true,
+            requestOptions = requestOptions,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -74,6 +78,7 @@ class CheckoutSessionRepositoryTest {
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             currencyCode = "eur",
+            requestOptions = requestOptions,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -89,6 +94,7 @@ class CheckoutSessionRepositoryTest {
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             currencyCode = "invalid",
+            requestOptions = requestOptions,
         )
 
         assertThat(result.isFailure).isTrue()
@@ -103,6 +109,7 @@ class CheckoutSessionRepositoryTest {
         repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             currencyCode = "eur",
+            requestOptions = requestOptions,
         ).getOrThrow()
 
         val params = analyticsRequestExecutor.getExecutedRequests().single().params
@@ -119,6 +126,7 @@ class CheckoutSessionRepositoryTest {
         val result = repository.updateCurrency(
             sessionId = DEFAULT_CHECKOUT_SESSION_ID,
             currencyCode = "invalid",
+            requestOptions = requestOptions,
         )
 
         assertThat(result.isFailure).isTrue()
