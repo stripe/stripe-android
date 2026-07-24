@@ -16,9 +16,9 @@ internal object CleanupChromeRule : TestRule {
                 try {
                     base.evaluate()
                 } finally {
+                    val instrumentation = InstrumentationRegistry.getInstrumentation()
                     val command = "am force-stop com.android.chrome"
-                    val uiAutomation = InstrumentationRegistry.getInstrumentation().uiAutomation
-                    uiAutomation.executeShellCommand(command).close()
+                    instrumentation.uiAutomation.executeShellCommand(command).close()
 
                     // Force-stopping Chrome leaves no window focused; restore focus so the next
                     // test's Espresso RootViewPicker doesn't time out waiting for it.
