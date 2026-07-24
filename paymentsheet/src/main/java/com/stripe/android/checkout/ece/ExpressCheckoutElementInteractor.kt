@@ -77,7 +77,7 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                 }
             }
             is ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped -> {
-                eventReporter.onEceWalletTapped()
+                eventReporter.onEceWalletTapped(viewAction.expressButton)
 
                 expressCheckoutElementConfirmationPerformer.confirm(viewAction.expressButton)
             }
