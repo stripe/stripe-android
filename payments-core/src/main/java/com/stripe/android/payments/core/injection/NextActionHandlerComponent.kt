@@ -1,10 +1,10 @@
 package com.stripe.android.payments.core.injection
 
 import android.content.Context
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.authentication.DefaultPaymentNextActionHandlerRegistry
@@ -29,6 +29,7 @@ import kotlin.coroutines.CoroutineContext
         WeChatPayNextActionHandlerModule::class,
         CoreCommonModule::class,
         StripeRepositoryModule::class,
+        ApiRequestOptionsModule::class,
     ]
 )
 internal interface NextActionHandlerComponent {
@@ -51,8 +52,7 @@ internal interface NextActionHandlerComponent {
             @UIContext
             uiContext: CoroutineContext,
             @BindsInstance
-            @Named(PUBLISHABLE_KEY)
-            publishableKeyProvider: () -> String,
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(PRODUCT_USAGE)
             productUsage: Set<String>,

@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
@@ -118,7 +119,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
-            publishableKeyProvider: () -> String,
+            apiConfiguration: ApiConfiguration.State,
             productUsage: Set<String>,
             isInstantApp: Boolean,
             includePaymentSheetNextActionHandlers: Boolean,
@@ -130,7 +131,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                     enableLogging = enableLogging,
                     workContext = workContext,
                     uiContext = uiContext,
-                    publishableKeyProvider = publishableKeyProvider,
+                    apiConfiguration = apiConfiguration,
                     productUsage = productUsage,
                     isInstantApp = isInstantApp,
                     includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,

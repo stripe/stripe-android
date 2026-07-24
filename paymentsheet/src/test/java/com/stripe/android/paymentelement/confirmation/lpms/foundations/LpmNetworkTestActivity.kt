@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
@@ -32,6 +33,7 @@ import com.stripe.android.paymentelement.confirmation.injection.DefaultConfirmat
 import com.stripe.android.paymentelement.confirmation.intent.DefaultIntentConfirmationModule
 import com.stripe.android.paymentelement.confirmation.lpms.foundations.network.StripeNetworkTestClient
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.injection.ApiRequestOptionsModule
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.FakePrefsRepository
@@ -88,6 +90,10 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
                 val component = DaggerLpmNetworkTestViewModelComponent.factory()
                     .create(
                         application = extras.requireApplication(),
+                        apiConfiguration = ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        ),
                         publishableKeyProvider = { args.publishableKey },
                         stripeAccountIdProvider = { null },
                         allowsManualConfirmation = args.allowsManualConfirmation,
@@ -131,6 +137,7 @@ internal class LpmNetworkTestActivity : AppCompatActivity() {
 
 @Component(
     modules = [
+        ApiRequestOptionsModule::class,
         ElementsSessionClientParamsModule::class,
         StripeRepositoryModule::class,
         PaymentElementRequestSurfaceModule::class,
@@ -148,6 +155,8 @@ internal interface LpmNetworkTestViewModelComponent {
         fun create(
             @BindsInstance
             application: Application,
+            @BindsInstance
+            apiConfiguration: ApiConfiguration.State,
             @BindsInstance
             @Named(PUBLISHABLE_KEY)
             publishableKeyProvider: () -> String,

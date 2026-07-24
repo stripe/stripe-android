@@ -60,6 +60,11 @@ constructor(
     private val uiContext: CoroutineContext = Dispatchers.Main
 ) : PaymentController {
 
+    private val apiConfiguration = ApiConfiguration.State(
+        publishableKey = publishableKeyProvider(),
+        stripeAccountId = null,
+    )
+
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
     private val pollingAnalyticsEventReporter = DefaultPollingAnalyticsEventReporter(
         analyticsRequestExecutor,
@@ -67,7 +72,7 @@ constructor(
     )
     private val paymentIntentFlowResultProcessor = PaymentIntentFlowResultProcessor(
         context,
-        publishableKeyProvider,
+        apiConfiguration,
         stripeRepository,
         Logger.getInstance(enableLogging),
         workContext,
@@ -75,7 +80,7 @@ constructor(
     )
     private val setupIntentFlowResultProcessor = SetupIntentFlowResultProcessor(
         context,
-        publishableKeyProvider,
+        apiConfiguration,
         stripeRepository,
         Logger.getInstance(enableLogging),
         workContext,
@@ -104,7 +109,7 @@ constructor(
             enableLogging = enableLogging,
             workContext = workContext,
             uiContext = uiContext,
-            publishableKeyProvider = publishableKeyProvider,
+            apiConfiguration = apiConfiguration,
             productUsage = paymentAnalyticsRequestFactory.defaultProductUsageTokens,
             isInstantApp = isInstantApp,
             includePaymentSheetNextActionHandlers = false, // StripePaymentController is not used in PaymentSheet.

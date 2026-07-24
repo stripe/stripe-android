@@ -3,8 +3,8 @@ package com.stripe.android.payments.core.authentication
 import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -32,7 +32,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
     @UIContext private val uiContext: CoroutineContext,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    private val apiConfiguration: ApiConfiguration.State,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
     private val redirectResolver: RedirectResolver,
@@ -106,7 +106,7 @@ internal class WebIntentNextActionHandler @Inject constructor(
                 shouldCancelSource = shouldCancelSource,
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
                 statusBarColor = host.statusBarColor,
-                publishableKey = publishableKeyProvider(),
+                publishableKey = apiConfiguration.publishableKey,
                 isInstantApp = isInstantApp,
                 referrer = referrer,
                 forceInAppWebView = forceInAppWebView,

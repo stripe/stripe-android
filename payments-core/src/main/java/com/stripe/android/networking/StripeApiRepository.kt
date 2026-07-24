@@ -26,7 +26,7 @@ import com.stripe.android.core.frauddetection.FraudDetectionData
 import com.stripe.android.core.frauddetection.FraudDetectionDataParamsUtils
 import com.stripe.android.core.frauddetection.FraudDetectionDataRepository
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.StripeFileParams
 import com.stripe.android.core.model.StripeModel
@@ -150,7 +150,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     @Inject
     constructor(
         appContext: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfiguration: ApiConfiguration.State,
         requestSurface: RequestSurface,
         @IOContext workContext: CoroutineContext,
         @Named(PRODUCT_USAGE) productUsageTokens: Set<String>,
@@ -159,7 +159,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         logger: Logger
     ) : this(
         context = appContext,
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfiguration.publishableKey },
         requestSurface = requestSurface,
         logger = logger,
         workContext = workContext,

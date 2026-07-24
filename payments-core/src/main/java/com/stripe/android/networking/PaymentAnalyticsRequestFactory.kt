@@ -7,7 +7,7 @@ import androidx.annotation.Keep
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.Stripe
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsFields
 import com.stripe.android.core.networking.AnalyticsRequest
@@ -48,32 +48,37 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         publishableKey: String,
         defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
-        context,
-        { publishableKey },
-        defaultProductUsageTokens
+        packageManager = context.applicationContext.packageManager,
+        packageInfo = context.applicationContext.packageInfo,
+        packageName = context.applicationContext.packageName.orEmpty(),
+        publishableKeyProvider = { publishableKey },
+        networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
     internal constructor(
         context: Context,
-        publishableKeyProvider: Provider<String>
+        publishableKeyProvider: () -> String,
+        defaultProductUsageTokens: Set<String> = emptySet()
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
         publishableKeyProvider = publishableKeyProvider,
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        defaultProductUsageTokens = defaultProductUsageTokens,
     )
 
     @Inject
     internal constructor(
         context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfiguration: ApiConfiguration.State,
         @Named(PRODUCT_USAGE) defaultProductUsageTokens: Set<String>
     ) : this(
         packageManager = context.applicationContext.packageManager,
         packageInfo = context.applicationContext.packageInfo,
         packageName = context.applicationContext.packageName.orEmpty(),
-        publishableKeyProvider = publishableKeyProvider,
+        publishableKeyProvider = { apiConfiguration.publishableKey },
         networkTypeProvider = NetworkTypeDetector(context)::invoke,
         defaultProductUsageTokens = defaultProductUsageTokens,
     )
