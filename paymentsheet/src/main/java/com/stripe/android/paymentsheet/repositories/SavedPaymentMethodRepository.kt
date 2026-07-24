@@ -14,22 +14,26 @@ import javax.inject.Inject
 internal interface SavedPaymentMethodRepository {
     suspend fun detachPaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
     ): Result<PaymentMethod>
 
     suspend fun updatePaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod>
 
     suspend fun setDefaultPaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String?,
     ): Result<Customer>
 
     suspend fun retrievePaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
     ): Result<PaymentMethod>
 }
@@ -41,6 +45,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
 
     override suspend fun detachPaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
@@ -55,6 +60,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.detachPaymentMethodAndDuplicates(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 customerSessionClientSecret = customerMetadata.customerSessionClientSecret,
                 paymentMethodId = paymentMethodId,
             )
@@ -63,6 +69,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.detachPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 paymentMethodId = paymentMethodId,
             )
         }
@@ -70,6 +77,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
 
     override suspend fun updatePaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> = when (customerMetadata) {
@@ -87,6 +95,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.updatePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 paymentMethodId = paymentMethodId,
                 params = params,
             )
@@ -95,6 +104,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.updatePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 paymentMethodId = paymentMethodId,
                 params = params,
             )
@@ -103,6 +113,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
 
     override suspend fun setDefaultPaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String?,
     ): Result<Customer> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
@@ -112,6 +123,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.setDefaultPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 paymentMethodId = paymentMethodId,
             )
         }
@@ -119,6 +131,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.setDefaultPaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 paymentMethodId = paymentMethodId,
             )
         }
@@ -126,6 +139,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
 
     override suspend fun retrievePaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
     ): Result<PaymentMethod> = when (customerMetadata) {
         is CustomerMetadata.CheckoutSession -> {
@@ -137,6 +151,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.retrievePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 paymentMethodId = paymentMethodId,
             )
         }
@@ -144,6 +159,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             customerRepository.retrievePaymentMethod(
                 customerId = customerMetadata.id,
                 ephemeralKeySecret = customerMetadata.ephemeralKeySecret,
+                stripeAccountId = stripeAccountId,
                 paymentMethodId = paymentMethodId,
             )
         }

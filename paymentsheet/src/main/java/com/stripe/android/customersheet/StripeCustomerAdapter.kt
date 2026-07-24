@@ -69,6 +69,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.getPaymentMethods(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                stripeAccountId = null,
                 types = requestedTypes,
                 silentlyFail = false,
             ).getOrElse {
@@ -87,6 +88,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.attachPaymentMethod(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                stripeAccountId = null,
                 paymentMethodId = paymentMethodId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
@@ -104,6 +106,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.detachPaymentMethod(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                stripeAccountId = null,
                 paymentMethodId = paymentMethodId,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
@@ -122,6 +125,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             customerRepository.updatePaymentMethod(
                 customerId = customerEphemeralKey.customerId,
                 ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
+                stripeAccountId = null,
                 paymentMethodId = paymentMethodId,
                 params = params,
             ).getOrElse {
