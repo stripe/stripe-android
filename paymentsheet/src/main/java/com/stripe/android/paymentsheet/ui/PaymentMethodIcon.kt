@@ -13,9 +13,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import com.stripe.android.paymentsheet.ui.IconHelper.isDark
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.isComponentColorDark
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val TEST_TAG_ICON_FROM_RES = "PaymentMethodIconFomRes"
@@ -29,7 +29,7 @@ internal fun PaymentMethodIcon(
     modifier: Modifier,
     contentAlignment: Alignment = Alignment.TopStart,
 ) {
-    val isDark = isDark()
+    val isDark = isComponentColorDark()
     val colorFilter = remember(iconRequiresTinting) {
         if (iconRequiresTinting) {
             val tintColor = if (isDark) Color.White else Color.Black
