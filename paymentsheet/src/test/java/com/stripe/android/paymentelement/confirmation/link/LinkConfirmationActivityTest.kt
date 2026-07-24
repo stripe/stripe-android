@@ -188,8 +188,6 @@ internal class LinkConfirmationActivityTest(private val nativeLinkEnabled: Boole
                             configuration = TestFactory.LINK_CONFIGURATION,
                             paymentMethodMetadata = paymentMethodMetadata,
                             requestSurface = RequestSurface.PaymentElement,
-                            publishableKey = PUBLISHABLE_KEY,
-                            stripeAccountId = null,
                             linkExpressMode = LinkExpressMode.ENABLED,
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                             paymentElementCallbackIdentifier = "ConfirmationTestIdentifier",

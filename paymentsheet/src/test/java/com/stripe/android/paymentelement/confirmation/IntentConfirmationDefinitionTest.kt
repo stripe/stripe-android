@@ -407,7 +407,7 @@ class IntentConfirmationDefinitionTest {
         var capturedStatusBarColor: Int? = null
 
         val definition = createIntentConfirmationDefinition(
-            paymentLauncherFactory = { _, statusBarColor ->
+            paymentLauncherFactory = { _, statusBarColor, _ ->
                 capturedStatusBarColor = statusBarColor
                 FakePaymentLauncher()
             },
@@ -517,8 +517,9 @@ class IntentConfirmationDefinitionTest {
                 }
             },
         paymentLauncher: PaymentLauncher = FakePaymentLauncher(),
-        paymentLauncherFactory: (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?) -> PaymentLauncher =
-            { _, _ -> paymentLauncher },
+        paymentLauncherFactory:
+            (ActivityResultLauncher<PaymentLauncherContract.Args>, Int?, com.stripe.android.ApiConfiguration.State)
+            -> PaymentLauncher = { _, _, _ -> paymentLauncher },
     ): IntentConfirmationDefinition {
         return IntentConfirmationDefinition(
             intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
