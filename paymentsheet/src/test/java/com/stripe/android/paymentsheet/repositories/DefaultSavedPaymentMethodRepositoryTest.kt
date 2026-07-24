@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.repositories
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.model.PaymentMethodRemovePermission
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
@@ -44,6 +45,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -57,6 +59,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -73,6 +76,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -89,6 +93,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.updatePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
             params = PaymentMethodUpdateParams.createCard(),
         )
@@ -117,6 +122,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val result = repository.updatePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
             params = PaymentMethodUpdateParams.createCard(
                 expiryMonth = 12,
@@ -148,6 +154,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val result = repository.updatePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
             params = PaymentMethodUpdateParams.createCard(
                 expiryMonth = 12,
@@ -166,6 +173,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.updatePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
             params = PaymentMethodUpdateParams.createCard(),
         )
@@ -181,6 +189,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.updatePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
             params = PaymentMethodUpdateParams.createCard(),
         )
@@ -197,6 +206,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.setDefaultPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -212,6 +222,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.setDefaultPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -225,6 +236,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.setDefaultPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -243,6 +255,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.retrievePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -259,6 +272,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.retrievePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_456",
         )
 
@@ -272,6 +286,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
     ) {
         val result = repository.retrievePaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -294,6 +309,7 @@ class DefaultSavedPaymentMethodRepositoryTest {
 
         val result = repository.detachPaymentMethod(
             customerMetadata = customerMetadata,
+            stripeAccountId = null,
             paymentMethodId = "pm_123",
         )
 
@@ -328,12 +344,11 @@ class DefaultSavedPaymentMethodRepositoryTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
         )
         val repository = DefaultSavedPaymentMethodRepository(
             customerRepository = customerRepository,
             checkoutSessionRepository = checkoutSessionRepository,
+            requestOptions = ApiRequest.Options(apiKey = "pk_test_123"),
         )
 
         Scenario(

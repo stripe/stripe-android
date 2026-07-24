@@ -1,9 +1,12 @@
 package com.stripe.android.customersheet.data
 
+import android.app.Application
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.runCatching
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.CustomerPermissions
@@ -26,6 +29,7 @@ import kotlin.coroutines.CoroutineContext
 
 @Singleton
 internal class CustomerAdapterDataSource @Inject constructor(
+    private val application: Application,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val customerAdapter: CustomerAdapter,
     private val errorReporter: ErrorReporter,
@@ -125,6 +129,7 @@ internal class CustomerAdapterDataSource @Inject constructor(
             )
         )
 
+        val paymentConfig = PaymentConfiguration.getInstance(application)
         return elementsSessionRepository.get(
             initializationMode,
             customer = null,
@@ -132,6 +137,10 @@ internal class CustomerAdapterDataSource @Inject constructor(
             customPaymentMethods = listOf(),
             savedPaymentMethodSelectionId = null,
             countryOverride = null,
+            requestOptions = ApiRequest.Options(
+                apiKey = paymentConfig.publishableKey,
+                stripeAccount = paymentConfig.stripeAccountId,
+            ),
         ).onSuccess {
             errorReporter.report(
                 errorEvent = ErrorReporter.SuccessEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_SUCCESS,

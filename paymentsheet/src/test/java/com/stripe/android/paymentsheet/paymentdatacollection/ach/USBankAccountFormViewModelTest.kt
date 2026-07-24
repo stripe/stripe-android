@@ -95,6 +95,8 @@ class USBankAccountFormViewModelTest {
         sellerBusinessName = null,
         forceSetupFutureUseBehavior = false,
         clientAttributionMetadata = PaymentMethodMetadataFixtures.CLIENT_ATTRIBUTION_METADATA,
+        publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+        stripeAccountId = STRIPE_ACCOUNT_ID,
     )
 
     private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
@@ -2131,7 +2133,6 @@ class USBankAccountFormViewModelTest {
         return USBankAccountFormViewModel(
             args = args,
             application = ApplicationProvider.getApplicationContext(),
-            lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         ).also { viewModelStoreRule.track(it) }

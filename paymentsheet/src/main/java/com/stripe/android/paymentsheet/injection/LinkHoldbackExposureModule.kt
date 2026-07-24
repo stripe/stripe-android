@@ -1,6 +1,8 @@
 package com.stripe.android.paymentsheet.injection
 
 import android.app.Application
+import com.stripe.android.ApiConfiguration
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.common.analytics.experiment.DefaultLogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.DefaultLogLinkHoldbackExperiment
@@ -8,8 +10,6 @@ import com.stripe.android.common.analytics.experiment.LogFcLiteExperiment
 import com.stripe.android.common.analytics.experiment.LogLinkHoldbackExperiment
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.link.repositories.LinkApiRepository
@@ -21,7 +21,7 @@ import com.stripe.android.repository.ConsumersApiServiceImpl
 import dagger.Module
 import dagger.Provides
 import java.util.Locale
-import javax.inject.Named
+import javax.inject.Provider
 import javax.inject.Qualifier
 import kotlin.coroutines.CoroutineContext
 
@@ -61,8 +61,7 @@ internal class LinkHoldbackExposureModule {
     @LinkDisabledApiRepository
     fun providesLinkRepository(
         application: Application,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
-        @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        paymentConfigurationProvider: Provider<PaymentConfiguration>,
         requestSurface: RequestSurface,
         stripeRepository: StripeRepository,
         @IOContext workContext: CoroutineContext,
@@ -79,11 +78,15 @@ internal class LinkHoldbackExposureModule {
                 workContext = workContext
             )
         )
+        val config = paymentConfigurationProvider.get()
+        val apiConfiguration = ApiConfiguration.State(
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
+        )
         return LinkApiRepository(
             application = application,
             requestSurface = requestSurface,
-            publishableKeyProvider = publishableKeyProvider,
-            stripeAccountIdProvider = stripeAccountIdProvider,
+            apiConfiguration = apiConfiguration,
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,
             workContext = workContext,

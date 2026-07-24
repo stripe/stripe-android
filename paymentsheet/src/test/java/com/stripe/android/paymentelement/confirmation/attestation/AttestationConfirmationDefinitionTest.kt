@@ -625,7 +625,6 @@ internal class AttestationConfirmationDefinitionTest {
         integrityRequestManager: IntegrityRequestManager = FakeIntegrityRequestManager(),
         coroutineScope: CoroutineScope = coroutineScopeCleanupRule.track(CoroutineScope(UnconfinedTestDispatcher())),
         workContext: CoroutineContext = UnconfinedTestDispatcher(),
-        publishableKey: String = launcherArgs.publishableKey,
         productUsage: Set<String> = launcherArgs.productUsage,
         eventsReporter: AttestationAnalyticsEventsReporter = FakeAttestationAnalyticsEventsReporter(),
         isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge =
@@ -637,7 +636,6 @@ internal class AttestationConfirmationDefinitionTest {
             integrityRequestManager = integrityRequestManager,
             coroutineScope = coroutineScope,
             workContext = workContext,
-            publishableKeyProvider = { publishableKey },
             productUsage = productUsage,
             attestationAnalyticsEventsReporter = eventsReporter,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,

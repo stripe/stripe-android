@@ -2,9 +2,11 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.networking.ApiRequest
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named
@@ -29,4 +31,23 @@ class PaymentConfigurationModule {
     fun provideStripeAccountId(
         paymentConfiguration: Provider<PaymentConfiguration>
     ): () -> String? = { paymentConfiguration.get().stripeAccountId }
+
+    @Provides
+    fun provideApiConfigurationState(
+        paymentConfiguration: Provider<PaymentConfiguration>
+    ): ApiConfiguration.State {
+        val config = paymentConfiguration.get()
+        return ApiConfiguration.State(
+            publishableKey = config.publishableKey,
+            stripeAccountId = config.stripeAccountId,
+        )
+    }
+
+    @Provides
+    fun provideApiRequestOptions(
+        paymentConfiguration: Provider<PaymentConfiguration>
+    ): ApiRequest.Options = ApiRequest.Options(
+        apiKey = paymentConfiguration.get().publishableKey,
+        stripeAccount = paymentConfiguration.get().stripeAccountId,
+    )
 }

@@ -3,11 +3,9 @@ package com.stripe.android.common.taptoadd
 import android.content.Context
 import android.content.pm.ApplicationInfo
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.PaymentConfiguration
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import javax.inject.Provider
 
 class DefaultTapToAddIsSimulatedProviderTest {
 
@@ -15,7 +13,7 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns true when test mode and application is debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = true),
-            paymentConfiguration = provider { PaymentConfiguration(publishableKey = "pk_test_123") },
+            isLiveModeProvider = { false },
         )
 
         assertThat(provider.get()).isTrue()
@@ -25,7 +23,7 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns false when live mode even if debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = true),
-            paymentConfiguration = provider { PaymentConfiguration(publishableKey = "pk_live_123") },
+            isLiveModeProvider = { true },
         )
 
         assertThat(provider.get()).isFalse()
@@ -35,7 +33,7 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns false when test mode but application is not debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = false),
-            paymentConfiguration = provider { PaymentConfiguration(publishableKey = "pk_test_123") },
+            isLiveModeProvider = { false },
         )
 
         assertThat(provider.get()).isFalse()
@@ -45,7 +43,7 @@ class DefaultTapToAddIsSimulatedProviderTest {
     fun `get returns false when live mode and not debuggable`() {
         val provider = DefaultTapToAddIsSimulatedProvider(
             applicationContext = context(debuggable = false),
-            paymentConfiguration = provider { PaymentConfiguration(publishableKey = "pk_live_123") },
+            isLiveModeProvider = { true },
         )
 
         assertThat(provider.get()).isFalse()
@@ -62,9 +60,5 @@ class DefaultTapToAddIsSimulatedProviderTest {
         whenever(context.applicationInfo).thenReturn(appInfo)
 
         return context
-    }
-
-    private fun provider(block: () -> PaymentConfiguration): Provider<PaymentConfiguration> {
-        return Provider { block() }
     }
 }

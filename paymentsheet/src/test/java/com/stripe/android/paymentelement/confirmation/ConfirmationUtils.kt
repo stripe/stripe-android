@@ -165,8 +165,6 @@ internal suspend fun createIntentConfirmationInterceptor(
                             context = ApplicationProvider.getApplicationContext(),
                             publishableKey = "pk",
                         ),
-                        publishableKeyProvider = { "pk" },
-                        stripeAccountIdProvider = { null },
                     ),
                     requestOptions = requestOptions,
                 )
@@ -198,10 +196,10 @@ internal fun createTestConfirmationHandlerFactory(
             confirmationDefinitions = listOf(
                 IntentConfirmationDefinition(
                     intentConfirmationInterceptorFactory = intentConfirmationInterceptorFactory,
-                    paymentLauncherFactory = { launcher, _ ->
+                    paymentLauncherFactory = { launcher, _, apiConfiguration ->
                         stripePaymentLauncherAssistedFactory.create(
-                            publishableKey = { paymentConfiguration.publishableKey },
-                            stripeAccountId = { paymentConfiguration.stripeAccountId },
+                            publishableKey = { apiConfiguration.publishableKey },
+                            stripeAccountId = { apiConfiguration.stripeAccountId },
                             hostActivityLauncher = launcher,
                             statusBarColor = statusBarColor,
                             includePaymentSheetNextHandlers = true,

@@ -100,6 +100,7 @@ internal class DefaultRetrieveCustomerEmailTest {
             configuration = configuration,
             customerMetadata = customerMetadata,
             customerEmail = customerEmail,
+            stripeAccountId = null,
         )
 
         Scenario(
@@ -127,6 +128,7 @@ internal class DefaultRetrieveCustomerEmailTest {
         override suspend fun retrieveCustomer(
             customerId: String,
             ephemeralKeySecret: String,
+            stripeAccountId: String?,
         ) = null.also {
             retrieveCalls.add(RetrieveCall(customerId, ephemeralKeySecret))
         }

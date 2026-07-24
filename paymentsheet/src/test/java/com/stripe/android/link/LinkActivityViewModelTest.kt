@@ -152,8 +152,6 @@ internal class LinkActivityViewModelTest {
             configuration = TestFactory.LINK_CONFIGURATION,
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             requestSurface = RequestSurface.PaymentElement,
-            publishableKey = "pk_123",
-            stripeAccountId = null,
             linkExpressMode = LinkExpressMode.DISABLED,
             linkAccountInfo = LinkAccountUpdate.Value(
                 account = null,
