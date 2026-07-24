@@ -93,8 +93,6 @@ internal object NfcScanningActivityTestFixtures {
     )
 
     fun declinedCardResponses(): List<ByteArray> = listOf(
-        apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
-        apduSuccessResponse(byteArrayOf()),
         CARD_DECLINED_RESPONSE,
     )
 
