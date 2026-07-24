@@ -307,6 +307,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             initializationMode = initializationMode,
             isLiveMode = paymentConfiguration.get().isLiveMode(),
             callbackIdentifier = paymentElementCallbackIdentifier,
+            isTapToAddSupported = tapToAddConnectionStarter.isSupported,
         )
 
         eventReporter.onLoadStarted(metadata.initializedViaCompose)
