@@ -39,9 +39,14 @@ def class_names_from_test_files(test_directory, test_file_names):
     return class_names
 
 
-EXCLUDED_TEST_CLASSES = {
+# Runs on Firebase Test Lab (needs Google Play), not the GMD run.
+FIREBASE_TEST_CLASSES = {
     'com.stripe.android.lpm.TestGooglePay',
 }
+
+# Excluded from the main sharded GMD run.
+EXCLUDED_TEST_CLASSES = FIREBASE_TEST_CLASSES
+
 
 def get_all_test_class_names():
     directory = 'paymentsheet-example/src/androidTest/java/'
@@ -51,9 +56,12 @@ def get_all_test_class_names():
     return sorted(c for c in class_names if c not in EXCLUDED_TEST_CLASSES)
 
 
+def shard(classes, shard_index, num_shards):
+    return [c for i, c in enumerate(classes) if i % num_shards == shard_index]
+
+
 def get_shard_classes(shard_index, num_shards):
-    all_classes = get_all_test_class_names()
-    return [c for i, c in enumerate(all_classes) if i % num_shards == shard_index]
+    return shard(get_all_test_class_names(), shard_index, num_shards)
 
 
 if __name__ == "__main__":
@@ -63,6 +71,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     classes = get_shard_classes(args.shard_index, args.num_shards)
+
     if not classes:
         print("No test classes found for shard", args.shard_index, file=sys.stderr)
         sys.exit(1)

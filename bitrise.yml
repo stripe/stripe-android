@@ -10,6 +10,9 @@ trigger_map:
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
+    # Number of parallel machines for run-paymentsheet-e2e. Must stay in sync with the
+    # --num-shards passed to get_shard_test_classes.py so every test class is assigned once.
+    - PAYMENTSHEET_E2E_SHARD_COUNT: 6
 
 pipelines:
   main-trigger-pipeline:
@@ -26,7 +29,7 @@ pipelines:
       run-crypto-onramp-example-e2e-tests: { }
       build-paymentsheet-e2e: { }
       run-paymentsheet-e2e:
-        parallel: 5
+        parallel: $PAYMENTSHEET_E2E_SHARD_COUNT
         depends_on:
           - build-paymentsheet-e2e
       run-paymentsheet-google-pay-e2e: { }
@@ -410,10 +413,13 @@ workflows:
             - content: |-
                 #!/usr/bin/env bash
                 set -euo pipefail
+                # The suite needs a real browser for the authorization step, which the google_apis
+                # image provides. One emulator per shard (parallelism comes from the pipeline
+                # shards); concurrent devices caused WebView/focus-cascade flakiness on this image.
                 envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
-                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards 5)
+                CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards "$PAYMENTSHEET_E2E_SHARD_COUNT")
 
-                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN -Pandroid.experimental.androidTest.numManagedDeviceShards=3 -Pandroid.experimental.testOptions.managedDevices.maxConcurrentDevices=6 "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:

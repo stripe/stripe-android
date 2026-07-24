@@ -169,6 +169,39 @@ internal class Selectors(
         device.waitForIdle()
     }
 
+    /**
+     * Clicks through Chrome's first-run onboarding, which otherwise blocks the authorization page.
+     * No-op if it isn't showing.
+     */
+    fun dismissChromeFirstRunIfPresent() {
+        val chrome = BrowserUI.Chrome.packageName
+        // Chrome may still be launching.
+        device.wait(Until.hasObject(By.pkg(chrome)), 5_000L)
+
+        // Chrome onboarding button ids, tied to the API 33 google_apis Chrome build; revisit if
+        // that system image is bumped.
+        val freButtonIds = listOf(
+            "terms_accept",
+            "next_button",
+            "signin_fre_dismiss_button",
+            "negative_button",
+            "button_secondary",
+        )
+        repeat(8) {
+            val clicked = freButtonIds.any { id ->
+                val button = device.findObject(UiSelector().resourceId("$chrome:id/$id"))
+                if (button.exists()) {
+                    runCatching { button.click() }
+                    device.waitForIdle()
+                    true
+                } else {
+                    false
+                }
+            }
+            if (!clicked) return
+        }
+    }
+
     fun getInstalledBrowsers() = getInstalledPackages()
         .mapNotNull {
             when (it.packageName) {

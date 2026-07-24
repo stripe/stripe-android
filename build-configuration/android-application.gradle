@@ -57,6 +57,13 @@ android {
                     apiLevel = 33
                     systemImageSource = "aosp-atd"
                 }
+                // google_apis ships a browser; used by the paymentsheet-example E2E suite,
+                // whose authorization step needs one.
+                register("pixel2api33chrome") {
+                    device = "Pixel 2"
+                    apiLevel = 33
+                    systemImageSource = "google_apis"
+                }
             }
         }
     }
