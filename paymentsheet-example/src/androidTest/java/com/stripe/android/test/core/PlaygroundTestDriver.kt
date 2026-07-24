@@ -113,7 +113,12 @@ internal class PlaygroundTestDriver(
         override fun onActivityPaused(activity: Activity) {}
         override fun onActivityStopped(activity: Activity) {}
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
-        override fun onActivityDestroyed(activity: Activity) {}
+        override fun onActivityDestroyed(activity: Activity) {
+            // Never keep a reference to a destroyed activity.
+            if (currentActivity === activity) {
+                currentActivity = null
+            }
+        }
         override fun onActivityResumed(activity: Activity) {
             currentActivity = activity
         }
@@ -1307,6 +1312,8 @@ internal class PlaygroundTestDriver(
 
     private fun monitorCurrentActivity(application: Application) {
         this.application = application
+        // Unregister first so retried attempts (e.g. RetryRule) don't stack callbacks.
+        application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
     }
 
@@ -1802,7 +1809,7 @@ internal class PlaygroundTestDriver(
         launchPlayground.await(5, TimeUnit.SECONDS)
     }
 
-    private fun teardown() {
+    internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         playgroundState = null
         currentActivity = null
