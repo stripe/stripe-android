@@ -38,11 +38,6 @@ internal interface TapToAddConnectionModule {
     ): HasStripeTerminalTapToPayLibrary
 
     @Binds
-    fun bindsIsSimulatedProvider(
-        isSimulatedProvider: DefaultTapToAddIsSimulatedProvider
-    ): TapToAddIsSimulatedProvider
-
-    @Binds
     fun bindsCreateCardPresentSetupIntentCallbackRetriever(
         callbackRetriever: DefaultCreateCardPresentSetupIntentCallbackRetriever
     ): CreateCardPresentSetupIntentCallbackRetriever
@@ -63,6 +58,17 @@ internal interface TapToAddConnectionModule {
         }
 
         @Provides
+        fun providesTapToAddIsSimulatedProvider(
+            applicationContext: Context,
+            paymentConfiguration: Provider<PaymentConfiguration>,
+        ): TapToAddIsSimulatedProvider {
+            return DefaultTapToAddIsSimulatedProvider(
+                applicationContext = applicationContext,
+                isLiveModeProvider = { paymentConfiguration.get().isLiveMode() },
+            )
+        }
+
+        @Provides
         fun providesTapToAddConnectionManager(
             isStripeTerminalSdkAvailable: IsStripeTerminalSdkAvailable,
             terminalWrapper: TerminalWrapper,
@@ -79,7 +85,7 @@ internal interface TapToAddConnectionModule {
                 isStripeTerminalSdkAvailable = isStripeTerminalSdkAvailable,
                 terminalWrapper = terminalWrapper,
                 errorReporter = errorReporter,
-                paymentConfiguration = paymentConfiguration,
+                publishableKeyProvider = { paymentConfiguration.get().publishableKey },
                 isSimulatedProvider = isSimulatedProvider,
                 logger = logger,
                 callbackRetriever = callbackRetriever,

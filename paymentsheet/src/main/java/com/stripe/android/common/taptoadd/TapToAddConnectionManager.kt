@@ -2,7 +2,6 @@ package com.stripe.android.common.taptoadd
 
 import android.annotation.SuppressLint
 import android.content.Context
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ExponentialBackoffRetryDelaySupplier
@@ -30,7 +29,6 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal interface TapToAddConnectionManager {
@@ -58,7 +56,7 @@ internal interface TapToAddConnectionManager {
             errorReporter: ErrorReporter,
             applicationContext: Context,
             logger: Logger,
-            paymentConfiguration: Provider<PaymentConfiguration>,
+            publishableKeyProvider: () -> String,
             workContext: CoroutineContext,
             callbackRetriever: CreateCardPresentSetupIntentCallbackRetriever,
             isSimulatedProvider: TapToAddIsSimulatedProvider,
@@ -68,7 +66,7 @@ internal interface TapToAddConnectionManager {
                     tapToAddConnectionManager = DefaultTapToAddConnectionManager(
                         applicationContext = applicationContext,
                         workContext = workContext,
-                        paymentConfiguration = paymentConfiguration,
+                        publishableKeyProvider = publishableKeyProvider,
                         errorReporter = errorReporter,
                         terminalWrapper = terminalWrapper,
                         logger = logger,
@@ -89,7 +87,7 @@ internal interface TapToAddConnectionManager {
 internal class DefaultTapToAddConnectionManager(
     private val applicationContext: Context,
     private val workContext: CoroutineContext,
-    private val paymentConfiguration: Provider<PaymentConfiguration>,
+    private val publishableKeyProvider: () -> String,
     private val errorReporter: ErrorReporter,
     private val terminalWrapper: TerminalWrapper,
     private val logger: Logger,
@@ -296,7 +294,7 @@ internal class DefaultTapToAddConnectionManager(
                 context = applicationContext,
                 tokenProvider = object : ConnectionTokenProvider {
                     override fun fetchConnectionToken(callback: ConnectionTokenCallback) {
-                        callback.onSuccess(paymentConfiguration.get().publishableKey)
+                        callback.onSuccess(publishableKeyProvider())
                     }
                 },
                 listener = this,
