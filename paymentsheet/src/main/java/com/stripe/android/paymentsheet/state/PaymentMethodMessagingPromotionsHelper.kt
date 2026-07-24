@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.repositories
 
-import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.core.networking.ApiRequest
@@ -22,12 +21,11 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import java.util.Locale
 import javax.inject.Inject
-import javax.inject.Provider
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
 internal interface PaymentMethodMessagePromotionsHelper {
-    fun fetchPromotionsAsync(intent: StripeIntent)
+    fun fetchPromotionsAsync(intent: StripeIntent, requestOptions: ApiRequest.Options)
 
     fun getPromotionIfAvailableForCode(
         code: PaymentMethodCode,
@@ -50,14 +48,13 @@ internal interface PaymentMethodMessagePromotionsHelper {
 @Singleton
 internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
     private val stripeRepository: StripeRepository,
-    private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     @ViewModelScope private val viewModelScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
     private var promotionsDeferred: Deferred<Result<PaymentMethodMessagePromotionList>>? = null
 
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
+    override fun fetchPromotionsAsync(intent: StripeIntent, requestOptions: ApiRequest.Options) {
         eventReporter.onPaymentMethodMessagePromotionsFetchBegin()
         promotionsDeferred?.cancel()
         promotionsDeferred = null
@@ -67,10 +64,7 @@ internal class DefaultPaymentMethodMessagePromotionsHelper @Inject constructor(
                 currency = intent.currency ?: "usd",
                 country = intent.countryCode,
                 locale = Locale.getDefault().language,
-                requestOptions = ApiRequest.Options(
-                    apiKey = lazyPaymentConfig.get().publishableKey,
-                    stripeAccount = lazyPaymentConfig.get().stripeAccountId
-                )
+                requestOptions = requestOptions,
             )
         }
     }
@@ -124,7 +118,7 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
     private val promotions: List<PaymentMethodMessagePromotion>?,
     private val eventReporter: EventReporter
 ) : PaymentMethodMessagePromotionsHelper {
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
+    override fun fetchPromotionsAsync(intent: StripeIntent, requestOptions: ApiRequest.Options) {
         // NO-OP
     }
 
@@ -164,7 +158,7 @@ internal class PrefetchedPaymentMethodMessagePromotionsHelper(
 }
 
 internal class NoOpPromotionsHelper @Inject constructor() : PaymentMethodMessagePromotionsHelper {
-    override fun fetchPromotionsAsync(intent: StripeIntent) {
+    override fun fetchPromotionsAsync(intent: StripeIntent, requestOptions: ApiRequest.Options) {
         // NO-OP
     }
 
