@@ -261,6 +261,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
         publishableKey: String? = null,
         displayItems: List<com.stripe.android.GooglePayJsonFactory.DisplayItem> = emptyList(),
         billingEmailOverride: String? = null,
+        allowRedisplay: PaymentMethod.AllowRedisplay? = null,
     ) {
         check(skipReadyCheck || isReady) {
             "present() may only be called when Google Pay is available on this device."
@@ -280,6 +281,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
                 publishableKey = publishableKey,
                 displayItems = displayItems,
                 billingEmailOverride = billingEmailOverride,
+                allowRedisplay = allowRedisplay,
             )
         )
     }

@@ -15,6 +15,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.isInstanceOf
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodSaveConsentBehavior
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -434,6 +435,7 @@ class GooglePayConfirmationDefinitionTest {
                 label = null,
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
             )
         }
     }
@@ -471,6 +473,7 @@ class GooglePayConfirmationDefinitionTest {
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
             )
         }
     }
@@ -509,6 +512,7 @@ class GooglePayConfirmationDefinitionTest {
                 label = "Merchant Inc.",
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
             )
         }
     }
@@ -560,6 +564,54 @@ class GooglePayConfirmationDefinitionTest {
                 clientAttributionMetadata = CONFIRMATION_PARAMETERS.paymentMethodMetadata.clientAttributionMetadata,
                 isElements = true,
                 displayItems = displayItems,
+                allowRedisplay = PaymentMethod.AllowRedisplay.UNSPECIFIED,
+            )
+        }
+    }
+
+    @Test
+    fun `On 'launch', passes allowRedisplay derived from a Customer Session subscription intent`() = runTest {
+        val googlePayLauncher = mock<GooglePayPaymentMethodLauncher>()
+
+        RecordingGooglePayPaymentMethodLauncherFactory.test(googlePayLauncher) {
+            val definition = createGooglePayConfirmationDefinition(factory)
+            val launcher = FakeActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>()
+
+            // Subscription-style intent: setup_future_usage is set, so the payment method must be
+            // saved. With a Customer Session that has payment method save disabled, allow_redisplay
+            // resolves to LIMITED and must be sent so the confirmation is not rejected.
+            val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PAYMENT_INTENT.copy(
+                    currency = "usd",
+                    setupFutureUsage = StripeIntent.Usage.OffSession,
+                ),
+                hasCustomerConfiguration = true,
+                saveConsent = PaymentMethodSaveConsentBehavior.Disabled(overrideAllowRedisplay = null),
+            )
+
+            definition.launch(
+                confirmationOption = GOOGLE_PAY_CONFIRMATION_OPTION.copy(
+                    config = GOOGLE_PAY_CONFIRMATION_OPTION.config.copy(
+                        merchantCurrencyCode = "USD",
+                    ),
+                ),
+                confirmationArgs = CONFIRMATION_PARAMETERS.copy(
+                    paymentMethodMetadata = paymentMethodMetadata,
+                ),
+                arguments = EmptyConfirmationLauncherArgs,
+                launcher = launcher,
+            )
+
+            assertThat(createGooglePayPaymentMethodLauncherCalls.awaitItem()).isNotNull()
+
+            verify(googlePayLauncher, times(1)).present(
+                currencyCode = "usd",
+                amount = 1000L,
+                transactionId = "pi_12345",
+                label = null,
+                clientAttributionMetadata = paymentMethodMetadata.clientAttributionMetadata,
+                isElements = true,
+                allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED,
             )
         }
     }

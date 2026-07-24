@@ -151,6 +151,29 @@ class GooglePayPaymentMethodLauncherViewModelTest {
     }
 
     @Test
+    fun `createPaymentMethod() forwards allowRedisplay from args`() = runTest {
+        val viewModelWithAllowRedisplay = GooglePayPaymentMethodLauncherViewModel(
+            ApplicationProvider.getApplicationContext(),
+            paymentsClient,
+            REQUEST_OPTIONS,
+            ARGS.copy(allowRedisplay = PaymentMethod.AllowRedisplay.LIMITED),
+            stripeRepository,
+            googlePayJsonFactory,
+            googlePayRepository,
+            SavedStateHandle()
+        )
+
+        viewModelWithAllowRedisplay.createPaymentMethod(
+            PaymentData.fromJson(
+                GooglePayFixtures.GOOGLE_PAY_RESULT_WITH_FULL_BILLING_ADDRESS.toString()
+            )
+        )
+
+        assertThat(stripeRepository.getCreateParams()?.allowRedisplay)
+            .isEqualTo(PaymentMethod.AllowRedisplay.LIMITED)
+    }
+
+    @Test
     fun `createTransactionInfo() with amount should create expected TransactionInfo`() {
         val transactionInfo = viewModel.createTransactionInfo(ARGS)
         assertThat(transactionInfo)

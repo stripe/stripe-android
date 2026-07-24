@@ -10,6 +10,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.confirmation.ConfirmationDefinition
@@ -18,6 +19,7 @@ import com.stripe.android.paymentelement.confirmation.EmptyConfirmationLauncherA
 import com.stripe.android.paymentelement.confirmation.PaymentMethodConfirmationOption
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import javax.inject.Inject
@@ -89,6 +91,16 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             confirmationArgs = confirmationArgs,
         )
 
+        // Google Pay does not present a "save for future use" choice, so the customer never
+        // explicitly requests reuse. The allow_redisplay value is derived from the intent's
+        // setup_future_usage and the Customer Session save-consent behavior, mirroring the
+        // form-based add-payment-method path. Setting it is required for the payment method to
+        // be saved when confirming a Customer Session intent (e.g. a subscription).
+        val allowRedisplay = confirmationArgs.paymentMethodMetadata.allowRedisplay(
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            code = PaymentMethod.Type.Card.code,
+        )
+
         googlePayLauncher.present(
             currencyCode = intent.asPaymentIntent()?.currency
                 ?: config.merchantCurrencyCode.orEmpty(),
@@ -102,6 +114,7 @@ internal class GooglePayConfirmationDefinition @Inject constructor(
             isElements = true,
             displayItems = config.displayItems,
             billingEmailOverride = config.billingEmailOverride,
+            allowRedisplay = allowRedisplay,
         )
     }
 
