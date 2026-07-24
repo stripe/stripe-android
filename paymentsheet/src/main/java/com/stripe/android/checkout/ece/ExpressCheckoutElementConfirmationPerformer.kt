@@ -8,6 +8,7 @@ import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayBillingEmailOverrideProvider
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayDisplayItemsFactory
 import com.stripe.android.paymentelement.confirmation.toConfirmationOption
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import kotlinx.coroutines.CoroutineScope
@@ -22,17 +23,28 @@ internal interface ExpressCheckoutElementConfirmationPerformer {
 internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
+    private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
 ) : ExpressCheckoutElementConfirmationPerformer {
     override fun confirm(expressButton: ExpressButton) {
-        val state = stateHolder.state ?: return
+        val state = stateHolder.state ?: run {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM
+            )
+            return
+        }
         val paymentSelection = expressButton.toSelection()
 
         val confirmationArgs = getConfirmationArgs(
             state = state,
             paymentSelection = paymentSelection,
-        ) ?: return
+        ) ?: run {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+            )
+            return
+        }
 
         viewModelScope.launch {
             confirmationHandler.start(confirmationArgs)
