@@ -213,25 +213,3 @@ class CardBillingAddressElement(
         addressElement.onValidationStateChanged(isValidating)
     }
 }
-
-/**
- * Billing address fields required in addition to the country, for a Checkout Session using
- * automatic tax with the billing address as the tax source. Most countries only need the
- * country. Source: https://docs.stripe.com/tax/customer-locations
- *
- * Billing only - shipping is out of scope, since it's always collected in full for delivery
- * regardless of tax, so there's no omittable mode there for tax to rescue.
- */
-private val additionalAutomaticTaxFieldsByCountry: Map<String, Set<IdentifierSpec>> = mapOf(
-    "CA" to setOf(IdentifierSpec.PostalCode),
-    "GB" to setOf(IdentifierSpec.PostalCode),
-    "IN" to setOf(IdentifierSpec.PostalCode),
-    "PR" to setOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.PostalCode),
-    "US" to setOf(IdentifierSpec.Line1, IdentifierSpec.City, IdentifierSpec.State, IdentifierSpec.PostalCode),
-)
-
-private fun automaticTaxRequiredFields(countryCode: String): Set<IdentifierSpec> {
-    // Matches the raw, non-uppercased comparison the AVS check above uses - countryCode is
-    // already an uppercase ISO code in practice (from CountryConfig).
-    return additionalAutomaticTaxFieldsByCountry[countryCode].orEmpty()
-}

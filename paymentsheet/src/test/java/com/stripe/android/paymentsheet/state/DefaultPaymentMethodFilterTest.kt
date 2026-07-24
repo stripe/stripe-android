@@ -190,6 +190,142 @@ class DefaultPaymentMethodFilterTest {
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
     }
 
+    private fun usCard(id: String, state: String?): PaymentMethod = PaymentMethodFactory.card(id = id).update(
+        last4 = "1000",
+        addCbcNetworks = false,
+        brand = CardBrand.Visa,
+    ).copy(
+        billingDetails = PaymentMethod.BillingDetails(
+            address = Address(
+                line1 = "123 Main St",
+                city = "San Francisco",
+                state = state,
+                postalCode = "94111",
+                country = "US",
+            ),
+        ),
+    )
+
+    @Test
+    fun `Drops SPM lacking automatic-tax-required fields when automatic tax requires a billing address`() = runTest {
+        val complete = usCard(id = "pm_complete", state = "CA")
+        val incomplete = usCard(id = "pm_incomplete", state = null)
+
+        val observed = filter(
+            paymentMethods = listOf(complete, incomplete),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(complete)
+    }
+
+    @Test
+    fun `Does not filter by automatic-tax fields when automatic tax does not require a billing address`() = runTest {
+        val complete = usCard(id = "pm_complete", state = "CA")
+        val incomplete = usCard(id = "pm_incomplete", state = null)
+
+        val observed = filter(
+            paymentMethods = listOf(complete, incomplete),
+            requiresBillingAddressForAutomaticTax = false,
+        )
+
+        assertThat(observed).containsExactly(complete, incomplete)
+    }
+
+    @Test
+    fun `Keeps a country-only-sufficient SPM when automatic tax requires a billing address`() = runTest {
+        // FR has no additional automatic-tax fields, so country alone is sufficient. Proves the
+        // clause does not over-drop valid cards.
+        val frCard = PaymentMethodFactory.card(id = "pm_fr").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(country = "FR"),
+            ),
+        )
+
+        val observed = filter(
+            paymentMethods = listOf(frCard),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(frCard)
+    }
+
+    @Test
+    fun `Drops SPM with null billing address when automatic tax requires a billing address`() = runTest {
+        val noAddress = PaymentMethodFactory.card(id = "pm_no_addr").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(billingDetails = PaymentMethod.BillingDetails(address = null))
+
+        val observed = filter(
+            paymentMethods = listOf(noAddress),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).isEmpty()
+    }
+
+    @Test
+    fun `Applies automatic-tax filter to non-card SPMs too`() = runTest {
+        // pay-server's confirm-time tax guard is not payment-method-type gated, so a bank-account
+        // SPM with an insufficient tax address 400s at confirm just like a card; the filter must
+        // drop it as well. Guards against a future card-only regression.
+        val completeBank = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_bank_complete",
+            billingDetails = PaymentMethod.BillingDetails(
+                address = Address(
+                    line1 = "1 Market St",
+                    city = "San Francisco",
+                    state = "CA",
+                    postalCode = "94111",
+                    country = "US",
+                ),
+            ),
+        )
+        val incompleteBank = PaymentMethodFactory.usBankAccount().copy(
+            id = "pm_bank_incomplete",
+            billingDetails = PaymentMethod.BillingDetails(
+                // Missing line1 and state for a US address.
+                address = Address(city = "San Francisco", postalCode = "94111", country = "US"),
+            ),
+        )
+
+        val observed = filter(
+            paymentMethods = listOf(completeBank, incompleteBank),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(completeBank)
+    }
+
+    @Test
+    fun `Applies per-country automatic-tax fields at the filter boundary`() = runTest {
+        // CA requires only a postal code (not the US line1/city/state set), proving the per-country
+        // lookup is consulted at the filter boundary rather than hardcoding US behavior.
+        val caComplete = PaymentMethodFactory.card(id = "pm_ca_complete").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(billingDetails = PaymentMethod.BillingDetails(address = Address(postalCode = "K1A0B1", country = "CA")))
+        val caMissingPostal = PaymentMethodFactory.card(id = "pm_ca_missing").update(
+            last4 = "1000",
+            addCbcNetworks = false,
+            brand = CardBrand.Visa,
+        ).copy(billingDetails = PaymentMethod.BillingDetails(address = Address(country = "CA")))
+
+        val observed = filter(
+            paymentMethods = listOf(caComplete, caMissingPostal),
+            requiresBillingAddressForAutomaticTax = true,
+        )
+
+        assertThat(observed).containsExactly(caComplete)
+    }
+
     private suspend fun filter(
         paymentMethods: List<PaymentMethod>,
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
@@ -197,6 +333,7 @@ class DefaultPaymentMethodFilterTest {
         isPaymentMethodSetAsDefaultEnabled: Boolean = false,
         remoteDefaultPaymentMethodId: String? = null,
         localSavedSelection: SavedSelection = SavedSelection.None,
+        requiresBillingAddressForAutomaticTax: Boolean = false,
         cardBrandFilter: PaymentSheetCardBrandFilter = PaymentSheetCardBrandFilter(
             cardBrandAcceptance = PaymentSheet.CardBrandAcceptance.all(),
         ),
@@ -222,6 +359,7 @@ class DefaultPaymentMethodFilterTest {
                 localSavedSelection = CompletableDeferred(localSavedSelection),
                 cardBrandFilter = cardBrandFilter,
                 cardFundingFilter = cardFundingFilter,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             )
         )
     }
