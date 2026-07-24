@@ -1,7 +1,6 @@
 package com.stripe.android.common.nfcscan.analytics
 
-import android.content.Context
-import com.stripe.android.PaymentConfiguration
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
@@ -48,10 +47,15 @@ internal interface NfcScanningEventReporterModule {
         }
 
         @Provides
+        fun providesApiConfiguration(
+            paymentMethodMetadata: PaymentMethodMetadata,
+        ): ApiConfiguration.State = paymentMethodMetadata.apiConfiguration
+
+        @Provides
         @Named(PUBLISHABLE_KEY)
-        fun providePublishableKey(context: Context): () -> String = {
-            PaymentConfiguration.getInstance(context).publishableKey
-        }
+        fun providePublishableKey(
+            apiConfiguration: ApiConfiguration.State,
+        ): () -> String = { apiConfiguration.publishableKey }
 
         @Provides
         fun provideDurationProvider(): DurationProvider {
