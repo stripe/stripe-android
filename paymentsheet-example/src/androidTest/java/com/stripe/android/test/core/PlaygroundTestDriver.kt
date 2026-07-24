@@ -1260,15 +1260,9 @@ internal class PlaygroundTestDriver(
         }
         Espresso.onIdle()
         composeTestRule.waitForIdle()
-        waitForWindowFocus()
-    }
-
-    /**
-     * Returning from a browser/external activity can leave no window focused. Fail fast with a
-     * clear message here instead of surfacing as an opaque Espresso RootViewPicker timeout later.
-     */
-    private fun waitForWindowFocus() {
         if (!awaitWindowFocus()) {
+            // Returning from a browser/external activity can leave no window focused. Fail fast with a
+            // clear message here instead of surfacing as an opaque Espresso RootViewPicker timeout later.
             error("Playground did not regain window focus after returning from an external activity")
         }
     }
