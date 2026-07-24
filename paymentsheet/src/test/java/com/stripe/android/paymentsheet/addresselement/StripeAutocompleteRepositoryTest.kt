@@ -56,6 +56,7 @@ class StripeAutocompleteRepositoryTest {
         scenario.repository.fetchPlaceDetails(
             placeId = "places/ChIJcznybKSAhYARlTOE-mb13JA",
             sessionToken = "session_123",
+            locale = null,
         )
 
         val request = scenario.networkClient.lastRequest as ApiRequest
@@ -75,6 +76,7 @@ class StripeAutocompleteRepositoryTest {
         val result = scenario.repository.fetchPlaceDetails(
             placeId = "place_123",
             sessionToken = "session_123",
+            locale = null,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -97,6 +99,7 @@ class StripeAutocompleteRepositoryTest {
         val result = scenario.repository.fetchPlaceDetails(
             placeId = "place_123",
             sessionToken = "session_123",
+            locale = null,
         )
 
         assertThat(result.isFailure).isTrue()
@@ -111,7 +114,6 @@ class StripeAutocompleteRepositoryTest {
             stripeNetworkClient = networkClient,
             apiRequestFactory = ApiRequest.Factory(),
             publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
         )
         return Scenario(networkClient = networkClient, repository = repository)
     }

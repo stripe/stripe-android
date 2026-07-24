@@ -12,11 +12,9 @@ import com.stripe.android.paymentsheet.utils.PlacesClientProxyTestRule
 import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
-import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
+import com.stripe.android.model.Address
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
-import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
 import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePredictionsResponse
-import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -145,46 +143,13 @@ class PaymentSheetAddressAutocompleteTest {
     private fun enqueuePlaceFetch() {
         placesClientProxyTestRule.enqueueFetchPlaceResponse(
             Result.success(
-                FetchPlaceResponse(
-                    place = Place(
-                        listOf(
-                            AddressComponent(
-                                shortName = "123",
-                                longName = "123",
-                                types = listOf(Place.Type.STREET_NUMBER.value)
-                            ),
-                            AddressComponent(
-                                shortName = "Main Street",
-                                longName = "Main Street",
-                                types = listOf(Place.Type.ROUTE.value)
-                            ),
-                            AddressComponent(
-                                shortName = "Unit #123",
-                                longName = "Unit #123",
-                                types = listOf(Place.Type.PREMISE.value)
-                            ),
-                            AddressComponent(
-                                shortName = "South SF",
-                                longName = "South San Francisco",
-                                types = listOf(Place.Type.LOCALITY.value)
-                            ),
-                            AddressComponent(
-                                shortName = "CA",
-                                longName = "California",
-                                types = listOf(Place.Type.ADMINISTRATIVE_AREA_LEVEL_1.value)
-                            ),
-                            AddressComponent(
-                                shortName = "US",
-                                longName = "United States",
-                                types = listOf(Place.Type.COUNTRY.value)
-                            ),
-                            AddressComponent(
-                                shortName = "94111",
-                                longName = "94111",
-                                types = listOf(Place.Type.POSTAL_CODE.value)
-                            )
-                        )
-                    )
+                Address(
+                    line1 = "123 Main Street",
+                    line2 = "Unit #123",
+                    city = "South San Francisco",
+                    state = "CA",
+                    country = "US",
+                    postalCode = "94111",
                 )
             )
         )
