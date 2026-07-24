@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -18,7 +16,6 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Named
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
@@ -26,8 +23,6 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
 ) {
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -37,22 +32,17 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    private fun createOptions(): ApiRequest.Options = ApiRequest.Options(
-        apiKey = publishableKeyProvider(),
-        stripeAccount = stripeAccountIdProvider(),
-    )
-
     private suspend fun executePost(
         url: String,
         params: Map<String, *>,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
-        val options = createOptions()
         return executeRequestWithResultParser(
             stripeErrorJsonParser = stripeErrorJsonParser,
             stripeNetworkClient = stripeNetworkClient,
             request = apiRequestFactory.createPost(
                 url = url,
-                options = options,
+                options = requestOptions,
                 params = params,
             ),
             responseJsonParser = CheckoutSessionResponseJsonParser,
@@ -62,6 +52,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun init(
         sessionId: String,
         adaptivePricingAllowed: Boolean,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         return executePost(
             url = initUrl(sessionId),
@@ -73,31 +64,37 @@ internal class CheckoutSessionRepository @Inject constructor(
                 "elements_session_client" to clientParams.toCheckoutSessionMap(),
                 "adaptive_pricing[allowed]" to adaptivePricingAllowed.toString(),
             ),
+            requestOptions = requestOptions,
         )
     }
 
     suspend fun confirm(
         id: String,
         params: ConfirmCheckoutSessionParams,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = confirmUrl(id),
         params = params.toParamMap().plus(Pair("elements_session_client[is_aggregation_expected]", "true")),
+        requestOptions = requestOptions,
     )
 
     suspend fun detachPaymentMethod(
         sessionId: String,
         paymentMethodId: String,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = mapOf(
             "payment_method_to_detach" to paymentMethodId,
         ),
+        requestOptions = requestOptions,
     )
 
     suspend fun updatePaymentMethod(
         sessionId: String,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> {
         val card = params as? PaymentMethodUpdateParams.Card
         val updateParams = CheckoutSessionUpdatePaymentMethodParams(
@@ -111,6 +108,7 @@ internal class CheckoutSessionRepository @Inject constructor(
             executePost(
                 url = updateUrl(sessionId),
                 params = updateParams.toParamMap(),
+                requestOptions = requestOptions,
             )
         } else {
             Result.failure(IllegalArgumentException(UNSUPPORTED_UPDATE_ERROR))
@@ -120,18 +118,21 @@ internal class CheckoutSessionRepository @Inject constructor(
     suspend fun applyPromotionCode(
         sessionId: String,
         promotionCode: String,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = mapOf(
             "promotion_code" to promotionCode,
             "elements_session_client[is_aggregation_expected]" to "true",
         ),
+        requestOptions = requestOptions,
     )
 
     suspend fun updateLineItemQuantity(
         sessionId: String,
         lineItemId: String,
         quantity: Int,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = mapOf(
@@ -139,22 +140,26 @@ internal class CheckoutSessionRepository @Inject constructor(
             "updated_line_item_quantity[quantity]" to quantity.toString(),
             "updated_line_item_quantity[fail_update_on_discount_error]" to "true",
         ),
+        requestOptions = requestOptions,
     )
 
     suspend fun selectShippingRate(
         sessionId: String,
         shippingRateId: String,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = mapOf(
             "shipping_rate" to shippingRateId,
             "elements_session_client[is_aggregation_expected]" to "true",
         ),
+        requestOptions = requestOptions,
     )
 
     suspend fun updateTaxRegion(
         sessionId: String,
         address: Address.State,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = buildMap {
@@ -166,12 +171,14 @@ internal class CheckoutSessionRepository @Inject constructor(
             putIfNotEmpty("tax_region[postal_code]", address.postalCode)
             put("elements_session_client[is_aggregation_expected]", "true")
         },
+        requestOptions = requestOptions,
     )
 
     suspend fun updateTaxId(
         sessionId: String,
         type: String,
         value: String,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = mapOf(
@@ -179,17 +186,20 @@ internal class CheckoutSessionRepository @Inject constructor(
             "tax_id_collection[tax_id][value]" to value,
             "elements_session_client[is_aggregation_expected]" to "true",
         ),
+        requestOptions = requestOptions,
     )
 
     suspend fun updateCurrency(
         sessionId: String,
         currencyCode: String,
+        requestOptions: ApiRequest.Options,
     ): Result<CheckoutSessionResponse> = executePost(
         url = updateUrl(sessionId),
         params = mapOf(
             "updated_currency" to currencyCode,
             "elements_session_client[is_aggregation_expected]" to "true",
         ),
+        requestOptions = requestOptions,
     ).onSuccess {
         fireEvent(PaymentSheetEvent.AdaptivePricingCurrencyToggled())
     }.onFailure {
