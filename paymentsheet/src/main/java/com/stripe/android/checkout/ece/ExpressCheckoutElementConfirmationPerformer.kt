@@ -23,6 +23,7 @@ internal interface ExpressCheckoutElementConfirmationPerformer {
 internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constructor(
     private val stateHolder: CheckoutControllerStateHolder,
     private val confirmationHandler: ConfirmationHandler,
+    private val eventReporter: ExpressCheckoutElementEventReporter,
     private val errorReporter: ErrorReporter,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @ViewModelScope private val viewModelScope: CoroutineScope,
@@ -48,6 +49,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformer @Inject constr
 
         viewModelScope.launch {
             confirmationHandler.start(confirmationArgs)
+
+            when (confirmationHandler.awaitResult()) {
+                is ConfirmationHandler.Result.Succeeded -> eventReporter.onEcePaymentSuccess()
+                is ConfirmationHandler.Result.Failed -> eventReporter.onEcePaymentFailure()
+                is ConfirmationHandler.Result.Canceled,
+                null -> Unit
+            }
         }
     }
 

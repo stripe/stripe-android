@@ -13,6 +13,14 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
         calls.add(Call.OnEceWalletTapped)
     }
 
+    override fun onEcePaymentSuccess() {
+        calls.add(Call.OnEcePaymentSuccess)
+    }
+
+    override fun onEcePaymentFailure() {
+        calls.add(Call.OnEcePaymentFailure)
+    }
+
     fun ensureAllEventsConsumed() {
         calls.ensureAllEventsConsumed()
     }
@@ -20,5 +28,7 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
     enum class Call {
         OnEceDisplayed,
         OnEceWalletTapped,
+        OnEcePaymentSuccess,
+        OnEcePaymentFailure,
     }
 }

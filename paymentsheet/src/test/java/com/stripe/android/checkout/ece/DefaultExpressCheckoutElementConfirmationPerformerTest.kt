@@ -6,12 +6,15 @@ import com.stripe.android.checkout.CheckoutControllerState
 import com.stripe.android.checkout.CheckoutControllerStateFactory
 import com.stripe.android.checkout.CheckoutControllerStateHolder
 import com.stripe.android.checkout.GooglePayConfiguration
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.isInstanceOf
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
+import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
@@ -105,6 +108,40 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         }
     }
 
+    @Test
+    fun `confirm reports ECE payment success when confirmation succeeds`() = runScenario(
+        state = googlePayState(),
+        expressButton = createGooglePayExpressButton(),
+    ) {
+        confirmationHandler.awaitResultTurbine.add(
+            ConfirmationHandler.Result.Succeeded(PaymentIntentFixtures.PI_SUCCEEDED)
+        )
+
+        performer.confirm(expressButton)
+
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentSuccess)
+    }
+
+    @Test
+    fun `confirm reports ECE payment failure when confirmation fails`() = runScenario(
+        state = googlePayState(),
+        expressButton = createGooglePayExpressButton(),
+    ) {
+        confirmationHandler.awaitResultTurbine.add(
+            ConfirmationHandler.Result.Failed(
+                cause = IllegalStateException("Payment failed"),
+                message = "Payment failed".resolvableString,
+                type = ConfirmationHandler.Result.Failed.ErrorType.Payment,
+            )
+        )
+
+        performer.confirm(expressButton)
+
+        assertThat(eventReporter.calls.awaitItem())
+            .isEqualTo(FakeExpressCheckoutElementEventReporter.Call.OnEcePaymentFailure)
+    }
+
     private fun googlePayState(): CheckoutControllerState {
         return CheckoutControllerStateFactory.create(
             embeddedConfiguration = EmbeddedPaymentElement.Configuration.Builder("Example, Inc.")
@@ -135,12 +172,14 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
+        val eventReporter = FakeExpressCheckoutElementEventReporter()
         val errorReporter = FakeErrorReporter()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
         stateHolder.state = state
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
+            eventReporter = eventReporter,
             errorReporter = errorReporter,
             statusBarColor = null,
             viewModelScope = backgroundScope,
@@ -149,18 +188,21 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         Scenario(
             performer = performer,
             confirmationHandler = confirmationHandler,
+            eventReporter = eventReporter,
             errorReporter = errorReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
         ).block()
 
         confirmationHandler.validate()
+        eventReporter.ensureAllEventsConsumed()
         errorReporter.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
+        val eventReporter: FakeExpressCheckoutElementEventReporter,
         val errorReporter: FakeErrorReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
