@@ -151,6 +151,8 @@ internal class ApduCommandTest {
         override val dataArray: ByteArray? = null,
         private val response: String?,
     ) : ApduCommand<String>() {
+        override val commandName: String = "testCommand"
+
         override fun responseData(tlv: Map<String, ByteArray>): String? = response
     }
 }

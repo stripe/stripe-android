@@ -1,5 +1,6 @@
 package com.stripe.android.common.nfcscan.scanner
 
+import android.util.Log
 import com.stripe.android.common.nfcscan.scanner.apdu.ApduResponseError
 import com.stripe.android.common.nfcscan.scanner.apdu.ReadRecordCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
@@ -39,7 +40,11 @@ internal class ApduCardReader @Inject constructor(
             onSuccess = { cardData ->
                 NfcCardReader.Result.Found(scannedCardData = cardData)
             },
-            onFailure = errorMapper::create,
+            onFailure = {
+                Log.d("NFC-Scan-Log", it.message ?: "Unknown error")
+
+                errorMapper.create(it)
+            },
         )
     }
 
@@ -65,6 +70,8 @@ internal class ApduCardReader @Inject constructor(
                             break@probeFiles
                         }
                     }.onFailure { error ->
+                        Log.d("NFC-Scan-Log", error.message ?: "Unknown record reading error")
+
                         if (isFileNotFoundError(error)) {
                             // Breaks the record loop but moves on to the next file
                             break
@@ -87,7 +94,7 @@ internal class ApduCardReader @Inject constructor(
 
     private companion object {
         // SFIs 1-3 cover virtually all Visa/Mastercard/Amex/Discover payment records.
-        val PROBE_SFIS = 1..3
+        val PROBE_SFIS = 1..8
         const val MAX_RECORDS_PER_SFI = 8
 
         const val PARAMETER_ERROR_SW1 = 0x6A.toByte()

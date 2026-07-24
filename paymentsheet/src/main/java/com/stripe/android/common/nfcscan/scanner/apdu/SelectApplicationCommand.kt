@@ -6,6 +6,8 @@ package com.stripe.android.common.nfcscan.scanner.apdu
 internal data class SelectApplicationCommand(
     val aid: ApplicationIdentifier,
 ) : ApduCommand<Unit>() {
+    override val commandName: String = "selectApplication(aid=$aid)"
+
     /*
      * Interindustry standardized command for ISO 7816-4
      */

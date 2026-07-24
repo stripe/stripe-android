@@ -10,7 +10,7 @@ internal sealed class ApduResponseError(
         val apduCommand: ApduCommand<*>,
         val sw1: Byte,
         val sw2: Byte,
-    ) : ApduResponseError("APDU error: SW1=$sw1, SW2=$sw2")
+    ) : ApduResponseError("APDU error (command=${apduCommand.commandName}): SW1=$sw1, SW2=$sw2")
 
     class Parsing(
         val data: ByteArray,

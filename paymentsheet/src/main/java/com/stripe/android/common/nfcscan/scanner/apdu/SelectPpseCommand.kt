@@ -6,6 +6,8 @@ import com.stripe.android.model.CardBrand
  * An APDU command for retrieving the payment application on the credit card chip
  */
 internal data object SelectPpseCommand : ApduCommand<ApplicationIdentifier>() {
+    override val commandName: String = "selectPpse"
+
     /*
      * Interindustry standardized command for ISO 7816-4
      */

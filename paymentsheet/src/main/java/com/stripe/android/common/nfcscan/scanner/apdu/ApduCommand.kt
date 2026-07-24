@@ -7,6 +7,8 @@ import com.stripe.android.common.nfcscan.scanner.NfcTagTransceiver
  * command that is for communication with an [ISO 7816-4 NFC card](https://en.wikipedia.org/wiki/ISO/IEC_7816).
  */
 internal abstract class ApduCommand<TResponseData> {
+    abstract val commandName: String
+
     /**
      * Instruction class - indicates the type of command
      */
