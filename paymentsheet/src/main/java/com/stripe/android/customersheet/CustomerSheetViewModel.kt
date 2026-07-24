@@ -847,6 +847,8 @@ internal class CustomerSheetViewModel(
                 usBankAccountFormArguments = createDefaultUsBankArguments(
                     stripeIntent,
                     paymentMethodMetadata.clientAttributionMetadata,
+                    paymentMethodMetadata.apiConfiguration.publishableKey,
+                    paymentMethodMetadata.apiConfiguration.stripeAccountId,
                 ),
                 draftPaymentSelection = null,
                 enabled = true,
@@ -866,6 +868,8 @@ internal class CustomerSheetViewModel(
     private fun createDefaultUsBankArguments(
         stripeIntent: StripeIntent?,
         clientAttributionMetadata: ClientAttributionMetadata,
+        publishableKey: String,
+        stripeAccountId: String?,
     ): USBankAccountFormArguments {
         return USBankAccountFormArguments(
             instantDebits = false,
@@ -903,6 +907,8 @@ internal class CustomerSheetViewModel(
             sellerBusinessName = null,
             forceSetupFutureUseBehavior = false,
             clientAttributionMetadata = clientAttributionMetadata,
+            publishableKey = publishableKey,
+            stripeAccountId = stripeAccountId,
         )
     }
 

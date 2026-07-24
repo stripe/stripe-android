@@ -370,7 +370,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
             launch { integrityRequestManager.prepare() }
         }
 
-        fetchPaymentMethodMessaging(elementsSession)
+        fetchPaymentMethodMessaging(elementsSession, requestOptions)
 
         val isGooglePayReady = isGooglePayReady(
             configuration = configuration,
@@ -918,13 +918,16 @@ internal class DefaultPaymentElementLoader @Inject constructor(
         }
     }
 
-    private fun fetchPaymentMethodMessaging(elementsSession: ElementsSession) {
+    private fun fetchPaymentMethodMessaging(
+        elementsSession: ElementsSession,
+        requestOptions: com.stripe.android.core.networking.ApiRequest.Options,
+    ) {
         val variant = elementsSession.experimentsData?.experimentAssignments[
             ExperimentAssignment.OCS_MOBILE_PAYMENT_METHOD_MESSAGING_PROMOTIONS
         ] ?: return
 
         if (variant == "treatment") {
-            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent)
+            paymentMethodMessagePromotionsHelper.fetchPromotionsAsync(elementsSession.stripeIntent, requestOptions)
         }
     }
 
