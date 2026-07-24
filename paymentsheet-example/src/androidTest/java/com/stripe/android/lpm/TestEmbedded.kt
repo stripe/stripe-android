@@ -87,7 +87,7 @@ internal class TestEmbedded : BasePlaygroundTest() {
         )
     }
 
-    @Ignore("RUN_MOBILESDK-5542")
+    @Ignore("#ir-implore-chord")
     @Test
     fun testUsBankAccount() {
         testDriver.confirmEmbeddedUsBankAccount(

@@ -9,7 +9,7 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 
-@Ignore("RUN_MOBILESDK-5542")
+@Ignore("#ir-implore-chord")
 @RunWith(AndroidJUnit4::class)
 internal class Test3ds2 : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
