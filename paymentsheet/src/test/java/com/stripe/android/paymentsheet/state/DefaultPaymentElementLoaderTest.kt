@@ -1019,6 +1019,7 @@ internal class DefaultPaymentElementLoaderTest {
                 override suspend fun getPaymentMethods(
                     customerId: String,
                     ephemeralKeySecret: String,
+                    stripeAccountId: String?,
                     types: List<PaymentMethod.Type>,
                     silentlyFail: Boolean,
                 ): Result<List<PaymentMethod>> {

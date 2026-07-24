@@ -242,6 +242,7 @@ internal class DefaultCreateLinkStateTest {
             configuration: CommonConfiguration,
             customerMetadata: CustomerMetadata?,
             customerEmail: String?,
+            stripeAccountId: String?,
         ): String? {
             invokedWith = Invocation(
                 configuration = configuration,

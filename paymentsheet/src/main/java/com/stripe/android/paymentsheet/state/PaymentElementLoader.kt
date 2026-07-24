@@ -512,6 +512,7 @@ internal class DefaultPaymentElementLoader @Inject constructor(
                 customerRepository.getPaymentMethods(
                     customerId = customer.id,
                     ephemeralKeySecret = accessType.ephemeralKeySecret,
+                    stripeAccountId = apiConfiguration.stripeAccountId,
                     types = listOf(
                         PaymentMethod.Type.Card,
                         PaymentMethod.Type.SepaDebit,

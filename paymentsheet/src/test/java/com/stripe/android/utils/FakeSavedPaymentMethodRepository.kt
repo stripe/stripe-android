@@ -36,6 +36,7 @@ internal class FakeSavedPaymentMethodRepository(
 
     override suspend fun detachPaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
     ): Result<PaymentMethod> {
         _detachRequests.add(
@@ -49,6 +50,7 @@ internal class FakeSavedPaymentMethodRepository(
 
     override suspend fun updatePaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> {
@@ -64,6 +66,7 @@ internal class FakeSavedPaymentMethodRepository(
 
     override suspend fun setDefaultPaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String?,
     ): Result<Customer> {
         _setDefaultPaymentMethodRequests.add(
@@ -81,6 +84,7 @@ internal class FakeSavedPaymentMethodRepository(
 
     override suspend fun retrievePaymentMethod(
         customerMetadata: CustomerMetadata,
+        stripeAccountId: String?,
         paymentMethodId: String,
     ): Result<PaymentMethod> {
         _retrievePaymentMethodRequests.add(
