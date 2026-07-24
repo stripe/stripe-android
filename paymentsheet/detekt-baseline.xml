@@ -21,7 +21,6 @@
     <ID>LargeClass:ConfirmationHandlerOptionKtxTest.kt:ConfirmationHandlerOptionKtxTest</ID>
     <ID>LargeClass:CustomerAdapterTest.kt:CustomerAdapterTest</ID>
     <ID>LargeClass:CustomerSheetViewModel.kt:CustomerSheetViewModel : ViewModel</ID>
-    <ID>LargeClass:CustomerSheetViewModelTest.kt:CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultConfirmationHandlerTest.kt:DefaultConfirmationHandlerTest</ID>
     <ID>LargeClass:DefaultEventReporterTest.kt:DefaultEventReporterTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt:DefaultFlowControllerTest</ID>
@@ -53,7 +52,6 @@
     <ID>LongMethod:ElementsSessionJsonParserTest.kt:ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response if 'customer_sheet' is null`</ID>
     <ID>LongMethod:ElementsSessionJsonParserTest.kt:ElementsSessionJsonParserTest$@Test fun `ElementsSession has expected customer session information in the response`</ID>
     <ID>LongMethod:ElementsSessionRepository.kt:internal fun PaymentElementLoader.InitializationMode.toElementsSessionParams: ElementsSessionParams</ID>
-    <ID>LongMethod:EmbeddedContentHelper.kt:DefaultEmbeddedContentHelper$private fun createInteractor: PaymentMethodVerticalLayoutInteractor</ID>
     <ID>LongMethod:FormViewModelTest.kt:FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`</ID>
     <ID>LongMethod:FormViewModelTest.kt:FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`</ID>
     <ID>LongMethod:FullScreenContent.kt:@Composable internal fun FullScreenContent</ID>
@@ -78,6 +76,7 @@
     <ID>LongMethod:UpdatePaymentMethodUI.kt:@Composable internal fun UpdatePaymentMethodUI</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable internal fun WalletBody</ID>
     <ID>LongMethod:WalletScreen.kt:@Composable private fun PaymentMethodSection</ID>
+    <ID>LoopWithTooManyJumpStatements:NfcCardReader.kt:ApduCardReader$for</ID>
     <ID>MagicNumber:FlagImageRepository.kt:FlagImageRepository$4</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.3f</ID>
     <ID>MagicNumber:NewPaymentMethodTabLayoutUI.kt:.4f</ID>
@@ -105,7 +104,6 @@
     <ID>MaxLineLength:PaymentSheet.kt:PaymentSheet.IntentConfiguration.SetupFutureUse$*</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt:PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:SupportedPaymentMethod.kt:SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
-    <ID>ThrowsCount:EmbeddedWalletsHelper.kt:DefaultEmbeddedWalletsHelper$override fun walletsState: StateFlow&lt;WalletsState?></ID>
     <ID>TooManyFunctions:CustomerSheetEventReporter.kt:CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt:DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultFlowController.kt:DefaultFlowController : FlowController</ID>

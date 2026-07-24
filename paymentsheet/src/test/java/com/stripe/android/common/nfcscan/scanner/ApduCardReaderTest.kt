@@ -2,7 +2,6 @@ package com.stripe.android.common.nfcscan.scanner
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.common.nfcscan.scanner.apdu.ApduResponseError
-import com.stripe.android.common.nfcscan.scanner.apdu.ReadRecordCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectApplicationCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.SelectPpseCommand
 import com.stripe.android.common.nfcscan.scanner.apdu.apduSuccessResponse
@@ -39,12 +38,62 @@ internal class ApduCardReaderTest {
     }
 
     @Test
-    fun `readCard continues probing when read record commands fail`() = runScenario(
+    fun `readCard skips remaining records in SFI when read record returns file not found`() = runScenario(
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(byteArrayOf()),
+            FILE_NOT_FOUND_RESPONSE,
+        ),
+        transceiveResult = RECORD_NOT_FOUND_RESPONSE,
+        errorResult = PARSE_FAILURE_ERROR,
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result).isEqualTo(PARSE_FAILURE_ERROR)
+        assertThat(errorCreator.createCalls.awaitItem()).isInstanceOf<IllegalStateException>()
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
+        assertReadRecordProbes(startingAtIndex = MAX_RECORDS_PER_SFI)
+
+        assertThat(cardDataParser.parseCalls.awaitItem()).isNotNull()
+    }
+
+    @Test
+    fun `readCard finds card data on later SFI when earlier SFI returns file not found`() = runScenario(
+        parseResult = SCANNED_CARD_DATA,
+        transceiveResults = listOf(
+            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
+            apduSuccessResponse(byteArrayOf()),
+            FILE_NOT_FOUND_RESPONSE,
+            apduSuccessResponse(tlv(tag = 0x57, value = TRACK_2_DATA)),
+        ),
+        transceiveResult = RECORD_NOT_FOUND_RESPONSE,
+    ) {
+        val result = cardReader.readCard(transceiver)
+
+        assertThat(result).isEqualTo(NfcCardReader.Result.Found(SCANNED_CARD_DATA))
+
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
+        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS[MAX_RECORDS_PER_SFI])
+
+        assertThat(cardDataParser.canParseCalls.awaitItem()).containsKey("57")
+        assertThat(cardDataParser.parseCalls.awaitItem()).containsKey("57")
+
+        cardDataParser.canParseCalls.ensureAllEventsConsumed()
+    }
+
+    @Test
+    fun `readCard continues probing when read record returns declined`() = runScenario(
         transceiveResults = listOf(
             apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
             apduSuccessResponse(byteArrayOf()),
         ),
-        transceiveResult = RECORD_NOT_FOUND_RESPONSE,
+        transceiveResult = CARD_DECLINED_RESPONSE,
         errorResult = PARSE_FAILURE_ERROR,
     ) {
         val result = cardReader.readCard(transceiver)
@@ -102,30 +151,6 @@ internal class ApduCardReaderTest {
 
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
         assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
-    }
-
-    @Test
-    fun `readCard propagates ReadRecord failure that is not record not found`() = runScenario(
-        transceiveResults = listOf(
-            apduSuccessResponse(tlv(tag = 0x4F, value = VISA_AID)),
-            apduSuccessResponse(byteArrayOf()),
-        ),
-        transceiveResult = CARD_DECLINED_RESPONSE,
-        errorResult = CARD_DECLINED_ERROR,
-    ) {
-        val result = cardReader.readCard(transceiver)
-
-        assertThat(result).isEqualTo(CARD_DECLINED_ERROR)
-        assertThat(errorCreator.createCalls.awaitItem()).isEqualTo(
-            ApduResponseError.Command(
-                apduCommand = ReadRecordCommand(recordNumber = 1, shortFileIdentifier = 1),
-                sw1 = 0x69.toByte(),
-                sw2 = 0x85.toByte(),
-            ),
-        )
-        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_PPSE_REQUEST)
-        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(SELECT_VISA_APPLICATION_REQUEST)
-        assertThat(transceiver.transceiveCalls.awaitItem()).isEqualTo(READ_RECORD_REQUESTS.first())
     }
 
     @Test
@@ -284,11 +309,6 @@ internal class ApduCardReaderTest {
         val UNSUPPORTED_CARD_ERROR = NfcCardReader.Result.Error(
             errorCode = "cardUnsupportedByNfc",
             userMessage = R.string.stripe_nfc_scan_unsupported_card.resolvableString,
-        )
-
-        val CARD_DECLINED_ERROR = NfcCardReader.Result.Error(
-            errorCode = "cardDeclinedByNfc",
-            userMessage = R.string.stripe_nfc_scan_error_declined_card.resolvableString,
         )
 
         val TRANSCEIVER_IO_ERROR = NfcCardReader.Result.Error(
