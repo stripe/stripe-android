@@ -288,11 +288,39 @@ internal class CheckoutControllerTest {
         controller.checkoutSession.test {
             assertThat(awaitItem()?.paymentOptionDisplayData).isNotNull()
 
-            controller.clearPaymentOption()
+            assertThat(controller.clearPaymentOption().isSuccess).isTrue()
 
             assertThat(requireNotNull(awaitItem()).paymentOptionDisplayData).isNull()
         }
     }
+
+    @Test
+    fun `clearPaymentOption returns failure before the session is configured`() = runTest {
+        val controller = createController()
+
+        val result = controller.clearPaymentOption()
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Cannot mutate checkout session before it is configured.")
+    }
+
+    @Test
+    fun `clearPaymentOption returns failure and preserves selection when a payment flow is presented`() =
+        runMutationScenario {
+            selectPaymentMethod(PaymentSelection.GooglePay)
+            markIntegrationLaunched()
+
+            val result = controller.clearPaymentOption()
+
+            assertThat(result.isFailure).isTrue()
+            assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+            assertThat(result.exceptionOrNull()).hasMessageThat()
+                .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+            // The rejected clear leaves the selection intact.
+            assertThat(controller.checkoutSession.value?.paymentOptionDisplayData).isNotNull()
+        }
 
     @Test
     fun `callback identifier is generated and stored when absent`() = runTest {
@@ -726,6 +754,31 @@ internal class CheckoutControllerTest {
     }
 
     @Test
+    fun `configure returns failure when a payment flow is presented`() = runMutationScenario {
+        markIntegrationLaunched()
+
+        val result = controller.configure(DEFAULT_CLIENT_SECRET)
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+        assertThat(result.exceptionOrNull()).hasMessageThat()
+            .isEqualTo("Cannot mutate checkout session while a payment flow is presented.")
+    }
+
+    @Test
+    fun `configure does not open a loading window when a payment flow is presented`() =
+        runMutationScenario(assertLoadingConsumed = true) {
+            markIntegrationLaunched()
+
+            // The guard fast-fails before runSerialized, so isLoading must never flip to true.
+            assertThat(isLoadingTurbine.awaitItem()).isFalse()
+
+            val result = controller.configure(DEFAULT_CLIENT_SECRET)
+
+            assertThat(result.isFailure).isTrue()
+        }
+
+    @Test
     fun `isLoading transitions to true then false on a successful mutation`() = runMutationScenario(
         assertLoadingConsumed = true,
     ) {
@@ -1149,7 +1202,7 @@ internal class CheckoutControllerTest {
             block(
                 MutationScenario(
                     controller = controller,
-                    savedStateHandle = savedStateHandle,
+                    stateHolder = CheckoutControllerStateFactory.createStateHolder(savedStateHandle),
                     sheetStateHolder = SheetStateHolder(savedStateHandle),
                     testScope = this@runTest,
                     isLoadingTurbine = isLoadingTurbine,
@@ -1165,7 +1218,7 @@ internal class CheckoutControllerTest {
 
     private class MutationScenario(
         val controller: CheckoutController,
-        private val savedStateHandle: SavedStateHandle,
+        private val stateHolder: CheckoutControllerStateHolder,
         private val sheetStateHolder: SheetStateHolder,
         private val testScope: TestScope,
         val isLoadingTurbine: ReceiveTurbine<Boolean>,
@@ -1182,13 +1235,18 @@ internal class CheckoutControllerTest {
 
         // Reads the state the controller committed via its state holder, which shares this
         // SavedStateHandle in the production graph.
-        fun committedState(): CheckoutControllerState =
-            requireNotNull(CheckoutControllerStateFactory.createStateHolder(savedStateHandle).state)
+        fun committedState(): CheckoutControllerState = requireNotNull(stateHolder.state)
 
         // Simulates a presented payment flow by opening the sheet through the SheetStateHolder backed
         // by the shared SavedStateHandle, which the mutation guard reads back through the same holder.
         fun markIntegrationLaunched() {
             sheetStateHolder.sheetIsOpen = true
+        }
+
+        // Simulates a payment method already being selected via the same setSelection path the
+        // production embedded selection flow uses.
+        fun selectPaymentMethod(selection: PaymentSelection) {
+            stateHolder.setSelection(selection)
         }
     }
 
