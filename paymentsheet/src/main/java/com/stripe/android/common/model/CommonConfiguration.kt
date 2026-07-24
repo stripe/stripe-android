@@ -53,12 +53,15 @@ internal data class CommonConfiguration(
         initializationMode: PaymentElementLoader.InitializationMode,
         isLiveMode: Boolean,
         @PaymentElementCallbackIdentifier callbackIdentifier: String,
+        isTapToAddSupported: Boolean = true,
     ) {
         customerAndMerchantValidate()
         checkoutSessionValidate(initializationMode)
         externalPaymentMethodsValidate(isLiveMode)
         confirmationTokenValidate(isLiveMode, callbackIdentifier)
-        tapToAddValidate(callbackIdentifier)
+        if (isTapToAddSupported) {
+            tapToAddValidate(callbackIdentifier)
+        }
 
         customer?.accessType?.let { customerAccessType ->
             customerAccessTypeValidate(customerAccessType)
