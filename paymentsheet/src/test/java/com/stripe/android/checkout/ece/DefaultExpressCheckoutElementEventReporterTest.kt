@@ -35,7 +35,9 @@ internal class DefaultExpressCheckoutElementEventReporterTest {
 
     @Test
     fun `onEceWalletTapped fires expected event for GooglePay`() = runScenario {
-        val googlePayConfiguration = GooglePayConfiguration(environment = GooglePayConfiguration.Environment.Test).build()
+        val googlePayConfiguration = GooglePayConfiguration(
+            environment = GooglePayConfiguration.Environment.Test,
+        ).build()
         val googlePayButton = ExpressButton.GooglePay.create(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             googlePayConfiguration = googlePayConfiguration,

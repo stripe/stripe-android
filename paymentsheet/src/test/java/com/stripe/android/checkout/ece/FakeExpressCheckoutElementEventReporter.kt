@@ -12,7 +12,7 @@ internal class FakeExpressCheckoutElementEventReporter : ExpressCheckoutElementE
     override fun onEceWalletTapped(expressButton: ExpressButton) {
         calls.add(Call.OnEceWalletTapped(expressButton))
     }
-    
+
     fun ensureAllEventsConsumed() {
         calls.ensureAllEventsConsumed()
     }
