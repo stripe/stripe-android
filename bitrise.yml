@@ -419,7 +419,7 @@ workflows:
                 envman add --key PAYMENTSHEET_E2E_SHARD_DISPLAY --value "$((BITRISE_IO_PARALLEL_INDEX + 1))"
                 CLASSES=$(python3 scripts/get_shard_test_classes.py --shard-index "$BITRISE_IO_PARALLEL_INDEX" --num-shards "$PAYMENTSHEET_E2E_SHARD_COUNT")
 
-                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33BaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
+                ./scripts/retry_with_emulator_cleanup.sh 3 ./gradlew -PSTRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN=$STRIPE_PAYMENTSHEET_EXAMPLE_SENTRY_DSN "-Pandroid.testInstrumentationRunnerArguments.class=$CLASSES" :paymentsheet-example:pixel2api33chromeBaseDebugAndroidTest --init-script build-configuration/instrumentation-test-init.gradle
       - bundle::export_instrumentation_test_results:
           title: Export PaymentSheet E2E test results
           inputs:
