@@ -10,6 +10,7 @@ import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.link.LinkExpressMode
 import com.stripe.android.link.ui.LinkButtonState
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.WalletType
 import com.stripe.android.model.CardFunding
 import com.stripe.android.model.LinkBrand
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -20,6 +21,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 internal sealed interface ExpressButton {
 
     fun toSelection(): PaymentSelection
+    fun toWalletType(): WalletType
 
     data class Link(
         val state: LinkButtonState,
@@ -33,6 +35,8 @@ internal sealed interface ExpressButton {
                 linkExpressMode = LinkExpressMode.DISABLED,
             )
         }
+
+        override fun toWalletType(): WalletType = WalletType.Link
 
         companion object {
             fun create(
@@ -64,6 +68,8 @@ internal sealed interface ExpressButton {
     ) : ExpressButton {
 
         override fun toSelection(): PaymentSelection = PaymentSelection.GooglePay
+
+        override fun toWalletType(): WalletType = WalletType.GooglePay
 
         companion object {
             fun create(
