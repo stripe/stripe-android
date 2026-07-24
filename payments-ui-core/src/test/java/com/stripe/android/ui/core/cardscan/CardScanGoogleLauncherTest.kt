@@ -3,7 +3,6 @@ package com.stripe.android.ui.core.cardscan
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.result.ActivityResult
-import androidx.activity.result.IntentSenderRequest
 import androidx.test.core.app.ApplicationProvider
 import com.google.android.gms.wallet.CreditCardExpirationDate
 import com.google.android.gms.wallet.PaymentCardRecognitionResult
@@ -122,7 +121,26 @@ class CardScanGoogleLauncherTest {
     }
 
     @Test
-    fun `card scan launcher should be able to launch card scan activity`() = runScenario {
+    fun `parseActivityResult with card scan failed result code returns Failed`() = runScenario {
+        val result = ActivityResult(
+            CardScanGoogleActivity.RESULT_CARD_SCAN_FAILED,
+            CardScanGoogleActivity.createFailureIntent("Failed to fetch intent")
+        )
+
+        val scanResult = launcher.parseActivityResult(result)
+
+        assertThat(scanResult).isInstanceOf(CardScanResult.Failed::class.java)
+        val failedResult = scanResult as CardScanResult.Failed
+        assertThat(failedResult.error).hasMessageThat().isEqualTo("Failed to fetch intent")
+
+        assertThat(fakeEventsReporter.apiCheckSucceededCalls.awaitItem()).isNotNull()
+        val scanFailedCall = fakeEventsReporter.scanFailedCalls.awaitItem()
+        assertThat(scanFailedCall.implementation).isEqualTo("google_pay")
+        assertThat(scanFailedCall.error).isInstanceOf(CardScanActivityResultException::class.java)
+    }
+
+    @Test
+    fun `card scan launcher should immediately launch card scan activity`() = runScenario {
         assertThat(launcher.isAvailable.value).isTrue()
 
         launcher.launch(ApplicationProvider.getApplicationContext())
@@ -133,37 +151,34 @@ class CardScanGoogleLauncherTest {
     }
 
     @Test
-    fun `card scan launcher should not be available when fetchIntent fails`() = runScenario(
+    fun `card scan launcher should not be available when availability fetch fails`() = runScenario(
         isFetchClientSucceed = false
     ) {
         assertThat(launcher.isAvailable.value).isFalse()
-        launcher.launch(ApplicationProvider.getApplicationContext())
 
         val apiCheckFailedCall = fakeEventsReporter.apiCheckFailedCalls.awaitItem()
         assertThat(apiCheckFailedCall.error?.message).isEqualTo("Failed to fetch intent")
-
-        val scanFailedCall = fakeEventsReporter.scanFailedCalls.awaitItem()
-        assertThat(scanFailedCall.implementation).isEqualTo("google_pay")
-        assertThat(scanFailedCall.error).isInstanceOf(Exception::class.java)
     }
 
     private class Scenario(
         val launcher: CardScanGoogleLauncher,
         val fakeEventsReporter: FakeCardScanEventsReporter,
-        val activityLauncher: FakeActivityLauncher<IntentSenderRequest>,
+        val activityLauncher: FakeActivityLauncher<Unit>,
     )
 
     private fun runScenario(
         isFetchClientSucceed: Boolean = true,
+        paymentCardRecognitionClient: PaymentCardRecognitionClient =
+            FakePaymentCardRecognitionClient(isFetchClientSucceed),
         block: suspend Scenario.() -> Unit
     ) = runTest {
-        val activityLauncher = FakeActivityLauncher<IntentSenderRequest>()
+        val activityLauncher = FakeActivityLauncher<Unit>()
         val fakeEventsReporter = FakeCardScanEventsReporter()
         val launcher = CardScanGoogleLauncher(
             context = ApplicationProvider.getApplicationContext(),
             eventsReporter = fakeEventsReporter,
             options = null,
-            paymentCardRecognitionClient = FakePaymentCardRecognitionClient(isFetchClientSucceed)
+            paymentCardRecognitionClient = paymentCardRecognitionClient
         ).apply {
             this.activityLauncher = activityLauncher
         }

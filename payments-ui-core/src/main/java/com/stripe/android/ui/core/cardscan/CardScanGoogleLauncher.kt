@@ -2,13 +2,14 @@ package com.stripe.android.ui.core.cardscan
 
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.core.app.ActivityOptionsCompat
@@ -29,7 +30,7 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     override val isAvailable: StateFlow<Boolean> = _isAvailable.asStateFlow()
 
     @VisibleForTesting
-    lateinit var activityLauncher: ActivityResultLauncher<IntentSenderRequest>
+    var activityLauncher: ActivityResultLauncher<Unit>? = null
 
     init {
         paymentCardRecognitionClient.fetchIntent(
@@ -51,21 +52,27 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
             return
         }
 
+        val launcher = activityLauncher ?: return
         _isLaunching = true
-        paymentCardRecognitionClient.fetchIntent(
-            context = context,
-            onFailure = { e ->
-                eventsReporter.onCardScanFailed(implementation, e)
-            },
-            onSuccess = { intentSenderRequest ->
-                eventsReporter.onCardScanStarted("google_pay")
-                activityLauncher.launch(intentSenderRequest, options)
-            }
-        )
+        eventsReporter.onCardScanStarted(implementation)
+        runCatching {
+            launcher.launch(Unit, options)
+        }.onFailure { e ->
+            _isLaunching = false
+            eventsReporter.onCardScanFailed(implementation, e)
+        }
     }
 
     internal fun parseActivityResult(result: ActivityResult): CardScanResult {
         val scanResult = when {
+            result.resultCode == CardScanGoogleActivity.RESULT_CARD_SCAN_FAILED -> {
+                CardScanResult.Failed(
+                    CardScanActivityResultException(
+                        CardScanGoogleActivity.getErrorMessage(result.data)
+                            ?: "Failed to start Google Pay card recognition"
+                    )
+                )
+            }
             result.resultCode == Activity.RESULT_OK && result.data != null -> {
                 val data = result.data ?: return CardScanResult.Canceled
                 val paymentCardRecognitionResult = PaymentCardRecognitionResult.getFromIntent(data)
@@ -102,6 +109,16 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
     }
 
     companion object {
+        private val activityResultContract = object : ActivityResultContract<Unit, ActivityResult>() {
+            override fun createIntent(context: Context, input: Unit): Intent {
+                return CardScanGoogleActivity.createIntent(context)
+            }
+
+            override fun parseResult(resultCode: Int, intent: Intent?): ActivityResult {
+                return ActivityResult(resultCode, intent)
+            }
+        }
+
         @Composable
         internal fun rememberCardScanGoogleLauncher(
             context: Context,
@@ -119,14 +136,23 @@ internal class CardScanGoogleLauncher @VisibleForTesting constructor(
                 )
             }
             val activityLauncher = rememberLauncherForActivityResult(
-                ActivityResultContracts.StartIntentSenderForResult(),
+                activityResultContract,
             ) { result ->
                 launcher._isLaunching = false
                 onResult(launcher.parseActivityResult(result))
             }
-            return remember(activityLauncher) {
+            val registeredLauncher = remember(launcher, activityLauncher) {
                 launcher.apply { this.activityLauncher = activityLauncher }
             }
+            DisposableEffect(launcher, activityLauncher) {
+                launcher.activityLauncher = activityLauncher
+                onDispose {
+                    if (launcher.activityLauncher === activityLauncher) {
+                        launcher.activityLauncher = null
+                    }
+                }
+            }
+            return registeredLauncher
         }
     }
 }
