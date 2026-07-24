@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.lpmfoundations.paymentmethod.CustomerMetadata
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
@@ -37,6 +38,7 @@ internal interface SavedPaymentMethodRepository {
 internal class DefaultSavedPaymentMethodRepository @Inject constructor(
     private val customerRepository: CustomerRepository,
     private val checkoutSessionRepository: CheckoutSessionRepository,
+    private val requestOptions: ApiRequest.Options,
 ) : SavedPaymentMethodRepository {
 
     override suspend fun detachPaymentMethod(
@@ -47,6 +49,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
             checkoutSessionRepository.detachPaymentMethod(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
+                requestOptions = requestOptions,
             ).map {
                 PaymentMethod.Builder().setId(paymentMethodId).build()
             }
@@ -78,6 +81,7 @@ internal class DefaultSavedPaymentMethodRepository @Inject constructor(
                 sessionId = customerMetadata.sessionId,
                 paymentMethodId = paymentMethodId,
                 params = params,
+                requestOptions = requestOptions,
             ).mapCatching { response ->
                 response.customer?.paymentMethods?.firstOrNull { it.id == paymentMethodId }
                     ?: error("Checkout session update response did not include updated payment method.")
