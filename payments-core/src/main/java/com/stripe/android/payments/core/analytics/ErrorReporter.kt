@@ -289,6 +289,12 @@ interface ErrorReporter : FraudDetectionErrorReporter {
         WALLET_BUTTONS_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
             partialEventName = "wallet_buttons.confirmation_arguments.null_on_confirm"
         ),
+        EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM(
+            partialEventName = "express_checkout_element.state.null_on_confirm"
+        ),
+        EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM(
+            partialEventName = "express_checkout_element.confirmation_arguments.null_on_confirm"
+        ),
         INTENT_CONFIRMATION_HANDLER_PASSIVE_CHALLENGE_PARAMS_NULL(
             partialEventName = "intent_confirmation_handler.passive_challenge.params_null"
         ),

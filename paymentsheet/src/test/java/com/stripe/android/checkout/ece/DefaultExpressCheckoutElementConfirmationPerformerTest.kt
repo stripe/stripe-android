@@ -15,9 +15,11 @@ import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.gpay.GooglePayConfirmationOption
 import com.stripe.android.paymentelement.confirmation.link.LinkConfirmationOption
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -28,19 +30,34 @@ import org.robolectric.RobolectricTestRunner
 internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
 
     @Test
-    fun `confirm does nothing when state is not loaded`() = runScenario(
+    fun `confirm reports unexpected error when state is not loaded`() = runScenario(
         state = null,
         expressButton = createGooglePayExpressButton(),
     ) {
         performer.confirm(expressButton)
+
+        val call = errorReporter.awaitCall()
+
+        assertThat(call.errorEvent)
+            .isEqualTo(ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_STATE_ON_CONFIRM)
+        assertThat(call.stripeException).isNull()
+        assertThat(call.additionalNonPiiParams).isEmpty()
     }
 
     @Test
-    fun `confirm does nothing when the button selection cannot be converted to a confirmation option`() = runScenario(
+    fun `confirm reports unexpected error when confirmation args are null`() = runScenario(
         state = CheckoutControllerStateFactory.create(),
         expressButton = createGooglePayExpressButton(),
     ) {
         performer.confirm(expressButton)
+
+        val call = errorReporter.awaitCall()
+
+        assertThat(call.errorEvent).isEqualTo(
+            ErrorReporter.UnexpectedErrorEvent.EXPRESS_CHECKOUT_ELEMENT_NULL_CONFIRMATION_ARGS_ON_CONFIRM
+        )
+        assertThat(call.stripeException).isNull()
+        assertThat(call.additionalNonPiiParams).isEmpty()
     }
 
     @Test
@@ -118,11 +135,13 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val confirmationHandler = FakeConfirmationHandler()
+        val errorReporter = FakeErrorReporter()
         val stateHolder = CheckoutControllerStateFactory.createStateHolder(SavedStateHandle())
         stateHolder.state = state
         val performer = DefaultExpressCheckoutElementConfirmationPerformer(
             stateHolder = stateHolder,
             confirmationHandler = confirmationHandler,
+            errorReporter = errorReporter,
             statusBarColor = null,
             viewModelScope = backgroundScope,
         )
@@ -130,16 +149,19 @@ internal class DefaultExpressCheckoutElementConfirmationPerformerTest {
         Scenario(
             performer = performer,
             confirmationHandler = confirmationHandler,
+            errorReporter = errorReporter,
             stateHolder = stateHolder,
             expressButton = expressButton,
         ).block()
 
         confirmationHandler.validate()
+        errorReporter.ensureAllEventsConsumed()
     }
 
     private class Scenario(
         val performer: DefaultExpressCheckoutElementConfirmationPerformer,
         val confirmationHandler: FakeConfirmationHandler,
+        val errorReporter: FakeErrorReporter,
         val stateHolder: CheckoutControllerStateHolder,
         val expressButton: ExpressButton,
     )
