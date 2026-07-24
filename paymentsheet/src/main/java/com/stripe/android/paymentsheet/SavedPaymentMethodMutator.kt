@@ -412,6 +412,8 @@ internal class SavedPaymentMethodMutator(
                                 ?.removeMessage(paymentMethodMetadata.merchantName),
                             onUpdateSuccess = viewModel.navigationHandler::pop,
                             autocompleteAddressInteractorFactory = viewModel.autocompleteAddressInteractorFactory,
+                            requiresBillingAddressForAutomaticTax =
+                                paymentMethodMetadata?.requiresBillingAddressForAutomaticTax ?: false,
                         )
                     )
                 )

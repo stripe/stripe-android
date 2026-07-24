@@ -28,6 +28,7 @@ internal class BillingDetailsForm(
     private val collectPhone: Boolean,
     allowedBillingCountries: Set<String>,
     autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+    requiresBillingAddressForAutomaticTax: Boolean,
 ) {
     val nameElement: SimpleTextElement? = if (nameCollection == NameCollection.OutsideBillingDetailsForm) {
         SimpleTextElement(
@@ -57,6 +58,7 @@ internal class BillingDetailsForm(
         rawValuesMap = rawAddressValues(billingDetails),
         autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
         shouldHideCountryOnNoAddressCollection = false,
+        requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
     )
 
     val addressSectionElement = SectionElement.wrap(

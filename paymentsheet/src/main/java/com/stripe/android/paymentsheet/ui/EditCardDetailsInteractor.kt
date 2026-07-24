@@ -175,6 +175,7 @@ internal interface EditCardDetailsInteractor {
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback,
             autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+            requiresBillingAddressForAutomaticTax: Boolean,
         ): EditCardDetailsInteractor
     }
 }
@@ -191,6 +192,7 @@ internal class DefaultEditCardDetailsInteractor(
     private val onBrandChoiceChanged: CardBrandCallback,
     private val onCardUpdateParamsChanged: CardUpdateParamsCallback,
     private val autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+    private val requiresBillingAddressForAutomaticTax: Boolean,
 ) : EditCardDetailsInteractor {
     private val cardDetailsEntry = MutableStateFlow(
         value = cardEditConfiguration?.buildDefaultCardEntry()
@@ -366,6 +368,7 @@ internal class DefaultEditCardDetailsInteractor(
             collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
             allowedBillingCountries = billingDetailsCollectionConfiguration.allowedBillingCountries,
             autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+            requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
         )
     }
 
@@ -400,6 +403,7 @@ internal class DefaultEditCardDetailsInteractor(
             onBrandChoiceChanged: CardBrandCallback,
             onCardUpdateParamsChanged: CardUpdateParamsCallback,
             autocompleteAddressInteractorFactory: AutocompleteAddressInteractor.Factory?,
+            requiresBillingAddressForAutomaticTax: Boolean,
         ): EditCardDetailsInteractor {
             return DefaultEditCardDetailsInteractor(
                 payload = payload,
@@ -410,6 +414,7 @@ internal class DefaultEditCardDetailsInteractor(
                 onCardUpdateParamsChanged = onCardUpdateParamsChanged,
                 requiresModification = requiresModification,
                 autocompleteAddressInteractorFactory = autocompleteAddressInteractorFactory,
+                requiresBillingAddressForAutomaticTax = requiresBillingAddressForAutomaticTax,
             )
         }
     }
