@@ -32,6 +32,7 @@ class PaymentElement @Inject internal constructor(
         private var embeddedViewDisplaysMandateText: Boolean = true
         private var billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
             BillingDetailsCollectionConfiguration()
+        private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.Vertical
 
         fun embeddedViewDisplaysMandateText(
             embeddedViewDisplaysMandateText: Boolean
@@ -45,15 +46,23 @@ class PaymentElement @Inject internal constructor(
             this.billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration
         }
 
+        fun paymentMethodLayout(
+            paymentMethodLayout: PaymentMethodLayout
+        ): Configuration = apply {
+            this.paymentMethodLayout = paymentMethodLayout
+        }
+
         @Parcelize
         internal data class State(
             val embeddedViewDisplaysMandateText: Boolean,
             val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration.State,
+            val paymentMethodLayout: PaymentMethodLayout,
         ) : Parcelable
 
         internal fun build(): State = State(
             embeddedViewDisplaysMandateText = embeddedViewDisplaysMandateText,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration.build(),
+            paymentMethodLayout = paymentMethodLayout,
         )
     }
 }

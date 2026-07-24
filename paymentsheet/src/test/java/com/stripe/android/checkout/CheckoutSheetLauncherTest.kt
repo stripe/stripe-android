@@ -392,17 +392,20 @@ internal class CheckoutSheetLauncherTest {
     }
 
     @Test
-    fun `launchPaymentOptions forwards previously entered new selections`() = testScenario {
+    fun `launchPaymentOptions forwards previously entered new selections into the sheet`() = testScenario {
+        selectionHolder.setSelection(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         selectionHolder.setSelection(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
 
         sheetLauncher.launchPaymentOptions(
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
-            customerState = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
-            selection = PaymentSelection.GooglePay,
+            customerState = createCustomerState(),
+            selection = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION,
             configuration = EmbeddedConfigurationFactory.create(),
         )
         val launchCall = dummyActivityResultCallerScenario.awaitLaunchCall() as EmbeddedActivityArgs
 
+        assertThat(launchCall.previousNewSelections.previousNewSelection("card"))
+            .isEqualTo(PaymentMethodFixtures.CARD_PAYMENT_SELECTION)
         assertThat(launchCall.previousNewSelections.previousNewSelection("cashapp"))
             .isEqualTo(PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION)
     }

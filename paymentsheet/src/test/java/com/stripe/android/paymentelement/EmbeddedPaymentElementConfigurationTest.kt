@@ -68,6 +68,7 @@ class EmbeddedPaymentElementConfigurationTest {
             .termsDisplay(mapOf(PaymentMethod.Type.Card to TermsDisplay.NEVER))
             .opensCardScannerAutomatically(true)
             .userOverrideCountry("GB")
+            .paymentMethodLayout(PaymentSheet.PaymentMethodLayout.Horizontal)
             .build()
 
         val roundTripped = original.newBuilder().build()
@@ -85,6 +86,6 @@ class EmbeddedPaymentElementConfigurationTest {
         // When a new property is added, this count will change, signaling that:
         // 1. newBuilder() needs to propagate the new property
         // 2. The round-trip test above needs a non-default value for it
-        assertThat(propertyCount).isEqualTo(23)
+        assertThat(propertyCount).isEqualTo(24)
     }
 }

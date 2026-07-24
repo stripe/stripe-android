@@ -28,6 +28,9 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
                 configuration.paymentElementConfiguration.embeddedViewDisplaysMandateText
             )
             .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+            .paymentMethodLayout(
+                configuration.paymentElementConfiguration.paymentMethodLayout.asPaymentSheet()
+            )
             .googlePay(
                 googlePay = checkoutSessionResponse.merchantCountry?.let { merchantCountry ->
                     configuration.googlePayConfiguration?.asPaymentSheet(merchantCountry)
@@ -50,6 +53,12 @@ internal class CheckoutEmbeddedConfigurationFactory @Inject constructor(
             )
             .build()
     }
+}
+
+@OptIn(CheckoutSessionPreview::class)
+private fun PaymentMethodLayout.asPaymentSheet(): PaymentSheet.PaymentMethodLayout = when (this) {
+    PaymentMethodLayout.Horizontal -> PaymentSheet.PaymentMethodLayout.Horizontal
+    PaymentMethodLayout.Vertical -> PaymentSheet.PaymentMethodLayout.Vertical
 }
 
 @OptIn(CheckoutSessionPreview::class)

@@ -43,18 +43,19 @@ internal class EmbeddedFormHelperFactory @Inject constructor(
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             paymentMethodMetadata = paymentMethodMetadata,
             newPaymentSelectionProvider = { code ->
-                val currentSelection = embeddedSelectionHolder.selection.value
-                    ?.takeIf { it.paymentMethodType == code }
+                // Prefer the live selection when it matches the requested code; otherwise fall back to any
+                // previously entered new selection for that code so switching between horizontal tabs restores input.
+                val selection = embeddedSelectionHolder.selection.value?.takeIf { it.paymentMethodType == code }
                     ?: embeddedSelectionHolder.getPreviousNewSelection(code)
-                when (currentSelection) {
+                when (selection) {
                     is PaymentSelection.ExternalPaymentMethod -> {
-                        NewPaymentOptionSelection.External(currentSelection)
+                        NewPaymentOptionSelection.External(selection)
                     }
                     is PaymentSelection.CustomPaymentMethod -> {
-                        NewPaymentOptionSelection.Custom(currentSelection)
+                        NewPaymentOptionSelection.Custom(selection)
                     }
                     is PaymentSelection.New -> {
-                        NewPaymentOptionSelection.New(currentSelection)
+                        NewPaymentOptionSelection.New(selection)
                     }
                     else -> null
                 }

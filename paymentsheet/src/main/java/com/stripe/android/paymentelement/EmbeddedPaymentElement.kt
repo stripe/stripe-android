@@ -264,6 +264,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
         internal val termsDisplay: Map<PaymentMethod.Type, TermsDisplay> = emptyMap(),
         internal val opensCardScannerAutomatically: Boolean = ConfigurationDefaults.opensCardScannerAutomatically,
         internal val userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry,
+        internal val paymentMethodLayout: PaymentSheet.PaymentMethodLayout = PaymentSheet.PaymentMethodLayout.Vertical,
     ) : Parcelable {
         @Suppress("TooManyFunctions")
         class Builder(
@@ -301,6 +302,8 @@ class EmbeddedPaymentElement @Inject internal constructor(
             private var opensCardScannerAutomatically: Boolean =
                 ConfigurationDefaults.opensCardScannerAutomatically
             private var userOverrideCountry: String? = ConfigurationDefaults.userOverrideCountry
+            private var paymentMethodLayout: PaymentSheet.PaymentMethodLayout =
+                PaymentSheet.PaymentMethodLayout.Vertical
 
             /**
              * If set, the customer can select a previously saved payment method.
@@ -537,6 +540,11 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 this.userOverrideCountry = userOverrideCountry
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun paymentMethodLayout(paymentMethodLayout: PaymentSheet.PaymentMethodLayout) = apply {
+                this.paymentMethodLayout = paymentMethodLayout
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -561,6 +569,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
                 termsDisplay = termsDisplay,
                 opensCardScannerAutomatically = opensCardScannerAutomatically,
                 userOverrideCountry = userOverrideCountry,
+                paymentMethodLayout = paymentMethodLayout,
             )
         }
 
@@ -590,6 +599,7 @@ class EmbeddedPaymentElement @Inject internal constructor(
             .termsDisplay(termsDisplay)
             .opensCardScannerAutomatically(opensCardScannerAutomatically)
             .userOverrideCountry(userOverrideCountry)
+            .paymentMethodLayout(paymentMethodLayout)
             .apply {
                 primaryButtonLabel?.let { primaryButtonLabel(it) }
             }

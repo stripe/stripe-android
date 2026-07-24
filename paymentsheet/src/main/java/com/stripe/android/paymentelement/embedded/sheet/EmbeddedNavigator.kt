@@ -13,15 +13,22 @@ import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.form.EmbeddedFormInteractorFactory
+import com.stripe.android.paymentelement.embedded.form.FormActivityError
 import com.stripe.android.paymentelement.embedded.form.FormActivityPrimaryButton
 import com.stripe.android.paymentelement.embedded.form.FormScreenContent
+import com.stripe.android.paymentelement.embedded.form.USBankAccountMandate
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.navigation.NavigationHandler
+import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
+import com.stripe.android.paymentsheet.ui.AddPaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
+import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
+import com.stripe.android.paymentsheet.ui.SelectSavedPaymentMethodsInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodInteractor
 import com.stripe.android.paymentsheet.ui.UpdatePaymentMethodUI
+import com.stripe.android.paymentsheet.utils.EventReporterProvider
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
@@ -41,6 +48,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import java.io.Closeable
 import javax.inject.Inject
+import com.stripe.android.paymentsheet.ui.AddPaymentMethod as AddPaymentMethodUI
 
 internal class EmbeddedNavigator private constructor(
     private val eventReporter: EventReporter,
@@ -109,6 +117,8 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageUpdate -> eventReporter.onShowEditablePaymentOption()
             is Screen.Form -> Unit
             is Screen.PaymentOptions -> eventReporter.onShowNewPaymentOptions()
+            is Screen.HorizontalPaymentOptions -> eventReporter.onShowNewPaymentOptions()
+            is Screen.AddPaymentMethod -> eventReporter.onShowNewPaymentOptions()
         }
     }
 
@@ -118,6 +128,8 @@ internal class EmbeddedNavigator private constructor(
             is Screen.ManageUpdate -> eventReporter.onHideEditablePaymentOption()
             is Screen.Form -> Unit
             is Screen.PaymentOptions -> Unit
+            is Screen.HorizontalPaymentOptions -> Unit
+            is Screen.AddPaymentMethod -> Unit
         }
     }
 
@@ -305,6 +317,95 @@ internal class EmbeddedNavigator private constructor(
                     onClick = onContinueClick,
                 )
                 PaymentSheetContentPadding()
+            }
+
+            override fun close() {
+                interactor.close()
+            }
+        }
+
+        class HorizontalPaymentOptions(
+            private val interactor: SelectSavedPaymentMethodsInteractor,
+            private val isLiveMode: Boolean,
+            private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val onContinueClick: () -> Unit,
+        ) : Screen(), Closeable {
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
+                PaymentSheetTopBarState(
+                    showTestModeLabel = !isLiveMode,
+                    showEditMenu = false,
+                    isEditing = false,
+                    onEditIconPressed = {},
+                )
+            )
+
+            override fun title(): StateFlow<ResolvableString?> = stateFlowOf(
+                R.string.stripe_paymentsheet_select_your_payment_method.resolvableString
+            )
+
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
+
+            @Composable
+            override fun Content() {
+                SavedPaymentMethodTabLayoutUI(
+                    interactor = interactor,
+                    cvcRecollectionState = CvcRecollectionState.NotRequired,
+                    modifier = Modifier.padding(StripeTheme.getOuterFormInsets()),
+                )
+                Spacer(Modifier.height(40.dp))
+                val state by sheetActivityState.collectAsState()
+                FormActivityPrimaryButton(
+                    state = state,
+                    onClick = onContinueClick,
+                )
+                PaymentSheetContentPadding()
+            }
+
+            override fun close() {
+                interactor.close()
+            }
+        }
+
+        class AddPaymentMethod(
+            private val interactor: AddPaymentMethodInteractor,
+            private val isLiveMode: Boolean,
+            private val eventReporter: EventReporter,
+            private val sheetActivityState: StateFlow<SheetActivityStateHolder.State>,
+            private val onContinueClick: () -> Unit,
+            private val onProcessingCompleted: () -> Unit,
+        ) : Screen(), Closeable {
+            override fun topBarState(): StateFlow<PaymentSheetTopBarState?> = stateFlowOf(
+                PaymentSheetTopBarState(
+                    showTestModeLabel = !isLiveMode,
+                    showEditMenu = false,
+                    isEditing = false,
+                    onEditIconPressed = {},
+                )
+            )
+
+            override fun title(): StateFlow<ResolvableString?> = stateFlowOf(
+                R.string.stripe_paymentsheet_add_payment_method_title.resolvableString
+            )
+
+            override fun isPerformingNetworkOperation(): StateFlow<Boolean> = stateFlowOf(false)
+
+            @Composable
+            override fun Content() {
+                // EventReporterProvider supplies the card scan / form event reporters that the card form requires.
+                EventReporterProvider(eventReporter) {
+                    // AddPaymentMethodUI (PaymentElement) applies its own outer form insets, so we don't add them here.
+                    AddPaymentMethodUI(interactor = interactor)
+                    val state by sheetActivityState.collectAsState()
+                    USBankAccountMandate(state)
+                    FormActivityError(state)
+                    Spacer(Modifier.height(40.dp))
+                    FormActivityPrimaryButton(
+                        state = state,
+                        onClick = onContinueClick,
+                        onProcessingCompleted = onProcessingCompleted,
+                    )
+                    PaymentSheetContentPadding()
+                }
             }
 
             override fun close() {

@@ -36,6 +36,7 @@ import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityRegi
 import com.stripe.android.paymentelement.embedded.sheet.DefaultSheetActivityStateHolder
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedFormScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.EmbeddedNavigator
+import com.stripe.android.paymentelement.embedded.sheet.InitialHorizontalPaymentOptionsScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.InitialPaymentOptionsScreenFactory
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityConfirmationHelper
 import com.stripe.android.paymentelement.embedded.sheet.SheetActivityRegistrar
@@ -43,6 +44,7 @@ import com.stripe.android.paymentelement.embedded.sheet.SheetActivityStateHolder
 import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.SavedPaymentMethodMutator
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -139,13 +141,27 @@ internal interface EmbeddedActivityModule {
             formScreenFactory: EmbeddedNavigator.Screen.Form.Factory,
             initialManageScreenFactory: InitialManageScreenFactory,
             initialPaymentOptionsScreenFactory: InitialPaymentOptionsScreenFactory,
+            initialHorizontalPaymentOptionsScreenFactory: InitialHorizontalPaymentOptionsScreenFactory,
+            configuration: EmbeddedPaymentElement.Configuration,
             @ViewModelScope viewModelScope: CoroutineScope,
             eventReporter: EventReporter,
         ): EmbeddedNavigator {
             val initialBackStack = when (launchMode) {
-                is EmbeddedLaunchMode.Form -> listOf(formScreenFactory.create(launchMode))
+                is EmbeddedLaunchMode.Form -> {
+                    if (configuration.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal) {
+                        listOf(initialHorizontalPaymentOptionsScreenFactory.createInitialScreen(launchMode))
+                    } else {
+                        listOf(formScreenFactory.create(launchMode))
+                    }
+                }
                 is EmbeddedLaunchMode.Manage -> listOf(initialManageScreenFactory.createInitialScreen())
-                is EmbeddedLaunchMode.PaymentOptions -> initialPaymentOptionsScreenFactory.createInitialScreen()
+                is EmbeddedLaunchMode.PaymentOptions -> {
+                    if (configuration.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Horizontal) {
+                        listOf(initialHorizontalPaymentOptionsScreenFactory.createInitialScreen())
+                    } else {
+                        initialPaymentOptionsScreenFactory.createInitialScreen()
+                    }
+                }
             }
             return EmbeddedNavigator(
                 coroutineScope = viewModelScope,
