@@ -204,6 +204,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = true,
             customerState = null,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -228,6 +229,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = false,
             customerState = null,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -254,6 +256,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 hasBeenConfirmed = false,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
+                checkoutSessionResponse = null,
                 launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             )
             val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -276,6 +279,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 hasBeenConfirmed = true,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
+                checkoutSessionResponse = null,
                 launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             )
             val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -335,6 +339,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = null,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -410,6 +415,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Manage,
         )
 
@@ -434,6 +440,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selection = selection,
                 hasBeenConfirmed = false,
                 shouldInvokeSelectionCallback = true,
+                checkoutSessionResponse = null,
                 launchMode = EmbeddedLaunchMode.Manage,
             )
 
@@ -455,6 +462,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
                 selection = selection,
                 hasBeenConfirmed = false,
                 shouldInvokeSelectionCallback = false,
+                checkoutSessionResponse = null,
                 launchMode = EmbeddedLaunchMode.Manage,
             )
 
@@ -498,6 +506,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             hasBeenConfirmed = true,
             customerState = null,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
         )
         val callback = registerCall.callback.asCallbackFor<EmbeddedActivityResult>()
@@ -592,6 +601,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = selection,
             hasBeenConfirmed = false,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 
@@ -611,6 +621,7 @@ internal class DefaultEmbeddedSheetLauncherTest {
             selection = null,
             hasBeenConfirmed = true,
             shouldInvokeSelectionCallback = false,
+            checkoutSessionResponse = null,
             launchMode = EmbeddedLaunchMode.PaymentOptions,
         )
 

@@ -87,6 +87,7 @@ internal class DefaultSheetActivityConfirmationHelperTest {
                 hasBeenConfirmed = false,
                 customerState = null,
                 shouldInvokeSelectionCallback = false,
+                checkoutSessionResponse = null,
                 launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
             )
         )

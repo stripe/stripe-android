@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
 import com.stripe.android.paymentelement.embedded.EmbeddedSelectionHolder
@@ -18,6 +19,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.amount
 import com.stripe.android.paymentsheet.model.currency
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.paymentsheet.utils.buyButtonLabel
@@ -55,6 +57,7 @@ internal interface SheetActivityStateHolder {
         val error: ResolvableString? = null,
         val mandateText: ResolvableString? = null,
         val savedPaymentSelectionToConfirm: PaymentSelection.Saved? = null,
+        val checkoutSessionResponse: CheckoutSessionResponse? = null,
     )
 }
 
@@ -105,6 +108,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            checkoutSessionResponse = null,
                             launchMode = launchMode,
                         )
                     }
@@ -114,6 +118,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             hasBeenConfirmed = true,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            checkoutSessionResponse = null,
                             launchMode = launchMode,
                         )
                     }
@@ -124,6 +129,7 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            checkoutSessionResponse = null,
                             launchMode = launchMode,
                         )
                     }
@@ -213,7 +219,8 @@ internal class DefaultSheetActivityStateHolder @Inject constructor(
                 when (state.result) {
                     is ConfirmationHandler.Result.Succeeded -> copy(
                         processingState = PrimaryButtonProcessingState.Completed,
-                        isEnabled = false
+                        isEnabled = false,
+                        checkoutSessionResponse = state.result.metadata[CheckoutSessionResponseKey],
                     )
                     is ConfirmationHandler.Result.Failed -> copy(
                         processingState = PrimaryButtonProcessingState.Idle(null),

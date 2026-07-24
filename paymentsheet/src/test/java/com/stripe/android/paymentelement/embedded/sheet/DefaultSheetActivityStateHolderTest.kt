@@ -16,6 +16,8 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.confirmation.ConfirmationHandler
 import com.stripe.android.paymentelement.confirmation.FakeConfirmationHandler
+import com.stripe.android.paymentelement.confirmation.MutableConfirmationMetadata
+import com.stripe.android.paymentelement.confirmation.intent.CheckoutSessionResponseKey
 import com.stripe.android.paymentelement.embedded.DefaultEmbeddedSelectionHolder
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityResult
 import com.stripe.android.paymentelement.embedded.EmbeddedLaunchMode
@@ -28,6 +30,7 @@ import com.stripe.android.paymentelement.embedded.form.confirmationStateConfirmi
 import com.stripe.android.paymentsheet.FakeCustomerStateHolder
 import com.stripe.android.paymentsheet.analytics.FakeEventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponseFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
 import com.stripe.android.ui.core.R
@@ -159,6 +162,24 @@ class DefaultSheetActivityStateHolderTest {
             val completedState = awaitItem()
             assertThat(completedState.processingState).isEqualTo(PrimaryButtonProcessingState.Completed)
             assertThat(completedState.isProcessing).isFalse()
+        }
+    }
+
+    @Test
+    fun `successful confirmation captures checkout session response into state`() = testScenario {
+        val response = CheckoutSessionResponseFactory.create()
+        stateHolder.state.test {
+            awaitAndVerifyInitialState()
+            confirmationHandler.state.value = ConfirmationHandler.State.Complete(
+                result = ConfirmationHandler.Result.Succeeded(
+                    intent = PaymentIntentFixtures.PI_SUCCEEDED,
+                    metadata = MutableConfirmationMetadata().apply {
+                        set(CheckoutSessionResponseKey, response)
+                    },
+                ),
+            )
+
+            assertThat(awaitItem().checkoutSessionResponse).isEqualTo(response)
         }
     }
 
@@ -349,6 +370,7 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
+                        checkoutSessionResponse = null,
                         launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
                     )
                 )
@@ -373,6 +395,7 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = true,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
+                        checkoutSessionResponse = null,
                         launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
                     )
                 )
@@ -403,6 +426,7 @@ class DefaultSheetActivityStateHolderTest {
                         hasBeenConfirmed = false,
                         customerState = customerStateHolder.customer.value,
                         shouldInvokeSelectionCallback = false,
+                        checkoutSessionResponse = null,
                         launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = "card"),
                     )
                 )

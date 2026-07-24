@@ -54,6 +54,7 @@ internal class DefaultSheetActivityConfirmationHelper @Inject constructor(
                             hasBeenConfirmed = false,
                             customerState = customerStateHolder.customer.value,
                             shouldInvokeSelectionCallback = false,
+                            checkoutSessionResponse = null,
                             launchMode = launchMode,
                         )
                     )

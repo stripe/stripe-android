@@ -4,8 +4,11 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.ViewModelScope
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodMessagePromotion
+import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentelement.EmbeddedPaymentElement
 import com.stripe.android.paymentelement.callbacks.PaymentElementCallbackIdentifier
 import com.stripe.android.paymentelement.embedded.EmbeddedActivityArgs
@@ -20,17 +23,24 @@ import com.stripe.android.payments.core.injection.STATUS_BAR_COLOR
 import com.stripe.android.paymentsheet.CustomerStateHolder
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.paymentMethodType
+import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
 import com.stripe.android.paymentsheet.state.CustomerState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
 
+@OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSheetLauncher @Inject constructor(
     activityResultCaller: ActivityResultCaller,
     lifecycleOwner: LifecycleOwner,
     private val selectionHolder: EmbeddedSelectionHolder,
     private val customerStateHolder: CustomerStateHolder,
     private val sheetStateHolder: SheetStateHolder,
+    private val stateHolder: CheckoutControllerStateHolder,
+    private val checkoutStateLoader: CheckoutStateLoader,
     private val errorReporter: ErrorReporter,
+    @ViewModelScope private val coroutineScope: CoroutineScope,
     @Named(STATUS_BAR_COLOR) private val statusBarColor: Int?,
     @PaymentElementCallbackIdentifier private val paymentElementCallbackIdentifier: String,
 ) : EmbeddedSheetLauncher {
@@ -61,10 +71,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleFormResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> handleCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
             }
@@ -74,10 +81,7 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handleManageResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> handleCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> Unit
             is EmbeddedActivityResult.Error -> Unit
         }
@@ -85,15 +89,41 @@ internal class CheckoutSheetLauncher @Inject constructor(
 
     private fun handlePaymentOptionsResult(result: EmbeddedActivityResult) {
         when (result) {
-            is EmbeddedActivityResult.Complete -> {
-                result.customerState?.let { customerStateHolder.setCustomerState(it) }
-                selectionHolder.setSelection(result.selection)
-            }
+            is EmbeddedActivityResult.Complete -> handleCompleteResult(result)
             is EmbeddedActivityResult.Cancelled -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
                 clearStaleSelection()
             }
             is EmbeddedActivityResult.Error -> Unit
+        }
+    }
+
+    /**
+     * When the sheet confirmed a payment it returns the post-confirm [CheckoutSessionResponse]; feed
+     * it through [CheckoutStateLoader] so the state holder reflects the final session (the reload
+     * re-derives the customer and selection, so the manual updates are skipped in that case).
+     */
+    private fun handleCompleteResult(result: EmbeddedActivityResult.Complete) {
+        val response = result.checkoutSessionResponse
+        if (response != null) {
+            reloadAfterConfirm(response)
+        } else {
+            result.customerState?.let { customerStateHolder.setCustomerState(it) }
+            selectionHolder.setSelection(result.selection)
+        }
+    }
+
+    private fun reloadAfterConfirm(response: CheckoutSessionResponse) {
+        val current = stateHolder.state ?: return
+        coroutineScope.launch {
+            runCatching {
+                checkoutStateLoader.reload(current.copy(checkoutSessionResponse = response))
+            }.onFailure {
+                errorReporter.report(
+                    errorEvent = ErrorReporter.UnexpectedErrorEvent.CHECKOUT_RELOAD_AFTER_CONFIRM_FAILED,
+                    stripeException = StripeException.create(it),
+                )
+            }
         }
     }
 

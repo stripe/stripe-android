@@ -216,6 +216,7 @@ internal class EmbeddedNavigator private constructor(
                                 hasBeenConfirmed = true,
                                 customerState = customerStateHolder.customer.value,
                                 shouldInvokeSelectionCallback = false,
+                                checkoutSessionResponse = state.checkoutSessionResponse,
                                 launchMode = launchMode,
                             )
                         )
