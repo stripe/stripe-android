@@ -6,9 +6,13 @@ import android.graphics.drawable.Drawable
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.LinkAccountUpdate
+import com.stripe.android.link.TestFactory
 import com.stripe.android.link.account.LinkAccountHolder
+import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.LinkBrand
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentelement.CheckoutSessionPreview
@@ -99,9 +103,28 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
         assertThat(option?.imageLoader?.invoke()).isNotNull()
     }
 
+    @Test
+    fun `create uses link account brand for saved Link passthrough card label`() = runScenario(
+        linkAccount = LinkAccount(
+            TestFactory.CONSUMER_SESSION.copy(linkBrand = LinkBrand.Onelink),
+        )
+    ) {
+        val option = factory.create(
+            selection = PaymentSelection.Saved(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(isLinkPassthroughMode = true),
+            ),
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                linkBrand = LinkBrand.Link,
+            ),
+        )
+
+        assertThat(option?.label).isEqualTo("Onelink")
+    }
+
     private fun runScenario(
         metadata: PaymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         cardArt: Drawable? = null,
+        linkAccount: LinkAccount? = null,
         block: suspend Scenario.() -> Unit,
     ) = runTest {
         val context = ApplicationProvider.getApplicationContext<Context>()
@@ -113,7 +136,9 @@ internal class DefaultCheckoutPaymentOptionFactoryTest {
                 ),
                 cardArtDrawableLoader = { cardArt },
                 context = context,
-                linkAccountHolder = LinkAccountHolder(SavedStateHandle()),
+                linkAccountHolder = LinkAccountHolder(SavedStateHandle()).apply {
+                    set(LinkAccountUpdate.Value(linkAccount))
+                },
             ),
             metadata = metadata,
             cardArt = cardArt,
