@@ -71,9 +71,7 @@ import com.stripe.android.test.core.ui.UiAutomatorText
 import com.stripe.android.utils.awaitWindowFocus
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
-import org.junit.Assume
 import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -338,10 +336,7 @@ internal class PlaygroundTestDriver(
         fieldPopulator.populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -492,10 +487,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -541,10 +533,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -591,10 +580,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -646,10 +632,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -1047,10 +1030,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         val result = playgroundState
 
@@ -1103,10 +1083,7 @@ internal class PlaygroundTestDriver(
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
         // after we have had the chance to capture a screenshot.
-        verifyDeviceSupportsTestAuthorization(
-            testParameters.authorizationAction,
-            testParameters.useBrowser
-        )
+        verifyDeviceSupportsTestAuthorization(testParameters.authorizationAction)
 
         pressContinue(waitForPlayground = false)
 
@@ -1290,16 +1267,7 @@ internal class PlaygroundTestDriver(
         }
     }
 
-    private fun verifyDeviceSupportsTestAuthorization(
-        authorizeAction: AuthorizeAction?,
-        requestedBrowser: Browser?
-    ) {
-        if (authorizeAction?.requiresBrowser == true) {
-            requestedBrowser?.let {
-                val browserUI = BrowserUI.convert(it)
-                Assume.assumeTrue(getBrowser(browserUI) == browserUI)
-            } ?: Assume.assumeTrue(selectors.getInstalledBrowsers().isNotEmpty())
-        }
+    private fun verifyDeviceSupportsTestAuthorization(authorizeAction: AuthorizeAction?) {
         if (authorizeAction == AuthorizeAction.DisplayQrCode) {
             // Tests fail on pixel 2 API 26.
             assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
@@ -1309,11 +1277,7 @@ internal class PlaygroundTestDriver(
     private fun getBrowser(requestedBrowser: BrowserUI?): BrowserUI {
         val installedBrowsers = selectors.getInstalledBrowsers()
 
-        return requestedBrowser?.let {
-            // Assume true will mark the test as skipped if it can't be executed
-            Assume.assumeTrue(installedBrowsers.contains(it))
-            it
-        } ?: installedBrowsers.first()
+        return requestedBrowser ?: installedBrowsers.first()
     }
 
     private fun monitorCurrentActivity(application: Application) {
@@ -1374,13 +1338,14 @@ internal class PlaygroundTestDriver(
                     // select the first browser found
                     val selectedBrowser = getBrowser(BrowserUI.convert(testParameters.useBrowser))
 
+                    // Chrome's first-run onboarding blocks the auth page; dismiss it if present.
+                    dismissChromeFirstRunIfPresent()
+
                     // If there are multiple browser there is a browser selector window
                     selectBrowserPrompt.wait(4000)
                     if (selectBrowserPrompt.exists()) {
                         browserIconAtPrompt(selectedBrowser).click()
                     }
-
-                    assumeTrue(browserWindow(selectedBrowser)?.exists() == true)
 
                     blockUntilAuthorizationPageLoaded(isSetup = testParameters.isSetupMode)
                 }
