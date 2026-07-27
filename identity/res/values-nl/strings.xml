@@ -222,8 +222,6 @@
   <string name="stripe_select">Selecteren</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Selfieopnamen zijn voltooid</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Selfieopnamen</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">één selfie gemaakt</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

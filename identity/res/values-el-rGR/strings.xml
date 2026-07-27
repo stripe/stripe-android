@@ -222,8 +222,6 @@
   <string name="stripe_select">Επιλογή</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Οι λήψεις selfie ολοκληρώθηκαν</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Λήψεις selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">έγινε λήψη μιας selfie</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

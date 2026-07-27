@@ -222,8 +222,6 @@
   <string name="stripe_select">Sélectionner</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Les captures d\'égoportraits sont terminées</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Captures d\'égoportraits</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">un égoportrait capturé</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

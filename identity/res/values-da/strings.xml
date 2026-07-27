@@ -222,8 +222,6 @@
   <string name="stripe_select">Vælg</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Optagelse af selfier er fuldført</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Selfie-optagelser</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">én selfie optaget</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

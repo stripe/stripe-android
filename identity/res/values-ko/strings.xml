@@ -222,8 +222,6 @@
   <string name="stripe_select">선택</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">셀카 캡처 완료</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">캡처된 셀카</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">셀카 1장 캡처됨</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

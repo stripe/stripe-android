@@ -222,8 +222,6 @@
   <string name="stripe_select">Pasirinkti</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Baigti asmenukių įrašai</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Asmenukių įrašai</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">užfiksuota viena asmenukė</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

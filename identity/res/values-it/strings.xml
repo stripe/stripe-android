@@ -222,8 +222,6 @@
   <string name="stripe_select">Seleziona</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">L\'acquisizione dei selfie è completa</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Acquisizioni di selfie</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">un selfie acquisito</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

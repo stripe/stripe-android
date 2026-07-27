@@ -222,8 +222,6 @@
   <string name="stripe_select">Odaberi</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Snimanje selfi slika je završeno</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Snimanje selfie slika</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">snimljen je jedan selfie</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

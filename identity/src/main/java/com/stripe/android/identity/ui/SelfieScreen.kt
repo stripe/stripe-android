@@ -289,7 +289,7 @@ private fun SelfieCaptureScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = stringResource(id = R.string.stripe_selfie_captures),
+                text = stringResource(id = R.string.stripe_selfie_title),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(

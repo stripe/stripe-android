@@ -222,8 +222,6 @@
   <string name="stripe_select">Vali</string>
   <!-- Instructional text when selfie is captured -->
   <string name="stripe_selfie_capture_complete">Selfi on jäädvustatud</string>
-  <!-- Title of selfie capture screen -->
-  <string name="stripe_selfie_captures">Selfi pildistamine</string>
   <!-- Content description of a captured selfie -->
   <string name="stripe_selfie_item_description">jäädvustatud üks selfi</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->

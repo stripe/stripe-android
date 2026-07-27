@@ -105,7 +105,7 @@ class SelfieScreenTest {
             scannerState = IdentityScanViewModel.State.Scanning(),
             messageId = R.string.stripe_position_selfie
         ) {
-            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
+            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_title))
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
@@ -126,7 +126,7 @@ class SelfieScreenTest {
             scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Initial>()),
             messageId = R.string.stripe_position_selfie
         ) {
-            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
+            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_title))
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
@@ -147,7 +147,7 @@ class SelfieScreenTest {
             scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Found>()),
             messageId = R.string.stripe_capturing
         ) {
-            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
+            onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_title))
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_capturing))
 
             onNodeWithTag(SCAN_VIEW_TAG).assertExists()
@@ -172,7 +172,7 @@ class SelfieScreenTest {
             messageId = R.string.stripe_captured_front_selfie
         ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
-                .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
+                .assertTextEquals(context.getString(R.string.stripe_selfie_title))
 
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_captured_front_selfie))
@@ -216,7 +216,7 @@ class SelfieScreenTest {
             verify(mockSelfieScanViewModel).stopScan(any())
             verify(mockSelfieScanViewModel, never()).startScan(any(), any())
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
-                .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
+                .assertTextEquals(context.getString(R.string.stripe_selfie_title))
 
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_capture_complete))
