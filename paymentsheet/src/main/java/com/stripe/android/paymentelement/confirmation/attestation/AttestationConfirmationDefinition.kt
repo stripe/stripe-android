@@ -2,13 +2,13 @@ package com.stripe.android.paymentelement.confirmation.attestation
 
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.attestation.AttestationActivityContract
 import com.stripe.android.attestation.AttestationActivityResult
 import com.stripe.android.attestation.analytics.AttestationAnalyticsEventsReporter
 import com.stripe.android.common.di.APPLICATION_ID
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.AndroidVerificationObject
@@ -25,6 +25,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Named
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 internal class AttestationConfirmationDefinition @Inject constructor(
@@ -33,7 +34,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
     @AttestationScope private val coroutineScope: CoroutineScope,
     @IOContext private val workContext: CoroutineContext,
     private val attestationAnalyticsEventsReporter: AttestationAnalyticsEventsReporter,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     @Named(APPLICATION_ID) private val appId: String,
     private val isEligibleForConfirmationChallenge: IsEligibleForConfirmationChallenge
@@ -130,7 +131,7 @@ internal class AttestationConfirmationDefinition @Inject constructor(
         if (confirmationArgs.paymentMethodMetadata.attestOnIntentConfirmation) {
             return ConfirmationDefinition.Action.Launch(
                 launcherArguments = AttestationActivityContract.Args(
-                    publishableKey = publishableKeyProvider(),
+                    publishableKey = apiConfigProvider.get().publishableKey,
                     productUsage = productUsage
                 ),
                 receivesResultInProcess = false,

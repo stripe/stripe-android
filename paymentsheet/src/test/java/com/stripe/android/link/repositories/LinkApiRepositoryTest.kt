@@ -2,6 +2,7 @@ package com.stripe.android.link.repositories
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.FakeConsumersApiService
@@ -45,6 +46,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.Locale
+import javax.inject.Provider
 
 @Suppress("LargeClass")
 @RunWith(RobolectricTestRunner::class)
@@ -1032,8 +1034,12 @@ class LinkApiRepositoryTest {
         return LinkApiRepository(
             application = ApplicationProvider.getApplicationContext(),
             requestSurface = RequestSurface.PaymentElement,
-            publishableKeyProvider = { PUBLISHABLE_KEY },
-            stripeAccountIdProvider = { STRIPE_ACCOUNT_ID },
+            apiConfigProvider = Provider {
+                ApiConfiguration.State(
+                    publishableKey = PUBLISHABLE_KEY,
+                    stripeAccountId = STRIPE_ACCOUNT_ID,
+                )
+            },
             stripeRepository = stripeRepository,
             consumersApiService = consumersApiService,
             workContext = Dispatchers.IO,

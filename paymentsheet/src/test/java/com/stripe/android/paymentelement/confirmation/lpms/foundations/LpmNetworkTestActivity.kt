@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
@@ -196,6 +197,17 @@ internal interface LpmNetworkTestModule {
             @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String,
         ): PaymentConfiguration {
             return PaymentConfiguration(
+                publishableKey = publishableKeyProvider(),
+                stripeAccountId = stripeAccountIdProvider(),
+            )
+        }
+
+        @Provides
+        fun providesApiConfigurationState(
+            @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+            @Named(STRIPE_ACCOUNT_ID) stripeAccountIdProvider: () -> String?,
+        ): ApiConfiguration.State {
+            return ApiConfiguration.State(
                 publishableKey = publishableKeyProvider(),
                 stripeAccountId = stripeAccountIdProvider(),
             )

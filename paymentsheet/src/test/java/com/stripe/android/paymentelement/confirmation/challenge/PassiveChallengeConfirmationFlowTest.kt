@@ -1,5 +1,6 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
@@ -17,6 +18,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.RadarOptionsFactory
 import com.stripe.android.utils.FakePassiveChallengeWarmer
 import org.junit.Test
+import javax.inject.Provider
 
 internal class PassiveChallengeConfirmationFlowTest {
     @Test
@@ -95,7 +97,12 @@ internal class PassiveChallengeConfirmationFlowTest {
     ) = PassiveChallengeConfirmationDefinition(
         errorReporter = errorReporter,
         passiveChallengeWarmer = passiveChallengeWarmer,
-        publishableKeyProvider = { "pk_123" },
+        apiConfigProvider = Provider {
+            ApiConfiguration.State(
+                publishableKey = "pk_123",
+                stripeAccountId = null,
+            )
+        },
         productUsage = setOf("PaymentSheet"),
         isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge,
     )

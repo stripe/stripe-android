@@ -2,6 +2,7 @@ package com.stripe.android.paymentelement.confirmation
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.SharedPaymentTokenSessionPreview
 import com.stripe.android.core.Logger
@@ -165,8 +166,12 @@ internal suspend fun createIntentConfirmationInterceptor(
                             context = ApplicationProvider.getApplicationContext(),
                             publishableKey = "pk",
                         ),
-                        publishableKeyProvider = { "pk" },
-                        stripeAccountIdProvider = { null },
+                        apiConfigProvider = Provider {
+                            ApiConfiguration.State(
+                                publishableKey = "pk",
+                                stripeAccountId = null,
+                            )
+                        },
                     ),
                     requestOptions = requestOptions,
                 )
