@@ -1019,8 +1019,8 @@ private fun SelfieStatusBadge(
         Text(
             text = stringResource(id = status.labelRes),
             color = Color.White,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
+            fontSize = 14.sp,
+            lineHeight = 18.sp,
             fontWeight = FontWeight.Medium,
             style = MaterialTheme.typography.body2.copy(
                 shadow = Shadow(
