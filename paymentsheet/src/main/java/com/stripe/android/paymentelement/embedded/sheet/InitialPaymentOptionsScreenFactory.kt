@@ -18,6 +18,8 @@ import com.stripe.android.paymentsheet.FormHelper
 import com.stripe.android.paymentsheet.FormHelper.FormType
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.paymentMethodType
 import com.stripe.android.paymentsheet.repositories.PaymentMethodMessagePromotionsHelper
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
@@ -45,10 +47,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
     private val formScreenFactory: EmbeddedFormScreenFactory,
     private val linkAccountHolder: LinkAccountHolder,
 ) {
-    fun createInitialScreen(): EmbeddedNavigator.Screen.PaymentOptions {
-        val interactor = createInteractor()
-        return EmbeddedNavigator.Screen.PaymentOptions(
-            interactor = interactor,
+    fun createInitialScreen(): List<EmbeddedNavigator.Screen> {
+        val formHelper = createFormHelper()
+        val paymentOptionsScreen = EmbeddedNavigator.Screen.PaymentOptions(
+            interactor = createInteractor(formHelper),
             isLiveMode = paymentMethodMetadata.stripeIntent.isLiveMode,
             sheetActivityState = sheetActivityStateHolder.state,
             onContinueClick = {
@@ -63,11 +65,21 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                 )
             },
         )
+        return buildList {
+            add(paymentOptionsScreen)
+            // When a new payment method requiring a form is already selected, open directly on that
+            // form with the payment options list underneath, so back returns to the list.
+            val selection = selectionHolder.selection.value
+            if (selection is PaymentSelection.New &&
+                formHelper.formTypeForCode(selection.paymentMethodType) == FormType.UserInteractionRequired
+            ) {
+                add(formScreenFactory.createFormScreen(selection.paymentMethodType))
+            }
+        }
     }
 
-    @Suppress("LongMethod")
-    private fun createInteractor(): PaymentMethodVerticalLayoutInteractor {
-        val formHelper = embeddedFormHelperFactory.create(
+    private fun createFormHelper(): FormHelper {
+        return embeddedFormHelperFactory.create(
             coroutineScope = viewModelScope,
             paymentMethodMetadata = paymentMethodMetadata,
             eventReporter = eventReporter,
@@ -78,7 +90,10 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             setAsDefaultMatchesSaveForFutureUse = FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
+    }
 
+    @Suppress("LongMethod")
+    private fun createInteractor(formHelper: FormHelper): PaymentMethodVerticalLayoutInteractor {
         return DefaultPaymentMethodVerticalLayoutInteractor(
             paymentMethodMetadata = paymentMethodMetadata,
             processing = stateFlowOf(false),
