@@ -557,7 +557,7 @@ class LinkControllerInteractorTest {
     }
 
     @Test
-    fun `onPresentPaymentMethods() with BankAccount payment method requires name collection`() = runTest {
+    fun `onPresentPaymentMethods() with collectName=true forces name collection to Always`() = runTest {
         val interactor = createInteractor()
         configure(interactor)
 
@@ -565,16 +565,19 @@ class LinkControllerInteractorTest {
         interactor.presentPaymentMethods(
             launcher = launcher,
             email = null,
-            paymentMethodTypes = listOf(LinkController.PaymentMethodType.BankAccount)
+            paymentMethodTypes = listOf(LinkController.PaymentMethodType.BankAccount),
+            collectName = true,
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
     }
 
     @Test
-    fun `onPresentPaymentMethods() with Generic payment method uses automatic name collection`() = runTest {
+    fun `onPresentPaymentMethods() without collectName uses configured billingDetailsCollectionConfiguration`() =
+        runTest {
         val interactor = createInteractor()
         configure(interactor)
 
@@ -585,7 +588,49 @@ class LinkControllerInteractorTest {
             paymentMethodTypes = listOf(LinkController.PaymentMethodType.Generic)
         )
 
-        val collectionConfig = launcher.calls.awaitItem().input.configuration.billingDetailsCollectionConfiguration
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
+        assertThat(collectionConfig.name)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() respects merchant-configured name collection`() = runTest {
+        val interactor = createInteractor()
+        configure(
+            interactor,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            ),
+        )
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentPaymentMethods(
+            launcher = launcher,
+            email = null,
+            paymentMethodTypes = listOf(LinkController.PaymentMethodType.Card),
+        )
+
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
+        assertThat(collectionConfig.name)
+            .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always)
+    }
+
+    @Test
+    fun `onPresentPaymentMethods() with null paymentMethodTypes uses configured default`() = runTest {
+        val interactor = createInteractor()
+        configure(interactor)
+
+        val launcher = FakeActivityResultLauncher<LinkActivityContract.Args>()
+        interactor.presentPaymentMethods(
+            launcher = launcher,
+            email = null,
+            paymentMethodTypes = null,
+        )
+
+        val collectionConfig = launcher.calls.awaitItem()
+            .input.configuration.billingDetailsCollectionConfiguration
         assertThat(collectionConfig.name)
             .isEqualTo(PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Automatic)
     }
