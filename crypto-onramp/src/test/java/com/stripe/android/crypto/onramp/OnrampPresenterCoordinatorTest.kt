@@ -23,6 +23,7 @@ import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -45,6 +46,12 @@ class OnrampPresenterCoordinatorTest {
     private val onrampSessionClientSecretProvider: suspend (String) -> String = { "cos_test_secret" }
     private val samsungPayLauncher = FakeSamsungPayLauncher()
     private val samsungPayLauncherFactory = FakeSamsungPayLauncherFactory(samsungPayLauncher)
+
+    @After
+    fun tearDown() {
+        samsungPayLauncher.ensureAllEventsConsumed()
+        samsungPayLauncherFactory.ensureAllEventsConsumed()
+    }
 
     @Test
     fun performCheckout_successfulPayment_callsCallbackWithCompleted() = runTest {
