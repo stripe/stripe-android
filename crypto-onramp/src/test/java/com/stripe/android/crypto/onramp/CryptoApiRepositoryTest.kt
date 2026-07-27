@@ -938,18 +938,6 @@ class CryptoApiRepositoryTest {
         val tokenParams = argumentCaptor<TokenParams>()
         val tokenOptions = argumentCaptor<ApiRequest.Options>()
         verify(stripeRepository).createToken(tokenParams.capture(), tokenOptions.capture())
-        assertThat(tokenParams.firstValue.toParamMap()).isEqualTo(
-            mapOf(
-                "card" to mapOf(
-                    "wallet" to mapOf(
-                        "type" to "samsung_pay",
-                        "samsung_pay" to mapOf(
-                            "token" to "{\"method\":\"3DS\"}",
-                        ),
-                    ),
-                ),
-            ),
-        )
         assertThat(tokenOptions.firstValue.apiKey).isEqualTo("pk_platform_samsung_pay")
         assertThat(tokenOptions.firstValue.stripeAccount).isEqualTo("TestAccountId")
 

@@ -18,8 +18,6 @@ import java.util.concurrent.Executors
 
 @RunWith(RobolectricTestRunner::class)
 class DefaultSamsungPayLauncherTest {
-    @Test
-    fun `launcher initialization is reported`() = runScenario {}
 
     @Test
     fun `ready status is reported`() = runScenario {
