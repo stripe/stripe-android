@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,8 +26,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupPositionProvider
 import androidx.compose.ui.window.PopupProperties
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
@@ -42,26 +47,44 @@ fun InlineAddressPredictionsUI(
     onPredictionSelected: (String) -> Unit,
     onDismiss: () -> Unit,
     onClear: () -> Unit,
-    onEnterManually: (() -> Unit)? = null,
+    onEnterManually: (() -> Unit)?,
 ) {
-    DropdownMenu(
-        expanded = shouldShowPredictionsDropdown(state),
+    if (!shouldShowPredictionsDropdown(state)) {
+        return
+    }
+
+    Popup(
         onDismissRequest = onDismiss,
-        offset = DpOffset(x = (-1).dp, y = 0.dp),
-        modifier = if (fieldWidthDp > 0.dp) {
-            Modifier.width(fieldWidthDp + 2.dp)
-        } else {
-            Modifier.fillMaxWidth()
-        },
+        popupPositionProvider = BelowAnchorPopupPositionProvider,
         properties = PopupProperties(focusable = false),
     ) {
-        InlineAddressPredictionsContent(
-            state = state,
-            attributionDrawable = attributionDrawable,
-            onPredictionSelected = onPredictionSelected,
-            onClear = onClear,
-            onEnterManually = onEnterManually,
-        )
+        Card(
+            elevation = 8.dp,
+            modifier = if (fieldWidthDp > 0.dp) {
+                Modifier.width(fieldWidthDp + 2.dp)
+            } else {
+                Modifier.fillMaxWidth()
+            },
+        ) {
+            InlineAddressPredictionsContent(
+                state = state,
+                attributionDrawable = attributionDrawable,
+                onPredictionSelected = onPredictionSelected,
+                onClear = onClear,
+                onEnterManually = onEnterManually,
+            )
+        }
+    }
+}
+
+private object BelowAnchorPopupPositionProvider : PopupPositionProvider {
+    override fun calculatePosition(
+        anchorBounds: IntRect,
+        windowSize: IntSize,
+        layoutDirection: LayoutDirection,
+        popupContentSize: IntSize,
+    ): IntOffset {
+        return IntOffset(x = anchorBounds.left - 1, y = anchorBounds.bottom)
     }
 }
 

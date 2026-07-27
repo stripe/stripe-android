@@ -116,8 +116,8 @@ internal class InlineAutocompleteController(
     }
 
     private suspend fun fetchPredictions(query: String, country: String) {
-        // Keep prior Results visible while refetching so the dropdown doesn't
-        // collapse/expand on every keystroke (noticeable when the menu opens upward).
+        // Keep prior Results visible while refetching so the spinner doesn't
+        // flash on every keystroke.
         if (_inlinePredictionsState.value !is AutocompleteAddressInteractor.InlinePredictionsState.Results) {
             _inlinePredictionsState.value = AutocompleteAddressInteractor.InlinePredictionsState.Loading
         }
