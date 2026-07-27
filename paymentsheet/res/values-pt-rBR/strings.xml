@@ -102,6 +102,8 @@ to be saved and used in future checkout sessions. -->
   <string name="stripe_network_error_message">Ocorreu um erro. Verifique sua conexão e tente novamente.</string>
   <!-- Error message with user action shown in NFC scanning flow when the card is expired. -->
   <string name="stripe_nfc_expired_error">Cartão expirado. Tente outro cartão.</string>
+  <!-- Error with action to take shown in the NFC scanning flow if the scanned card was declined -->
+  <string name="stripe_nfc_scan_error_declined_card">Cartão recusado. Tente outro cartão.</string>
   <!-- Error with action to take shown in the NFC scanning flow if the scanned card is expired -->
   <string name="stripe_nfc_scan_error_expired_card">Cartão expirado. Tente outro cartão.</string>
   <!-- Instruction shown below the NFC coil animation while waiting for a card tap -->
