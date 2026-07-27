@@ -41,11 +41,15 @@ internal fun BottomSheetHTML(
         urlSpanStyle = urlSpanStyle
     ) { annotatedStringRanges ->
         annotatedStringRanges.firstOrNull()?.item?.let { urlString ->
+            val uri = Uri.parse(urlString)
             when {
                 (URLUtil.isNetworkUrl(urlString)) -> {
-                    val openURL = Intent(Intent.ACTION_VIEW)
-                    openURL.data = Uri.parse(urlString)
+                    val openURL = Intent(Intent.ACTION_VIEW, uri)
                     context.startActivity(openURL)
+                }
+                uri.scheme.equals(MAILTO_SCHEME, ignoreCase = true) -> {
+                    val emailIntent = Intent(Intent.ACTION_SENDTO, uri)
+                    context.startActivity(emailIntent)
                 }
                 urlString.startsWith(STRIPE_BOTTOM_SHEET) -> {
                     val bottomSheetId = urlString.substringAfterLast('/')
@@ -68,3 +72,4 @@ internal fun BottomSheetHTML(
 }
 
 internal const val BottomSheetHTMLTAG = "BottomSheetHTML"
+private const val MAILTO_SCHEME = "mailto"
