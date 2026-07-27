@@ -149,6 +149,8 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
                     isVerticalLayout = true,
                 )
             },
+            // Embedded renders mandate text through its own path, not the mandate-above-button handler.
+            updateMandateText = null,
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
