@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
 import com.stripe.android.common.configuration.ConfigurationDefaults
@@ -102,6 +103,7 @@ internal data class PaymentMethodMetadata(
     val requiresBillingAddressForAutomaticTax: Boolean,
     val checkoutSessionResponse: CheckoutSessionResponse?,
     private val paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+    val apiConfiguration: ApiConfiguration.State,
 ) : Parcelable {
 
     fun paymentMethodOrientation(): PaymentMethodOrientation {
@@ -380,6 +382,7 @@ internal data class PaymentMethodMetadata(
             analyticsMetadata: AnalyticsMetadata,
             isTapToAddAvailable: Boolean,
             paymentMethodLayout: PaymentSheet.PaymentMethodLayout,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             val linkSettings = elementsSession.linkSettings
             val cardArts = elementsSession.customer?.paymentMethods?.mapNotNull { it.card?.cardArt }.orEmpty()
@@ -446,6 +449,7 @@ internal data class PaymentMethodMetadata(
                     (initializationMode as? PaymentElementLoader.InitializationMode.CheckoutSession)
                         ?.checkoutSessionResponse,
                 paymentMethodLayout = paymentMethodLayout,
+                apiConfiguration = apiConfiguration,
             )
         }
 
@@ -457,6 +461,7 @@ internal data class PaymentMethodMetadata(
             isGooglePayReady: Boolean,
             customerMetadata: CustomerMetadata,
             integrationMetadata: IntegrationMetadata.CustomerSheet,
+            apiConfiguration: ApiConfiguration.State,
         ): PaymentMethodMetadata {
             return PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -519,6 +524,7 @@ internal data class PaymentMethodMetadata(
                 requiresBillingAddressForAutomaticTax = false,
                 checkoutSessionResponse = null,
                 paymentMethodLayout = PaymentSheet.PaymentMethodLayout.Horizontal,
+                apiConfiguration = apiConfiguration,
             )
         }
     }

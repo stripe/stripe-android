@@ -4,6 +4,7 @@ import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CardBrandFilter
 import com.stripe.android.CardFundingFilter
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.coroutines.Single
 import com.stripe.android.common.model.PaymentMethodRemovePermission
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -63,6 +64,7 @@ import org.junit.Test
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
@@ -864,7 +866,8 @@ internal class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             eventReporter = eventReporter,
             errorReporter = errorReporter,
-            workContext = workContext
+            workContext = workContext,
+            paymentConfiguration = Provider { PaymentConfiguration("pk_test_123") }
         )
     }
 
