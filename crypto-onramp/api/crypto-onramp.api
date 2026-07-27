@@ -183,6 +183,7 @@ public final class com/stripe/android/crypto/onramp/model/CryptoNetwork : java/l
 	public static final field Solana Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Stellar Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Sui Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
+	public static final field Tempo Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Worldchain Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static final field Xrpl Lcom/stripe/android/crypto/onramp/model/CryptoNetwork;
 	public static fun getEntries ()Lkotlin/enums/EnumEntries;
