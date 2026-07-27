@@ -53,7 +53,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.StrokeCap
@@ -843,6 +845,7 @@ private fun CapturedSelfieCheckmark(
                 alpha = opacity
                 scaleX = scale
                 scaleY = scale
+                compositingStrategy = CompositingStrategy.Offscreen
             }
             .testTag(SELFIE_CAPTURED_CHECK_TAG)
     ) {
@@ -857,12 +860,13 @@ private fun CapturedSelfieCheckmark(
         }
         drawPath(
             path = checkPath,
-            color = Color(CAPTURE_GUIDE_ACTIVE_TICK_COLOR),
+            color = Color.Transparent,
             style = Stroke(
                 width = 2.6.dp.toPx(),
                 cap = StrokeCap.Round,
                 join = StrokeJoin.Round
-            )
+            ),
+            blendMode = BlendMode.Clear
         )
     }
 }
