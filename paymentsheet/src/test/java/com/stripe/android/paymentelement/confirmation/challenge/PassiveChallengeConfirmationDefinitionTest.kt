@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.confirmation.challenge
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.challenge.passive.PassiveChallengeActivityContract
 import com.stripe.android.challenge.passive.PassiveChallengeActivityResult
 import com.stripe.android.challenge.passive.warmer.PassiveChallengeWarmer
@@ -34,6 +35,7 @@ import com.stripe.android.utils.FakePassiveChallengeWarmer
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import javax.inject.Provider
 
 internal class PassiveChallengeConfirmationDefinitionTest {
     @get:Rule
@@ -609,7 +611,12 @@ internal class PassiveChallengeConfirmationDefinitionTest {
     ): PassiveChallengeConfirmationDefinition {
         return PassiveChallengeConfirmationDefinition(
             errorReporter = errorReporter,
-            publishableKeyProvider = { publishableKey },
+            apiConfigProvider = Provider {
+                ApiConfiguration.State(
+                    publishableKey = publishableKey,
+                    stripeAccountId = null,
+                )
+            },
             productUsage = productUsage,
             passiveChallengeWarmer = passiveChallengeWarmer,
             isEligibleForConfirmationChallenge = isEligibleForConfirmationChallenge

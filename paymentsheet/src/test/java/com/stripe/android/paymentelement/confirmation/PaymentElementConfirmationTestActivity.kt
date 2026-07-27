@@ -13,6 +13,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.test.core.app.ActivityScenario
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.di.ElementsSessionClientParamsModule
 import com.stripe.android.core.Logger
@@ -218,6 +219,14 @@ internal interface PaymentElementConfirmationTestModule {
         @Provides
         @Named(STRIPE_ACCOUNT_ID)
         fun providesStripeAccountId(config: PaymentConfiguration): () -> String? = { config.stripeAccountId }
+
+        @Provides
+        fun providesApiConfigurationState(config: PaymentConfiguration): ApiConfiguration.State {
+            return ApiConfiguration.State(
+                publishableKey = config.publishableKey,
+                stripeAccountId = config.stripeAccountId,
+            )
+        }
 
         @Provides
         @Singleton

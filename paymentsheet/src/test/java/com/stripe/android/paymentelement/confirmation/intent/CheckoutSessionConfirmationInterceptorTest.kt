@@ -3,6 +3,7 @@ package com.stripe.android.paymentelement.confirmation.intent
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.checkouttesting.checkoutConfirm
 import com.stripe.android.core.networking.ApiRequest
@@ -47,6 +48,7 @@ import org.junit.Test
 import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 @RunWith(RobolectricTestRunner::class)
@@ -360,8 +362,12 @@ class CheckoutSessionConfirmationInterceptorTest {
                 context = ApplicationProvider.getApplicationContext(),
                 publishableKey = "pk_test_123",
             ),
-            publishableKeyProvider = { "pk_test_123" },
-            stripeAccountIdProvider = { null },
+            apiConfigProvider = Provider {
+                ApiConfiguration.State(
+                    publishableKey = "pk_test_123",
+                    stripeAccountId = null,
+                )
+            },
         )
 
         val interceptor = CheckoutSessionConfirmationInterceptor(

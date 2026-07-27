@@ -1,10 +1,9 @@
 package com.stripe.android.paymentsheet.repositories
 
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.Stripe
 import com.stripe.android.checkout.Address
 import com.stripe.android.core.exception.safeAnalyticsMessage
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
@@ -18,7 +17,7 @@ import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import java.util.TimeZone
 import java.util.UUID
 import javax.inject.Inject
-import javax.inject.Named
+import javax.inject.Provider
 
 @OptIn(CheckoutSessionPreview::class)
 internal class CheckoutSessionRepository @Inject constructor(
@@ -26,8 +25,7 @@ internal class CheckoutSessionRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
-    @Named(STRIPE_ACCOUNT_ID) private val stripeAccountIdProvider: () -> String?,
+    private val apiConfigProvider: Provider<ApiConfiguration.State>,
 ) {
 
     private val apiRequestFactory = ApiRequest.Factory(
@@ -37,10 +35,13 @@ internal class CheckoutSessionRepository @Inject constructor(
     )
     private val stripeErrorJsonParser = StripeErrorJsonParser()
 
-    private fun createOptions(): ApiRequest.Options = ApiRequest.Options(
-        apiKey = publishableKeyProvider(),
-        stripeAccount = stripeAccountIdProvider(),
-    )
+    private fun createOptions(): ApiRequest.Options {
+        val config = apiConfigProvider.get()
+        return ApiRequest.Options(
+            apiKey = config.publishableKey,
+            stripeAccount = config.stripeAccountId,
+        )
+    }
 
     private suspend fun executePost(
         url: String,

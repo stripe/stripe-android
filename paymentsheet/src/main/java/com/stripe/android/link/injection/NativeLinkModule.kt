@@ -13,6 +13,8 @@ import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.utils.DefaultDurationProvider
@@ -219,6 +221,18 @@ internal interface NativeLinkModule {
         ): ApiConfiguration.State {
             return paymentMethodMetadata.apiConfiguration
         }
+
+        @Provides
+        @Named(PUBLISHABLE_KEY)
+        fun providePublishableKeyProvider(
+            apiConfigState: ApiConfiguration.State
+        ): () -> String = { apiConfigState.publishableKey }
+
+        @Provides
+        @Named(STRIPE_ACCOUNT_ID)
+        fun provideStripeAccountIdProvider(
+            apiConfigState: ApiConfiguration.State
+        ): () -> String? = { apiConfigState.stripeAccountId }
 
         @Provides
         @NativeLinkScope
