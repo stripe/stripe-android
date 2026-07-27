@@ -2,9 +2,9 @@ package com.stripe.android.payments.core.injection
 
 import android.content.Context
 import com.google.android.instantapps.InstantApps
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
@@ -38,7 +38,7 @@ internal class PaymentLauncherModule {
         @IOContext workContext: CoroutineContext,
         @UIContext uiContext: CoroutineContext,
         paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-        @Named(PUBLISHABLE_KEY) publishableKeyProvider: () -> String,
+        apiConfigurationState: ApiConfiguration.State,
         @Named(PRODUCT_USAGE) productUsage: Set<String>,
         @Named(IS_INSTANT_APP) isInstantApp: Boolean,
         @Named(INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS) includePaymentSheetNextHandlers: Boolean,
@@ -48,7 +48,7 @@ internal class PaymentLauncherModule {
         enableLogging = enableLogging,
         workContext = workContext,
         uiContext = uiContext,
-        publishableKeyProvider = publishableKeyProvider,
+        apiConfigurationState = apiConfigurationState,
         productUsage = productUsage,
         isInstantApp = isInstantApp,
         includePaymentSheetNextActionHandlers = includePaymentSheetNextHandlers,

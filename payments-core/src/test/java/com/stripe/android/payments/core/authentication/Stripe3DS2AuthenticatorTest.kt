@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
 import com.stripe.android.core.networking.ApiRequest
@@ -40,7 +41,7 @@ class Stripe3DS2AuthenticatorTest {
     private val authenticator = Stripe3DS2NextActionHandler(
         paymentAuthConfig,
         enableLogging = false,
-        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+        apiConfigProvider = javax.inject.Provider { ApiConfiguration.State(publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, stripeAccountId = null) },
         productUsage = setOf()
     )
 

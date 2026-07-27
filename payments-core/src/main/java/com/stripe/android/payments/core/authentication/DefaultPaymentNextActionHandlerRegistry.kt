@@ -14,6 +14,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.payments.core.injection.DaggerNextActionHandlerComponent
 import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_NEXT_ACTION_HANDLERS
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
@@ -118,7 +119,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
             enableLogging: Boolean,
             workContext: CoroutineContext,
             uiContext: CoroutineContext,
-            publishableKeyProvider: () -> String,
+            apiConfigurationState: ApiConfiguration.State,
             productUsage: Set<String>,
             isInstantApp: Boolean,
             includePaymentSheetNextActionHandlers: Boolean,
@@ -130,7 +131,7 @@ internal class DefaultPaymentNextActionHandlerRegistry @Inject internal construc
                     enableLogging = enableLogging,
                     workContext = workContext,
                     uiContext = uiContext,
-                    publishableKeyProvider = publishableKeyProvider,
+                    apiConfigurationState = apiConfigurationState,
                     productUsage = productUsage,
                     isInstantApp = isInstantApp,
                     includePaymentSheetNextActionHandlers = includePaymentSheetNextActionHandlers,

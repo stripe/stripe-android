@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.AP
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import com.stripe.android.ApiConfiguration
 import com.stripe.android.challenge.passive.PassiveChallengeActivity.Companion.getArgs
 import com.stripe.android.hcaptcha.HCaptchaService
 import com.stripe.android.model.PassiveCaptchaParams
@@ -53,7 +54,10 @@ internal class PassiveChallengeViewModel @Inject constructor(
                 DaggerPassiveChallengeComponent.factory()
                     .create(
                         context = app,
-                        publishableKeyProvider = { args.publishableKey },
+                        apiConfigurationState = ApiConfiguration.State(
+                            publishableKey = args.publishableKey,
+                            stripeAccountId = null,
+                        ),
                         productUsage = args.productUsage.toSet(),
                         passiveCaptchaParams = args.passiveCaptchaParams,
                     )
