@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.lifecycle.viewModelScope
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.ui.LinkButtonState
@@ -118,6 +117,7 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
     private val invokeRowSelectionCallback: (() -> Unit)? = null,
     private val displaysMandatesInFormScreen: Boolean,
     private val onInitiallyDisplayedPaymentMethodVisibilitySnapshot: (List<String>, List<String>) -> Unit,
+    private val updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)?,
     dispatcher: CoroutineContext = Dispatchers.Default,
     mainDispatcher: CoroutineContext = Dispatchers.Main.immediate,
     private val paymentMethodMessagePromotionsHelper: PaymentMethodMessagePromotionsHelper?
@@ -203,26 +203,9 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         isVerticalLayout = true,
                     )
                 },
+                updateMandateText = viewModel.mandateHandler::updateMandateText,
                 paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper
-            ).also { interactor ->
-                viewModel.viewModelScope.launch {
-                    interactor.state.mapAsStateFlow { it.mandate }.collect { mandate ->
-                        viewModel.mandateHandler.updateMandateText(
-                            mandateText = mandate,
-                            showAbove = true,
-                        )
-                    }
-                }
-
-                viewModel.viewModelScope.launch {
-                    isCurrentScreen.filter { it }.collect {
-                        viewModel.mandateHandler.updateMandateText(
-                            mandateText = interactor.state.value.mandate,
-                            showAbove = true,
-                        )
-                    }
-                }
-            }
+            )
         }
     }
 
@@ -376,6 +359,24 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                         _verticalModeScreenSelection.value = updatedSelection
                         updateSelection(updatedSelection, false)
                     }
+                }
+            }
+        }
+
+        // Only wired up for flows that surface mandate text above the primary button (PaymentSheet and
+        // FlowController). Embedded renders mandates through its own path and passes null. Launched on this
+        // interactor's scope so both collectors are cancelled by close() when the screen goes away.
+        val updateMandateText = updateMandateText
+        if (updateMandateText != null) {
+            coroutineScope.launch(mainDispatcher) {
+                state.mapAsStateFlow { it.mandate }.collect { mandate ->
+                    updateMandateText(mandate, true)
+                }
+            }
+
+            coroutineScope.launch(mainDispatcher) {
+                isCurrentScreen.filter { it }.collect {
+                    updateMandateText(state.value.mandate, true)
                 }
             }
         }

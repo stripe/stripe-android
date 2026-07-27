@@ -7,6 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.DefaultCardBrandFilter
 import com.stripe.android.DefaultCardFundingFilter
 import com.stripe.android.R
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.link.TestFactory
 import com.stripe.android.link.ui.LinkButtonState
@@ -1506,6 +1507,40 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
     }
 
     @Test
+    fun `updateMandateText receives updates while open and stops after close`() {
+        val paymentMethodTypes = listOf("card", "cashapp")
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = paymentMethodTypes
+            )
+        )
+        val mandateTurbine = Turbine<Pair<ResolvableString?, Boolean>>()
+        runScenario(
+            paymentMethodMetadata = paymentMethodMetadata,
+            formTypeForCode = { FormHelper.FormType.MandateOnly("Foobar".resolvableString) },
+            updateMandateText = { mandateText, showAbove ->
+                mandateTurbine.add(mandateText to showAbove)
+            },
+        ) {
+            // Initial mandate (no selection) is pushed through the callback.
+            assertThat(mandateTurbine.awaitItem()).isEqualTo(null to true)
+
+            // Selecting a payment method with a mandate pushes the updated text.
+            selectionSource.value = PaymentMethodFixtures.CASHAPP_PAYMENT_SELECTION
+            assertThat(mandateTurbine.awaitItem()).isEqualTo("Foobar".resolvableString to true)
+
+            // After close(), the collectors are cancelled along with the interactor's scope, so
+            // further mandate changes are no longer pushed. Guards against the previous behavior
+            // where these collectors ran on the viewModelScope and outlived the screen.
+            interactor.close()
+            selectionSource.value = null
+            testScope.testScheduler.advanceUntilIdle()
+            mandateTurbine.expectNoEvents()
+            mandateTurbine.ensureAllEventsConsumed()
+        }
+    }
+
+    @Test
     fun temporarySelection_doesNotAllowChangeDetails_whenSavedCardIsSelected() = runScenario(
         formTypeForCode = {
             FormHelper.FormType.UserInteractionRequired
@@ -1851,6 +1886,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
         invokeRowSelectionCallback: (() -> Unit)? = null,
         initialWalletsState: WalletsState? = null,
         displaysMandatesInFormScreen: Boolean = false,
+        updateMandateText: ((mandateText: ResolvableString?, showAbove: Boolean) -> Unit)? = null,
         promotionsHelper: PaymentMethodMessagePromotionsHelper? = null,
         testBlock: suspend TestParams.() -> Unit
     ) {
@@ -1920,6 +1956,7 @@ class DefaultPaymentMethodVerticalLayoutInteractorTest {
                     Pair(visibleItems, hiddenItems)
                 )
             },
+            updateMandateText = updateMandateText,
             paymentMethodMessagePromotionsHelper = promotionsHelper
         )
         closeInteractorRule.track(interactor)
