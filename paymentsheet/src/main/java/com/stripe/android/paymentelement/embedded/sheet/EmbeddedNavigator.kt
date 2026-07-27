@@ -223,6 +223,7 @@ internal class EmbeddedNavigator private constructor(
                         sheetActivityStateHolder.setResult(
                             EmbeddedActivityResult.Complete(
                                 selection = null,
+                                previousNewSelections = embeddedSelectionHolder.previousNewSelections,
                                 hasBeenConfirmed = true,
                                 customerState = customerStateHolder.customer.value,
                                 shouldInvokeSelectionCallback = false,

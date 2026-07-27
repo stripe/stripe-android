@@ -90,6 +90,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
                 selectionHolder.setSelection(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
@@ -113,6 +114,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
                 selectionHolder.setSelection(result.selection)
                 if (result.shouldInvokeSelectionCallback && result.selection is PaymentSelection.Saved) {
                     rowSelectionImmediateActionHandler.invoke()
@@ -127,6 +129,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
         when (result) {
             is EmbeddedActivityResult.Complete -> {
                 result.customerState?.let { customerStateHolder.setCustomerState(it) }
+                selectionHolder.setPreviousNewSelections(result.previousNewSelections)
                 selectionHolder.setSelection(result.selection)
                 if (result.hasBeenConfirmed) {
                     embeddedResultCallbackHelper.setResult(
@@ -178,6 +181,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = currentSelection,
+            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = promotion,
             launchMode = EmbeddedLaunchMode.Form(selectedPaymentMethodCode = code),
@@ -205,6 +209,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
+            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.Manage,
@@ -232,6 +237,7 @@ internal class DefaultEmbeddedSheetLauncher @Inject constructor(
             paymentElementCallbackIdentifier = paymentElementCallbackIdentifier,
             statusBarColor = statusBarColor,
             selection = selection,
+            previousNewSelections = selectionHolder.previousNewSelections,
             customerState = customerState,
             promotion = null,
             launchMode = EmbeddedLaunchMode.PaymentOptions,

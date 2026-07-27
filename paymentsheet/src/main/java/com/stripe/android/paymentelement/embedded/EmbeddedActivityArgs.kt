@@ -1,6 +1,7 @@
 package com.stripe.android.paymentelement.embedded
 
 import android.content.Intent
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.core.os.BundleCompat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -17,6 +18,7 @@ internal data class EmbeddedActivityArgs(
     val paymentElementCallbackIdentifier: String,
     val statusBarColor: Int?,
     val selection: PaymentSelection?,
+    val previousNewSelections: Bundle,
     val customerState: CustomerState?,
     val promotion: PaymentMethodMessagePromotion?,
     val launchMode: EmbeddedLaunchMode,
