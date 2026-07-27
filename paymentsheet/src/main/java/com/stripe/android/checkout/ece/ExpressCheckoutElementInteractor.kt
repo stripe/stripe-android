@@ -4,6 +4,7 @@ package com.stripe.android.checkout.ece
 
 import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.checkout.CheckoutControllerStateHolder
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.link.account.LinkAccountHolder
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -18,6 +19,8 @@ internal interface ExpressCheckoutElementInteractor {
 
     data class State(
         val expressButtons: List<ExpressButton>,
+        val buttonHeight: Float?,
+        val buttonOrientation: ExpressCheckoutElement.Configuration.ButtonOrientation,
     )
 
     sealed class ViewAction {
@@ -49,7 +52,11 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
         stateHolder.checkoutSession,
     ) { linkAccountInfo, state, checkoutSession, ->
         if (state == null || checkoutSession == null) {
-            return@combineAsStateFlow ExpressCheckoutElementInteractor.State(expressButtons = emptyList())
+            return@combineAsStateFlow ExpressCheckoutElementInteractor.State(
+                expressButtons = emptyList(),
+                buttonHeight = null,
+                buttonOrientation = ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical,
+            )
         }
 
         ExpressCheckoutElementInteractor.State(
@@ -65,6 +72,8 @@ internal class DefaultExpressCheckoutElementInteractor @Inject constructor(
                     )
                 }
             },
+            buttonHeight = state.configuration.expressCheckoutElementConfiguration.buttonHeight,
+            buttonOrientation = state.configuration.expressCheckoutElementConfiguration.buttonOrientation,
         )
     }
 

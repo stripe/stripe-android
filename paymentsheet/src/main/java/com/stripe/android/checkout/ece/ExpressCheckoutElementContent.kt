@@ -1,12 +1,18 @@
+@file:OptIn(com.stripe.android.paymentelement.CheckoutSessionPreview::class)
+
 package com.stripe.android.checkout.ece
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.ui.GooglePayButton
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -22,9 +28,8 @@ internal fun ExpressCheckoutElementContent(
         interactor.handleViewAction(ExpressCheckoutElementInteractor.ViewAction.OnDisplayed)
     }
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
+    val buttonModifier = state.buttonHeight?.let { Modifier.height(it.dp) } ?: Modifier
+    val content: @Composable () -> Unit = {
         state.expressButtons.forEach { button ->
             key(button) {
                 when (button) {
@@ -37,6 +42,7 @@ internal fun ExpressCheckoutElementContent(
                         cardBrandFilter = button.cardBrandFilter,
                         cardFundingFilter = button.cardFundingFilter,
                         additionalEnabledNetworks = button.additionalEnabledNetworks,
+                        modifier = buttonModifier,
                         onPressed = {
                             interactor.handleViewAction(
                                 ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
@@ -50,6 +56,7 @@ internal fun ExpressCheckoutElementContent(
                         enabled = true,
                         theme = button.theme,
                         linkBrand = button.linkBrand,
+                        modifier = buttonModifier,
                         onClick = {
                             interactor.handleViewAction(
                                 ExpressCheckoutElementInteractor.ViewAction.OnWalletTapped(
@@ -61,5 +68,14 @@ internal fun ExpressCheckoutElementContent(
                 }
             }
         }
+    }
+
+    when (state.buttonOrientation) {
+        ExpressCheckoutElement.Configuration.ButtonOrientation.Horizontal -> Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) { content() }
+        ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical -> Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) { content() }
     }
 }

@@ -87,6 +87,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                             linkAccountInfo = LinkAccountUpdate.Value(null),
                         ),
                     ),
+                    buttonHeight = null,
+                    buttonOrientation = ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical,
                 ),
             )
 
@@ -100,6 +102,8 @@ internal class DefaultExpressCheckoutElementInteractorTest {
                             linkAccountInfo = LinkAccountUpdate.Value(linkAccount),
                         ),
                     ),
+                    buttonHeight = null,
+                    buttonOrientation = ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical,
                 ),
             )
 

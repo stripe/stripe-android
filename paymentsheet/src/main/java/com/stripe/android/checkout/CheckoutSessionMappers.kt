@@ -32,6 +32,14 @@ internal fun CheckoutSessionResponse.asCheckoutSession(
 }
 
 @OptIn(CheckoutSessionPreview::class)
+internal fun ExpressButtonType.asPaymentMethod(): ExpressCheckoutElement.PaymentMethod {
+    return when (this) {
+        is ExpressButtonType.GooglePay -> ExpressCheckoutElement.PaymentMethod.GooglePay
+        ExpressButtonType.Link -> ExpressCheckoutElement.PaymentMethod.Link
+    }
+}
+
+@OptIn(CheckoutSessionPreview::class)
 private fun CheckoutSessionResponse.Status.asStatus(): CheckoutSession.Status {
     return when (this) {
         CheckoutSessionResponse.Status.OPEN -> CheckoutSession.Status.Open

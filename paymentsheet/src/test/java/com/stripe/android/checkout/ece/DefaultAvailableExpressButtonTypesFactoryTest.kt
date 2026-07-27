@@ -36,7 +36,11 @@ class DefaultAvailableExpressButtonTypesFactoryTest {
         val availableExpressButtonTypes = create(
             availableWallets = listOf(WalletType.Link, WalletType.GooglePay),
             configuration = ExpressCheckoutElement.Configuration()
-                .linkVisibility(ExpressCheckoutElement.Configuration.LinkVisibility.Never),
+                .paymentMethods(
+                    ExpressCheckoutElement.Configuration.PaymentMethods().link(
+                        ExpressCheckoutElement.Configuration.PaymentMethods.LinkVisibility.Never
+                    )
+                ),
         )
 
         assertThat(availableExpressButtonTypes).containsExactly(

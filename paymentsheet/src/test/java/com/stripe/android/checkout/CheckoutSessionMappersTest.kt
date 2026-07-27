@@ -1,6 +1,7 @@
 package com.stripe.android.checkout
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.checkout.ece.ExpressButtonType
 import com.stripe.android.checkouttesting.DEFAULT_CHECKOUT_SESSION_ID
 import com.stripe.android.paymentelement.CheckoutSessionPreview
 import com.stripe.android.paymentsheet.repositories.CheckoutSessionResponse
@@ -278,6 +279,23 @@ class CheckoutSessionMappersTest {
         assertThat(session.shippingOptions).isEmpty()
     }
 
+    @Test
+    fun `maps available express checkout payment methods`() {
+        val session = createSession(
+            availableExpressButtonTypes = listOf(
+                ExpressButtonType.Link,
+                ExpressButtonType.GooglePay(
+                    GooglePayConfiguration(GooglePayConfiguration.Environment.Test).build()
+                ),
+            ),
+        )
+
+        assertThat(session.availableExpressCheckoutPaymentMethods).containsExactly(
+            ExpressCheckoutElement.PaymentMethod.Link,
+            ExpressCheckoutElement.PaymentMethod.GooglePay,
+        ).inOrder()
+    }
+
     private fun createSession(
         id: String = DEFAULT_CHECKOUT_SESSION_ID,
         status: CheckoutSessionResponse.Status = CheckoutSessionResponse.Status.OPEN,
@@ -288,6 +306,7 @@ class CheckoutSessionMappersTest {
         totalSummary: CheckoutSessionResponse.TotalSummaryResponse? = null,
         lineItems: List<CheckoutSessionResponse.LineItem> = emptyList(),
         shippingOptions: List<CheckoutSessionResponse.ShippingRate> = emptyList(),
+        availableExpressButtonTypes: List<ExpressButtonType> = emptyList(),
     ): CheckoutSession {
         return CheckoutSessionResponseFactory.create(
             id = id,
@@ -302,7 +321,7 @@ class CheckoutSessionMappersTest {
         ).asCheckoutSession(
             flagImages = null,
             paymentOptionDisplayData = null,
-            availableExpressButtonTypes = emptyList(),
+            availableExpressButtonTypes = availableExpressButtonTypes,
         )
     }
 }

@@ -2,6 +2,7 @@
 
 package com.stripe.android.checkout.ece
 
+import com.stripe.android.checkout.ExpressCheckoutElement
 import com.stripe.android.checkout.GooglePayConfiguration
 import com.stripe.android.link.LinkAccountUpdate
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -28,6 +29,8 @@ internal object ExpressCheckoutElementInteractorStateFactory {
     ): ExpressCheckoutElementInteractor.State {
         return ExpressCheckoutElementInteractor.State(
             expressButtons = expressButtons,
+            buttonHeight = null,
+            buttonOrientation = ExpressCheckoutElement.Configuration.ButtonOrientation.Vertical,
         )
     }
 }
