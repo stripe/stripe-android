@@ -256,7 +256,7 @@ class LinkController @Inject internal constructor(
             this.supportedPaymentMethodTypes = types
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @LinkControllerPreview
         fun appearance(appearance: LinkAppearance) = apply { this.appearance = appearance }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
