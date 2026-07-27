@@ -26,6 +26,12 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutI
 import com.stripe.android.ui.core.elements.FORM_ELEMENT_SET_DEFAULT_MATCHES_SAVE_FOR_FUTURE_DEFAULT_VALUE
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.emitAll
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 import javax.inject.Provider
 
@@ -103,7 +109,7 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             updateSelection = { updatedSelection, _ ->
                 selectionHolder.setSelection(updatedSelection)
             },
-            isCurrentScreen = stateFlowOf(true),
+            isCurrentScreen = isCurrentScreen(),
             reportPaymentMethodTypeSelected = eventReporter::onSelectPaymentMethod,
             reportFormShown = eventReporter::onPaymentMethodFormShown,
             onUpdatePaymentMethod = { savedPaymentMethod ->
@@ -130,6 +136,19 @@ internal class InitialPaymentOptionsScreenFactory @Inject constructor(
             paymentMethodMessagePromotionsHelper = paymentMethodMessagePromotionsHelper,
         )
     }
+
+    // The navigator is built from this initial screen (see EmbeddedActivityModule.provideEmbeddedNavigator), so
+    // embeddedNavigatorProvider.get() can't be called synchronously here without recursing into the @Singleton
+    // mid-construction. flow { } defers the get() until first collection, by which point the navigator exists.
+    private fun isCurrentScreen(): StateFlow<Boolean> = flow {
+        emitAll(embeddedNavigatorProvider.get().screen)
+    }.map { screen ->
+        screen is EmbeddedNavigator.Screen.PaymentOptions
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.Eagerly,
+        initialValue = true,
+    )
 
     private fun navigateToManageScreen() {
         val paymentMethods = customerStateHolder.customer.value?.paymentMethods
