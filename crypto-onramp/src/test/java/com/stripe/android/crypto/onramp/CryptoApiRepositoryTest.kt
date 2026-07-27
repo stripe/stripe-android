@@ -20,6 +20,9 @@ import com.stripe.android.crypto.onramp.model.compliance.SubmitIdentifiersResult
 import com.stripe.android.crypto.onramp.repositories.CryptoApiRepository
 import com.stripe.android.link.LinkController
 import com.stripe.android.model.DateOfBirth
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.Token
+import com.stripe.android.model.TokenParams
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.runTest
@@ -29,9 +32,11 @@ import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.util.Date
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
@@ -909,6 +914,73 @@ class CryptoApiRepositoryTest {
             assertThat(consumerWallet.network).isEqualTo(CryptoNetwork.Ethereum)
             assertThat(consumerWallet.verifiedOwnership).isTrue()
         }
+    }
+
+    @Test
+    fun `create Samsung Pay payment method tokenizes credential before creating payment method`() = runTest {
+        val token = Token(
+            id = "tok_samsung_pay",
+            type = Token.Type.Card,
+            created = Date(0),
+            livemode = false,
+            used = false,
+        )
+        val paymentMethod = createCardPaymentMethod()
+        whenever(stripeRepository.createToken(any(), any())).thenReturn(Result.success(token))
+        whenever(stripeRepository.createPaymentMethod(any(), any())).thenReturn(Result.success(paymentMethod))
+
+        val result = cryptoApiRepository.createSamsungPayPaymentMethod(
+            paymentCredential = "{\"method\":\"3DS\"}",
+            platformPublishableKey = "pk_platform_samsung_pay",
+        )
+
+        assertThat(result.getOrThrow()).isSameInstanceAs(paymentMethod)
+        val tokenParams = argumentCaptor<TokenParams>()
+        val tokenOptions = argumentCaptor<ApiRequest.Options>()
+        verify(stripeRepository).createToken(tokenParams.capture(), tokenOptions.capture())
+        assertThat(tokenParams.firstValue.toParamMap()).isEqualTo(
+            mapOf(
+                "card" to mapOf(
+                    "wallet" to mapOf(
+                        "type" to "samsung_pay",
+                        "samsung_pay" to mapOf(
+                            "token" to "{\"method\":\"3DS\"}",
+                        ),
+                    ),
+                ),
+            ),
+        )
+        assertThat(tokenOptions.firstValue.apiKey).isEqualTo("pk_platform_samsung_pay")
+        assertThat(tokenOptions.firstValue.stripeAccount).isEqualTo("TestAccountId")
+
+        val paymentMethodParams = argumentCaptor<PaymentMethodCreateParams>()
+        val paymentMethodOptions = argumentCaptor<ApiRequest.Options>()
+        verify(stripeRepository).createPaymentMethod(
+            paymentMethodParams.capture(),
+            paymentMethodOptions.capture(),
+        )
+        assertThat(paymentMethodParams.firstValue.toParamMap()).isEqualTo(
+            mapOf(
+                "type" to "card",
+                "card" to mapOf("token" to "tok_samsung_pay"),
+            ),
+        )
+        assertThat(paymentMethodOptions.firstValue.apiKey).isEqualTo("pk_platform_samsung_pay")
+        assertThat(paymentMethodOptions.firstValue.stripeAccount).isEqualTo("TestAccountId")
+    }
+
+    @Test
+    fun `create Samsung Pay payment method stops when tokenization fails`() = runTest {
+        val error = APIException(message = "Samsung Pay tokenization failed")
+        whenever(stripeRepository.createToken(any(), any())).thenReturn(Result.failure(error))
+
+        val result = cryptoApiRepository.createSamsungPayPaymentMethod(
+            paymentCredential = "invalid_credential",
+            platformPublishableKey = "pk_platform_samsung_pay",
+        )
+
+        assertThat(result.exceptionOrNull()).isSameInstanceAs(error)
+        verify(stripeRepository, never()).createPaymentMethod(any(), any())
     }
 
     private fun assertKycCollectionRequest(apiRequest: ApiRequest) {
